@@ -31,9 +31,23 @@ macro(import_glew)
     include_directories(${GLEW_SOURCE_DIR}/include)
 endmacro()
 
+# Macro to import glm
+macro(import_glm)
+    if(NOT TARGET glm)  # Guard to prevent multiple inclusion
+        FetchContent_Declare(
+            glm
+            GIT_REPOSITORY https://github.com/g-truc/glm.git
+            GIT_TAG 0.9.9.8
+        )
+        FetchContent_MakeAvailable(glm)
+ 
+        include_directories(${glm_SOURCE_DIR})
+    endif()
+endmacro()
 
 # Macro to import all dependencies
 macro(importDependencies)
     import_glfw()
     import_glew()
+    import_glm()
 endmacro()
