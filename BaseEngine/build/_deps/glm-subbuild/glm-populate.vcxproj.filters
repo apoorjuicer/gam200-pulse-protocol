@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glm-subbuild\CMakeFiles\8c522ff6732f624caf85c167bc66e8da\glm-populate-mkdir.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glm-subbuild\CMakeFiles\8c522ff6732f624caf85c167bc66e8da\glm-populate-download.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glm-subbuild\CMakeFiles\8c522ff6732f624caf85c167bc66e8da\glm-populate-update.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glm-subbuild\CMakeFiles\8c522ff6732f624caf85c167bc66e8da\glm-populate-patch.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glm-subbuild\CMakeFiles\8c522ff6732f624caf85c167bc66e8da\glm-populate-configure.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glm-subbuild\CMakeFiles\8c522ff6732f624caf85c167bc66e8da\glm-populate-build.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glm-subbuild\CMakeFiles\8c522ff6732f624caf85c167bc66e8da\glm-populate-install.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glm-subbuild\CMakeFiles\8c522ff6732f624caf85c167bc66e8da\glm-populate-test.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glm-subbuild\CMakeFiles\dd37f55c0364acc37a492209d0bfbf27\glm-populate-complete.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glm-subbuild\CMakeFiles\49f6e085d91c217e90755dbccba63c4e\glm-populate.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glm-subbuild\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glm-subbuild\CMakeFiles\glm-populate" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{B0F7C621-32BD-335E-B4D8-85DAECC02A27}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

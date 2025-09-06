@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\MyEngine\Math\a.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\MyEngine\Math\b.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\MyEngine\Physics\c.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\MyEngine\Physics\d.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\MyEngine\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\MyEngine\Math\a.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\MyEngine\Math\b.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\MyEngine\Physics\c.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\MyEngine\Physics\d.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\MyEngine\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{0A46D442-7748-35E2-9EED-016CD863A4C1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Math">
+      <UniqueIdentifier>{48AA9B17-AB0F-3895-8836-888CF88DDD3C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics">
+      <UniqueIdentifier>{4C23ABFD-A440-3697-A16A-C368971202A5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{382B072C-7ED8-30F2-AAE2-919300CED4B6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Math">
+      <UniqueIdentifier>{6C15FF13-1685-3E66-9091-A81FDF591A81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Physics">
+      <UniqueIdentifier>{6AABC806-01FC-3000-B539-FB33D5879BB0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
