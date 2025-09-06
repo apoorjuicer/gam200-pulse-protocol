@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\CMakeFiles\681194cc937871ab43df123dc4e6470b\update_mappings.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glfw-src\src\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glfw-src\src\mappings.h.in">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\_deps\glfw-src\CMake\GenerateMappings.cmake" />
+    <None Include="C:\Users\eugen\sandbox\Y2T1\GAM\csd2401f25_team_bloop\BaseEngine\build\build\_deps\glfw-src\src\CMakeFiles\update_mappings" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{E8FB6553-9A02-384E-B66A-A0097E7AF3E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{0A46D442-7748-35E2-9EED-016CD863A4C1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
