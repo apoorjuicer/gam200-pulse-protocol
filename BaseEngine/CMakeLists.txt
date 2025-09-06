@@ -1,6 +1,6 @@
 ﻿# Projects Settings
 
-cmake_minimum_required(VERSION 3.4...3.28 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.4...4.1 FATAL_ERROR)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 project("MyEngine" VERSION 0.1 LANGUAGES C CXX)
