@@ -7,7 +7,7 @@ if not exist build (
 
 REM BUILDING DEBUG
 pushd build
-cmake ..
+cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 cmake --build . --config Debug
 popd
 
