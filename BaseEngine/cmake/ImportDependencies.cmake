@@ -2,46 +2,47 @@ include(FetchContent)
 
 # Macro to import GLFW
 macro(import_glfw)
-    if(NOT TARGET glfw)  # Guard to prevent multiple inclusion
+ if(NOT TARGET glfw)
         FetchContent_Declare(
             glfw
             GIT_REPOSITORY https://github.com/glfw/glfw.git
             GIT_TAG 3.3.8
         )
-        if(NOT glfw_POPULATED)
-            set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-            set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-            set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-            FetchContent_Populate(glfw)
-        endif()
+        # Trim extras
+        set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+        set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+        set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-        add_subdirectory(${glfw_SOURCE_DIR})
-        include_directories(${GLFW_SOURCE_DIR}/include)
+        # Works on CMake >=3.14, including 3.29.2 and all 4.x
+        FetchContent_MakeAvailable(glfw)
+        # no add_subdirectory(), no include_directories()
     endif()
 endmacro()
 
+# --- GLEW ---
 macro(import_glew)
-    FetchContent_Declare(
-      glew
-      GIT_REPOSITORY https://github.com/Perlmint/glew-cmake
-      GIT_TAG master
-    )
-
-    FetchContent_MakeAvailable(glew)
-    include_directories(${GLEW_SOURCE_DIR}/include)
+    if(NOT TARGET GLEW::glew AND NOT TARGET glew)
+        FetchContent_Declare(
+            glew
+            GIT_REPOSITORY https://github.com/Perlmint/glew-cmake
+            GIT_TAG master
+        )
+        FetchContent_MakeAvailable(glew)
+        # no include_directories()
+        # Link with: target_link_libraries(<tgt> PRIVATE GLEW::glew)  (or 'glew'/'glew_s' if that's what the repo defines)
+    endif()
 endmacro()
 
-# Macro to import glm
+# --- GLM ---
 macro(import_glm)
-    if(NOT TARGET glm)  # Guard to prevent multiple inclusion
+    if(NOT TARGET glm AND NOT TARGET glm::glm)
         FetchContent_Declare(
             glm
             GIT_REPOSITORY https://github.com/g-truc/glm.git
             GIT_TAG 0.9.9.8
         )
         FetchContent_MakeAvailable(glm)
- 
-        include_directories(${glm_SOURCE_DIR})
+        # Link with: target_link_libraries(<tgt> PRIVATE glm)  # or glm::glm if available
     endif()
 endmacro()
 
