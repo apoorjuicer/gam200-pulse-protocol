@@ -146,7 +146,7 @@ namespace Framework
 
 		if (IsKeyJustPressed(GLFW_KEY_S) && IsWeaponKey(GLFW_KEY_S))
 		{
-			std::cout << "[M1 SWORD TEST] Sword attack key (A) pressed" << std::endl;
+			std::cout << "[M1 SWORD TEST] Sword attack key (S) pressed" << std::endl;
 		}
 
 		if (IsKeyJustPressed(GLFW_KEY_D) && IsWeaponKey(GLFW_KEY_D))
