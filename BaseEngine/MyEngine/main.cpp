@@ -1,3 +1,12 @@
+// ==================================================================================
+// main.cpp
+// Authors: Team Bloop - Rachael (Window Setup), Chloe Lau Rey En (Input System)
+//          Pin Kai, Benjamin, Reginald, Carrie, Fenny, Jun Yong (TBA)
+// Brief: Main application entry point for custom game engine. Currently demonstrates
+//        window creation and input system for M1 milestone. Additional systems
+//        will be integrated as team completes their respective components.
+// ==================================================================================
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -36,11 +45,13 @@ void initEngine() {
 
     // Display M1 test instructions
     std::cout << "\n=== M1 INPUT SYSTEM DEMONSTRATION ===" << std::endl;
-    std::cout << "SPACE     -> Primary rhythm beat input" << std::endl;
-    std::cout << "A/S/D     -> Weapon combo keys (spear/sword/bow)" << std::endl;
-    std::cout << "MOUSE     -> UI interaction testing" << std::endl;
+    std::cout << "Q/W/E/R        -> Rhythm beat inputs (core gameplay)" << std::endl;
+    std::cout << "1/2/3          -> Weapon switching (Spear/Sword/Bow)" << std::endl;
+    std::cout << "RIGHT MOUSE    -> Aim mode (hold)" << std::endl;
+    std::cout << "LEFT MOUSE     -> Attack/Shoot or UI interaction" << std::endl;
+    std::cout << "MOUSE MOVE     -> Aiming direction" << std::endl;
     std::cout << "Close window to exit testing" << std::endl;
-    std::cout << "=======================================" << std::endl;
+    std::cout << "===========================================" << std::endl;
 }
 
 void update()

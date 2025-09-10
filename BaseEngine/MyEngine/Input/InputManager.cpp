@@ -1,10 +1,20 @@
+// ==================================================================================
+// InputManager.cpp  
+// Author: Chloe Lau Rey En
+// Brief: Implementation of InputManager class with frame-based input detection.
+//        Handles rhythm gameplay inputs, weapon switching, mouse aiming, and
+//        provides M1 testing functionality with console output.
+// ==================================================================================
+
 #include "InputManager.h"
 #include <iostream>
 #include <cstring>
 
 namespace Framework
 {
-	InputManager::InputManager() : window(nullptr), mouseX(0.0), mouseY(0.0)
+	InputManager::InputManager() : window(nullptr), mouseX(0.0), mouseY(0.0),
+		previousMouseX(0.0), previousMouseY(0.0), mouseSensitivity(1.0f),
+		isFirstMouse(true), currentWeapon(1)
 	{
 		// initialize all input states to false by default
 		std::memset(currentKeys, 0, sizeof(currentKeys));
@@ -66,9 +76,15 @@ namespace Framework
 
 		// remember to update mouse cursor position
 		glfwGetCursorPos(window, &mouseX, &mouseY);
+
+		if (isFirstMouse) {
+			previousMouseX = mouseX;
+			previousMouseY = mouseY;
+			isFirstMouse = false;
+		}
 	}
 
-	// RETURNING OF KEY STATES (BOOL)
+	// RETURNING OF KEY STATES (BOOL) * CALCULATION OF MOUSE STATS
 	bool InputManager::IsKeyPressed(int key)
 	{
 		if (key < 0 || key > GLFW_KEY_LAST) return false;
@@ -90,7 +106,7 @@ namespace Framework
 	bool InputManager::IsMousePressed(int button)
 	{
 		if (button < 0 || button > GLFW_MOUSE_BUTTON_LAST) return false;
-		return currentKeys[button];
+		return currentMouse[button];
 	}
 
 	bool InputManager::IsMouseJustPressed(int button)
@@ -105,13 +121,34 @@ namespace Framework
 		y = mouseY;
 	}
 
-	// specific rhythm game functions 
-	bool InputManager::IsRhythmKeyPressed() {
-		return IsKeyJustPressed(GLFW_KEY_SPACE);
+	void InputManager::GetMouseDelta(double& deltaX, double& deltaY)
+	{
+		deltaX = (mouseX - previousMouseX) * mouseSensitivity;
+		deltaY = (mouseY - previousMouseY) * mouseSensitivity;
 	}
 
-	bool InputManager::IsWeaponKey(int key) {
-		return (key == GLFW_KEY_A || key == GLFW_KEY_S || key == GLFW_KEY_D);
+	void InputManager::SetMouseSensitivity(float sensitivity)
+	{
+		mouseSensitivity = sensitivity;
+	}
+
+
+	// specific rhythm game functions 
+	bool InputManager::IsRhythmKeyPressed(int key) {
+		return (key == GLFW_KEY_Q || key == GLFW_KEY_W ||
+			key == GLFW_KEY_E || key == GLFW_KEY_R) && IsKeyJustPressed(key);
+	}
+
+	bool InputManager::IsWeaponSwitchPressed(int key) {
+		return (key == GLFW_KEY_1 || key == GLFW_KEY_2 || key == GLFW_KEY_3) && IsKeyJustPressed(key);
+	}
+
+	int InputManager::GetCurrentWeaponSelected() {
+		return currentWeapon;
+	}
+
+	bool InputManager::IsAiming() {
+		return IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT);
 	}
 
 	double InputManager::GetInputTiming() {
@@ -120,13 +157,53 @@ namespace Framework
 
 	void InputManager::RunM1Test()
 	{
-
-		// test rhythm key (aka space key)
-		if (IsRhythmKeyPressed())
+		// testing of the rhythm keys Q/W/E/R (core rhythm gameplay)
+		if (IsKeyJustPressed(GLFW_KEY_Q))
 		{
 			double timing = GetInputTiming();
-			std::cout << "[M1 SPACEBAR TEST] Rhythm Key (SPACE) pressed at: " << timing << "s" << std::endl;
-			std::cout << "          Beat input detected for rhythm mechanics" << std::endl;
+			std::cout << "[M1 BEAT1 TEST] Q pressed at: " << timing << "s - Rhythm Beat 1" << std::endl;
+		}
+		if (IsKeyJustPressed(GLFW_KEY_W))
+		{
+			double timing = GetInputTiming();
+			std::cout << "[M1 BEAT2 TEST] W pressed at: " << timing << "s - Rhythm Beat 2" << std::endl;
+		}
+		if (IsKeyJustPressed(GLFW_KEY_E))
+		{
+			double timing = GetInputTiming();
+			std::cout << "[M1 BEAT3 TEST] E pressed at: " << timing << "s - Rhythm Beat 3" << std::endl;
+		}
+		if (IsKeyJustPressed(GLFW_KEY_R))
+		{
+			double timing = GetInputTiming();
+			std::cout << "[M1 BEAT4 TEST] R pressed at: " << timing << "s - Rhythm Beat 4" << std::endl;
+		}
+
+		// test switchign of 3 weapons (1,2,3)
+		if (IsKeyJustPressed(GLFW_KEY_1))
+		{
+			currentWeapon = 1;
+			std::cout << "[M1 SPEAR TEST] Switched to Spear (1)" << std::endl;
+		}
+		if (IsKeyJustPressed(GLFW_KEY_2))
+		{
+			currentWeapon = 2;
+			std::cout << "[M1 SWORD TEST] Switched to Sword (2)" << std::endl;
+		}
+		if (IsKeyJustPressed(GLFW_KEY_3))
+		{
+			currentWeapon = 3;
+			std::cout << "[M1 GUN TEST] Switched to Gun (3)" << std::endl;
+		}
+
+		// test for aiming using mouse
+		if (IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT))
+		{
+			double x, y, deltaX, deltaY;
+			GetMousePosition(x, y);
+			GetMouseDelta(deltaX, deltaY);
+			std::cout << "[M1 AIM TEST] Aiming mode - Position: (" << x << ", " << y
+				<< ") Delta: (" << deltaX << ", " << deltaY << ")" << std::endl;
 		}
 
 		// test mouse input
@@ -138,20 +215,17 @@ namespace Framework
 			std::cout << "          UI interaction capability confirmed" << std::endl;
 		}
 
-		// test simple weapon combo keys
-		if (IsKeyJustPressed(GLFW_KEY_A) && IsWeaponKey(GLFW_KEY_A))
+		// test shooting or attacking while aiming
+		if (IsMouseJustPressed(GLFW_MOUSE_BUTTON_LEFT))
 		{
-			std::cout << "[M1 SPEAR TEST] Spear attack key (A) pressed" << std::endl;
-		}
-
-		if (IsKeyJustPressed(GLFW_KEY_S) && IsWeaponKey(GLFW_KEY_S))
-		{
-			std::cout << "[M1 SWORD TEST] Sword attack key (A) pressed" << std::endl;
-		}
-
-		if (IsKeyJustPressed(GLFW_KEY_D) && IsWeaponKey(GLFW_KEY_D))
-		{
-			std::cout << "[M1 BOW TEST] Bow attack key (D) pressed" << std::endl;
+			double x, y;
+			GetMousePosition(x, y);
+			if (IsAiming()) {
+				std::cout << "[M1 SHOOT TEST] Aimed shot fired at: (" << x << ", " << y << ")" << std::endl;
+			}
+			else {
+				std::cout << "[M1 CLICK TEST] UI click at: (" << x << ", " << y << ")" << std::endl;
+			}
 		}
 	}
 
