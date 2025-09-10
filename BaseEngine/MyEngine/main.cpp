@@ -15,6 +15,25 @@ const char WindowTitle[] = "Game Window";
 const int Game_Window_Height = 1400;
 const int Game_Window_Width = 800;
 
+// just concepts for game states, will be in GSM 
+struct GameStates {
+    bool MainMenu = true;
+    bool IsRunning = false;
+    bool IsPaused = false;
+    bool GameOver = false;
+
+    //libs that are good to use.
+        //fmod
+        //imgui
+        //glm 
+        //glfw
+        //freetype for font
+        //stb
+        //xcore lib for game engine
+        // spdlog
+
+} gamestate;
+
 
 #ifdef _DEBUG
 //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -38,6 +57,9 @@ void render() {
 }
 
 int main() {
+//#ifdef _DEBUG
+//    _CrtMemCheckpoint(&sOld); // Take initial snapshot (its like lock in the state of memory)
+//#endif
 
     if (!glfwInit()) {
         return -1;
@@ -52,20 +74,23 @@ int main() {
 
     glfwMakeContextCurrent(window);
 
+    // Initialize engine
     initEngine();
 
+    // Game loop goes here gamestate.IsRunning 
     while (!glfwWindowShouldClose(window)) {
         render();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    // Graphics cleanup 
     glfwDestroyWindow(window);
     glfwTerminate();
 
 
 #ifdef _DEBUG
-    _CrtMemCheckpoint(&sNew); //take a snapshot 
+    _CrtMemCheckpoint(&sNew); //take a snapshot (lock in the memory use again and now we compare :3)
     if (_CrtMemDifference(&sDiff, &sOld, &sNew)) // if there is a difference
     {
         OutputDebugString("-----------_CrtMemDumpStatistics ---------\n");
