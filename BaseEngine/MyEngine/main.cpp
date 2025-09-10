@@ -1,6 +1,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "Input/InputManager.h"
+
+using namespace Framework;
 
 #if (_DEBUG)
 // MEM LEAKS LIBRARIES (See _CrtMemCheckpoint for examples to check for mem leaks)
@@ -44,9 +47,36 @@ _CrtMemState sNew;
 _CrtMemState sDiff;
 #endif
 
+InputManager* g_inputSystem = nullptr;
+
 void initEngine() {
     glewInit();
     std::cout << "Engine initialized." << std::endl;
+
+    // Display M1 test instructions
+    std::cout << "\n=== M1 INPUT SYSTEM DEMONSTRATION ===" << std::endl;
+    std::cout << "SPACE     -> Primary rhythm beat input" << std::endl;
+    std::cout << "A/S/D     -> Weapon combo keys (spear/sword/bow)" << std::endl;
+    std::cout << "MOUSE     -> UI interaction testing" << std::endl;
+    std::cout << "Close window to exit testing" << std::endl;
+    std::cout << "=======================================" << std::endl;
+}
+
+void update()
+{
+
+
+    if (g_inputSystem) {
+        // Update input system
+        g_inputSystem->Update();
+
+        // Run M1 testing demonstrations
+        g_inputSystem->RunM1Test();
+
+        // Future game systems would be updated here:
+        // gameManager.Update();
+        // physics.Simulate();
+    }
 }
 
 void render() {
@@ -73,18 +103,25 @@ int main() {
     }
 
     glfwMakeContextCurrent(window);
-
-    // Initialize engine
+    g_inputSystem = new InputManager();
     initEngine();
 
-    // Game loop goes here gamestate.IsRunning 
+    g_inputSystem->Initialize(window);
+
     while (!glfwWindowShouldClose(window)) {
         render();
+        update();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    // Graphics cleanup 
+    // CLEANUP InputManager
+    if (g_inputSystem) {
+        g_inputSystem->Shutdown();
+        delete g_inputSystem;
+        g_inputSystem = nullptr;
+    }
+
     glfwDestroyWindow(window);
     glfwTerminate();
 
