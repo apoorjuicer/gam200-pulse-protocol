@@ -1,6 +1,8 @@
 #include "InputManager.h"
 #include <iostream>
 #include <cstring>
+#include "pch/pch.h"
+
 
 namespace Framework
 {
@@ -120,7 +122,6 @@ namespace Framework
 
 	void InputManager::RunM1Test()
 	{
-
 		// test rhythm key (aka space key)
 		if (IsRhythmKeyPressed())
 		{

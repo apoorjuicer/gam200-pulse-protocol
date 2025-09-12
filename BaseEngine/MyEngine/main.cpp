@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "Input/InputManager.h"
+#include "pch/pch.h"
 
 using namespace Framework;
 
@@ -22,7 +23,7 @@ const int Game_Window_Width = 800;
 struct GameStates {
     bool MainMenu = true;
     bool IsRunning = false;
-    bool IsPaused = false;
+    bool IsPaused = false;  
     bool GameOver = false;
 
     //libs that are good to use.
@@ -34,7 +35,6 @@ struct GameStates {
         //stb
         //xcore lib for game engine
         // spdlog
-
 } gamestate;
 
 
@@ -48,6 +48,7 @@ _CrtMemState sDiff;
 #endif
 
 InputManager* g_inputSystem = nullptr;
+//CoreEngine* engine = new CoreEngine();
 
 void initEngine() {
     glewInit();
@@ -64,8 +65,6 @@ void initEngine() {
 
 void update()
 {
-
-
     if (g_inputSystem) {
         // Update input system
         g_inputSystem->Update();
@@ -87,15 +86,15 @@ void render() {
 }
 
 int main() {
-//#ifdef _DEBUG
-//    _CrtMemCheckpoint(&sOld); // Take initial snapshot (its like lock in the state of memory)
-//#endif
+#ifdef _DEBUG
+    _CrtMemCheckpoint(&sOld); // Take initial snapshot (its like lock in the state of memory)
+#endif
 
     if (!glfwInit()) {
         return -1;
     }
 
-    // Size of game window here. 1400 x 800 is just a temp
+    // Size of game window here. 1400 x 800 is just a temp, we will change to get from resource manager which gets from text file
     GLFWwindow* window = glfwCreateWindow(Game_Window_Height, Game_Window_Width, WindowTitle, nullptr, nullptr);
     if (!window) {
         glfwTerminate();
@@ -108,12 +107,26 @@ int main() {
 
     g_inputSystem->Initialize(window);
 
+    //engine_initialize();
+    //engine_run() in here are vvv
+    // This will be where the application loop is. No more game loop, just the update
     while (!glfwWindowShouldClose(window)) {
-        render();
+        //  1. Poll event(input key)
+        //  2. update engine cpp
+        //  3. ImGui update
+        //  4. game update(NOT A WHILE LOOP)
+        //  5. game rendering
+        //  6. ImGui rendering
+        //  7. Swap Buffer(like two window)
+
+        glfwPollEvents();
         update();
+        render();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    //engine_exit(); the cleanup all in here
 
     // CLEANUP InputManager
     if (g_inputSystem) {
