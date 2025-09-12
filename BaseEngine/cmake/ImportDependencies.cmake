@@ -33,16 +33,17 @@ macro(import_glew)
     endif()
 endmacro()
 
-# --- GLM ---
+# Macro to import glm
 macro(import_glm)
-    if(NOT TARGET glm AND NOT TARGET glm::glm)
+    if(NOT TARGET glm)  # Guard to prevent multiple inclusion
         FetchContent_Declare(
             glm
             GIT_REPOSITORY https://github.com/g-truc/glm.git
             GIT_TAG 0.9.9.8
         )
         FetchContent_MakeAvailable(glm)
-        # Link with: target_link_libraries(<tgt> PRIVATE glm)  # or glm::glm if available
+ 
+        include_directories(${glm_SOURCE_DIR})
     endif()
 endmacro()
 

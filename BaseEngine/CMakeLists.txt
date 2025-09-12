@@ -2,6 +2,7 @@
 
 cmake_minimum_required(VERSION 3.4...4.1 FATAL_ERROR)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MyEngine)
 
 project("MyEngine" VERSION 0.1 LANGUAGES C CXX)
 
