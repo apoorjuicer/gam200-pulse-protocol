@@ -8,6 +8,8 @@
 
 #pragma once
 #include <GLFW/glfw3.h>
+#include "pch/pch.h"
+
 
 namespace Framework
 {

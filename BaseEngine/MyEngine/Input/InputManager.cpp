@@ -9,6 +9,8 @@
 #include "InputManager.h"
 #include <iostream>
 #include <cstring>
+#include "pch/pch.h"
+
 
 namespace Framework
 {
