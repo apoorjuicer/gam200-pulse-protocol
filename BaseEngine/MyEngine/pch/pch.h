@@ -17,6 +17,10 @@
 // Graphics Library Headers
 #include <GLFW/glfw3.h>
 
+// Suppress APIENTRY macro redefinition warning
+#pragma warning(push)
+#pragma warning(disable: 4005)
+
 // System Library Headers
 #include <../MyEngine/GSM/gsm.h>
 #include <../MyEngine/ECS/ecs.h>
@@ -26,5 +30,7 @@
 #include <../MyEngine/Time/Time_Manager.h>
 #include <../MyEngine/CoreEngine/CoreEngine.h>
 
+// Restore warning settings
+#pragma warning(pop)
 
 #endif //PCH_H

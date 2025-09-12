@@ -6,7 +6,15 @@
 //        window creation and input system for M1 milestone. Additional systems
 //        will be integrated as team completes their respective components.
 // ==================================================================================
-
+#if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>   // for OutputDebugString, etc.
+#endif
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>

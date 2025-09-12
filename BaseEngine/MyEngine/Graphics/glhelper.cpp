@@ -190,6 +190,7 @@ This function is called when keyboard buttons are pressed.
 When the ESC key is pressed, the close flag of the window is set.
 */
 void GLHelper::key_cb(GLFWwindow *pwin, int key, int scancode, int action, int mod) {
+  (void)pwin; (void)mod; (void)scancode; // Suppress unused parameter warnings
   if (GLFW_PRESS == action) {
       //if ((mod & GLFW_MOD_CONTROL) && (mod & GLFW_MOD_ALT) && key == GLFW_KEY_9) {
       //    GAM200_CORE_INFO("Key Ctrl+Alt+Del pressed");
@@ -220,6 +221,7 @@ void GLHelper::key_cb(GLFWwindow *pwin, int key, int scancode, int action, int m
 
       // Attempt to get the key name using glfwGetKeyName (for printable keys)
       const char* keyName = glfwGetKeyName(key, scancode);
+      (void)keyName; // Suppress unused variable warning
 
       //if (keyName) {
       //    GAM200_CORE_INFO("Key released: {}", keyName);
@@ -300,6 +302,7 @@ were held down
 This function is called when mouse buttons are pressed.
 */
 void GLHelper::mousebutton_cb(GLFWwindow *pwin, int button, int action, int mod) {
+  (void)pwin; (void)mod; // Suppress unused parameter warnings
     //UNREFERENCED_PARAMETER(*pwin);
     //UNREFERENCED_PARAMETER(mod);
   switch (button) {
@@ -359,6 +362,7 @@ This functions receives the cursor position, measured in screen coordinates but
 relative to the top-left corner of the window client area.
 */
 void GLHelper::mousepos_cb(GLFWwindow *pwin, double xpos, double ypos) {
+  (void)pwin; (void)xpos; (void)ypos; // Suppress unused parameter warnings
 #ifdef _DEBUG
     //UNREFERENCED_PARAMETER(*pwin);
   //std::cout << "Mouse cursor position: (" << xpos << ", " << ypos << ")" << std::endl;
@@ -393,6 +397,7 @@ touchpad gesture. Although the function receives 2D scroll offsets, a simple
 mouse scroll wheel, being vertical, provides offsets only along the Y-axis.
 */
 void GLHelper::mousescroll_cb(GLFWwindow *pwin, double xoffset, double yoffset) {
+  (void)pwin; (void)xoffset; (void)yoffset; // Suppress unused parameter warnings
 #ifdef _DEBUG
     //UNREFERENCED_PARAMETER(*pwin);
   std::cout << "Mouse scroll wheel offset: ("
@@ -415,6 +420,7 @@ The error callback receives a human-readable description of the error and
 (when possible) its cause.
 */
 void GLHelper::error_cb(int error, char const* description) {
+  (void)error; (void)description; // Suppress unused parameter warnings
 #ifdef _DEBUG
     //UNREFERENCED_PARAMETER(error);
   std::cerr << "GLFW error: " << description << std::endl;
@@ -439,6 +445,7 @@ This function is called when the window is resized - it receives the new size
 of the window in pixels.
 */
 void GLHelper::fbsize_cb(GLFWwindow *ptr_win, int fbwidth, int fbheight) {
+  (void)ptr_win; // Suppress unused parameter warning
 #ifdef _DEBUG
     //UNREFERENCED_PARAMETER(*ptr_win);
   std::cout << "fbsize_cb getting called!!!" << std::endl;
@@ -481,6 +488,7 @@ void GLHelper::fbsize_cb(GLFWwindow *ptr_win, int fbwidth, int fbheight) {
 }
 
 void GLHelper::focus_cb(GLFWwindow* window, int focused) {
+  (void)window; // Suppress unused parameter warning
     //UNREFERENCED_PARAMETER(window);
     if (focused) {
         // Window has gained focus, resume game and audio
