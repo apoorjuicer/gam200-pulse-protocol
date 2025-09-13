@@ -1,29 +1,112 @@
 /******************************************************************************/
 /*!
-\file   IOManager.cpp
+\file   ResourceManager.cpp
 \author [Your Name]
 \date   [Current Date]
 
 \brief
-    Implementation of basic file I/O operations. Provides text file reading,
-    writing, and simple key=value config parsing for game engine systems.
-
-Functions:
-    - ReadTextFile: Load entire file as string
-    - WriteTextFile: Save string to file
-    - ParseSimpleConfig: Load key=value pairs from config files
+    Implementation of basic text resource manager with caching capabilities.
+    Manages text files, configuration files, and provides data-driven loading.
 */
 /******************************************************************************/
 
-#include "pch/pch.h"
-#include <ostream>
+#include "ResourceManager.h"
+#include <iostream>
 #include <sstream>
 
-//basic file ops
-std::string IOManager::ReadTextFile(const std::string& filename) {
+// ============================= TEXT RESOURCES ============================= //
+bool ResourceManager::LoadTextResource(const std::string& name, const std::string& filename) {
+    std::string content = ReadFile(filename);
+    if (content.empty()) {
+        std::cout << "[ResourceManager] Failed to load text resource: " << filename << std::endl;
+        return false;
+    }
+
+    // saves the text in memory under given name
+    textResources[name] = content;
+    std::cout << "[ResourceManager] Loaded text resource '" << name << "' from " << filename << std::endl;
+    return true;
+}
+
+std::string ResourceManager::GetTextResource(const std::string& name) {
+    // looks up resources by name
+    auto it = textResources.find(name);
+    if (it != textResources.end()) {
+        return it->second; // returns content that is found
+    }
+
+    std::cout << "[ResourceManager] Warning: Text resource '" << name << "' not found" << std::endl;
+    return "";
+}
+
+// ============================= CONFIG RESOURCES =========================== //
+bool ResourceManager::LoadConfig(const std::string& configName, const std::string& filename) {
+    std::string content = ReadFile(filename);
+    if (content.empty()) {
+        std::cout << "[ResourceManager] Failed to load config: " << filename << std::endl;
+        return false;
+    }
+
+    configResources[configName] = ParseConfig(content);
+    std::cout << "[ResourceManager] Loaded config '" << configName << "' from " << filename << std::endl;
+    return true;
+}
+
+std::string ResourceManager::GetConfigValue(const std::string& configName, const std::string& key) {
+    auto configIt = configResources.find(configName);
+    if (configIt != configResources.end()) {
+        auto valueIt = configIt->second.find(key);
+        if (valueIt != configIt->second.end()) {
+            return valueIt->second;
+        }
+    }
+
+    std::cout << "[ResourceManager] Warning: Config value '" << key << "' not found in '" << configName << "'" << std::endl;
+    return "";
+}
+
+// ============================= RESOURCE MANAGEMENT ======================== //
+bool ResourceManager::IsResourceLoaded(const std::string& name) {
+    return textResources.find(name) != textResources.end();
+}
+
+void ResourceManager::UnloadResource(const std::string& name) {
+    textResources.erase(name);
+    configResources.erase(name);
+    std::cout << "[ResourceManager] Unloaded resource: " << name << std::endl;
+}
+
+void ResourceManager::UnloadAll() {
+    textResources.clear();
+    configResources.clear();
+    std::cout << "[ResourceManager] All resources unloaded" << std::endl;
+}
+
+// ============================= FILE UTILITIES ============================= //
+bool ResourceManager::WriteTextFile(const std::string& filename, const std::string& content) {
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        return false;
+    }
+    file << content;
+    file.close();
+    return true;
+}
+
+bool ResourceManager::AppendToLog(const std::string& filename, const std::string& message) {
+    std::ofstream file(filename, std::ios::app);
+    if (!file.is_open()) {
+        return false;
+    }
+    file << message << std::endl;
+    file.close();
+    return true;
+}
+
+// ============================= HELPER FUNCS ============================ //
+std::string ResourceManager::ReadFile(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cout << "Error: Could not open file " << filename << std::endl;
         return "";
     }
 
@@ -37,40 +120,13 @@ std::string IOManager::ReadTextFile(const std::string& filename) {
     return content;
 }
 
-bool IOManager::WriteTextFile(const std::string& filename, const std::string& content) {
-    std::ofstream file(filename);
-    if (!file.is_open()) {
-        std::cout << "Error: Could not create file " << filename << std::endl;
-        return false;
-    }
-
-    file << content;
-    file.close();
-    return true;
-}
-
-bool IOManager::FileExists(const std::string& filename) {
-    std::ifstream file(filename);
-    return file.good(); // .good() checks whether the state of stream is good or not
-}
-
-//config parsing
-std::unordered_map<std::string, std::string> IOManager::ParseConfig(const std::string& filename) {
+std::unordered_map<std::string, std::string> ResourceManager::ParseConfig(const std::string& content) {
     std::unordered_map<std::string, std::string> config;
-    std::string content = ReadTextFile(filename);
-
-    if (content.empty()) {
-        return config;
-    }
-
     std::istringstream stream(content);
     std::string line;
 
     while (std::getline(stream, line)) {
-        // if line is empty or is a comment, it gets skipped
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
+        if (line.empty() || line[0] == '#') continue;
 
         size_t pos = line.find('=');
         if (pos != std::string::npos) {
@@ -81,16 +137,4 @@ std::unordered_map<std::string, std::string> IOManager::ParseConfig(const std::s
     }
 
     return config;
-}
-
-//logging utilities
-bool IOManager::AppendToLog(const std::string& filename, const std::string& message) {
-    std::ofstream file(filename, std::ios::app);
-    if (!file.is_open()) {
-        return false;
-    }
-
-    file << message << std::endl;
-    file.close();
-    return true;
 }

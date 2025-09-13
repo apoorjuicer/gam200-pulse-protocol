@@ -10,10 +10,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include "Input/InputManager.h"
 #include "pch/pch.h"
-
-using namespace Framework;
 
 #if (_DEBUG)
 // MEM LEAKS LIBRARIES (See _CrtMemCheckpoint for examples to check for mem leaks)

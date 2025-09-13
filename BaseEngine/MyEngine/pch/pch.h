@@ -25,7 +25,7 @@
 #include <../MyEngine/Physics/collision.h>
 #include <../MyEngine/Time/Time_Manager.h>
 #include <../MyEngine/CoreEngine/CoreEngine.h>
-#include <../MyEngine/IO/IOManager.h>
+#include <../MyEngine/Resources/ResourceManager.h>
 
 
 #endif //PCH_H
