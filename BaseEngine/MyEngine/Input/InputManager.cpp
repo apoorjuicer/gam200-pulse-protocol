@@ -12,8 +12,6 @@
 #include "pch/pch.h"
 
 
-namespace Framework
-{
 	InputManager::InputManager() : window(nullptr), mouseX(0.0), mouseY(0.0),
 		previousMouseX(0.0), previousMouseY(0.0), mouseSensitivity(1.0f),
 		isFirstMouse(true), currentWeapon(1)
@@ -239,4 +237,3 @@ namespace Framework
 			window = nullptr;
 		}
 	}
-}
