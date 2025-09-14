@@ -13,6 +13,9 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include <cmath>
+#include <cassert> //debug throw assertion
+#include <iomanip> //debug
 
 // Graphics Library Headers
 #include <GLFW/glfw3.h>

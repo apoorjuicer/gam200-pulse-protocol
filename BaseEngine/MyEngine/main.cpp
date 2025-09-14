@@ -18,6 +18,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+
 #include "pch/pch.h"
 
 #if (_DEBUG)
@@ -77,6 +78,7 @@ void initEngine() {
     std::cout << "MOUSE MOVE     -> Aiming direction" << std::endl;
     std::cout << "Close window to exit testing" << std::endl;
     std::cout << "===========================================" << std::endl;
+
 }
 
 void update()
