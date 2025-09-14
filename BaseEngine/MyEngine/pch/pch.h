@@ -29,6 +29,7 @@
 #include <../MyEngine/Physics/collision.h>
 #include <../MyEngine/Time/Time_Manager.h>
 #include <../MyEngine/CoreEngine/CoreEngine.h>
+#include <../MyEngine/Resources/ResourceManager.h>
 
 // Restore warning settings
 #pragma warning(pop)

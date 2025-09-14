@@ -11,8 +11,7 @@
 #include "pch/pch.h"
 
 
-namespace Framework
-{
+
 	// input manager handles keyboard input and mouse input states
 	// provides frame-based input detection and rhythm game timing support
 	class InputManager
@@ -70,4 +69,3 @@ namespace Framework
 		void UpdateKeyStates();
 		void UpdateMouseStates();
 	};
-}
