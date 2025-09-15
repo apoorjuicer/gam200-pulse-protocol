@@ -66,7 +66,7 @@ public:
     static std::vector<GLApp::GLModel> models; // added for Tutorial 2
 
     GLApp::GLModel box_model();
-    GLApp::GLModel mystery_model();
+    //GLApp::GLModel mystery_model();
     GLApp::GLModel bg_model();
 
     static std::vector<GLSLShader> shdrpgms; // singleton in tutorial 3

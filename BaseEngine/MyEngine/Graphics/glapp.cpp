@@ -344,7 +344,7 @@ void GLApp::cleanup() {
 void GLApp::init_models_cont() {
     GLApp::models.emplace_back(GLApp::bg_model());
     GLApp::models.emplace_back(GLApp::box_model());
-    GLApp::models.emplace_back(GLApp::mystery_model());
+    //GLApp::models.emplace_back(GLApp::mystery_model());
 }
 
 //Shader Program Container
