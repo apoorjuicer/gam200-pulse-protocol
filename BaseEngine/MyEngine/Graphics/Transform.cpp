@@ -1,9 +1,7 @@
-//#include "Transform.h"
-//
 ///*********************************************************************************************
 // \file      Transform.cpp
-// \par       Cat Feeders
-// \author    Goh Pin Kai (pinkai.g@digipen.edu) 100%
+// \par       Bloop
+// \author    Goh Pin Kai (pinkai.g@digipen.edu)
 //
 //
 //\copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.

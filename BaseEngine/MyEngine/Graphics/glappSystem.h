@@ -1,8 +1,7 @@
 ///*********************************************************************************************
 // \file      glappSystem.h
-// \par		Cat Feeders
-// \author    Goh pin Kai (pinkai.g@digipen.edu) 75%
-//			Michelle Han Jian Ping (m.han@digipen.edu) 25%
+// \par		  Bloop
+// \author    Goh pin Kai (pinkai.g@digipen.edu)
 //
 //
 //\copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.

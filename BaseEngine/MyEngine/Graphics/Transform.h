@@ -1,10 +1,7 @@
 ///*********************************************************************************************
 // \file      Transform.h
-// \par       Cat Feeders
+// \par       Bloop
 // \author    Goh Pin Kai (pinkai.g@digipen.edu) 100%
-// \par		Cat Feeders
-// \author	 Goh pin Kai (pinkai.g@digipen.edu) 70%
-//             Tee Ming Zhe, Daniel (m.tee@digipen.edu) 30%
 //
 //
 //\copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.

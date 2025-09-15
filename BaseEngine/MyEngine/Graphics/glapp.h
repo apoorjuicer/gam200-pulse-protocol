@@ -1,7 +1,7 @@
 /*********************************************************************************************
  \file      glapp.h
  \par		Bloop
- \author    Goh pin Kai (pinkai.g@digipen.edu) 100%
+ \author    Goh pin Kai (pinkai.g@digipen.edu)
 
 
 \copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.
