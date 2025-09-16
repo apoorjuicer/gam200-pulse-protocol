@@ -1,0 +1,93 @@
+#pragma once
+#include "pch/pch.h"
+#include "ComponentArray.h"
+
+class ComponentManager
+{
+public:
+	template<typename T>
+	void RegisterComponents()
+	{
+		// get name of component T. Exp: transform, scale
+		const char* ComponentTypeName = typeid(T).name();
+
+		assert(ComponentTypes.find(ComponentTypeName) == ComponentTypes.end() && "Registering component type more than once.");
+
+		ComponentTypes.insert({ ComponentTypeName, NextComponentType });
+		ComponentDataArray.insert({ ComponentTypeName, std::make_shared<ComponentList<T>>() });
+
+		++NextComponentType;
+
+	}
+
+	template<typename T>
+	ComponentType GetComponentType()
+	{
+		const char* ComponentTypeName = typeid(T).name();
+
+		assert(ComponentTypes.find(ComponentTypeName) != ComponentTypes.end() && "Component has not been registered!");
+
+		return ComponentTypes[ComponentTypeName];
+	}
+
+
+	template<typename T>
+	void AddComponent(Entity entity, T component)
+	{
+		GetComponentArray<T>()->InsertData(entity, component);
+	}
+
+	template<typename T>
+	void RemoveComponent(Entity entity)
+	{
+		GetComponentArray<T>()->RemoveData(entity);
+	}
+
+	template<typename T>
+	T& GetComponent(Entity entity)
+	{
+		return GetComponentArray<T>()->GetData(entity);
+	}
+
+	void RemoveEntity(Entity entity)
+	{
+		// remove all the component the entity is apart of 
+		for (auto const& pair : ComponentDataArray)
+		{
+			auto const& component = pair.second;
+
+			component->RemoveEntity(entity);
+		}
+	}
+	
+
+
+private:
+	// Map where ame of component is key and Component Type(ID) as "reward" (Max 32 for now ah)
+	std::unordered_map<const char*, ComponentType> ComponentTypes{};
+
+	// Map where name of componentis key and the component data as "reward"
+	std::unordered_map<const char*, std::shared_ptr<ComponentTypeList>> ComponentDataArray{};
+	
+	//std::shared_pt: A smart pointer that retains shared ownership of an object through a pointer and 
+	//				  only dies when all the object owning the object is destroyed
+
+	// The component type to be assigned to the next registered component. Starts at 0.
+	ComponentType NextComponentType{};
+
+	// Helper function thats gets T Component array
+	template<typename T>
+	std::shared_ptr<ComponentList<T>> GetComponentArray()
+	{
+		// Grab da name of component T
+		const char* ComponentTypeName = typeid(T).name();
+
+		// Check if component has been registered
+		assert(ComponentTypes.find(ComponentTypeName) != ComponentTypes.end() && "Component has not been registered!");
+
+		// We change the parent to child. As ComponentDataArray is Parent(ComponentTypeList) & ComponentList is child
+		// So we use ComponenTypeName that was set in above and we will get the pointer to the ComponentTypeList that has the data.
+		return std::static_pointer_cast<ComponentList<T>>(ComponentDataArray[ComponentTypeName]);
+	}
+
+};

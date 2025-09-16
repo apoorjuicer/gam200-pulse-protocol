@@ -1,9 +1,5 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <iostream>
-#include "Input/InputManager.h"
 #include "pch/pch.h"
-
+#include "Core/Coordinator.h"
 using namespace Framework;
 
 #if (_DEBUG)
@@ -12,6 +8,9 @@ using namespace Framework;
 #define _CRTDBG_MAP_ALLOC //to get more details
 #include <cstdlib>  
 #include <crtdbg.h>   //for malloc and free
+static _CrtMemState sOld;
+static _CrtMemState sNew;
+static _CrtMemState sDiff;
 #endif
 
 // Game window dimensions and title
@@ -38,21 +37,13 @@ struct GameStates {
 } gamestate;
 
 
-#ifdef _DEBUG
-//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-//_CrtSetBreakAlloc(15046); // Uncomment and replace param with the allocation number to break on specific leaks
-
-_CrtMemState sOld;
-_CrtMemState sNew;
-_CrtMemState sDiff;
-#endif
-
+Coordinator* g_coordinator = nullptr;
 InputManager* g_inputSystem = nullptr;
-//CoreEngine* engine = new CoreEngine();
 
 void initEngine() {
     glewInit();
     std::cout << "Engine initialized." << std::endl;
+
 
     // Display M1 test instructions
     std::cout << "\n=== M1 INPUT SYSTEM DEMONSTRATION ===" << std::endl;
@@ -86,10 +77,13 @@ void render() {
 }
 
 int main() {
+
 #ifdef _DEBUG
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); // start checking 
+    //_CrtSetBreakAlloc(181); // Uncomment and replace param with the allocation number to break on specific leaks
     _CrtMemCheckpoint(&sOld); // Take initial snapshot (its like lock in the state of memory)
 #endif
-
+    CoreEngine Engine;
     if (!glfwInit()) {
         return -1;
     }
@@ -101,14 +95,25 @@ int main() {
         return -1;
     }
 
+    Engine.Init(); //for all the system init yeah? where the gsm load and init
+    
+    //g_coordinator->RegisterSystem<InputManager>();
+    //g_coordinator->init();
+
+    //Signature signature;
+    //signature.set(g_coordinator->GetComponentType<InputManager>());
+    //std::vector<Entity> entities(MaxEntity);
+
+
+
     glfwMakeContextCurrent(window);
     g_inputSystem = new InputManager();
-    initEngine();
-
+    //initEngine();
     g_inputSystem->Initialize(window);
 
-    //engine_initialize();
-    //engine_run() in here are vvv
+    
+    
+    //Engine.Update(); in here are vvv
     // This will be where the application loop is. No more game loop, just the update
     while (!glfwWindowShouldClose(window)) {
         //  1. Poll event(input key)
@@ -120,13 +125,12 @@ int main() {
         //  7. Swap Buffer(like two window)
 
         glfwPollEvents();
-        update();
+        Engine.Update();
         render();
         glfwSwapBuffers(window);
-        glfwPollEvents();
     }
 
-    //engine_exit(); the cleanup all in here
+    Engine.Exit(); 
 
     // CLEANUP InputManager
     if (g_inputSystem) {
