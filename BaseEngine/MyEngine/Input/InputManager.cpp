@@ -3,7 +3,6 @@
 #include <cstring>
 #include "pch/pch.h"
 
-
 namespace Framework
 {
 	InputManager::InputManager() : window(nullptr), mouseX(0.0), mouseY(0.0)

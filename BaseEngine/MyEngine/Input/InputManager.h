@@ -4,7 +4,7 @@ namespace Framework
 {
 	// input manager handles keyboard input and mouse input states
 	// provides frame-based input detection and rhythm game timing support
-	class InputManager //: public Systems
+	class InputManager :// public Systems
 	{
 	public:
 		InputManager();

@@ -37,7 +37,8 @@ struct GameStates {
 } gamestate;
 
 
-Coordinator* g_coordinator = nullptr;
+
+
 InputManager* g_inputSystem = nullptr;
 
 void initEngine() {
@@ -97,11 +98,17 @@ int main() {
 
     Engine.Init(); //for all the system init yeah? where the gsm load and init
     
-    //g_coordinator->RegisterSystem<InputManager>();
+    
     //g_coordinator->init();
 
-    //Signature signature;
-    //signature.set(g_coordinator->GetComponentType<InputManager>());
+    // NEED TO INCLUDE THIS vvvv
+    /*Coordinator* g_coordinator = nullptr;
+    g_coordinator->RegisterSystem<InputManager>();
+    g_coorindator->AddComponent<InputManager>();
+    Signature signature;
+    signature.set(g_coordinator->GetComponentType<InputManager>());*/
+
+
     //std::vector<Entity> entities(MaxEntity);
 
 
