@@ -16,6 +16,7 @@
 #include <cmath>
 #include <cassert> //debug throw assertion
 #include <iomanip> //debug
+#include <algorithm>
 
 // Graphics Library Headers
 #include <GLFW/glfw3.h>
