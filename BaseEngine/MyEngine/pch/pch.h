@@ -17,9 +17,13 @@
 #include <cassert> //debug throw assertion
 #include <iomanip> //debug
 #include <algorithm>
+#include <random>
+#include <array>
 
 // Graphics Library Headers
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <GL/glew.h>
 
 // Suppress APIENTRY macro redefinition warning
 #pragma warning(push)
