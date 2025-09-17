@@ -15,7 +15,7 @@
 #include <memory>		 // for std::shared_ptr
 #include <any>
 #include <set>			
-#include <cassert>		 // for assertion
+#include <cassert>		 // for debug throwassertion
 #include <cstdint>		 // for uint32
 #include <bitset>		 // for System ID/signature
 #include <array>		 // for std::array
@@ -24,11 +24,18 @@
 #include <unordered_map> // for std::unordered_map
 
 
+#include <cmath>
+#include <iomanip> //debug
+#include <algorithm>
 
 // Graphics Library Headers
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 //#include <glm/glm.hpp>
+
+// Suppress APIENTRY macro redefinition warning
+#pragma warning(push)
+#pragma warning(disable: 4005)
 
 // System Library Headers
 #include "../MyEngine/GSM/gsm.h"
@@ -53,6 +60,16 @@
 #include "../MyEngine/Core/ComponentManager.h"
 
 
+#include <../MyEngine/GSM/gsm.h>
+#include <../MyEngine/ECS/ecs.h>
+#include <../MyEngine/Math/math.h>
+#include <../MyEngine/Input/InputManager.h>
+#include <../MyEngine/Physics/collision.h>
+#include <../MyEngine/Time/Time_Manager.h>
+#include <../MyEngine/CoreEngine/CoreEngine.h>
+#include <../MyEngine/Resources/ResourceManager.h>
 
+// Restore warning settings
+#pragma warning(pop)
 
 #endif //PCH_H
