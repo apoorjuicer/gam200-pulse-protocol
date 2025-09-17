@@ -20,7 +20,7 @@
 
 namespace Framework
 {
-    class Transform : /*public GameCom*/ {
+    class Transform  /* : public GameCom*/ {
     public:
         //ComponentTypeID typeID = Com_Trans;
         Vector2 Pos;
