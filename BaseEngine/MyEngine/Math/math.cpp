@@ -202,8 +202,8 @@ void Matrix3x3::SetToZero() {
 }
 
 void Matrix3x3::SetToTranspose() {
-    for (int i = 0; i < 3; ++i) {
-        for (int j = i + 1; j < 3; ++j) {
+    for (unsigned int i = 0; i < 3; ++i) {
+        for (unsigned int j = i + 1; j < 3; ++j) {
             //std::swap((*this)(i, j), (*this)(j, i));
             std::swap((i, j), (j, i));
         }
@@ -212,10 +212,10 @@ void Matrix3x3::SetToTranspose() {
 
 Matrix3x3 Matrix3x3::GetTranspose() const {
     Matrix3x3 result{};
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
+    for (unsigned int i = 0; i < 3; ++i) {
+        for (unsigned int j = 0; j < 3; ++j) {
             //result(i, j) = (*this)(j, i);
-            result(i, j) = (j, i);
+            result(i, j) =  static_cast<float>(j, i);
         }
     }
     return result;
@@ -233,8 +233,8 @@ Matrix3x3 operator*(Matrix3x3 const& L, Matrix3x3 const& R) {
         // each row of result is a dot of row(L) with that column
         for (unsigned row = 0; row < 3; ++row) {
             tmp(col, row) = L(0, row) * r0
-                + L(1, row) * r1
-                + L(2, row) * r2;
+                            + L(1, row) * r1
+                            + L(2, row) * r2;
         }
     }
     return tmp;
@@ -251,9 +251,9 @@ Matrix3x3 operator*(float s, Matrix3x3 const& mat) {
 
 std::ostream& operator<<(std::ostream& os, Matrix3x3 const& M) {
     os << "Printing Matrix\n";
-    for (int row = 0; row < 3; ++row) {
+    for (unsigned int row = 0; row < 3; ++row) {
         os << "[ ";
-        for (int col = 0; col < 3; ++col) {
+        for (unsigned int col = 0; col < 3; ++col) {
             os << M(col, row) << ' ';   // <-- (col,row)
         }
         os << "]\n";
