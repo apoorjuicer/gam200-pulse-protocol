@@ -1,6 +1,81 @@
 #include "pch/pch.h"
+extern InputManager* g_inputSystem;
+
+//A global pointer to the core
+CoreEngine* Engine;
+int CoreEngine::WindowWidth;
+int CoreEngine::WindowHeight;
 
 
+CoreEngine::CoreEngine()
+{
+
+}
+
+CoreEngine::~CoreEngine()
+{
+
+}
+
+void CoreEngine::Init()
+{
+	glewInit();
+	std::cout << "Engine initialized." << std::endl;
+
+	// Display M1 test instructions
+	std::cout << "\n=== M1 INPUT SYSTEM DEMONSTRATION ===" << std::endl;
+	std::cout << "SPACE     -> Primary rhythm beat input" << std::endl;
+	std::cout << "A/S/D     -> Weapon combo keys (spear/sword/bow)" << std::endl;
+	std::cout << "MOUSE     -> UI interaction testing" << std::endl;
+	std::cout << "Close window to exit testing" << std::endl;
+	std::cout << "=======================================" << std::endl;
+
+
+
+}
+
+void CoreEngine::Update()
+{
+	if (g_inputSystem) {
+		// Update input system
+		g_inputSystem->Update();
+
+		// Run M1 testing demonstrations
+		g_inputSystem->RunM1Test();
+
+		// Future game systems would be updated here:
+		// gameManager.Update();
+		// physics.Simulate();
+	}
+
+
+
+	/*while (GameRunning)
+	{
+		for (unsigned i = 0; i < Systems.size(); ++i)
+			Systems[i]->Update(dt);
+	}*/
+
+
+}
+
+void CoreEngine::Exit()
+{
+	// ask chloe how to test it 
+	if (g_inputSystem) {
+		g_inputSystem->Shutdown();
+		delete g_inputSystem;
+		g_inputSystem = nullptr;
+	}
+}
+
+// where application loop is. Just gonna name is game loop since its easier to understand
+void CoreEngine::GameLoop()
+{
+		
+}
+
+//void BroadcastMessage(){}
 
 
 

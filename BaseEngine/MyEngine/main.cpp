@@ -16,8 +16,10 @@
 #include <windows.h>   // for OutputDebugString, etc.
 #endif
 #include <iostream>
-
+#include "Core/Coordinator.h"
 #include "pch/pch.h"
+
+#include "Core/Assets.h"
 
 #if (_DEBUG)
 // MEM LEAKS LIBRARIES (See _CrtMemCheckpoint for examples to check for mem leaks)
@@ -25,6 +27,9 @@
 #define _CRTDBG_MAP_ALLOC //to get more details
 #include <cstdlib>  
 #include <crtdbg.h>   //for malloc and free
+static _CrtMemState sOld;
+static _CrtMemState sNew;
+static _CrtMemState sDiff;
 #endif
 
 // Game window dimensions and title
@@ -47,25 +52,17 @@ struct GameStates {
         //freetype for font
         //stb
         //xcore lib for game engine
-        // spdlog
+        //spdlog
+        //rapid json
 } gamestate;
 
-
-#ifdef _DEBUG
-//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-//_CrtSetBreakAlloc(15046); // Uncomment and replace param with the allocation number to break on specific leaks
-
-_CrtMemState sOld;
-_CrtMemState sNew;
-_CrtMemState sDiff;
-#endif
-
+Coordinator g_coordinator;
 InputManager* g_inputSystem = nullptr;
-//CoreEngine* engine = new CoreEngine();
 
 void initEngine() {
     glewInit();
     std::cout << "Engine initialized." << std::endl;
+
 
     // Display M1 test instructions
     std::cout << "\n=== M1 INPUT SYSTEM DEMONSTRATION ===" << std::endl;
@@ -102,29 +99,67 @@ void render() {
 }
 
 int main() {
-#ifdef _DEBUG
-    _CrtMemCheckpoint(&sOld); // Take initial snapshot (its like lock in the state of memory)
-#endif
 
+#ifdef _DEBUG
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); // start checking 
+    //_CrtSetBreakAlloc(309); // Uncomment and replace param with the allocation number to break on specific leaks
+    //_CrtMemCheckpoint(&sOld); // Take initial snapshot (its like lock in the state of memory)
+#endif
+    CoreEngine Engine;
     if (!glfwInit()) {
         return -1;
     }
 
     // Size of game window here. 1400 x 800 is just a temp, we will change to get from resource manager which gets from text file
     GLFWwindow* window = glfwCreateWindow(Game_Window_Height, Game_Window_Width, WindowTitle, nullptr, nullptr);
+    
     if (!window) {
         glfwTerminate();
         return -1;
     }
 
+    Engine.Init(); //for all the system init yeah? where the gsm load and init
+    
+    
+
+    g_coordinator.init();
+
+    // NEED TO INCLUDE THIS vvvv
+    g_coordinator.RegisterComponent<Player>();
+    g_coordinator.RegisterSystem<InputManager>();
+    
+    Signature signature;
+    signature.set(g_coordinator.GetComponentType<Player>());
+    g_coordinator.SetSystemSignature<InputManager>(signature);
+
+    std::vector<Entity> entities(MaxEntity);
+    int i = 0;
+    for (auto& x : entities)
+    {
+        std::cout << i++;
+    }
+    
+    //class Position;
+    //class Velocity;
+
+    //for (auto&& [entity, pos, vel] : g_coordinator.view<Position, Velocity>().each()) {
+    //    // ...
+    //}
+
+
+    int entity = g_coordinator.CreateEntity();
+
+    // ID and component
+    g_coordinator.AddComponent(entity, Player{100,200});
+
     glfwMakeContextCurrent(window);
     g_inputSystem = new InputManager();
-    initEngine();
-
+    //initEngine();
     g_inputSystem->Initialize(window);
 
-    //engine_initialize();
-    //engine_run() in here are vvv
+    
+    
+    //Engine.Update(); in here are vvv
     // This will be where the application loop is. No more game loop, just the update
     while (!glfwWindowShouldClose(window)) {
         //  1. Poll event(input key)
@@ -134,15 +169,26 @@ int main() {
         //  5. game rendering
         //  6. ImGui rendering
         //  7. Swap Buffer(like two window)
+        
+        
+        Player& player = g_coordinator.GetComponent<Player>(entity);
+        std::cout << "Player: " << player.x << ", " << player.y << std::endl;
+        std::cout << "Player: " << player.position.x << ", " << player.position.y << std::endl;
+ 
+        /*if ()
+        {
+            std::cout << "Player: " << ++player.x << ", " << ++player.y << std::endl;
+        }*/
+
+
 
         glfwPollEvents();
-        update();
+        Engine.Update();
         render();
         glfwSwapBuffers(window);
-        glfwPollEvents();
     }
 
-    //engine_exit(); the cleanup all in here
+    Engine.Exit(); 
 
     // CLEANUP InputManager
     if (g_inputSystem) {
@@ -154,8 +200,7 @@ int main() {
     glfwDestroyWindow(window);
     glfwTerminate();
 
-
-#ifdef _DEBUG
+#if 0
     _CrtMemCheckpoint(&sNew); //take a snapshot (lock in the memory use again and now we compare :3)
     if (_CrtMemDifference(&sDiff, &sOld, &sNew)) // if there is a difference
     {
