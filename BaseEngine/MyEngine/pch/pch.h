@@ -21,9 +21,9 @@
 #include <array>
 
 // Graphics Library Headers
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <GL/glew.h>
 
 // Suppress APIENTRY macro redefinition warning
 #pragma warning(push)

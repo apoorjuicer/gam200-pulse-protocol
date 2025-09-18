@@ -11,9 +11,9 @@
 #ifndef DEBUG_DRAW_H
 #define DEBUG_DRAW_H
 
+#include <GL/glew.h>
 #include <vector>
 #include <glm/glm.hpp>
-#include <GL/glew.h>
 
 #include "glslshader.h"
 

@@ -15,8 +15,6 @@
 #endif
 #include <windows.h>   // for OutputDebugString, etc.
 #endif
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <iostream>
 
 #include "pch/pch.h"
