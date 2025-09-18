@@ -47,9 +47,24 @@ macro(import_glm)
     endif()
 endmacro()
 
+# Macro to import json
+macro(import_json)
+    if(NOT TARGET json)  # Guard to prevent multiple inclusion
+        FetchContent_Declare(
+            json
+            GIT_REPOSITORY "https://github.com/nlohmann/json"
+            GIT_TAG v3.11.3
+        )
+        FetchContent_MakeAvailable(json)
+ 
+        include_directories(${json_SOURCE_DIR}/include)
+    endif()
+endmacro()
+
 # Macro to import all dependencies
 macro(importDependencies)
     import_glfw()
     import_glew()
     import_glm()
+    import_json()
 endmacro()
