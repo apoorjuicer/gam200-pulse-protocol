@@ -21,6 +21,8 @@
 #include "Core/Coordinator.h"
 #include "pch/pch.h"
 
+#include "Core/Assets.h"
+
 #if (_DEBUG)
 // MEM LEAKS LIBRARIES (See _CrtMemCheckpoint for examples to check for mem leaks)
 #include "windows.h"
@@ -52,12 +54,11 @@ struct GameStates {
         //freetype for font
         //stb
         //xcore lib for game engine
-        // spdlog
+        //spdlog
+        //rapid json
 } gamestate;
 
-
-
-
+Coordinator g_coordinator;
 InputManager* g_inputSystem = nullptr;
 
 void initEngine() {
@@ -103,8 +104,8 @@ int main() {
 
 #ifdef _DEBUG
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); // start checking 
-    //_CrtSetBreakAlloc(181); // Uncomment and replace param with the allocation number to break on specific leaks
-    _CrtMemCheckpoint(&sOld); // Take initial snapshot (its like lock in the state of memory)
+    //_CrtSetBreakAlloc(309); // Uncomment and replace param with the allocation number to break on specific leaks
+    //_CrtMemCheckpoint(&sOld); // Take initial snapshot (its like lock in the state of memory)
 #endif
     CoreEngine Engine;
     if (!glfwInit()) {
@@ -113,6 +114,7 @@ int main() {
 
     // Size of game window here. 1400 x 800 is just a temp, we will change to get from resource manager which gets from text file
     GLFWwindow* window = glfwCreateWindow(Game_Window_Height, Game_Window_Width, WindowTitle, nullptr, nullptr);
+    
     if (!window) {
         glfwTerminate();
         return -1;
@@ -121,19 +123,36 @@ int main() {
     Engine.Init(); //for all the system init yeah? where the gsm load and init
     
     
-    //g_coordinator->init();
+
+    g_coordinator.init();
 
     // NEED TO INCLUDE THIS vvvv
-    /*Coordinator* g_coordinator = nullptr;
-    g_coordinator->RegisterSystem<InputManager>();
-    g_coorindator->AddComponent<InputManager>();
+    g_coordinator.RegisterComponent<Player>();
+    g_coordinator.RegisterSystem<InputManager>();
+    
     Signature signature;
-    signature.set(g_coordinator->GetComponentType<InputManager>());*/
+    signature.set(g_coordinator.GetComponentType<Player>());
+    g_coordinator.SetSystemSignature<InputManager>(signature);
+
+    std::vector<Entity> entities(MaxEntity);
+    int i = 0;
+    for (auto& x : entities)
+    {
+        std::cout << i++;
+    }
+    
+    //class Position;
+    //class Velocity;
+
+    //for (auto&& [entity, pos, vel] : g_coordinator.view<Position, Velocity>().each()) {
+    //    // ...
+    //}
 
 
-    //std::vector<Entity> entities(MaxEntity);
+    int entity = g_coordinator.CreateEntity();
 
-
+    // ID and component
+    g_coordinator.AddComponent(entity, Player{100,200});
 
     glfwMakeContextCurrent(window);
     g_inputSystem = new InputManager();
@@ -152,6 +171,18 @@ int main() {
         //  5. game rendering
         //  6. ImGui rendering
         //  7. Swap Buffer(like two window)
+        
+        
+        Player& player = g_coordinator.GetComponent<Player>(entity);
+        std::cout << "Player: " << player.x << ", " << player.y << std::endl;
+        std::cout << "Player: " << player.position.x << ", " << player.position.y << std::endl;
+ 
+        /*if ()
+        {
+            std::cout << "Player: " << ++player.x << ", " << ++player.y << std::endl;
+        }*/
+
+
 
         glfwPollEvents();
         Engine.Update();
@@ -171,8 +202,7 @@ int main() {
     glfwDestroyWindow(window);
     glfwTerminate();
 
-
-#ifdef _DEBUG
+#if 0
     _CrtMemCheckpoint(&sNew); //take a snapshot (lock in the memory use again and now we compare :3)
     if (_CrtMemDifference(&sDiff, &sOld, &sNew)) // if there is a difference
     {

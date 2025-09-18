@@ -5,12 +5,13 @@
 //        
 //        
 // ==================================================================================
+#pragma once
 #include "pch/pch.h"
+#include "Core/system.h"
 
-#ifndef MATH_H_
-#define MATH_H_
 
-class Vector2 {
+class Vector2 :public Systems
+{
 public:
 	// ctr and dtr
 	Vector2();
@@ -107,6 +108,4 @@ Matrix3x3 operator*(Matrix3x3 const& l, Matrix3x3 const& r);
 Matrix3x3 operator*(float s, Matrix3x3 const& mat);
 
 std::ostream& operator<<(std::ostream& os, Matrix3x3 const& mat3);
-
-#endif	/* MATH_H_ */
 

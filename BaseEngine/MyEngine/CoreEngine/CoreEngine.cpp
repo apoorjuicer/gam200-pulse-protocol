@@ -1,5 +1,5 @@
 #include "pch/pch.h"
-extern Framework::InputManager* g_inputSystem;
+extern InputManager* g_inputSystem;
 
 //A global pointer to the core
 CoreEngine* Engine;
@@ -76,19 +76,6 @@ void CoreEngine::GameLoop()
 }
 
 //void BroadcastMessage(){}
-
-void CoreEngine::AddSystem(System* system)
-{
-	// Core systems that will be continuiosly updated in the application loop
-	//if (system) {
-	//	// Fix: Use Systems (the vector), not system (the parameter)
-	//	Systems.push_back(system);
-	//	std::cout << "System succesfully added to CoreEngine" << std::endl;
-	//}
-		
-}
-
-
 
 
 

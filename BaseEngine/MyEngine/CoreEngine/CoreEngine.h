@@ -19,9 +19,6 @@ public:
 	// One of the ways to glue systems tgt. 
 	//void BroadcastMessage(Message* message);
 
-	// for adding new core system to the game.
-	void AddSystem(System* system);
-
 	static int WindowWidth, WindowHeight;
 
 private:

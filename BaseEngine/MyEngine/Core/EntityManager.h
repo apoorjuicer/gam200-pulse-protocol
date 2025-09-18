@@ -57,10 +57,10 @@ public:
 		return SignatureID[entity];
 	}
 
-
+	
 
 private:
-	std::deque<Entity> EntityList{};
+	std::deque<Entity> EntityList{}; //EntityList[i]
 	std::array<Signature, MaxEntity> SignatureID{};
 	unsigned int LiveEntityCount{};
 
