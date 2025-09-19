@@ -6,7 +6,6 @@
 
 \copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
 **********************************************************************************************/
-#include "../pch/pch.h"
 #include "glapp.h"
 #include "DebugDraw.h"
 //#include "../Managers/LevelManager.h"
@@ -19,15 +18,14 @@
 
 /*                                                   objects with file scope
 ----------------------------------------------------------------------------- */
-//using namespace Framework;
 // define singleton containers
 std::vector<GLSLShader> GLApp::shdrpgms;
 std::vector<GLApp::GLModel> GLApp::models;
 std::vector<GLApp::GLViewport> GLApp::vps;
-//std::list<Framework::Transform*> transObj;
-//std::list<Framework::Transform*> fore;
-//std::list<Framework::Transform*> Obj;
-//std::list<Framework::Transform*> pause;
+std::list<Framework::Transform*> transObj;
+std::list<Framework::Transform*> fore;
+std::list<Framework::Transform*> Obj;
+std::list<Framework::Transform*> pause;
 
 //other containers
 const float PI = 3.14159265358979323846f;
@@ -135,38 +133,38 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 }
 
 
-//void GLApp::update() {
-//    if (GLHelper::keystateP == GL_TRUE) {
-//        if (polygonmode == 0) {
-//            ++polygonmode;
-//
-//            GLHelper::keystateP = GL_FALSE;
-//
-//        }
-//        else if (polygonmode == 1) {
-//            ++polygonmode;
-//            GLHelper::keystateP = GL_FALSE;
-//        }
-//        else if (polygonmode == 2) {
-//            polygonmode = 0;
-//            GLHelper::keystateP = GL_FALSE;
-//        }
-//        GLHelper::keystateP = GL_FALSE;
-//    }
-//
-//    for (auto& x : transObj) {
-//        x->update(GLHelper::delta_time);
-//    }
-//    for (auto& x : Obj) {
-//        x->update(GLHelper::delta_time);
-//    }
-//    for (auto& x : fore) {
-//        x->update(GLHelper::delta_time);
-//    }
-//    for (auto& x : pause) {
-//        x->update(GLHelper::delta_time);
-//    }
-//}
+void GLApp::update() {
+    if (GLHelper::keystateP == GL_TRUE) {
+        if (polygonmode == 0) {
+            ++polygonmode;
+
+            GLHelper::keystateP = GL_FALSE;
+
+        }
+        else if (polygonmode == 1) {
+            ++polygonmode;
+            GLHelper::keystateP = GL_FALSE;
+        }
+        else if (polygonmode == 2) {
+            polygonmode = 0;
+            GLHelper::keystateP = GL_FALSE;
+        }
+        GLHelper::keystateP = GL_FALSE;
+    }
+
+    for (auto& x : transObj) {
+        x->update(GLHelper::delta_time);
+    }
+    for (auto& x : Obj) {
+        x->update(GLHelper::delta_time);
+    }
+    for (auto& x : fore) {
+        x->update(GLHelper::delta_time);
+    }
+    for (auto& x : pause) {
+        x->update(GLHelper::delta_time);
+    }
+}
 
 //void GLApp::updateAnimation(Framework::Transform& x) {
 //    float frameDuration = 1.0f / x.animationSpeed; // Time per frame
@@ -181,139 +179,142 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 //    }
 //}
 
-//void GLApp::drawTrans(Framework::Transform x) {
-//    GLint uniform_var_loc1 = 0;
-//    GLint uOffsetLoc = 0;
-//    GLint uScaleLoc = 0;
-//    //// Part 1
-//    shdrpgms[static_cast<uint64_t>(x.shd_ref)].Use();
-//
-//    //// Part 2
-//    glBindVertexArray(models[static_cast<uint64_t>(x.mdl_ref)].vaoid);
-//
-//    x.totalFrames = x.rows * x.columns;
-//
-//    float frameWidth = 1.0f / x.columns;
-//    float frameHeight = 1.0f / x.rows;
-//    // Calculate current frame offset
-//    float uOffsetX = (x.currentFrame % x.columns) * frameWidth;
-//    float uOffsetY = 1.0f - ((x.currentFrame / x.columns + 1) * frameHeight); // Vertical offset (top-to-bottom)
-//
-//    //// Part 3
-//    if (x.shd_ref == 1) {
-//        uOffsetLoc = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uOffset");
-//        uScaleLoc = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uScale");
-//        uniform_var_loc1 = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uModel_to_NDC");
-//    }
-//    if (uOffsetLoc >= 0)
-//        glUniform2f(uOffsetLoc, uOffsetX, uOffsetY);
-//
-//    if (uScaleLoc >= 0)
-//        glUniform2f(uScaleLoc, frameWidth, frameHeight);
-//    if (uniform_var_loc1 >= 0) {
-//        glm::mat3x3 mdl_to_ndc_xform = static_cast<glm::mat3x3>(x.mdl_to_ndc_xform);
-//        glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
-//    }
-//    else
-//    {
-//        std::cout << "Uniform variable doesn't exist!!!\n";
-//        std::exit(EXIT_FAILURE);
-//    }
-//    glDrawElements(models[static_cast<uint64_t>(x.mdl_ref)].primitive_type, models[static_cast<uint64_t>(x.mdl_ref)].draw_cnt, GL_UNSIGNED_SHORT, NULL);
-//    //// Part 5
-//    glBindVertexArray(0);
-//    shdrpgms[static_cast<uint64_t>(x.shd_ref)].UnUse();
-//}
+void GLApp::drawTrans(Framework::Transform x) {
+    GLint uniform_var_loc1 = 0;
+    GLint uOffsetLoc = 0;
+    GLint uScaleLoc = 0;
+    //// Part 1
+    shdrpgms[static_cast<uint64_t>(x.shd_ref)].Use();
 
-//void GLApp::draw() {
-//    bool pm = false;
-//    bool fg = false;
-//    // clear back buffer as before
-//    glClear(GL_COLOR_BUFFER_BIT);
-//    glClear(GL_DEPTH_BUFFER_BIT);
-//    shdrpgms[0].Use();
-//    transObj.clear();
-//    Obj.clear();
-//    pause.clear();
-//    fore.clear();
-//
-//    for (auto it = Framework::levelManager->GameObjects.GOCM.begin(); it != Framework::levelManager->GameObjects.GOCM.end(); it++) {
-//        Transform* t = dynamic_cast<Transform*>(it->second->GetCom(Com_Trans));
-//
-//        if (t) {
-//            t->update(0.f);
-//            Player* p = dynamic_cast<Player*>(t->GetOwner()->GetCom(Com_Player));
-//            Cat* c = dynamic_cast<Cat*>(t->GetOwner()->GetCom(Com_Cat));
-//            pm = t->GetOwner()->Name == "Pausepopup menu " || t->GetOwner()->Name == "Pausepopup Resume button"
-//                || t->GetOwner()->Name == "Pausepopup Exit button";
-//            fg = t->GetOwner()->Name == "Level1_Foreground";
-//            if (p || c) {
-//                Obj.push_back(t); // Add the current Transform* to the vector
-//            }
-//            else if (pm) {
-//                pause.push_back(t);
-//            }
-//            else if (fg) {
-//                fore.push_back(t);
-//            }
-//            else {
-//                transObj.push_back(t); // Add the current Transform* to the vector
-//            }
-//
-//            std::vector<Framework::Transform*> vec(Obj.begin(), Obj.end());
-//            std::sort(vec.begin(), vec.end(), [](Framework::Transform* a, Framework::Transform* b) {
-//                return a->Pos.getY() > b->Pos.getY();
-//                });
-//            Obj.assign(vec.begin(), vec.end()); // Convert back to list if needed
-//        }
-//    }
-//
-//    // Render the transforms after collecting them
-//    for (auto x : transObj) {
-//        updateAnimation(*x);
-//        glBindTexture(GL_TEXTURE_2D, x->textureID);
-//        drawTrans(*x);
-//    }
-//    for (auto x : Obj) {
-//        updateAnimation(*x);
-//        glBindTexture(GL_TEXTURE_2D, x->textureID);
-//        drawTrans(*x);
-//    }
-//    for (auto x : fore) {
-//        updateAnimation(*x);
-//        glBindTexture(GL_TEXTURE_2D, x->textureID);
-//        drawTrans(*x);
-//    }
-//    for (auto x : pause) {
-//        updateAnimation(*x);
-//        glBindTexture(GL_TEXTURE_2D, x->textureID);
-//        drawTrans(*x);
-//    }
-//
-//
-//    if (polygonmode == 0)
-//    {
-//        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-//    }
-//    else if (polygonmode == 1)
-//    {
-//        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-//        glLineWidth(3.f);
-//    }
-//    else if (polygonmode == 2)
-//    {
-//        glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-//        glPointSize(10.f); // Reset back to 1
-//    }
-//
-//    // Debug draw sample (NDC space)
-//    glm::mat4 mvp = MakeOrthoMvp(-1.0f, 1.0f, -1.0f, 1.0f);
-//    DebugDraw::Begin(mvp);
-//    DebugDraw::DrawLine({-0.5f, -0.5f}, {0.5f, -0.5f}, {1,0,0});
-//    DebugDraw::DrawRect({-0.2f,-0.2f}, {0.2f,0.2f}, {0,1,0});
-//    DebugDraw::DrawCircle({0.0f,0.0f}, 0.3f, {0,0,1}, 48);
-//    DebugDraw::End();
-//}
+    //// Part 2
+    glBindVertexArray(models[static_cast<uint64_t>(x.mdl_ref)].vaoid);
+
+    x.totalFrames = x.rows * x.columns;
+
+    float frameWidth = 1.0f / x.columns;
+    float frameHeight = 1.0f / x.rows;
+    // Calculate current frame offset
+    float uOffsetX = (x.currentFrame % x.columns) * frameWidth;
+    float uOffsetY = 1.0f - ((x.currentFrame / x.columns + 1) * frameHeight); // Vertical offset (top-to-bottom)
+
+    //// Part 3
+    if (x.shd_ref == 1) {
+        uOffsetLoc = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uOffset");
+        uScaleLoc = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uScale");
+        uniform_var_loc1 = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uModel_to_NDC");
+    }
+    if (uOffsetLoc >= 0)
+        glUniform2f(uOffsetLoc, uOffsetX, uOffsetY);
+
+    if (uScaleLoc >= 0)
+        glUniform2f(uScaleLoc, frameWidth, frameHeight);
+    if (uniform_var_loc1 >= 0) {
+        glm::mat3x3 mdl_to_ndc_xform = static_cast<glm::mat3x3>(x.mdl_to_ndc_xform);
+        glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
+    }
+    else
+    {
+        std::cout << "Uniform variable doesn't exist!!!\n";
+        std::exit(EXIT_FAILURE);
+    }
+    glDrawElements(models[static_cast<uint64_t>(x.mdl_ref)].primitive_type, models[static_cast<uint64_t>(x.mdl_ref)].draw_cnt, GL_UNSIGNED_SHORT, NULL);
+    //// Part 5
+    glBindVertexArray(0);
+    shdrpgms[static_cast<uint64_t>(x.shd_ref)].UnUse();
+}
+
+void GLApp::draw() {
+    bool pm = false;
+    bool fg = false;
+    // clear back buffer as before
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    shdrpgms[0].Use();
+    transObj.clear();
+    Obj.clear();
+    pause.clear();
+    fore.clear();
+    g_coordinator.grabcomponent<class_type>(projection);
+    int projection = g_coordinaor.addentity(entity)
+
+    //Render each object
+    for (auto it = Framework::levelManager->GameObjects.GOCM.begin(); it != Framework::levelManager->GameObjects.GOCM.end(); it++) {
+        Transform* t = dynamic_cast<Transform*>(it->second->GetCom(Com_Trans));
+
+        if (t) {
+            t->update(0.f);
+            Player* p = dynamic_cast<Player*>(t->GetOwner()->GetCom(Com_Player));
+            Cat* c = dynamic_cast<Cat*>(t->GetOwner()->GetCom(Com_Cat));
+            pm = t->GetOwner()->Name == "Pausepopup menu " || t->GetOwner()->Name == "Pausepopup Resume button"
+                || t->GetOwner()->Name == "Pausepopup Exit button";
+            fg = t->GetOwner()->Name == "Level1_Foreground";
+            if (p || c) {
+                Obj.push_back(t); // Add the current Transform* to the vector
+            }
+            else if (pm) {
+                pause.push_back(t);
+            }
+            else if (fg) {
+                fore.push_back(t);
+            }
+            else {
+                transObj.push_back(t); // Add the current Transform* to the vector
+            }
+
+            std::vector<Framework::Transform*> vec(Obj.begin(), Obj.end());
+            std::sort(vec.begin(), vec.end(), [](Framework::Transform* a, Framework::Transform* b) {
+                return a->Pos.getY() > b->Pos.getY();
+                });
+            Obj.assign(vec.begin(), vec.end()); // Convert back to list if needed
+        }
+    }
+
+    // Render the transforms after collecting them
+    //for (auto x : transObj) {
+    //    updateAnimation(*x);
+    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
+    //    drawTrans(*x);
+    //}
+    //for (auto x : Obj) {
+    //    updateAnimation(*x);
+    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
+    //    drawTrans(*x);
+    //}
+    //for (auto x : fore) {
+    //    updateAnimation(*x);
+    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
+    //    drawTrans(*x);
+    //}
+    //for (auto x : pause) {
+    //    updateAnimation(*x);
+    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
+    //    drawTrans(*x);
+    //}
+
+
+    if (polygonmode == 0)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+    else if (polygonmode == 1)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glLineWidth(3.f);
+    }
+    else if (polygonmode == 2)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+        glPointSize(10.f); // Reset back to 1
+    }
+
+    // Debug draw sample (NDC space)
+    glm::mat4 mvp = MakeOrthoMvp(-1.0f, 1.0f, -1.0f, 1.0f);
+    DebugDraw::Begin(mvp);
+    DebugDraw::DrawLine({-0.5f, -0.5f}, {0.5f, -0.5f}, {1,0,0});
+    DebugDraw::DrawRect({-0.2f,-0.2f}, {0.2f,0.2f}, {0,1,0});
+    DebugDraw::DrawCircle({0.0f,0.0f}, 0.3f, {0,0,1}, 48);
+    DebugDraw::End();
+}
 
 void GLApp::cleanup() {
     // Delete VAOs, VBOs
