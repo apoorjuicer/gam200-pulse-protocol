@@ -1,16 +1,17 @@
 // ==================================================================================
 // math.h  
 // Author: Benjamin Ban
-// Brief: Vector2 and Matrix3 class
+// Brief: Vector2 and Matrix3x3 class
 //        
 //        
 // ==================================================================================
+#pragma once
 #include "pch/pch.h"
+#include "Core/system.h"
 
-#ifndef MATH_H_
-#define MATH_H_
 
-class Vector2 {
+class Vector2 :public Systems
+{
 public:
 	// ctr and dtr
 	Vector2();
@@ -68,19 +69,19 @@ Vector2 operator*(float s, Vector2  v);         // scalar * vector
 Vector2 operator/(Vector2  v, float s);     // vector / scalar
 std::ostream& operator<<(std::ostream& os, Vector2 const& vec);
 
-class Matrix3 {
+class Matrix3x3 {
 private:
 		float m[9];      // column-major flat array
 public:
-	Matrix3(); //default identity
-	Matrix3(float e00, float e10, float e20,
+	Matrix3x3(); //default identity
+	Matrix3x3(float e00, float e10, float e20,
 		float e01, float e11, float e21,
 		float e02, float e12, float e22);
-	Matrix3(Matrix3 const& m);
-	~Matrix3();
+	Matrix3x3(Matrix3x3 const& m);
+	~Matrix3x3();
 
 	// = operator: assignment
-	Matrix3& operator=(Matrix3 const& copied);
+	Matrix3x3& operator=(Matrix3x3 const& copied);
 	// () operators: component access
 	float& operator()(unsigned int column, unsigned int row);
 	const float& operator()(unsigned int column, unsigned int row) const;
@@ -96,17 +97,15 @@ public:
 		float e02, float e12, float e22);
 	void	SetToZero();			// zero all 9 elements
 	void	SetToIdentity();	// set 9 elements to define an identity matrix
-
-
+	void    SetToTranspose();
+	Matrix3x3 GetTranspose() const;
 }; // end of matrix 3 class
 
 // * operator: matrix multiplication
-Matrix3 operator*(Matrix3 const& l, Matrix3 const& r);
+Matrix3x3 operator*(Matrix3x3 const& l, Matrix3x3 const& r);
 
 // * operator: scalar multiplication
-Matrix3 operator*(float s, Matrix3 const& mat);
+Matrix3x3 operator*(float s, Matrix3x3 const& mat);
 
-std::ostream& operator<<(std::ostream& os, Matrix3 const& mat3);
-
-#endif	/* MATH_H_ */
+std::ostream& operator<<(std::ostream& os, Matrix3x3 const& mat3);
 

@@ -92,4 +92,11 @@ public:
     static std::vector<GLViewport> vps; // container for viewports
 };
 
+// Simple orthographic MVP helper for DebugDraw usage
+inline glm::mat4 MakeOrthoMvp(float left, float right, float bottom, float top) {
+    // Z range -1..1
+    glm::mat4 proj = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
+    return proj; // No view/model yet
+}
+
 #endif /* GLAPP_H */

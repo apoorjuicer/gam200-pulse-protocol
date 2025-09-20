@@ -6,17 +6,9 @@
 
 \copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
 **********************************************************************************************/
-//#include "../Engine/Precompiled.h"
-// -----------------------------
-//will be store in a general header file
-#include <glm/glm.hpp>
-#include <GL/glew.h>
-#include <random>
-#include <array>
-//--------------------------
-
+#include "../pch/pch.h"
 #include "glapp.h"
-#include "iostream"
+#include "DebugDraw.h"
 //#include "../Managers/LevelManager.h"
 //#include "../ComponentJson/Component_System.h"
 //#include "../Managers/AssetsManager.h"
@@ -112,6 +104,9 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
     };
     GLApp::init_shdrpgms_cont(shdr_strs);
     GLApp::init_models_cont();
+
+    // Initialize debug draw
+    DebugDraw::Init();
 
     bool fixed_seed = true;
     std::random_device rd;
@@ -310,6 +305,14 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 //        glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 //        glPointSize(10.f); // Reset back to 1
 //    }
+//
+//    // Debug draw sample (NDC space)
+//    glm::mat4 mvp = MakeOrthoMvp(-1.0f, 1.0f, -1.0f, 1.0f);
+//    DebugDraw::Begin(mvp);
+//    DebugDraw::DrawLine({-0.5f, -0.5f}, {0.5f, -0.5f}, {1,0,0});
+//    DebugDraw::DrawRect({-0.2f,-0.2f}, {0.2f,0.2f}, {0,1,0});
+//    DebugDraw::DrawCircle({0.0f,0.0f}, 0.3f, {0,0,1}, 48);
+//    DebugDraw::End();
 //}
 
 void GLApp::cleanup() {
@@ -337,6 +340,9 @@ void GLApp::cleanup() {
 
     // Clear viewport containers
     GLApp::vps.clear();
+
+    // Debug draw shutdown
+    DebugDraw::Shutdown();
 
     std::cout << "Graphics Resources successfully cleaned up." << std::endl;
 }
