@@ -12,6 +12,7 @@
 //#include "../Math/Vector_2D.h"
 #pragma once
 #include "pch/pch.h"        // FIRST
+#include "Core/Coordinator.h"
 #include <vector>
 #include <glm/gtc/type_ptr.hpp>
 #include "glhelper.h" 
@@ -42,6 +43,7 @@ namespace Framework
         int rows = 1;                 // Rows in the sprite sheet
         float animationSpeed = 7.f;
 
+        Coordinator g_coordinator;
         Transform();
         ~Transform();
 
@@ -51,7 +53,13 @@ namespace Framework
 
         void SetSprite(std::string ref);
         std::string GetSprite() const;
+        // Register these components in your initialization code:
+        void InitializeECS() {
+            g_coordinator.init();
 
+            g_coordinator.RegisterComponent<Transform>();
+            g_coordinator.RegisterComponent<Player>();
+        }
         //void Serialize(Value& data, Document::AllocatorType& alloc) override;
         //void Deserialize(Value& data);
     };

@@ -166,18 +166,18 @@ void GLApp::update() {
     }
 }
 
-//void GLApp::updateAnimation(Framework::Transform& x) {
-//    float frameDuration = 1.0f / x.animationSpeed; // Time per frame
-//
-//    // Accumulate elapsed time
-//    x.elapsedTime += (float)GLHelper::delta_time;
-//
-//    // Update frame only if enough time has passed
-//    if (x.elapsedTime >= frameDuration) {
-//        x.currentFrame = (x.currentFrame + 1) % x.totalFrames; // Loop through frames
-//        x.elapsedTime -= frameDuration; // Handle overshoot
-//    }
-//}
+void GLApp::updateAnimation(Framework::Transform& x) {
+    float frameDuration = 1.0f / x.animationSpeed; // Time per frame
+
+    // Accumulate elapsed time
+    x.elapsedTime += (float)GLHelper::delta_time;
+
+    // Update frame only if enough time has passed
+    if (x.elapsedTime >= frameDuration) {
+        x.currentFrame = (x.currentFrame + 1) % x.totalFrames; // Loop through frames
+        x.elapsedTime -= frameDuration; // Handle overshoot
+    }
+}
 
 void GLApp::drawTrans(Framework::Transform x) {
     GLint uniform_var_loc1 = 0;
@@ -209,8 +209,9 @@ void GLApp::drawTrans(Framework::Transform x) {
     if (uScaleLoc >= 0)
         glUniform2f(uScaleLoc, frameWidth, frameHeight);
     if (uniform_var_loc1 >= 0) {
-        glm::mat3x3 mdl_to_ndc_xform = static_cast<glm::mat3x3>(x.mdl_to_ndc_xform);
-        glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
+        //glm::mat3x3 mdl_to_ndc_xform = static_cast<glm::mat3x3>(x.mdl_to_ndc_xform);
+        //glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
+        glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, x.mdl_to_ndc_xform.Begin());
     }
     else
     {
@@ -234,21 +235,23 @@ void GLApp::draw() {
     Obj.clear();
     pause.clear();
     fore.clear();
-    g_coordinator.grabcomponent<class_type>(projection);
-    int projection = g_coordinaor.addentity(entity)
+    //g_coordinator.grabcomponent<class_type>(projection);
+    //int projection = g_coordinaor.addentity(entity)
 
     //Render each object
-    for (auto it = Framework::levelManager->GameObjects.GOCM.begin(); it != Framework::levelManager->GameObjects.GOCM.end(); it++) {
+    //for (auto it = Framework::levelManager->GameObjects.GOCM.begin(); it != Framework::levelManager->GameObjects.GOCM.end(); it++) {
+    Coordinator g_coordinator;
+        for (Entity entity : g_coordinator.GetComponent(entity)){
         Transform* t = dynamic_cast<Transform*>(it->second->GetCom(Com_Trans));
 
         if (t) {
             t->update(0.f);
             Player* p = dynamic_cast<Player*>(t->GetOwner()->GetCom(Com_Player));
-            Cat* c = dynamic_cast<Cat*>(t->GetOwner()->GetCom(Com_Cat));
+            //Cat* c = dynamic_cast<Cat*>(t->GetOwner()->GetCom(Com_Cat));
             pm = t->GetOwner()->Name == "Pausepopup menu " || t->GetOwner()->Name == "Pausepopup Resume button"
                 || t->GetOwner()->Name == "Pausepopup Exit button";
             fg = t->GetOwner()->Name == "Level1_Foreground";
-            if (p || c) {
+            if (p /* || c*/) {
                 Obj.push_back(t); // Add the current Transform* to the vector
             }
             else if (pm) {
@@ -260,37 +263,36 @@ void GLApp::draw() {
             else {
                 transObj.push_back(t); // Add the current Transform* to the vector
             }
-
-            std::vector<Framework::Transform*> vec(Obj.begin(), Obj.end());
-            std::sort(vec.begin(), vec.end(), [](Framework::Transform* a, Framework::Transform* b) {
-                return a->Pos.getY() > b->Pos.getY();
-                });
-            Obj.assign(vec.begin(), vec.end()); // Convert back to list if needed
+			//Sort the objects based on Y position (if needed)
+            //std::vector<Framework::Transform*> vec(Obj.begin(), Obj.end());
+            //std::sort(vec.begin(), vec.end(), [](Framework::Transform* a, Framework::Transform* b) {
+            //    return a->Pos.getY() > b->Pos.getY();
+            //    });
+            //Obj.assign(vec.begin(), vec.end()); // Convert back to list if needed
         }
     }
 
-    // Render the transforms after collecting them
-    //for (auto x : transObj) {
-    //    updateAnimation(*x);
-    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
-    //    drawTrans(*x);
-    //}
-    //for (auto x : Obj) {
-    //    updateAnimation(*x);
-    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
-    //    drawTrans(*x);
-    //}
-    //for (auto x : fore) {
-    //    updateAnimation(*x);
-    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
-    //    drawTrans(*x);
-    //}
-    //for (auto x : pause) {
-    //    updateAnimation(*x);
-    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
-    //    drawTrans(*x);
-    //}
-
+     //Render the transforms after collecting them
+    for (auto x : transObj) {
+        updateAnimation(*x);
+        glBindTexture(GL_TEXTURE_2D, x->textureID);
+        drawTrans(*x);
+    }
+    for (auto x : Obj) {
+        updateAnimation(*x);
+        glBindTexture(GL_TEXTURE_2D, x->textureID);
+        drawTrans(*x);
+    }
+    for (auto x : fore) {
+        updateAnimation(*x);
+        glBindTexture(GL_TEXTURE_2D, x->textureID);
+        drawTrans(*x);
+    }
+    for (auto x : pause) {
+        updateAnimation(*x);
+        glBindTexture(GL_TEXTURE_2D, x->textureID);
+        drawTrans(*x);
+    }
 
     if (polygonmode == 0)
     {

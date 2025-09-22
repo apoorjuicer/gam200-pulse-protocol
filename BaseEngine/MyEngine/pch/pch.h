@@ -34,13 +34,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include "Graphics/glslshader.h"
 
 // Suppress APIENTRY macro redefinition warning
 #pragma warning(push)
 #pragma warning(disable: 4005)
 
 // System Library Headers
-#include "../MyEngine/GSM/gsm.h"
+//#include "../MyEngine/GSM/gsm.h"
 #include "../MyEngine/ECS/ecs.h"
 #include "../MyEngine/Math/math.h"
 #include "../MyEngine/Input/InputManager.h"

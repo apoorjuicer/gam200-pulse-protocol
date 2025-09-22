@@ -18,7 +18,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Transform.h"
 #include "algorithm"
-
 // External transforms list (used elsewhere)
 extern std::list<Framework::Transform*> transObj; // transforms  
 
@@ -35,7 +34,7 @@ public:
     GLuint idx_elem_cnt;
     GLenum primitive_type;
     void drawTrans(Framework::Transform);
-    //void updateAnimation(Framework::Transform& x);
+    void updateAnimation(Framework::Transform& x);
 
     // encapsulates state required to render a geometrical model
     struct GLModel {
