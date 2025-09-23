@@ -7,13 +7,15 @@
 \copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.
 **********************************************************************************************/
 #pragma once
-#include <vector>
 //#include "../ComponentJson/Component_System.h"
 //#include "../Math/Matrix_3x3.h"
 //#include "../Math/Vector_2D.h"
+#pragma once
+#include "pch/pch.h"        // FIRST
+#include "Core/Coordinator.h"
+#include <vector>
 #include <glm/gtc/type_ptr.hpp>
-#include "../Graphics/glhelper.h"
-#include "pch/pch.h"
+#include "glhelper.h" 
 
 #ifndef FRAMEWORK_TRANSFORM_H
 #define FRAMEWORK_TRANSFORM_H
@@ -50,7 +52,7 @@ namespace Framework
 
         void SetSprite(std::string ref);
         std::string GetSprite() const;
-
+        // Register these components in your initialization code:
         //void Serialize(Value& data, Document::AllocatorType& alloc) override;
         //void Deserialize(Value& data);
     };

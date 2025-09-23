@@ -7,7 +7,6 @@
 //\copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.
 //**********************************************************************************************/
 //#include "glappSystem.h"
-//#include "Transform.h"
 ////#include "../ComponentJson/files/Composition.h"
 ////#include "../ComponentJson/Component_System.h"
 ////#include "../Engine/Core.h"
@@ -16,8 +15,9 @@
 //
 //using namespace Framework;
 //
-//
-//Transform trans;
+//extern float editorHeight;
+//extern float editorWidth;
+//Framework::Transform trans;
 //
 //
 //namespace Framework
@@ -25,9 +25,9 @@
 //    glappSystem::glappSystem() { glapp = new GLApp; };
 //    void glappSystem::Initialize() {
 //
-//        AssetsManager::Instance().LoadAllImage();   
+//        //AssetsManager::Instance().LoadAllImage();   
 //        
-//        GAM200graphics::Log::Init(); 
+//        //GAM200graphics::Log::Init(); 
 //
 //        // Part 2
 //        GLHelper::print_specs();
@@ -44,7 +44,7 @@
 //
 //    void glappSystem::Update(float timeSlice) {
 //
-//        UNREFERENCED_PARAMETER(timeSlice);
+//        //UNREFERENCED_PARAMETER(timeSlice);
 //        //update
 //        glfwPollEvents();
 //        GLHelper::update_time(1.0);
@@ -54,15 +54,15 @@
 //
 //      
 //
-//        if (glfwWindowShouldClose(GLHelper::ptr_window)) {    
-//            Message pause(QUIT);
-//            CORE->BroadcastMessage(&pause);
-//        }
+//        //if (glfwWindowShouldClose(GLHelper::ptr_window)) {    
+//        //    Message pause(QUIT);
+//        //    CORE->BroadcastMessage(&pause);
+//        //}
 //
 //    }
 //
 //    glappSystem::~glappSystem() {
-//        AssetsManager::Instance().UnloadAllImage();   
+//        //AssetsManager::Instance().UnloadAllImage();   
 //        transObj.clear();
 //        glapp->cleanup();
 //        delete glapp;
@@ -70,15 +70,15 @@
 //    std::string glappSystem::GetName() {
 //        return "Graphics";
 //    }
-//    void glappSystem::SendMessageMess(Message* message) {
+//    //void glappSystem::SendMessageMess(Message* message) {
 //
-//        //TEMP
-//        if (message->messageId==SCENECHANGE) {
-//            NewImage();
-//        }
+//    //    //TEMP
+//    //    if (message->messageId==SCENECHANGE) {
+//    //        NewImage();
+//    //    }
 //
-//        
-//    }
+//    //    
+//    //}
 //
 //
 //

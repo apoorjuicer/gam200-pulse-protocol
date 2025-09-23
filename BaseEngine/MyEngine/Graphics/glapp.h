@@ -6,22 +6,20 @@
 
 \copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.
 **********************************************************************************************/
-
+#pragma once
 #ifndef GLAPP_H
 #define GLAPP_H
 #include <fstream>
 #include <vector>
 #include <list>
-#include "glhelper.h"
-#include "glslshader.h"
-#include <GL/glew.h>
+//#include "glhelper.h"
+#include "pch/pch.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-//#include "../Components/Transform.h"
-#include "algorithm"
-
-// External transforms list (used elsewhere)
-//extern std::list<Framework::Transform*> transObj; // transforms  
+#include <algorithm>
+// External transforms list (used elsewhere)   
+namespace Framework { class Transform; }
+extern std::list<Framework::Transform*> transObj; // transforms  
 
 class GLApp {
 public:
@@ -35,8 +33,8 @@ public:
     GLuint vaoid; // handle to VAO
     GLuint idx_elem_cnt;
     GLenum primitive_type;
-    //void drawTrans(Framework::Transform);
-    //void updateAnimation(Framework::Transform& x);
+    void drawTrans(Framework::Transform& x);
+    void updateAnimation(Framework::Transform& x);
 
     // encapsulates state required to render a geometrical model
     struct GLModel {
