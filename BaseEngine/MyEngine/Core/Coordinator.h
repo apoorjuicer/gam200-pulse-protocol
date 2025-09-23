@@ -86,7 +86,17 @@ public:
 	{
 		CoordSystemManager->SetSignature<T>(signature);
 	}
-
+	template<typename T>
+	bool HasComponent(Entity entity) const {
+		auto sig = CoordEnitiyManager->GetSignature(entity);
+		auto type = CoordComponentManager->GetComponentType<T>();
+		return sig.test(type);
+	}
+	template<typename T>
+	T* TryGetComponent(Entity entity) {
+		if (!HasComponent<T>(entity)) return nullptr;
+		return &CoordComponentManager->GetComponent<T>(entity);
+	}
 private:
 	std::unique_ptr<EntityManager> CoordEnitiyManager;
 	std::unique_ptr<ComponentManager> CoordComponentManager;

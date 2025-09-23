@@ -23,7 +23,6 @@
 
 #if (_DEBUG)
 // MEM LEAKS LIBRARIES (See _CrtMemCheckpoint for examples to check for mem leaks)
-#include "windows.h"
 #define _CRTDBG_MAP_ALLOC //to get more details
 #include <cstdlib>  
 #include <crtdbg.h>   //for malloc and free
@@ -58,6 +57,7 @@ struct GameStates {
 
 Coordinator g_coordinator;
 InputManager* g_inputSystem = nullptr;
+GraphicsManager* g_graphicsSystem = nullptr;
 
 void initEngine() {
     glewInit();
@@ -89,6 +89,9 @@ void update()
         // gameManager.Update();
         // physics.Simulate();
     }
+    if (g_graphicsSystem) {
+        g_graphicsSystem->Update();
+    }
 }
 
 void render() {
@@ -99,103 +102,88 @@ void render() {
 }
 
 int main() {
-
 #ifdef _DEBUG
-    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); // start checking 
-    //_CrtSetBreakAlloc(309); // Uncomment and replace param with the allocation number to break on specific leaks
-    //_CrtMemCheckpoint(&sOld); // Take initial snapshot (its like lock in the state of memory)
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-    CoreEngine Engine;
-    if (!glfwInit()) {
-        return -1;
-    }
 
-    // Size of game window here. 1400 x 800 is just a temp, we will change to get from resource manager which gets from text file
+    if (!glfwInit()) return -1;
+
     GLFWwindow* window = glfwCreateWindow(Game_Window_Height, Game_Window_Width, WindowTitle, nullptr, nullptr);
-    
-    if (!window) {
-        glfwTerminate();
-        return -1;
-    }
+    if (!window) { glfwTerminate(); return -1; }
 
-    Engine.Init(); //for all the system init yeah? where the gsm load and init
-    
-    
+    glfwMakeContextCurrent(window);      // (1) context
+    glewInit();                          // (2) load GL
 
+    // ECS setup
     g_coordinator.init();
-
-    // NEED TO INCLUDE THIS vvvv
     g_coordinator.RegisterComponent<Player>();
+    g_coordinator.RegisterComponent<Framework::Transform>();
     g_coordinator.RegisterSystem<InputManager>();
-    
+    g_coordinator.RegisterSystem<GraphicsManager>();
     Signature signature;
+ 
     signature.set(g_coordinator.GetComponentType<Player>());
     g_coordinator.SetSystemSignature<InputManager>(signature);
+    Signature graphicsSig;
+    graphicsSig.set(g_coordinator.GetComponentType<Framework::Transform>());  // <-- needs Transform
+    g_coordinator.SetSystemSignature<GraphicsManager>(graphicsSig);
 
-    std::vector<Entity> entities(MaxEntity);
-    int i = 0;
-    for (auto& x : entities)
-    {
-        std::cout << i++;
-    }
-    
-    //class Position;
-    //class Velocity;
+    // Create systems AFTER GL is ready
+    g_inputSystem     = new InputManager();
+    g_graphicsSystem  = new GraphicsManager();
 
-    //for (auto&& [entity, pos, vel] : g_coordinator.view<Position, Velocity>().each()) {
-    //    // ...
-    //}
+    // Initialize systems AFTER GL is ready
+    g_inputSystem->Initialize(window);
+    g_graphicsSystem->Initialize();
 
+    // If CoreEngine::Init() also calls glewInit() or GraphicsManager->Initialize(),
+    // REMOVE those calls from CoreEngine::Init() or call Engine.Init() *here* only
+    // for non-GL things:
+     CoreEngine Engine;
+     Engine.Init(); // <-- only if it does NOT touch OpenGL
 
     int entity = g_coordinator.CreateEntity();
+    g_coordinator.AddComponent(entity, Player{100, 200});
 
-    // ID and component
-    g_coordinator.AddComponent(entity, Player{100,200});
+    Framework::Transform tr{};            // fill in fields as your renderer expects
+    // e.g. tr.mdl_ref = 1; tr.shd_ref = 1; tr.rows = ...; tr.columns = ...; tr.textureID = ...
+    // After registering components (including Framework::Transform) and creating the entity:
 
-    glfwMakeContextCurrent(window);
-    g_inputSystem = new InputManager();
-    //initEngine();
-    g_inputSystem->Initialize(window);
+    // where to draw (your update() normalizes by 1600x900)
+    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900 “virtual” screen
+    tr.Scale = { 128.0f, 128.0f };   // size in pixels in that same space
+    tr.angle_disp = 0.0f;           // degrees
+    tr.angle_speed = 0.0f;           // no rotation
 
-    
-    
-    //Engine.Update(); in here are vvv
-    // This will be where the application loop is. No more game loop, just the update
+    // model & shader indices (you push models: 0=bg, 1=box; shaders: 0=test,1=bg,2=sprite,3=font)
+    tr.mdl_ref = 0.0f;               // box_model()
+    tr.shd_ref = 0.0f;               // sprite shader
+    // NOTE: In drawTrans() you currently check `if (x.shd_ref == 1)` before grabbing uniforms.
+    // Either change that `1` to `2`, or set `tr.shd_ref = 1` if your bg shader has those uniforms.
+
+    // sprite-sheet / animation
+    tr.rows = 1;
+    tr.columns = 1;
+    tr.currentFrame = 0;
+    tr.animationSpeed = 0.0f;        // static
+
+    // a valid GL texture id. Use your loader or 0 if you just want a colored quad.
+    tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
+    g_coordinator.AddComponent(entity, tr);  // <-- add Transform
+
     while (!glfwWindowShouldClose(window)) {
-        //  1. Poll event(input key)
-        //  2. update engine cpp
-        //  3. ImGui update
-        //  4. game update(NOT A WHILE LOOP)
-        //  5. game rendering
-        //  6. ImGui rendering
-        //  7. Swap Buffer(like two window)
-        
-        
-        Player& player = g_coordinator.GetComponent<Player>(entity);
-        std::cout << "Player: " << player.x << ", " << player.y << std::endl;
-        std::cout << "Player: " << player.position.x << ", " << player.position.y << std::endl;
- 
-        /*if ()
-        {
-            std::cout << "Player: " << ++player.x << ", " << ++player.y << std::endl;
-        }*/
-
-
-
         glfwPollEvents();
-        Engine.Update();
-        render();
+
+        if (g_inputSystem)    g_inputSystem->Update();
+        if (g_graphicsSystem) g_graphicsSystem->Update();
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
         glfwSwapBuffers(window);
     }
 
-    Engine.Exit(); 
-
-    // CLEANUP InputManager
-    if (g_inputSystem) {
-        g_inputSystem->Shutdown();
-        delete g_inputSystem;
-        g_inputSystem = nullptr;
-    }
+    if (g_inputSystem)    { g_inputSystem->Shutdown(); delete g_inputSystem;    g_inputSystem = nullptr; }
+    if (g_graphicsSystem) { g_graphicsSystem->Shutdown(); delete g_graphicsSystem; g_graphicsSystem = nullptr; }
 
     glfwDestroyWindow(window);
     glfwTerminate();

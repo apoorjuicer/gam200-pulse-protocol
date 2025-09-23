@@ -32,7 +32,13 @@ const float PI = 3.14159265358979323846f;
 int polygonmode = 0;
 GLuint future_shd_ref = 0; // Initial shader index
 GLuint textureID;
+const std::string test_vs = {
+    #include "shader/test_vs.vert" 
+};
 
+const std::string test_fs = {
+    #include "shader/test_fs.frag" 
+};
 const std::string bg_vs = {
     #include "shader/bg_vs.vert" 
 };
@@ -93,9 +99,9 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
     GLHelper::EditorHeight = static_cast<GLint>(inputEditorHeight);
 
     GLApp::vps.push_back({ 300, 200, w, h });
-
     // Shader Strings Storage
     GLApp::VPSS shdr_strs{
+        std::make_pair(test_vs, test_fs),
         std::make_pair(bg_vs, bg_fs),
         std::make_pair(sprite_vs, sprite_fs),
         std::make_pair(font_vs, font_fs)
@@ -179,7 +185,7 @@ void GLApp::updateAnimation(Framework::Transform& x) {
     }
 }
 
-void GLApp::drawTrans(Framework::Transform x) {
+void GLApp::drawTrans(Framework::Transform &x) {
     GLint uniform_var_loc1 = 0;
     GLint uOffsetLoc = 0;
     GLint uScaleLoc = 0;
@@ -225,6 +231,11 @@ void GLApp::drawTrans(Framework::Transform x) {
 }
 
 void GLApp::draw() {
+    
+    static int frame = 0;
+    //if ((frame++ % 60) == 0) {
+    //    std::cout << "[draw] tick " << frame << std::endl; // endl forces flush
+    //}
     bool pm = false;
     bool fg = false;
     // clear back buffer as before
@@ -240,59 +251,35 @@ void GLApp::draw() {
 
     //Render each object
     //for (auto it = Framework::levelManager->GameObjects.GOCM.begin(); it != Framework::levelManager->GameObjects.GOCM.end(); it++) {
-    Coordinator g_coordinator;
-        for (Entity entity : g_coordinator.GetComponent(entity)){
-        Transform* t = dynamic_cast<Transform*>(it->second->GetCom(Com_Trans));
-
-        if (t) {
-            t->update(0.f);
-            Player* p = dynamic_cast<Player*>(t->GetOwner()->GetCom(Com_Player));
-            //Cat* c = dynamic_cast<Cat*>(t->GetOwner()->GetCom(Com_Cat));
-            pm = t->GetOwner()->Name == "Pausepopup menu " || t->GetOwner()->Name == "Pausepopup Resume button"
-                || t->GetOwner()->Name == "Pausepopup Exit button";
-            fg = t->GetOwner()->Name == "Level1_Foreground";
-            if (p /* || c*/) {
-                Obj.push_back(t); // Add the current Transform* to the vector
-            }
-            else if (pm) {
-                pause.push_back(t);
-            }
-            else if (fg) {
-                fore.push_back(t);
-            }
-            else {
-                transObj.push_back(t); // Add the current Transform* to the vector
-            }
-			//Sort the objects based on Y position (if needed)
-            //std::vector<Framework::Transform*> vec(Obj.begin(), Obj.end());
-            //std::sort(vec.begin(), vec.end(), [](Framework::Transform* a, Framework::Transform* b) {
-            //    return a->Pos.getY() > b->Pos.getY();
-            //    });
-            //Obj.assign(vec.begin(), vec.end()); // Convert back to list if needed
+    extern Coordinator g_coordinator;
+    for (Entity e = 0; e < MaxEntity; ++e) {
+        if (auto* tr = g_coordinator.TryGetComponent<Framework::Transform>(e)) {
+            transObj.push_back(tr);
         }
     }
-
+    //std::cout << "[draw] found transforms: "
+    //      << transObj.size() /* + Obj.size() + fore.size() */<< "\n";
      //Render the transforms after collecting them
     for (auto x : transObj) {
         updateAnimation(*x);
         glBindTexture(GL_TEXTURE_2D, x->textureID);
         drawTrans(*x);
     }
-    for (auto x : Obj) {
-        updateAnimation(*x);
-        glBindTexture(GL_TEXTURE_2D, x->textureID);
-        drawTrans(*x);
-    }
-    for (auto x : fore) {
-        updateAnimation(*x);
-        glBindTexture(GL_TEXTURE_2D, x->textureID);
-        drawTrans(*x);
-    }
-    for (auto x : pause) {
-        updateAnimation(*x);
-        glBindTexture(GL_TEXTURE_2D, x->textureID);
-        drawTrans(*x);
-    }
+    //for (auto x : Obj) {
+    //    updateAnimation(*x);
+    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
+    //    drawTrans(*x);
+    //}
+    //for (auto x : fore) {
+    //    updateAnimation(*x);
+    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
+    //    drawTrans(*x);
+    //}
+    //for (auto x : pause) {
+    //    updateAnimation(*x);
+    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
+    //    drawTrans(*x);
+    //}
 
     if (polygonmode == 0)
     {
@@ -473,8 +460,10 @@ GLApp::GLModel GLApp::box_model() {
 
     GLApp::GLModel quad{};
     quad.vaoid = vaoid;
-    quad.primitive_type = GL_TRIANGLE_STRIP;
+    //quad.primitive_type = GL_TRIANGLE_STRIP;
+    // quad.primitive_type = GL_TRIANGLES;      
     quad.draw_cnt = static_cast<GLuint>(idx_vtx.size());
+    
     quad.primitive_cnt = 2;
     return quad;
 }

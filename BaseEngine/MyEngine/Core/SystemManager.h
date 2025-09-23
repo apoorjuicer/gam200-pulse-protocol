@@ -1,7 +1,6 @@
 #pragma once
 #include "pch/pch.h"
 
-
 class SystemManager
 {
 public:

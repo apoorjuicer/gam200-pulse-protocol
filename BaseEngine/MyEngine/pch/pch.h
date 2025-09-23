@@ -34,6 +34,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include "Graphics/glhelper.h"
 #include "Graphics/glslshader.h"
 
 // Suppress APIENTRY macro redefinition warning
@@ -45,6 +46,7 @@
 #include "../MyEngine/ECS/ecs.h"
 #include "../MyEngine/Math/math.h"
 #include "../MyEngine/Input/InputManager.h"
+#include "../MyEngine/Graphics/GraphicsManager.h"
 #include "../MyEngine/Physics/collision.h"
 #include "../MyEngine/Time/Time_Manager.h"
 #include "../MyEngine/CoreEngine/CoreEngine.h"

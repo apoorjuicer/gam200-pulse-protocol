@@ -1,5 +1,6 @@
 #include "pch/pch.h"
 extern InputManager* g_inputSystem;
+extern GraphicsManager* g_graphicsSystem;
 
 //A global pointer to the core
 CoreEngine* Engine;
@@ -21,6 +22,7 @@ void CoreEngine::Init()
 {
 	glewInit();
 	std::cout << "Engine initialized." << std::endl;
+	g_graphicsSystem->Initialize();
 
 	// Display M1 test instructions
 	std::cout << "\n=== M1 INPUT SYSTEM DEMONSTRATION ===" << std::endl;
@@ -47,7 +49,9 @@ void CoreEngine::Update()
 		// gameManager.Update();
 		// physics.Simulate();
 	}
-
+	if (g_graphicsSystem) {
+		g_graphicsSystem->Update();
+	}
 
 
 	/*while (GameRunning)
@@ -66,6 +70,11 @@ void CoreEngine::Exit()
 		g_inputSystem->Shutdown();
 		delete g_inputSystem;
 		g_inputSystem = nullptr;
+	}
+	if (g_graphicsSystem) {
+		g_graphicsSystem->Shutdown();
+		delete g_graphicsSystem;
+		g_graphicsSystem = nullptr;
 	}
 }
 
