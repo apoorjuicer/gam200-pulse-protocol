@@ -1,4 +1,6 @@
 #include "pch/pch.h"
+
+// global pointer to the input system
 extern InputManager* g_inputSystem;
 
 //A global pointer to the core
@@ -22,13 +24,12 @@ void CoreEngine::Init()
 	glewInit();
 	std::cout << "Engine initialized." << std::endl;
 
-	// Display M1 test instructions
-	std::cout << "\n=== M1 INPUT SYSTEM DEMONSTRATION ===" << std::endl;
-	std::cout << "SPACE     -> Primary rhythm beat input" << std::endl;
-	std::cout << "A/S/D     -> Weapon combo keys (spear/sword/bow)" << std::endl;
-	std::cout << "MOUSE     -> UI interaction testing" << std::endl;
-	std::cout << "Close window to exit testing" << std::endl;
-	std::cout << "=======================================" << std::endl;
+	// test instructions for input (for now)
+	std::cout << "\n=== INPUT GUIDE ===" << std::endl;
+	std::cout << "Q/W/E -> Rhythm keys" << std::endl;
+	std::cout << "Combos: Q->W, Q->E, Q->W->E" << std::endl;
+	std::cout << "Mouse: Right=aim, Left=attack" << std::endl;
+	std::cout << "====================" << std::endl;
 
 
 
@@ -39,17 +40,9 @@ void CoreEngine::Update()
 	if (g_inputSystem) {
 		// Update input system
 		g_inputSystem->Update();
-
-		// Run M1 testing demonstrations
-		g_inputSystem->RunM1Test();
-
-		// Future game systems would be updated here:
-		// gameManager.Update();
-		// physics.Simulate();
 	}
 
-
-
+	// Update rest of the game systems efficiently with delta time
 	/*while (GameRunning)
 	{
 		for (unsigned i = 0; i < Systems.size(); ++i)
@@ -61,7 +54,9 @@ void CoreEngine::Update()
 
 void CoreEngine::Exit()
 {
-	// ask chloe how to test it 
+	// 1. Shutdown() displays final stats and cleans internal state
+	// 2. delete frees memory and prevents leaks
+	// 3. nullptr prevents dangling pointer access
 	if (g_inputSystem) {
 		g_inputSystem->Shutdown();
 		delete g_inputSystem;

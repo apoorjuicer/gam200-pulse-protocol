@@ -172,8 +172,8 @@ int main() {
         
         
         Player& player = g_coordinator.GetComponent<Player>(entity);
-        std::cout << "Player: " << player.x << ", " << player.y << std::endl;
-        std::cout << "Player: " << player.position.x << ", " << player.position.y << std::endl;
+        //std::cout << "Player: " << player.x << ", " << player.y << std::endl;
+        //std::cout << "Player: " << player.position.x << ", " << player.position.y << std::endl;
  
         /*if ()
         {
