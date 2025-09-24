@@ -1,27 +1,67 @@
+#include <windows.h>   // for OutputDebugString, etc.
 #include "pch/pch.h"
 
 // global pointer to the input system
+#pragma comment(lib, "winmm.lib")
+
+//Coordinator g_coordinator;
 extern InputManager* g_inputSystem;
+extern GraphicsManager* g_graphicsSystem;
 
 //A global pointer to the core
 CoreEngine* Engine;
-int CoreEngine::WindowWidth;
-int CoreEngine::WindowHeight;
+extern Coordinator g_coordinator;
 
 
-CoreEngine::CoreEngine()
+// Game window dimensions and title
+const char WindowTitle[] = "Game Window";
+const int WindowHeight = 1400;
+const int WindowWidth = 800;
+
+CoreEngine::CoreEngine(): window(nullptr)
 {
-
+	LastTime = 0;
+	GameRunning = false;
 }
 
 CoreEngine::~CoreEngine()
 {
-
+	if (window) 
+	{
+		glfwDestroyWindow(window);
+		glfwTerminate();
+	}
 }
+
 
 void CoreEngine::Init()
 {
+	// 3 in 1 system
+	g_coordinator.init(); 
+
+	if (!glfwInit()) {
+		std::cerr << "Failed to initialize GLFW" << std::endl;
+		return;
+	}
+
+	window = glfwCreateWindow(WindowHeight, WindowWidth, WindowTitle, nullptr, nullptr);
+	if (!window) {
+		std::cerr << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return;
+	}
+
+	glfwMakeContextCurrent(window);
 	glewInit();
+
+	// Create systems AFTER GL is ready
+	g_inputSystem = new InputManager();
+	g_graphicsSystem = new GraphicsManager();
+	
+	// Initialize systems AFTER GL is ready
+	g_inputSystem->Initialize(window);
+	g_graphicsSystem->Initialize();
+	g_coordinator.InitializeAllSystems();
 	std::cout << "Engine initialized." << std::endl;
 
 	// test instructions for input (for now)
@@ -30,12 +70,25 @@ void CoreEngine::Init()
 	std::cout << "Combos: Q->W, Q->E, Q->W->E" << std::endl;
 	std::cout << "Mouse: Right=aim, Left=attack" << std::endl;
 	std::cout << "====================" << std::endl;
-
-
-
 }
 
-void CoreEngine::Update()
+// add/register your systems and component here  for our games here 
+void CoreEngine::Setup()
+{
+	// Register your component here
+	g_coordinator.RegisterComponent<Framework::Transform>();
+	
+	// Register your systems here
+	g_coordinator.RegisterSystem<InputManager>();
+	g_coordinator.RegisterSystem<GraphicsManager>();
+
+	// Set your signatures for both component and system
+	Signature graphicsSig;
+	graphicsSig.set(g_coordinator.GetComponentType<Framework::Transform>());  // <-- needs Transform
+	g_coordinator.SetSystemSignature<GraphicsManager>(graphicsSig);
+}
+
+void CoreEngine::Update(float dt)
 {
 	if (g_inputSystem) {
 		// Update input system
@@ -44,13 +97,61 @@ void CoreEngine::Update()
 
 	// Update rest of the game systems efficiently with delta time
 	/*while (GameRunning)
+
+		// Run M1 testing demonstrations
+		g_inputSystem->RunM1Test();
+
+	}
+	if (g_graphicsSystem) {
+		g_graphicsSystem->Update();
+	}
+
+	g_coordinator.UpdateAllSystems(dt);
+}
+
+// Ask pin kai if he needs this. 
+void CoreEngine::Render()
+{
+
+}
+
+void CoreEngine::GameLoop()
+{
+	LastTime = timeGetTime();
+
+	// application loop
+	while(!glfwWindowShouldClose(window) && GameRunning)
 	{
-		for (unsigned i = 0; i < Systems.size(); ++i)
-			Systems[i]->Update(dt);
-	}*/
+		//Get the current time in milliseconds
+		unsigned currenttime = timeGetTime();
+		//Convert it to the time passed since the last frame (in seconds)
+		float dt = (currenttime - LastTime) / 1000.0f;
+		//Update the when the last update started
+		LastTime = currenttime;
+
+		//  1. Poll event(input key)
+		glfwPollEvents();
+		 
+		//  2. update engine cpp
+		Update(dt);
+
+		//  3. ImGui update
+
+		//  4. game update(NOT A WHILE LOOP) gsm
+
+		//  5. game rendering
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+
+		//  6. ImGui rendering
+
+		//7. Swap Buffer(like two window)
+		glfwSwapBuffers(window);
+	}
 
 
 }
+
 
 void CoreEngine::Exit()
 {
@@ -62,13 +163,21 @@ void CoreEngine::Exit()
 		delete g_inputSystem;
 		g_inputSystem = nullptr;
 	}
+	if (g_graphicsSystem) {
+		g_graphicsSystem->Shutdown();
+		delete g_graphicsSystem;
+		g_graphicsSystem = nullptr;
+	}
+
+
+	if (window) 
+	{
+		glfwDestroyWindow(window);
+		window = nullptr;
+	}
+	glfwTerminate();
 }
 
-// where application loop is. Just gonna name is game loop since its easier to understand
-void CoreEngine::GameLoop()
-{
-		
-}
 
 //void BroadcastMessage(){}
 
@@ -121,3 +230,22 @@ void CoreEngine::GameLoop()
 //        window_swap_buffers();
 //    }
 //}
+
+
+
+//// ECS setup
+//g_coordinator.init();
+//g_coordinator.RegisterComponent<Player>();
+//g_coordinator.RegisterComponent<Framework::Transform>();
+//
+//g_coordinator.RegisterSystem<InputManager>();
+//g_coordinator.RegisterSystem<GraphicsManager>();
+// 
+// Signature signature;
+// signature.set(g_coordinator.GetComponentType<Player>());
+// g_coordinator.SetSystemSignature<InputManager>(signature);
+//
+//Engine.Init(); // <-- only if it does NOT touch OpenGL
+//
+//int entity = g_coordinator.CreateEntity();
+//g_coordinator.AddComponent(entity, Player{ 100, 200 });

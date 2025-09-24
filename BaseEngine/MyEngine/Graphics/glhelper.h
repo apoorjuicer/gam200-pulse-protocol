@@ -9,11 +9,10 @@
 
 #ifndef GLHELPER_H
 #define GLHELPER_H
-
+#pragma once
 /*                                                                   includes
 ----------------------------------------------------------------------------- */
-#include <GL/glew.h> // for access to OpenGL API declarations 
-#include <GLFW/glfw3.h>
+#include "pch/pch.h"
 #include <string>
 #include <unordered_map>
 

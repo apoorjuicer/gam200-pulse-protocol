@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef PCH_H
-#define PCH_H
-
 // pch.h: This is a precompiled header file.
 // I'm doing this as we only need to compile it once and make  the files neater, we will put all our lib that we are using here. 
 // Just put #include "pch/pch.h" and you will have acces to it
@@ -34,18 +31,18 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include "Graphics/glhelper.h"
+#include "Graphics/glslshader.h"
 
 // Suppress APIENTRY macro redefinition warning
 #pragma warning(push)
 #pragma warning(disable: 4005)
 
 // System Library Headers
-#include "../MyEngine/GameState/gsm.h"
-#include "../MyEngine/ECS/ecs.h"
 #include "../MyEngine/Math/math.h"
 #include "../MyEngine/Input/InputManager.h"
+#include "../MyEngine/Graphics/GraphicsManager.h"
 #include "../MyEngine/Physics/collision.h"
-#include "../MyEngine/Time/Time_Manager.h"
 #include "../MyEngine/CoreEngine/CoreEngine.h"
 #include <../MyEngine/Resources/ResourceManager.h>
 
@@ -54,7 +51,6 @@
 #include "../MyEngine/Core/Window.h"
 #include "../MyEngine/Core/System.h"
 #include "../MyEngine/Core/Assets.h"
-#include "../MyEngine/Core/Factory.h"
 #include "../MyEngine/Core/Coordinator.h"
 #include "../MyEngine/Core/SystemManager.h"
 #include "../MyEngine/Core/EntityManager.h"
@@ -63,5 +59,3 @@
 
 // Restore warning settings
 #pragma warning(pop)
-
-#endif //PCH_H
