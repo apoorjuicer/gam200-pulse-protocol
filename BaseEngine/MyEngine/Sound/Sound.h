@@ -10,7 +10,6 @@
 #pragma once
 //#include "../Engine/Core.h"
 //#include "../Engine/Message.h"
-#include "fmod.hpp"
 //#include "ISystem.h"
 #include <GLFW/glfw3.h>
 //#include "../Engine/Precompiled.h"
@@ -20,47 +19,42 @@
 //#include "../Components/SFX.h"
 #include "../Graphics/glhelper.h"
 #include <iostream>
+#include <WinUser.h>
 
-//namespace Framework {
-//
-//	extern FMOD::System* pSystem;
-//
-//	class SoundSystem :public ISystem {
-//	public:
-//		static SoundSystem& Instance(); // Singleton accessor
-//		bool isMuted = false;
-//
-//
-//		void SendMessageMess(Message* message);
-//
-//		///All systems are updated every game frame.
-//		void Update(float timeslice);
-//
-//		///All systems provide a string name for debugging.
-//		std::string GetName();
-//
-//
-//		///Initialize the system.
-//		void Initialize();
-//
-//		void PlayMySound(FMOD::Sound* pSound);
-//
-//		///All systems need a virtual destructor to have their destructor called 
-//		SoundSystem();
-//		~SoundSystem();
-//
-//		void PlayNew();
-//		void PauseAllSounds();
-//		void ResumeAllSounds();
-//		void StopSound(FMOD::Sound* targetSound);
-//		void ToggleMute();
-//
-//	private:
-//		std::vector<FMOD::Channel*> channels;    // Collection of active channels 
-//		bool mKeyWasPressed = false; 
-//
-//	};
-//
-//
-//
-//}
+extern FMOD::System* pSystem;
+
+class SoundSystem : public Systems {
+public:
+	static SoundSystem& Instance(); // Singleton accessor
+	bool isMuted = false;
+
+
+	void SendMessageMess(Message* message);
+
+	///All systems are updated every game frame.
+	void Update(float timeslice);
+
+	///All systems provide a string name for debugging.
+	std::string GetName();
+
+
+	///Initialize the system.
+	void Initialize();
+
+	void PlayMySound(FMOD::Sound* pSound);
+
+	///All systems need a virtual destructor to have their destructor called 
+	SoundSystem();
+	~SoundSystem();
+
+	void PlayNew();
+	void PauseAllSounds();
+	void ResumeAllSounds();
+	void StopSound(FMOD::Sound* targetSound);
+	void ToggleMute();
+
+private:
+	std::vector<FMOD::Channel*> channels;    // Collection of active channels 
+	bool mKeyWasPressed = false; 
+
+};

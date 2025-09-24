@@ -37,4 +37,3 @@ private:
 
 //A global pointer to the instance of the core
 extern CoreEngine* Core;
-

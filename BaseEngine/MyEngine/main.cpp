@@ -99,6 +99,9 @@ int main() {
     int entity = g_coordinator.CreateEntity();
     //g_coordinator.AddComponent(entity, tr);  // <-- add Transform
 
+    // FOR AUDIO + INPUT TESTING PURPOSE ONLY. WILL REMOVE AFTER FINISH TESTING
+    Engine.SetTestMode(CoreEngine::TestMode::INPUT_AUDIO);
+
     // this is where the update() is 
     Engine.GameLoop();
 
