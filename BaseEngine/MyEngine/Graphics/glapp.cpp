@@ -230,7 +230,7 @@ void GLApp::drawTrans(Framework::Transform &x) {
     shdrpgms[static_cast<uint64_t>(x.shd_ref)].UnUse();
 }
 
-void GLApp::draw() {
+void GLApp::draw(std::set<Entity> entities) {
     
     //static int frame = 0;
     //if ((frame++ % 60) == 0) {
@@ -249,12 +249,21 @@ void GLApp::draw() {
 
     //Render each object
     //for (auto it = Framework::levelManager->GameObjects.GOCM.begin(); it != Framework::levelManager->GameObjects.GOCM.end(); it++) {
-    extern Coordinator g_coordinator;
+  /* 
     for (Entity e = 0; e < MaxEntity; ++e) {
         if (auto* tr = g_coordinator.TryGetComponent<Framework::Transform>(e)) {
             transObj.push_back(tr);
         }
+    }*/
+    extern Coordinator g_coordinator;
+    for (auto it : entities)
+    {
+        if (auto* tr = g_coordinator.TryGetComponent<Framework::Transform>(it))
+        {
+            transObj.push_back(tr);
+        }
     }
+
     //std::cout << "[draw] found transforms: "
     //      << transObj.size() /* + Obj.size() + fore.size() */<< "\n";
      //Render the transforms after collecting them

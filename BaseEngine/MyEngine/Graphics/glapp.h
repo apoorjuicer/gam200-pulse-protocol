@@ -25,7 +25,7 @@ class GLApp {
 public:
     void init(float inputEditorWidth, float inputEditorHeight);
     void update();
-    void draw();
+    void draw(std::set<Entity>);
     void cleanup();
 
     void init_models_cont();
