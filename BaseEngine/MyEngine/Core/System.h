@@ -18,6 +18,12 @@ public:
 	// Only contains entities that have ALL the components this system needs
 	// We do this using the signatures 
 	std::set<Entity> EntityMember;
+
+	// All system can have a init() and update(), just need to override
+	virtual void Update(float dt) {};
+
+	virtual void Init() {};
+
 };
 
 

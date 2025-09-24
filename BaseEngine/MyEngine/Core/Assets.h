@@ -12,12 +12,7 @@ struct Render
 
 };
 
-struct Transform
-{
-	//scale;
-	//rotation;
-	Vector2 position{200,500};
-};
+
 
 
 

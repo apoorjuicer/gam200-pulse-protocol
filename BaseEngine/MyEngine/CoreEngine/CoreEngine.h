@@ -10,21 +10,29 @@ public:
 
 	// Engine 3 states
 	void Init();
-	void Update();
+	void Setup();
+	void Update(float dt);
+	void Render();
+	void GameLoop();
 	void Exit();
 
-	// where application loop is. Just gonna name is game loop since its easier to understand
-	void GameLoop();
 
 	// One of the ways to glue systems tgt. 
 	//void BroadcastMessage(Message* message);
 
-	static int WindowWidth, WindowHeight;
+	bool IsGameRunning() const { return GameRunning; }
 
+	GLFWwindow* GetWindow() const { return window; }
+	
 private:
 	bool GameRunning;
-	//std::vector<System*> Systems;
+	bool DebugMode;
+	unsigned LastTime; //The last time the game was updated
 
+	GLFWwindow* window;
+	/*static const char WindowTitle[];
+	static const int WindowHeight;
+	static const int WindowWidth;*/
 };
 
 //A global pointer to the instance of the core
