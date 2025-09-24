@@ -23,7 +23,7 @@ public:
 	bool IsGameRunning() const { return GameRunning; }
 
 	GLFWwindow* GetWindow() const { return window; }
-	
+
 private:
 	bool GameRunning;
 	bool DebugMode;

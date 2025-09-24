@@ -1,7 +1,5 @@
 #include <windows.h>   // for OutputDebugString, etc.
 #include "pch/pch.h"
-
-// global pointer to the input system
 #pragma comment(lib, "winmm.lib")
 
 //Coordinator g_coordinator;
@@ -18,7 +16,7 @@ const char WindowTitle[] = "Game Window";
 const int WindowHeight = 1400;
 const int WindowWidth = 800;
 
-CoreEngine::CoreEngine(): window(nullptr)
+CoreEngine::CoreEngine() : window(nullptr)
 {
 	LastTime = 0;
 	GameRunning = false;
@@ -26,7 +24,7 @@ CoreEngine::CoreEngine(): window(nullptr)
 
 CoreEngine::~CoreEngine()
 {
-	if (window) 
+	if (window)
 	{
 		glfwDestroyWindow(window);
 		glfwTerminate();
@@ -37,7 +35,7 @@ CoreEngine::~CoreEngine()
 void CoreEngine::Init()
 {
 	// 3 in 1 system
-	g_coordinator.init(); 
+	g_coordinator.init();
 
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW" << std::endl;
@@ -57,19 +55,22 @@ void CoreEngine::Init()
 	// Create systems AFTER GL is ready
 	g_inputSystem = new InputManager();
 	g_graphicsSystem = new GraphicsManager();
-	
+
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
 	g_graphicsSystem->Initialize();
 	g_coordinator.InitializeAllSystems();
 	std::cout << "Engine initialized." << std::endl;
 
-	// test instructions for input (for now)
-	std::cout << "\n=== INPUT GUIDE ===" << std::endl;
-	std::cout << "Q/W/E -> Rhythm keys" << std::endl;
-	std::cout << "Combos: Q->W, Q->E, Q->W->E" << std::endl;
-	std::cout << "Mouse: Right=aim, Left=attack" << std::endl;
-	std::cout << "====================" << std::endl;
+	// Display M1 test instructions
+	std::cout << "\n=== M1 INPUT SYSTEM DEMONSTRATION ===" << std::endl;
+	std::cout << "SPACE     -> Primary rhythm beat input" << std::endl;
+	std::cout << "A/S/D     -> Weapon combo keys (spear/sword/bow)" << std::endl;
+	std::cout << "MOUSE     -> UI interaction testing" << std::endl;
+	std::cout << "Close window to exit testing" << std::endl;
+	std::cout << "=======================================" << std::endl;
+
+	GameRunning = true;
 }
 
 // add/register your systems and component here  for our games here 
@@ -77,7 +78,7 @@ void CoreEngine::Setup()
 {
 	// Register your component here
 	g_coordinator.RegisterComponent<Framework::Transform>();
-	
+
 	// Register your systems here
 	g_coordinator.RegisterSystem<InputManager>();
 	g_coordinator.RegisterSystem<GraphicsManager>();
@@ -93,10 +94,6 @@ void CoreEngine::Update(float dt)
 	if (g_inputSystem) {
 		// Update input system
 		g_inputSystem->Update();
-	}
-
-	// Update rest of the game systems efficiently with delta time
-	/*while (GameRunning)
 
 		// Run M1 testing demonstrations
 		g_inputSystem->RunM1Test();
@@ -120,7 +117,7 @@ void CoreEngine::GameLoop()
 	LastTime = timeGetTime();
 
 	// application loop
-	while(!glfwWindowShouldClose(window) && GameRunning)
+	while (!glfwWindowShouldClose(window) && GameRunning)
 	{
 		//Get the current time in milliseconds
 		unsigned currenttime = timeGetTime();
@@ -131,7 +128,7 @@ void CoreEngine::GameLoop()
 
 		//  1. Poll event(input key)
 		glfwPollEvents();
-		 
+
 		//  2. update engine cpp
 		Update(dt);
 
@@ -155,9 +152,6 @@ void CoreEngine::GameLoop()
 
 void CoreEngine::Exit()
 {
-	// 1. Shutdown() displays final stats and cleans internal state
-	// 2. delete frees memory and prevents leaks
-	// 3. nullptr prevents dangling pointer access
 	if (g_inputSystem) {
 		g_inputSystem->Shutdown();
 		delete g_inputSystem;
@@ -170,7 +164,7 @@ void CoreEngine::Exit()
 	}
 
 
-	if (window) 
+	if (window)
 	{
 		glfwDestroyWindow(window);
 		window = nullptr;

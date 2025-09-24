@@ -40,7 +40,7 @@ const int Game_Window_Width = 800;
 struct GameStates {
     bool MainMenu = true;
     bool IsRunning = false;
-    bool IsPaused = false;  
+    bool IsPaused = false;
     bool GameOver = false;
 
     //libs that are good to use.
@@ -77,7 +77,7 @@ int main() {
     // After registering components (including Framework::Transform) and creating the entity:
 
     // where to draw (your update() normalizes by 1600x900)
-    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900 “virtual” screen
+    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900  virtual  screen
     tr.Scale = { 128.0f, 128.0f };   // size in pixels in that same space
     tr.angle_disp = 0.0f;           // degrees
     tr.angle_speed = 0.0f;           // no rotation
@@ -102,53 +102,6 @@ int main() {
     // this is where the update() is 
     Engine.GameLoop();
 
-    glfwMakeContextCurrent(window);
-    g_inputSystem = new InputManager();
-    //initEngine();
-    g_inputSystem->Initialize(window);
-
-    
-    
-    //Engine.Update(); in here are vvv
-    // This will be where the application loop is. No more game loop, just the update
-    while (!glfwWindowShouldClose(window)) {
-        //  1. Poll event(input key)
-        //  2. update engine cpp
-        //  3. ImGui update
-        //  4. game update(NOT A WHILE LOOP)
-        //  5. game rendering
-        //  6. ImGui rendering
-        //  7. Swap Buffer(like two window)
-        
-        
-        Player& player = g_coordinator.GetComponent<Player>(entity);
-        //std::cout << "Player: " << player.x << ", " << player.y << std::endl;
-        //std::cout << "Player: " << player.position.x << ", " << player.position.y << std::endl;
- 
-        /*if ()
-        {
-            std::cout << "Player: " << ++player.x << ", " << ++player.y << std::endl;
-        }*/
-
-
-
-        glfwPollEvents();
-        Engine.Update();
-        render();
-        glfwSwapBuffers(window);
-    }
-
-    Engine.Exit(); 
-
-    // CLEANUP InputManager
-    if (g_inputSystem) {
-        g_inputSystem->Shutdown();
-        delete g_inputSystem;
-        g_inputSystem = nullptr;
-    }
-
-    glfwDestroyWindow(window);
-    glfwTerminate();
     // clean up
     Engine.Exit();
 
