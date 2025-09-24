@@ -15,10 +15,10 @@
 #endif
 #include <windows.h>   // for OutputDebugString, etc.
 #endif
+
 #include <iostream>
 #include "Core/Coordinator.h"
 #include "pch/pch.h"
-
 #include "Core/Assets.h"
 
 #if (_DEBUG)
@@ -55,95 +55,22 @@ struct GameStates {
         //rapid json
 } gamestate;
 
+CoreEngine Engine;
 Coordinator g_coordinator;
 InputManager* g_inputSystem = nullptr;
 GraphicsManager* g_graphicsSystem = nullptr;
-
-void initEngine() {
-    glewInit();
-    std::cout << "Engine initialized." << std::endl;
-
-
-    // Display M1 test instructions
-    std::cout << "\n=== M1 INPUT SYSTEM DEMONSTRATION ===" << std::endl;
-    std::cout << "Q/W/E/R        -> Rhythm beat inputs (core gameplay)" << std::endl;
-    std::cout << "1/2/3          -> Weapon switching (Spear/Sword/Bow)" << std::endl;
-    std::cout << "RIGHT MOUSE    -> Aim mode (hold)" << std::endl;
-    std::cout << "LEFT MOUSE     -> Attack/Shoot or UI interaction" << std::endl;
-    std::cout << "MOUSE MOVE     -> Aiming direction" << std::endl;
-    std::cout << "Close window to exit testing" << std::endl;
-    std::cout << "===========================================" << std::endl;
-
-}
-
-void update()
-{
-    if (g_inputSystem) {
-        // Update input system
-        g_inputSystem->Update();
-
-        // Run M1 testing demonstrations
-        g_inputSystem->RunM1Test();
-
-        // Future game systems would be updated here:
-        // gameManager.Update();
-        // physics.Simulate();
-    }
-    if (g_graphicsSystem) {
-        g_graphicsSystem->Update();
-    }
-}
-
-void render() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
-
-    // You can add more rendering code here
-}
 
 int main() {
 #ifdef _DEBUG
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    if (!glfwInit()) return -1;
-
-    GLFWwindow* window = glfwCreateWindow(Game_Window_Height, Game_Window_Width, WindowTitle, nullptr, nullptr);
-    if (!window) { glfwTerminate(); return -1; }
-
-    glfwMakeContextCurrent(window);      // (1) context
-    glewInit();                          // (2) load GL
-
-    // ECS setup
-    g_coordinator.init();
-    g_coordinator.RegisterComponent<Player>();
-    g_coordinator.RegisterComponent<Framework::Transform>();
-    g_coordinator.RegisterSystem<InputManager>();
-    g_coordinator.RegisterSystem<GraphicsManager>();
-    Signature signature;
- 
-    signature.set(g_coordinator.GetComponentType<Player>());
-    g_coordinator.SetSystemSignature<InputManager>(signature);
-    Signature graphicsSig;
-    graphicsSig.set(g_coordinator.GetComponentType<Framework::Transform>());  // <-- needs Transform
-    g_coordinator.SetSystemSignature<GraphicsManager>(graphicsSig);
-
-    // Create systems AFTER GL is ready
-    g_inputSystem     = new InputManager();
-    g_graphicsSystem  = new GraphicsManager();
-
-    // Initialize systems AFTER GL is ready
-    g_inputSystem->Initialize(window);
-    g_graphicsSystem->Initialize();
-
     // If CoreEngine::Init() also calls glewInit() or GraphicsManager->Initialize(),
     // REMOVE those calls from CoreEngine::Init() or call Engine.Init() *here* only
     // for non-GL things:
-     CoreEngine Engine;
-     Engine.Init(); // <-- only if it does NOT touch OpenGL
+    Engine.Init(); // <-- only if it does NOT touch OpenGL
 
-    int entity = g_coordinator.CreateEntity();
-    g_coordinator.AddComponent(entity, Player{100, 200});
+    Engine.Setup();
 
     Framework::Transform tr{};            // fill in fields as your renderer expects
     // e.g. tr.mdl_ref = 1; tr.shd_ref = 1; tr.rows = ...; tr.columns = ...; tr.textureID = ...
@@ -169,24 +96,14 @@ int main() {
 
     // a valid GL texture id. Use your loader or 0 if you just want a colored quad.
     tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
-    g_coordinator.AddComponent(entity, tr);  // <-- add Transform
+    int entity = g_coordinator.CreateEntity();
+    //g_coordinator.AddComponent(entity, tr);  // <-- add Transform
 
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
+    // this is where the update() is 
+    Engine.GameLoop();
 
-        if (g_inputSystem)    g_inputSystem->Update();
-        if (g_graphicsSystem) g_graphicsSystem->Update();
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
-        glfwSwapBuffers(window);
-    }
-
-    if (g_inputSystem)    { g_inputSystem->Shutdown(); delete g_inputSystem;    g_inputSystem = nullptr; }
-    if (g_graphicsSystem) { g_graphicsSystem->Shutdown(); delete g_graphicsSystem; g_graphicsSystem = nullptr; }
-
-    glfwDestroyWindow(window);
-    glfwTerminate();
+    // clean up
+    Engine.Exit();
 
 #if 0
     _CrtMemCheckpoint(&sNew); //take a snapshot (lock in the memory use again and now we compare :3)

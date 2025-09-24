@@ -21,6 +21,9 @@ public:
 		// With the name of the system as key and access to the actual system as the "reward"
 		MappedSystems.insert({ SystemTypeName, system });
 
+		// Add added system into a container we can iterate thru in one shot
+		SystemType.push_back(system);
+
 		// Return the newly made system to be configurated/modified
 		return system;
 	}
@@ -77,6 +80,25 @@ public:
 		}
 	}
 
+	void UpdateAllSystems(float deltaTime)
+	{
+		for (unsigned i = 0; i < SystemType.size(); ++i)
+		{
+			SystemType[i]->Update(deltaTime);
+			//std::cout << "updating!";
+		}
+	}
+
+	void InitializeAllSystems()
+	{
+		for (unsigned i = 0; i < SystemType.size(); ++i)
+		{
+			SystemType[i]->Init();
+			//std::cout << "init done";
+		}
+	}
+
+
 	// add one for all the system added already to console
 
 private:
@@ -91,5 +113,6 @@ private:
 	// Same thing but now mapped for system name and pointer to system instance
 	std::unordered_map<std::string, std::shared_ptr<Systems>> MappedSystems{};
 
-
+	std::vector<std::shared_ptr<Systems>> SystemType; 
+	
 };
