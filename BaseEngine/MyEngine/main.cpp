@@ -57,20 +57,20 @@ struct GameStates {
 
 CoreEngine Engine;
 Coordinator g_coordinator;
-InputManager* g_inputSystem = nullptr;
-GraphicsManager* g_graphicsSystem = nullptr;
+//InputManager* g_inputSystem = nullptr;
+//GraphicsManager* g_graphicsSystem = nullptr;
 
 int main() {
 #ifdef _DEBUG
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+    Engine.Setup();
     // If CoreEngine::Init() also calls glewInit() or GraphicsManager->Initialize(),
     // REMOVE those calls from CoreEngine::Init() or call Engine.Init() *here* only
     // for non-GL things:
     Engine.Init(); // <-- only if it does NOT touch OpenGL
 
-    Engine.Setup();
 
     Framework::Transform tr{};            // fill in fields as your renderer expects
     // e.g. tr.mdl_ref = 1; tr.shd_ref = 1; tr.rows = ...; tr.columns = ...; tr.textureID = ...
@@ -97,7 +97,7 @@ int main() {
     // a valid GL texture id. Use your loader or 0 if you just want a colored quad.
     tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
     int entity = g_coordinator.CreateEntity();
-    //g_coordinator.AddComponent(entity, tr);  // <-- add Transform
+    g_coordinator.AddComponent(entity, tr);  // <-- add Transform
 
     // FOR AUDIO + INPUT TESTING PURPOSE ONLY. WILL REMOVE AFTER FINISH TESTING
     Engine.SetTestMode(CoreEngine::TestMode::INPUT_AUDIO);
