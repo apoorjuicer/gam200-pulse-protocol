@@ -76,6 +76,12 @@ public:
 	}
 
 	template<typename T>
+	std::shared_ptr<T> GetSystem()
+	{
+		return CoordSystemManager->GetSystem<T>();
+	}
+
+	template<typename T>
 	std::shared_ptr<T> RegisterSystem()
 	{
 		return CoordSystemManager->RegisteringSystem<T>();
