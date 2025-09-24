@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\CMakeFiles\9a4856e12ff786d921fc1f9f049e9aa9\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{D9902826-DCEA-3350-9195-C9F6CA428CB5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

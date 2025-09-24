@@ -1,0 +1,10 @@
+^C:\USERS\65981\DESKTOP\CSD2401F25_TEAM_BLOOP\BASEENGINE\BUILD\CMAKEFILES\59856D6447E498EC34A1F0792556D7F4\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/65981/Desktop/csd2401f25_team_bloop/BaseEngine -BC:/Users/65981/Desktop/csd2401f25_team_bloop/BaseEngine/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/65981/Desktop/csd2401f25_team_bloop/BaseEngine/build/MyEngine.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

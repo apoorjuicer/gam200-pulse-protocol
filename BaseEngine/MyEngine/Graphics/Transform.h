@@ -10,7 +10,6 @@
 //#include "../ComponentJson/Component_System.h"
 //#include "../Math/Matrix_3x3.h"
 //#include "../Math/Vector_2D.h"
-#pragma once
 #include "pch/pch.h"        // FIRST
 #include "Core/Coordinator.h"
 #include <vector>

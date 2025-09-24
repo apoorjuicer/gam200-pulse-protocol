@@ -1,0 +1,13 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "MyEngine.dir\\Release\\audio.obj",
+            "outputs": [
+                "MyEngine.dir\\Release\\"
+            ],
+            "requires": []
+        }
+    ]
+}
