@@ -35,7 +35,7 @@ void GraphicsManager::Update()
 	glfwPollEvents();
 	GLHelper::update_time(1.0);
 	glapp->update();
-	glapp->draw(EntityMember);
+	glapp->draw();
 
 }
 

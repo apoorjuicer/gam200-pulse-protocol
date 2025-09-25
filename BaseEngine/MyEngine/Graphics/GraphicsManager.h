@@ -27,8 +27,6 @@ public:
 	GraphicsManager();
 	~GraphicsManager(); // destructor
 
-
-
 	void Initialize();
 	void Update();
 	void Shutdown();

@@ -76,12 +76,6 @@ public:
 	}
 
 	template<typename T>
-	std::shared_ptr<T> GetSystem()
-	{
-		return CoordSystemManager->GetSystem<T>();
-	}
-
-	template<typename T>
 	std::shared_ptr<T> RegisterSystem()
 	{
 		return CoordSystemManager->RegisteringSystem<T>();
@@ -102,7 +96,7 @@ public:
 	{
 		CoordSystemManager->InitializeAllSystems();
 	}
-	//Created to check if componenet exist
+
 	template<typename T>
 	bool HasComponent(Entity entity) const {
 		auto sig = CoordEnitiyManager->GetSignature(entity);
