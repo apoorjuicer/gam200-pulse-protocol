@@ -53,6 +53,8 @@ void CoreEngine::Init()
 	// Create systems AFTER GL is ready
 	//g_inputSystem = new InputManager();
 	//g_graphicsSystem = new GraphicsManager();
+
+
 	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
 
