@@ -9,6 +9,9 @@
 #include "pch/pch.h"
 #include <vector>
 
+class Collision : public Systems
+{
+};
 // Hero struct for collision system
 struct Hero {
     Vector2 pos;

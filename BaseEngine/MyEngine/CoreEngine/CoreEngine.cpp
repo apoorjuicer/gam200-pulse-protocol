@@ -123,7 +123,7 @@ void CoreEngine::GameLoop()
         hero.swingProgress = 0.0f;
         hero.isSwinging = automaticSwordSwing;
         hero.hp = 10;
-
+         
         Monster monsterTemplate;
         monsterTemplate.width = 50.0f;
         monsterTemplate.height = 50.0f;

@@ -1,6 +1,8 @@
 #include "collision.h"
 #include <iostream>
 
+
+
 void collision_init()
 {
     std::cout << "[Collision] Init\n";
