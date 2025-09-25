@@ -1,6 +1,5 @@
 #include <windows.h>   // for OutputDebugString, etc.
 #include "pch/pch.h"
-extern AudioManager* g_audioSystem;
 #pragma comment(lib, "winmm.lib")
 
 //Coordinator g_coordinator;
@@ -56,6 +55,7 @@ void CoreEngine::Init()
 	//g_graphicsSystem = new GraphicsManager();
 	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
+	auto g_audioSystem = g_coordinator.GetSystem<AudioManager>();
 
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
@@ -87,6 +87,7 @@ void CoreEngine::Setup()
 	// Register your systems here
 	g_coordinator.RegisterSystem<InputManager>();
 	g_coordinator.RegisterSystem<GraphicsManager>();
+	g_coordinator.RegisterSystem<AudioManager>();
 
 	// Set your signatures for both component and system
 	Signature graphicsSig;
@@ -98,6 +99,7 @@ void CoreEngine::Update(float dt)
 {
 	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
+	auto g_audioSystem = g_coordinator.GetSystem<AudioManager>();
 
 	if (g_inputSystem) {
 		// Update input system
@@ -163,6 +165,7 @@ void CoreEngine::Exit()
 {
 	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
+	auto g_audioSystem = g_coordinator.GetSystem<AudioManager>();
 
 	if (g_inputSystem) {
 		g_inputSystem->Shutdown();
@@ -172,8 +175,8 @@ void CoreEngine::Exit()
 
 	if (g_audioSystem) {
 		g_audioSystem->Shutdown();
-		delete g_audioSystem;
-		g_audioSystem = nullptr;
+		//delete g_audioSystem;
+		//g_audioSystem = nullptr;
 	}
 
 	if (g_graphicsSystem) {
