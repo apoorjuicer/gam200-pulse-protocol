@@ -83,8 +83,8 @@ int main() {
     tr.angle_speed = 0.0f;           // no rotation
 
     // model & shader indices (you push models: 0=bg, 1=box; shaders: 0=test,1=bg,2=sprite,3=font)
-    tr.mdl_ref = 0.0f;               // box_model()
-    tr.shd_ref = 0.0f;               // sprite shader
+    tr.mdl_ref = 0.0f;               // bg_model()
+    tr.shd_ref = 0.0f;               // test shader
     // NOTE: In drawTrans() you currently check `if (x.shd_ref == 1)` before grabbing uniforms.
     // Either change that `1` to `2`, or set `tr.shd_ref = 1` if your bg shader has those uniforms.
 
