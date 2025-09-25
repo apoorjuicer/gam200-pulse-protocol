@@ -1,7 +1,6 @@
 #pragma once
 #include "pch/pch.h"
 
-
 class SystemManager
 {
 public:
@@ -21,6 +20,9 @@ public:
 		// Now that we have the name of the system and the pointer to the system, we insert it into our map
 		// With the name of the system as key and access to the actual system as the "reward"
 		MappedSystems.insert({ SystemTypeName, system });
+
+		// Add added system into a container we can iterate thru in one shot
+		SystemType.push_back(system);
 
 		// Return the newly made system to be configurated/modified
 		return system;
@@ -78,6 +80,43 @@ public:
 		}
 	}
 
+	template<typename T>
+	std::shared_ptr<T> GetSystem()
+	{
+		// Get the system type name
+		const char* SystemTypeName = typeid(T).name();
+
+		// Check if the system exists
+		auto it = MappedSystems.find(SystemTypeName);
+		assert(it != MappedSystems.end() && "System has not been registered yet!");
+
+		// pointing at that system instance
+		return std::static_pointer_cast<T>(it->second);;
+
+		//const char* ComponentTypeName = typeid(T).name();
+		//assert(ComponentTypes.find(ComponentTypeName) != ComponentTypes.end() && "Component has not been registered!");
+	}
+
+
+	void UpdateAllSystems(float deltaTime)
+	{
+		for (unsigned i = 0; i < SystemType.size(); ++i)
+		{
+			SystemType[i]->Update(deltaTime);
+			//std::cout << "updating!";
+		}
+	}
+
+	void InitializeAllSystems()
+	{
+		for (unsigned i = 0; i < SystemType.size(); ++i)
+		{
+			SystemType[i]->Init();
+			//std::cout << "init done";
+		}
+	}
+
+
 	// add one for all the system added already to console
 
 private:
@@ -92,5 +131,6 @@ private:
 	// Same thing but now mapped for system name and pointer to system instance
 	std::unordered_map<std::string, std::shared_ptr<Systems>> MappedSystems{};
 
-
+	std::vector<std::shared_ptr<Systems>> SystemType; 
+	
 };
