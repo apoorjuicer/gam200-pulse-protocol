@@ -1,6 +1,5 @@
 #include <windows.h>   // for OutputDebugString, etc.
 #include "pch/pch.h"
-#pragma comment(lib, "winmm.lib")
 
 //Coordinator g_coordinator;
 //extern InputManager* g_inputSystem;
@@ -10,7 +9,7 @@
 CoreEngine* Engine;
 extern Coordinator g_coordinator;
 extern InputManager* g_inputSystem;
-extern AudioManager* g_audioSystem;
+//extern AudioManager* g_audioSystem;
 
 
 // Game window dimensions and title
@@ -60,10 +59,21 @@ void CoreEngine::Init()
 
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
+	g_inputSystem->RegisterInputListener("CoreEngine", [](const InputEvent& event) {
+		if (event.type == InputEvent::Type::COMBO_EXECUTED) {
+			std::cout << "[COMBO SUCCESS] " << event.comboName
+				<< " with quality: " << event.feedback << std::endl;
+		}
+		if (event.type == InputEvent::Type::RHYTHM_INPUT) {
+			std::cout << "[INPUT] Key pressed: " << event.key
+				<< " | Timing: " << event.feedback << std::endl;
+		}
+		});
+
 	g_graphicsSystem->Initialize();
 	g_coordinator.InitializeAllSystems();
 	// Init engine Systems here
-	g_audioSystem->Initialize(); 
+	//g_audioSystem->Initialize(); 
 
 
 	std::cout << "Engine initialized." << std::endl;
@@ -103,7 +113,7 @@ void CoreEngine::Update(float dt)
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Update();
 	}
-		g_audioSystem->Update();  
+		//g_audioSystem->Update();  
 
 	g_coordinator.UpdateAllSystems(dt);
 }
@@ -165,9 +175,9 @@ void CoreEngine::Exit()
 		g_graphicsSystem->Shutdown();
 	}
 
-	if (g_audioSystem) {
-		g_audioSystem->Shutdown();
-	}
+	//if (g_audioSystem) {
+	//	g_audioSystem->Shutdown();
+	//}
 
 	if (window)
 	{
