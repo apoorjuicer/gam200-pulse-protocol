@@ -1,5 +1,6 @@
 #include "pch/pch.h"
 extern InputManager* g_inputSystem;
+extern AudioManager* g_audioSystem;
 
 //A global pointer to the core
 CoreEngine* Engine;
@@ -20,6 +21,10 @@ CoreEngine::~CoreEngine()
 void CoreEngine::Init()
 {
 	glewInit();
+
+	// Init engine Systems here
+	g_audioSystem->Initialize(); 
+
 	std::cout << "Engine initialized." << std::endl;
 
 	// Display M1 test instructions
@@ -39,6 +44,7 @@ void CoreEngine::Update()
 	if (g_inputSystem) {
 		// Update input system
 		g_inputSystem->Update();
+		g_audioSystem->Update();  
 
 		// Run M1 testing demonstrations
 		g_inputSystem->RunM1Test();
@@ -61,12 +67,18 @@ void CoreEngine::Update()
 
 void CoreEngine::Exit()
 {
-	// ask chloe how to test it 
 	if (g_inputSystem) {
 		g_inputSystem->Shutdown();
 		delete g_inputSystem;
 		g_inputSystem = nullptr;
 	}
+
+	if (g_audioSystem) {
+		g_audioSystem->Shutdown();
+		delete g_audioSystem;
+		g_audioSystem = nullptr;
+	}
+
 }
 
 // where application loop is. Just gonna name is game loop since its easier to understand

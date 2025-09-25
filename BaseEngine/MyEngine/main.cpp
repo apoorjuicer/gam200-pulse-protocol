@@ -58,6 +58,7 @@ struct GameStates {
 
 Coordinator g_coordinator;
 InputManager* g_inputSystem = nullptr;
+AudioManager* g_audioSystem = nullptr; 
 
 void initEngine() {
     glewInit();
@@ -76,11 +77,12 @@ void initEngine() {
 
 }
 
-void update()
+void update() //Is this being called since there is another engine.updated? - Jun Yong
 {
     if (g_inputSystem) {
-        // Update input system
+        // Update input system 
         g_inputSystem->Update();
+   
 
         // Run M1 testing demonstrations
         g_inputSystem->RunM1Test();
@@ -89,6 +91,9 @@ void update()
         // gameManager.Update();
         // physics.Simulate();
     }
+
+   
+
 }
 
 void render() {
@@ -118,6 +123,8 @@ int main() {
         return -1;
     }
 
+    g_audioSystem = new AudioManager(); 
+
     Engine.Init(); //for all the system init yeah? where the gsm load and init
     
     
@@ -136,7 +143,7 @@ int main() {
     int i = 0;
     for (auto& x : entities)
     {
-        std::cout << i++;
+        //std::cout << i++;
     }
     
     //class Position;
@@ -154,8 +161,10 @@ int main() {
 
     glfwMakeContextCurrent(window);
     g_inputSystem = new InputManager();
+   
     //initEngine();
     g_inputSystem->Initialize(window);
+    
 
     
     
@@ -172,8 +181,8 @@ int main() {
         
         
         Player& player = g_coordinator.GetComponent<Player>(entity);
-        std::cout << "Player: " << player.x << ", " << player.y << std::endl;
-        std::cout << "Player: " << player.position.x << ", " << player.position.y << std::endl;
+        //std::cout << "Player: " << player.x << ", " << player.y << std::endl;
+        //std::cout << "Player: " << player.position.x << ", " << player.position.y << std::endl;
  
         /*if ()
         {
@@ -189,13 +198,21 @@ int main() {
     }
 
     Engine.Exit(); 
-
+    
+    
+    // Engine.exit already calls the 2 below, is it still needed????
     // CLEANUP InputManager
-    if (g_inputSystem) {
-        g_inputSystem->Shutdown();
-        delete g_inputSystem;
-        g_inputSystem = nullptr;
-    }
+    //if (g_inputSystem) {
+    //    g_inputSystem->Shutdown();
+    //    delete g_inputSystem;
+    //    g_inputSystem = nullptr;
+    //}
+
+    //if (g_audioSystem) {
+    //    g_audioSystem->Shutdown();
+    //    delete g_audioSystem;
+    //    g_audioSystem = nullptr;
+    //}
 
     glfwDestroyWindow(window);
     glfwTerminate();

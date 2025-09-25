@@ -49,3 +49,13 @@ else() # Release or other build types
     )
 endif()
 
+
+# Copy FMOD DLLs after build (Windows only)
+if (WIN32)
+    add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+	"${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/core/lib/x64/fmod.dll"
+	"${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/studio/lib/x64/fmodstudio.dll"
+        $<TARGET_FILE_DIR:${ENGINE_NAME}>
+    )
+endif()
