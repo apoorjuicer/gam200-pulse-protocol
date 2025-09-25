@@ -83,7 +83,7 @@ void CoreEngine::Setup()
 
 	// Register your component here
 	g_coordinator.RegisterComponent<Framework::Transform>();
-	
+
 	// Register your systems here
 	g_coordinator.RegisterSystem<InputManager>();
 	g_coordinator.RegisterSystem<GraphicsManager>();
@@ -147,6 +147,11 @@ void CoreEngine::GameLoop()
     std::cout << "Automatic Sword Swing: " << (automaticSwordSwing ? "ON" : "OFF") << "\n";
     std::cout << "Testing Mode: " << (testBoxLineCollision ? "BOX-TO-LINE" : "HERO/MONSTER") << "\n";
     std::cout << "=====================\n";
+		//  1. Poll event(input key)
+		glfwPollEvents();
+
+		//  2. update engine cpp
+		Update(dt);
 
     if (!testBoxLineCollision)
     {

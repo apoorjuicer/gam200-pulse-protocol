@@ -40,11 +40,11 @@ Vector2& Vector2::operator=(Vector2 v) {
 }
 
 // element access
-float& Vector2::operator[](unsigned int i) {
+float& Vector2::operator[](size_t i) {
     assert(i < 2);
     return m[i];
 }
-float Vector2::operator[](unsigned int i) const {
+float Vector2::operator[](size_t i) const {
     assert(i < 2);
     return m[i];
 }
@@ -165,11 +165,11 @@ Matrix3x3& Matrix3x3::operator=(Matrix3x3 const& other) {
 
 
 // () operators: component access
-float& Matrix3x3::operator()(unsigned int column, unsigned int row) {
+float& Matrix3x3::operator()(size_t column, size_t row) {
     assert(column < 3 && row < 3);
     return m[column * 3 + row];
 }
-const float& Matrix3x3::operator()(unsigned int column, unsigned int row) const {
+const float& Matrix3x3::operator()(size_t column, size_t row) const {
     assert(column < 3 && row < 3);
     return m[column * 3 + row];
 }
@@ -202,8 +202,8 @@ void Matrix3x3::SetToZero() {
 }
 
 void Matrix3x3::SetToTranspose() {
-    for (unsigned int i = 0; i < 3; ++i) {
-        for (unsigned int j = i + 1; j < 3; ++j) {
+    for (size_t i = 0; i < 3; ++i) {
+        for (size_t j = i + 1; j < 3; ++j) {
             //std::swap((*this)(i, j), (*this)(j, i));
             std::swap((i, j), (j, i));
         }
@@ -212,10 +212,10 @@ void Matrix3x3::SetToTranspose() {
 
 Matrix3x3 Matrix3x3::GetTranspose() const {
     Matrix3x3 result{};
-    for (unsigned int i = 0; i < 3; ++i) {
-        for (unsigned int j = 0; j < 3; ++j) {
+    for (size_t i = 0; i < 3; ++i) {
+        for (size_t j = 0; j < 3; ++j) {
             //result(i, j) = (*this)(j, i);
-            result(i, j) =  static_cast<float>(j, i);
+            result(i, j) = (*this)(j, i);
         }
     }
     return result;
@@ -223,21 +223,20 @@ Matrix3x3 Matrix3x3::GetTranspose() const {
 
 // * operator: matrix multiplication
 Matrix3x3 operator*(Matrix3x3 const& L, Matrix3x3 const& R) {
-    Matrix3x3 tmp{};
-    for (unsigned col = 0; col < 3; ++col) {
-        // take column c of R once
-        float r0 = R(col, 0);
-        float r1 = R(col, 1);
-        float r2 = R(col, 2);
 
-        // each row of result is a dot of row(L) with that column
-        for (unsigned row = 0; row < 3; ++row) {
-            tmp(col, row) = L(0, row) * r0
-                            + L(1, row) * r1
-                            + L(2, row) * r2;
+    Matrix3x3 result{};
+    for (size_t col = 0; col < 3; ++col)
+    {
+        for (size_t row = 0; row < 3; ++row)
+        {
+            result[col][row] = 0; // init to zero
+            for (size_t k = 0; k < 3; ++k)
+            {
+                result[col][row] += L[k][row] * R[col][k];
+            }
         }
     }
-    return tmp;
+    return result;
 }
 
 // * operator: scalar multiplication
@@ -249,11 +248,52 @@ Matrix3x3 operator*(float s, Matrix3x3 const& mat) {
     return tmp;
 }
 
+
+//Matrix3x3::ProxyClass::ProxyClass(Matrix3x3& mainMatrix, size_t c)
+//    : outer_(mainMatrix), col_(c) {
+//}
+
+
+Matrix3x3::ProxyClass::ProxyClass(Matrix3x3& m, size_t c) : outer_(&m), col_(c) {}
+Matrix3x3::ProxyClass::ProxyClass(Matrix3x3 const& m, size_t c) : outer_(&m), col_(c) {}
+
+float& Matrix3x3::ProxyClass::operator[](size_t r)
+{
+    // access element at (col = c, row = inner_mat_row)
+    //return outer_mat.m[inner_mat_col * 3 + r];
+    return const_cast<float&>((*outer_)(col_, r));
+}
+
+
+float const& Matrix3x3::ProxyClass::operator[](size_t r) const
+{
+    return (*outer_)(col_, r);
+}
+
+
+typename Matrix3x3::ProxyClass Matrix3x3::operator[](size_t c)
+{
+    return ProxyClass(*this, c); // explicit *this for readability
+}
+
+typename Matrix3x3::ProxyClass const Matrix3x3::operator[](size_t c) const
+{
+    return ProxyClass(static_cast<Matrix3x3 const&>(*this), c); // allows const element access
+}
+
+Matrix3x3::operator glm::mat3() const {
+    return glm::mat3(
+        m[0], m[3], m[6],
+        m[1], m[4], m[7],
+        m[2], m[5], m[8]
+    );
+}
+
 std::ostream& operator<<(std::ostream& os, Matrix3x3 const& M) {
     os << "Printing Matrix\n";
-    for (unsigned int row = 0; row < 3; ++row) {
+    for (size_t row = 0; row < 3; ++row) {
         os << "[ ";
-        for (unsigned int col = 0; col < 3; ++col) {
+        for (size_t col = 0; col < 3; ++col) {
             os << M(col, row) << ' ';   // <-- (col,row)
         }
         os << "]\n";
