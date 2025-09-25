@@ -3,8 +3,6 @@ C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Audio\audio.cpp
 C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Core\Factory.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\Factory.obj
 C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Core\Window.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\Window.obj
 C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\CoreEngine\CoreEngine.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\CoreEngine.obj
-C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\ECS\ecs.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\ecs.obj
-C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\GameState\gsm.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\gsm.obj
 C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Graphics\DebugDraw.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\DebugDraw.obj
 C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Graphics\GraphicsManager.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\GraphicsManager.obj
 C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Graphics\Transform.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\Transform.obj
@@ -16,6 +14,5 @@ C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Input\InputMana
 C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Math\math.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\math.obj
 C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Physics\collision.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\collision.obj
 C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Resources\ResourceManager.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\ResourceManager.obj
-C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Time\Time_manager.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\Time_manager.obj
 C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\main.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\main.obj
 C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\pch\pch.cpp;C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\build\MyEngine\MyEngine.dir\Release\pch.obj
