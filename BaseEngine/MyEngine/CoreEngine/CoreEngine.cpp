@@ -88,6 +88,8 @@ void CoreEngine::Setup()
 	g_coordinator.RegisterSystem<InputManager>();
 	g_coordinator.RegisterSystem<GraphicsManager>();
 
+    //g_coordinator.RegisterSystem<>(Collision);
+
     Signature graphicsSig;
     graphicsSig.set(g_coordinator.GetComponentType<Framework::Transform>());
     g_coordinator.SetSystemSignature<GraphicsManager>(graphicsSig);
@@ -126,19 +128,20 @@ void CoreEngine::GameLoop()
     float printTimer = 0.0f;
     
     bool spawnFromLeft = true; //true = start left move right,  false = start right move left
-    bool automaticSwordSwing = false; // true = sword swinging, false = not swinging
+    bool automaticSwordSwing = true; // true = sword swinging, false = not swinging
     bool testBoxLineCollision = false; //true = boxline collision, false = monsterplayer
 
-	// application loop 
-	while(!glfwWindowShouldClose(window) && GameRunning)
-	{
-		//Get the current time in milliseconds
-		unsigned currenttime = timeGetTime();
-		//Convert it to the time passed since the last frame (in seconds)
-		float dt = (currenttime - LastTime) / 1000.0f;
-		//Update the when the last update started
-		LastTime = currenttime;
-    }
+	//// application loop 
+	//while(!glfwWindowShouldClose(window) && GameRunning)
+	//{
+	//	//Get the current time in milliseconds
+	//	unsigned currenttime = timeGetTime();
+	//	//Convert it to the time passed since the last frame (in seconds)
+	//	float dt = (currenttime - LastTime) / 1000.0f;
+	//	//Update the when the last update started
+	//	LastTime = currenttime;
+ //   }
+
     std::cout << "\n=== TEST SETTINGS ===\n";
     std::cout << "Monster Spawn Side: " << (spawnFromLeft ? "LEFT" : "RIGHT") << "\n";
     std::cout << "Automatic Sword Swing: " << (automaticSwordSwing ? "ON" : "OFF") << "\n";
