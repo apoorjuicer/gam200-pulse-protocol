@@ -33,7 +33,7 @@ void collision_update(Hero& hero, std::vector<Monster>& monsters)
             {
                 monster.isAlive = false;
                 std::cout << "Monster " << i << " hit by sword!\n";
-                continue;
+                continue; // skip hero damage if monster is dead
             }
         }
 
@@ -46,6 +46,11 @@ void collision_update(Hero& hero, std::vector<Monster>& monsters)
         std::cout << "Monster Hitbox: min" << monsterBox.min << " max" << monsterBox.max << "\n";
         bool heroHit = CheckAABBCollision(heroBox, monsterBox);
         std::cout << "Hero collision result: " << (heroHit ? "HIT" : "NO HIT") << "\n";
+
+        // Optionally: circle collision based on center and radius
+        // float heroRadius = hero.width * 0.5f;
+        // float monsterRadius = monster.width * 0.5f;
+        // bool heroHit = CheckDistanceCollision(hero.pos, heroRadius, monster.pos, monsterRadius);
 
         if (heroHit)
         {
@@ -65,8 +70,10 @@ void collision_exit()
 }
 
 // Utility Functions
+
 AABB BuildSwordHitbox(const Hero& hero)
 {
+    // Sword swings horizontally from hero position
     Vector2 min(hero.pos.x + hero.swingProgress, hero.pos.y);
     Vector2 max = min + Vector2(hero.swordWidth, hero.swordHeight);
     std::cout << "[BuildSwordHitbox] min" << min << " max" << max << "\n";
@@ -75,6 +82,7 @@ AABB BuildSwordHitbox(const Hero& hero)
 
 AABB BuildHeroHitbox(const Hero& hero)
 {
+    // Hero hitbox centered on position
     Vector2 min(hero.pos.x - hero.width / 2.0f, hero.pos.y - hero.height / 2.0f);
     Vector2 max = min + Vector2(hero.width, hero.height);
     std::cout << "[BuildHeroHitbox] min" << min << " max" << max << "\n";
@@ -83,6 +91,7 @@ AABB BuildHeroHitbox(const Hero& hero)
 
 AABB BuildMonsterHitbox(const Monster& monster)
 {
+    // Monster hitbox centered on position (consistent with hero)
     Vector2 min(monster.pos.x - monster.width / 2.0f, monster.pos.y - monster.height / 2.0f);
     Vector2 max = min + Vector2(monster.width, monster.height);
     std::cout << "[BuildMonsterHitbox] min" << min << " max" << max << "\n";
@@ -106,40 +115,3 @@ bool CheckDistanceCollision(const Vector2& a, float aradius, const Vector2& b, f
     std::cout << "[CheckDistanceCollision] distance: " << dist << " result: " << (collision ? "TRUE" : "FALSE") << "\n";
     return collision;
 }
-
-// Box-to-Line Collision
-LineHitResult CheckBoxLineCollision(const AABB& box, float lineY, float lineStartX, float lineEndX)
-{
-    // Check vertical overlap
-    if (box.max.y < lineY || box.min.y > lineY) {
-        return LineHitResult::None;
-    }
-
-    // Box center x-coordinate
-    float boxCenterX = (box.min.x + box.max.x) / 2.0f;
-
-    // Check if center is inside line range
-    if (boxCenterX < lineStartX || boxCenterX > lineEndX) {
-        return LineHitResult::None;
-    }
-
-    // Width of box
-    float boxWidth = box.max.x - box.min.x;
-
-    // Determine position relative to box width
-    float relativePos = boxCenterX - box.min.x; // 0 to boxWidth
-
-    if (relativePos >= 0 && relativePos <= 19)
-        return LineHitResult::Bad;
-    else if (relativePos >= 20 && relativePos <= 39)
-        return LineHitResult::Good;
-    else if (relativePos >= 40 && relativePos <= 60)
-        return LineHitResult::Excellent;
-    else if (relativePos >= 61 && relativePos <= 80)
-        return LineHitResult::Good;
-    else if (relativePos >= 81 && relativePos <= 100)
-        return LineHitResult::Bad;
-
-    return LineHitResult::None;
-}
-

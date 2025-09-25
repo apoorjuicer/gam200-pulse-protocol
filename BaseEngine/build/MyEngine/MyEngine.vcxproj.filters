@@ -16,6 +16,12 @@
     <ClCompile Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\CoreEngine\CoreEngine.cpp">
       <Filter>CoreEngine</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\ECS\ecs.cpp">
+      <Filter>ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\GameState\gsm.cpp">
+      <Filter>GameState</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Graphics\DebugDraw.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
@@ -48,6 +54,9 @@
     </ClCompile>
     <ClCompile Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Resources\ResourceManager.cpp">
       <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Time\Time_manager.cpp">
+      <Filter>Time</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\main.cpp" />
     <ClCompile Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\pch\pch.cpp">
@@ -97,6 +106,12 @@
     <ClInclude Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\CoreEngine\CoreEngine.h">
       <Filter>CoreEngine</Filter>
     </ClInclude>
+    <ClInclude Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\ECS\ecs.h">
+      <Filter>ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\GameState\gsm.h">
+      <Filter>GameState</Filter>
+    </ClInclude>
     <ClInclude Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Graphics\DebugDraw.h">
       <Filter>Graphics</Filter>
     </ClInclude>
@@ -133,6 +148,9 @@
     <ClInclude Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Resources\ResourceManager.h">
       <Filter>Resources</Filter>
     </ClInclude>
+    <ClInclude Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\Time\Time_manager.h">
+      <Filter>Time</Filter>
+    </ClInclude>
     <ClInclude Include="C:\Users\65981\Desktop\csd2401f25_team_bloop\BaseEngine\MyEngine\pch\pch.h">
       <Filter>pch</Filter>
     </ClInclude>
@@ -153,6 +171,12 @@
     <Filter Include="CoreEngine">
       <UniqueIdentifier>{D060089A-6A1C-33CC-AF47-F234DF7429AD}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ECS">
+      <UniqueIdentifier>{99907746-984B-387D-8C0E-546635CF90C2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameState">
+      <UniqueIdentifier>{BDE84BCC-1A25-3F90-8C45-69A5702E4E0A}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Graphics">
       <UniqueIdentifier>{18185273-D401-3DF1-BFE1-652FF431BD90}</UniqueIdentifier>
     </Filter>
@@ -167,6 +191,9 @@
     </Filter>
     <Filter Include="Resources">
       <UniqueIdentifier>{A9EDFBF6-8536-3DAE-A908-7E612F9F7182}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Time">
+      <UniqueIdentifier>{96F94E89-1D20-304E-9EFD-D5240325C4D5}</UniqueIdentifier>
     </Filter>
     <Filter Include="pch">
       <UniqueIdentifier>{73D2ABB7-AD91-363A-9C14-3281E442F99A}</UniqueIdentifier>

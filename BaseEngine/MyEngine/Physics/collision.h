@@ -1,10 +1,3 @@
-// ==================================================================================
-// collision.h  
-// Author: Reginald
-// Brief: AABB
-//        
-//        
-// ==================================================================================
 #pragma once
 #include "pch/pch.h"
 #include <vector>
@@ -41,10 +34,3 @@ AABB BuildMonsterHitbox(const Monster& monster);
 bool CheckAABBCollision(const AABB& a, const AABB& b);
 bool CheckDistanceCollision(const Vector2& a, float aradius, const Vector2& b, float bradius);
 
-// Box-to-Line Collision System
-enum class LineHitResult { None, Bad, Good, Excellent };
-
-// Check if a box (AABB) collides with a horizontal line
-// lineY: y-coordinate of the line
-// lineStartX, lineEndX: x-range of the line
-LineHitResult CheckBoxLineCollision(const AABB& box, float lineY, float lineStartX, float lineEndX);
