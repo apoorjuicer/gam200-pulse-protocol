@@ -3,8 +3,8 @@
 #pragma comment(lib, "winmm.lib")
 
 //Coordinator g_coordinator;
-extern InputManager* g_inputSystem;
-extern GraphicsManager* g_graphicsSystem;
+//extern InputManager* g_inputSystem;
+//extern GraphicsManager* g_graphicsSystem;
 
 //A global pointer to the core
 CoreEngine* Engine;
@@ -34,8 +34,6 @@ CoreEngine::~CoreEngine()
 
 void CoreEngine::Init()
 {
-	// 3 in 1 system
-	g_coordinator.init();
 
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW" << std::endl;
@@ -53,8 +51,10 @@ void CoreEngine::Init()
 	glewInit();
 
 	// Create systems AFTER GL is ready
-	g_inputSystem = new InputManager();
-	g_graphicsSystem = new GraphicsManager();
+	//g_inputSystem = new InputManager();
+	//g_graphicsSystem = new GraphicsManager();
+	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
+	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
 
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
@@ -76,6 +76,9 @@ void CoreEngine::Init()
 // add/register your systems and component here  for our games here 
 void CoreEngine::Setup()
 {
+	// 3 in 1 system
+	g_coordinator.init();
+
 	// Register your component here
 	g_coordinator.RegisterComponent<Framework::Transform>();
 
@@ -91,6 +94,9 @@ void CoreEngine::Setup()
 
 void CoreEngine::Update(float dt)
 {
+	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
+	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
+
 	if (g_inputSystem) {
 		// Update input system
 		g_inputSystem->Update();
@@ -116,8 +122,8 @@ void CoreEngine::GameLoop()
 {
 	LastTime = timeGetTime();
 
-	// application loop
-	while (!glfwWindowShouldClose(window) && GameRunning)
+	// application loop 
+	while(!glfwWindowShouldClose(window) && GameRunning)
 	{
 		//Get the current time in milliseconds
 		unsigned currenttime = timeGetTime();
@@ -152,15 +158,18 @@ void CoreEngine::GameLoop()
 
 void CoreEngine::Exit()
 {
+	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
+	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
+
 	if (g_inputSystem) {
 		g_inputSystem->Shutdown();
-		delete g_inputSystem;
-		g_inputSystem = nullptr;
+		//delete g_inputSystem;
+		//g_inputSystem = nullptr;
 	}
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Shutdown();
-		delete g_graphicsSystem;
-		g_graphicsSystem = nullptr;
+		//delete g_graphicsSystem;
+		//g_graphicsSystem = nullptr;
 	}
 
 
@@ -227,7 +236,7 @@ void CoreEngine::Exit()
 
 
 
-//// ECS setup
+// ECS setup
 //g_coordinator.init();
 //g_coordinator.RegisterComponent<Player>();
 //g_coordinator.RegisterComponent<Framework::Transform>();
