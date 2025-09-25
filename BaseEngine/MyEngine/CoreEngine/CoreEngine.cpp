@@ -60,15 +60,9 @@ void CoreEngine::Init()
 	g_inputSystem->Initialize(window);
 	g_graphicsSystem->Initialize();
 	g_coordinator.InitializeAllSystems();
-	std::cout << "Engine initialized." << std::endl;
 
-	// Display M1 test instructions
-	std::cout << "\n=== M1 INPUT SYSTEM DEMONSTRATION ===" << std::endl;
-	std::cout << "SPACE     -> Primary rhythm beat input" << std::endl;
-	std::cout << "A/S/D     -> Weapon combo keys (spear/sword/bow)" << std::endl;
-	std::cout << "MOUSE     -> UI interaction testing" << std::endl;
-	std::cout << "Close window to exit testing" << std::endl;
-	std::cout << "=======================================" << std::endl;
+	std::cout << "Engine initialized." << std::endl;
+	std::cout << "Input system ready for rhythm gameplay." << std::endl;
 
 	GameRunning = true;
 }
@@ -100,10 +94,6 @@ void CoreEngine::Update(float dt)
 	if (g_inputSystem) {
 		// Update input system
 		g_inputSystem->Update();
-
-		// Run M1 testing demonstrations
-		g_inputSystem->RunM1Test();
-
 	}
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Update();

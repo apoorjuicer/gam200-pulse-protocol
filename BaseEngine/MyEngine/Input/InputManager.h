@@ -72,8 +72,8 @@ public:
     void UnregisterInputListener(const std::string& systemName);
 
     // M1 testing and statistics
-    void RunM1Test();
-    void DisplayInputStats() const;
+    //void RunM1Test();
+    //void DisplayInputStats() const;
 
     // Public access to combo stats for other systems
     int GetTotalCombos() const { return totalCombosAttempted; }

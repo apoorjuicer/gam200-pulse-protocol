@@ -2,8 +2,7 @@
 // InputManager.cpp  
 // Author: Chloe Lau Rey En
 // Brief: Implementation of InputManager class with frame-based input detection.
-//        Handles rhythm gameplay inputs, weapon switching, mouse aiming, and
-//        provides M1 testing functionality with console output.
+//        Handles rhythm gameplay inputs, weapon switching, mouse aiming.
 // ==================================================================================
 
 #include "InputManager.h"
@@ -15,7 +14,7 @@ InputManager::InputManager()
     : window(nullptr), mouseX(0.0), mouseY(0.0), previousMouseX(0.0),
     previousMouseY(0.0), mouseSensitivity(1.0f), isFirstMouse(true),
     comboTimeout(2.0), totalRhythmInputs(0), accurateRhythmInputs(0),
-    totalCombosAttempted(0), successfulCombos(0), m1TestMode(true), lastStatusTime(0.0) {
+    totalCombosAttempted(0), successfulCombos(0) {
 
     // Initialize input state arrays
     std::memset(currentKeys, 0, sizeof(currentKeys));
@@ -50,17 +49,11 @@ void InputManager::Update() {
     ProcessRhythmInputs();
     ProcessComboInputs();
     ProcessMouseInputs();
-
-    // M1 testing demonstration
-    if (m1TestMode) {
-        RunM1Test();
-    }
 }
 
 void InputManager::Shutdown() {
     if (window) {
         std::cout << "[InputManager] System shutting down..." << std::endl;
-        DisplayInputStats();
 
         // Clear all registered listeners (ECS cleanup)
         inputListeners.clear();
@@ -144,7 +137,7 @@ double InputManager::GetInputTiming() const {
 }
 
 int InputManager::GetCurrentWeaponSelected() const {
-    return 1; // Always sword for M1 milestone
+    return 1; // Always sword for now
 }
 
 // ECS-Compatible Input Processing Methods
@@ -156,7 +149,6 @@ void InputManager::UpdateInputStates() {
 
 void InputManager::ProcessRhythmInputs() {
     const int rhythmKeys[] = { GLFW_KEY_Q, GLFW_KEY_W, GLFW_KEY_E };
-    const char* keyNames[] = { "Q", "W", "E" };
 
     for (int i = 0; i < 3; ++i) {
         if (IsKeyJustPressed(rhythmKeys[i])) {
@@ -179,13 +171,6 @@ void InputManager::ProcessRhythmInputs() {
             if (currentComboSequence.size() == 1) {
                 lastComboInputTime = GetInputTiming();
             }
-
-            // M1 console output
-            if (m1TestMode) {
-                std::cout << "[M1 RHYTHM] " << keyNames[i] << " pressed | "
-                    << feedback << " | Total inputs: " << totalRhythmInputs
-                    << " | ECS listeners: " << inputListeners.size() << std::endl;
-            }
         }
     }
 }
@@ -197,9 +182,6 @@ void InputManager::ProcessComboInputs() {
 
     // Check for combo timeout
     if (currentTime - lastComboInputTime > comboTimeout) {
-        if (m1TestMode && !currentComboSequence.empty()) {
-            std::cout << "[TIMEOUT] Combo reset!" << std::endl;
-        }
         currentComboSequence.clear();
         return;
     }
@@ -229,15 +211,6 @@ void InputManager::ProcessComboInputs() {
                 comboEvent.comboName = combo.name;
                 BroadcastInputEvent(comboEvent);
 
-                if (m1TestMode) {
-                    std::cout << "[EXECUTE " << combo.name << "]"
-                        << " | Quality: " << comboQuality
-                        << " | Timing: " << std::fixed << std::setprecision(2) << comboTime << "s"
-                        << " | Success rate: " << std::fixed << std::setprecision(1)
-                        << (GetComboSuccessRate() * 100.0) << "%"
-                        << " | ECS Event Sent" << std::endl;
-                }
-
                 currentComboSequence.clear();
                 return;
             }
@@ -246,9 +219,6 @@ void InputManager::ProcessComboInputs() {
 
     // If we have maximum inputs and no match, it's invalid
     if (currentComboSequence.size() >= 3) {
-        if (m1TestMode) {
-            std::cout << "[OVERLOAD] Invalid sequence - resetting" << std::endl;
-        }
         totalCombosAttempted++;
         currentComboSequence.clear();
     }
@@ -260,72 +230,6 @@ void InputManager::ProcessMouseInputs() {
         InputEvent mouseEvent(InputEvent::Type::MOUSE_INPUT, mouseX, mouseY, GetInputTiming());
         BroadcastInputEvent(mouseEvent);
     }
-}
-
-// M1 Testing - demonstrates ECS compatibility and all input functionality
-void InputManager::RunM1Test() {
-    // Test mouse functionality
-    if (IsMouseJustPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
-        std::cout << "[MOUSE] Right-click (AIM) at position: ("
-            << std::fixed << std::setprecision(1) << mouseX << ", " << mouseY
-            << ") | ECS Event Broadcast" << std::endl;
-    }
-
-    if (IsMouseJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-        if (IsAiming()) {
-            std::cout << "[MOUSE] Left-click while aiming (ATTACK) at: ("
-                << std::fixed << std::setprecision(1) << mouseX << ", " << mouseY
-                << ") | ECS Event Broadcast" << std::endl;
-        }
-        else {
-            std::cout << "[MOUSE] Left-click (UI INTERACTION) at: ("
-                << std::fixed << std::setprecision(1) << mouseX << ", " << mouseY
-                << ") | ECS Event Broadcast" << std::endl;
-        }
-    }
-
-    // Test mouse movement during aiming
-    if (IsAiming()) {
-        double deltaX, deltaY;
-        GetMouseDelta(deltaX, deltaY);
-        if (std::abs(deltaX) > 1.0 || std::abs(deltaY) > 1.0) {
-            std::cout << "[AIM] Mouse movement - Delta: ("
-                << std::fixed << std::setprecision(2) << deltaX << ", " << deltaY
-                << ") | Sensitivity: " << mouseSensitivity << std::endl;
-        }
-    }
-
-    // ECS status updates every 5 seconds
-    double currentTime = GetInputTiming();
-    if (currentTime - lastStatusTime > 5.0) {
-        std::cout << "\n=== INPUT STATUS ===" << std::endl;
-        std::cout << "ECS Systems listening: " << inputListeners.size() << std::endl;
-        std::cout << "Total rhythm inputs: " << totalRhythmInputs << std::endl;
-        std::cout << "Accurate inputs: " << accurateRhythmInputs << "/" << totalRhythmInputs
-            << " (" << std::fixed << std::setprecision(1)
-            << (totalRhythmInputs > 0 ? 100.0 * accurateRhythmInputs / totalRhythmInputs : 0.0) << "%)" << std::endl;
-        std::cout << "Successful combos: " << successfulCombos << "/" << totalCombosAttempted
-            << " (" << std::fixed << std::setprecision(1) << (GetComboSuccessRate() * 100.0) << "%)" << std::endl;
-        std::cout << "Current weapon: Sword" << std::endl;
-        std::cout << "Available combos: Q->W, Q->E, Q->W->E" << std::endl;
-        std::cout << "EntityMember count: " << EntityMember.size() << " (from Systems base)" << std::endl;
-        std::cout << "=========================" << std::endl;
-        lastStatusTime = currentTime;
-    }
-}
-
-void InputManager::DisplayInputStats() const {
-    std::cout << "\n=== INPUT STATS ===" << std::endl;
-    std::cout << "Total ECS systems registered: " << inputListeners.size() << std::endl;
-    std::cout << "Total rhythm inputs processed: " << totalRhythmInputs << std::endl;
-    std::cout << "Accurate rhythm inputs: " << accurateRhythmInputs
-        << " (" << std::fixed << std::setprecision(1)
-        << (totalRhythmInputs > 0 ? 100.0 * accurateRhythmInputs / totalRhythmInputs : 0.0) << "%)" << std::endl;
-    std::cout << "Total combo attempts: " << totalCombosAttempted << std::endl;
-    std::cout << "Successful combos: " << successfulCombos
-        << " (" << std::fixed << std::setprecision(1) << (GetComboSuccessRate() * 100.0) << "%)" << std::endl;
-    std::cout << "ECS EntityMember set size: " << EntityMember.size() << std::endl;
-    std::cout << "====================================" << std::endl;
 }
 
 // Internal State Management Methods
@@ -356,7 +260,7 @@ void InputManager::UpdateMouseStates() {
 void InputManager::InitializeSwordCombos() {
     swordCombos.clear();
 
-    // Define the 3 sword combos for M1 demonstration
+    // Define the 3 sword combos
     swordCombos.emplace_back(std::vector<int>{GLFW_KEY_Q, GLFW_KEY_W}, "Basic Strike", 1.0);
     swordCombos.emplace_back(std::vector<int>{GLFW_KEY_Q, GLFW_KEY_E}, "Swift Slash", 0.8);
     swordCombos.emplace_back(std::vector<int>{GLFW_KEY_Q, GLFW_KEY_W, GLFW_KEY_E}, "Power Combo", 1.5);
@@ -366,7 +270,7 @@ void InputManager::InitializeSwordCombos() {
 
 // Helper Methods for Quality Feedback
 std::string InputManager::GetTimingFeedback() const {
-    // Simulate timing feedback with variety for M1 demonstration
+    // Simulate timing feedback with variety
     static int feedbackCounter = 0;
     feedbackCounter++;
 
@@ -396,68 +300,3 @@ std::string InputManager::GetComboQuality(double actualTime, double maxTime) con
         return "SLOW";
     }
 }
-
-/*
-===============================================================================
-TEAM INTEGRATION GUIDE - How to use InputManager in your systems:
-===============================================================================
-
-FOR AUDIO SYSTEM INTEGRATION:
-- When your audio system is ready, connect it to InputManager:
-  g_inputSystem->RegisterInputListener("AudioSystem", callback);
-- Use rhythm events to sync audio with input timing
-- InputManager can provide beat timing once audio system provides BPM
-
-FOR RENDERING SYSTEM INTEGRATION:
-- Register for input events to handle visual feedback:
-  g_inputSystem->RegisterInputListener("RenderSystem", callback);
-- Use combo events to trigger visual effects
-- Query mouse position for cursor rendering, aiming reticles
-
-FOR GAME LOGIC SYSTEMS:
-- Register for specific events you care about
-- Query input state directly when needed
-- Access statistics for scoring, achievements
-
-FOR ECS SYSTEMS SPECIFICALLY:
-- Inherit from Systems base class
-- Use EntityMember set for entity processing
-- Register input callbacks in Initialize()
-- Process your components in Update()
-
-EXAMPLE ECS SYSTEM TEMPLATE:
-class YourSystem : public Systems {
-public:
-    void Initialize() {
-        // Register for input events you need
-        g_inputSystem->RegisterInputListener("YourSystem",
-            [this](const InputEvent& event) {
-                HandleInputEvent(event);
-            });
-    }
-
-    void Update() {
-        // Process all entities with components this system needs
-        for (Entity entity : EntityMember) {
-            // Your component processing logic
-        }
-    }
-
-private:
-    void HandleInputEvent(const InputEvent& event) {
-        switch (event.type) {
-            case InputEvent::Type::RHYTHM_INPUT:
-                // Handle rhythm input
-                break;
-            case InputEvent::Type::COMBO_EXECUTED:
-                // Handle combo execution
-                break;
-            case InputEvent::Type::MOUSE_INPUT:
-                // Handle mouse input
-                break;
-        }
-    }
-};
-
-===============================================================================
-*/

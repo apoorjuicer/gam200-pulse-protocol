@@ -3,8 +3,8 @@
 // Authors: Team Bloop - Rachael (Window Setup), Chloe Lau Rey En (Input System)
 //          Pin Kai, Benjamin, Reginald, Carrie, Fenny, Jun Yong (TBA)
 // Brief: Main application entry point for custom game engine. Currently demonstrates
-//        window creation and input system for M1 milestone. Additional systems
-//        will be integrated as team completes their respective components.
+//        window creation and input system. Additional systems will be integrated 
+//        as team completes their respective components.
 // ==================================================================================
 #if defined(_WIN32)
 #ifndef NOMINMAX
@@ -57,36 +57,30 @@ struct GameStates {
 
 CoreEngine Engine;
 Coordinator g_coordinator;
-//InputManager* g_inputSystem = nullptr;
-//GraphicsManager* g_graphicsSystem = nullptr;
 
 int main() {
 #ifdef _DEBUG
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+    // Setup ECS and register components/systems
     Engine.Setup();
-    // If CoreEngine::Init() also calls glewInit() or GraphicsManager->Initialize(),
-    // REMOVE those calls from CoreEngine::Init() or call Engine.Init() *here* only
-    // for non-GL things:
-    Engine.Init(); // <-- only if it does NOT touch OpenGL
 
+    // Initialize the engine (creates window, OpenGL context, initializes systems)
+    Engine.Init();
 
-    Framework::Transform tr{};            // fill in fields as your renderer expects
-    // e.g. tr.mdl_ref = 1; tr.shd_ref = 1; tr.rows = ...; tr.columns = ...; tr.textureID = ...
-    // After registering components (including Framework::Transform) and creating the entity:
+    // Create a test entity with Transform component
+    Framework::Transform tr{};
 
-    // where to draw (your update() normalizes by 1600x900)
-    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900  virtual  screen
-    tr.Scale = { 128.0f, 128.0f };   // size in pixels in that same space
-    tr.angle_disp = 0.0f;           // degrees
+    // Set transform properties for rendering
+    tr.Pos = { 800.0f, 450.0f };     // center of a 1600x900 virtual screen
+    tr.Scale = { 128.0f, 128.0f };   // size in pixels
+    tr.angle_disp = 0.0f;            // degrees
     tr.angle_speed = 0.0f;           // no rotation
 
-    // model & shader indices (you push models: 0=bg, 1=box; shaders: 0=test,1=bg,2=sprite,3=font)
-    tr.mdl_ref = 0.0f;               // box_model()
+    // model & shader indices
+    tr.mdl_ref = 0.0f;               // box_model
     tr.shd_ref = 0.0f;               // sprite shader
-    // NOTE: In drawTrans() you currently check `if (x.shd_ref == 1)` before grabbing uniforms.
-    // Either change that `1` to `2`, or set `tr.shd_ref = 1` if your bg shader has those uniforms.
 
     // sprite-sheet / animation
     tr.rows = 1;
@@ -94,22 +88,25 @@ int main() {
     tr.currentFrame = 0;
     tr.animationSpeed = 0.0f;        // static
 
-    // a valid GL texture id. Use your loader or 0 if you just want a colored quad.
-    tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
+    // texture ID (0 for colored quad)
+    tr.textureID = 0;
+
+    // Create entity and add Transform component
     int entity = g_coordinator.CreateEntity();
-    g_coordinator.AddComponent(entity, tr);  // <-- add Transform
+    g_coordinator.AddComponent(entity, tr);
 
-    // FOR AUDIO + INPUT TESTING PURPOSE ONLY. WILL REMOVE AFTER FINISH TESTING
-    Engine.SetTestMode(CoreEngine::TestMode::INPUT_AUDIO);
+    std::cout << "Engine setup complete. Starting game loop..." << std::endl;
+    std::cout << "Controls: Q, W, E for rhythm input. Mouse for aiming." << std::endl;
+    std::cout << "Combos: Q->W (Basic Strike), Q->E (Swift Slash), Q->W->E (Power Combo)" << std::endl;
 
-    // this is where the update() is 
+    // Start the main game loop
     Engine.GameLoop();
 
-    // clean up
+    // Clean up
     Engine.Exit();
 
 #if 0
-    _CrtMemCheckpoint(&sNew); //take a snapshot (lock in the memory use again and now we compare :3)
+    _CrtMemCheckpoint(&sNew); //take a snapshot 
     if (_CrtMemDifference(&sDiff, &sOld, &sNew)) // if there is a difference
     {
         OutputDebugString("-----------_CrtMemDumpStatistics ---------\n");
