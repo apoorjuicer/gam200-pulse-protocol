@@ -80,6 +80,24 @@ public:
 		}
 	}
 
+	template<typename T>
+	std::shared_ptr<T> GetSystem()
+	{
+		// Get the system type name
+		const char* SystemTypeName = typeid(T).name();
+
+		// Check if the system exists
+		auto it = MappedSystems.find(SystemTypeName);
+		assert(it != MappedSystems.end() && "System has not been registered yet!");
+
+		// pointing at that system instance
+		return std::static_pointer_cast<T>(it->second);;
+
+		//const char* ComponentTypeName = typeid(T).name();
+		//assert(ComponentTypes.find(ComponentTypeName) != ComponentTypes.end() && "Component has not been registered!");
+	}
+
+
 	void UpdateAllSystems(float deltaTime)
 	{
 		for (unsigned i = 0; i < SystemType.size(); ++i)

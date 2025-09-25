@@ -9,12 +9,15 @@ public:
 	void RegisterComponents()
 	{
 		// get name of component T. Exp: transform, scale
-		const char* ComponentTypeName = typeid(T).name();
+		std::string ComponentTypeName = typeid(T).name();
 
-		assert(ComponentTypes.find(ComponentTypeName) == ComponentTypes.end() && "Registering component type more than once.");
+		//assert(ComponentTypes.find(ComponentTypeName) != ComponentTypes.end() && "Registering component type more than once.");
 
-		ComponentTypes.insert({ ComponentTypeName, NextComponentType });
-		ComponentDataArray.insert({ ComponentTypeName, std::make_shared<ComponentList<T>>() });
+		ComponentTypes[ComponentTypeName] = NextComponentType;
+		ComponentDataArray[ComponentTypeName] = std::make_shared<ComponentList<T>>();
+
+		//ComponentTypes.insert({ ComponentTypeName, NextComponentType });
+		//ComponentDataArray.insert({ ComponentTypeName, std::make_shared<ComponentList<T>>() });
 
 		++NextComponentType;
 
@@ -64,10 +67,10 @@ public:
 
 private:
 	// Map where ame of component is key and Component Type(ID) as "reward" (Max 32 for now ah)
-	std::unordered_map<const char*, ComponentType> ComponentTypes{};
+	std::unordered_map<std::string, ComponentType> ComponentTypes;
 
 	// Map where name of componentis key and the component data as "reward"
-	std::unordered_map<const char*, std::shared_ptr<ComponentTypeList>> ComponentDataArray{};
+	std::unordered_map<std::string, std::shared_ptr<ComponentTypeList>> ComponentDataArray;
 	
 	//std::shared_pt: A smart pointer that retains shared ownership of an object through a pointer and 
 	//				  only dies when all the object owning the object is destroyed

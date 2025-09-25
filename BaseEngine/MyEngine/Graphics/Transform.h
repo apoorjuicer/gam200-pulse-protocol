@@ -21,6 +21,13 @@
 
 namespace Framework
 {
+    struct TestComponent
+    {
+        Vector2 Pos;
+        Vector2 Scale;
+
+    };
+
     class Transform  /* : public GameCom*/ {
     public:
         //ComponentTypeID typeID = Com_Trans;
@@ -32,9 +39,9 @@ namespace Framework
         float angle_speed = 0.f;
         float mdl_ref = 0.f;    // Model no    
         float shd_ref = 0.f;    // Shader no
-        std::string spriteName;
         Matrix3x3 mdl_to_ndc_xform;  // Initialize as identity matrix
         GLuint textureID = 0;         // Texture ID
+        std::string spriteName;
         int currentFrame = 5;
         float elapsedTime = 0.0f;     // Time accumulator for animation
         int totalFrames = 6;          // Total frames in the sprite sheet

@@ -2,8 +2,9 @@
 #include "pch/pch.h"
 #pragma comment(lib, "winmm.lib")
 
-extern InputManager* g_inputSystem;
-extern GraphicsManager* g_graphicsSystem;
+//Coordinator g_coordinator;
+//extern InputManager* g_inputSystem;
+//extern GraphicsManager* g_graphicsSystem;
 
 // A global pointer to the core
 CoreEngine* Engine;
@@ -31,7 +32,6 @@ CoreEngine::~CoreEngine()
 
 void CoreEngine::Init()
 {
-    g_coordinator.init();
 
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
@@ -48,9 +48,19 @@ void CoreEngine::Init()
     glfwMakeContextCurrent(window);
     glewInit();
 
-    // Create systems AFTER GL is ready
-    g_inputSystem = new InputManager();
-    g_graphicsSystem = new GraphicsManager();
+	// Create systems AFTER GL is ready
+	//g_inputSystem = new InputManager();
+	//g_graphicsSystem = new GraphicsManager();
+
+
+	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
+	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
+
+	// Initialize systems AFTER GL is ready
+	g_inputSystem->Initialize(window);
+	g_graphicsSystem->Initialize();
+	g_coordinator.InitializeAllSystems();
+	std::cout << "Engine initialized." << std::endl;
 
     g_inputSystem->Initialize(window);
     g_graphicsSystem->Initialize();
@@ -68,9 +78,17 @@ void CoreEngine::Init()
 
 void CoreEngine::Setup()
 {
-    g_coordinator.RegisterComponent<Framework::Transform>();
-    g_coordinator.RegisterSystem<InputManager>();
-    g_coordinator.RegisterSystem<GraphicsManager>();
+	// 3 in 1 system
+	g_coordinator.init();
+
+	// Register your component here
+	g_coordinator.RegisterComponent<Framework::Transform>();
+	
+	// Register your systems here
+	g_coordinator.RegisterSystem<InputManager>();
+	g_coordinator.RegisterSystem<GraphicsManager>();
+
+    //g_coordinator.RegisterSystem<>(Collision);
 
     Signature graphicsSig;
     graphicsSig.set(g_coordinator.GetComponentType<Framework::Transform>());
@@ -79,14 +97,22 @@ void CoreEngine::Setup()
 
 void CoreEngine::Update(float dt)
 {
-    if (g_inputSystem) {
-        g_inputSystem->Update();
-        g_inputSystem->RunM1Test();
-    }
-    if (g_graphicsSystem) {
-        g_graphicsSystem->Update();
-    }
-    g_coordinator.UpdateAllSystems(dt);
+	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
+	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
+
+	if (g_inputSystem) {
+		// Update input system
+		g_inputSystem->Update();
+
+		// Run M1 testing demonstrations
+		g_inputSystem->RunM1Test();
+
+	}
+	if (g_graphicsSystem) {
+		g_graphicsSystem->Update();
+	}
+
+	g_coordinator.UpdateAllSystems(dt);
 }
 
 void CoreEngine::Render()
@@ -102,8 +128,19 @@ void CoreEngine::GameLoop()
     float printTimer = 0.0f;
     
     bool spawnFromLeft = true; //true = start left move right,  false = start right move left
-    bool automaticSwordSwing = false; // true = sword swinging, false = not swinging
+    bool automaticSwordSwing = true; // true = sword swinging, false = not swinging
     bool testBoxLineCollision = false; //true = boxline collision, false = monsterplayer
+
+	//// application loop 
+	//while(!glfwWindowShouldClose(window) && GameRunning)
+	//{
+	//	//Get the current time in milliseconds
+	//	unsigned currenttime = timeGetTime();
+	//	//Convert it to the time passed since the last frame (in seconds)
+	//	float dt = (currenttime - LastTime) / 1000.0f;
+	//	//Update the when the last update started
+	//	LastTime = currenttime;
+ //   }
 
     std::cout << "\n=== TEST SETTINGS ===\n";
     std::cout << "Monster Spawn Side: " << (spawnFromLeft ? "LEFT" : "RIGHT") << "\n";
@@ -273,16 +310,19 @@ void CoreEngine::GameLoop()
 
 void CoreEngine::Exit()
 {
-    if (g_inputSystem) {
-        g_inputSystem->Shutdown();
-        delete g_inputSystem;
-        g_inputSystem = nullptr;
-    }
-    if (g_graphicsSystem) {
-        g_graphicsSystem->Shutdown();
-        delete g_graphicsSystem;
-        g_graphicsSystem = nullptr;
-    }
+	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
+	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
+
+	if (g_inputSystem) {
+		g_inputSystem->Shutdown();
+		//delete g_inputSystem;
+		//g_inputSystem = nullptr;
+	}
+	if (g_graphicsSystem) {
+		g_graphicsSystem->Shutdown();
+		//delete g_graphicsSystem;
+		//g_graphicsSystem = nullptr;
+	}
 
     if (window)
     {
@@ -291,3 +331,75 @@ void CoreEngine::Exit()
     }
     glfwTerminate();
 }
+
+
+//void BroadcastMessage(){}
+
+
+
+
+
+
+// STILL BUILDING IM SORRY ;-;
+//// MyEditor.cpp
+//void imgui_update() {
+//    // imgui logic here
+//
+//    if (ImGui::Button("Butt")) {
+//        EngineCreateEntity();
+//    }
+//}
+//
+//void (*pre_game_update)() = imgui_update;
+//
+//// MyEngine.cpp
+//void engine_run() {
+//    while (window_open) {
+//        window_update();
+//        input_update();
+//        time_update();
+//
+//        // pre_game_update();
+//        imgui_update();
+//
+//        if (state == LEVEL_LOADING) {
+//            gsm_game_load();
+//            state = LEVEL_UPDATE;
+//        }
+//
+//        if (state == LEVEL_UPDATE) {
+//            gsm_game_update();
+//            // if (key_down(key_space)) {
+//            //  state = LEVEL_CHANGE;
+//            //}
+//        }
+//
+//        if (state == LEVEL_CHANGE) {
+//            gsm_game_unload();
+//            state = LEVEL_LOADING;
+//        }
+//
+//        game_render();
+//        imgui_render();
+//        window_swap_buffers();
+//    }
+//}
+
+
+
+// ECS setup
+//g_coordinator.init();
+//g_coordinator.RegisterComponent<Player>();
+//g_coordinator.RegisterComponent<Framework::Transform>();
+//
+//g_coordinator.RegisterSystem<InputManager>();
+//g_coordinator.RegisterSystem<GraphicsManager>();
+// 
+// Signature signature;
+// signature.set(g_coordinator.GetComponentType<Player>());
+// g_coordinator.SetSystemSignature<InputManager>(signature);
+//
+//Engine.Init(); // <-- only if it does NOT touch OpenGL
+//
+//int entity = g_coordinator.CreateEntity();
+//g_coordinator.AddComponent(entity, Player{ 100, 200 });

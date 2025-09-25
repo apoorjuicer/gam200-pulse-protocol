@@ -6,7 +6,7 @@
 #include "ComponentArray.h"
 
 //  Acts as a mediator that allows us to have a single instance of the coordinator to use for all 3 manager :D
-class Coordinator
+class Coordinator //: public Singleton<Coordinator>
 {
 public:	
 	void init()
@@ -73,6 +73,12 @@ public:
 	ComponentType GetComponentType()
 	{
 		return CoordComponentManager->GetComponentType<T>();
+	}
+
+	template<typename T>
+	std::shared_ptr<T> GetSystem()
+	{
+		return CoordSystemManager->GetSystem<T>();
 	}
 
 	template<typename T>
