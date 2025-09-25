@@ -7,7 +7,7 @@
 \copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
 **********************************************************************************************/
 #include "glapp.h"
-//#include "DebugDraw.h"
+#include "DebugDraw.h"
 //#include "../Managers/LevelManager.h"
 //#include "../ComponentJson/Component_System.h"
 //#include "../Managers/AssetsManager.h"
@@ -23,9 +23,9 @@ std::vector<GLSLShader> GLApp::shdrpgms;
 std::vector<GLApp::GLModel> GLApp::models;
 std::vector<GLApp::GLViewport> GLApp::vps;
 std::list<Framework::Transform*> transObj;
-//std::list<Framework::Transform*> fore;
-//std::list<Framework::Transform*> Obj;
-//std::list<Framework::Transform*> pause;
+std::list<Framework::Transform*> fore;
+std::list<Framework::Transform*> Obj;
+std::list<Framework::Transform*> pause;
 
 //other containers
 const float PI = 3.14159265358979323846f;
@@ -68,6 +68,7 @@ double random() {
     return static_cast<double>((rand() % 10) / 10.0f);
 }
 
+
 GLApp::GLModel GLApp::mdl;
 GLApp::TranslationBuf GLApp::tb;
 void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
@@ -109,7 +110,7 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
     GLApp::init_models_cont();
 
     // Initialize debug draw
-    //DebugDraw::Init();
+    DebugDraw::Init();
 
     bool fixed_seed = true;
     std::random_device rd;
@@ -137,6 +138,7 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
     glNamedBufferSubData(tb.translationBuffer, 0, tb.translationBufferSize, tb.position_scale.data());
 }
 
+
 void GLApp::update() {
     if (GLHelper::keystateP == GL_TRUE) {
         if (polygonmode == 0) {
@@ -159,15 +161,15 @@ void GLApp::update() {
     for (auto& x : transObj) {
         x->update(GLHelper::delta_time);
     }
-    //for (auto& x : Obj) {
-    //    x->update(GLHelper::delta_time);
-    //}
-    //for (auto& x : fore) {
-    //    x->update(GLHelper::delta_time);
-    //}
-    //for (auto& x : pause) {
-    //    x->update(GLHelper::delta_time);
-    //}
+    for (auto& x : Obj) {
+        x->update(GLHelper::delta_time);
+    }
+    for (auto& x : fore) {
+        x->update(GLHelper::delta_time);
+    }
+    for (auto& x : pause) {
+        x->update(GLHelper::delta_time);
+    }
 }
 
 void GLApp::updateAnimation(Framework::Transform& x) {
@@ -184,8 +186,6 @@ void GLApp::updateAnimation(Framework::Transform& x) {
 }
 
 void GLApp::drawTrans(Framework::Transform &x) {
-    std::cout << "[draw] found transforms: "
-      << x.shd_ref << "|| " << x.mdl_ref /* + Obj.size() + fore.size() */ << "\n";
     GLint uniform_var_loc1 = 0;
     GLint uOffsetLoc = 0;
     GLint uScaleLoc = 0;
@@ -216,7 +216,7 @@ void GLApp::drawTrans(Framework::Transform &x) {
         glUniform2f(uScaleLoc, frameWidth, frameHeight);
     if (uniform_var_loc1 >= 0) {
         //glm::mat3x3 mdl_to_ndc_xform = static_cast<glm::mat3x3>(x.mdl_to_ndc_xform);
-        //gluniformmatrix3fv(uniform_var_loc1, 1, gl_false, glm::value_ptr(mdl_to_ndc_xform));
+        //glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
         glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, x.mdl_to_ndc_xform.Begin());
     }
     else
@@ -232,7 +232,7 @@ void GLApp::drawTrans(Framework::Transform &x) {
 
 void GLApp::draw(std::set<Entity> entities) {
     
-    //static int frame = 0;
+    static int frame = 0;
     //if ((frame++ % 60) == 0) {
     //    std::cout << "[draw] tick " << frame << std::endl; // endl forces flush
     //}
@@ -243,9 +243,11 @@ void GLApp::draw(std::set<Entity> entities) {
     glClear(GL_DEPTH_BUFFER_BIT);
     shdrpgms[0].Use();
     transObj.clear();
-    //Obj.clear();
-    //pause.clear();
-    //fore.clear();
+    Obj.clear();
+    pause.clear();
+    fore.clear();
+    //g_coordinator.grabcomponent<class_type>(projection);
+    //int projection = g_coordinaor.addentity(entity)
 
     //Render each object
     //for (auto it = Framework::levelManager->GameObjects.GOCM.begin(); it != Framework::levelManager->GameObjects.GOCM.end(); it++) {
@@ -273,7 +275,6 @@ void GLApp::draw(std::set<Entity> entities) {
         updateAnimation(*x);
         glBindTexture(GL_TEXTURE_2D, x->textureID);
         drawTrans(*x);
-        std::cout << "hello";
     }
     //for (auto x : Obj) {
     //    updateAnimation(*x);
@@ -307,12 +308,12 @@ void GLApp::draw(std::set<Entity> entities) {
     }
 
     // Debug draw sample (NDC space)
-//glm::mat4 mvp = MakeOrthoMvp(-1.0f, 1.0f, -1.0f, 1.0f);
-//    DebugDraw::Begin(mvp);
-//    DebugDraw::DrawLine({-0.5f, -0.5f}, {0.5f, -0.5f}, {1,0,0});
-//    DebugDraw::DrawRect({-0.2f,-0.2f}, {0.2f,0.2f}, {0,1,0});
-//    DebugDraw::DrawCircle({0.0f,0.0f}, 0.3f, {0,0,1}, 48);
-//    DebugDraw::End();
+    glm::mat4 mvp = MakeOrthoMvp(-1.0f, 1.0f, -1.0f, 1.0f);
+    DebugDraw::Begin(mvp);
+    DebugDraw::DrawLine({-0.5f, -0.5f}, {0.5f, -0.5f}, {1,0,0});
+    DebugDraw::DrawRect({-0.2f,-0.2f}, {0.2f,0.2f}, {0,1,0});
+    DebugDraw::DrawCircle({0.0f,0.0f}, 0.3f, {0,0,1}, 48);
+    DebugDraw::End();
 }
 
 void GLApp::cleanup() {
@@ -342,7 +343,7 @@ void GLApp::cleanup() {
     GLApp::vps.clear();
 
     // Debug draw shutdown
-    //DebugDraw::Shutdown();
+    DebugDraw::Shutdown();
 
     std::cout << "Graphics Resources successfully cleaned up." << std::endl;
 }
@@ -471,7 +472,7 @@ GLApp::GLModel GLApp::box_model() {
     GLApp::GLModel quad{};
     quad.vaoid = vaoid;
     //quad.primitive_type = GL_TRIANGLE_STRIP;
-    quad.primitive_type = GL_TRIANGLES;      
+    // quad.primitive_type = GL_TRIANGLES;      
     quad.draw_cnt = static_cast<GLuint>(idx_vtx.size());
     
     quad.primitive_cnt = 2;

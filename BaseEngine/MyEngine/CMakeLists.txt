@@ -28,38 +28,3 @@ target_include_directories(${ENGINE_NAME} PUBLIC ${GLEW_SOURCE_DIR}/include)
 
 # Link GLFW and GLEW to the engine
 target_link_libraries(${ENGINE_NAME} PUBLIC glfw libglew_static)
-
-# Include directories for FMOD
-target_include_directories(${ENGINE_NAME} PUBLIC 
-    ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/core/inc
-    ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/studio/inc
-)
-
-
-# Add FMOD libraries based on build type
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_libraries(${ENGINE_NAME} PUBLIC 
-        ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/core/lib/x64/fmodL_vc.lib
-        ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/studio/lib/x64/fmodstudioL_vc.lib
-    )
-else() # Release or other build types
-    target_link_libraries(${ENGINE_NAME} PUBLIC 
-        ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/core/lib/x64/fmod_vc.lib
-        ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/studio/lib/x64/fmodstudio_vc.lib
-    )
-endif()
-
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/core/lib/x64/fmodL.dll"
-        $<TARGET_FILE_DIR:${ENGINE_NAME}>
-    )
-else()
-    add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/core/lib/x64/fmod.dll"
-        $<TARGET_FILE_DIR:${ENGINE_NAME}>
-    )
-endif()
-

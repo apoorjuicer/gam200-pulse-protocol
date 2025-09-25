@@ -40,7 +40,7 @@ const int Game_Window_Width = 800;
 struct GameStates {
     bool MainMenu = true;
     bool IsRunning = false;
-    bool IsPaused = false;
+    bool IsPaused = false;  
     bool GameOver = false;
 
     //libs that are good to use.
@@ -77,7 +77,7 @@ int main() {
     // After registering components (including Framework::Transform) and creating the entity:
 
     // where to draw (your update() normalizes by 1600x900)
-    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900  virtual  screen
+    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900 “virtual” screen
     tr.Scale = { 128.0f, 128.0f };   // size in pixels in that same space
     tr.angle_disp = 0.0f;           // degrees
     tr.angle_speed = 0.0f;           // no rotation
@@ -98,9 +98,6 @@ int main() {
     tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
     int entity = g_coordinator.CreateEntity();
     g_coordinator.AddComponent(entity, tr);  // <-- add Transform
-
-    // FOR AUDIO + INPUT TESTING PURPOSE ONLY. WILL REMOVE AFTER FINISH TESTING
-    Engine.SetTestMode(CoreEngine::TestMode::INPUT_AUDIO);
 
     // this is where the update() is 
     Engine.GameLoop();

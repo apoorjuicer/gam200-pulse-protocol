@@ -102,7 +102,7 @@ public:
 	{
 		CoordSystemManager->InitializeAllSystems();
 	}
-	//Created to check if componenet exist
+
 	template<typename T>
 	bool HasComponent(Entity entity) const {
 		auto sig = CoordEnitiyManager->GetSignature(entity);

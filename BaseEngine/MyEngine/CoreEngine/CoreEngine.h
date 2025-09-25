@@ -23,7 +23,7 @@ public:
 	bool IsGameRunning() const { return GameRunning; }
 
 	GLFWwindow* GetWindow() const { return window; }
-
+	
 private:
 	bool GameRunning;
 	bool DebugMode;
@@ -37,3 +37,4 @@ private:
 
 //A global pointer to the instance of the core
 extern CoreEngine* Core;
+
