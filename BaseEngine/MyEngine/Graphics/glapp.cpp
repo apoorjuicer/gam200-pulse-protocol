@@ -468,8 +468,8 @@ GLApp::GLModel GLApp::box_model() {
 
     GLApp::GLModel quad{};
     quad.vaoid = vaoid;
-    //quad.primitive_type = GL_TRIANGLE_STRIP;
-    quad.primitive_type = GL_TRIANGLES;      
+    quad.primitive_type = GL_TRIANGLE_STRIP;
+    //quad.primitive_type = GL_TRIANGLES;      
     quad.draw_cnt = static_cast<GLuint>(idx_vtx.size());
     
     quad.primitive_cnt = 2;
