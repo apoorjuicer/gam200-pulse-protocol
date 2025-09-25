@@ -9,6 +9,8 @@
 //A global pointer to the core
 CoreEngine* Engine;
 extern Coordinator g_coordinator;
+extern InputManager* g_inputSystem;
+extern AudioManager* g_audioSystem;
 
 
 // Game window dimensions and title
@@ -60,6 +62,9 @@ void CoreEngine::Init()
 	g_inputSystem->Initialize(window);
 	g_graphicsSystem->Initialize();
 	g_coordinator.InitializeAllSystems();
+	// Init engine Systems here
+	g_audioSystem->Initialize(); 
+
 
 	std::cout << "Engine initialized." << std::endl;
 	std::cout << "Input system ready for rhythm gameplay." << std::endl;
@@ -98,6 +103,7 @@ void CoreEngine::Update(float dt)
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Update();
 	}
+		g_audioSystem->Update();  
 
 	g_coordinator.UpdateAllSystems(dt);
 }
@@ -153,15 +159,15 @@ void CoreEngine::Exit()
 
 	if (g_inputSystem) {
 		g_inputSystem->Shutdown();
-		//delete g_inputSystem;
-		//g_inputSystem = nullptr;
-	}
-	if (g_graphicsSystem) {
-		g_graphicsSystem->Shutdown();
-		//delete g_graphicsSystem;
-		//g_graphicsSystem = nullptr;
 	}
 
+	if (g_graphicsSystem) {
+		g_graphicsSystem->Shutdown();
+	}
+
+	if (g_audioSystem) {
+		g_audioSystem->Shutdown();
+	}
 
 	if (window)
 	{
