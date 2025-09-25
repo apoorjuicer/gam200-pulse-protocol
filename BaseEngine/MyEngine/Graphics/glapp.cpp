@@ -255,8 +255,6 @@ void GLApp::draw(std::set<Entity> entities) {
             transObj.push_back(tr);
         }
     }*/
-
-
     extern Coordinator g_coordinator;
     for (auto it : entities)
     {
