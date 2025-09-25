@@ -13,8 +13,6 @@ extern Coordinator g_coordinator;
 
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
-const int WindowHeight = 1400;
-const int WindowWidth = 800;
 
 CoreEngine::CoreEngine(): window(nullptr)
 {
@@ -148,8 +146,8 @@ void CoreEngine::GameLoop()
 		//  4. game update(NOT A WHILE LOOP) gsm
 
 		//  5. game rendering
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
 
 		//  6. ImGui rendering
 

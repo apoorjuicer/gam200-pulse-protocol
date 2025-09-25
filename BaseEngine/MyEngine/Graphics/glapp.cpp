@@ -73,8 +73,8 @@ GLApp::TranslationBuf GLApp::tb;
 void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 
     // Use local inputEditorWidth and inputEditorHeight values for calculations.
-    GLint w = static_cast<GLint>(GLHelper::width - static_cast<GLint>(inputEditorWidth)),
-        h = static_cast<GLint>(GLHelper::height - static_cast<GLint>(inputEditorHeight));
+    GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth)),
+        h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
 
     float a = (9.0f / 16.0f) * w;
     float b = (16.0f / 9.0f) * h;
@@ -126,8 +126,8 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
     glCreateBuffers(1, &tb.translationBuffer);
 
 
-    GLbitfield flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT; // Adjust flags based on usage
-    glNamedBufferStorage(tb.translationBuffer, tb.translationBufferSize, nullptr, flags);
+    //GLbitfield flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT; // Adjust flags based on usage
+glNamedBufferStorage(tb.translationBuffer, tb.translationBufferSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 
     GLuint bindingIndex = 0; // Set binding index in shader program
@@ -184,16 +184,11 @@ void GLApp::updateAnimation(Framework::Transform& x) {
 }
 
 void GLApp::drawTrans(Framework::Transform &x) {
-    std::cout << "[draw] found transforms: "
-      << x.shd_ref << "|| " << x.mdl_ref /* + Obj.size() + fore.size() */ << "\n";
+    //std::cout << "[draw] found transforms: "
+    //  << x.shd_ref << "|| " << x.mdl_ref /* + Obj.size() + fore.size() */ << "\n";
     GLint uniform_var_loc1 = 0;
     GLint uOffsetLoc = 0;
     GLint uScaleLoc = 0;
-    //// Part 1
-    shdrpgms[static_cast<uint64_t>(x.shd_ref)].Use();
-
-    //// Part 2
-    glBindVertexArray(models[static_cast<uint64_t>(x.mdl_ref)].vaoid);
 
     x.totalFrames = x.rows * x.columns;
 
@@ -209,38 +204,35 @@ void GLApp::drawTrans(Framework::Transform &x) {
         uScaleLoc = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uScale");
         uniform_var_loc1 = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uModel_to_NDC");
     }
-    if (uOffsetLoc >= 0)
+    if (uOffsetLoc > 0)
         glUniform2f(uOffsetLoc, uOffsetX, uOffsetY);
 
-    if (uScaleLoc >= 0)
+    if (uScaleLoc > 0)
         glUniform2f(uScaleLoc, frameWidth, frameHeight);
-    if (uniform_var_loc1 >= 0) {
-        //glm::mat3x3 mdl_to_ndc_xform = static_cast<glm::mat3x3>(x.mdl_to_ndc_xform);
-        //gluniformmatrix3fv(uniform_var_loc1, 1, gl_false, glm::value_ptr(mdl_to_ndc_xform));
-        glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, x.mdl_to_ndc_xform.Begin());
+    if (uniform_var_loc1 > 0) {
+        glm::mat3x3 mdl_to_ndc_xform = static_cast<glm::mat3x3>(x.mdl_to_ndc_xform);
+        glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
     }
     else
     {
         std::cout << "Uniform variable doesn't exist!!!\n";
-        std::exit(EXIT_FAILURE);
+        //std::exit(EXIT_FAILURE);
     }
-    glDrawElements(models[static_cast<uint64_t>(x.mdl_ref)].primitive_type, models[static_cast<uint64_t>(x.mdl_ref)].draw_cnt, GL_UNSIGNED_SHORT, NULL);
+    
     //// Part 5
+    glBindVertexArray(models[static_cast<uint64_t>(x.mdl_ref)].vaoid);
+    glDrawElements(models[static_cast<uint64_t>(x.mdl_ref)].primitive_type, models[static_cast<uint64_t>(x.mdl_ref)].draw_cnt, GL_UNSIGNED_SHORT, NULL);
     glBindVertexArray(0);
     shdrpgms[static_cast<uint64_t>(x.shd_ref)].UnUse();
 }
 
 void GLApp::draw(std::set<Entity> entities) {
-    
-    //static int frame = 0;
-    //if ((frame++ % 60) == 0) {
-    //    std::cout << "[draw] tick " << frame << std::endl; // endl forces flush
-    //}
     bool pm = false;
     bool fg = false;
     // clear back buffer as before
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
+    glClearDepth(1.0f);
     shdrpgms[0].Use();
     transObj.clear();
     //Obj.clear();
@@ -271,7 +263,6 @@ void GLApp::draw(std::set<Entity> entities) {
         updateAnimation(*x);
         glBindTexture(GL_TEXTURE_2D, x->textureID);
         drawTrans(*x);
-        std::cout << "hello";
     }
     //for (auto x : Obj) {
     //    updateAnimation(*x);
@@ -468,8 +459,8 @@ GLApp::GLModel GLApp::box_model() {
 
     GLApp::GLModel quad{};
     quad.vaoid = vaoid;
-    quad.primitive_type = GL_TRIANGLE_STRIP;
-    //quad.primitive_type = GL_TRIANGLES;      
+    //quad.primitive_type = GL_TRIANGLE_STRIP;
+    quad.primitive_type = GL_TRIANGLES;      
     quad.draw_cnt = static_cast<GLuint>(idx_vtx.size());
     
     quad.primitive_cnt = 2;
