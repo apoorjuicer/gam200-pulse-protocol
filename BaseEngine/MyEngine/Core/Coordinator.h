@@ -6,7 +6,7 @@
 #include "ComponentArray.h"
 
 //  Acts as a mediator that allows us to have a single instance of the coordinator to use for all 3 manager :D
-class Coordinator: Singleton<Coordinator>
+class Coordinator //: public Singleton<Coordinator>
 {
 public:	
 	void init()
