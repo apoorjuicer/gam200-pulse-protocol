@@ -56,6 +56,7 @@ void CoreEngine::Init()
 	//g_graphicsSystem = new GraphicsManager();
 	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
+	auto g_audioSystem = g_coordinator.GetSystem<AudioManager>();
 
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
@@ -71,10 +72,8 @@ void CoreEngine::Init()
 		});
 
 	g_graphicsSystem->Initialize();
+	g_audioSystem->Initialize(); 
 	g_coordinator.InitializeAllSystems();
-	// Init engine Systems here
-	//g_audioSystem->Initialize(); 
-
 
 	std::cout << "Engine initialized." << std::endl;
 	std::cout << "Input system ready for rhythm gameplay." << std::endl;
@@ -94,6 +93,7 @@ void CoreEngine::Setup()
 	// Register your systems here
 	g_coordinator.RegisterSystem<InputManager>();
 	g_coordinator.RegisterSystem<GraphicsManager>();
+	g_coordinator.RegisterSystem<AudioManager>();
 
 	// Set your signatures for both component and system
 	Signature graphicsSig;
@@ -105,6 +105,7 @@ void CoreEngine::Update(float dt)
 {
 	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
+	auto g_audioSystem = g_coordinator.GetSystem<AudioManager>();
 
 	if (g_inputSystem) {
 		// Update input system
@@ -166,11 +167,16 @@ void CoreEngine::Exit()
 {
 	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
+	auto g_audioSystem = g_coordinator.GetSystem<AudioManager>();
 
 	if (g_inputSystem) {
 		g_inputSystem->Shutdown();
 	}
 
+	if (g_audioSystem) {
+		g_audioSystem->Shutdown();
+
+	}
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Shutdown();
 	}

@@ -77,7 +77,7 @@ int main() {
     // After registering components (including Framework::Transform) and creating the entity:
 
     // where to draw (your update() normalizes by 1600x900)
-    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900  virtual  screen
+    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900 �virtual� screen
     tr.Scale = { 128.0f, 128.0f };   // size in pixels in that same space
     tr.angle_disp = 0.0f;           // degrees
     tr.angle_speed = 0.0f;           // no rotation
