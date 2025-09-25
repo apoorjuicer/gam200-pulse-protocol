@@ -133,23 +133,21 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 }
 
 void GLApp::update() {
-    if (GLHelper::keystateP == GL_TRUE) {
-        if (polygonmode == 0) {
-            ++polygonmode;
-
-            GLHelper::keystateP = GL_FALSE;
-
-        }
-        else if (polygonmode == 1) {
-            ++polygonmode;
-            GLHelper::keystateP = GL_FALSE;
-        }
-        else if (polygonmode == 2) {
-            polygonmode = 0;
-            GLHelper::keystateP = GL_FALSE;
-        }
-        GLHelper::keystateP = GL_FALSE;
-    }
+    //if (GLHelper::keystateP == GL_TRUE) {
+    //    if (polygonmode == 0) {
+    //        ++polygonmode;
+    //        GLHelper::keystateP = GL_FALSE;
+    //    }
+    //    else if (polygonmode == 1) {
+    //        ++polygonmode;
+    //        GLHelper::keystateP = GL_FALSE;
+    //    }
+    //    else if (polygonmode == 2) {
+    //        polygonmode = 0;
+    //        GLHelper::keystateP = GL_FALSE;
+    //    }
+    //    GLHelper::keystateP = GL_FALSE;
+    //}
 
     for (auto& x : transObj) {
         x->update(GLHelper::delta_time);
