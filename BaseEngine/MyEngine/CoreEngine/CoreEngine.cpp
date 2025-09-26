@@ -10,6 +10,7 @@
 CoreEngine* Engine;
 extern Coordinator g_coordinator;
 
+
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
 
@@ -119,22 +120,21 @@ void CoreEngine::Init()
 	g_inputSystem->Initialize(window);
 	g_inputSystem->RegisterInputListener("CoreEngine", [](const InputEvent& event) {
 		if (event.type == InputEvent::Type::RHYTHM_INPUT) {
-			if (event.key == GLFW_KEY_Q) {
-				auto* g_coordinator = Coordinator::GetInstance();
-				// Toggle existing box visibility (entity 0)
-				auto& boxTransform = g_coordinator->GetComponent<Framework::Transform>(0);
-				boxTransform.isVisible = !boxTransform.isVisible;
-				std::cout << "[BOX] Toggled visibility: " << (boxTransform.isVisible ? "VISIBLE" : "HIDDEN") << std::endl;
+			auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
+			if (!g_inputSystem || !g_inputSystem->CanInput()) {
+				std::cout << "[GAME OVER] No more chances!" << std::endl;
+				return; // ignore input if game over
 			}
 
-			// General input logging for all rhythm keys
-			std::cout << "[INPUT] Key pressed: " << event.key
-				<< " | Timing: " << event.feedback << std::endl;
-		}
+			auto& boxTransform = g_coordinator.GetComponent<Framework::Transform>(0);
+			boxTransform.isVisible = true;
+			boxTransform.visibilityTimer = 0.5f;
+			boxTransform.autoHide = true;
 
-		if (event.type == InputEvent::Type::COMBO_EXECUTED) {
-			std::cout << "[COMBO SUCCESS] " << event.comboName
-				<< " with quality: " << event.feedback << std::endl;
+			auto g_audioSystem = g_coordinator.GetSystem<AudioManager>();
+			if (g_audioSystem) {
+				g_audioSystem->PlayInputSFX(1.0f);
+			}
 		}
 	});
 
@@ -170,6 +170,15 @@ void CoreEngine::Setup()
 
 void CoreEngine::Update(float dt)
 {
+	auto& boxTransform = g_coordinator.GetComponent<Framework::Transform>(0);
+	if (boxTransform.autoHide && boxTransform.isVisible) {
+		boxTransform.visibilityTimer -= dt;
+		if (boxTransform.visibilityTimer <= 0.0f) {
+			boxTransform.isVisible = false;
+			boxTransform.autoHide = false;
+		}
+	}
+
 	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
 	auto g_audioSystem = g_coordinator.GetSystem<AudioManager>();

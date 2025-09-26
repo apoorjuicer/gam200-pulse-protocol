@@ -81,7 +81,13 @@ void AudioManager::Initialize()
     //   build\MyEngine\Assets\MainMenuMusic.wav
     // If your assets live elsewhere, update this string accordingly.
     const char* defaultBGM = "../../MyEngine/Assets/Music/Song/Demo V1_70BPM.mp3";
-    PlayBGM(defaultBGM, 0.30f);
+    PlayBGM(defaultBGM, 0.05f);
+
+    // preloads sfx sound for beat
+    const char* defaultInputSFX = "../../MyEngine/Assets/SFX/Rhythm_Feedback/beat_placeholder.wav";
+    if (!LoadInputSFX(defaultInputSFX)) {
+        std::cerr << "[AudioManager] Failed to load default input SFX: " << defaultInputSFX << "\n";
+    }
 }
 
 void AudioManager::Update()
@@ -164,4 +170,39 @@ bool AudioManager::IsBGMPlaying(bool* outPlaying) const
     mBGMCh->isPlaying(&playing);
     if (outPlaying) *outPlaying = playing;
     return playing;
+}
+
+bool AudioManager::LoadInputSFX(const std::string& path) {
+    if (!mSystem) return false;
+    return (mSystem->createSound(path.c_str(), FMOD_DEFAULT, 0, &mInputSFX) == FMOD_OK);
+}
+void AudioManager::PlayInputSFX(float volume) {
+    if (!mSystem || !mInputSFX) return;
+
+    FMOD::Channel* channel = nullptr;
+    FMOD_RESULT result = mSystem->playSound(mInputSFX, 0, false, &channel);
+    if (result == FMOD_OK && channel) {
+        channel->setVolume(volume); // applies only to this SFX
+    }
+}
+
+double AudioManager::GetMusicPosition() const
+{
+    if (!mBGMCh) return 0.0;
+
+    unsigned int position = 0;
+    mBGMCh->getPosition(&position, FMOD_TIMEUNIT_MS);
+    return position / 1000.0;  // this converts to seconds
+}
+
+void AudioManager::StopMusic() {
+    if (mBGMCh) {
+        FMOD_RESULT result = mBGMCh->stop();
+        if (result != FMOD_OK) {
+            std::cerr << "[GAME OVER..] Stop demo music." << std::endl;
+        }
+        else {
+            std::cout << "[Audio] Music stopped." << std::endl;
+        }
+    }
 }

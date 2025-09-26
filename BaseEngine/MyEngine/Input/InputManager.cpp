@@ -10,22 +10,29 @@
 #include <cstring>
 #include <iomanip>
 
+static std::string KeyToString(int key) {
+    switch (key) {
+    case GLFW_KEY_Q: return "Q";
+    case GLFW_KEY_W: return "W";
+    case GLFW_KEY_E: return "E";
+    case GLFW_KEY_SPACE: return "SPACE";
+    case GLFW_KEY_ESCAPE: return "ESC";
+    default: return std::to_string(key); // fallback for debugging
+    }
+}
+
 InputManager::InputManager()
     : window(nullptr), mouseX(0.0), mouseY(0.0), previousMouseX(0.0),
     previousMouseY(0.0), mouseSensitivity(1.0f), isFirstMouse(true),
     comboTimeout(2.0), totalRhythmInputs(0), accurateRhythmInputs(0),
     totalCombosAttempted(0), successfulCombos(0) {
 
-    // Initialize input state arrays
     std::memset(currentKeys, 0, sizeof(currentKeys));
     std::memset(previousKeys, 0, sizeof(previousKeys));
     std::memset(currentMouse, 0, sizeof(currentMouse));
     std::memset(previousMouse, 0, sizeof(previousMouse));
 
-    // Initialize sword combos for rhythm game
     InitializeSwordCombos();
-
-    std::cout << "[InputManager] System initialized" << std::endl;
 }
 
 InputManager::~InputManager() {
@@ -39,23 +46,31 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
         return;
     }
 
-    std::cout << "[InputManager] Successfully initialized for rhythm game input." << std::endl;
+    std::cout << "[InputManager] Successfully initialized." << std::endl;
     std::cout << "[COMBOS READY] Available combos: Basic Strike (Q->W), Swift Slash (Q->E), Power Combo (Q->W->E)" << std::endl;
+
+    currentBeatIndex = -4;  // Start at -4 so countdown can happen on beats -4, -3, -2, -1
+    comboStartBeat = -1;
+    lastBeatTime = 0.0;
+
+    inCountdown = true;
+    countdownBeats = 4;
+
+    // Print first countdown immediately to sync with first beat
+    std::cout << "[COUNTDOWN] " << countdownBeats << ".." << std::endl;
+    countdownBeats--;
 }
 
 void InputManager::Update() {
-    // Main ECS-style update loop
     UpdateInputStates();
     ProcessRhythmInputs();
     ProcessComboInputs();
     ProcessMouseInputs();
+    CheckForMissedBeat();
 }
 
 void InputManager::Shutdown() {
     if (window) {
-        std::cout << "[InputManager] System shutting down..." << std::endl;
-
-        // Clear all registered listeners (ECS cleanup)
         inputListeners.clear();
         window = nullptr;
 
@@ -66,17 +81,17 @@ void InputManager::Shutdown() {
 // ECS System Communication Methods
 void InputManager::RegisterInputListener(const std::string& systemName, InputCallback callback) {
     inputListeners[systemName] = callback;
-    std::cout << "[InputManager] ECS System '" << systemName << "' registered for input events" << std::endl;
+    //std::cout << "[InputManager] ECS System '" << systemName << "' registered for input events" << std::endl;
 }
 
 void InputManager::UnregisterInputListener(const std::string& systemName) {
     if (inputListeners.erase(systemName)) {
-        std::cout << "[InputManager] ECS System '" << systemName << "' unregistered from input events" << std::endl;
+        //std::cout << "[InputManager] ECS System '" << systemName << "' unregistered from input events" << std::endl;
     }
 }
 
 void InputManager::BroadcastInputEvent(const InputEvent& event) {
-    // Broadcast to all registered ECS systems
+    // broadcast to all systems egistered in our ECS
     for (const auto& [systemName, callback] : inputListeners) {
         callback(event);
     }
@@ -123,7 +138,7 @@ void InputManager::SetMouseSensitivity(float sensitivity) {
     std::cout << "[InputManager] Mouse sensitivity set to: " << sensitivity << std::endl;
 }
 
-// Rhythm Game Specific Methods
+// rhythm game specific methods
 bool InputManager::IsRhythmKeyPressed(int key) const {
     return (key == GLFW_KEY_Q || key == GLFW_KEY_W || key == GLFW_KEY_E) && IsKeyJustPressed(key);
 }
@@ -137,39 +152,25 @@ double InputManager::GetInputTiming() const {
 }
 
 int InputManager::GetCurrentWeaponSelected() const {
-    return 1; // Always sword for now
+    return 1; // always sword for now
 }
 
-// ECS-Compatible Input Processing Methods
 void InputManager::UpdateInputStates() {
-    // Update all input states for this frame
+    // update all input states for this frame
     UpdateKeyStates();
     UpdateMouseStates();
 }
 
 void InputManager::ProcessRhythmInputs() {
     const int rhythmKeys[] = { GLFW_KEY_Q, GLFW_KEY_W, GLFW_KEY_E };
-
     for (int i = 0; i < 3; ++i) {
         if (IsKeyJustPressed(rhythmKeys[i])) {
-            totalRhythmInputs++;
-
-            // Generate timing feedback
-            std::string feedback = GetTimingFeedback();
-            if (feedback.find("PERFECT") != std::string::npos ||
-                feedback.find("GREAT") != std::string::npos ||
-                feedback.find("GOOD") != std::string::npos) {
-                accurateRhythmInputs++;
-            }
-
-            // Create and broadcast ECS input event
-            InputEvent rhythmEvent(InputEvent::Type::RHYTHM_INPUT, rhythmKeys[i], GetInputTiming(), feedback);
-            BroadcastInputEvent(rhythmEvent);
-
-            // Add to combo sequence for processing
-            currentComboSequence.push_back(rhythmKeys[i]);
-            if (currentComboSequence.size() == 1) {
-                lastComboInputTime = GetInputTiming();
+            // Only process input if not in countdown OR if countdown just ended
+            if (!inCountdown || (inCountdown && countdownBeats == 0)) {
+                ProcessRhythmTiming(rhythmKeys[i]);
+                std::string feedback = GetTimingFeedback();
+                InputEvent rhythmEvent(InputEvent::Type::RHYTHM_INPUT, rhythmKeys[i], GetInputTiming(), feedback);
+                BroadcastInputEvent(rhythmEvent);
             }
         }
     }
@@ -178,48 +179,58 @@ void InputManager::ProcessRhythmInputs() {
 void InputManager::ProcessComboInputs() {
     if (currentComboSequence.empty()) return;
 
-    double currentTime = GetInputTiming();
-
-    // Check for combo timeout
-    if (currentTime - lastComboInputTime > comboTimeout) {
-        currentComboSequence.clear();
-        return;
-    }
-
-    // Check each sword combo pattern
     for (const auto& combo : swordCombos) {
         if (currentComboSequence.size() == combo.keySequence.size()) {
-            bool matches = true;
-            for (size_t i = 0; i < combo.keySequence.size(); ++i) {
-                if (currentComboSequence[i] != combo.keySequence[i]) {
-                    matches = false;
-                    break;
-                }
-            }
-
-            if (matches) {
-                // Combo successfully executed!
-                successfulCombos++;
+            if (currentComboSequence == combo.keySequence) {
                 totalCombosAttempted++;
+                successfulCombos++;
+                successfulCombosThisWindow++;
 
-                // Calculate combo quality based on timing
-                double comboTime = currentTime - lastComboInputTime;
-                std::string comboQuality = GetComboQuality(comboTime, combo.maxTimeBetweenInputs);
+                bool isPartOfLongerCombo = false;
+                for (const auto& longerCombo : swordCombos) {
+                    if (longerCombo.keySequence.size() > combo.keySequence.size()) {
+                        bool matches = true;
+                        for (size_t i = 0; i < combo.keySequence.size(); ++i) {
+                            if (longerCombo.keySequence[i] != combo.keySequence[i]) {
+                                matches = false;
+                                break;
+                            }
+                        }
+                        if (matches) {
+                            isPartOfLongerCombo = true;
+                            break;
+                        }
+                    }
+                }
 
-                // Create and broadcast ECS combo event
-                InputEvent comboEvent(InputEvent::Type::COMBO_EXECUTED, 0, currentTime, comboQuality);
-                comboEvent.comboName = combo.name;
-                BroadcastInputEvent(comboEvent);
-
-                currentComboSequence.clear();
+                if (!isPartOfLongerCombo) {
+                    currentComboSequence.clear();
+                }
                 return;
             }
         }
     }
 
-    // If we have maximum inputs and no match, it's invalid
-    if (currentComboSequence.size() >= 3) {
+    bool isValidPrefix = false;
+    for (const auto& combo : swordCombos) {
+        if (currentComboSequence.size() < combo.keySequence.size()) {
+            bool matches = true;
+            for (size_t i = 0; i < currentComboSequence.size(); ++i) {
+                if (currentComboSequence[i] != combo.keySequence[i]) {
+                    matches = false;
+                    break;
+                }
+            }
+            if (matches) {
+                isValidPrefix = true;
+                break;
+            }
+        }
+    }
+
+    if (!isValidPrefix) {
         totalCombosAttempted++;
+        // Remove the immediate feedback - let it be handled at end of window
         currentComboSequence.clear();
     }
 }
@@ -259,44 +270,138 @@ void InputManager::UpdateMouseStates() {
 
 void InputManager::InitializeSwordCombos() {
     swordCombos.clear();
-
-    // Define the 3 sword combos
     swordCombos.emplace_back(std::vector<int>{GLFW_KEY_Q, GLFW_KEY_W}, "Basic Strike", 1.0);
     swordCombos.emplace_back(std::vector<int>{GLFW_KEY_Q, GLFW_KEY_E}, "Swift Slash", 0.8);
     swordCombos.emplace_back(std::vector<int>{GLFW_KEY_Q, GLFW_KEY_W, GLFW_KEY_E}, "Power Combo", 1.5);
-
-    std::cout << "[InputManager] System initialized " << swordCombos.size() << " sword combos" << std::endl;
 }
 
 // Helper Methods for Quality Feedback
-std::string InputManager::GetTimingFeedback() const {
-    // Simulate timing feedback with variety
-    static int feedbackCounter = 0;
-    feedbackCounter++;
+std::string InputManager::GetTimingFeedback() {
+    extern Coordinator g_coordinator;
+    auto audioSystem = g_coordinator.GetSystem<AudioManager>();
 
-    // Cycle through different feedback types to show range
-    switch (feedbackCounter % 5) {
-    case 0: return "PERFECT";
-    case 1: return "GREAT";
-    case 2: return "GOOD";
-    case 3: return "OK";
-    default: return "MISS";
+    double musicPosition = audioSystem->GetMusicPosition();
+    double beatPosition = fmod(musicPosition, beatInterval);
+
+    double distance = std::min(beatPosition, fabs(beatInterval - beatPosition));
+
+    if (distance <= 0.05) return "PERFECT";  // very tight
+    if (distance <= 0.15) return "GOOD";     // slightly off
+    return "MISS";                           // outside tolerance
+}
+
+bool InputManager::IsInputOnBeat() {
+    extern Coordinator g_coordinator;
+    auto audioSystem = g_coordinator.GetSystem<AudioManager>();
+
+    double musicPosition = audioSystem->GetMusicPosition();
+    double beatPosition = fmod(musicPosition, beatInterval);
+
+    return (beatPosition <= beatTolerance) || (beatPosition >= (beatInterval - beatTolerance));
+}
+
+void InputManager::ProcessRhythmTiming(int key) {
+    if (!canInput) return;
+
+    inputReceivedOnThisBeat = true;
+
+    if (currentComboSequence.empty()) {
+        comboStartBeat = currentBeatIndex;
+    }
+
+    currentComboSequence.push_back(key);
+    lastComboInputTime = GetInputTiming();
+
+    // Check if this completes a combo before showing feedback
+    bool comboCompleted = false;
+    std::string completedComboName = "";
+
+    for (const auto& combo : swordCombos) {
+        if (currentComboSequence.size() == combo.keySequence.size() &&
+            currentComboSequence == combo.keySequence) {
+            comboCompleted = true;
+            completedComboName = combo.name;
+            break;
+        }
+    }
+
+    std::string feedback = GetTimingFeedback();
+
+    if (comboCompleted) {
+        // Only show timing + combo name for successful combos
+        std::cout << "[" << feedback << " - " << completedComboName << "] Key: " << KeyToString(key) << std::endl;
+    }
+    else {
+        // For non-completing keys, just show timing feedback
+        std::cout << "[" << feedback << "] Key: " << KeyToString(key) << std::endl;
     }
 }
 
-std::string InputManager::GetComboQuality(double actualTime, double maxTime) const {
-    double ratio = actualTime / maxTime;
+void InputManager::CheckForMissedBeat() {
+    if (!canInput) return;
 
-    if (ratio <= 0.3) {
-        return "PERFECT";
+    extern Coordinator g_coordinator;
+    auto audioSystem = g_coordinator.GetSystem<AudioManager>();
+    if (!audioSystem) return;
+
+    double currentTime = audioSystem->GetMusicPosition();
+
+    // Simple guard: only advance beat if enough time has passed
+    if (currentTime - lastBeatTime < beatInterval) {
+        return; // Not enough time passed for next beat
     }
-    else if (ratio <= 0.6) {
-        return "GREAT";
+
+    // Update beat tracking
+    lastBeatTime = currentTime - fmod(currentTime, beatInterval);
+    currentBeatIndex++;
+
+    // --- Countdown phase ---
+    if (inCountdown) {
+        if (countdownBeats > 0) {
+            std::cout << "[COUNTDOWN] " << countdownBeats << ".." << std::endl;
+            countdownBeats--;
+            inputReceivedOnThisBeat = false;
+            return;
+        }
+        else {
+            // Countdown finished
+            inCountdown = false;
+            currentBeatIndex = 1;
+            comboStartBeat = 1;
+            inputReceivedOnThisBeat = false;
+            return;
+        }
     }
-    else if (ratio <= 0.9) {
-        return "GOOD";
+
+    // --- Normal gameplay beats ---
+    int beatInWindow = (currentBeatIndex - comboStartBeat) % maxComboBeats;
+
+    if (beatInWindow < maxComboBeats - 1) {
+        // Check if input was received BEFORE printing INCOMING
+        if (!inputReceivedOnThisBeat) {
+            std::cout << "[INCOMING] Beat " << (beatInWindow + 1)
+                << " / " << maxComboBeats << std::endl;
+        }
     }
     else {
-        return "SLOW";
+        // End of 4-beat window
+        if (successfulCombosThisWindow == 0) {
+            playerChances--;
+            std::cout << "[MISS] No valid combo completed | Chances left: "
+                << playerChances << std::endl;
+        }
+
+        currentComboSequence.clear();
+        comboStartBeat = currentBeatIndex + 1;
+        successfulCombosThisWindow = 0;
     }
+
+    if (playerChances <= 0) {
+        canInput = false;
+        std::cout << "[YOU DIED!] No more chances." << std::endl;
+        if (audioSystem) audioSystem->StopMusic();
+    }
+
+    // Reset flag AFTER all processing is done
+    inputReceivedOnThisBeat = false;
 }

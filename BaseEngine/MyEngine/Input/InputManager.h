@@ -1,9 +1,8 @@
 // ==================================================================================
 // InputManager.h
 // Author: Chloe Lau Rey En
-// Brief: InputManager handles rhythm inputs and sord combos.
-//        Inherits from Systems for ECS compatibility but operates 
-//        independently from SystemManager.
+// Brief: InputManager handles rhythm inputs and sword combos.
+//        ECS-compatible but can also operate independently.
 // ==================================================================================
 
 #pragma once
@@ -15,7 +14,9 @@
 #include <functional>
 #include "Core/System.h"
 
-// Input event structure for potential future ECS integration
+// -----------------------------------------------------------------------------
+// InputEvent structure for ECS communication
+// -----------------------------------------------------------------------------
 struct InputEvent {
     enum class Type {
         RHYTHM_INPUT,
@@ -31,27 +32,51 @@ struct InputEvent {
     std::string comboName;
 
     InputEvent(Type t, int k, double time, const std::string& fb = "")
-        : type(t), key(k), timestamp(time), mouseX(0), mouseY(0), feedback(fb), comboName("") {
+        : type(t), key(k), timestamp(time),
+        mouseX(0), mouseY(0), feedback(fb), comboName("") {
     }
 
     InputEvent(Type t, double x, double y, double time)
-        : type(t), key(0), timestamp(time), mouseX(x), mouseY(y), feedback(""), comboName("") {
+        : type(t), key(0), timestamp(time),
+        mouseX(x), mouseY(y), feedback(""), comboName("") {
     }
 };
 
-// Callback type for future system communication
 using InputCallback = std::function<void(const InputEvent&)>;
 
+// -----------------------------------------------------------------------------
+// InputManager class
+// -----------------------------------------------------------------------------
 class InputManager : public Systems {
 public:
     InputManager();
     ~InputManager();
 
     void Initialize(GLFWwindow* window);
-    void Update(); // ECS-style update method
+    void Update();
     void Shutdown();
 
-    // Basic input detection - ECS systems can query these
+    // -------------------------------------------------
+    // Rhythm game configuration
+    // -------------------------------------------------
+    float songBPM = 70.0f;
+    float beatInterval = 60.0f / songBPM; // seconds per beat
+    float beatTolerance = 0.2f;           // timing window
+    int playerChances = 3;
+    bool canInput = true;
+    int maxComboBeats = 4;     // must finish within 4 beats
+
+    bool CanInput() const { return canInput; }
+
+    // -------------------------------------------------
+    // ECS / Input Event communication
+    // -------------------------------------------------
+    void RegisterInputListener(const std::string& systemName, InputCallback callback);
+    void UnregisterInputListener(const std::string& systemName);
+
+    // -------------------------------------------------
+    // Input querying (for other systems)
+    // -------------------------------------------------
     bool IsKeyPressed(int key) const;
     bool IsKeyJustPressed(int key) const;
     bool IsKeyReleased(int key) const;
@@ -61,21 +86,17 @@ public:
     void GetMouseDelta(double& deltaX, double& deltaY) const;
     void SetMouseSensitivity(float sensitivity);
 
-    // Rhythm game specific methods - for game systems to use
+    // -------------------------------------------------
+    // Rhythm gameplay methods
+    // -------------------------------------------------
     bool IsRhythmKeyPressed(int key) const;
     bool IsAiming() const;
     double GetInputTiming() const;
     int GetCurrentWeaponSelected() const;
+    bool IsInputOnBeat();
+    void ProcessRhythmTiming(int key);
 
-    // event system methods
-    void RegisterInputListener(const std::string& systemName, InputCallback callback);
-    void UnregisterInputListener(const std::string& systemName);
-
-    // M1 testing and statistics
-    //void RunM1Test();
-    //void DisplayInputStats() const;
-
-    // Public access to combo stats for other systems
+    // Combo stats
     int GetTotalCombos() const { return totalCombosAttempted; }
     int GetSuccessfulCombos() const { return successfulCombos; }
     double GetComboSuccessRate() const {
@@ -83,23 +104,37 @@ public:
     }
 
 private:
+    // -------------------------------------------------
     // Core input state
-    GLFWwindow* window;
+    // -------------------------------------------------
+    GLFWwindow* window = nullptr;
     bool currentKeys[GLFW_KEY_LAST + 1];
     bool previousKeys[GLFW_KEY_LAST + 1];
     bool currentMouse[GLFW_MOUSE_BUTTON_LAST + 1];
     bool previousMouse[GLFW_MOUSE_BUTTON_LAST + 1];
 
-    // Mouse state
-    double mouseX, mouseY;
-    double previousMouseX, previousMouseY;
-    float mouseSensitivity;
-    bool isFirstMouse;
+    // Mouse
+    double mouseX = 0.0, mouseY = 0.0;
+    double previousMouseX = 0.0, previousMouseY = 0.0;
+    float mouseSensitivity = 1.0f;
+    bool isFirstMouse = true;
 
-    // ECS integration - for future system communication
+    // Beat tracking
+    int currentBeatIndex = 0;
+    int comboStartBeat = -1;
+    double lastBeatTime = 0.0;
+    bool inputReceivedOnThisBeat = false;
+
+    // Countdown state
+    bool inCountdown = true;
+    int countdownBeats = 4;   // 4..3..2..1..
+
+    // ECS callbacks
     std::unordered_map<std::string, InputCallback> inputListeners;
 
-    // Sword combo system
+    // -------------------------------------------------
+    // Combos
+    // -------------------------------------------------
     struct SwordCombo {
         std::vector<int> keySequence;
         std::string name;
@@ -112,32 +147,29 @@ private:
 
     std::vector<SwordCombo> swordCombos;
     std::vector<int> currentComboSequence;
-    double lastComboInputTime;
-    double comboTimeout;
+    double lastComboInputTime = 0.0;
+    double comboTimeout = 2.0;
 
-    // Statistics for ECS systems to access
-    int totalRhythmInputs;
-    int accurateRhythmInputs;
-    int totalCombosAttempted;
-    int successfulCombos;
+    // -------------------------------------------------
+    // Stats
+    // -------------------------------------------------
+    int totalRhythmInputs = 0;
+    int accurateRhythmInputs = 0;
+    int totalCombosAttempted = 0;
+    int successfulCombos = 0;
+    int successfulCombosThisWindow = 0;
 
-    // M1 testing
-    bool m1TestMode;
-    double lastStatusTime;
-
-    // Internal ECS-compatible methods
+    // -------------------------------------------------
+    // Internal helpers
+    // -------------------------------------------------
     void UpdateInputStates();
     void ProcessRhythmInputs();
     void ProcessComboInputs();
     void ProcessMouseInputs();
     void BroadcastInputEvent(const InputEvent& event);
     void InitializeSwordCombos();
-
-    // Helper methods for feedback
-    std::string GetTimingFeedback() const;
-    std::string GetComboQuality(double actualTime, double maxTime) const;
-
-    // Internal state management
+    std::string GetTimingFeedback();
     void UpdateKeyStates();
     void UpdateMouseStates();
+    void CheckForMissedBeat();
 };

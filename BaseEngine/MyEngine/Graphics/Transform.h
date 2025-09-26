@@ -61,6 +61,9 @@ namespace Framework
         std::string GetSprite() const;
 
         bool isVisible = true; // Used for input detect purpose
+        float visibilityTimer = 0.0f; // Used for input detect purpose
+        bool autoHide = false; // Used for input detect purpose
+
         // Register these components in your initialization code:
         //void Serialize(Value& data, Document::AllocatorType& alloc) override;
         //void Deserialize(Value& data);
