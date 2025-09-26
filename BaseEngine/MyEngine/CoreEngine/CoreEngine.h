@@ -12,7 +12,6 @@ public:
 	void Init();
 	void Setup();
 	void Update(float dt);
-	void Render();
 	void GameLoop();
 	void Exit();
 

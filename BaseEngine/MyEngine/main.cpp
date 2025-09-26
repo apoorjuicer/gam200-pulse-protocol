@@ -56,7 +56,6 @@ struct GameStates {
 } gamestate;
 
 CoreEngine Engine;
-Coordinator g_coordinator;
 //InputManager* g_inputSystem = nullptr;
 //GraphicsManager* g_graphicsSystem = nullptr;
 
@@ -70,6 +69,11 @@ int main() {
     // REMOVE those calls from CoreEngine::Init() or call Engine.Init() *here* only
     // for non-GL things:
     Engine.Init(); // <-- only if it does NOT touch OpenGL
+
+    //Hero cheese{};
+    //cheese.pos = { 700,500 };
+    //int hero = g_coordinator.CreateEntity();
+    //g_coordinator.AddComponent(hero, cheese);  
 
 
     Framework::Transform tr{};            // fill in fields as your renderer expects
@@ -95,9 +99,9 @@ int main() {
     tr.animationSpeed = 0.0f;        // static
 
     // a valid GL texture id. Use your loader or 0 if you just want a colored quad.
-    tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
-    int entity = g_coordinator.CreateEntity();
-    g_coordinator.AddComponent(entity, tr);  // <-- add Transform
+    //tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
+    //int entity = g_coordinator.CreateEntity();
+    //g_coordinator.AddComponent(entity, tr);  // <-- add Transform
 
     // this is where the update() is 
     Engine.GameLoop();

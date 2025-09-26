@@ -9,7 +9,8 @@ public:
     // make an instance of g_coordinator
     static T* GetInstance()
     {
-        static T instance; // creates instance once
+        // creates instance once
+        static T instance; 
 
         return &instance; 
     }

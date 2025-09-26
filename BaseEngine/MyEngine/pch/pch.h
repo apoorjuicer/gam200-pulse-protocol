@@ -50,7 +50,7 @@
 #include "../MyEngine/Core/Types.h"
 #include "../MyEngine/Core/Window.h"
 #include "../MyEngine/Core/System.h"
-#include "../MyEngine/Core/Assets.h"
+//#include "../MyEngine/Core/Assets.h"
 #include "../MyEngine/Core/Singleton.h"
 #include "../MyEngine/Core/Coordinator.h"
 #include "../MyEngine/Core/SystemManager.h"

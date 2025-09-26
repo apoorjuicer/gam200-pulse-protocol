@@ -259,10 +259,9 @@ void GLApp::draw(std::set<Entity> entities) {
     }*/
 
 
-    extern Coordinator g_coordinator;
     for (auto it : entities)
     {
-        if (auto* tr = g_coordinator.TryGetComponent<Framework::Transform>(it))
+        if (auto* tr = Coordinator::GetInstance()->TryGetComponent<Framework::Transform>(it))
         {
             transObj.push_back(tr);
         }
