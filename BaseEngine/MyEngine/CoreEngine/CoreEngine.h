@@ -37,6 +37,6 @@ private:
 
 //A global pointer to the instance of the core
 extern CoreEngine* Core;
-
 constexpr int WindowWidth = 800;
 constexpr int WindowHeight = 1400;
+

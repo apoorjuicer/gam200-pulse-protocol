@@ -1,5 +1,6 @@
 #include <windows.h>   // for OutputDebugString, etc.
 #include "pch/pch.h"
+#pragma comment(lib, "winmm.lib")
 
 //Coordinator g_coordinator;
 //extern InputManager* g_inputSystem;
@@ -8,9 +9,6 @@
 //A global pointer to the core
 CoreEngine* Engine;
 extern Coordinator g_coordinator;
-extern InputManager* g_inputSystem;
-//extern AudioManager* g_audioSystem;
-
 
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
