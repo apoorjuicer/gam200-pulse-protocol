@@ -168,6 +168,8 @@ void GLApp::updateAnimation(Framework::Transform& x) {
 }
 
 void GLApp::drawTrans(Framework::Transform &x) {
+    shdrpgms[static_cast<uint64_t>(x.shd_ref)].Use();
+
     GLint uniform_var_loc1 = -1;
     GLint uOffsetLoc = -1;
     GLint uScaleLoc = -1;
@@ -181,7 +183,7 @@ void GLApp::drawTrans(Framework::Transform &x) {
     float uOffsetY = 1.0f - ((x.currentFrame / x.columns + 1) * frameHeight); // Vertical offset (top-to-bottom)
 
     //// Part 3
-    if (x.shd_ref == 1) {
+    if (x.shd_ref == 1 || x.shd_ref == 0) {
         uOffsetLoc = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uOffset");
         uScaleLoc = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uScale");
         uniform_var_loc1 = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uModel_to_NDC");
@@ -216,7 +218,7 @@ void GLApp::draw(std::set<Entity> entities) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
     glClearDepth(1.0f);
-    shdrpgms[0].Use();
+    //shdrpgms[0].Use();
     transObj.clear();
 
     extern Coordinator g_coordinator;

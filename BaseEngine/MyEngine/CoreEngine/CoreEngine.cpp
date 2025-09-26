@@ -118,15 +118,25 @@ void CoreEngine::Init()
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
 	g_inputSystem->RegisterInputListener("CoreEngine", [](const InputEvent& event) {
+		if (event.type == InputEvent::Type::RHYTHM_INPUT) {
+			if (event.key == GLFW_KEY_Q) {
+				auto* g_coordinator = Coordinator::GetInstance();
+				// Toggle existing box visibility (entity 0)
+				auto& boxTransform = g_coordinator->GetComponent<Framework::Transform>(0);
+				boxTransform.isVisible = !boxTransform.isVisible;
+				std::cout << "[BOX] Toggled visibility: " << (boxTransform.isVisible ? "VISIBLE" : "HIDDEN") << std::endl;
+			}
+
+			// General input logging for all rhythm keys
+			std::cout << "[INPUT] Key pressed: " << event.key
+				<< " | Timing: " << event.feedback << std::endl;
+		}
+
 		if (event.type == InputEvent::Type::COMBO_EXECUTED) {
 			std::cout << "[COMBO SUCCESS] " << event.comboName
 				<< " with quality: " << event.feedback << std::endl;
 		}
-		if (event.type == InputEvent::Type::RHYTHM_INPUT) {
-			std::cout << "[INPUT] Key pressed: " << event.key
-				<< " | Timing: " << event.feedback << std::endl;
-		}
-		});
+	});
 
 	g_graphicsSystem->Initialize();
 	g_audioSystem->Initialize(); 
