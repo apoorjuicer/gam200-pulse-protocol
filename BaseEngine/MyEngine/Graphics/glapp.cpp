@@ -8,10 +8,7 @@
 **********************************************************************************************/
 #include "glapp.h"
 #include "DebugDraw.h"
-//#include "../Managers/LevelManager.h"
-//#include "../ComponentJson/Component_System.h"
 //#include "../Managers/AssetsManager.h"
-//#include "../Engine/Core.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"

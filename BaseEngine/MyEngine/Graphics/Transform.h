@@ -4,7 +4,7 @@
  \author    Goh Pin Kai (pinkai.g@digipen.edu) 100%
 
 
-\copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.
+\copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
 **********************************************************************************************/
 #pragma once
 //#include "../ComponentJson/Component_System.h"
