@@ -48,7 +48,7 @@ namespace Framework
         int totalFrames = 6;          // Total frames in the sprite sheet
         int columns = 1;              // Columns in the sprite sheet
         int rows = 1;                 // Rows in the sprite sheet
-        float animationSpeed = 7.f;
+        float animationSpeed = 2.f;
 
         Transform();
         ~Transform();
