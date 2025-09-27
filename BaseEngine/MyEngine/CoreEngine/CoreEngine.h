@@ -12,6 +12,7 @@ public:
 	void Init();
 	void Setup();
 	void Update(float dt);
+	void Render();
 	void GameLoop();
 	void Exit();
 
@@ -22,7 +23,7 @@ public:
 	bool IsGameRunning() const { return GameRunning; }
 
 	GLFWwindow* GetWindow() const { return window; }
-	
+
 private:
 	bool GameRunning;
 	bool DebugMode;

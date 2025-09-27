@@ -4,7 +4,7 @@
  \author    Goh pin Kai (pinkai.g@digipen.edu)
 
 
-\copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
+\copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.
 **********************************************************************************************/
 #pragma once
 #ifndef GLAPP_H

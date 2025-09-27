@@ -8,7 +8,10 @@
 **********************************************************************************************/
 #include "glapp.h"
 #include "DebugDraw.h"
+//#include "../Managers/LevelManager.h"
+//#include "../ComponentJson/Component_System.h"
 //#include "../Managers/AssetsManager.h"
+//#include "../Engine/Core.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -61,7 +64,6 @@ const std::string font_fs = {
 double random() {
     return static_cast<double>((rand() % 10) / 10.0f);
 }
-
 
 GLApp::GLModel GLApp::mdl;
 GLApp::TranslationBuf GLApp::tb;
@@ -130,7 +132,6 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
     glNamedBufferSubData(tb.translationBuffer, 0, tb.translationBufferSize, tb.position_scale.data());
 }
 
-
 void GLApp::update() {
     //if (GLHelper::keystateP == GL_TRUE) {
     //    if (polygonmode == 0) {
@@ -167,6 +168,8 @@ void GLApp::updateAnimation(Framework::Transform& x) {
 }
 
 void GLApp::drawTrans(Framework::Transform &x) {
+    shdrpgms[static_cast<uint64_t>(x.shd_ref)].Use();
+
     GLint uniform_var_loc1 = -1;
     GLint uOffsetLoc = -1;
     GLint uScaleLoc = -1;
@@ -180,7 +183,7 @@ void GLApp::drawTrans(Framework::Transform &x) {
     float uOffsetY = 1.0f - ((x.currentFrame / x.columns + 1) * frameHeight); // Vertical offset (top-to-bottom)
 
     //// Part 3
-    if (x.shd_ref == 1) {
+    if (x.shd_ref == 1 || x.shd_ref == 0) {
         uOffsetLoc = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uOffset");
         uScaleLoc = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uScale");
         uniform_var_loc1 = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uModel_to_NDC");
@@ -191,10 +194,8 @@ void GLApp::drawTrans(Framework::Transform &x) {
     if (uScaleLoc >= 0)
         glUniform2f(uScaleLoc, frameWidth, frameHeight);
     if (uniform_var_loc1 >= 0) {
-        //glm::mat3x3 mdl_to_ndc_xform = static_cast<glm::mat3x3>(x.mdl_to_ndc_xform);
-        //glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
-
-        glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, x.mdl_to_ndc_xform.Begin());
+        glm::mat3x3 mdl_to_ndc_xform = static_cast<glm::mat3x3>(x.mdl_to_ndc_xform);
+        glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
     }
     else
     {
@@ -217,22 +218,24 @@ void GLApp::draw(std::set<Entity> entities) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
     glClearDepth(1.0f);
-    shdrpgms[0].Use();
+    //shdrpgms[0].Use();
     transObj.clear();
-    auto* g_coordinator = Coordinator::GetInstance();
-    //extern Coordinator g_coordinator;
+
+    extern Coordinator g_coordinator;
     for (auto it : entities)
     {
-        if (auto* tr = g_coordinator->TryGetComponent<Framework::Transform>(it))
+        if (auto* tr = g_coordinator.TryGetComponent<Framework::Transform>(it))
         {
             transObj.push_back(tr);
         }
     }
 
     for (auto x : transObj) {
-        updateAnimation(*x);
-        glBindTexture(GL_TEXTURE_2D, x->textureID);
-        drawTrans(*x);
+        if (x->isVisible) {
+            updateAnimation(*x);
+            glBindTexture(GL_TEXTURE_2D, x->textureID);
+            drawTrans(*x);
+        }
     }
 
 	//Polygon mode
@@ -416,7 +419,7 @@ GLApp::GLModel GLApp::box_model() {
     GLApp::GLModel quad{};
     quad.vaoid = vaoid;
     //quad.primitive_type = GL_TRIANGLE_STRIP;
-    // quad.primitive_type = GL_TRIANGLES;      
+    quad.primitive_type = GL_TRIANGLES;      
     quad.draw_cnt = static_cast<GLuint>(idx_vtx.size());
     
     quad.primitive_cnt = 2;

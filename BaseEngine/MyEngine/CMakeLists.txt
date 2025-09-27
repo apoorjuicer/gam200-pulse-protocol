@@ -29,9 +29,6 @@ target_include_directories(${ENGINE_NAME} PUBLIC ${GLEW_SOURCE_DIR}/include)
 # Link GLFW and GLEW to the engine
 target_link_libraries(${ENGINE_NAME} PUBLIC glfw libglew_static)
 
-# Link Freetype to the engine
-target_link_libraries(MyEngine PRIVATE Freetype::Freetype)
-
 # Include directories for FMOD
 target_include_directories(${ENGINE_NAME} PUBLIC 
     ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/core/inc
