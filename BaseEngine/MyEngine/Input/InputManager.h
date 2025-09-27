@@ -1,4 +1,4 @@
-// ==================================================================================
+==================================================================================
 // InputManager.h
 // Author: Chloe Lau Rey En
 // Brief: InputManager handles rhythm inputs and sword combos.

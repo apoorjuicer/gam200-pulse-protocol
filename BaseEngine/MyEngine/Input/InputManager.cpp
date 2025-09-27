@@ -1,4 +1,4 @@
-// ==================================================================================
+==================================================================================
 // InputManager.cpp  
 // Author: Chloe Lau Rey En
 // Brief: Implementation of InputManager class with frame-based input detection.
@@ -189,7 +189,7 @@ void InputManager::ProcessComboInputs() {
             }
             if (matches) {
                 isValidPrefix = true;
-                break; 
+                break;
             }
         }
     }
