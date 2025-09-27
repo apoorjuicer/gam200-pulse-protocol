@@ -1,9 +1,8 @@
 // ==================================================================================
 // InputManager.h
 // Author: Chloe Lau Rey En
-// Brief: Header file for InputManager class providing keyboard and mouse input 
-//        handling for rhythm-action game. Supports Q/W/E/R rhythm inputs, 
-//        1/2/3 weapon switching, and mouse aiming functionality.
+// Brief: InputManager handles rhythm inputs and sword combos.
+//        ECS-compatible but can also operate independently.
 // ==================================================================================
 
 #pragma once
@@ -12,61 +11,162 @@
 #include "Core/System.h"
 #include "Core/SystemManager.h"
 
+// -----------------------------------------------------------------------------
+// InputEvent structure for ECS communication
+// -----------------------------------------------------------------------------
+struct InputEvent {
+    enum class Type {
+        RHYTHM_INPUT,
+        COMBO_EXECUTED,
+        MOUSE_INPUT
+    };
 
-// input manager handles keyboard input and mouse input states
-// provides frame-based input detection and rhythm game timing support
-class InputManager : public Systems
-{
+    Type type;
+    int key;
+    double timestamp;
+    double mouseX, mouseY;
+    std::string feedback;
+    std::string comboName;
+
+    InputEvent(Type t, int k, double time, const std::string& fb = "")
+        : type(t), key(k), timestamp(time),
+        mouseX(0), mouseY(0), feedback(fb), comboName("") {
+    }
+
+    InputEvent(Type t, double x, double y, double time)
+        : type(t), key(0), timestamp(time),
+        mouseX(x), mouseY(y), feedback(""), comboName("") {
+    }
+};
+
+using InputCallback = std::function<void(const InputEvent&)>;
+
+// -----------------------------------------------------------------------------
+// InputManager class
+// -----------------------------------------------------------------------------
+class InputManager : public Systems {
 public:
 	InputManager();
 	~InputManager(); // destructor
 
-	void Initialize(GLFWwindow* window);
-	void Update();
-	void Shutdown();
+    void Initialize(GLFWwindow* window);
+    void Update();
+    void Shutdown();
 
-	// basic input detection
-	bool IsKeyPressed(int key);
-	bool IsKeyJustPressed(int key);
-	bool IsKeyReleased(int key);
+    // -------------------------------------------------
+    // Rhythm game configuration
+    // -------------------------------------------------
+    float songBPM = 70.0f;
+    float beatInterval = 60.0f / songBPM; // seconds per beat
+    float beatTolerance = 0.2f;           // timing window
+    int playerChances = 3;
+    bool canInput = true;
+    int maxComboBeats = 4;     // must finish within 4 beats
 
-	bool IsMousePressed(int button);
-	bool IsMouseJustPressed(int button);
+    bool CanInput() const { return canInput; }
 
-	// mouse tracking
-	void GetMousePosition(double& x, double &y);
-	void GetMouseDelta(double& deltaX, double& deltaY);
-	void SetMouseSensitivity(float sensitivity);
+    // -------------------------------------------------
+    // ECS / Input Event communication
+    // -------------------------------------------------
+    void RegisterInputListener(const std::string& systemName, InputCallback callback);
+    void UnregisterInputListener(const std::string& systemName);
 
-	// specific rhythm game functions 
-	bool IsRhythmKeyPressed(int key); // Q-W-E-R for the rhythm beats (max 4 beats) 
-	bool IsWeaponSwitchPressed(int key); // 1-2-3 for weapon switching
-	int GetCurrentWeaponSelected(); // gets the value of the weapon currently selected
-	bool IsAiming();
-	double GetInputTiming();
+    // -------------------------------------------------
+    // Input querying (for other systems)
+    // -------------------------------------------------
+    bool IsKeyPressed(int key) const;
+    bool IsKeyJustPressed(int key) const;
+    bool IsKeyReleased(int key) const;
+    bool IsMousePressed(int button) const;
+    bool IsMouseJustPressed(int button) const;
+    void GetMousePosition(double& x, double& y) const;
+    void GetMouseDelta(double& deltaX, double& deltaY) const;
+    void SetMouseSensitivity(float sensitivity);
 
-	// for M1 test
-	void RunM1Test();
+    // -------------------------------------------------
+    // Rhythm gameplay methods
+    // -------------------------------------------------
+    bool IsRhythmKeyPressed(int key) const;
+    bool IsAiming() const;
+    double GetInputTiming() const;
+    int GetCurrentWeaponSelected() const;
+    bool IsInputOnBeat();
+    void ProcessRhythmTiming(int key);
+
+    // Combo stats
+    int GetTotalCombos() const { return totalCombosAttempted; }
+    int GetSuccessfulCombos() const { return successfulCombos; }
+    double GetComboSuccessRate() const {
+        return totalCombosAttempted > 0 ? (double)successfulCombos / totalCombosAttempted : 0.0;
+    }
 
 private:
-	GLFWwindow* window;
+    // -------------------------------------------------
+    // Core input state
+    // -------------------------------------------------
+    GLFWwindow* window = nullptr;
+    bool currentKeys[GLFW_KEY_LAST + 1];
+    bool previousKeys[GLFW_KEY_LAST + 1];
+    bool currentMouse[GLFW_MOUSE_BUTTON_LAST + 1];
+    bool previousMouse[GLFW_MOUSE_BUTTON_LAST + 1];
 
-	// tracking of the differnt input states
-	bool currentKeys[GLFW_KEY_LAST + 1];
-	bool previousKeys[GLFW_KEY_LAST + 1];
-	bool currentMouse[GLFW_MOUSE_BUTTON_LAST + 1];
-	bool previousMouse[GLFW_MOUSE_BUTTON_LAST + 1];
+    // Mouse
+    double mouseX = 0.0, mouseY = 0.0;
+    double previousMouseX = 0.0, previousMouseY = 0.0;
+    float mouseSensitivity = 1.0f;
+    bool isFirstMouse = true;
 
-	// for tracking of mouse
-	double mouseX, mouseY;
-	double previousMouseX, previousMouseY;
-	float mouseSensitivity;
-	bool isFirstMouse;
+    // Beat tracking
+    int currentBeatIndex = 0;
+    int comboStartBeat = -1;
+    double lastBeatTime = 0.0;
+    bool inputReceivedOnThisBeat = false;
 
-	// index of each weapon
-	int currentWeapon;  // 1 = Spear, 2 = Sword, 3 = Gun
+    // Countdown state
+    bool inCountdown = true;
+    int countdownBeats = 4;   // 4..3..2..1..
 
-	// internal helper func
-	void UpdateKeyStates();
-	void UpdateMouseStates();
+    // ECS callbacks
+    std::unordered_map<std::string, InputCallback> inputListeners;
+
+    // -------------------------------------------------
+    // Combos
+    // -------------------------------------------------
+    struct SwordCombo {
+        std::vector<int> keySequence;
+        std::string name;
+        double maxTimeBetweenInputs;
+
+        SwordCombo(const std::vector<int>& keys, const std::string& n, double maxTime)
+            : keySequence(keys), name(n), maxTimeBetweenInputs(maxTime) {
+        }
+    };
+
+    std::vector<SwordCombo> swordCombos;
+    std::vector<int> currentComboSequence;
+    double lastComboInputTime = 0.0;
+    double comboTimeout = 2.0;
+
+    // -------------------------------------------------
+    // Stats
+    // -------------------------------------------------
+    int totalRhythmInputs = 0;
+    int accurateRhythmInputs = 0;
+    int totalCombosAttempted = 0;
+    int successfulCombos = 0;
+    int successfulCombosThisWindow = 0;
+
+    // -------------------------------------------------
+    // Internal helpers
+    // -------------------------------------------------
+    void UpdateInputStates();
+    void ProcessRhythmInputs();
+    void ProcessComboInputs();
+    void ProcessMouseInputs();
+    void BroadcastInputEvent(const InputEvent& event);
+    void InitializeSwordCombos();
+    std::string GetTimingFeedback();
+    void UpdateKeyStates();
+    void UpdateMouseStates();
+    void CheckForMissedBeat();
 };

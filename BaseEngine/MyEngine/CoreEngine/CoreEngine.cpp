@@ -120,11 +120,33 @@ void CoreEngine::Init()
 
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
+	g_inputSystem->RegisterInputListener("CoreEngine", [](const InputEvent& event) {
+		if (event.type == InputEvent::Type::RHYTHM_INPUT) {
+			auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
+			if (!g_inputSystem || !g_inputSystem->CanInput()) {
+				std::cout << "[GAME OVER] No more chances!" << std::endl;
+				return; // ignore input if game over
+			}
+
+			auto& boxTransform = g_coordinator.GetComponent<Framework::Transform>(0);
+			boxTransform.isVisible = true;
+			boxTransform.visibilityTimer = 0.5f;
+			boxTransform.autoHide = true;
+
+			auto g_audioSystem = g_coordinator.GetSystem<AudioManager>();
+			if (g_audioSystem) {
+				g_audioSystem->PlayInputSFX(1.0f);
+			}
+		}
+	});
+
 	g_graphicsSystem->Initialize();
 	g_audioSystem->Initialize(); 
 	g_coordinator->InitializeAllSystems();
 
     std::cout << "Engine initialized." << std::endl;
+	std::cout << "Input system ready for rhythm gameplay." << std::endl;
+	
     std::cout << "\n=== M1 INPUT SYSTEM DEMO ===" << std::endl;
     std::cout << "SPACE -> Primary rhythm beat input" << std::endl;
     std::cout << "A/S/D -> Weapon combo keys" << std::endl;
@@ -168,7 +190,16 @@ void CoreEngine::Setup()
 
 void CoreEngine::Update(float dt)
 {
-    auto g_coordinator = Coordinator::GetInstance();
+	auto& boxTransform = g_coordinator.GetComponent<Framework::Transform>(0);
+	if (boxTransform.autoHide && boxTransform.isVisible) {
+		boxTransform.visibilityTimer -= dt;
+		if (boxTransform.visibilityTimer <= 0.0f) {
+			boxTransform.isVisible = false;
+			boxTransform.autoHide = false;
+		}
+	}
+
+	auto g_coordinator = Coordinator::GetInstance();
 	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
@@ -176,15 +207,11 @@ void CoreEngine::Update(float dt)
 	if (g_inputSystem) {
 		// Update input system
 		g_inputSystem->Update();
-		g_audioSystem->Update();  
-
-		// Run M1 testing demonstrations
-		g_inputSystem->RunM1Test();
-
 	}
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Update();
 	}
+		//g_audioSystem->Update();  
 
 	g_coordinator->UpdateAllSystems(dt);
 }
@@ -244,28 +271,27 @@ void CoreEngine::Exit()
 
 	if (g_inputSystem) {
 		g_inputSystem->Shutdown();
-		//delete g_inputSystem;
-		//g_inputSystem = nullptr;
-	}
-
-	if (g_audioSystem) {
-		g_audioSystem->Shutdown();
-		//delete g_audioSystem;
-		//g_audioSystem = nullptr;
 	}
 
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Shutdown();
-		//delete g_graphicsSystem;
-		//g_graphicsSystem = nullptr;
 	}
 
-    if (window)
-    {
-        glfwDestroyWindow(window);
-        window = nullptr;
-    }
-    glfwTerminate();
+	if (g_audioSystem) {
+		g_audioSystem->Shutdown();
+
+	}
+	
+	//if (g_audioSystem) {
+	//	g_audioSystem->Shutdown();
+	//}
+
+	if (window)
+	{
+		glfwDestroyWindow(window);
+		window = nullptr;
+	}
+	glfwTerminate();
 }
 
 
