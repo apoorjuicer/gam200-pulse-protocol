@@ -56,7 +56,6 @@ struct GameStates {
 } gamestate;
 
 CoreEngine Engine;
-Coordinator g_coordinator;
 //InputManager* g_inputSystem = nullptr;
 //GraphicsManager* g_graphicsSystem = nullptr;
 
@@ -77,14 +76,14 @@ int main() {
     // After registering components (including Framework::Transform) and creating the entity:
 
     // where to draw (your update() normalizes by 1600x900)
-    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900 “virtual” screen
+    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900 ï¿½virtualï¿½ screen
     tr.Scale = { 128.0f, 128.0f };   // size in pixels in that same space
     tr.angle_disp = 0.0f;           // degrees
     tr.angle_speed = 0.0f;           // no rotation
 
     // model & shader indices (you push models: 0=bg, 1=box; shaders: 0=test,1=bg,2=sprite,3=font)
-    tr.mdl_ref = 0.0f;               // box_model()
-    tr.shd_ref = 0.0f;               // sprite shader
+    tr.mdl_ref = 0.0f;               // bg_model()
+    tr.shd_ref = 0.0f;               // test shader
     // NOTE: In drawTrans() you currently check `if (x.shd_ref == 1)` before grabbing uniforms.
     // Either change that `1` to `2`, or set `tr.shd_ref = 1` if your bg shader has those uniforms.
 
@@ -95,9 +94,10 @@ int main() {
     tr.animationSpeed = 0.0f;        // static
 
     // a valid GL texture id. Use your loader or 0 if you just want a colored quad.
-    tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
-    int entity = g_coordinator.CreateEntity();
-    g_coordinator.AddComponent(entity, tr);  // <-- add Transform
+    //tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
+    auto* g_coordinator = Coordinator::GetInstance();
+    int entity = g_coordinator->CreateEntity();
+    g_coordinator->AddComponent(entity, tr);  // <-- add Transform
 
     // this is where the update() is 
     Engine.GameLoop();
