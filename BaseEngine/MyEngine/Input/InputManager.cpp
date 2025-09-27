@@ -1,8 +1,7 @@
 // ==================================================================================
 // InputManager.cpp  
 // Author: Chloe Lau Rey En
-// Brief: Implementation of InputManager class with frame-based input detection.
-//        Handles rhythm gameplay inputs, weapon switching, mouse aiming.
+// Brief: Implementation of InputManager class with synchronized cycle timing
 // ==================================================================================
 
 #include "InputManager.h"
@@ -14,25 +13,20 @@ extern Coordinator g_coordinator;
 
 static std::string KeyToString(int key) {
     switch (key) {
-    case GLFW_KEY_Q: return "Q";
     case GLFW_KEY_W: return "W";
-    case GLFW_KEY_E: return "E";
-    case GLFW_KEY_SPACE: return "SPACE";
-    case GLFW_KEY_ESCAPE: return "ESC";
-    default: return std::to_string(key); // fallback for debugging
+    case GLFW_KEY_A: return "A";
+    case GLFW_KEY_S: return "S";
+    case GLFW_KEY_D: return "D";
+    default: return std::to_string(key);
     }
 }
 
-// -------------------------------------------------
-// Class Implementation
-// -------------------------------------------------
 InputManager::InputManager() : window(nullptr) {
     std::memset(currentKeys, 0, sizeof(currentKeys));
     std::memset(previousKeys, 0, sizeof(previousKeys));
-
     successfulCombos = 0;
     successfulCombosThisWindow = 0;
-
+    currentCyclePosition = 1;
     InitializeSwordCombos();
 }
 
@@ -48,18 +42,12 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     }
 
     std::cout << "[InputManager] Successfully initialized." << std::endl;
-    std::cout << "[COMBOS READY] Available combos: Basic Strike (Q->W), Swift Slash (Q->E), Power Combo (Q->W->E)" << std::endl;
+    std::cout << "[COMBOS READY] Available combos: Basic Strike (W->A), Swift Slash (S->D), Power Combo (A->S->D)" << std::endl;
 
-    currentBeatIndex = -4;  // Start at -4 so countdown can happen on beats -4, -3, -2, -1
+    currentBeatIndex = 0;
     comboStartBeat = -1;
     lastBeatTime = 0.0;
-
-    inCountdown = true;
-    countdownBeats = 4;
-
-    // Print first countdown immediately to sync with first beat
-    std::cout << "[COUNTDOWN] " << countdownBeats << ".." << std::endl;
-    countdownBeats--;
+    currentCyclePosition = 1;
 }
 
 void InputManager::Update() {
@@ -71,7 +59,7 @@ void InputManager::Update() {
     auto& transform = g_coordinator.GetComponent<Framework::Transform>(0);
 
     if (transform.autoHide && transform.isVisible) {
-        float dt = 0.016f; // approximately 60 FPS
+        float dt = 0.016f;
         transform.visibilityTimer -= dt;
         if (transform.visibilityTimer <= 0.0f) {
             transform.isVisible = false;
@@ -84,45 +72,31 @@ void InputManager::Shutdown() {
     if (window) {
         inputListeners.clear();
         window = nullptr;
-
         std::cout << "[InputManager] Shutdown completed." << std::endl;
     }
 }
 
-// -------------------------------------------------
-// System communication Implementation
-// -------------------------------------------------
 void InputManager::RegisterInputListener(const std::string& systemName, InputCallback callback) {
     inputListeners[systemName] = callback;
-    //std::cout << "[InputManager] ECS System '" << systemName << "' registered for input events" << std::endl;
 }
 
 void InputManager::UnregisterInputListener(const std::string& systemName) {
-    if (inputListeners.erase(systemName)) {
-        //std::cout << "[InputManager] ECS System '" << systemName << "' unregistered from input events" << std::endl;
-    }
+    inputListeners.erase(systemName);
 }
 
 void InputManager::BroadcastInputEvent(const InputEvent& event) {
-    // When broadcasting rhythm input, update the visual entity
     if (event.type == InputEvent::Type::RHYTHM_INPUT) {
         auto& transform = g_coordinator.GetComponent<Framework::Transform>(0);
-
-        // Show visual feedback
         transform.isVisible = true;
         transform.visibilityTimer = 0.5f;
         transform.autoHide = true;
     }
 
-    // Broadcast to all registered listeners
     for (const auto& [systemName, callback] : inputListeners) {
         callback(event);
     }
 }
 
-// -------------------------------------------------
-// Input Detection Implementation
-// -------------------------------------------------
 bool InputManager::IsKeyJustPressed(int key) const {
     if (key < 0 || key > GLFW_KEY_LAST) return false;
     return currentKeys[key] && !previousKeys[key];
@@ -133,28 +107,26 @@ double InputManager::GetInputTiming() const {
 }
 
 bool InputManager::IsRhythmKeyPressed(int key) const {
-    return (key == GLFW_KEY_Q || key == GLFW_KEY_W || key == GLFW_KEY_E) && IsKeyJustPressed(key);
+    return (key == GLFW_KEY_W || key == GLFW_KEY_A || key == GLFW_KEY_S || key == GLFW_KEY_D) && IsKeyJustPressed(key);
 }
 
-// -------------------------------------------------
-// Internal Helper Implementation
-// -------------------------------------------------
 void InputManager::UpdateInputStates() {
-    // Copy previous frame's key states
     std::memcpy(previousKeys, currentKeys, sizeof(currentKeys));
 
-    // Update current frame's key states
     for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++) {
         currentKeys[key] = (glfwGetKey(window, key) == GLFW_PRESS);
     }
 }
 
 void InputManager::ProcessRhythmInputs() {
-    const int rhythmKeys[] = { GLFW_KEY_Q, GLFW_KEY_W, GLFW_KEY_E };
-    for (int i = 0; i < 3; ++i) {
+    const int rhythmKeys[] = { GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D };
+
+    // Use the synchronized cycle position
+    bool inInputWindow = (currentCyclePosition >= 5 && currentCyclePosition <= 8);
+
+    for (int i = 0; i < 4; ++i) {
         if (IsKeyJustPressed(rhythmKeys[i])) {
-            // Only process input if not in countdown OR if countdown just ended
-            if (!inCountdown || (inCountdown && countdownBeats == 0)) {
+            if (inInputWindow) {
                 ProcessRhythmTiming(rhythmKeys[i]);
                 std::string feedback = GetTimingFeedback();
                 InputEvent rhythmEvent(InputEvent::Type::RHYTHM_INPUT, rhythmKeys[i], GetInputTiming(), feedback);
@@ -212,7 +184,7 @@ void InputManager::ProcessComboInputs() {
             }
             if (matches) {
                 isValidPrefix = true;
-                break; 
+                break;
             }
         }
     }
@@ -224,22 +196,25 @@ void InputManager::ProcessComboInputs() {
 
 void InputManager::InitializeSwordCombos() {
     swordCombos.clear();
-    swordCombos.emplace_back(std::vector<int>{GLFW_KEY_Q, GLFW_KEY_W}, "Basic Strike");
-    swordCombos.emplace_back(std::vector<int>{GLFW_KEY_Q, GLFW_KEY_E}, "Swift Slash");
-    swordCombos.emplace_back(std::vector<int>{GLFW_KEY_Q, GLFW_KEY_W, GLFW_KEY_E}, "Power Combo");
+    swordCombos.emplace_back(std::vector<int>{GLFW_KEY_W, GLFW_KEY_A}, "Basic Strike");
+    swordCombos.emplace_back(std::vector<int>{GLFW_KEY_S, GLFW_KEY_D}, "Swift Slash");
+    swordCombos.emplace_back(std::vector<int>{GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D}, "Power Combo");
 }
 
 std::string InputManager::GetTimingFeedback() {
     auto audioSystem = g_coordinator.GetSystem<AudioManager>();
 
+    if (!audioSystem) {
+        return "GOOD";
+    }
+
     double musicPosition = audioSystem->GetMusicPosition();
     double beatPosition = fmod(musicPosition, beatInterval);
-
     double distance = std::min(beatPosition, fabs(beatInterval - beatPosition));
 
-    if (distance <= 0.05) return "PERFECT";  // very tight
-    if (distance <= 0.15) return "GOOD";     // slightly off
-    return "MISS";                           // outside tolerance
+    if (distance <= 0.05) return "PERFECT";
+    if (distance <= 0.15) return "GOOD";
+    return "MISS";
 }
 
 void InputManager::ProcessRhythmTiming(int key) {
@@ -253,7 +228,16 @@ void InputManager::ProcessRhythmTiming(int key) {
 
     currentComboSequence.push_back(key);
 
-    // Check if this completes a combo before showing feedback
+    // Get timing quality first
+    std::string feedback = GetTimingFeedback();
+
+    // Play SFX immediately when input is processed
+    auto audioSystem = g_coordinator.GetSystem<AudioManager>();
+    if (audioSystem) {
+        audioSystem->PlayInputSFX(1.0f);
+    }
+
+    // Check if this completes a combo
     bool comboCompleted = false;
     std::string completedComboName = "";
 
@@ -266,15 +250,11 @@ void InputManager::ProcessRhythmTiming(int key) {
         }
     }
 
-    std::string feedback = GetTimingFeedback();
-
     if (comboCompleted) {
-        // Only show timing + combo name for successful combos
-        std::cout << "[" << feedback << " - " << completedComboName << "] Key: " << KeyToString(key) << std::endl;
+        std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << KeyToString(key) << " | Combo: " << completedComboName << std::endl;
     }
     else {
-        // For non-completing keys, just show timing feedback
-        std::cout << "[" << feedback << "] Key: " << KeyToString(key) << std::endl;
+        std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << KeyToString(key) << " | Combo: unsuccessful" << std::endl;
     }
 }
 
@@ -286,54 +266,45 @@ void InputManager::CheckForMissedBeat() {
 
     double currentTime = audioSystem->GetMusicPosition();
 
-    // Simple guard: only advance beat if enough time has passed
     if (currentTime - lastBeatTime < beatInterval) {
-        return; // Not enough time passed for next beat
+        return;
     }
 
-    // Update beat tracking
     lastBeatTime = currentTime - fmod(currentTime, beatInterval);
     currentBeatIndex++;
 
-    // --- Countdown phase ---
-    if (inCountdown) {
-        if (countdownBeats > 0) {
-            std::cout << "[COUNTDOWN] " << countdownBeats << ".." << std::endl;
-            countdownBeats--;
-            inputReceivedOnThisBeat = false;
-            return;
-        }
-        else {
-            // Countdown finished
-            inCountdown = false;
-            currentBeatIndex = 1;
-            comboStartBeat = 1;
-            inputReceivedOnThisBeat = false;
-            return;
-        }
+    // Update cycle position once per beat - synchronized
+    currentCyclePosition = ((currentBeatIndex - 1) % 8) + 1;
+
+    if (currentCyclePosition >= 1 && currentCyclePosition <= 4) {
+        // Beats 1-4: INCOMING phase
+        std::cout << "[INCOMING] GET READY.." << std::endl;
+        inputReceivedOnThisBeat = false;
     }
+    else if (currentCyclePosition >= 5 && currentCyclePosition <= 8) {
+        // Beats 5-8: INPUT phase
 
-    // --- Normal gameplay beats ---
-    int beatInWindow = (currentBeatIndex - comboStartBeat) % maxComboBeats;
-
-    if (beatInWindow < maxComboBeats - 1) {
-        // Check if input was received BEFORE printing INCOMING
-        if (!inputReceivedOnThisBeat) {
-            std::cout << "[INCOMING] Beat " << (beatInWindow + 1)
-                << " / " << maxComboBeats << std::endl;
-        }
-    }
-    else {
-        // End of 4-beat window
-        if (successfulCombosThisWindow == 0) {
-            playerChances--;
-            std::cout << "[MISS] No valid combo completed | Chances left: "
-                << playerChances << std::endl;
+        // Reset input flag when entering INPUT WINDOW (beat 5)
+        if (currentCyclePosition == 5) {
+            inputReceivedOnThisBeat = false;
         }
 
-        currentComboSequence.clear();
-        comboStartBeat = currentBeatIndex + 1;
-        successfulCombosThisWindow = 0;
+        // Only check for no input if we're past beat 5
+        if (currentCyclePosition > 5 && !inputReceivedOnThisBeat) {
+            std::cout << "[MISS] NO INPUT DETECTED" << std::endl;
+        }
+
+        // End of input window - check for combos
+        if (currentCyclePosition == 8) {
+            if (successfulCombosThisWindow == 0) {
+                playerChances--;
+                std::cout << "[MISS] No valid combo completed | Chances left: " << playerChances << std::endl;
+            }
+
+            currentComboSequence.clear();
+            successfulCombosThisWindow = 0;
+            comboStartBeat = currentBeatIndex + 1;
+        }
     }
 
     if (playerChances <= 0) {
@@ -342,6 +313,8 @@ void InputManager::CheckForMissedBeat() {
         if (audioSystem) audioSystem->StopMusic();
     }
 
-    // Reset flag AFTER all processing is done
-    inputReceivedOnThisBeat = false;
+    // Only reset at the end for INCOMING phase
+    if (currentCyclePosition <= 4) {
+        inputReceivedOnThisBeat = false;
+    }
 }

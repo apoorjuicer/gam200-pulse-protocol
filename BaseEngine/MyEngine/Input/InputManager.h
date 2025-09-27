@@ -92,6 +92,7 @@ private:
     bool previousKeys[GLFW_KEY_LAST + 1];
 
     // Beat tracking
+    int currentCyclePosition = 1;
     int currentBeatIndex = 0;
     int comboStartBeat = -1;
     double lastBeatTime = 0.0;
