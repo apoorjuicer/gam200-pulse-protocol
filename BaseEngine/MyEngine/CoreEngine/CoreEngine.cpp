@@ -129,7 +129,7 @@ void CoreEngine::GameLoop()
     
     bool spawnFromLeft = true; //true = start left move right,  false = start right move left
     bool automaticSwordSwing = true; // true = sword swinging, false = not swinging
-    bool testBoxLineCollision = false; //true = boxline collision, false = monsterplayer
+    bool testBoxLineCollision = true; //true = boxline collision, false = monsterplayer
 
 	//// application loop 
 	//while(!glfwWindowShouldClose(window) && GameRunning)
