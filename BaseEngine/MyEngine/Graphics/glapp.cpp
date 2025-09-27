@@ -8,10 +8,7 @@
 **********************************************************************************************/
 #include "glapp.h"
 #include "DebugDraw.h"
-//#include "../Managers/LevelManager.h"
-//#include "../ComponentJson/Component_System.h"
 //#include "../Managers/AssetsManager.h"
-//#include "../Engine/Core.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -23,13 +20,10 @@ std::vector<GLSLShader> GLApp::shdrpgms;
 std::vector<GLApp::GLModel> GLApp::models;
 std::vector<GLApp::GLViewport> GLApp::vps;
 std::list<Framework::Transform*> transObj;
-std::list<Framework::Transform*> fore;
-std::list<Framework::Transform*> Obj;
-std::list<Framework::Transform*> pause;
 
 //other containers
 const float PI = 3.14159265358979323846f;
-int polygonmode = 0;
+//int polygonmode = 0;
 GLuint future_shd_ref = 0; // Initial shader index
 GLuint textureID;
 const std::string test_vs = {
@@ -74,8 +68,8 @@ GLApp::TranslationBuf GLApp::tb;
 void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 
     // Use local inputEditorWidth and inputEditorHeight values for calculations.
-    GLint w = static_cast<GLint>(GLHelper::width - static_cast<GLint>(inputEditorWidth)),
-        h = static_cast<GLint>(GLHelper::height - static_cast<GLint>(inputEditorHeight));
+    GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth)),
+        h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
 
     float a = (9.0f / 16.0f) * w;
     float b = (16.0f / 9.0f) * h;
@@ -126,9 +120,7 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 
     glCreateBuffers(1, &tb.translationBuffer);
 
-
-    GLbitfield flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT; // Adjust flags based on usage
-    glNamedBufferStorage(tb.translationBuffer, tb.translationBufferSize, nullptr, flags);
+    glNamedBufferStorage(tb.translationBuffer, tb.translationBufferSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 
     GLuint bindingIndex = 0; // Set binding index in shader program
@@ -140,34 +132,23 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 
 
 void GLApp::update() {
-    if (GLHelper::keystateP == GL_TRUE) {
-        if (polygonmode == 0) {
-            ++polygonmode;
-
-            GLHelper::keystateP = GL_FALSE;
-
-        }
-        else if (polygonmode == 1) {
-            ++polygonmode;
-            GLHelper::keystateP = GL_FALSE;
-        }
-        else if (polygonmode == 2) {
-            polygonmode = 0;
-            GLHelper::keystateP = GL_FALSE;
-        }
-        GLHelper::keystateP = GL_FALSE;
-    }
+    //if (GLHelper::keystateP == GL_TRUE) {
+    //    if (polygonmode == 0) {
+    //        ++polygonmode;
+    //        GLHelper::keystateP = GL_FALSE;
+    //    }
+    //    else if (polygonmode == 1) {
+    //        ++polygonmode;
+    //        GLHelper::keystateP = GL_FALSE;
+    //    }
+    //    else if (polygonmode == 2) {
+    //        polygonmode = 0;
+    //        GLHelper::keystateP = GL_FALSE;
+    //    }
+    //    GLHelper::keystateP = GL_FALSE;
+    //}
 
     for (auto& x : transObj) {
-        x->update(GLHelper::delta_time);
-    }
-    for (auto& x : Obj) {
-        x->update(GLHelper::delta_time);
-    }
-    for (auto& x : fore) {
-        x->update(GLHelper::delta_time);
-    }
-    for (auto& x : pause) {
         x->update(GLHelper::delta_time);
     }
 }
@@ -186,14 +167,9 @@ void GLApp::updateAnimation(Framework::Transform& x) {
 }
 
 void GLApp::drawTrans(Framework::Transform &x) {
-    GLint uniform_var_loc1 = 0;
-    GLint uOffsetLoc = 0;
-    GLint uScaleLoc = 0;
-    //// Part 1
-    shdrpgms[static_cast<uint64_t>(x.shd_ref)].Use();
-
-    //// Part 2
-    glBindVertexArray(models[static_cast<uint64_t>(x.mdl_ref)].vaoid);
+    GLint uniform_var_loc1 = -1;
+    GLint uOffsetLoc = -1;
+    GLint uScaleLoc = -1;
 
     x.totalFrames = x.rows * x.columns;
 
@@ -215,50 +191,34 @@ void GLApp::drawTrans(Framework::Transform &x) {
     if (uScaleLoc >= 0)
         glUniform2f(uScaleLoc, frameWidth, frameHeight);
     if (uniform_var_loc1 >= 0) {
-        //glm::mat3x3 mdl_to_ndc_xform = static_cast<glm::mat3x3>(x.mdl_to_ndc_xform);
-        //glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
-        glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, x.mdl_to_ndc_xform.Begin());
+        glm::mat3x3 mdl_to_ndc_xform = static_cast<glm::mat3x3>(x.mdl_to_ndc_xform);
+        glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
     }
     else
     {
-        std::cout << "Uniform variable doesn't exist!!!\n";
-        std::exit(EXIT_FAILURE);
+        //Debug Uniform Purpose
+        //std::cout << "Uniform variable doesn't exist!!!\n";
+        //std::exit(EXIT_FAILURE);
     }
-    glDrawElements(models[static_cast<uint64_t>(x.mdl_ref)].primitive_type, models[static_cast<uint64_t>(x.mdl_ref)].draw_cnt, GL_UNSIGNED_SHORT, NULL);
+    
     //// Part 5
+    glBindVertexArray(models[static_cast<uint64_t>(x.mdl_ref)].vaoid);
+    glDrawElements(models[static_cast<uint64_t>(x.mdl_ref)].primitive_type, models[static_cast<uint64_t>(x.mdl_ref)].draw_cnt, GL_UNSIGNED_SHORT, NULL);
     glBindVertexArray(0);
     shdrpgms[static_cast<uint64_t>(x.shd_ref)].UnUse();
 }
 
 void GLApp::draw(std::set<Entity> entities) {
-    
-    static int frame = 0;
-    //if ((frame++ % 60) == 0) {
-    //    std::cout << "[draw] tick " << frame << std::endl; // endl forces flush
-    //}
     bool pm = false;
     bool fg = false;
     // clear back buffer as before
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
+    glClearDepth(1.0f);
     shdrpgms[0].Use();
     transObj.clear();
-    Obj.clear();
-    pause.clear();
-    fore.clear();
-    //g_coordinator.grabcomponent<class_type>(projection);
-    //int projection = g_coordinaor.addentity(entity)
 
-    //Render each object
-    //for (auto it = Framework::levelManager->GameObjects.GOCM.begin(); it != Framework::levelManager->GameObjects.GOCM.end(); it++) {
-  /* 
-    for (Entity e = 0; e < MaxEntity; ++e) {
-        if (auto* tr = g_coordinator.TryGetComponent<Framework::Transform>(e)) {
-            transObj.push_back(tr);
-        }
-    }*/
-
-
+    extern Coordinator g_coordinator;
     for (auto it : entities)
     {
         if (auto* tr = Coordinator::GetInstance()->TryGetComponent<Framework::Transform>(it))
@@ -267,52 +227,35 @@ void GLApp::draw(std::set<Entity> entities) {
         }
     }
 
-    //std::cout << "[draw] found transforms: "
-    //      << transObj.size() /* + Obj.size() + fore.size() */<< "\n";
-     //Render the transforms after collecting them
     for (auto x : transObj) {
         updateAnimation(*x);
         glBindTexture(GL_TEXTURE_2D, x->textureID);
         drawTrans(*x);
     }
-    //for (auto x : Obj) {
-    //    updateAnimation(*x);
-    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
-    //    drawTrans(*x);
+
+	//Polygon mode
+    //if (polygonmode == 0)
+    //{
+    //    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     //}
-    //for (auto x : fore) {
-    //    updateAnimation(*x);
-    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
-    //    drawTrans(*x);
+    //else if (polygonmode == 1)
+    //{
+    //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //    glLineWidth(3.f);
     //}
-    //for (auto x : pause) {
-    //    updateAnimation(*x);
-    //    glBindTexture(GL_TEXTURE_2D, x->textureID);
-    //    drawTrans(*x);
+    //else if (polygonmode == 2)
+    //{
+    //    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+    //    glPointSize(10.f); // Reset back to 1
     //}
 
-    if (polygonmode == 0)
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-    else if (polygonmode == 1)
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glLineWidth(3.f);
-    }
-    else if (polygonmode == 2)
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-        glPointSize(10.f); // Reset back to 1
-    }
-
-    // Debug draw sample (NDC space)
-    glm::mat4 mvp = MakeOrthoMvp(-1.0f, 1.0f, -1.0f, 1.0f);
-    DebugDraw::Begin(mvp);
-    DebugDraw::DrawLine({-0.5f, -0.5f}, {0.5f, -0.5f}, {1,0,0});
-    DebugDraw::DrawRect({-0.2f,-0.2f}, {0.2f,0.2f}, {0,1,0});
-    DebugDraw::DrawCircle({0.0f,0.0f}, 0.3f, {0,0,1}, 48);
-    DebugDraw::End();
+    // -------------------*Debug draw sample (NDC space)*----------------------
+	//glm::mat4 mvp = MakeOrthoMvp(-1.0f, 1.0f, -1.0f, 1.0f);   //  create the ndc space
+    //DebugDraw::Begin(mvp);
+	//DebugDraw::DrawLine({-0.5f, -0.5f}, {0.5f, -0.5f}, {1,1,0}); // yellow line
+	//DebugDraw::DrawRect({-0.2f,-0.2f}, {0.2f,0.2f}, {0,1,0}); // green rect
+	//DebugDraw::DrawCircle({0.0f,0.0f}, 0.3f, {0,0,1}, 48);    // (more segments = smoother)
+	//DebugDraw::End();   // actually draw to screen
 }
 
 void GLApp::cleanup() {

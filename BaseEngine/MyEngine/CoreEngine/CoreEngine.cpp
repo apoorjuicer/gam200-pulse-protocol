@@ -11,8 +11,53 @@ CoreEngine* Engine;
 
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
-const int WindowHeight = 1400;
-const int WindowWidth = 800;
+
+void APIENTRY glDebugOutput(GLenum source,
+	GLenum type,
+	unsigned int id,
+	GLenum severity,
+	GLsizei length,
+	const char* message,
+	const void* userParam)
+{
+	// ignore non-significant error/warning codes
+	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+
+	std::cout << "---------------" << std::endl;
+	std::cout << "Debug message (" << id << "): " << message << std::endl;
+
+	switch (source)
+	{
+	case GL_DEBUG_SOURCE_API:             std::cout << "Source: API"; break;
+	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   std::cout << "Source: Window System"; break;
+	case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cout << "Source: Shader Compiler"; break;
+	case GL_DEBUG_SOURCE_THIRD_PARTY:     std::cout << "Source: Third Party"; break;
+	case GL_DEBUG_SOURCE_APPLICATION:     std::cout << "Source: Application"; break;
+	case GL_DEBUG_SOURCE_OTHER:           std::cout << "Source: Other"; break;
+	} std::cout << std::endl;
+
+	switch (type)
+	{
+	case GL_DEBUG_TYPE_ERROR:               std::cout << "Type: Error"; break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: std::cout << "Type: Deprecated Behaviour"; break;
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  std::cout << "Type: Undefined Behaviour"; break;
+	case GL_DEBUG_TYPE_PORTABILITY:         std::cout << "Type: Portability"; break;
+	case GL_DEBUG_TYPE_PERFORMANCE:         std::cout << "Type: Performance"; break;
+	case GL_DEBUG_TYPE_MARKER:              std::cout << "Type: Marker"; break;
+	case GL_DEBUG_TYPE_PUSH_GROUP:          std::cout << "Type: Push Group"; break;
+	case GL_DEBUG_TYPE_POP_GROUP:           std::cout << "Type: Pop Group"; break;
+	case GL_DEBUG_TYPE_OTHER:               std::cout << "Type: Other"; break;
+	} std::cout << std::endl;
+
+	switch (severity)
+	{
+	case GL_DEBUG_SEVERITY_HIGH:         std::cout << "Severity: high"; break;
+	case GL_DEBUG_SEVERITY_MEDIUM:       std::cout << "Severity: medium"; break;
+	case GL_DEBUG_SEVERITY_LOW:          std::cout << "Severity: low"; break;
+	case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
+	} std::cout << std::endl;
+	std::cout << std::endl;
+}
 
 CoreEngine::CoreEngine() : window(nullptr)
 {
@@ -37,15 +82,29 @@ void CoreEngine::Init()
         return;
     }
 
-    window = glfwCreateWindow(WindowHeight, WindowWidth, WindowTitle, nullptr, nullptr);
-    if (!window) {
-        std::cerr << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return;
-    }
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	window = glfwCreateWindow(WindowHeight, WindowWidth, WindowTitle, nullptr, nullptr);
+	if (!window) {
+		std::cerr << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return;
+	}
 
     glfwMakeContextCurrent(window);
     glewInit();
+
+	int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+	{
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(glDebugOutput, nullptr);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+	}
 
 	// Create systems AFTER GL is ready
 
@@ -55,12 +114,14 @@ void CoreEngine::Init()
     auto g_coordinator = Coordinator::GetInstance();
 
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
+	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
     auto g_CollisionManager = g_coordinator->GetSystem<CollisionManager>();
 
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
 	g_graphicsSystem->Initialize();
+	g_audioSystem->Initialize(); 
 	g_coordinator->InitializeAllSystems();
 
     std::cout << "Engine initialized." << std::endl;
@@ -88,6 +149,7 @@ void CoreEngine::Setup()
 	
 	// Register your systems here
 	g_coordinator->RegisterSystem<InputManager>();
+	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
     g_coordinator->RegisterSystem<CollisionManager>();
 
@@ -107,13 +169,14 @@ void CoreEngine::Setup()
 void CoreEngine::Update(float dt)
 {
     auto g_coordinator = Coordinator::GetInstance();
-
+	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 
 	if (g_inputSystem) {
 		// Update input system
 		g_inputSystem->Update();
+		g_audioSystem->Update();  
 
 		// Run M1 testing demonstrations
 		g_inputSystem->RunM1Test();
@@ -160,8 +223,8 @@ void CoreEngine::GameLoop()
         //  4. game update(NOT A WHILE LOOP) gsm
 
         //  5. game rendering
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
 
         //  6. ImGui rendering
 
@@ -176,12 +239,19 @@ void CoreEngine::Exit()
     auto g_coordinator = Coordinator::GetInstance();
 
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
+	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 
 	if (g_inputSystem) {
 		g_inputSystem->Shutdown();
 		//delete g_inputSystem;
 		//g_inputSystem = nullptr;
+	}
+
+	if (g_audioSystem) {
+		g_audioSystem->Shutdown();
+		//delete g_audioSystem;
+		//g_audioSystem = nullptr;
 	}
 
 	if (g_graphicsSystem) {
