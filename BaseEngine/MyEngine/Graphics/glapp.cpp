@@ -191,8 +191,10 @@ void GLApp::drawTrans(Framework::Transform &x) {
     if (uScaleLoc >= 0)
         glUniform2f(uScaleLoc, frameWidth, frameHeight);
     if (uniform_var_loc1 >= 0) {
-        glm::mat3x3 mdl_to_ndc_xform = static_cast<glm::mat3x3>(x.mdl_to_ndc_xform);
-        glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
+        //glm::mat3x3 mdl_to_ndc_xform = static_cast<glm::mat3x3>(x.mdl_to_ndc_xform);
+        //glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mdl_to_ndc_xform));
+
+        glUniformMatrix3fv(uniform_var_loc1, 1, GL_FALSE, x.mdl_to_ndc_xform.Begin());
     }
     else
     {
@@ -217,11 +219,11 @@ void GLApp::draw(std::set<Entity> entities) {
     glClearDepth(1.0f);
     shdrpgms[0].Use();
     transObj.clear();
-
-    extern Coordinator g_coordinator;
+    auto* g_coordinator = Coordinator::GetInstance();
+    //extern Coordinator g_coordinator;
     for (auto it : entities)
     {
-        if (auto* tr = Coordinator::GetInstance()->TryGetComponent<Framework::Transform>(it))
+        if (auto* tr = g_coordinator->TryGetComponent<Framework::Transform>(it))
         {
             transObj.push_back(tr);
         }

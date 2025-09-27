@@ -80,7 +80,8 @@ void AudioManager::Initialize()
     // Make sure this path exists relative to your exe working directory:
     //   build\MyEngine\Assets\MainMenuMusic.wav
     // If your assets live elsewhere, update this string accordingly.
-    const char* defaultBGM = "../../MyEngine/Assets/GameplayMusic.wav";
+    //const char* defaultBGM = "../../MyEngine/Assets/GameplayMusic.wav";
+    const char* defaultBGM = "../../MyEngine/Audio/GameMusic.mp3";
     PlayBGM(defaultBGM, 0.30f);
 }
 

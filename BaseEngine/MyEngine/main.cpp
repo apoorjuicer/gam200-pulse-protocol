@@ -70,11 +70,6 @@ int main() {
     // for non-GL things:
     Engine.Init(); // <-- only if it does NOT touch OpenGL
 
-    //Hero cheese{};
-    //cheese.pos = { 700,500 };
-    //int hero = g_coordinator.CreateEntity();
-    //g_coordinator.AddComponent(hero, cheese);  
-
 
     Framework::Transform tr{};            // fill in fields as your renderer expects
     // e.g. tr.mdl_ref = 1; tr.shd_ref = 1; tr.rows = ...; tr.columns = ...; tr.textureID = ...
@@ -100,8 +95,9 @@ int main() {
 
     // a valid GL texture id. Use your loader or 0 if you just want a colored quad.
     //tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
-    //int entity = g_coordinator.CreateEntity();
-    //g_coordinator.AddComponent(entity, tr);  // <-- add Transform
+    auto* g_coordinator = Coordinator::GetInstance();
+    int entity = g_coordinator->CreateEntity();
+    g_coordinator->AddComponent(entity, tr);  // <-- add Transform
 
     // this is where the update() is 
     Engine.GameLoop();
