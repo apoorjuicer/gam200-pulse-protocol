@@ -118,26 +118,6 @@ void CoreEngine::Init()
 
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
-	g_inputSystem->RegisterInputListener("CoreEngine", [](const InputEvent& event) {
-		if (event.type == InputEvent::Type::RHYTHM_INPUT) {
-			auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
-			if (!g_inputSystem || !g_inputSystem->CanInput()) {
-				std::cout << "[GAME OVER] No more chances!" << std::endl;
-				return; // ignore input if game over
-			}
-
-			auto& boxTransform = g_coordinator.GetComponent<Framework::Transform>(0);
-			boxTransform.isVisible = true;
-			boxTransform.visibilityTimer = 0.5f;
-			boxTransform.autoHide = true;
-
-			auto g_audioSystem = g_coordinator.GetSystem<AudioManager>();
-			if (g_audioSystem) {
-				g_audioSystem->PlayInputSFX(1.0f);
-			}
-		}
-	});
-
 	g_graphicsSystem->Initialize();
 	g_audioSystem->Initialize(); 
 	g_coordinator.InitializeAllSystems();
@@ -163,6 +143,10 @@ void CoreEngine::Setup()
 	g_coordinator.RegisterSystem<AudioManager>();
 
 	// Set your signatures for both component and system
+	Signature inputSig;
+	inputSig.set(g_coordinator.GetComponentType<Framework::Transform>());
+	g_coordinator.SetSystemSignature<InputManager>(inputSig);
+
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator.GetComponentType<Framework::Transform>());  // <-- needs Transform
 	g_coordinator.SetSystemSignature<GraphicsManager>(graphicsSig);
@@ -170,15 +154,6 @@ void CoreEngine::Setup()
 
 void CoreEngine::Update(float dt)
 {
-	auto& boxTransform = g_coordinator.GetComponent<Framework::Transform>(0);
-	if (boxTransform.autoHide && boxTransform.isVisible) {
-		boxTransform.visibilityTimer -= dt;
-		if (boxTransform.visibilityTimer <= 0.0f) {
-			boxTransform.isVisible = false;
-			boxTransform.autoHide = false;
-		}
-	}
-
 	auto g_inputSystem = g_coordinator.GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator.GetSystem<GraphicsManager>();
 	auto g_audioSystem = g_coordinator.GetSystem<AudioManager>();

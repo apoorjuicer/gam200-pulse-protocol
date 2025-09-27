@@ -10,6 +10,8 @@
 #include <cstring>
 #include <iomanip>
 
+extern Coordinator g_coordinator;
+
 static std::string KeyToString(int key) {
     switch (key) {
     case GLFW_KEY_Q: return "Q";
@@ -65,6 +67,17 @@ void InputManager::Update() {
     ProcessRhythmInputs();
     ProcessComboInputs();
     CheckForMissedBeat();
+
+    auto& transform = g_coordinator.GetComponent<Framework::Transform>(0);
+
+    if (transform.autoHide && transform.isVisible) {
+        float dt = 0.016f; // approximately 60 FPS
+        transform.visibilityTimer -= dt;
+        if (transform.visibilityTimer <= 0.0f) {
+            transform.isVisible = false;
+            transform.autoHide = false;
+        }
+    }
 }
 
 void InputManager::Shutdown() {
@@ -91,7 +104,17 @@ void InputManager::UnregisterInputListener(const std::string& systemName) {
 }
 
 void InputManager::BroadcastInputEvent(const InputEvent& event) {
-    // broadcast to all systems egistered in our ECS
+    // When broadcasting rhythm input, update the visual entity
+    if (event.type == InputEvent::Type::RHYTHM_INPUT) {
+        auto& transform = g_coordinator.GetComponent<Framework::Transform>(0);
+
+        // Show visual feedback
+        transform.isVisible = true;
+        transform.visibilityTimer = 0.5f;
+        transform.autoHide = true;
+    }
+
+    // Broadcast to all registered listeners
     for (const auto& [systemName, callback] : inputListeners) {
         callback(event);
     }
@@ -207,7 +230,6 @@ void InputManager::InitializeSwordCombos() {
 }
 
 std::string InputManager::GetTimingFeedback() {
-    extern Coordinator g_coordinator;
     auto audioSystem = g_coordinator.GetSystem<AudioManager>();
 
     double musicPosition = audioSystem->GetMusicPosition();
@@ -259,7 +281,6 @@ void InputManager::ProcessRhythmTiming(int key) {
 void InputManager::CheckForMissedBeat() {
     if (!canInput) return;
 
-    extern Coordinator g_coordinator;
     auto audioSystem = g_coordinator.GetSystem<AudioManager>();
     if (!audioSystem) return;
 

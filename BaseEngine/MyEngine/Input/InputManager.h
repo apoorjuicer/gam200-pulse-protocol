@@ -81,6 +81,8 @@ public:
     // Stats
     int GetSuccessfulCombos() const { return successfulCombos; }
 
+    std::vector<Entity> EntityMember;
+
 private:
     // -------------------------------------------------
     // Core input state
