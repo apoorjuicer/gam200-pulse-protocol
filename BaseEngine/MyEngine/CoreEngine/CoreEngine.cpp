@@ -6,8 +6,6 @@
 //extern InputManager* g_inputSystem;
 //extern GraphicsManager* g_graphicsSystem;
 
-// A global pointer to the core
-CoreEngine* Engine;
 
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";

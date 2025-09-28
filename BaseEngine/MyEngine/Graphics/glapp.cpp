@@ -131,7 +131,7 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 }
 
 
-void GLApp::update() {
+void GLApp::update(GLFWwindow* window) {
     //if (GLHelper::keystateP == GL_TRUE) {
     //    if (polygonmode == 0) {
     //        ++polygonmode;
@@ -147,6 +147,14 @@ void GLApp::update() {
     //    }
     //    GLHelper::keystateP = GL_FALSE;
     //}
+
+
+    if (window) 
+    {
+        std::ostringstream title;
+        title << "Game Window - FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
+        glfwSetWindowTitle(window, title.str().c_str());
+    }
 
     for (auto& x : transObj) {
         x->update(GLHelper::delta_time);
