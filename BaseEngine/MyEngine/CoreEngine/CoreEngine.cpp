@@ -142,8 +142,7 @@ void CoreEngine::Setup()
 
 	// Register your component here
 	g_coordinator->RegisterComponent<Framework::Transform>();
-    g_coordinator->RegisterComponent<Hero>();
-    g_coordinator->RegisterComponent<Monster>();
+    g_coordinator->RegisterComponent<NPC>();
     g_coordinator->RegisterComponent<AABB>();
 	
 	// Register your systems here
@@ -152,15 +151,21 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterSystem<GraphicsManager>();
     g_coordinator->RegisterSystem<CollisionManager>();
 
+
+
     // Set signature for component and system
     Signature collisionSig;
-    collisionSig.set(g_coordinator.GetComponentType<NPC>());
-    collisionSig.set(g_coordinator.GetComponentType<AABB>());
-    g_coordinator.SetSystemSignature<CollisionManager>(collisionSig);
+    collisionSig.set(g_coordinator->GetComponentType<NPC>());
+    collisionSig.set(g_coordinator->GetComponentType<AABB>());
+    g_coordinator->SetSystemSignature<CollisionManager>(collisionSig);
+
+	Signature inputSig;
+	inputSig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	g_coordinator->SetSystemSignature<InputManager>(inputSig);
 
 	Signature graphicsSig;
-	graphicsSig.set(g_coordinator.GetComponentType<Framework::Transform>());  // <-- needs Transform
-	g_coordinator.SetSystemSignature<GraphicsManager>(graphicsSig);
+	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
+	g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
 }
 
 void CoreEngine::Update(float dt)
@@ -170,18 +175,17 @@ void CoreEngine::Update(float dt)
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 
-	if (g_inputSystem) {
-		// Update input system
-		g_inputSystem->Update();
-		g_audioSystem->Update();  
-
-		// Run M1 testing demonstrations
-		g_inputSystem->RunM1Test();
-
-	}
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Update();
 	}
+
+	if (g_inputSystem) {
+		// Update input system
+		g_inputSystem->Update();
+		//g_audioSystem->Update();  
+
+	}
+	
 
 	g_coordinator->UpdateAllSystems(dt);
 }

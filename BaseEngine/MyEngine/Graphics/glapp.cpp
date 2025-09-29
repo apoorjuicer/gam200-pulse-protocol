@@ -238,9 +238,11 @@ void GLApp::draw(std::set<Entity> entities) {
     }
 
     for (auto x : transObj) {
-        updateAnimation(*x);
-        glBindTexture(GL_TEXTURE_2D, x->textureID);
-        drawTrans(*x);
+        if (x->isVisible) {
+            updateAnimation(*x);
+            glBindTexture(GL_TEXTURE_2D, x->textureID);
+            drawTrans(*x);
+        }
     }
 
 	//Polygon mode

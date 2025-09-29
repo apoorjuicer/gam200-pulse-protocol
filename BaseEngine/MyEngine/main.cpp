@@ -96,6 +96,11 @@ int main() {
     tr.currentFrame = 0;
     tr.animationSpeed = 0.0f;        // static
 
+
+    tr.isVisible = false;
+    tr.autoHide = false;
+    tr.visibilityTimer = 0.0f;
+
     // a valid GL texture id. Use your loader or 0 if you just want a colored quad.
     //tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
     auto* g_coordinator = Coordinator::GetInstance();

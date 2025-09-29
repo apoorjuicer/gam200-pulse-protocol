@@ -11,12 +11,6 @@
 class Coordinator : public Singleton<Coordinator>
 {
 public:	
-	static Coordinator& GetInstance()
-	{
-		static Coordinator instance;
-		return instance;
-	}
-
 	void init()
 	{
 		// Create pointers to each manager
