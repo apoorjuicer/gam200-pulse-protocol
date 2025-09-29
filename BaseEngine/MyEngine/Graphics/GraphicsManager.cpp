@@ -20,6 +20,8 @@ void GraphicsManager::Initialize()
 	GLHelper::print_specs();
 	glapp->init(editorWidth, editorHeight);
 	std::cout << "[GraphicsManager] Successfully initialized for graphics." << std::endl;
+
+
 }
 // dtor
 GraphicsManager::~GraphicsManager()

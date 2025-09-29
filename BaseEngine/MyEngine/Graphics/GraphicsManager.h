@@ -20,6 +20,7 @@
 #include <string.h>
 #include "Transform.h"
 #include"../Physics/collision.h"
+#include "../Core/AssetsManager.h"
 
 class GLApp;                    
 namespace Framework { class Transform; } 

@@ -252,9 +252,8 @@ void InputManager::ProcessRhythmTiming(int key) {
     std::string feedback = GetTimingFeedback();
 
     // Play SFX immediately when input is processed
-    auto audioSystem = g_coordinator->GetSystem<AudioManager>();
-    if (audioSystem) {
-        audioSystem->PlayInputSFX(0.8f);
+    if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
+        audio->PlaySound("beat_placeholder", 0.8f);
     }
 
     // Check if this completes a combo

@@ -43,6 +43,9 @@ bool AudioManager::initCore()
     FMOD_CHECK(r, "init");
     if (r != FMOD_OK) return false;
 
+    Framework::AssetsManager::Instance().SetFMODSystem(mSystem); 
+    Framework::AssetsManager::Instance().LoadAllSound();
+
 #ifdef _DEBUG
     try {
         std::cerr << "[AudioManager] FMOD initialized. CWD = " << fs::current_path().string() << "\n";
@@ -76,18 +79,25 @@ void AudioManager::Initialize()
 
     std::cout << "[AudioManager] Successfully initialized.\n";
 
+   
+
     // Auto-start BGM here so your CoreEngine::Init() "just works".
     // Make sure this path exists relative to your exe working directory:
     //   build\MyEngine\Assets\MainMenuMusic.wav
     // If your assets live elsewhere, update this string accordingly.
-    const char* defaultBGM = "../../MyEngine/Assets/Music/Background/GameMusic.mp3";
-    PlayBGM(defaultBGM, 0.30f);
+    //const char* defaultBGM = "../../MyEngine/Assets/Music/Background/GameMusic.mp3";
+    //PlayBGM(defaultBGM, 0.30f);
 
-    // preloads sfx sound for beat
-    const char* defaultInputSFX = "../../MyEngine/Assets/SFX/Rhythm_Feedback/beat_placeholder.wav";
-    if (!LoadInputSFX(defaultInputSFX)) {
-        std::cerr << "[AudioManager] Failed to load default input SFX: " << defaultInputSFX << "\n";
-    }
+
+
+    auto defaultBGM = Framework::AssetsManager::Instance().GetSound("gamemusic");
+
+    if (defaultBGM) { 
+        mSystem->playSound(defaultBGM, nullptr, false, nullptr); 
+    } 
+
+
+
 }
 
 void AudioManager::Update()
@@ -106,43 +116,6 @@ void AudioManager::Shutdown()
 
 // ---------------------- BGM controls ----------------------
 
-bool AudioManager::PlayBGM(const std::string& path, float volume)
-{
-    if (!initCore()) return false;
-
-#ifdef _DEBUG
-    try {
-        std::cerr << "[AudioManager] Try BGM: " << path
-            << "  exists? " << (fs::exists(path) ? "YES" : "NO") << "\n";
-    }
-    catch (...) {}
-#endif
-
-    // Stop & release old BGM if needed
-    StopBGM();
-    if (mBGM) { mBGM->release(); mBGM = nullptr; }
-
-    // Stream + loop (2D)
-    FMOD_MODE mode = FMOD_DEFAULT | FMOD_CREATESTREAM | FMOD_LOOP_NORMAL | FMOD_2D;
-
-    FMOD_RESULT r = mSystem->createSound(path.c_str(), mode, nullptr, &mBGM);
-    FMOD_CHECK(r, "createSound(BGM)");
-    if (r != FMOD_OK || !mBGM) {
-        std::cerr << "[AudioManager] Failed to load BGM (bad path or unsupported format?).\n";
-        return false;
-    }
-
-    r = mSystem->playSound(mBGM, nullptr, false, &mBGMCh);
-    FMOD_CHECK(r, "playSound(BGM)");
-    if (r != FMOD_OK || !mBGMCh) {
-        std::cerr << "[AudioManager] Failed to play BGM.\n";
-        return false;
-    }
-
-    SetBGMVolume(volume);
-    std::cout << "[AudioManager] BGM started: " << path << " (vol=" << volume << ")\n";
-    return true;
-}
 
 void AudioManager::StopBGM()
 {
@@ -176,13 +149,18 @@ bool AudioManager::LoadInputSFX(const std::string& path) {
     if (!mSystem) return false;
     return (mSystem->createSound(path.c_str(), FMOD_DEFAULT, 0, &mInputSFX) == FMOD_OK);
 }
-void AudioManager::PlayInputSFX(float volume) {
-    if (!mSystem || !mInputSFX) return;
 
-    FMOD::Channel* channel = nullptr;
-    FMOD_RESULT result = mSystem->playSound(mInputSFX, 0, false, &channel);
-    if (result == FMOD_OK && channel) {
-        channel->setVolume(volume); // applies only to this SFX
+void AudioManager::PlaySound(const std::string& key, float volume) {
+    if (!mSystem) return;
+
+    if (FMOD::Sound* s = Framework::AssetsManager::Instance().GetSound(key)) {
+        FMOD::Channel* ch = nullptr;
+        FMOD_RESULT r = mSystem->playSound(s, nullptr, false, &ch);
+        if (r == FMOD_OK && ch) ch->setVolume(volume);
+        else std::cerr << "[Audio] playSound failed: " << FMOD_ErrorString(r) << "\n";
+    }
+    else {
+        std::cerr << "[Audio] Sound not found: " << key << "\n";
     }
 }
 

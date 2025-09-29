@@ -9,6 +9,9 @@
 #include "Core/System.h"
 #include "Core/SystemManager.h"
 #include <string>
+#include "../Core/AssetsManager.h"
+
+extern FMOD::System* mSystem;
 
 // Forward-declare FMOD types to avoid heavy includes here
 namespace FMOD {
@@ -30,14 +33,14 @@ public:
     void Shutdown();       // releases all FMOD resources
 
     // BGM controls (optional for other places in engine)
-    bool PlayBGM(const std::string& path, float volume = 0.35f);
     void StopBGM();
     void SetBGMVolume(float volume);                 // 0..1
     bool IsBGMPlaying(bool* outPlaying = nullptr) const;
 
     // gets path from source file and plays it at wanted volume, default volume is 1.0f
     bool LoadInputSFX(const std::string& path);
-    void PlayInputSFX(float volume = 1.0f);
+    void PlaySound(const std::string& key, float volume);
+    //void PlayInputSFX(float volume = 1.0f);
 
     // checks how far into the song the music has played
     double GetMusicPosition() const;
