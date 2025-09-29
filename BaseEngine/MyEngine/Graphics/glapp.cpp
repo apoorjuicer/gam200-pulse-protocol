@@ -192,10 +192,6 @@ void GLApp::drawTrans(Framework::Transform &x) {
         uOffsetLoc = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uOffset");
         uScaleLoc = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uScale");
         uniform_var_loc1 = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uModel_to_NDC");
-
-        GLint colorLoc = glGetUniformLocation(shdrpgms[1].GetHandle(), "uColor");
-        if (colorLoc >= 0)
-            glUniform3f(colorLoc, x.color.r, x.color.g, x.color.b);
     }
     if (uOffsetLoc >= 0)
         glUniform2f(uOffsetLoc, uOffsetX, uOffsetY);

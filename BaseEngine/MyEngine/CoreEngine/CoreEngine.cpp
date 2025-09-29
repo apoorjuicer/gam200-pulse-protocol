@@ -123,7 +123,12 @@ void CoreEngine::Init()
 
 	g_coordinator->InitializeAllSystems();
 
-	LevelManager::LoadDemo(); // Utility class; shouldn't be part of the system cus load once only
+    std::cout << "Engine initialized." << std::endl;
+    std::cout << "\n=== M1 INPUT SYSTEM DEMO ===" << std::endl;
+    std::cout << "SPACE -> Primary rhythm beat input" << std::endl;
+    std::cout << "A/S/D -> Weapon combo keys" << std::endl;
+    std::cout << "MOUSE -> UI interaction testing" << std::endl;
+    std::cout << "Close window to exit testing" << std::endl;
 
     GameRunning = true;
 }

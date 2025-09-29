@@ -27,7 +27,6 @@ struct InputEvent {
     double timestamp;
     std::string feedback;
     std::string comboName;
-    Entity testInput;
 
     InputEvent(Type t, int k, double time, const std::string& fb = "", const std::string& combo = "")
         : type(t), key(k), timestamp(time), feedback(fb), comboName(combo) {
@@ -48,7 +47,7 @@ public:
     void Update();
     void Shutdown();
 
-    void SetFeedbackEntity(Entity entity);
+    void SetFeedbackEntity(Entity entity) { feedbackEntity = entity; }
 
     // -------------------------------------------------
     // Rhythm game configuration
@@ -130,4 +129,3 @@ private:
     std::string GetTimingFeedback();
     void CheckForMissedBeat();
 };
-

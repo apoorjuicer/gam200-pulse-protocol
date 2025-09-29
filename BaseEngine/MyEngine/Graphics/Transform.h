@@ -11,6 +11,7 @@
 //#include "../Math/Matrix_3x3.h"
 //#include "../Math/Vector_2D.h"
 #include "pch/pch.h"        // FIRST
+#include "Core/Coordinator.h"
 #include <vector>
 #include <glm/gtc/type_ptr.hpp>
 #include "glhelper.h" 
@@ -41,9 +42,6 @@ namespace Framework
         Matrix3x3 mdl_to_ndc_xform;  // Initialize as identity matrix
         GLuint textureID = 0;         // Texture ID
         std::string spriteName;
-
-        glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
-
         int currentFrame = 5;
         float elapsedTime = 0.0f;     // Time accumulator for animation
         int totalFrames = 6;          // Total frames in the sprite sheet
