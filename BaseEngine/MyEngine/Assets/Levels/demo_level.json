@@ -1,0 +1,9 @@
+{
+  "entities": [
+    {
+      "name": "background",
+      "position": { "x": 800.0, "y": 450.0 },
+      "scale": { "x": 1600.0, "y": 900.0 }
+    }
+  ]
+}
