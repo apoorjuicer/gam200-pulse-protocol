@@ -4,6 +4,8 @@
 // Brief: Core asset data structures used by the ECS system
 // ==================================================================================
 
+#include <pch/pch.h>
+
 #ifndef ASSETS_H
 #define ASSETS_H
 
@@ -28,6 +30,36 @@ struct NPC
     // Health and status
     int hp;               // Health points (e.g., Hero = 10 HP, Monster = 1 HP)
     bool isAlive;         // True if NPC is alive, false if defeated
+
+    void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
+        out.SetObject();
+        rapidjson::Value posVal;
+        pos.Serialize(posVal, alloc);
+        out.AddMember("pos", posVal, alloc);
+
+        out.AddMember("width", width, alloc);
+        out.AddMember("height", height, alloc);
+        out.AddMember("swordWidth", swordWidth, alloc);
+        out.AddMember("swordHeight", swordHeight, alloc);
+        out.AddMember("swingProgress", swingProgress, alloc);
+        out.AddMember("isSwinging", isSwinging, alloc);
+        out.AddMember("hp", hp, alloc);
+        out.AddMember("isAlive", isAlive, alloc);
+    }
+
+    void Deserialize(const rapidjson::Value& in) {
+        if (!in.IsObject()) throw std::runtime_error("Invalid JSON for NPC");
+
+        if (in.HasMember("pos")) pos.Deserialize(in["pos"]);
+        if (in.HasMember("width")) width = in["width"].GetFloat();
+        if (in.HasMember("height")) height = in["height"].GetFloat();
+        if (in.HasMember("swordWidth")) swordWidth = in["swordWidth"].GetFloat();
+        if (in.HasMember("swordHeight")) swordHeight = in["swordHeight"].GetFloat();
+        if (in.HasMember("swingProgress")) swingProgress = in["swingProgress"].GetFloat();
+        if (in.HasMember("isSwinging")) isSwinging = in["isSwinging"].GetBool();
+        if (in.HasMember("hp")) hp = in["hp"].GetInt();
+        if (in.HasMember("isAlive")) isAlive = in["isAlive"].GetBool();
+    }
 };
 
 // -----------------------------------------------------------------------------
@@ -39,6 +71,21 @@ struct AABB
 {
     Vector2 min;          // Minimum corner (bottom-left)
     Vector2 max;          // Maximum corner (top-right)
+
+    //void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
+    //    out.SetObject();
+    //    rapidjson::Value minVal, maxVal;
+    //    min.Serialize(minVal, alloc);
+    //    max.Serialize(maxVal, alloc);
+    //    out.AddMember("min", minVal, alloc);
+    //    out.AddMember("max", maxVal, alloc);
+    //}
+
+    //void Deserialize(const rapidjson::Value& in) {
+    //    if (!in.IsObject()) throw std::runtime_error("Invalid JSON for AABB");
+    //    if (in.HasMember("min")) min.Deserialize(in["min"]);
+    //    if (in.HasMember("max")) max.Deserialize(in["max"]);
+    //}
 };
 
 #endif // ASSETS_H

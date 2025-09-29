@@ -107,7 +107,7 @@ int main() {
         std::cerr << "Failed to load transform!\n";
     }
     else {
-        std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
+        std::cout << "loaded from: " << std::filesystem::absolute(path) << "\n";
     }
     //to load into BaseEngine>MyEngine>JSON
     //if (!Framework::SaveTransform(tr, "../../MyEngine/JSON/transform.json")) {
