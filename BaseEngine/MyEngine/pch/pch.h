@@ -24,7 +24,8 @@
 #include <iomanip> //debug
 #include <algorithm>
 #include <random>
-#include <array>
+#include <list>
+#include <filesystem>
 
 // Graphics Library Headers
 #include <GL/glew.h>
@@ -32,6 +33,7 @@
 #include <glm/glm.hpp>
 #include "Graphics/glhelper.h"
 #include "Graphics/glslshader.h"
+#include "Graphics/glapp.h"
 
 // Suppress APIENTRY macro redefinition warning
 #pragma warning(push)

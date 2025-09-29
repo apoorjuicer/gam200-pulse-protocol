@@ -24,6 +24,7 @@
 class GLApp;                    
 namespace Framework { class Transform; } 
 namespace Framework { class Systems; }   
+
 class GraphicsManager : public Systems
 {
 public:

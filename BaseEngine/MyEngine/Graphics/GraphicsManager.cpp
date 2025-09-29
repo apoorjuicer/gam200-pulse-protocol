@@ -30,7 +30,6 @@ GraphicsManager::~GraphicsManager()
 }
 
 
-
 void GraphicsManager::Update()
 {
 
