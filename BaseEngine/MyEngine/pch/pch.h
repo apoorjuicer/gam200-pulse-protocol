@@ -19,8 +19,7 @@
 #include <vector>		 // for std::vectors
 #include <deque>		 // for std::deque
 #include <unordered_map> // for std::unordered_map
-
-
+#include <map>
 #include <cmath>
 #include <iomanip> //debug
 #include <algorithm>
@@ -39,9 +38,6 @@
 #pragma warning(push)
 #pragma warning(disable: 4005)
 
-// FMod Library header
-#include "fmod.hpp"
-
 // System Library Headers
 #include "../MyEngine/Math/math.h"
 #include "../MyEngine/Input/InputManager.h"
@@ -56,7 +52,8 @@
 #include "../MyEngine/Core/Types.h"
 #include "../MyEngine/Core/Window.h"
 #include "../MyEngine/Core/System.h"
-#include "../MyEngine/Core/Assets.h"
+//#include "../MyEngine/Core/Assets.h"
+#include "../MyEngine/Core/Singleton.h"
 #include "../MyEngine/Core/Coordinator.h"
 #include "../MyEngine/Core/SystemManager.h"
 #include "../MyEngine/Core/EntityManager.h"

@@ -40,7 +40,7 @@ const int Game_Window_Width = 800;
 struct GameStates {
     bool MainMenu = true;
     bool IsRunning = false;
-    bool IsPaused = false;
+    bool IsPaused = false;  
     bool GameOver = false;
 
     //libs that are good to use.
@@ -96,13 +96,11 @@ int main() {
     tr.currentFrame = 0;
     tr.animationSpeed = 0.0f;        // static
 
-    // rectangle is invisible at first
-    tr.isVisible = false;
-
     // a valid GL texture id. Use your loader or 0 if you just want a colored quad.
-    tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
-    int entity = g_coordinator.CreateEntity();
-    g_coordinator.AddComponent(entity, tr);  // <-- add Transform
+    //tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
+    auto* g_coordinator = Coordinator::GetInstance();
+    int entity = g_coordinator->CreateEntity();
+    g_coordinator->AddComponent(entity, tr);  // <-- add Transform
 
     // this is where the update() is 
     Engine->GameLoop();

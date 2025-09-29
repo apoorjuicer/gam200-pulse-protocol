@@ -23,8 +23,8 @@ public:
 	Vector2& operator=(Vector2  vec);
 
 	// subscript operator[] - access element of vector
-	float& operator[](size_t i);
-	float operator[](size_t i) const;
+	float& operator[](unsigned int i);
+	float operator[](unsigned int i) const;
 
 	// arithmetic operators: vector operations +-
 	Vector2& operator+=(Vector2 vec);
@@ -72,9 +72,6 @@ std::ostream& operator<<(std::ostream& os, Vector2 const& vec);
 class Matrix3x3 {
 private:
 		float m[9];      // column-major flat array
-		//static constexpr std::size_t idx(std::size_t c, std::size_t r) {
-		//	return c * 3 + r; // col-major mapping
-		//}
 public:
 	Matrix3x3(); //default identity
 	Matrix3x3(float e00, float e10, float e20,
@@ -83,41 +80,11 @@ public:
 	Matrix3x3(Matrix3x3 const& m);
 	~Matrix3x3();
 
-	//class ProxyClass
-	//{
-	//public:
-	//	ProxyClass(Matrix3x3 & mainMatrix, size_t c);
-	//	float& operator[](size_t r);
-	//	float const& operator[](size_t r) const;
-
-	//private:
-	//	Matrix3x3 & outer_mat;
-	//	size_t inner_mat_col;
-	//}; // end of proxy class
-	//ProxyClass operator[](size_t c);
-	//ProxyClass const operator[](size_t c) const;
-	
-	class ProxyClass {
-	public:
-		ProxyClass(Matrix3x3& m, size_t c);
-		ProxyClass(Matrix3x3 const& m, size_t c);
-
-		float& operator[](size_t r);
-		float const& operator[](size_t r) const;
-
-	private:
-		Matrix3x3 const* outer_; // pointer to const works for both
-		size_t col_;
-	};
-	ProxyClass       operator[](size_t c);
-	ProxyClass const operator[](size_t c) const;
 	// = operator: assignment
 	Matrix3x3& operator=(Matrix3x3 const& copied);
 	// () operators: component access
-	float& operator()(size_t column, size_t row);
-	const float& operator()(size_t column, size_t row) const;
-	// glm conversion operator
-	explicit operator glm::mat3() const;
+	float& operator()(unsigned int column, unsigned int row);
+	const float& operator()(unsigned int column, unsigned int row) const;
 
 	// iterators
 	float* Begin();

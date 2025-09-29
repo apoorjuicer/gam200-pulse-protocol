@@ -1,320 +1,239 @@
 // ==================================================================================
 // InputManager.cpp  
 // Author: Chloe Lau Rey En
-// Brief: Implementation of InputManager class with synchronized cycle timing
+// Brief: Implementation of InputManager class with frame-based input detection.
+//        Handles rhythm gameplay inputs, weapon switching, mouse aiming, and
+//        provides M1 testing functionality with console output.
 // ==================================================================================
 
 #include "InputManager.h"
 #include <iostream>
 #include <cstring>
-#include <iomanip>
+#include "pch/pch.h"
 
-extern Coordinator g_coordinator;
 
-static std::string KeyToString(int key) {
-    switch (key) {
-    case GLFW_KEY_W: return "W";
-    case GLFW_KEY_A: return "A";
-    case GLFW_KEY_S: return "S";
-    case GLFW_KEY_D: return "D";
-    default: return std::to_string(key);
-    }
-}
+	InputManager::InputManager() : window(nullptr), mouseX(0.0), mouseY(0.0),
+		previousMouseX(0.0), previousMouseY(0.0), mouseSensitivity(1.0f),
+		isFirstMouse(true), currentWeapon(1)
+	{
+		// initialize all input states to false by default
+		std::memset(currentKeys, 0, sizeof(currentKeys));
+		std::memset(previousKeys, 0, sizeof(previousKeys));
+		std::memset(currentMouse, 0, sizeof(currentMouse));
+		std::memset(previousMouse, 0, sizeof(previousMouse));
+	}
 
-InputManager::InputManager() : window(nullptr) {
-    std::memset(currentKeys, 0, sizeof(currentKeys));
-    std::memset(previousKeys, 0, sizeof(previousKeys));
-    successfulCombos = 0;
-    successfulCombosThisWindow = 0;
-    currentCyclePosition = 1;
-    InitializeSwordCombos();
-}
+	// dtor
+	InputManager::~InputManager()
+	{
+		Shutdown();
+	}
 
-InputManager::~InputManager() {
-    Shutdown();
-}
+	void InputManager::Initialize(GLFWwindow* glfwWindow)
+	{
+		window = glfwWindow;
 
-void InputManager::Initialize(GLFWwindow* glfwWindow) {
-    window = glfwWindow;
-    if (!window) {
-        std::cerr << "[InputManager] Error: Invalid window pointer" << std::endl;
-        return;
-    }
+		if (!window) // if window is unable to open
+		{
+			std::cerr << "[InputManager] error: invalid window pointer" << std::endl;
+			return;
+		}
 
-    std::cout << "[InputManager] Successfully initialized." << std::endl;
-    std::cout << "[COMBOS READY] Available combos: Basic Strike (W->A), Swift Slash (S->D), Power Combo (A->S->D)" << std::endl;
+		std::cout << "[InputManager] Successfully initialized for rhythm game input." << std::endl;
+	}
 
-    currentBeatIndex = 0;
-    comboStartBeat = -1;
-    lastBeatTime = 0.0;
-    currentCyclePosition = 1;
-}
+	void InputManager::Update()
+	{
+		if (!window) return;
 
-void InputManager::Update() {
-    UpdateInputStates();
-    ProcessRhythmInputs();
-    ProcessComboInputs();
-    CheckForMissedBeat();
+		// update input state
+		UpdateKeyStates();
+		UpdateMouseStates();
+	}
 
-    auto& transform = g_coordinator.GetComponent<Framework::Transform>(0);
+	void InputManager::UpdateKeyStates()
+	{
+		// store previous key frame states
+		std::memcpy(previousKeys, currentKeys, sizeof(currentKeys));
 
-    if (transform.autoHide && transform.isVisible) {
-        float dt = 0.016f;
-        transform.visibilityTimer -= dt;
-        if (transform.visibilityTimer <= 0.0f) {
-            transform.isVisible = false;
-            transform.autoHide = false;
-        }
-    }
-}
+		// iterate through current keyboard states
+		for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++)
+		{
+			currentKeys[key] = (glfwGetKey(window, key) == GLFW_PRESS);
+		}
+	}
 
-void InputManager::Shutdown() {
-    if (window) {
-        inputListeners.clear();
-        window = nullptr;
-        std::cout << "[InputManager] Shutdown completed." << std::endl;
-    }
-}
+	void InputManager::UpdateMouseStates()
+	{
+		// store previous key frame states
+		std::memcpy(previousMouse, currentMouse, sizeof(currentMouse));
 
-void InputManager::RegisterInputListener(const std::string& systemName, InputCallback callback) {
-    inputListeners[systemName] = callback;
-}
+		// iterate through current keyboard states
+		for (int button = GLFW_MOUSE_BUTTON_1; button <= GLFW_MOUSE_BUTTON_LAST; button++)
+		{
+			currentMouse[button] = (glfwGetMouseButton(window, button) == GLFW_PRESS);
+		}
 
-void InputManager::UnregisterInputListener(const std::string& systemName) {
-    inputListeners.erase(systemName);
-}
+		// remember to update mouse cursor position
+		glfwGetCursorPos(window, &mouseX, &mouseY);
 
-void InputManager::BroadcastInputEvent(const InputEvent& event) {
-    if (event.type == InputEvent::Type::RHYTHM_INPUT) {
-        auto& transform = g_coordinator.GetComponent<Framework::Transform>(0);
-        transform.isVisible = true;
-        transform.visibilityTimer = 0.5f;
-        transform.autoHide = true;
-    }
+		if (isFirstMouse) {
+			previousMouseX = mouseX;
+			previousMouseY = mouseY;
+			isFirstMouse = false;
+		}
+	}
 
-    for (const auto& [systemName, callback] : inputListeners) {
-        callback(event);
-    }
-}
+	// RETURNING OF KEY STATES (BOOL) * CALCULATION OF MOUSE STATS
+	bool InputManager::IsKeyPressed(int key)
+	{
+		if (key < 0 || key > GLFW_KEY_LAST) return false;
+		return currentKeys[key];
+	}
 
-bool InputManager::IsKeyJustPressed(int key) const {
-    if (key < 0 || key > GLFW_KEY_LAST) return false;
-    return currentKeys[key] && !previousKeys[key];
-}
+	bool InputManager::IsKeyJustPressed(int key)
+	{
+		if (key < 0 || key > GLFW_KEY_LAST) return false;
+		return currentKeys[key] && !previousKeys[key];
+	}
 
-double InputManager::GetInputTiming() const {
-    return glfwGetTime();
-}
+	bool InputManager::IsKeyReleased(int key)
+	{
+		if (key < 0 || key > GLFW_KEY_LAST) return false;
+		return !currentKeys[key] && previousKeys[key];
+	}
 
-bool InputManager::IsRhythmKeyPressed(int key) const {
-    return (key == GLFW_KEY_W || key == GLFW_KEY_A || key == GLFW_KEY_S || key == GLFW_KEY_D) && IsKeyJustPressed(key);
-}
+	bool InputManager::IsMousePressed(int button)
+	{
+		if (button < 0 || button > GLFW_MOUSE_BUTTON_LAST) return false;
+		return currentMouse[button];
+	}
 
-void InputManager::UpdateInputStates() {
-    std::memcpy(previousKeys, currentKeys, sizeof(currentKeys));
+	bool InputManager::IsMouseJustPressed(int button)
+	{
+		if (button < 0 || button > GLFW_MOUSE_BUTTON_LAST) return false;
+		return currentMouse[button] && !previousMouse[button];
+	}
 
-    for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++) {
-        currentKeys[key] = (glfwGetKey(window, key) == GLFW_PRESS);
-    }
-}
+	void InputManager::GetMousePosition(double& x, double& y)
+	{
+		x = mouseX;
+		y = mouseY;
+	}
 
-void InputManager::ProcessRhythmInputs() {
-    const int rhythmKeys[] = { GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D };
+	void InputManager::GetMouseDelta(double& deltaX, double& deltaY)
+	{
+		deltaX = (mouseX - previousMouseX) * mouseSensitivity;
+		deltaY = (mouseY - previousMouseY) * mouseSensitivity;
+	}
 
-    // Use the synchronized cycle position
-    bool inInputWindow = (currentCyclePosition >= 5 && currentCyclePosition <= 8);
+	void InputManager::SetMouseSensitivity(float sensitivity)
+	{
+		mouseSensitivity = sensitivity;
+	}
 
-    for (int i = 0; i < 4; ++i) {
-        if (IsKeyJustPressed(rhythmKeys[i])) {
-            if (inInputWindow) {
-                ProcessRhythmTiming(rhythmKeys[i]);
-                std::string feedback = GetTimingFeedback();
-                InputEvent rhythmEvent(InputEvent::Type::RHYTHM_INPUT, rhythmKeys[i], GetInputTiming(), feedback);
-                BroadcastInputEvent(rhythmEvent);
-            }
-        }
-    }
-}
 
-void InputManager::ProcessComboInputs() {
-    if (currentComboSequence.empty()) return;
+	// specific rhythm game functions 
+	bool InputManager::IsRhythmKeyPressed(int key) {
+		return (key == GLFW_KEY_Q || key == GLFW_KEY_W ||
+			key == GLFW_KEY_E || key == GLFW_KEY_R) && IsKeyJustPressed(key);
+	}
 
-    for (const auto& combo : swordCombos) {
-        if (currentComboSequence.size() == combo.keySequence.size()) {
-            if (currentComboSequence == combo.keySequence) {
-                successfulCombos++;
-                successfulCombosThisWindow++;
+	bool InputManager::IsWeaponSwitchPressed(int key) {
+		return (key == GLFW_KEY_1 || key == GLFW_KEY_2 || key == GLFW_KEY_3) && IsKeyJustPressed(key);
+	}
 
-                bool isPartOfLongerCombo = false;
-                for (const auto& longerCombo : swordCombos) {
-                    if (longerCombo.keySequence.size() > combo.keySequence.size()) {
-                        bool matches = true;
-                        for (size_t i = 0; i < combo.keySequence.size(); ++i) {
-                            if (longerCombo.keySequence[i] != combo.keySequence[i]) {
-                                matches = false;
-                                break;
-                            }
-                        }
-                        if (matches) {
-                            isPartOfLongerCombo = true;
-                            break;
-                        }
-                    }
-                }
+	int InputManager::GetCurrentWeaponSelected() {
+		return currentWeapon;
+	}
 
-                if (!isPartOfLongerCombo) {
-                    InputEvent comboEvent(InputEvent::Type::COMBO_EXECUTED, 0, GetInputTiming(), "COMBO", combo.name);
-                    BroadcastInputEvent(comboEvent);
-                    currentComboSequence.clear();
-                }
-                return;
-            }
-        }
-    }
+	bool InputManager::IsAiming() {
+		return IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT);
+	}
 
-    bool isValidPrefix = false;
-    for (const auto& combo : swordCombos) {
-        if (currentComboSequence.size() < combo.keySequence.size()) {
-            bool matches = true;
-            for (size_t i = 0; i < currentComboSequence.size(); ++i) {
-                if (currentComboSequence[i] != combo.keySequence[i]) {
-                    matches = false;
-                    break;
-                }
-            }
-            if (matches) {
-                isValidPrefix = true;
-                break;
-            }
-        }
-    }
+	double InputManager::GetInputTiming() {
+		return glfwGetTime(); // get simple timing using glfw
+	}
 
-    if (!isValidPrefix) {
-        currentComboSequence.clear();
-    }
-}
+	void InputManager::RunM1Test()
+	{
+		// testing of the rhythm keys Q/W/E/R (core rhythm gameplay)
+		if (IsKeyJustPressed(GLFW_KEY_Q))
+		{
+			double timing = GetInputTiming();
+			std::cout << "[M1 BEAT1 TEST] Q pressed at: " << timing << "s - Rhythm Beat 1" << std::endl;
+		}
+		if (IsKeyJustPressed(GLFW_KEY_W))
+		{
+			double timing = GetInputTiming();
+			std::cout << "[M1 BEAT2 TEST] W pressed at: " << timing << "s - Rhythm Beat 2" << std::endl;
+		}
+		if (IsKeyJustPressed(GLFW_KEY_E))
+		{
+			double timing = GetInputTiming();
+			std::cout << "[M1 BEAT3 TEST] E pressed at: " << timing << "s - Rhythm Beat 3" << std::endl;
+		}
+		if (IsKeyJustPressed(GLFW_KEY_R))
+		{
+			double timing = GetInputTiming();
+			std::cout << "[M1 BEAT4 TEST] R pressed at: " << timing << "s - Rhythm Beat 4" << std::endl;
+		}
 
-void InputManager::InitializeSwordCombos() {
-    swordCombos.clear();
-    swordCombos.emplace_back(std::vector<int>{GLFW_KEY_W, GLFW_KEY_A}, "Basic Strike");
-    swordCombos.emplace_back(std::vector<int>{GLFW_KEY_S, GLFW_KEY_D}, "Swift Slash");
-    swordCombos.emplace_back(std::vector<int>{GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D}, "Power Combo");
-}
+		// test switchign of 3 weapons (1,2,3)
+		if (IsKeyJustPressed(GLFW_KEY_1))
+		{
+			currentWeapon = 1;
+			std::cout << "[M1 SPEAR TEST] Switched to Spear (1)" << std::endl;
+		}
+		if (IsKeyJustPressed(GLFW_KEY_2))
+		{
+			currentWeapon = 2;
+			std::cout << "[M1 SWORD TEST] Switched to Sword (2)" << std::endl;
+		}
+		if (IsKeyJustPressed(GLFW_KEY_3))
+		{
+			currentWeapon = 3;
+			std::cout << "[M1 GUN TEST] Switched to Gun (3)" << std::endl;
+		}
 
-std::string InputManager::GetTimingFeedback() {
-    auto audioSystem = g_coordinator.GetSystem<AudioManager>();
+		// test for aiming using mouse
+		if (IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT))
+		{
+			double x, y, deltaX, deltaY;
+			GetMousePosition(x, y);
+			GetMouseDelta(deltaX, deltaY);
+			std::cout << "[M1 AIM TEST] Aiming mode - Position: (" << x << ", " << y
+				<< ") Delta: (" << deltaX << ", " << deltaY << ")" << std::endl;
+		}
 
-    if (!audioSystem) {
-        return "GOOD";
-    }
+		// test mouse input
+		if (IsMouseJustPressed(GLFW_MOUSE_BUTTON_LEFT))
+		{
+			double x, y;
+			GetMousePosition(x, y);
+			std::cout << "[M1 MOUSE TEST] Left mouse button pressed at position: (" << x << ", " << y << ")" << std::endl;
+			std::cout << "          UI interaction capability confirmed" << std::endl;
+		}
 
-    double musicPosition = audioSystem->GetMusicPosition();
-    double beatPosition = fmod(musicPosition, beatInterval);
-    double distance = std::min(beatPosition, fabs(beatInterval - beatPosition));
+		// test shooting or attacking while aiming
+		if (IsMouseJustPressed(GLFW_MOUSE_BUTTON_LEFT))
+		{
+			double x, y;
+			GetMousePosition(x, y);
+			if (IsAiming()) {
+				std::cout << "[M1 SHOOT TEST] Aimed shot fired at: (" << x << ", " << y << ")" << std::endl;
+			}
+			else {
+				std::cout << "[M1 CLICK TEST] UI click at: (" << x << ", " << y << ")" << std::endl;
+			}
+		}
+	}
 
-    if (distance <= 0.05) return "PERFECT";
-    if (distance <= 0.15) return "GOOD";
-    return "MISS";
-}
-
-void InputManager::ProcessRhythmTiming(int key) {
-    if (!canInput) return;
-
-    inputReceivedOnThisBeat = true;
-
-    if (currentComboSequence.empty()) {
-        comboStartBeat = currentBeatIndex;
-    }
-
-    currentComboSequence.push_back(key);
-
-    // Get timing quality first
-    std::string feedback = GetTimingFeedback();
-
-    // Play SFX immediately when input is processed
-    auto audioSystem = g_coordinator.GetSystem<AudioManager>();
-    if (audioSystem) {
-        audioSystem->PlayInputSFX(1.0f);
-    }
-
-    // Check if this completes a combo
-    bool comboCompleted = false;
-    std::string completedComboName = "";
-
-    for (const auto& combo : swordCombos) {
-        if (currentComboSequence.size() == combo.keySequence.size() &&
-            currentComboSequence == combo.keySequence) {
-            comboCompleted = true;
-            completedComboName = combo.name;
-            break;
-        }
-    }
-
-    if (comboCompleted) {
-        std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << KeyToString(key) << " | Combo: " << completedComboName << std::endl;
-    }
-    else {
-        std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << KeyToString(key) << " | Combo: unsuccessful" << std::endl;
-    }
-}
-
-void InputManager::CheckForMissedBeat() {
-    if (!canInput) return;
-
-    auto audioSystem = g_coordinator.GetSystem<AudioManager>();
-    if (!audioSystem) return;
-
-    double currentTime = audioSystem->GetMusicPosition();
-
-    if (currentTime - lastBeatTime < beatInterval) {
-        return;
-    }
-
-    lastBeatTime = currentTime - fmod(currentTime, beatInterval);
-    currentBeatIndex++;
-
-    // Update cycle position once per beat - synchronized
-    currentCyclePosition = ((currentBeatIndex - 1) % 8) + 1;
-
-    if (currentCyclePosition >= 1 && currentCyclePosition <= 4) {
-        // Beats 1-4: INCOMING phase
-        std::cout << "[INCOMING] GET READY.." << std::endl;
-        inputReceivedOnThisBeat = false;
-    }
-    else if (currentCyclePosition >= 5 && currentCyclePosition <= 8) {
-        // Beats 5-8: INPUT phase
-
-        // Reset input flag when entering INPUT WINDOW (beat 5)
-        if (currentCyclePosition == 5) {
-            inputReceivedOnThisBeat = false;
-        }
-
-        // Only check for no input if we're past beat 5
-        if (currentCyclePosition > 5 && !inputReceivedOnThisBeat) {
-            std::cout << "[MISS] NO INPUT DETECTED" << std::endl;
-        }
-
-        // End of input window - check for combos
-        if (currentCyclePosition == 8) {
-            if (successfulCombosThisWindow == 0) {
-                playerChances--;
-                std::cout << "[MISS] No valid combo completed | Chances left: " << playerChances << std::endl;
-            }
-
-            currentComboSequence.clear();
-            successfulCombosThisWindow = 0;
-            comboStartBeat = currentBeatIndex + 1;
-        }
-    }
-
-    if (playerChances <= 0) {
-        canInput = false;
-        std::cout << "[YOU DIED!] No more chances." << std::endl;
-        if (audioSystem) audioSystem->StopMusic();
-    }
-
-    // Only reset at the end for INCOMING phase
-    if (currentCyclePosition <= 4) {
-        inputReceivedOnThisBeat = false;
-    }
-}
+	void InputManager::Shutdown()
+	{
+		if (window)
+		{
+			std::cout << "[InputManager] Shutdown completed" << std::endl;
+			window = nullptr;
+		}
+	}
