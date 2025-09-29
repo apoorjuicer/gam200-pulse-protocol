@@ -36,7 +36,7 @@ void GraphicsManager::Update()
 	//std::cout << "[GraphicsManager] UPDATED." << std::endl;
 	glfwPollEvents();
 	GLHelper::update_time(1.0);
-	glapp->update();
+	glapp->update(Engine->GetWindow());
 	glapp->draw(EntityMember);
 
 }
