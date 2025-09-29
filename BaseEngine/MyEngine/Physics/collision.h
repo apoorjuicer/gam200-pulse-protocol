@@ -1,12 +1,4 @@
-// ==================================================================================
-// collision.h  
-// Author: Reginald
-// Brief: AABB
-//        
-//        
-// ==================================================================================
-#ifndef COLLISION_H
-#define COLLISION_H
+#include "pch/pch.h"
 
 #include "../Core/Assets.h"
 

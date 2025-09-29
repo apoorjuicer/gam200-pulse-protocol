@@ -22,7 +22,7 @@ public:
 		Entity ID = EntityList.front();
 
 		// remove it from queue
-		EntityList.pop_front();
+		EntityList.pop_back();
 		++LiveEntityCount;
 
 		return ID;
@@ -56,6 +56,8 @@ public:
 		// give entity systems bit signature
 		return SignatureID[entity];
 	}
+
+	
 
 private:
 	std::deque<Entity> EntityList{}; //EntityList[i]
