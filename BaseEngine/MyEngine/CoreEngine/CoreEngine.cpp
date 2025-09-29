@@ -143,8 +143,7 @@ void CoreEngine::Setup()
 
 	// Register your component here
 	g_coordinator->RegisterComponent<Framework::Transform>();
-    g_coordinator->RegisterComponent<Hero>();
-    g_coordinator->RegisterComponent<Monster>();
+    g_coordinator->RegisterComponent<NPC>();
     g_coordinator->RegisterComponent<AABB>();
 	
 	// Register your systems here
@@ -159,8 +158,7 @@ void CoreEngine::Setup()
     g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
      
     Signature collisionSig;
-    collisionSig.set(g_coordinator->GetComponentType<Hero>());
-    collisionSig.set(g_coordinator->GetComponentType<Monster>());
+    collisionSig.set(g_coordinator->GetComponentType<NPC>());
     collisionSig.set(g_coordinator->GetComponentType<AABB>());
     g_coordinator->SetSystemSignature<CollisionManager>(collisionSig);
 
@@ -212,6 +210,25 @@ void CoreEngine::GameLoop()
 		LastTime = currenttime;
 
 
+    //if (!testBoxLineCollision)
+    //{
+    //    // HERO/MONSTER TEST SETUP
+    //    Hero hero;
+    //    hero.pos = { 400.0f, 700.0f };
+    //    hero.width = 50.0f;
+    //    hero.height = 50.0f;
+    //    hero.swordWidth = 60.0f;
+    //    hero.swordHeight = 20.0f;
+    //    hero.swingProgress = 0.0f;
+    //    hero.isSwinging = automaticSwordSwing;
+    //    hero.hp = 10;
+    //     
+    //    Monster monsterTemplate;
+    //    monsterTemplate.width = 50.0f;
+    //    monsterTemplate.height = 50.0f;
+    //    monsterTemplate.isAlive = true;
+    //    std::vector<Monster> monsters = { monsterTemplate };
+    //    float monsterSpeed = 200.0f;
         //  1. Poll event(input key)
         glfwPollEvents();
 

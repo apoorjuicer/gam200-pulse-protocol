@@ -1,78 +1,65 @@
 // ==================================================================================
-// collision.h  
+// File: collision.h
 // Author: Reginald
-// Brief: AABB
-//        
-//        
+// Brief: Collision management system (NPC, Monster, Sword, and Box-to-Line logic)
 // ==================================================================================
+
 #ifndef COLLISION_H
 #define COLLISION_H
 
 #include "../Core/Assets.h"
 
+// -----------------------------------------------------------------------------
+// CollisionManager
+// -----------------------------------------------------------------------------
+// Handles all collision-related systems in the ECS engine:
+//  - NPC vs Monster (AABB checks)
+//  - NPC sword vs Monster (AABB checks with auto-swing toggle)
+//  - Box-to-Line collision detection (for timing-based systems)
+// -----------------------------------------------------------------------------
 class CollisionManager : public Systems
 {
-    
 public:
-    void Init() override;
-    void Update(float dt) override;
+    // -------------------------------------------------------------------------
+    // System Lifecycle
+    // -------------------------------------------------------------------------
+    void Init() override;               // Called once at system startup
+    void Update(float dt) override;     // Called every frame with delta time
 
-    // Utility functions
-    AABB BuildSwordHitbox(const Hero& hero);
-    AABB BuildHeroHitbox(const Hero& hero);
-    AABB BuildMonsterHitbox(const Monster& monster);
-    bool CheckAABBCollision(const AABB& a, const AABB& b);
-    bool CheckDistanceCollision(const Vector2& a, float aradius, const Vector2& b, float bradius);
+    // -------------------------------------------------------------------------
+    // Utility Functions for Hitbox Construction
+    // -------------------------------------------------------------------------
+    AABB BuildSwordHitbox(const NPC& npc);     // Build AABB for NPC's sword
+    AABB BuildHeroHitbox(const NPC& npc);      // Build AABB for central NPC
+    AABB BuildMonsterHitbox(const NPC& npc);   // Build AABB for moving monster
 
+    // -------------------------------------------------------------------------
+    // Collision Checks
+    // -------------------------------------------------------------------------
+    bool CheckAABBCollision(const AABB& a, const AABB& b);  // Axis-Aligned Bounding Box collision
+    bool CheckDistanceCollision(const Vector2& a, float aradius,
+        const Vector2& b, float bradius); // Circle-based distance collision
+
+    // -------------------------------------------------------------------------
     // Box-to-Line Collision System
+    // -------------------------------------------------------------------------
     enum class LineHitResult { None, Bad, Good, Excellent };
 
-    // Check if a box (AABB) collides with a horizontal line
-    // lineY: y-coordinate of the line
-    // lineStartX, lineEndX: x-range of the line
-    LineHitResult CheckBoxLineCollision(const AABB& box, float lineY, float lineStartX, float lineEndX);
+    // Checks if a box collides with a horizontal line segment.
+    // Parameters:
+    //   box        -> The AABB of the moving box
+    //   lineY      -> Y position of the line
+    //   lineStartX -> Start X of the line
+    //   lineEndX   -> End X of the line
+    // Returns:
+    //   LineHitResult::Bad / Good / Excellent depending on relative position
+    LineHitResult CheckBoxLineCollision(const AABB& box, float lineY,
+        float lineStartX, float lineEndX);
+
+    // -------------------------------------------------------------------------
+    // ECS Data
+    // -------------------------------------------------------------------------
+    std::vector<Entity> EntityNPC; // List of NPC entities in the world
 };
 
-
-
-// Hero struct for collision system
-//struct Hero {
-//    Vector2 pos;
-//    float width, height;
-//    float swordWidth, swordHeight;
-//    float swingProgress;
-//    bool isSwinging;
-//    int hp;
-//};
-//
-//struct Monster {
-//    Vector2 pos;
-//    float width, height;
-//    bool isAlive;
-//};
-//
-//struct AABB {
-//    Vector2 min;
-//    Vector2 max;
-//};
-//
-//void collision_init();
-//void collision_update(Hero& hero, std::vector<Monster>& monsters);
-//void collision_exit();
-//
-//// Utility functions
-//AABB BuildSwordHitbox(const Hero& hero);
-//AABB BuildHeroHitbox(const Hero& hero);
-//AABB BuildMonsterHitbox(const Monster& monster);
-//bool CheckAABBCollision(const AABB& a, const AABB& b);
-//bool CheckDistanceCollision(const Vector2& a, float aradius, const Vector2& b, float bradius);
-//
-//// Box-to-Line Collision System
-//enum class LineHitResult { None, Bad, Good, Excellent };
-//
-//// Check if a box (AABB) collides with a horizontal line
-//// lineY: y-coordinate of the line
-//// lineStartX, lineEndX: x-range of the line
-//LineHitResult CheckBoxLineCollision(const AABB& box, float lineY, float lineStartX, float lineEndX);
-
-#endif
+#endif // COLLISION_H
