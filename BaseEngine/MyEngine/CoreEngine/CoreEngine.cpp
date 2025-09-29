@@ -120,6 +120,7 @@ void CoreEngine::Init()
 	g_inputSystem->Initialize(window);
 	g_graphicsSystem->Initialize();
 	g_audioSystem->Initialize(); 
+
 	g_coordinator.InitializeAllSystems();
 
 	std::cout << "Engine initialized." << std::endl;
@@ -135,14 +136,15 @@ void CoreEngine::Setup()
 	g_coordinator.init();
 
 	// Register your component here
-	g_coordinator->RegisterComponent<Framework::Transform>();
-    g_coordinator->RegisterComponent<NPC>();
-    g_coordinator->RegisterComponent<AABB>();
+	g_coordinator.RegisterComponent<Framework::Transform>();
+    g_coordinator.RegisterComponent<NPC>();
+    g_coordinator.RegisterComponent<AABB>();
 	
 	// Register your systems here
 	g_coordinator.RegisterSystem<InputManager>();
 	g_coordinator.RegisterSystem<GraphicsManager>();
 	g_coordinator.RegisterSystem<AudioManager>();
+	g_coordinator.RegisterSystem<CollisionManager>();
 
 	// Set your signatures for both component and system
 	Signature inputSig;
@@ -150,9 +152,9 @@ void CoreEngine::Setup()
 	g_coordinator.SetSystemSignature<InputManager>(inputSig);
 
     Signature collisionSig;
-    collisionSig.set(g_coordinator->GetComponentType<NPC>());
-    collisionSig.set(g_coordinator->GetComponentType<AABB>());
-    g_coordinator->SetSystemSignature<CollisionManager>(collisionSig);
+    collisionSig.set(g_coordinator.GetComponentType<NPC>());
+    collisionSig.set(g_coordinator.GetComponentType<AABB>());
+    g_coordinator.SetSystemSignature<CollisionManager>(collisionSig);
 
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator.GetComponentType<Framework::Transform>());  // <-- needs Transform
@@ -172,7 +174,6 @@ void CoreEngine::Update(float dt)
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Update();
 	}
-		//g_audioSystem->Update();  
 
 	g_coordinator.UpdateAllSystems(dt);
 }
