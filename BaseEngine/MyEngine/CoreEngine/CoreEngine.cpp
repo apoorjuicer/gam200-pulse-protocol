@@ -135,8 +135,10 @@ void CoreEngine::Setup()
 	g_coordinator.init();
 
 	// Register your component here
-	g_coordinator.RegisterComponent<Framework::Transform>();
-
+	g_coordinator->RegisterComponent<Framework::Transform>();
+    g_coordinator->RegisterComponent<NPC>();
+    g_coordinator->RegisterComponent<AABB>();
+	
 	// Register your systems here
 	g_coordinator.RegisterSystem<InputManager>();
 	g_coordinator.RegisterSystem<GraphicsManager>();
@@ -146,6 +148,11 @@ void CoreEngine::Setup()
 	Signature inputSig;
 	inputSig.set(g_coordinator.GetComponentType<Framework::Transform>());
 	g_coordinator.SetSystemSignature<InputManager>(inputSig);
+
+    Signature collisionSig;
+    collisionSig.set(g_coordinator->GetComponentType<NPC>());
+    collisionSig.set(g_coordinator->GetComponentType<AABB>());
+    g_coordinator->SetSystemSignature<CollisionManager>(collisionSig);
 
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator.GetComponentType<Framework::Transform>());  // <-- needs Transform
@@ -195,6 +202,9 @@ void CoreEngine::GameLoop()
 
 		//  2. update engine cpp
 		Update(dt);
+
+        //  1. Poll event(input key)
+        glfwPollEvents();
 
 		//  3. ImGui update
 
