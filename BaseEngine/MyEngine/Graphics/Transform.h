@@ -4,13 +4,12 @@
  \author    Goh Pin Kai (pinkai.g@digipen.edu) 100%
 
 
-\copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.
+\copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
 **********************************************************************************************/
 #pragma once
 //#include "../ComponentJson/Component_System.h"
 //#include "../Math/Matrix_3x3.h"
 //#include "../Math/Vector_2D.h"
-#pragma once
 #include "pch/pch.h"        // FIRST
 #include "Core/Coordinator.h"
 #include <vector>
@@ -48,7 +47,7 @@ namespace Framework
         int totalFrames = 6;          // Total frames in the sprite sheet
         int columns = 1;              // Columns in the sprite sheet
         int rows = 1;                 // Rows in the sprite sheet
-        float animationSpeed = 7.f;
+        float animationSpeed = 2.f;
 
         Transform();
         ~Transform();
@@ -59,11 +58,6 @@ namespace Framework
 
         void SetSprite(std::string ref);
         std::string GetSprite() const;
-
-        bool isVisible = true; // Used for input detect purpose
-        float visibilityTimer = 0.0f; // Used for input detect purpose
-        bool autoHide = false; // Used for input detect purpose
-
         // Register these components in your initialization code:
         //void Serialize(Value& data, Document::AllocatorType& alloc) override;
         //void Deserialize(Value& data);

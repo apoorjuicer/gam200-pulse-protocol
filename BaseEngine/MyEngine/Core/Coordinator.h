@@ -5,8 +5,10 @@
 #include "ComponentManager.h"
 #include "ComponentArray.h"
 
+#include "../MyEngine/Core/Singleton.h"
+
 //  Acts as a mediator that allows us to have a single instance of the coordinator to use for all 3 manager :D
-class Coordinator
+class Coordinator : public Singleton<Coordinator>
 {
 public:	
 	static Coordinator& GetInstance()
@@ -108,7 +110,7 @@ public:
 	{
 		CoordSystemManager->InitializeAllSystems();
 	}
-	//Created to check if componenet exist
+
 	template<typename T>
 	bool HasComponent(Entity entity) const {
 		auto sig = CoordEnitiyManager->GetSignature(entity);
@@ -125,5 +127,6 @@ private:
 	std::unique_ptr<EntityManager> CoordEnitiyManager;
 	std::unique_ptr<ComponentManager> CoordComponentManager;
 	std::unique_ptr<SystemManager> CoordSystemManager;
+	
 };
 

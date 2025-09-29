@@ -61,10 +61,74 @@ macro(import_json)
     endif()
 endmacro()
 
+# Import FreeType once and expose target Freetype::Freetype
+macro(import_freetype)
+  if(NOT TARGET Freetype::Freetype)
+    # Prefer a preinstalled package (vcpkg, brew, system)
+    find_package(Freetype QUIET CONFIG)
+    if(NOT Freetype_FOUND)
+      # Some environments only have FindFreetype.cmake
+      find_package(Freetype QUIET)
+    endif()
+
+    if(NOT Freetype_FOUND AND NOT TARGET Freetype::Freetype)
+      include(FetchContent)
+      # Fetch FreeType source
+      FetchContent_Declare(
+        freetype_src
+        GIT_REPOSITORY https://github.com/freetype/freetype.git
+        GIT_TAG        VER-2-13-3
+        GIT_SHALLOW    TRUE
+      )
+
+      # Trim features to avoid extra dependencies (zlib/png/brotli/bzip2)
+      set(FT_DISABLE_BZIP2     ON  CACHE BOOL "" FORCE)
+      set(FT_DISABLE_HARFBUZZ  ON  CACHE BOOL "" FORCE)
+      set(FT_REQUIRE_ZLIB      OFF CACHE BOOL "" FORCE)
+      set(FT_REQUIRE_BZIP2     OFF CACHE BOOL "" FORCE)
+      set(FT_REQUIRE_PNG       OFF CACHE BOOL "" FORCE)
+      set(FT_REQUIRE_BROTLI    OFF CACHE BOOL "" FORCE)
+      set(FT_WITH_ZLIB         OFF CACHE BOOL "" FORCE)
+      set(FT_WITH_BZIP2        OFF CACHE BOOL "" FORCE)
+      set(FT_WITH_PNG          OFF CACHE BOOL "" FORCE)
+      set(FT_WITH_BROTLI       OFF CACHE BOOL "" FORCE)
+      set(BUILD_TESTING        OFF CACHE BOOL "" FORCE)
+      set(FT_DISABLE_DOCS      ON  CACHE BOOL "" FORCE)
+
+      FetchContent_MakeAvailable(freetype_src)
+
+      # Upstream defines the target 'freetype'. Create a consistent alias.
+      if(TARGET freetype AND NOT TARGET Freetype::Freetype)
+        add_library(Freetype::Freetype ALIAS freetype)
+      endif()
+    endif()
+
+    if(NOT TARGET Freetype::Freetype)
+      message(FATAL_ERROR "FreeType not found and fallback did not create target Freetype::Freetype")
+    endif()
+  endif()
+endmacro()
+
+macro(import_spdlog)
+    if(NOT TARGET spdlog)  # Guard to prevent multiple inclusion
+        FetchContent_Declare(
+          spdlog
+          GIT_REPOSITORY https://github.com/gabime/spdlog.git
+          GIT_TAG v1.14.1
+        )
+
+        FetchContent_MakeAvailable(spdlog)
+
+        include_directories(${spdlog_SOURCE_DIR}/include)
+    endif()
+endmacro()
+
 # Macro to import all dependencies
 macro(importDependencies)
     import_glfw()
     import_glew()
     import_glm()
     import_json()
+    import_freetype()
+    import_spdlog()
 endmacro()

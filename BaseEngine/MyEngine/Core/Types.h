@@ -10,7 +10,7 @@ using Entity = std::uint32_t;
 // Used to define the size of our container later on
 const Entity MaxEntity = 5000;
 
-// 8 type if component tyoe for now
+// 2^8 type if component tyoe for now
 using ComponentType = std::uint8_t;
 
 // max amount of component per type

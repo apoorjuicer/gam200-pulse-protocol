@@ -19,17 +19,17 @@ bool SwordEnabled = true;      // true = sword swings, false = sword disabled
 // ==================================================================================
 void CollisionManager::Init()
 {
-    auto& g_coordinator = Coordinator::GetInstance();
+    auto* g_coordinator = Coordinator::GetInstance();
 
     if (!UseBoxLineTest)
     {
         // --- Hero NPC: stationary at center of screen ---
-        Entity Hero = g_coordinator.CreateEntity();
-        g_coordinator.AddComponent(Hero, NPC{
+        Entity Hero = g_coordinator->CreateEntity();
+        g_coordinator->AddComponent(Hero, NPC{
             Vector2(400.0f, 300.0f), 50.0f, 50.0f,
             100.0f, 50.0f, 0.0f, false, 10, true
             });
-        g_coordinator.AddComponent(Hero, AABB{
+        g_coordinator->AddComponent(Hero, AABB{
             Vector2(400.0f, 300.0f),
             Vector2(450.0f, 350.0f)
             });
@@ -40,12 +40,12 @@ void CollisionManager::Init()
         // --- Monster NPC: spawns left or right ---
         float startX = SpawnLeftMonster ? 100.0f : 700.0f;
 
-        Entity Monster = g_coordinator.CreateEntity();
-        g_coordinator.AddComponent(Monster, NPC{
+        Entity Monster = g_coordinator->CreateEntity();
+        g_coordinator->AddComponent(Monster, NPC{
             Vector2(startX, 300.0f), 50.0f, 50.0f,
             0.0f, 0.0f, 0.0f, false, 1, true
             });
-        g_coordinator.AddComponent(Monster, AABB{
+        g_coordinator->AddComponent(Monster, AABB{
             Vector2(startX, 300.0f),
             Vector2(startX + 50.0f, 350.0f)
             });
@@ -57,12 +57,12 @@ void CollisionManager::Init()
     else
     {
         // --- BoxLine Test: moving box across horizontal line segments ---
-        Entity boxNPC = g_coordinator.CreateEntity();
-        g_coordinator.AddComponent(boxNPC, NPC{
+        Entity boxNPC = g_coordinator->CreateEntity();
+        g_coordinator->AddComponent(boxNPC, NPC{
             Vector2(0.0f, 250.0f), 50.0f, 50.0f,
             0.0f, 0.0f, 0.0f, false, 1, true
             });
-        g_coordinator.AddComponent(boxNPC, AABB{
+        g_coordinator->AddComponent(boxNPC, AABB{
             Vector2(0.0f, 250.0f),
             Vector2(50.0f, 300.0f)
             });
@@ -78,12 +78,12 @@ void CollisionManager::Init()
 // ==================================================================================
 void CollisionManager::Update(float dt)
 {
-    auto& g_coordinator = Coordinator::GetInstance();
+    auto* g_coordinator = Coordinator::GetInstance();
 
     if (UseBoxLineTest)
     {
         // --- BoxLine test: move box across 4 vertical lines ---
-        auto& box = g_coordinator.GetComponent<AABB>(EntityNPC[0]);
+        auto& box = g_coordinator->GetComponent<AABB>(EntityNPC[0]);
         float speed = 200.0f; // units per second
 
         if (box.min.x <= 600.0f)
@@ -115,10 +115,10 @@ void CollisionManager::Update(float dt)
     }
 
     // --- NPC/Monster collision test ---
-    auto& centre = g_coordinator.GetComponent<NPC>(EntityNPC[0]);
-    auto& centreBox = g_coordinator.GetComponent<AABB>(EntityNPC[0]);
-    auto& moving = g_coordinator.GetComponent<NPC>(EntityNPC[1]);
-    auto& movingBox = g_coordinator.GetComponent<AABB>(EntityNPC[1]);
+    auto& centre = g_coordinator->GetComponent<NPC>(EntityNPC[0]);
+    auto& centreBox = g_coordinator->GetComponent<AABB>(EntityNPC[0]);
+    auto& moving = g_coordinator->GetComponent<NPC>(EntityNPC[1]);
+    auto& movingBox = g_coordinator->GetComponent<AABB>(EntityNPC[1]);
 
     if (!moving.isAlive || !centre.isAlive) return;
 

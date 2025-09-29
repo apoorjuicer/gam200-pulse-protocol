@@ -35,19 +35,10 @@ public:
     void SetBGMVolume(float volume);                 // 0..1
     bool IsBGMPlaying(bool* outPlaying = nullptr) const;
 
-    // gets path from source file and plays it at wanted volume, default volume is 1.0f
-    bool LoadInputSFX(const std::string& path);
-    void PlayInputSFX(float volume = 1.0f);
-
-    // checks how far into the song the music has played
-    double GetMusicPosition() const; 
-    void StopMusic();
-
 private:
     FMOD::System* mSystem = nullptr;
     FMOD::Sound* mBGM = nullptr;
     FMOD::Channel* mBGMCh = nullptr;
-    FMOD::Sound* mInputSFX = nullptr;
 
     bool initCore();   // create + init FMOD system
     void releaseAll(); // stop channel, release sound/system

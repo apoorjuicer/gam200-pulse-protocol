@@ -1,8 +1,11 @@
-// ==================================================================================
+/*********************************************************************************************
 // GraphicsManager.cpp  
-// Author: Goh Pin Kai
-// Brief: 
-// ==================================================================================
+\par		Bloop
+\author    Goh pin Kai(pinkai.g@digipen.edu)
+
+
+\copyright All content   2025 DigiPen Institute of Technology Singapore.All rights reserved.
+* *********************************************************************************************/
 
 #include "GraphicsManager.h"
 
@@ -34,7 +37,7 @@ void GraphicsManager::Update()
 	//std::cout << "[GraphicsManager] UPDATED." << std::endl;
 	glfwPollEvents();
 	GLHelper::update_time(1.0);
-	glapp->update();
+	glapp->update(Engine->GetWindow());
 	glapp->draw(EntityMember);
 
 }

@@ -4,7 +4,7 @@
  \author    Goh pin Kai (pinkai.g@digipen.edu)
 
 
-\copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.
+\copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
 **********************************************************************************************/
 #pragma once
 #ifndef GLAPP_H
@@ -24,7 +24,7 @@ extern std::list<Framework::Transform*> transObj; // transforms
 class GLApp {
 public:
     void init(float inputEditorWidth, float inputEditorHeight);
-    void update();
+    void update(GLFWwindow* window);
     void draw(std::set<Entity>);
     void cleanup();
 
