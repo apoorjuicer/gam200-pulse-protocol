@@ -13,7 +13,7 @@ void CollisionManager::Init()
 {
     // i threw all ur components into asset.h
     auto* g_coordinator = Coordinator::GetInstance();
-    std::vector<Entity> entities(2); // ADD 2 MONSTERS
+    
     for (auto& monster : entities)
     {
         monster = g_coordinator->CreateEntity();
@@ -21,6 +21,16 @@ void CollisionManager::Init()
         g_coordinator->AddComponent(monster, AABB{ Vector2(500,200), Vector2(10,50)});
         g_coordinator->AddComponent(monster, Hero{ Vector2(500,200) });
     }
+
+    //or
+
+    Entity hero = g_coordinator->CreateEntity();
+    g_coordinator->AddComponent(hero, Monster{ Vector2(500,200), 20, 20, true });
+    g_coordinator->AddComponent(hero, AABB{ Vector2(500,200), Vector2(10,50) });
+    g_coordinator->AddComponent(hero, Hero{ Vector2(500,200) });
+    entities.push_back(hero);
+    // so now there are 3 entity made and stored into ur own vector 
+
 }
 
 void CollisionManager::Update(float dt)
@@ -47,6 +57,13 @@ void CollisionManager::Update(float dt)
         }
     }
    
+    // IF YOU WANNA USE THIS, THE std::vector<Entity> must be in class private:
+    Entity entity1 = entities[0];  
+    auto& hero_AABB = g_coordinator->GetComponent<AABB>(entity1);
+    hero_AABB.min.x += 50;
+    //auto& heros_health = g_coordinator->GetComponent<Health>(entity1);  
+    //hero.hp -= 5;
+
 
 
 

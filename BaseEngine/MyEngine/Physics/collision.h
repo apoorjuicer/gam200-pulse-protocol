@@ -10,10 +10,12 @@
 
 #include "../Core/Assets.h"
 
-class CollisionManager : public Systems
+class CollisionManager : public Systems 
 {
-    
+    //std::vector<Entity> List_Lmao
 public:
+    std::vector<Entity> entities; // ADD 2 MONSTERS
+
     void Init() override;
     void Update(float dt) override;
 
