@@ -76,7 +76,7 @@ int main() {
     // After registering components (including Framework::Transform) and creating the entity:
 
     // where to draw (your update() normalizes by 1600x900)
-    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900 �virtual� screen
+    tr.Pos = { 850.0f, 450.0f };   // center of a 1600x900 �virtual� screen
     tr.Scale = { 128.0f, 128.0f };   // size in pixels in that same space
     tr.angle_disp = 0.0f;           // degrees
     tr.angle_speed = 0.0f;           // no rotation
@@ -92,6 +92,36 @@ int main() {
     tr.columns = 1;
     tr.currentFrame = 0;
     tr.animationSpeed = 0.0f;        // static
+
+    std::string path = "../JSON/transform.json";
+
+    if (!Framework::SaveTransform(tr, path)) {
+        std::cerr << "Failed to save transform!\n";
+    }
+    else {
+        std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
+    }
+
+    Framework::Transform loaded;
+    if (!Framework::LoadTransform(loaded, path)) {
+        std::cerr << "Failed to load transform!\n";
+    }
+    else {
+        std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
+    }
+    //to load into BaseEngine>MyEngine>JSON
+    //if (!Framework::SaveTransform(tr, "../../MyEngine/JSON/transform.json")) {
+    //    std::cerr << "Failed to save transform!\n";
+    //}
+
+    //Framework::Transform loaded;
+    //if (!Framework::LoadTransform(loaded, "../../MyEngine/JSON/transform.json")) {
+    //    std::cerr << "Failed to load transform!\n";
+    //}
+
+    // test it
+    std::cout << "Loaded Pos: " << loaded.Pos.x << ", " << loaded.Pos.y << "\n";
+
 
     // a valid GL texture id. Use your loader or 0 if you just want a colored quad.
     //tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;

@@ -52,8 +52,8 @@ macro(import_json)
     if(NOT TARGET json)  # Guard to prevent multiple inclusion
         FetchContent_Declare(
             json
-            GIT_REPOSITORY "https://github.com/nlohmann/json"
-            GIT_TAG v3.11.3
+            GIT_REPOSITORY "https://github.com/Tencent/rapidjson.git"
+            GIT_TAG v1.1.0
         )
         FetchContent_MakeAvailable(json)
  

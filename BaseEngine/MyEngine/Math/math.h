@@ -48,6 +48,9 @@ public:
 	void       Normalize(); // mutating, normalizes in place
 	//
 
+	//Serialize
+	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
+	void Deserialize(rapidjson::Value const& in);
 
 private:
 	float m[2];
@@ -99,6 +102,12 @@ public:
 	void	SetToIdentity();	// set 9 elements to define an identity matrix
 	void    SetToTranspose();
 	Matrix3x3 GetTranspose() const;
+
+	//Serialize
+	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
+	void Deserialize(rapidjson::Value const& in);
+
+
 }; // end of matrix 3 class
 
 // * operator: matrix multiplication

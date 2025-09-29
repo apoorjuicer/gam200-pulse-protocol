@@ -260,3 +260,40 @@ std::ostream& operator<<(std::ostream& os, Matrix3x3 const& M) {
     }
     return os;
 }
+
+
+/*Serialization && Deserialization */
+//vector2
+void Vector2::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
+    //using namespace rapidjson;
+    out.SetObject();
+    out.AddMember("x", x, alloc);
+    out.AddMember("y", y, alloc);
+
+}
+
+void Vector2::Deserialize(rapidjson::Value const& in) {
+    //not an obj and doesnt have the members x y
+    if (!in.IsObject() || !in.HasMember("x") || !in.HasMember("y")) {
+        throw std::runtime_error("Invalid JSON for Vector2");
+    }
+    x = in["x"].GetFloat();
+    y = in["y"].GetFloat();
+}
+
+//matrix3
+void Matrix3x3::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
+    out.SetArray();
+    for (int i = 0; i < 9; ++i) {
+        out.PushBack(m[i], alloc);
+    }
+}
+
+void Matrix3x3::Deserialize(rapidjson::Value const& in) {
+    if (!in.IsArray() || in.Size() != 9) {
+        throw std::runtime_error("Invalid JSON for Matrix3x3");
+    }
+    for (int i = 0; i < 9; ++i) {
+        m[i] = in[i].GetFloat();
+    }
+}
