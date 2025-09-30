@@ -81,7 +81,7 @@ void AudioManager::Initialize()
     //   build\MyEngine\Assets\MainMenuMusic.wav
     // If your assets live elsewhere, update this string accordingly.
     //const char* defaultBGM = "../../MyEngine/Assets/GameplayMusic.wav";
-    const char* defaultBGM = "../../MyEngine/Audio/GameMusic.mp3";
+    const char* defaultBGM = "../../MyEngine/Assets/Music/Background/GameMusic.mp3";
     PlayBGM(defaultBGM, 0.30f);
 
     // preloads sfx sound for beat

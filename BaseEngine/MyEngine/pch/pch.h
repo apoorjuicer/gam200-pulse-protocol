@@ -26,6 +26,7 @@
 #include <random>
 #include <array>
 #include <sstream>
+#include <chrono> // for profiling
 
 // Graphics Library Headers
 #include <GL/glew.h>
@@ -39,6 +40,7 @@
 #pragma warning(disable: 4005)
 
 // System Library Headers
+#include "../MyEngine/Profiling/Profiling.h"
 #include "../MyEngine/Math/math.h"
 #include "../MyEngine/Input/InputManager.h"
 #include "../MyEngine/Audio/audio.h"
@@ -46,7 +48,7 @@
 #include "../MyEngine/Graphics/GraphicsManager.h"
 #include "../MyEngine/Physics/collision.h"
 #include "../MyEngine/CoreEngine/CoreEngine.h"
-#include <../MyEngine/Resources/ResourceManager.h>
+#include "../MyEngine/Resources/ResourceManager.h"
 
 // ECS
 #include "../MyEngine/Core/Types.h"

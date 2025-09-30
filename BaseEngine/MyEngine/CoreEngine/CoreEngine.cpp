@@ -123,13 +123,6 @@ void CoreEngine::Init()
 
 	g_coordinator->InitializeAllSystems();
 
-    std::cout << "Engine initialized." << std::endl;
-    std::cout << "\n=== M1 INPUT SYSTEM DEMO ===" << std::endl;
-    std::cout << "SPACE -> Primary rhythm beat input" << std::endl;
-    std::cout << "A/S/D -> Weapon combo keys" << std::endl;
-    std::cout << "MOUSE -> UI interaction testing" << std::endl;
-    std::cout << "Close window to exit testing" << std::endl;
-
     GameRunning = true;
 }
 
@@ -147,8 +140,8 @@ void CoreEngine::Setup()
 	
 	// Register your systems here
 	g_coordinator->RegisterSystem<InputManager>();
-	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
+	g_coordinator->RegisterSystem<AudioManager>();
     g_coordinator->RegisterSystem<CollisionManager>();
 
 
@@ -175,17 +168,8 @@ void CoreEngine::Update(float dt)
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 
-	if (g_graphicsSystem) {
-		g_graphicsSystem->Update();
-	}
-
-	if (g_inputSystem) {
-		// Update input system
-		g_inputSystem->Update();
-		//g_audioSystem->Update();  
-
-	}
-	
+	if (g_graphicsSystem) g_graphicsSystem->Update();
+	if (g_inputSystem) g_inputSystem->Update();
 
 	g_coordinator->UpdateAllSystems(dt);
 }
@@ -197,10 +181,8 @@ void CoreEngine::GameLoop()
     //init
     const float printInterval = 0.2f;
     float printTimer = 0.0f;
-    
-    bool spawnFromLeft = true; //true = start left move right,  false = start right move left
-    bool automaticSwordSwing = true; // true = sword swinging, false = not swinging
-    bool testBoxLineCollision = false; //true = boxline collision, false = monsterplayer
+
+	auto profiler = ProfilingManager::GetInstance();
 
 	// application loop 
 	while(!glfwWindowShouldClose(window) && GameRunning)
@@ -211,6 +193,8 @@ void CoreEngine::GameLoop()
 		float dt = (currenttime - LastTime) / 1000.0f;
 		//Update the when the last update started
 		LastTime = currenttime;
+
+		profiler->StartFrame();
 
 
         //  1. Poll event(input key)
@@ -231,7 +215,16 @@ void CoreEngine::GameLoop()
 
         //7. Swap Buffer(like two window)
         glfwSwapBuffers(window);
-        
+
+		profiler->EndFrame();
+
+		// Print profiling stats every 2 secs
+		printTimer += dt;
+		if (printTimer >= 1.0f) {
+			printTimer = 0.0f;
+			profiler->PrintStats();
+			profiler->Reset();
+		}
     }
 }
 

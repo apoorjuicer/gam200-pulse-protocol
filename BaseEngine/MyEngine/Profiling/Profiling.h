@@ -1,0 +1,58 @@
+// ==================================================================================
+// Profiling.h
+// Author: Chloe Lau Rey En
+// Brief: Standalone performance profiling system for measuring and displaying
+//        system execution times as percentages of total frame time.
+// ==================================================================================
+#pragma once
+#include "pch/pch.h"
+
+class ProfilingManager {
+public:
+    struct SystemProfile {
+        double totalTime = 0.0;
+        double percentage = 0.0;
+        int callCount = 0;
+    };
+
+    static ProfilingManager* GetInstance();
+
+    void StartFrame();
+    void EndFrame();
+
+    void StartSystem(const std::string& systemName);
+    void EndSystem(const std::string& systemName);
+
+    const std::unordered_map<std::string, SystemProfile>& GetProfiles() const;
+    double GetTotalFrameTime() const { return totalFrameTime; }
+    double GetFPS() const { return fps; }
+
+    void Reset();
+    void PrintStats();
+
+private:
+    ProfilingManager() = default;
+    static ProfilingManager* instance;
+
+    std::unordered_map<std::string, SystemProfile> profiles;
+    std::unordered_map<std::string, std::chrono::high_resolution_clock::time_point> startTimes;
+
+    std::chrono::high_resolution_clock::time_point frameStartTime;
+    double totalFrameTime = 0.0;
+    double fps = 0.0;
+};
+
+// RAII helper - use only in CoreEngine, NOT in individual systems
+class ScopedProfiler {
+public:
+    ScopedProfiler(const std::string& systemName) : name(systemName) {
+        ProfilingManager::GetInstance()->StartSystem(name);
+    }
+    ~ScopedProfiler() {
+        ProfilingManager::GetInstance()->EndSystem(name);
+    }
+private:
+    std::string name;
+};
+
+#define PROFILE_SCOPE(name) ScopedProfiler profiler_##__LINE__(name)
