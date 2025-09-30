@@ -32,9 +32,11 @@ static _CrtMemState sDiff;
 #endif
 
 // Game window dimensions and title
-const char WindowTitle[] = "Game Window";
+//const char WindowTitle[] = "Game Window";
 const int Game_Window_Height = 1400;
 const int Game_Window_Width = 800;
+
+Matrix3x3 beforeTranpose = {1.f,2.f,3.f,4.f,5.f,6.f,7.f,8.f,9.f};
 
 // just concepts for game states, will be in GSM 
 struct GameStates {
@@ -122,6 +124,12 @@ int main() {
     // test it
     std::cout << "Loaded Pos: " << loaded.Pos.x << ", " << loaded.Pos.y << "\n";
 
+    std::cout << "beforeTranpose: " << beforeTranpose;
+
+    std::cout << "after Transpose: " << beforeTranpose.GetTranspose();
+
+    beforeTranpose.SetToTranspose();
+    std::cout << "after Transpose : " << beforeTranpose;
 
     // a valid GL texture id. Use your loader or 0 if you just want a colored quad.
     //tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
