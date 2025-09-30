@@ -44,19 +44,18 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     lastBeatTime = 0.0;
     currentCyclePosition = 1;
 
-    auto* g_coordinator = Coordinator::GetInstance();
-    Entity entity = g_coordinator->CreateEntity();
+    //Framework::Transform feedbackTransform{};
+    //feedbackTransform.Pos = { 800.0f, 450.0f };
+    //feedbackTransform.Scale = { 128.0f, 128.0f };
+    //feedbackTransform.mdl_ref = 1.0f;
+    //feedbackTransform.shd_ref = 0.0f;
+    //feedbackTransform.isVisible = false;
+    //feedbackTransform.currentFrame = 0;
 
-    Framework::Transform feedbackTransform{};
-    feedbackTransform.Pos = { 800.0f, 450.0f };
-    feedbackTransform.Scale = { 128.0f, 128.0f };
-    feedbackTransform.mdl_ref = 1.0f;
-    feedbackTransform.shd_ref = 1.0f;
-    feedbackTransform.isVisible = false;
-    feedbackTransform.currentFrame = 0;
-
-    g_coordinator->AddComponent(entity, feedbackTransform);
-    SetFeedbackEntity(entity);
+    //auto* g_coordinator = Coordinator::GetInstance();
+    //Entity entity = g_coordinator->CreateEntity();
+    //g_coordinator->AddComponent(entity, feedbackTransform);
+    //SetFeedbackEntity(entity);
 }
 
 void InputManager::Update() {
@@ -70,14 +69,14 @@ void InputManager::Update() {
     {
         auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
 
-        if (transform.autoHide && transform.isVisible) {
-            float dt = 0.016f;
-            transform.visibilityTimer -= dt;
-            if (transform.visibilityTimer <= 0.0f) {
-                transform.isVisible = false;
-                transform.autoHide = false;
-            }
-        }
+        //if (transform.autoHide && transform.isVisible) {
+        //    float dt = 0.016f;
+        //    transform.visibilityTimer -= dt;
+        //    if (transform.visibilityTimer <= 0.0f) {
+        //        transform.isVisible = false;
+        //        transform.autoHide = false;
+        //    }
+        //}
     }
 }
 
@@ -101,10 +100,10 @@ void InputManager::BroadcastInputEvent(const InputEvent& event) {
     auto* g_coordinator = Coordinator::GetInstance();
     if (event.type == InputEvent::Type::RHYTHM_INPUT)
     {
-        auto& transform = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity);  // Use feedbackEntity instead of 0
-        transform.isVisible = true;
-        transform.visibilityTimer = 0.5f;
-        transform.autoHide = true;
+        //auto& transform = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity);  // Use feedbackEntity instead of 0
+        //transform.isVisible = true;
+        //transform.visibilityTimer = 0.5f;
+        //transform.autoHide = true;
     }
 
     for (const auto& [systemName, callback] : inputListeners) {

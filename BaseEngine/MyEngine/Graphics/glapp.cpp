@@ -149,7 +149,7 @@ void GLApp::update(GLFWwindow* window) {
     //}
 
 
-    if (window) 
+    if (window)
     {
         std::ostringstream title;
         title << "Game Window - FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
@@ -174,7 +174,7 @@ void GLApp::updateAnimation(Framework::Transform& x) {
     }
 }
 
-void GLApp::drawTrans(Framework::Transform &x) {
+void GLApp::drawTrans(Framework::Transform& x) {
     GLint uniform_var_loc1 = -1;
     GLint uOffsetLoc = -1;
     GLint uScaleLoc = -1;
@@ -210,7 +210,7 @@ void GLApp::drawTrans(Framework::Transform &x) {
         //std::cout << "Uniform variable doesn't exist!!!\n";
         //std::exit(EXIT_FAILURE);
     }
-    
+
     //// Part 5
     glBindVertexArray(models[static_cast<uint64_t>(x.mdl_ref)].vaoid);
     glDrawElements(models[static_cast<uint64_t>(x.mdl_ref)].primitive_type, models[static_cast<uint64_t>(x.mdl_ref)].draw_cnt, GL_UNSIGNED_SHORT, NULL);
@@ -238,14 +238,12 @@ void GLApp::draw(std::set<Entity> entities) {
     }
 
     for (auto x : transObj) {
-        if (x->isVisible) {
             updateAnimation(*x);
             glBindTexture(GL_TEXTURE_2D, x->textureID);
             drawTrans(*x);
-        }
     }
 
-	//Polygon mode
+    //Polygon mode
     //if (polygonmode == 0)
     //{
     //    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -262,12 +260,12 @@ void GLApp::draw(std::set<Entity> entities) {
     //}
 
     // -------------------*Debug draw sample (NDC space)*----------------------
-	//glm::mat4 mvp = MakeOrthoMvp(-1.0f, 1.0f, -1.0f, 1.0f);   //  create the ndc space
+    //glm::mat4 mvp = MakeOrthoMvp(-1.0f, 1.0f, -1.0f, 1.0f);   //  create the ndc space
     //DebugDraw::Begin(mvp);
-	//DebugDraw::DrawLine({-0.5f, -0.5f}, {0.5f, -0.5f}, {1,1,0}); // yellow line
-	//DebugDraw::DrawRect({-0.2f,-0.2f}, {0.2f,0.2f}, {0,1,0}); // green rect
-	//DebugDraw::DrawCircle({0.0f,0.0f}, 0.3f, {0,0,1}, 48);    // (more segments = smoother)
-	//DebugDraw::End();   // actually draw to screen
+    //DebugDraw::DrawLine({-0.5f, -0.5f}, {0.5f, -0.5f}, {1,1,0}); // yellow line
+    //DebugDraw::DrawRect({-0.2f,-0.2f}, {0.2f,0.2f}, {0,1,0}); // green rect
+    //DebugDraw::DrawCircle({0.0f,0.0f}, 0.3f, {0,0,1}, 48);    // (more segments = smoother)
+    //DebugDraw::End();   // actually draw to screen
 }
 
 void GLApp::cleanup() {
@@ -428,7 +426,7 @@ GLApp::GLModel GLApp::box_model() {
     //quad.primitive_type = GL_TRIANGLE_STRIP;
     // quad.primitive_type = GL_TRIANGLES;      
     quad.draw_cnt = static_cast<GLuint>(idx_vtx.size());
-    
+
     quad.primitive_cnt = 2;
     return quad;
 }
