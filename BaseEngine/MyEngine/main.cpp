@@ -57,7 +57,7 @@ struct GameStates {
         //rapid json
 } gamestate;
 
-CoreEngine Engine;
+CoreEngine* Engine = nullptr;
 //InputManager* g_inputSystem = nullptr;
 //GraphicsManager* g_graphicsSystem = nullptr;
 
@@ -66,11 +66,14 @@ int main() {
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    Engine.Setup();
+    // Create the Engine instance
+    Engine = new CoreEngine();
+
+    Engine->Setup();
     // If CoreEngine::Init() also calls glewInit() or GraphicsManager->Initialize(),
     // REMOVE those calls from CoreEngine::Init() or call Engine.Init() *here* only
     // for non-GL things:
-    Engine.Init(); // <-- only if it does NOT touch OpenGL
+    Engine->Init(); // <-- only if it does NOT touch OpenGL
 
 
     Framework::Transform tr{};            // fill in fields as your renderer expects
@@ -131,6 +134,10 @@ int main() {
     beforeTranpose.SetToTranspose();
     std::cout << "after Transpose : " << beforeTranpose;
 
+    tr.isVisible = false;
+    tr.autoHide = false;
+    tr.visibilityTimer = 0.0f;
+
     // a valid GL texture id. Use your loader or 0 if you just want a colored quad.
     //tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
     auto* g_coordinator = Coordinator::GetInstance();
@@ -138,10 +145,13 @@ int main() {
     g_coordinator->AddComponent(entity, tr);  // <-- add Transform
 
     // this is where the update() is 
-    Engine.GameLoop();
+    Engine->GameLoop();
 
-    // clean up
-    Engine.Exit();
+    Engine->Exit();
+
+    // Clean up
+    delete Engine;
+    Engine = nullptr;
 
 #if 0
     _CrtMemCheckpoint(&sNew); //take a snapshot (lock in the memory use again and now we compare :3)

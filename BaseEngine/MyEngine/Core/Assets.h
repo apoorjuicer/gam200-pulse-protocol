@@ -3,6 +3,7 @@
 // Author: Reginald
 // Brief: Core asset data structures used by the ECS system
 // ==================================================================================
+#pragma once
 
 #include <pch/pch.h>
 
@@ -88,4 +89,5 @@ struct AABB
     //}
 };
 
-#endif // ASSETS_H
+#endif
+

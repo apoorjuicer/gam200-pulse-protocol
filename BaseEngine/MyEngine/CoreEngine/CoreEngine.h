@@ -29,13 +29,10 @@ private:
 	unsigned LastTime; //The last time the game was updated
 
 	GLFWwindow* window;
-	/*static const char WindowTitle[];
-	static const int WindowHeight;
-	static const int WindowWidth;*/
 };
 
 //A global pointer to the instance of the core
-extern CoreEngine* Core;
+extern CoreEngine* Engine;
 constexpr int WindowWidth = 800;
 constexpr int WindowHeight = 1400;
 
