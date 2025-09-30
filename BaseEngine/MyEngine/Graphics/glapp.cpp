@@ -80,7 +80,6 @@ GLuint GLApp::LoadTexture(const std::string& filepath) {
 
     int width = 0, height = 0, nrChannels = 0;
 
-    // If your JPEG is CMYK or weird, force 4 channels to normalize
     const int desired_channels = 4;
 
     stbi_set_flip_vertically_on_load(true);
