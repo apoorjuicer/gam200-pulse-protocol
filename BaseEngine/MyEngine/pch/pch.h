@@ -7,6 +7,7 @@
 // Standard Library Headers
 #include <fstream>
 #include <iostream>
+#include <functional>
 #include <string>
 #include <cstring>
 #include <memory>		 // for std::shared_ptr
@@ -61,6 +62,7 @@
 #include "../MyEngine/Core/EntityManager.h"
 #include "../MyEngine/Core/ComponentArray.h"
 #include "../MyEngine/Core/ComponentManager.h"
+#include "../MyEngine/Core/MessageManager.h"
 
 // Restore warning settings
 #pragma warning(pop)

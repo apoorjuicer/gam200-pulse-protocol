@@ -269,6 +269,10 @@ void InputManager::ProcessRhythmTiming(int key) {
 
     if (comboCompleted) {
         std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << KeyToString(key) << " | Combo: " << completedComboName << std::endl;
+
+        auto* msgMgr = MessageManager::GetInstance();
+        InputComboMessage msg(completedComboName, GetInputTiming());
+        msgMgr->Publish(msg);
     }
     else {
         std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << KeyToString(key) << " | Combo: unsuccessful" << std::endl;

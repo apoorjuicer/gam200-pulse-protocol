@@ -20,6 +20,13 @@ void GraphicsManager::Initialize()
 	GLHelper::print_specs();
 	glapp->init(editorWidth, editorHeight);
 	std::cout << "[GraphicsManager] Successfully initialized for graphics." << std::endl;
+
+	auto* msgMgr = MessageManager::GetInstance();
+	msgMgr->Subscribe(Message::Type::INPUT_COMBO, "GraphicsManager",
+		[](const Message& msg) {
+			const InputComboMessage& combo = static_cast<const InputComboMessage&>(msg);
+			std::cout << "[GraphicsManager] Received combo: " << combo.comboName << std::endl;
+		});
 }
 // dtor
 GraphicsManager::~GraphicsManager()
