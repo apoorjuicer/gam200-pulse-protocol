@@ -189,40 +189,85 @@ namespace Framework {
     }
     
     //void Framework::AssetsManager::TextureAssignment() {
-    //    // Loop through all textures in the texture map
-    //    for (const auto& [key, value] : textureMap) {
-    //        const std::string& textureName = value.textureName; // Extract texture name
-    //        GLuint textureID = value.textureID;                 // Extract texture ID
-    //        int col = value.col;
-    //        int row = value.row;
+    //    // For each transform, find a texture with the same name and assign its ID
+    //    for (auto& x : transObj) {
+    //        if (!x) continue;
+    //        // If your spriteName/file names differ in case, consider lowercasing both strings
+    //        const AssetsManager::TextureData* td = getTextureDataByName(x->spriteName);
+    //        if (td) {
+    //            x->textureID = td->textureID;
+    //            // If you later store animation grids, set them here:
+    //            // x->columns = td->col;
+    //            // x->rows    = td->row;
 
-    //        // Loop through all transform objects and assign the correct texture
-    //        for (auto x : transObj) {
-    //            if (x->spriteName == textureName && x->active) {
-    //                // Assign the texture ID if the sprite name matches the texture name
-    //                x->textureID = textureID;
-
-    //                // Assign the Col and Row for moving sprites (default will be 1 : 1 if is not moving sprite) 
-    //                x->columns = col;
-    //                x->rows = row;
-
-    //                std::cout << "Assigned texture '" << textureName
-    //                    << "' (ID: " << textureID
-    //                    << ") to object with spriteName '"
-    //                    << x->spriteName << "'" << std::endl;
-    //            }
-    //            else if (!x->active)
-    //            {
-    //                x->textureID = textureMap["ScreenPng"].textureID;
-    //                x->spriteName = "ScreenPng";
-    //                x->SetActive(true);
-    //            }
+    //            std::cout << "Assigned texture '" << td->textureName
+    //                << "' (ID: " << td->textureID
+    //                << ") to object with spriteName '" << x->spriteName << "'\n";
+    //        }
+    //        else {
+    //            // Optional: set a fallback (e.g., "ScreenPng") if no matching texture name found
+    //            // auto* fallback = getTextureDataByName("ScreenPng");
+    //            // if (fallback) { x->textureID = fallback->textureID; x->spriteName = "ScreenPng"; }
+    //            std::cerr << "No texture found for spriteName '" << x->spriteName << "'\n";
     //        }
     //    }
     //}
 
-    
+    void AssetsManager::CreateTransformsFromTextures(bool overwriteExisting) {
+        // Build a quick set of existing names/ids to avoid duplicates
+        std::unordered_set<std::string> existingNames;
+        std::unordered_set<GLuint> existingIDs;
+        existingNames.reserve(transObj.size());
+        existingIDs.reserve(transObj.size());
 
+        for (auto* t : transObj) {
+            if (!t) continue;
+            existingNames.insert(t->spriteName);
+            existingIDs.insert(t->textureID);
+        }
+
+        for (const auto& [key, td] : textureMap) {
+            const std::string& name = td.textureName;
+            const GLuint id = td.textureID;
+
+            // If a transform with the same name already exists
+            if (!overwriteExisting && (existingNames.count(name) || existingIDs.count(id))) {
+                // If you want to *update* existing ones when overwriteExisting=true:
+                if (overwriteExisting) {
+                    for (auto* t : transObj) {
+                        if (!t) continue;
+                        if (t->spriteName == name || t->textureID == id) {
+                            t->spriteName = name;     // keep name consistent
+                            t->textureID = id;       // update to current texture ID
+                            // Optional if you store grids in TextureData:
+                            // t->columns = td.col;
+                            // t->rows    = td.row;
+                        }
+                    }
+                }
+                continue;
+            }
+
+            // Create a new Transform for this texture
+            auto* t = new Transform();        // make sure this matches your ctor
+            t->spriteName = name;
+            t->textureID = id;
+            // Optional defaults (uncomment if you have these fields/methods):
+            // t->SetActive(true);
+            // t->columns = td.col;
+            // t->rows    = td.row;
+            // t->position = {0.0f, 0.0f};  // or any default you like
+
+            transObj.push_back(t);
+            existingNames.insert(name);
+            existingIDs.insert(id);
+
+            std::cout << "[Image] Created Transform for '"
+                << name << "' (ID: " << id << ")\n";
+        }
+    }
+
+    
     void AssetsManager::UnloadAllImage() {
         // Must be called while a valid OpenGL context is current!
         // If you shut the window/GL first, glDeleteTextures is undefined.

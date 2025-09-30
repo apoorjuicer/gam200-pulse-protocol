@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cctype>
 #include <unordered_map>
+#include <unordered_set>
 #include <string>
 #include <fmod_errors.h>
 #include <filesystem>
@@ -58,6 +59,9 @@ namespace Framework {
         void LoadAllImage();
         void loadImage(const char* filepath /*,int frames*/);
         void UnloadAllImage();
+
+        void CreateTransformsFromTextures(bool overwriteExisting = false);
+
         //void TextureAssignment();
         const TextureData* getTextureData(const char* filepath) const;
         const TextureData* getTextureDataByName(const std::string& textureName) const;
