@@ -10,9 +10,10 @@
 #include <iomanip> // for std::setw and formatting
 
 // --- Toggles (can be modified to control behavior) ---
-bool UseBoxLineTest = false;    // true = BoxLine test, false = Hero/Monster collision
-bool SpawnLeftMonster = false;   // true = spawn monster on left, false = right
-bool SwordEnabled = true;      // true = sword swings, false = sword disabled
+bool UseBoxLineTest = false;       // true = BoxLine test, false = Hero/Monster collision
+bool SpawnLeftMonster = false;     // true = spawn monster on left, false = right
+bool SwordEnabled = false;          // true = sword swings, false = sword disabled
+bool EnableTestCases = false;       // true = print test case output, false = silent
 
 // ==================================================================================
 // CollisionManager Initialization
@@ -35,7 +36,10 @@ void CollisionManager::Init()
             });
         EntityNPC.push_back(Hero);
 
-        std::cout << "\n=== [Init] Hero Spawned at (400,300) ===\n";
+        if (EnableTestCases)
+        {
+            std::cout << "\n=== [Init] Hero Spawned at (400,300) ===\n";
+        }
 
         // --- Monster NPC: spawns left or right ---
         float startX = SpawnLeftMonster ? 100.0f : 700.0f;
@@ -51,8 +55,11 @@ void CollisionManager::Init()
             });
         EntityNPC.push_back(Monster);
 
-        std::cout << "[Init] Monster spawned at x=" << startX << "\n";
-        std::cout << "============================================\n\n";
+        if (EnableTestCases)
+        {
+            std::cout << "[Init] Monster spawned at x=" << startX << "\n";
+            std::cout << "============================================\n\n";
+        }
     }
     else
     {
@@ -68,8 +75,11 @@ void CollisionManager::Init()
             });
         EntityNPC.push_back(boxNPC);
 
-        std::cout << "\n=== [Init] BoxLine Test Box spawned at (0,250) ===\n";
-        std::cout << "============================================\n\n";
+        if (EnableTestCases)
+        {
+            std::cout << "\n=== [Init] BoxLine Test Box spawned at (0,250) ===\n";
+            std::cout << "============================================\n\n";
+        }
     }
 }
 
@@ -99,7 +109,7 @@ void CollisionManager::Update(float dt)
                 CollisionManager::LineHitResult result =
                     CheckBoxLineCollision(box, 250.0f, lines[i], lines[i] + 100.0f);
 
-                if (result != LineHitResult::None)
+                if (result != LineHitResult::None && EnableTestCases)
                 {
                     std::string str =
                         (result == LineHitResult::Bad ? "Bad" :
@@ -128,8 +138,11 @@ void CollisionManager::Update(float dt)
     movingBox.min.x += speed * dt;
     movingBox.max.x += speed * dt;
 
-    std::cout << std::setw(12) << "[Move] "
-        << "Monster at x=" << moving.pos.x << "\n";
+    if (EnableTestCases)
+    {
+        std::cout << std::setw(12) << "[Move] "
+            << "Monster at x=" << moving.pos.x << "\n";
+    }
 
     // --- Sword Auto-Swing Check ---
     if (SwordEnabled)
@@ -146,8 +159,11 @@ void CollisionManager::Update(float dt)
             if (CheckAABBCollision(swordBox, movingBox))
             {
                 moving.isAlive = false;
-                std::cout << std::setw(12) << "[SwordHit] "
-                    << "Monster killed by sword!\n";
+                if (EnableTestCases)
+                {
+                    std::cout << std::setw(12) << "[SwordHit] "
+                        << "Monster killed by sword!\n";
+                }
             }
         }
         else
@@ -162,14 +178,20 @@ void CollisionManager::Update(float dt)
     {
         centre.hp -= 1;
         moving.isAlive = false;
-        std::cout << std::setw(12) << "[Collision] "
-            << "Monster collided with Hero! Hero HP: " << centre.hp << "\n";
+        if (EnableTestCases)
+        {
+            std::cout << std::setw(12) << "[Collision] "
+                << "Monster collided with Hero! Hero HP: " << centre.hp << "\n";
+        }
 
         if (centre.hp <= 0)
         {
             centre.isAlive = false;
-            std::cout << std::setw(12) << "[Hero] "
-                << "Hero has died!\n";
+            if (EnableTestCases)
+            {
+                std::cout << std::setw(12) << "[Hero] "
+                    << "Hero has died!\n";
+            }
         }
     }
 }

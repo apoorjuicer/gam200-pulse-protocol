@@ -20,12 +20,14 @@
 #include "Core/Coordinator.h"
 #include "pch/pch.h"
 #include "Core/Assets.h"
+#include "Core/Log.h" // <-- include your logging system
+#include <GLFW/glfw3.h>
 
+// ----------------- Memory leak detection for DEBUG -----------------
 #if (_DEBUG)
-// MEM LEAKS LIBRARIES (See _CrtMemCheckpoint for examples to check for mem leaks)
-#define _CRTDBG_MAP_ALLOC //to get more details
+#define _CRTDBG_MAP_ALLOC
 #include <cstdlib>  
-#include <crtdbg.h>   //for malloc and free
+#include <crtdbg.h>
 static _CrtMemState sOld;
 static _CrtMemState sNew;
 static _CrtMemState sDiff;
@@ -40,7 +42,7 @@ const int Game_Window_Width = 800;
 struct GameStates {
     bool MainMenu = true;
     bool IsRunning = false;
-    bool IsPaused = false;  
+    bool IsPaused = false;
     bool GameOver = false;
 
     //libs that are good to use.
@@ -56,39 +58,47 @@ struct GameStates {
 } gamestate;
 
 CoreEngine* Engine = nullptr;
-//InputManager* g_inputSystem = nullptr;
-//GraphicsManager* g_graphicsSystem = nullptr;
+
+// ----------------- Toggle key for crash test -----------------
+static std::string KeyToString(int key) {
+    switch (key) {
+    case GLFW_KEY_W: return "W";
+    case GLFW_KEY_A: return "A";
+    case GLFW_KEY_S: return "S";
+    case GLFW_KEY_D: return "D";
+    case GLFW_KEY_P: return "P";
+    default: return std::to_string(key);
+    }
+}
 
 int main() {
 #ifdef _DEBUG
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    // Create the Engine instance
+    // ----------------- Initialize Logging System -----------------
+    GAM200graphics::Log::Init();
+    GAM200_CORE_INFO("Core Logger Initialized.");
+    GAM200_INFO("Client Logger Initialized.");
+
+    // ----------------- Create the Engine instance -----------------
     Engine = new CoreEngine();
 
     Engine->Setup();
-    // If CoreEngine::Init() also calls glewInit() or GraphicsManager->Initialize(),
-    // REMOVE those calls from CoreEngine::Init() or call Engine.Init() *here* only
-    // for non-GL things:
     Engine->Init(); // <-- only if it does NOT touch OpenGL
 
-
+    // ----------------- Transform Setup -----------------
     Framework::Transform tr{};            // fill in fields as your renderer expects
-    // e.g. tr.mdl_ref = 1; tr.shd_ref = 1; tr.rows = ...; tr.columns = ...; tr.textureID = ...
-    // After registering components (including Framework::Transform) and creating the entity:
 
     // where to draw (your update() normalizes by 1600x900)
-    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900 �virtual� screen
+    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900 “virtual” screen
     tr.Scale = { 128.0f, 128.0f };   // size in pixels in that same space
     tr.angle_disp = 0.0f;           // degrees
     tr.angle_speed = 0.0f;           // no rotation
 
-    // model & shader indices (you push models: 0=bg, 1=box; shaders: 0=test,1=bg,2=sprite,3=font)
+    // model & shader indices
     tr.mdl_ref = 0.0f;               // bg_model()
     tr.shd_ref = 0.0f;               // test shader
-    // NOTE: In drawTrans() you currently check `if (x.shd_ref == 1)` before grabbing uniforms.
-    // Either change that `1` to `2`, or set `tr.shd_ref = 1` if your bg shader has those uniforms.
 
     // sprite-sheet / animation
     tr.rows = 1;
@@ -96,19 +106,21 @@ int main() {
     tr.currentFrame = 0;
     tr.animationSpeed = 0.0f;        // static
 
-
     tr.isVisible = false;
     tr.autoHide = false;
     tr.visibilityTimer = 0.0f;
 
-    // a valid GL texture id. Use your loader or 0 if you just want a colored quad.
-    //tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
     auto* g_coordinator = Coordinator::GetInstance();
     int entity = g_coordinator->CreateEntity();
     g_coordinator->AddComponent(entity, tr);  // <-- add Transform
 
-    // this is where the update() is 
-    Engine->GameLoop();
+    // ----------------- Main Game Loop -----------------
+    while (!glfwWindowShouldClose(Engine->GetWindow()))
+    {
+        glfwPollEvents();
+        
+        Engine->GameLoop(); // normal engine loop
+    }
 
     Engine->Exit();
 
@@ -117,8 +129,9 @@ int main() {
     Engine = nullptr;
 
 #if 0
-    _CrtMemCheckpoint(&sNew); //take a snapshot (lock in the memory use again and now we compare :3)
-    if (_CrtMemDifference(&sDiff, &sOld, &sNew)) // if there is a difference
+    // ----------------- Memory leak check -----------------
+    _CrtMemCheckpoint(&sNew);
+    if (_CrtMemDifference(&sDiff, &sOld, &sNew))
     {
         OutputDebugString("-----------_CrtMemDumpStatistics ---------\n");
         _CrtMemDumpStatistics(&sDiff);
