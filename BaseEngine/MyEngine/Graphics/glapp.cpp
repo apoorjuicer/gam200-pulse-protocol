@@ -299,6 +299,9 @@ void GLApp::cleanup() {
     // Debug draw shutdown
     DebugDraw::Shutdown();
 
+
+
+
     std::cout << "Graphics Resources successfully cleaned up." << std::endl;
 }
 

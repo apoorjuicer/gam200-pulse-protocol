@@ -9,7 +9,6 @@
 #include "Core/System.h"
 #include "Core/SystemManager.h"
 #include <string>
-#include "../Core/AssetsManager.h"
 
 extern FMOD::System* mSystem;
 
@@ -52,7 +51,6 @@ private:
     FMOD::Channel* mBGMCh = nullptr;
     FMOD::Sound* mInputSFX = nullptr;
 
-    bool initCore();   // create + init FMOD system
     void releaseAll(); // stop channel, release sound/system
 
     // non-copyable

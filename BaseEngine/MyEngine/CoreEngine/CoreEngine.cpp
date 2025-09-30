@@ -116,12 +116,14 @@ void CoreEngine::Init()
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
     auto g_CollisionManager = g_coordinator->GetSystem<CollisionManager>();
 
+
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
 	g_graphicsSystem->Initialize();
 	g_audioSystem->Initialize(); 
-
 	g_coordinator->InitializeAllSystems();
+
+
 
     std::cout << "Engine initialized." << std::endl;
     std::cout << "\n=== M1 INPUT SYSTEM DEMO ===" << std::endl;

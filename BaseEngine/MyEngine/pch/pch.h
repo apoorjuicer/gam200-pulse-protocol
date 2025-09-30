@@ -47,6 +47,7 @@
 #include "../MyEngine/Physics/collision.h"
 #include "../MyEngine/CoreEngine/CoreEngine.h"
 #include <../MyEngine/Resources/ResourceManager.h>
+#include <../MyEngine/Core/AssetsManager.h>
 
 // ECS
 #include "../MyEngine/Core/Types.h"

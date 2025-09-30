@@ -24,62 +24,44 @@ static inline void FMOD_CHECK(FMOD_RESULT r, const char* where)
 }
 
 AudioManager::AudioManager() {}
-AudioManager::~AudioManager() { Shutdown(); }
+AudioManager::~AudioManager() {}
 
-bool AudioManager::initCore()
-{
-    if (mSystem) return true; // already initialized
-
-    FMOD_RESULT r = FMOD::System_Create(&mSystem);
-    FMOD_CHECK(r, "System_Create");
-    if (r != FMOD_OK || !mSystem) return false;
-
-    unsigned int version = 0;
-    r = mSystem->getVersion(&version);
-    FMOD_CHECK(r, "getVersion");
-
-    // 32 channels is plenty for now
-    r = mSystem->init(32, FMOD_INIT_NORMAL, nullptr);
-    FMOD_CHECK(r, "init");
-    if (r != FMOD_OK) return false;
-
-    Framework::AssetsManager::Instance().SetFMODSystem(mSystem); 
-    Framework::AssetsManager::Instance().LoadAllSound();
-
-#ifdef _DEBUG
-    try {
-        std::cerr << "[AudioManager] FMOD initialized. CWD = " << fs::current_path().string() << "\n";
-    }
-    catch (...) {}
-#endif
-    return true;
-}
 
 void AudioManager::releaseAll()
 {
-    StopBGM();
+    if (!mSystem) return;
 
-    if (mBGM) {
-        mBGM->release();
-        mBGM = nullptr;
+    // 1) Stop anything that might still be playing
+    if (FMOD::ChannelGroup* master = nullptr;
+        mSystem->getMasterChannelGroup(&master) == FMOD_OK && master) {
+        master->stop();
     }
-    if (mSystem) {
-        mSystem->close();
-        mSystem->release();
-        mSystem = nullptr;
-    }
+
+    // 2) Unload all sounds (does not require the system to be closed yet)
+    Framework::AssetsManager::Instance().UnloadAllSound();
+
+    // 3) Tear down FMOD
+    mSystem->close();
+    mSystem->release();
+    mSystem = nullptr;
 }
+
 
 void AudioManager::Initialize()
 {
-    if (!initCore()) {
-        std::cerr << "[AudioManager] Init FAILED (check fmod.dll next to the exe and correct architecture).\n";
-        return;
+    // Create and initialize the FMOD system
+    FMOD::System_Create(&mSystem);
+    if (mSystem) {
+        mSystem->init(32, FMOD_INIT_NORMAL, nullptr);
+    }
+    else {
+        std::cerr << "FMOD system initialization failed." << std::endl;
     }
 
-    std::cout << "[AudioManager] Successfully initialized.\n";
+    Framework::AssetsManager::Instance().SetFMODSystem(mSystem);
+    Framework::AssetsManager::Instance().LoadAllSound();
 
-   
+    std::cout << "[AudioManager] Successfully initialized.\n";
 
     // Auto-start BGM here so your CoreEngine::Init() "just works".
     // Make sure this path exists relative to your exe working directory:

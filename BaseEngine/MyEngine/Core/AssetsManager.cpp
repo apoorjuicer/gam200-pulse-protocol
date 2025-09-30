@@ -15,6 +15,12 @@ namespace fs = std::filesystem;
 
 namespace Framework {
 
+    void AssetsManager::LoadAllAssets() {
+        LoadAllSound();
+        LoadAllImage();
+    }
+
+
     void AssetsManager::LoadAllSound()
     {
         const fs::path root = "../../MyEngine/Assets/Sound";
@@ -72,45 +78,74 @@ namespace Framework {
         return (it != soundMap.end()) ? it->second : nullptr;
     }
 
-    void AssetsManager::UnloadAllSound() { 
-        for (auto it = soundMap.begin(); it != soundMap.end(); ++it) {
-            // Release the FMOD sound object
-            it->second->release();
+    void AssetsManager::UnloadAllSound() {
+        // Stop anything that may still be playing (prevents stale handles).
+        if (mSystem) {
+            FMOD::ChannelGroup* master = nullptr;
+            if (mSystem->getMasterChannelGroup(&master) == FMOD_OK && master) {
+                master->stop();
+            }
+        }
+
+        size_t released = 0;
+        for (auto& kv : soundMap) {
+            FMOD::Sound* s = kv.second;
+            if (!s) continue;
+
+            FMOD_RESULT r = s->release();
+            if (r != FMOD_OK) {
+                std::cerr << "[Audio] release failed for '" << kv.first
+                    << "': " << FMOD_ErrorString(r) << "\n";
+            }
+            else {
+                ++released;
+            }
         }
         soundMap.clear();
-        std::cout << "All sounds have been unloaded." << std::endl;
+        std::cout << "[Audio] Unloaded " << released << " sound(s).\n";
     }
 
 
+    void AssetsManager::LoadAllImage()
+    {
+        const fs::path root = "../../MyEngine/Assets/Image";
 
-    //void AssetsManager::LoadAllImage() { 
-    //    LoaderBot yy;
-    //    std::vector<fs::path> check = yy.LoadGeneralType(for_Art);
-    //    for (auto it : check)
-    //    {
-    //        int frames = 1;
-    //        if (it.string().find("SpriteSheet")!= std::string::npos)
-    //        {
-    //            int size_check = (int)fs::file_size(it) / 1024;
-    //            frames = (size_check > 1200) ? 6 : 4;
-    //            frames = (size_check > 400) ? frames : 1;
-    //        }
-    //        loadImage(it.string().c_str(), frames);
-    //    }
-    //}
+        if (!fs::exists(root)) {
+            std::cerr << "[Image] Folder not found: " << root.string() << "\n";
+            return;
+        }
 
-    void AssetsManager::loadImage(const char* filepath, int frames) {
+        size_t count = 0;
+
+        for (const auto& entry : fs::recursive_directory_iterator(root)) {
+            if (!entry.is_regular_file()) continue;
+
+            const fs::path& p = entry.path();
+            std::string ext = p.extension().string();
+            for (auto& c : ext) c = (char)std::tolower((unsigned char)c);
+            if (ext != ".png") continue;
+
+            const std::string pathStr = p.generic_string(); // forward slashes
+            loadImage(pathStr.c_str());
+            ++count;
+        }
+
+        std::cout << "[Image] Scan complete. Attempted to load " << count
+            << " .png file(s) from " << root.generic_string() << "\n";
+    }
+
+    void AssetsManager::loadImage(const char* filepath /*,int frames*/) {
         // Check if the texture is already loaded
         if (textureMap.find(filepath) != textureMap.end()) {
             std::cout << "Texture already loaded: " << filepath << std::endl;
             return;
         }
 
-        int col = 1;
+ /*       int col = 1;
         int row = 1;
 
         col = (frames == 6) ? 3 : ((frames == 4) ? 4 : 1);
-        row = (frames == 6) ? 2 : ((frames == 4) ? 1 : 1); 
+        row = (frames == 6) ? 2 : ((frames == 4) ? 1 : 1); */
 
 
         // Extract the texture name from the file path
@@ -144,7 +179,7 @@ namespace Framework {
             stbi_image_free(data); 
 
             // Store texture data in the map, including file path
-            textureMap[filepath] = { textureID, width, height, nrChannels, data, textureName, col, row, filepath };
+            textureMap[filepath] = { textureID, width, height, nrChannels, data, textureName, /*col, row,*/ filepath };
 
             // assignment of textures to current objects ( background only for now) 
         }
@@ -186,28 +221,27 @@ namespace Framework {
     //    }
     //}
 
-
+    
 
     void AssetsManager::UnloadAllImage() {
-        for (auto it = textureMap.begin(); it != textureMap.end(); it++) {
-            // Store the file path for logging before erasing
-            std::string filePath = it->second.filePath;
-            // Delete the OpenGL texture
-            glDeleteTextures(1, &it->second.textureID);
-        }
-        textureMap.clear();
-        std::cout << "All textures have been unloaded." << std::endl;
-    }
+        // Must be called while a valid OpenGL context is current!
+        // If you shut the window/GL first, glDeleteTextures is undefined.
 
-    const AssetsManager::TextureData* AssetsManager::getTextureData(const char* filepath) const {
-        auto it = textureMap.find(filepath);
-        if (it != textureMap.end()) {
-            return &it->second; // Return a pointer to the TextureData
+        // Collect texture IDs first (avoid iterator pitfalls)
+        std::vector<GLuint> ids;
+        ids.reserve(textureMap.size());
+        for (const auto& kv : textureMap) {
+            if (kv.second.textureID != 0) ids.push_back(kv.second.textureID);
         }
-        else {
-            std::cerr << "Texture not found: " << filepath << std::endl;
-            return nullptr; // Return nullptr if the texture is not found
+
+        if (!ids.empty()) {
+            // Unbind to be safe
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glDeleteTextures(static_cast<GLsizei>(ids.size()), ids.data());
         }
+
+        textureMap.clear();
+        std::cout << "[Image] Unloaded " << ids.size() << " texture(s).\n";
     }
 
     const AssetsManager::TextureData* AssetsManager::getTextureDataByName(const std::string& textureName) const {

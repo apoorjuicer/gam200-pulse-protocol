@@ -33,8 +33,8 @@ namespace Framework {
             int nrChannels;
             unsigned char* data;
             std::string textureName;
-            int col;
-            int row;
+ /*           int col;
+            int row;*/
             std::string filePath;
         };
 
@@ -44,6 +44,9 @@ namespace Framework {
             return instance;
         }
 
+        // ---------- Assets management ----------
+        void LoadAllAssets();
+        void UnloadAllAssets();
 
         // ---------- Sound management ----------
         void LoadAllSound();
@@ -52,8 +55,8 @@ namespace Framework {
         FMOD::Sound* GetSound(const std::string& soundName);
 
         // ---------- Texture management ----------
-        //void LoadAllImage();
-        void loadImage(const char* filepath, int frames);
+        void LoadAllImage();
+        void loadImage(const char* filepath /*,int frames*/);
         void UnloadAllImage();
         //void TextureAssignment();
         const TextureData* getTextureData(const char* filepath) const;

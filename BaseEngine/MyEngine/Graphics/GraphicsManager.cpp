@@ -19,6 +19,9 @@ void GraphicsManager::Initialize()
 {
 	GLHelper::print_specs();
 	glapp->init(editorWidth, editorHeight);
+
+	Framework::AssetsManager::Instance().LoadAllImage();
+
 	std::cout << "[GraphicsManager] Successfully initialized for graphics." << std::endl;
 
 
@@ -26,9 +29,7 @@ void GraphicsManager::Initialize()
 // dtor
 GraphicsManager::~GraphicsManager()
 {
-	transObj.clear();
-	glapp->cleanup();
-	delete glapp;
+
 }
 
 
@@ -46,7 +47,11 @@ void GraphicsManager::Update()
 
 
 void GraphicsManager::Shutdown()
-{
-		std::cout << "[GraphicsManager] Shutdown completed" << std::endl;
+{	
+	Framework::AssetsManager::Instance().UnloadAllImage();
+	transObj.clear();
+	glapp->cleanup();
+	delete glapp;
+	std::cout << "[GraphicsManager] Shutdown completed" << std::endl;
 
 }
