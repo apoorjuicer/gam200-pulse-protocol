@@ -74,12 +74,31 @@ CoreEngine::~CoreEngine()
 
 void CoreEngine::Init()
 {
+	if (!glfwInit()) {
+		spdlog::error("Failed to initialize GLFW");
+		return;
+	}
 
-    if (!glfwInit()) {
-        std::cerr << "Failed to initialize GLFW" << std::endl;
-        return;
-    }
+	// --- Logging Setup ---
+	try {
+		auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+		auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+			"logs/engine.log", 1024 * 1024 * 5, 3);
+		// 5 MB max per file, keep 3 backups
 
+		std::vector<spdlog::sink_ptr> sinks{ console_sink, file_sink };
+		auto logger = std::make_shared<spdlog::logger>("multi_sink", sinks.begin(), sinks.end());
+		spdlog::set_default_logger(logger);
+
+		spdlog::set_level(spdlog::level::debug); // debug/info/warn/error
+		spdlog::flush_on(spdlog::level::info);
+
+		spdlog::info("=== Engine Logging Initialized ===");
+	}
+	catch (const spdlog::spdlog_ex& ex) {
+		std::cerr << "Log init failed: " << ex.what() << std::endl;
+	}
+	// ----------------------
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);

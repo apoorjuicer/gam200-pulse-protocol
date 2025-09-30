@@ -67,5 +67,9 @@
 #include "../MyEngine/Core/ComponentManager.h"
 #include "../MyEngine/Core/Types.h"
 
+//Logging library
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 // Restore warning settings
 #pragma warning(pop)
