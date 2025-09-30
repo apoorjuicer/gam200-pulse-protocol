@@ -61,6 +61,24 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
 
 void InputManager::Update() {
     UpdateInputStates();
+
+    // Handle multiple debug toggles F1-F6
+    const int debugKeys[] = { GLFW_KEY_F1, GLFW_KEY_F2, GLFW_KEY_F3, GLFW_KEY_F4, GLFW_KEY_F5, GLFW_KEY_F6 };
+    bool* debugFlags[] = { &debugRectsEnabled, &debugLinesEnabled, &debugCirclesEnabled,
+                          &debugCirclesFilledEnabled, &debugPointsEnabled, &debugGridEnabled };
+    const char* debugNames[] = { "DEBUG RECTS", "DEBUG LINES", "DEBUG CIRCLES",
+                                "DEBUG CIRCLES FILLED", "DEBUG POINTS", "DEBUG GRID" };
+
+    for (int i = 0; i < 6; ++i) {
+        bool keyPressed = (glfwGetKey(window, debugKeys[i]) == GLFW_PRESS);
+
+        if (keyPressed && !debugToggleKeyPressed[i]) {
+            *debugFlags[i] = !(*debugFlags[i]);
+            std::cout << "[" << debugNames[i] << "] " << (*debugFlags[i] ? "ENABLED" : "DISABLED") << std::endl;
+        }
+        debugToggleKeyPressed[i] = keyPressed;
+    }
+
     ProcessRhythmInputs();
     ProcessComboInputs();
     CheckForMissedBeat();

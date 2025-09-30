@@ -83,8 +83,16 @@ public:
     // Stats
     int GetSuccessfulCombos() const { return successfulCombos; }
 
+    // Debug helper
+    bool IsDebugRectsEnabled() const { return debugRectsEnabled; }
+    bool IsDebugLinesEnabled() const { return debugLinesEnabled; }
+    bool IsDebugCirclesEnabled() const { return debugCirclesEnabled; }
+    bool IsDebugCirclesFilledEnabled() const { return debugCirclesFilledEnabled; }
+    bool IsDebugPointsEnabled() const { return debugPointsEnabled; }
+    bool IsDebugGridEnabled() const { return debugGridEnabled; }
+
 private:
-    Entity feedbackEntity = 0;
+    Entity feedbackEntity;
     // -------------------------------------------------
     // Core input state
     // -------------------------------------------------
@@ -128,4 +136,13 @@ private:
     void InitializeSwordCombos();
     std::string GetTimingFeedback();
     void CheckForMissedBeat();
+
+    bool debugRectsEnabled = false;
+    bool debugLinesEnabled = false;
+    bool debugCirclesEnabled = false;
+    bool debugCirclesFilledEnabled = false;
+    bool debugPointsEnabled = false;
+    bool debugGridEnabled = false;
+
+    bool debugToggleKeyPressed[6] = { false }; // Track F1-F6
 };

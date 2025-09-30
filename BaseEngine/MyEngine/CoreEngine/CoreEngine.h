@@ -28,6 +28,8 @@ private:
 	bool DebugMode;
 	unsigned LastTime; //The last time the game was updated
 
+	void RenderDebugDraw();
+
 	GLFWwindow* window;
 };
 

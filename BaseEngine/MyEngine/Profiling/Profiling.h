@@ -16,6 +16,7 @@ public:
     };
 
     static ProfilingManager* GetInstance();
+    static void DestroyInstance();
 
     void StartFrame();
     void EndFrame();

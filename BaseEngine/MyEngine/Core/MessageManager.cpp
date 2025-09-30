@@ -14,6 +14,13 @@ MessageManager* MessageManager::GetInstance() {
     return instance;
 }
 
+void MessageManager::DestroyInstance() {
+    if (instance) {
+        delete instance;
+        instance = nullptr;
+    }
+}
+
 void MessageManager::Subscribe(Message::Type type, const std::string& listenerName, MessageCallback callback) {
     subscribers[type][listenerName] = callback;
 }

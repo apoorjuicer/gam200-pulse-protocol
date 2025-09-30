@@ -75,6 +75,14 @@ void DebugDraw::Init() {
 }
 
 void DebugDraw::Shutdown() {
+    // Clear vectors to free their memory
+    sLineVertices.clear();
+    sLineVertices.shrink_to_fit();
+    sPointVertices.clear();
+    sPointVertices.shrink_to_fit();
+    sTriangleVertices.clear();
+    sTriangleVertices.shrink_to_fit();
+
     if (sVao) {
         glDeleteVertexArrays(1, &sVao);
         sVao = 0;
@@ -82,6 +90,12 @@ void DebugDraw::Shutdown() {
     if (sVbo) {
         glDeleteBuffers(1, &sVbo);
         sVbo = 0;
+    }
+
+    // Clean up shader program - THIS IS WHAT'S MISSING
+    GLuint handle = sShader.GetHandle();
+    if (handle != 0) {
+        glDeleteProgram(handle);
     }
 }
 

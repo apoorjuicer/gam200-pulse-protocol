@@ -77,3 +77,10 @@ void ProfilingManager::PrintStats() {
     }
     std::cout << "=========================================\n\n";
 }
+
+void ProfilingManager::DestroyInstance() {
+    if (instance) {
+        delete instance;
+        instance = nullptr;
+    }
+}

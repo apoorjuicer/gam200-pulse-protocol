@@ -77,6 +77,7 @@ public:
     using MessageCallback = std::function<void(const Message&)>;
 
     static MessageManager* GetInstance();
+    static void DestroyInstance();
 
     void Subscribe(Message::Type type, const std::string& listenerName, MessageCallback callback);
     void Unsubscribe(Message::Type type, const std::string& listenerName);
