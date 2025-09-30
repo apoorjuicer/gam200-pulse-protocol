@@ -188,7 +188,8 @@ void GLApp::drawTrans(Framework::Transform &x) {
     float uOffsetY = 1.0f - ((x.currentFrame / x.columns + 1) * frameHeight); // Vertical offset (top-to-bottom)
 
     //// Part 3
-    if (x.shd_ref == 1) {
+    if (x.shd_ref == 0) {   //test shader
+    //if (x.shd_ref == 2) {
         uOffsetLoc = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uOffset");
         uScaleLoc = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uScale");
         uniform_var_loc1 = glGetUniformLocation(shdrpgms[static_cast<uint64_t>(x.shd_ref)].GetHandle(), "uModel_to_NDC");
@@ -228,13 +229,18 @@ void GLApp::draw(std::set<Entity> entities) {
     shdrpgms[0].Use();
     transObj.clear();
     auto* g_coordinator = Coordinator::GetInstance();
-    //extern Coordinator g_coordinator;
     for (auto it : entities)
     {
         if (auto* tr = g_coordinator->TryGetComponent<Framework::Transform>(it))
         {
             transObj.push_back(tr);
         }
+        //auto x = g_coordinator->GetComponent<Framework::Transform>(it);
+        //    if (x.isVisible) {
+        //        updateAnimation(x);
+        //        glBindTexture(GL_TEXTURE_2D, x.textureID);
+        //        drawTrans(x);
+        //    }
     }
 
     for (auto x : transObj) {
@@ -426,7 +432,7 @@ GLApp::GLModel GLApp::box_model() {
     GLApp::GLModel quad{};
     quad.vaoid = vaoid;
     //quad.primitive_type = GL_TRIANGLE_STRIP;
-    // quad.primitive_type = GL_TRIANGLES;      
+     quad.primitive_type = GL_TRIANGLES;      
     quad.draw_cnt = static_cast<GLuint>(idx_vtx.size());
     
     quad.primitive_cnt = 2;

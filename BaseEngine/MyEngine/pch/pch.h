@@ -33,7 +33,13 @@
 #include <glm/glm.hpp>
 #include "Graphics/glhelper.h"
 #include "Graphics/glslshader.h"
-#include "Graphics/glapp.h"
+
+//Serialize
+#include <rapidjson/document.h>     // for Document, Value, AllocatorType
+//#include <rapidjson/writer.h>       // for Writer
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/stringbuffer.h> // for StringBuffer
 
 // Suppress APIENTRY macro redefinition warning
 #pragma warning(push)
@@ -43,7 +49,6 @@
 #include "../MyEngine/Math/math.h"
 #include "../MyEngine/Input/InputManager.h"
 #include "../MyEngine/Audio/audio.h"
-#include "../MyEngine/Math/math.h"
 #include "../MyEngine/Graphics/GraphicsManager.h"
 #include "../MyEngine/Physics/collision.h"
 #include "../MyEngine/CoreEngine/CoreEngine.h"
@@ -60,6 +65,7 @@
 #include "../MyEngine/Core/EntityManager.h"
 #include "../MyEngine/Core/ComponentArray.h"
 #include "../MyEngine/Core/ComponentManager.h"
+#include "../MyEngine/Core/Types.h"
 
 // Restore warning settings
 #pragma warning(pop)
