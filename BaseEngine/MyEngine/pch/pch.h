@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <random>
 #include <array>
+#include <sstream>
 
 // Graphics Library Headers
 #include <GL/glew.h>

@@ -6,8 +6,6 @@
 //extern InputManager* g_inputSystem;
 //extern GraphicsManager* g_graphicsSystem;
 
-// A global pointer to the core
-CoreEngine* Engine;
 
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
@@ -122,6 +120,7 @@ void CoreEngine::Init()
 	g_inputSystem->Initialize(window);
 	g_graphicsSystem->Initialize();
 	g_audioSystem->Initialize(); 
+
 	g_coordinator->InitializeAllSystems();
 
     std::cout << "Engine initialized." << std::endl;
@@ -152,16 +151,21 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterSystem<GraphicsManager>();
     g_coordinator->RegisterSystem<CollisionManager>();
 
+
+
     // Set signature for component and system
-    Signature graphicsSig;
-    graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());
-    g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
-     
     Signature collisionSig;
     collisionSig.set(g_coordinator->GetComponentType<NPC>());
     collisionSig.set(g_coordinator->GetComponentType<AABB>());
     g_coordinator->SetSystemSignature<CollisionManager>(collisionSig);
 
+	Signature inputSig;
+	inputSig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	g_coordinator->SetSystemSignature<InputManager>(inputSig);
+
+	Signature graphicsSig;
+	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
+	g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
 }
 
 void CoreEngine::Update(float dt)
@@ -171,18 +175,17 @@ void CoreEngine::Update(float dt)
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 
-	if (g_inputSystem) {
-		// Update input system
-		g_inputSystem->Update();
-		g_audioSystem->Update();  
-
-		// Run M1 testing demonstrations
-		g_inputSystem->RunM1Test();
-
-	}
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Update();
 	}
+
+	if (g_inputSystem) {
+		// Update input system
+		g_inputSystem->Update();
+		//g_audioSystem->Update();  
+
+	}
+	
 
 	g_coordinator->UpdateAllSystems(dt);
 }
@@ -210,25 +213,6 @@ void CoreEngine::GameLoop()
 		LastTime = currenttime;
 
 
-    //if (!testBoxLineCollision)
-    //{
-    //    // HERO/MONSTER TEST SETUP
-    //    Hero hero;
-    //    hero.pos = { 400.0f, 700.0f };
-    //    hero.width = 50.0f;
-    //    hero.height = 50.0f;
-    //    hero.swordWidth = 60.0f;
-    //    hero.swordHeight = 20.0f;
-    //    hero.swingProgress = 0.0f;
-    //    hero.isSwinging = automaticSwordSwing;
-    //    hero.hp = 10;
-    //     
-    //    Monster monsterTemplate;
-    //    monsterTemplate.width = 50.0f;
-    //    monsterTemplate.height = 50.0f;
-    //    monsterTemplate.isAlive = true;
-    //    std::vector<Monster> monsters = { monsterTemplate };
-    //    float monsterSpeed = 200.0f;
         //  1. Poll event(input key)
         glfwPollEvents();
 

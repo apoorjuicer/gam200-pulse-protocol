@@ -24,7 +24,7 @@ extern std::list<Framework::Transform*> transObj; // transforms
 class GLApp {
 public:
     void init(float inputEditorWidth, float inputEditorHeight);
-    void update();
+    void update(GLFWwindow* window);
     void draw(std::set<Entity>);
     void cleanup();
 
