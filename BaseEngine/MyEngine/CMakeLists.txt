@@ -38,6 +38,9 @@ target_include_directories(${ENGINE_NAME} PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/studio/inc
 )
 
+target_compile_definitions(MyEngine PRIVATE
+  ASSETS_DIR="${CMAKE_SOURCE_DIR}/MyEngine/Assets"
+)
 
 # Add FMOD libraries based on build type
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
