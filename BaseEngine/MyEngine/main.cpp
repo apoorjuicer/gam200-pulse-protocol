@@ -74,7 +74,7 @@ int main() {
     Engine->Init(); // <-- only if it does NOT touch OpenGL
 
 
-    Framework::Transform tr{};            // fill in fields as your renderer expects
+/*    Framework::Transform tr{};   */         // fill in fields as your renderer expects
     // e.g. tr.mdl_ref = 1; tr.shd_ref = 1; tr.rows = ...; tr.columns = ...; tr.textureID = ...
     // After registering components (including Framework::Transform) and creating the entity:
 

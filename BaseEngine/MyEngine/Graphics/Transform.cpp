@@ -81,7 +81,6 @@ namespace Framework
         //Matrix3x3 temp;
         //Matrix3x3::Mtx33Transpose(temp, Translating);
         mdl_to_ndc_xform = /*translationMatrix * scalingMatrix **/ Translating * Rotating * Scaling;
-        std::cout << mdl_to_ndc_xform;
         angle_disp += angle_speed * static_cast<GLfloat>(delta_time);
     }
 
