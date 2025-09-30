@@ -37,6 +37,8 @@ const int Game_Window_Height = 1400;
 const int Game_Window_Width = 800;
 
 Matrix3x3 beforeTranpose = {1.f,2.f,3.f,4.f,5.f,6.f,7.f,8.f,9.f};
+Matrix3x3 A{};
+
 
 // just concepts for game states, will be in GSM 
 struct GameStates {
@@ -133,6 +135,14 @@ int main() {
 
     beforeTranpose.SetToTranspose();
     std::cout << "after Transpose : " << beforeTranpose;
+
+    A[0][0] = 2; A[0][1] = 3; A[0][2] = 4;
+    A[1][0] = 5; A[1][1] = 6; A[1][2] = 7;
+    A[2][0] = 8; A[2][1] = 9; A[2][2] = 10;
+
+    std::cout << "A : " << A;
+
+    std::cout << "Matrix multi : " << A*beforeTranpose;
 
     tr.isVisible = false;
     tr.autoHide = false;

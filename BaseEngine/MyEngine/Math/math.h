@@ -23,8 +23,8 @@ public:
 	Vector2& operator=(Vector2  vec);
 
 	// subscript operator[] - access element of vector
-	float& operator[](unsigned int i);
-	float operator[](unsigned int i) const;
+	float& operator[](size_t i);
+	float operator[](size_t i) const;
 
 	// arithmetic operators: vector operations +-
 	Vector2& operator+=(Vector2 vec);
@@ -83,11 +83,28 @@ public:
 	Matrix3x3(Matrix3x3 const& m);
 	~Matrix3x3();
 
+	class ProxyClass {
+	public:
+		ProxyClass(Matrix3x3& m, size_t c);
+		ProxyClass(Matrix3x3 const& m, size_t c);
+
+		float& operator[](size_t r);
+		float const& operator[](size_t r) const;
+
+	private:
+		Matrix3x3 const* outer_; // pointer to const works for both
+		size_t col_;
+	};
+	ProxyClass       operator[](size_t c);
+	ProxyClass const operator[](size_t c) const;
+
 	// = operator: assignment
 	Matrix3x3& operator=(Matrix3x3 const& copied);
 	// () operators: component access
-	float& operator()(unsigned int column, unsigned int row);
-	const float& operator()(unsigned int column, unsigned int row) const;
+	float& operator()(size_t column, size_t row);
+	const float& operator()(size_t column, size_t row) const;
+	// glm conversion operator
+	explicit operator glm::mat3() const;
 
 	// iterators
 	float* Begin();
