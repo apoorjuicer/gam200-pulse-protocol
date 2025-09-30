@@ -124,7 +124,7 @@ bool AudioManager::PlayBGM(const std::string& path, float volume)
     if (mBGM) { mBGM->release(); mBGM = nullptr; }
 
     // Stream + loop (2D)
-    FMOD_MODE mode = FMOD_DEFAULT | FMOD_CREATESTREAM | FMOD_LOOP_NORMAL | FMOD_2D;
+    FMOD_MODE mode = FMOD_DEFAULT | FMOD_CREATESTREAM | FMOD_LOOP_OFF | FMOD_2D;
 
     FMOD_RESULT r = mSystem->createSound(path.c_str(), mode, nullptr, &mBGM);
     FMOD_CHECK(r, "createSound(BGM)");

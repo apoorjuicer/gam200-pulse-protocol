@@ -1,5 +1,6 @@
 #include <windows.h>   // for OutputDebugString, etc.
 #include "pch/pch.h"
+#include "graphics/stb_image.h"
 #pragma comment(lib, "winmm.lib")
 
 //Coordinator g_coordinator;
@@ -57,6 +58,29 @@ void APIENTRY glDebugOutput(GLenum source,
 	std::cout << std::endl;
 }
 
+// THIS FUNCTION IS TO BE REMOVED AFTER RESOURCE MANAGER HAS BEEN TESTED AND WORKING.
+static GLuint LoadTexture(const char* filepath) {
+	stbi_set_flip_vertically_on_load(true); // flip image vertically when loading
+
+	int width, height, channels;
+	unsigned char* data = stbi_load(filepath, &width, &height, &channels, 4);
+
+	if (!data) {
+		std::cerr << "Failed to load texture: " << filepath << std::endl;
+		return 0;
+	}
+
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	stbi_image_free(data);
+	return textureID;
+}
+
 CoreEngine::CoreEngine() : window(nullptr)
 {
     LastTime = 0;
@@ -85,7 +109,7 @@ void CoreEngine::Init()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(WindowHeight, WindowWidth, WindowTitle, nullptr, nullptr);
+	window = glfwCreateWindow(WindowWidth, WindowHeight, WindowTitle, nullptr, nullptr);
 	if (!window) {
 		std::cerr << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
@@ -125,6 +149,15 @@ void CoreEngine::Init()
 	g_audioSystem->Initialize(); 
 
 	g_coordinator->InitializeAllSystems();
+
+	GLuint barTexture = LoadTexture("../../MyEngine/Assets/Sprites/perfect.png");
+	if (barTexture > 0) {
+		Entity box2 = g_inputSystem->GetFeedbackEntity2();  // Use getter
+		auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(box2);
+		transform2.textureID = barTexture;
+		std::cout << "Texture loaded and assigned to box 2: " << barTexture << std::endl;
+	}
+
 
     GameRunning = true;
 }

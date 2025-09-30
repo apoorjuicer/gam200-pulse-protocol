@@ -48,6 +48,7 @@ public:
     void Shutdown();
 
     void SetFeedbackEntity(Entity entity) { feedbackEntity = entity; }
+    Entity GetFeedbackEntity2() const { return feedbackEntity2; }
 
     // -------------------------------------------------
     // Rhythm game configuration
@@ -92,10 +93,13 @@ public:
     bool IsDebugGridEnabled() const { return debugGridEnabled; }
 
 private:
+
     Entity feedbackEntity;
+    Entity feedbackEntity2;
+
     // -------------------------------------------------
     // Core input state
-    // -------------------------------------------------
+    // -------------------------------------------- -----
     GLFWwindow* window = nullptr;
     bool currentKeys[GLFW_KEY_LAST + 1];
     bool previousKeys[GLFW_KEY_LAST + 1];

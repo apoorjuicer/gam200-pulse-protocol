@@ -5,6 +5,7 @@
 // ==================================================================================
 
 #include "pch/pch.h"
+#include "graphics/stb_image.h"
 
 static std::string KeyToString(int key) {
     switch (key) {
@@ -14,6 +15,26 @@ static std::string KeyToString(int key) {
     case GLFW_KEY_D: return "D";
     default: return std::to_string(key);
     }
+}
+
+static GLuint LoadTexture(const char* filepath) {
+    int width, height, channels;
+    unsigned char* data = stbi_load(filepath, &width, &height, &channels, 4);
+
+    if (!data) {
+        std::cerr << "Failed to load texture: " << filepath << std::endl;
+        return 0;
+    }
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    stbi_image_free(data);
+    return textureID;
 }
 
 InputManager::InputManager() : window(nullptr) {
@@ -45,18 +66,30 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     currentCyclePosition = 1;
 
     auto* g_coordinator = Coordinator::GetInstance();
-    Entity entity = g_coordinator->CreateEntity();
 
-    Framework::Transform feedbackTransform{};
-    feedbackTransform.Pos = { 1400.0f, 250.0f };
-    feedbackTransform.Scale = { 500.0f, 500.0f };
-    feedbackTransform.mdl_ref = 1.0f;
-    feedbackTransform.shd_ref = 0.0f;
-    feedbackTransform.isVisible = true;
-    feedbackTransform.currentFrame = 0;
+    // ---------------- BOX 1 ----------------
+    Entity entity1 = g_coordinator->CreateEntity();
+    Framework::Transform feedbackTransform1{};
+    feedbackTransform1.Pos = { 200.0f, 450.0f };
+    feedbackTransform1.Scale = { 150.0f, 150.0f };
+    feedbackTransform1.mdl_ref = 1.0f;
+    feedbackTransform1.shd_ref = 0.0f;
+    feedbackTransform1.isVisible = true;  // Make visible to test
+    feedbackTransform1.currentFrame = 0;
+    g_coordinator->AddComponent(entity1, feedbackTransform1);
+    SetFeedbackEntity(entity1);
 
-    g_coordinator->AddComponent(entity, feedbackTransform);
-    SetFeedbackEntity(entity);
+    // ---------------- BOX 2 ----------------
+    Entity entity2 = g_coordinator->CreateEntity();
+    Framework::Transform feedbackTransform2{};
+    feedbackTransform2.Pos = { -1000.0f, -450.0f };
+    feedbackTransform2.Scale = { 300.0f, 300.0f };
+    feedbackTransform2.mdl_ref = 1.0f;
+    feedbackTransform2.shd_ref = 2.0f;
+    feedbackTransform2.isVisible = false;  // Make visible to test
+    feedbackTransform2.currentFrame = 0;
+    g_coordinator->AddComponent(entity2, feedbackTransform2);
+    feedbackEntity2 = entity2;
 }
 
 void InputManager::Update() {
@@ -119,10 +152,17 @@ void InputManager::BroadcastInputEvent(const InputEvent& event) {
     auto* g_coordinator = Coordinator::GetInstance();
     if (event.type == InputEvent::Type::RHYTHM_INPUT)
     {
-        auto& transform = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity);  // Use feedbackEntity instead of 0
-        transform.isVisible = true;
-        transform.visibilityTimer = 0.5f;
-        transform.autoHide = true;
+        // box 1
+        auto& transform1 = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity);
+        transform1.isVisible = true;
+        transform1.visibilityTimer = 0.5f;
+        transform1.autoHide = true;
+
+        // box 2
+        auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity2);
+        transform2.isVisible = true;
+        transform2.visibilityTimer = 0.5f;
+        transform2.autoHide = true;
     }
 
     for (const auto& [systemName, callback] : inputListeners) {
