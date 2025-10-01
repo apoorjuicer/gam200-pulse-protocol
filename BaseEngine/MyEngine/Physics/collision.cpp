@@ -11,8 +11,7 @@
 
 // --- Toggles (can be modified to control behavior) ---
 bool UseBoxLineTest = false;       // true = BoxLine test, false = Hero/Monster collision
-bool SpawnLeftMonster = false;     // true = spawn monster on left, false = right
-bool SwordEnabled = false;          // true = sword swings, false = sword disabled
+bool SwordEnabled = false;         // true = sword swings, false = sword disabled
 bool EnableTestCases = true;       // true = print test case output, false = silent
 
 // ==================================================================================
@@ -29,54 +28,55 @@ void CollisionManager::Init()
         Framework::Transform heroTransform{};
         heroTransform.Pos = { 0,0 };
         heroTransform.Scale = { 200.0f, 200.0f };
-        heroTransform.mdl_ref = 1.0f;  // model reference
-        heroTransform.shd_ref = 0.0f;  // shader reference
+        heroTransform.mdl_ref = 1.0f;
+        heroTransform.shd_ref = 0.0f;
         heroTransform.isVisible = true;
         heroTransform.currentFrame = 0;
         g_coordinator->AddComponent(Hero, heroTransform);
 
         g_coordinator->AddComponent(Hero, NPC{
-            50.0f, 50.0f,       // width, height
-            100.0f, 50.0f,      // swordWidth, swordHeight
+            100.0f, 100.0f,       // width, height
+            200.0f, 100.0f,      // swordWidth, swordHeight
             0.0f, false, 10, true
             });
 
-        // Add hero AABB at edges
         g_coordinator->AddComponent(Hero, BuildHeroHitbox(heroTransform, g_coordinator->GetComponent<NPC>(Hero)));
         EntityNPC.push_back(Hero);
         std::cout << "Hero spawned at center.\n";
 
-        // --- Monster NPC: spawns left or right ---
-        float startX = SpawnLeftMonster ? -500.0f : 500.0f; // relative to center
+        // --- Spawn Two Monster NPCs ---
+        float startPositions[2] = { -500.0f, 500.0f }; // left and right
+        for (int i = 0; i < 2; ++i)
+        {
+            Entity Monster = g_coordinator->CreateEntity();
+            Framework::Transform MonsterTransform{};
+            MonsterTransform.Pos = { startPositions[i], 0 };
+            MonsterTransform.Scale = { 200.0f, 200.0f };
+            MonsterTransform.mdl_ref = 1.0f;
+            MonsterTransform.shd_ref = 0.0f;
+            MonsterTransform.isVisible = true;
+            MonsterTransform.currentFrame = 0;
+            g_coordinator->AddComponent(Monster, MonsterTransform);
 
-        Entity Monster = g_coordinator->CreateEntity();
-        Framework::Transform MonsterTransform{};
-        MonsterTransform.Pos = { startX, 0 };
-        MonsterTransform.Scale = { 200.0f, 200.0f };
-        MonsterTransform.mdl_ref = 1.0f;
-        MonsterTransform.shd_ref = 0.0f;
-        MonsterTransform.isVisible = true;
-        MonsterTransform.currentFrame = 0;
-        g_coordinator->AddComponent(Monster, MonsterTransform);
+            g_coordinator->AddComponent(Monster, NPC{
+                100.0f, 100.0f,       // width, height
+                200.0f, 100.0f,       // swordWidth, swordHeight
+                0.0f, false, 10, true
+                });
 
-        g_coordinator->AddComponent(Monster, NPC{
-            50.0f, 50.0f,       // width, height
-            100.0f, 50.0f,      // swordWidth, swordHeight
-            0.0f, false, 10, true
-            });
+            g_coordinator->AddComponent(Monster, BuildMonsterHitbox(MonsterTransform, g_coordinator->GetComponent<NPC>(Monster)));
+            EntityNPC.push_back(Monster);
+            std::cout << "[Init] Monster spawned at x=" << startPositions[i] << "\n";
+        }
 
-        // Add monster AABB at edges
-        g_coordinator->AddComponent(Monster, BuildMonsterHitbox(MonsterTransform, g_coordinator->GetComponent<NPC>(Monster)));
-        EntityNPC.push_back(Monster);
-        std::cout << "[Init] Monster spawned at x=" << startX << "\n";
         std::cout << "============================================\n\n";
     }
     else
     {
-        // --- BoxLine Test: moving box across horizontal line segments ---
+        // --- BoxLine Test ---
         Entity boxNPC = g_coordinator->CreateEntity();
         g_coordinator->AddComponent(boxNPC, NPC{
-            50.0f, 50.0f, 0.0f,0.0f,0.0f,false,1,true
+            50.0f, 50.0f, 0.0f, 0.0f, 0.0f, false, 1, true
             });
         g_coordinator->AddComponent(boxNPC, AABB{
             Vector2(0.0f, 250.0f),
@@ -99,91 +99,82 @@ void CollisionManager::Update(float dt)
 {
     auto* g_coordinator = Coordinator::GetInstance();
 
-    if (UseBoxLineTest)
-    {
-        // BoxLine test (unchanged)
-        return;
-    }
+    if (UseBoxLineTest) return; // BoxLine logic unchanged
 
-    // --- NPC/Monster collision test ---
     auto& centre = g_coordinator->GetComponent<NPC>(EntityNPC[0]);
-    auto& moving = g_coordinator->GetComponent<NPC>(EntityNPC[1]);
     auto& hero_pos = g_coordinator->GetComponent<Framework::Transform>(EntityNPC[0]);
-    auto& monster_pos = g_coordinator->GetComponent<Framework::Transform>(EntityNPC[1]);
 
-    // Rebuild AABBs from center positions (edge collision)
-    AABB centreBox = BuildHeroHitbox(hero_pos, centre);
-    AABB movingBox = BuildMonsterHitbox(monster_pos, moving);
-
-    if (!moving.isAlive || !centre.isAlive) return;
-
-    // --- Move Monster ---
-    float speed = 100.0f * (SpawnLeftMonster ? 1.0f : -1.0f);
-    monster_pos.Pos.x += speed * dt;
-
-    if (EnableTestCases)
-        std::cout << std::setw(12) << "[Move] "
-        << "Monster at x=" << monster_pos.Pos.x << "\n";
-
-    // --- Sword Auto-Swing Check ---
-    if (SwordEnabled)
+    // --- Loop through all monsters (starting from index 1) ---
+    for (size_t i = 1; i < EntityNPC.size(); ++i)
     {
-        float distanceX = std::abs(monster_pos.Pos.x - hero_pos.Pos.x);
-        if (distanceX <= 150.0f)
+        auto& moving = g_coordinator->GetComponent<NPC>(EntityNPC[i]);
+        auto& monster_pos = g_coordinator->GetComponent<Framework::Transform>(EntityNPC[i]);
+
+        if (!moving.isAlive || !centre.isAlive) continue;
+
+        // Rebuild AABBs
+        AABB centreBox = BuildHeroHitbox(hero_pos, centre);
+        AABB movingBox = BuildMonsterHitbox(monster_pos, moving);
+
+        // --- Move Monster ---
+        float speed = (monster_pos.Pos.x < 0) ? 100.0f : -100.0f; // left->right, right->left
+        monster_pos.Pos.x += speed * dt;
+
+        if (EnableTestCases)
+            std::cout << std::setw(12) << "[Move] "
+            << "Monster at x=" << monster_pos.Pos.x << "\n";
+
+        // --- Sword Auto-Swing Check ---
+        if (SwordEnabled)
         {
             centre.isSwinging = true;
-            centre.swingProgress += 180.0f * dt; // swing speed
+            centre.swingProgress += 180.0f * dt;
             if (centre.swingProgress >= 180.0f) centre.swingProgress = 0.0f;
 
-            // Build sword hitbox
-            AABB swordBox = BuildSwordHitbox(hero_pos, centre);
+            AABB swordBox = BuildSwordHitbox(hero_pos, centre, monster_pos.Pos);
 
-            // Offset for edge-triggered collision
-            float offset = 76.5f; // adjust as needed
-            if (moving.isAlive &&
-                (swordBox.max.x + offset >= movingBox.min.x - offset &&
-                    swordBox.min.x - offset <= movingBox.max.x + offset) &&
+            float SwordOffset = centre.width / 2.0f;
+            float MonsterOffset = moving.width / 2.0f;
+
+            if ((swordBox.max.x + SwordOffset >= movingBox.min.x - MonsterOffset &&
+                swordBox.min.x - SwordOffset <= movingBox.max.x + MonsterOffset) &&
                 (swordBox.max.y >= movingBox.min.y && swordBox.min.y <= movingBox.max.y))
             {
-                moving.isAlive = false;
                 if (EnableTestCases)
-                {
                     std::cout << std::setw(12) << "[SwordHit] "
-                        << "Monster killed by sword at edge!\n";
-                }
+                    << "Monster killed by sword at edge!\n";
+
+                g_coordinator->DestroyEntity(EntityNPC[i]);
+                EntityNPC.erase(EntityNPC.begin() + i);
+                --i; // adjust index after erase
+                continue; // skip further collision for this monster
             }
         }
-        else
+
+        // --- NPC vs Monster collision at edges ---
+        float HeroOffset = centre.width / 2.0f;
+        float MonsterOffset = moving.width / 2.0f;
+
+        if ((centreBox.max.x + HeroOffset >= movingBox.min.x - MonsterOffset &&
+            centreBox.min.x - HeroOffset <= movingBox.max.x + MonsterOffset) &&
+            (centreBox.max.y >= movingBox.min.y && centreBox.min.y <= movingBox.max.y))
         {
-            centre.isSwinging = false;
-            centre.swingProgress = 0.0f;
-        }
-    }
+            centre.hp -= 1;
 
-    // Offset value (can adjust based on how early you want collision)
-    float offset = 76.5f;
-
-    // --- NPC vs Monster collision at edges ---
-
-    if (moving.isAlive &&
-        // Check horizontal (X) edges
-        (centreBox.max.x + offset >= movingBox.min.x - offset &&  // hero's right vs monster's left
-            centreBox.min.x - offset <= movingBox.max.x + offset) && // hero's left vs monster's right
-        // Check vertical (Y) edges
-        (centreBox.max.y >= movingBox.min.y && centreBox.min.y <= movingBox.max.y))
-    {
-        centre.hp -= 1;
-        moving.isAlive = false;
-        if (EnableTestCases)
-            std::cout << std::setw(12) << "[Collision] "
-            << "Monster collided with Hero! Hero HP: " << centre.hp << "\n";
-
-        if (centre.hp <= 0)
-        {
-            centre.isAlive = false;
             if (EnableTestCases)
-                std::cout << std::setw(12) << "[Hero] "
-                << "Hero has died!\n";
+                std::cout << std::setw(12) << "[Collision] "
+                << "Monster collided with Hero! Hero HP: " << centre.hp << "\n";
+
+            g_coordinator->DestroyEntity(EntityNPC[i]);
+            EntityNPC.erase(EntityNPC.begin() + i);
+            --i; // adjust index after erase
+
+            if (centre.hp <= 0)
+            {
+                centre.isAlive = false;
+                if (EnableTestCases)
+                    std::cout << std::setw(12) << "[Hero] Hero has died!\n";
+            }
         }
     }
 }
@@ -191,11 +182,13 @@ void CollisionManager::Update(float dt)
 // ==================================================================================
 // Utility Functions
 // ==================================================================================
-AABB CollisionManager::BuildSwordHitbox(Framework::Transform& pos, const NPC& npc)
+AABB CollisionManager::BuildSwordHitbox(Framework::Transform& heroPos, const NPC& hero, const Vector2& targetPos)
 {
-    Vector2 min(pos.Pos.x - npc.swordWidth / 2.0f + npc.swingProgress,
-        pos.Pos.y - npc.swordHeight / 2.0f);
-    Vector2 max = min + Vector2(npc.swordWidth, npc.swordHeight);
+    float dir = (targetPos.x >= heroPos.Pos.x) ? 1.0f : -1.0f;
+
+    Vector2 min(heroPos.Pos.x + dir * hero.swingProgress - (dir < 0 ? hero.swordWidth : 0.0f),
+        heroPos.Pos.y - hero.swordHeight / 2.0f);
+    Vector2 max = min + Vector2(hero.swordWidth, hero.swordHeight);
     return { min, max };
 }
 
@@ -237,9 +230,9 @@ CollisionManager::LineHitResult CollisionManager::CheckBoxLineCollision(
 
     float relative = (boxCenterX - lineStartX) / (lineEndX - lineStartX);
 
-    if (relative <= 0.2f)   return LineHitResult::Bad;
-    if (relative <= 0.4f)   return LineHitResult::Good;
-    if (relative <= 0.6f)   return LineHitResult::Excellent;
-    if (relative <= 0.8f)   return LineHitResult::Good;
+    if (relative <= 0.2f) return LineHitResult::Bad;
+    if (relative <= 0.4f) return LineHitResult::Good;
+    if (relative <= 0.6f) return LineHitResult::Excellent;
+    if (relative <= 0.8f) return LineHitResult::Good;
     return LineHitResult::Bad;
 }
