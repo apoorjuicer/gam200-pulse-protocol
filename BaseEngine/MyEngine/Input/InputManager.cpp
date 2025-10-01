@@ -50,15 +50,32 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     auto* g_coordinator = Coordinator::GetInstance();
     Entity entity = g_coordinator->CreateEntity();
 
-    Framework::Transform feedbackTransform{};
+    /*Framework::Transform feedbackTransform{};
     feedbackTransform.Pos = { 100.0f, 250.0f };
     feedbackTransform.Scale = { 500.0f, 500.0f };
     feedbackTransform.mdl_ref = 1.0f;
     feedbackTransform.shd_ref = 2.0f;
     feedbackTransform.isVisible = true;
-    feedbackTransform.currentFrame = 0;
+    feedbackTransform.currentFrame = 0;*/
 
-    g_coordinator->AddComponent(entity, feedbackTransform);
+    std::string path = "../../MyEngine/JSON/transform.json";
+
+    //if (!Framework::SaveTransform(feedbackTransform, path)) {
+    //    std::cerr << "Failed to save transform!\n";
+    //}
+    //else {
+    //    std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
+    //}
+
+    Framework::Transform new_feedbackTransform;
+    if (!Framework::LoadTransform(new_feedbackTransform, path)) {
+        std::cerr << "Failed to load transform!\n";
+    }
+    else {
+        std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
+    }
+
+    g_coordinator->AddComponent(entity, new_feedbackTransform);
     SetFeedbackEntity(entity);
 }
 

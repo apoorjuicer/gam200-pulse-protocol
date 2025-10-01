@@ -306,7 +306,7 @@ void GLApp::draw(std::set<Entity> entities) {
 
     // -------------------*Debug draw sample (NDC space)*----------------------
 	//glm::mat4 mvp = MakeOrthoMvp(-1.0f, 1.0f, -1.0f, 1.0f);   //  create the ndc space
-    //DebugDraw::Begin(mvp);
+ //   DebugDraw::Begin(mvp);
 	//DebugDraw::DrawLine({-0.5f, -0.5f}, {0.5f, -0.5f}, {1,1,0}); // yellow line
 	//DebugDraw::DrawRect({-0.2f,-0.2f}, {0.2f,0.2f}, {0,1,0}); // green rect
 	//DebugDraw::DrawCircle({0.0f,0.0f}, 0.3f, {0,0,1}, 48);    // (more segments = smoother)

@@ -8,12 +8,13 @@
 #define COLLISION_H
 
 #include "../Core/Assets.h"
+#include "pch/pch.h"
 
 // -----------------------------------------------------------------------------
 // CollisionManager
 // -----------------------------------------------------------------------------
 // Handles all collision-related systems in the ECS engine:
-//  - NPC vs Monster (AABB checks)
+//  - NPC vs Monster (AABB checks at edges)
 //  - NPC sword vs Monster (AABB checks with auto-swing toggle)
 //  - Box-to-Line collision detection (for timing-based systems)
 // -----------------------------------------------------------------------------
@@ -29,14 +30,14 @@ public:
     // -------------------------------------------------------------------------
     // Utility Functions for Hitbox Construction
     // -------------------------------------------------------------------------
-    AABB BuildSwordHitbox(const NPC& npc);     // Build AABB for NPC's sword
-    AABB BuildHeroHitbox(const NPC& npc);      // Build AABB for central NPC
-    AABB BuildMonsterHitbox(const NPC& npc);   // Build AABB for moving monster
+    AABB BuildSwordHitbox(Framework::Transform& pos, const NPC& npc);     // Build AABB for NPC's sword
+    AABB BuildHeroHitbox(Framework::Transform& pos, const NPC& npc);      // Build AABB for central NPC
+    AABB BuildMonsterHitbox(Framework::Transform& pos, const NPC& npc);   // Build AABB for moving monster
 
     // -------------------------------------------------------------------------
     // Collision Checks
     // -------------------------------------------------------------------------
-    bool CheckAABBCollision(const AABB& a, const AABB& b);  // Axis-Aligned Bounding Box collision
+    bool CheckAABBCollision(const AABB& a, const AABB& b);  // Axis-Aligned Bounding Box collision at edges
     bool CheckDistanceCollision(const Vector2& a, float aradius,
         const Vector2& b, float bradius); // Circle-based distance collision
 
