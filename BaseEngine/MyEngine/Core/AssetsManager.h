@@ -8,7 +8,8 @@
 
 #pragma once
 
-#include "fmod.hpp"
+
+#include "../MyEngine/pch/pch.h"
 #include <GL/glew.h>
 #include "../Audio/Audio.h"
 #include "../Graphics/GraphicsManager.h"
@@ -19,7 +20,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <string>
-#include <fmod_errors.h>
 #include <filesystem>
 
 
@@ -65,6 +65,7 @@ namespace Framework {
         //void TextureAssignment();
         const TextureData* getTextureData(const char* filepath) const;
         const TextureData* getTextureDataByName(const std::string& textureName) const;
+        void DestroyAllTransforms();
 
         // ---------- Getters ----------
         const std::unordered_map<std::string, FMOD::Sound*>& GetSoundMap() const {

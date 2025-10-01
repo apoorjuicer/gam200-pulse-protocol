@@ -222,6 +222,9 @@ void CoreEngine::GameLoop()
         Update(dt);
 
         //  3. ImGui update
+		#ifdef ENABLE_EDITOR
+		MyEditor::NewFrame();
+		#endif
 
         //  4. game update(NOT A WHILE LOOP) gsm
 
@@ -230,6 +233,10 @@ void CoreEngine::GameLoop()
         //glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
 
         //  6. ImGui rendering
+		#ifdef ENABLE_EDITOR
+		MyEditor::Draw();
+		MyEditor::Render();
+		#endif
 
         //7. Swap Buffer(like two window)
         glfwSwapBuffers(window);

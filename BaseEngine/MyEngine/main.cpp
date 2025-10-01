@@ -73,6 +73,11 @@ int main() {
     // for non-GL things:
     Engine->Init(); // <-- only if it does NOT touch OpenGL
 
+    // After you create the GLFW window and GL context
+    #ifdef ENABLE_EDITOR
+    MyEditor::Init(Engine->GetWindow());  // or your window pointer
+    #endif
+
 
     Framework::Transform tr{};            // fill in fields as your renderer expects
     // e.g. tr.mdl_ref = 1; tr.shd_ref = 1; tr.rows = ...; tr.columns = ...; tr.textureID = ...
@@ -109,6 +114,11 @@ int main() {
 
     // this is where the update() is 
     Engine->GameLoop();
+
+
+    #ifdef ENABLE_EDITOR
+    MyEditor::Shutdown();
+    #endif
 
     Engine->Exit();
 

@@ -34,6 +34,14 @@
 #include "Graphics/glhelper.h"
 #include "Graphics/glslshader.h"
 
+// FMOD Headers
+#include "../MyEngine/FMOD_API/api/core/inc/fmod.hpp"
+#include "../MyEngine/FMOD_API/api/core/inc/fmod_errors.h"
+
+// Editor Header
+#include "../MyEditor/Editor.h"
+
+
 // Suppress APIENTRY macro redefinition warning
 #pragma warning(push)
 #pragma warning(disable: 4005)

@@ -267,6 +267,17 @@ namespace Framework {
         }
     }
 
+    void AssetsManager::DestroyAllTransforms()
+    {
+        for (auto* t : transObj)
+        {
+            delete t;   // free each Transform
+        }
+        transObj.clear();
+
+        std::cout << "[Cleanup] All transforms destroyed\n";
+    }
+
     
     void AssetsManager::UnloadAllImage() {
         // Must be called while a valid OpenGL context is current!

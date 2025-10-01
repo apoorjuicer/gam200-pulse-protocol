@@ -6,7 +6,6 @@
 #include "audio.h"
 #include <iostream>
 #include <filesystem>   // for debug path logs (safe to keep)
-#include "fmod.hpp"
 
 // If you want convenience linking on MSVC, you can uncomment this:
 // #ifdef _MSC_VER
