@@ -12,7 +12,7 @@
 // --- Toggles (can be modified to control behavior) ---
 bool UseBoxLineTest = false;       // true = BoxLine test, false = Hero/Monster collision
 bool SpawnLeftMonster = false;     // true = spawn monster on left, false = right
-bool SwordEnabled = false;          // true = sword swings, false = sword disabled
+bool SwordEnabled = true;          // true = sword swings, false = sword disabled
 bool EnableTestCases = true;       // true = print test case output, false = silent
 
 // ==================================================================================
@@ -29,19 +29,18 @@ void CollisionManager::Init()
         Framework::Transform heroTransform{};
         heroTransform.Pos = { 0,0 };
         heroTransform.Scale = { 200.0f, 200.0f };
-        heroTransform.mdl_ref = 1.0f;  // model reference
-        heroTransform.shd_ref = 0.0f;  // shader reference
+        heroTransform.mdl_ref = 1.0f;
+        heroTransform.shd_ref = 0.0f;
         heroTransform.isVisible = true;
         heroTransform.currentFrame = 0;
         g_coordinator->AddComponent(Hero, heroTransform);
 
         g_coordinator->AddComponent(Hero, NPC{
-            50.0f, 50.0f,       // width, height
-            100.0f, 50.0f,      // swordWidth, swordHeight
+            100.0f, 100.0f,       // width, height
+            200.0f, 100.0f,      // swordWidth, swordHeight
             0.0f, false, 10, true
             });
 
-        // Add hero AABB at edges
         g_coordinator->AddComponent(Hero, BuildHeroHitbox(heroTransform, g_coordinator->GetComponent<NPC>(Hero)));
         EntityNPC.push_back(Hero);
         std::cout << "Hero spawned at center.\n";
@@ -60,12 +59,11 @@ void CollisionManager::Init()
         g_coordinator->AddComponent(Monster, MonsterTransform);
 
         g_coordinator->AddComponent(Monster, NPC{
-            50.0f, 50.0f,       // width, height
-            100.0f, 50.0f,      // swordWidth, swordHeight
+            100.0f, 100.0f,       // width, height
+            200.0f, 100.0f,      // swordWidth, swordHeight
             0.0f, false, 10, true
             });
 
-        // Add monster AABB at edges
         g_coordinator->AddComponent(Monster, BuildMonsterHitbox(MonsterTransform, g_coordinator->GetComponent<NPC>(Monster)));
         EntityNPC.push_back(Monster);
         std::cout << "[Init] Monster spawned at x=" << startX << "\n";
@@ -73,7 +71,7 @@ void CollisionManager::Init()
     }
     else
     {
-        // --- BoxLine Test: moving box across horizontal line segments ---
+        // --- BoxLine Test ---
         Entity boxNPC = g_coordinator->CreateEntity();
         g_coordinator->AddComponent(boxNPC, NPC{
             50.0f, 50.0f, 0.0f,0.0f,0.0f,false,1,true
@@ -99,13 +97,9 @@ void CollisionManager::Update(float dt)
 {
     auto* g_coordinator = Coordinator::GetInstance();
 
-    if (UseBoxLineTest)
-    {
-        // BoxLine test (unchanged)
-        return;
-    }
+    if (UseBoxLineTest) return; // BoxLine logic unchanged
 
-    // --- NPC/Monster collision test ---
+    // --- NPC/Monster references ---
     auto& centre = g_coordinator->GetComponent<NPC>(EntityNPC[0]);
     auto& moving = g_coordinator->GetComponent<NPC>(EntityNPC[1]);
     auto& hero_pos = g_coordinator->GetComponent<Framework::Transform>(EntityNPC[0]);
@@ -128,52 +122,41 @@ void CollisionManager::Update(float dt)
     // --- Sword Auto-Swing Check ---
     if (SwordEnabled)
     {
-        float distanceX = std::abs(monster_pos.Pos.x - hero_pos.Pos.x);
-        if (distanceX <= 150.0f)
-        {
-            centre.isSwinging = true;
-            centre.swingProgress += 180.0f * dt; // swing speed
-            if (centre.swingProgress >= 180.0f) centre.swingProgress = 0.0f;
+        centre.isSwinging = true;
+        centre.swingProgress += 180.0f * dt;
+        if (centre.swingProgress >= 180.0f) centre.swingProgress = 0.0f;
 
-            // Build sword hitbox
-            AABB swordBox = BuildSwordHitbox(hero_pos, centre);
+        // Build sword hitbox towards monster
+        AABB swordBox = BuildSwordHitbox(hero_pos, centre, monster_pos.Pos);
 
-            // Offset for edge-triggered collision
-            float offset = 76.5f; // adjust as needed
-            if (moving.isAlive &&
-                (swordBox.max.x + offset >= movingBox.min.x - offset &&
-                    swordBox.min.x - offset <= movingBox.max.x + offset) &&
-                (swordBox.max.y >= movingBox.min.y && swordBox.min.y <= movingBox.max.y))
-            {
-                moving.isAlive = false;
-                if (EnableTestCases)
-                {
-                    std::cout << std::setw(12) << "[SwordHit] "
-                        << "Monster killed by sword at edge!\n";
-                }
-            }
-        }
-        else
+        // Edge-based offset collision for sword
+        float SwordOffset = centre.width / 2.0f;
+        float MonsterOffset = moving.width / 2.0f;
+
+        if (moving.isAlive &&
+            (swordBox.max.x + SwordOffset >= movingBox.min.x - MonsterOffset &&
+                swordBox.min.x - SwordOffset <= movingBox.max.x + MonsterOffset) &&
+            (swordBox.max.y >= movingBox.min.y && swordBox.min.y <= movingBox.max.y))
         {
-            centre.isSwinging = false;
-            centre.swingProgress = 0.0f;
+            moving.isAlive = false;
+            if (EnableTestCases)
+                std::cout << std::setw(12) << "[SwordHit] "
+                << "Monster killed by sword at edge!\n";
         }
     }
 
-    // Offset value (can adjust based on how early you want collision)
-    float offset = 76.5f;
-
     // --- NPC vs Monster collision at edges ---
+    float HeroOffset = centre.width / 2.0f;
+    float MonsterOffset = moving.width / 2.0f;
 
     if (moving.isAlive &&
-        // Check horizontal (X) edges
-        (centreBox.max.x + offset >= movingBox.min.x - offset &&  // hero's right vs monster's left
-            centreBox.min.x - offset <= movingBox.max.x + offset) && // hero's left vs monster's right
-        // Check vertical (Y) edges
+        (centreBox.max.x + HeroOffset >= movingBox.min.x - MonsterOffset &&
+            centreBox.min.x - HeroOffset <= movingBox.max.x + MonsterOffset) &&
         (centreBox.max.y >= movingBox.min.y && centreBox.min.y <= movingBox.max.y))
     {
         centre.hp -= 1;
         moving.isAlive = false;
+
         if (EnableTestCases)
             std::cout << std::setw(12) << "[Collision] "
             << "Monster collided with Hero! Hero HP: " << centre.hp << "\n";
@@ -191,11 +174,14 @@ void CollisionManager::Update(float dt)
 // ==================================================================================
 // Utility Functions
 // ==================================================================================
-AABB CollisionManager::BuildSwordHitbox(Framework::Transform& pos, const NPC& npc)
+AABB CollisionManager::BuildSwordHitbox(Framework::Transform& heroPos, const NPC& hero, const Vector2& targetPos)
 {
-    Vector2 min(pos.Pos.x - npc.swordWidth / 2.0f + npc.swingProgress,
-        pos.Pos.y - npc.swordHeight / 2.0f);
-    Vector2 max = min + Vector2(npc.swordWidth, npc.swordHeight);
+    // Determine direction: right (+1) or left (-1)
+    float dir = (targetPos.x >= heroPos.Pos.x) ? 1.0f : -1.0f;
+
+    Vector2 min(heroPos.Pos.x + dir * hero.swingProgress - (dir < 0 ? hero.swordWidth : 0.0f),
+        heroPos.Pos.y - hero.swordHeight / 2.0f);
+    Vector2 max = min + Vector2(hero.swordWidth, hero.swordHeight);
     return { min, max };
 }
 
