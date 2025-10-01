@@ -35,8 +35,8 @@ static _CrtMemState sDiff;
 
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
-const int Game_Window_Height = 1400;
-const int Game_Window_Width = 800;
+const int Game_Window_Height = 900;
+const int Game_Window_Width = 1600;
 
 // just concepts for game states, will be in GSM 
 struct GameStates {
@@ -87,32 +87,39 @@ int main() {
     Engine->Setup();
     Engine->Init(); // <-- only if it does NOT touch OpenGL
 
-    // ----------------- Transform Setup -----------------
-    Framework::Transform tr{};            // fill in fields as your renderer expects
+
+/*    Framework::Transform tr{};   */         // fill in fields as your renderer expects
+    // e.g. tr.mdl_ref = 1; tr.shd_ref = 1; tr.rows = ...; tr.columns = ...; tr.textureID = ...
+    // After registering components (including Framework::Transform) and creating the entity:
 
     // where to draw (your update() normalizes by 1600x900)
-    tr.Pos = { 800.0f, 450.0f };   // center of a 1600x900 “virtual” screen
-    tr.Scale = { 128.0f, 128.0f };   // size in pixels in that same space
-    tr.angle_disp = 0.0f;           // degrees
-    tr.angle_speed = 0.0f;           // no rotation
+    //tr.Pos = { 1800.0f, 450.0f };   // center of a 1600x900 �virtual� screen
+    //tr.Scale = { 128.0f, 128.0f };   // size in pixels in that same space
+    //tr.angle_disp = 0.0f;           // degrees
+    //tr.angle_speed = 0.0f;           // no rotation
 
-    // model & shader indices
-    tr.mdl_ref = 0.0f;               // bg_model()
-    tr.shd_ref = 0.0f;               // test shader
+    //// model & shader indices (you push models: 0=bg, 1=box; shaders: 0=test,1=bg,2=sprite,3=font)
+    //tr.mdl_ref = 0.0f;               // bg_model()
+    //tr.shd_ref = 0.0f;               // test shader
+    //// NOTE: In drawTrans() you currently check `if (x.shd_ref == 1)` before grabbing uniforms.
+    //// Either change that `1` to `2`, or set `tr.shd_ref = 1` if your bg shader has those uniforms.
 
-    // sprite-sheet / animation
-    tr.rows = 1;
-    tr.columns = 1;
-    tr.currentFrame = 0;
-    tr.animationSpeed = 0.0f;        // static
+    //// sprite-sheet / animation
+    //tr.rows = 1;
+    //tr.columns = 1;
+    //tr.currentFrame = 0;
+    //tr.animationSpeed = 0.0f;        // static
 
-    tr.isVisible = false;
-    tr.autoHide = false;
-    tr.visibilityTimer = 0.0f;
 
-    auto* g_coordinator = Coordinator::GetInstance();
-    int entity = g_coordinator->CreateEntity();
-    g_coordinator->AddComponent(entity, tr);  // <-- add Transform
+    //tr.isVisible = false;
+    //tr.autoHide = false;
+    //tr.visibilityTimer = 0.0f;
+
+    //// a valid GL texture id. Use your loader or 0 if you just want a colored quad.
+    ////tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
+    //auto* g_coordinator = Coordinator::GetInstance();
+    //int entity = g_coordinator->CreateEntity();
+    //g_coordinator->AddComponent(entity, tr);  // <-- add Transform
 
     // ----------------- Main Game Loop -----------------
     while (!glfwWindowShouldClose(Engine->GetWindow()))

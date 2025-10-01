@@ -116,8 +116,8 @@ void CollisionManager::Update(float dt)
                             result == LineHitResult::Good ? "Good" :
                             result == LineHitResult::Excellent ? "Excellent" : "None");
 
-                    std::cout << std::setw(12) << "[BoxLine] "
-                        << "Line " << (i + 1) << " -> " << str << "\n";
+                    //std::cout << std::setw(12) << "[BoxLine] "
+                     //   << "Line " << (i + 1) << " -> " << str << "\n";
                 }
             }
         }

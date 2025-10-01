@@ -1,6 +1,8 @@
 R"( #version 450 core
-out vec4 FragColor;
+layout(location = 0) in vec3 vColor;
+layout(location = 0) out vec4 FragColor;
+
 void main() {
-    FragColor = vec4(1.0, 0.2, 0.0, 1.0);  // pink-ish so it's obvious
+    FragColor = vec4(vColor, 1.0);
 }
 )"
