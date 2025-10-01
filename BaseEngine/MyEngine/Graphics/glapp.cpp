@@ -19,7 +19,7 @@
 std::vector<GLSLShader> GLApp::shdrpgms;
 std::vector<GLApp::GLModel> GLApp::models;
 std::vector<GLApp::GLViewport> GLApp::vps;
-std::list<Framework::Transform*> transObj;
+//std::list<Framework::Transform*> transObj;
 
 //other containers
 const float PI = 3.14159265358979323846f;
@@ -176,7 +176,7 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 }
 
 
-void GLApp::update(GLFWwindow* window) {
+void GLApp::update(GLFWwindow* window,std::set<Entity> entity) {
     //if (GLHelper::keystateP == GL_TRUE) {
     //    if (polygonmode == 0) {
     //        ++polygonmode;
@@ -201,9 +201,10 @@ void GLApp::update(GLFWwindow* window) {
         glfwSetWindowTitle(window, title.str().c_str());
     }
 
-    for (auto& x : transObj) {
-        x->update(GLHelper::delta_time);
-    }
+    
+     
+     //update(GLHelper::delta_time);
+    
 }
 
 void GLApp::updateAnimation(Framework::Transform& x) {
@@ -258,28 +259,34 @@ void GLApp::draw(std::set<Entity> entities) {
     glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
     glClearDepth(1.0f);
     //shdrpgms[0].Use();
-    transObj.clear();
+    //transObj.clear();
     auto* g_coordinator = Coordinator::GetInstance();
-    for (auto it : entities)
-    {
-        if (auto* tr = g_coordinator->TryGetComponent<Framework::Transform>(it))
-        {
-            transObj.push_back(tr);
-            tr->textureID = textureID;
-        }
-        //auto x = g_coordinator->GetComponent<Framework::Transform>(it);
-        //    if (x.isVisible) {
-        //        updateAnimation(x);
-        //        glBindTexture(GL_TEXTURE_2D, x.textureID);
-        //        drawTrans(x);
-        //    }
+        //if (auto* tr = g_coordinator->TryGetComponent<Framework::Transform>(it))
+        //{
+        //    transObj.push_back(tr);
+        //    tr->textureID = textureID;
+        //}
+        for (auto it : entities) {
+            auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
+            if (tr.textureID == 0) tr.textureID = textureID;
+            if (tr.isVisible) {
+                updateAnimation(tr);
+                glBindTexture(GL_TEXTURE_2D, tr.textureID); 
+                drawTrans(tr);
+            }
     }
 
-    for (auto x : transObj) {
-        if (x->isVisible) {
-            updateAnimation(*x);
-            glBindTexture(GL_TEXTURE_2D, x->textureID);
-            drawTrans(*x);
+    for (auto x : entities) {
+        //if (x->isVisible) {
+        //    updateAnimation(*x);
+        //    glBindTexture(GL_TEXTURE_2D, x->textureID);
+        //    drawTrans(*x);
+        //}
+        auto y = g_coordinator->GetComponent<Framework::Transform>(x);
+        if (y.isVisible) {
+            updateAnimation(y);
+            glBindTexture(GL_TEXTURE_2D, y.textureID);
+            drawTrans(y);
         }
     }
 

@@ -19,12 +19,13 @@
 #include <algorithm>
 // External transforms list (used elsewhere)   
 namespace Framework { class Transform; }
-extern std::list<Framework::Transform*> transObj; // transforms  
+//extern std::list<Framework::Transform*> transObj; // transforms  
 
 class GLApp {
 public:
     void init(float inputEditorWidth, float inputEditorHeight);
-    void update(GLFWwindow* window);
+    //void update(GLFWwindow* window);
+    void update(GLFWwindow* window, std::set<Entity>);
     void draw(std::set<Entity>);
     void cleanup();
     GLuint LoadTexture(const std::string& filepath);
