@@ -33,6 +33,6 @@ private:
 
 //A global pointer to the instance of the core
 extern CoreEngine* Engine;
-constexpr int WindowWidth = 800;
-constexpr int WindowHeight = 1400;
+constexpr int WindowWidth = 1600;
+constexpr int WindowHeight = 900;
 

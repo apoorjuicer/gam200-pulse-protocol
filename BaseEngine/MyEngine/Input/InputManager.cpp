@@ -51,12 +51,12 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     Entity entity = g_coordinator->CreateEntity();
 
     Framework::Transform feedbackTransform{};
-    feedbackTransform.Pos = { 800.0f, 450.0f };
-    feedbackTransform.Scale = { 128.0f, 128.0f };
+    feedbackTransform.Pos = { 0.0f, 0.0f };
+    feedbackTransform.Scale = { 500.0f, 500.0f };
     feedbackTransform.mdl_ref = 1.0f;
-    feedbackTransform.shd_ref = 1.0f;
-    feedbackTransform.isVisible = false;
-    feedbackTransform.currentFrame = 0;
+    feedbackTransform.shd_ref = 2.0f;
+    feedbackTransform.isVisible = true;
+    feedbackTransform.currentFrame = 1;
 
     g_coordinator->AddComponent(entity, feedbackTransform);
     SetFeedbackEntity(entity);
