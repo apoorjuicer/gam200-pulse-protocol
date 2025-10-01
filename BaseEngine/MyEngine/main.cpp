@@ -17,6 +17,8 @@
 #endif
 
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include "Core/Coordinator.h"
 #include "pch/pch.h"
 #include "Core/Assets.h"
@@ -55,6 +57,73 @@ struct GameStates {
         //rapid json
 } gamestate;
 
+// Global variables for object management
+bool objectsVisible = false;
+std::vector<Entity> renderObjects;
+
+// Function to create multiple objects for rendering
+void CreateRenderObjects(int count) {
+    auto* g_coordinator = Coordinator::GetInstance();
+    
+    // Clear existing objects
+    renderObjects.clear();
+    
+    for (int i = 0; i < count; ++i) {
+        // Create a new entity
+        Entity newEntity = g_coordinator->CreateEntity();
+        
+        // Create a Transform component with random properties
+        Framework::Transform transform;
+        
+        // Random position within the game window bounds (accounting for viewport)
+        // The game viewport is centered and has aspect ratio 16:9
+        // We'll spawn objects within a reasonable area of the viewport
+        
+        // Spawn within the game area, leaving some margin
+        float margin = 50.0f;
+        transform.Pos = Vector2(
+           rand() % static_cast<int>(Game_Window_Width),
+            rand() % static_cast<int>(Game_Window_Height)
+        );
+        
+        // Random size between 20x20 and 60x60 pixels
+        float size = 200.0f + static_cast<float>(rand() % 40);
+        transform.Scale = Vector2(size, size);
+        
+        // Random rotation
+        transform.angle_disp = static_cast<float>(rand() % 360);
+        transform.angle_speed = static_cast<float>(rand() % 10) - 5.0f; // -5 to +5 degrees per frame
+        
+        // Set model and shader references for sprite rendering
+        transform.mdl_ref = 1.0f;  // Use box model (1) instead of background (0)
+        transform.shd_ref = 2.0f;  // Use sprite shader (2) for texture rendering
+        
+        // Initially hidden - will be toggled with Z key
+        transform.isVisible = objectsVisible;
+        
+        // Add the Transform component to the entity
+        // This automatically adds the entity to the GraphicsManager system
+        g_coordinator->AddComponent(newEntity, transform);
+        
+        // Store entity reference for toggle functionality
+        renderObjects.push_back(newEntity);
+    }
+    
+    std::cout << "Successfully created " << count << " objects!" << std::endl;
+    std::cout << "Press Z to toggle object visibility!" << std::endl;
+}
+
+// Function to toggle object visibility
+void ToggleObjectVisibility() {
+    auto* g_coordinator = Coordinator::GetInstance();
+    objectsVisible = !objectsVisible;
+    
+    for (Entity entity : renderObjects) {
+        auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
+        transform.isVisible = objectsVisible;
+    }
+}
+
 CoreEngine* Engine = nullptr;
 //InputManager* g_inputSystem = nullptr;
 //GraphicsManager* g_graphicsSystem = nullptr;
@@ -73,6 +142,11 @@ int main() {
     // for non-GL things:
     Engine->Init(); // <-- only if it does NOT touch OpenGL
 
+    // Initialize random seed
+    srand(static_cast<unsigned int>(time(nullptr)));
+    
+    // Create 2500 objects for rendering
+    CreateRenderObjects(2500);
 
 /*    Framework::Transform tr{};   */         // fill in fields as your renderer expects
     // e.g. tr.mdl_ref = 1; tr.shd_ref = 1; tr.rows = ...; tr.columns = ...; tr.textureID = ...
