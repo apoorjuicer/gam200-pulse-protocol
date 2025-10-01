@@ -114,7 +114,7 @@ int main() {
     //tr.currentFrame = 0;
     //tr.animationSpeed = 0.0f;        // static
 
-    std::string path = "../JSON/transform.json";
+    /*std::string path = "../JSON/transform.json";
 
     if (!Framework::SaveTransform(tr, path)) {
         std::cerr << "Failed to save transform!\n";
@@ -129,7 +129,7 @@ int main() {
     }
     else {
         std::cout << "loaded from: " << std::filesystem::absolute(path) << "\n";
-    }
+    }*/
     //to load into BaseEngine>MyEngine>JSON
     //if (!Framework::SaveTransform(tr, "../../MyEngine/JSON/transform.json")) {
     //    std::cerr << "Failed to save transform!\n";
@@ -141,7 +141,7 @@ int main() {
     //}
 
     // test it
-    std::cout << "Loaded Pos: " << loaded.Pos.x << ", " << loaded.Pos.y << "\n";
+    //std::cout << "Loaded Pos: " << loaded.Pos.x << ", " << loaded.Pos.y << "\n";
 
     std::cout << "beforeTranpose: " << beforeTranpose;
 

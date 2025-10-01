@@ -183,8 +183,8 @@ namespace Framework
 
         // Ensure directory exists
         namespace fs = std::filesystem;
-        //fs::create_directories("../../MyEngine/JSON");
-        fs::create_directories("../JSON");
+        fs::create_directories("../../MyEngine/JSON");
+        //fs::create_directories("../JSON");
 
         std::ofstream ofs(path);
         if (!ofs.is_open()) {
