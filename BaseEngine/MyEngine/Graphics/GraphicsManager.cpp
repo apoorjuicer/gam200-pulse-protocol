@@ -24,7 +24,6 @@ void GraphicsManager::Initialize()
 // dtor
 GraphicsManager::~GraphicsManager()
 {
-	transObj.clear();
 	glapp->cleanup();
 	delete glapp;
 }

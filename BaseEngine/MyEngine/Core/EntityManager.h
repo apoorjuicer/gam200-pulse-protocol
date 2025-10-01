@@ -9,6 +9,7 @@ public:
 	{
 		for (Entity entity = 0; entity < MaxEntity; ++entity)
 		{
+			// Just an queue of Entity ID(int)
 			EntityList.push_back(entity);
 		}
 	}

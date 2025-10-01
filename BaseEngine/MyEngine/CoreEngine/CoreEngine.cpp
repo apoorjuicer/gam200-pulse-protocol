@@ -131,6 +131,8 @@ void CoreEngine::Init()
     std::cout << "Close window to exit testing" << std::endl;
 
     GameRunning = true;
+
+	SceneManager::GetInstance()->LoadScene(Scene::MainMenu);
 }
 
 void CoreEngine::Setup()
@@ -183,9 +185,20 @@ void CoreEngine::Update(float dt)
 		// Update input system
 		g_inputSystem->Update();
 		//g_audioSystem->Update();  
+	}
+
+	bool pressedalr = false;
+	int keyState = glfwGetKey(window, GLFW_KEY_M);
+	bool keypressed = (keyState == GLFW_PRESS);
+	if (keypressed && !pressedalr)
+	{
+		auto* coord = SceneManager::GetInstance();
+		if (coord->GrabCurrentScene() == Scene::MainMenu)
+		{
+			coord->LoadScene(Scene::Pause);
+		}
 
 	}
-	
 
 	g_coordinator->UpdateAllSystems(dt);
 }
@@ -270,11 +283,6 @@ void CoreEngine::Exit()
 }
 
 
-//void BroadcastMessage(){}
-
-
-
-
 
 
 // STILL BUILDING IM SORRY ;-;
@@ -321,9 +329,6 @@ void CoreEngine::Exit()
 //        window_swap_buffers();
 //    }
 //}
-
-
-
 //
 //class Settings {};
 //class Preferences {};
@@ -361,8 +366,6 @@ void CoreEngine::Exit()
 //
 //    Engine() : systems(settings) {};
 //};
-
-
 // ECS setup
 //g_coordinator->init();
 //g_coordinator->RegisterComponent<Player>();

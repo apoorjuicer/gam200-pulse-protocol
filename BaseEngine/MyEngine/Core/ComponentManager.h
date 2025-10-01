@@ -11,7 +11,7 @@ public:
 		// get name of component T. Exp: transform, scale
 		std::string ComponentTypeName = typeid(T).name();
 
-		//assert(ComponentTypes.find(ComponentTypeName) != ComponentTypes.end() && "Registering component type more than once.");
+		assert(ComponentTypes.find(ComponentTypeName) == ComponentTypes.end() && "Registering component type more than once.");
 
 		ComponentTypes[ComponentTypeName] = NextComponentType;
 		ComponentDataArray[ComponentTypeName] = std::make_shared<ComponentList<T>>();

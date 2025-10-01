@@ -19,7 +19,6 @@
 std::vector<GLSLShader> GLApp::shdrpgms;
 std::vector<GLApp::GLModel> GLApp::models;
 std::vector<GLApp::GLViewport> GLApp::vps;
-std::list<Framework::Transform*> transObj;
 
 //other containers
 const float PI = 3.14159265358979323846f;
@@ -229,21 +228,31 @@ void GLApp::draw(std::set<Entity> entities) {
     transObj.clear();
     auto* g_coordinator = Coordinator::GetInstance();
     //extern Coordinator g_coordinator;
-    for (auto it : entities)
+    for (auto it : entities) // std::smthing smthing // Itererate through this list
     {
-        if (auto* tr = g_coordinator->TryGetComponent<Framework::Transform>(it))
-        {
-            transObj.push_back(tr);
+        auto x = g_coordinator->GetComponent<Framework::Transform>(it);
+
+        if (x.isVisible) {
+            updateAnimation(x);
+            glBindTexture(GL_TEXTURE_2D, x.textureID);
+            drawTrans(x);
         }
+        //if (auto* tr = g_coordinator->TryGetComponent<Framework::Transform>(it))
+        //{
+        //    transObj.push_back(tr);
+        //}
+        //
+        //auto pos_x = g_coordinator->GetComponent<Framework::Transform>(it).Pos.x;
+
     }
 
-    for (auto x : transObj) {
-        if (x->isVisible) {
-            updateAnimation(*x);
-            glBindTexture(GL_TEXTURE_2D, x->textureID);
-            drawTrans(*x);
-        }
-    }
+    //for (auto x : transObj) {
+    //    if (x->isVisible) {
+    //        updateAnimation(*x);
+    //        glBindTexture(GL_TEXTURE_2D, x->textureID);
+    //        drawTrans(*x);
+    //    }
+    //}
 
 	//Polygon mode
     //if (polygonmode == 0)
