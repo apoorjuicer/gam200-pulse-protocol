@@ -44,7 +44,7 @@ public:
     ~InputManager();
 
     void Initialize(GLFWwindow* window);
-    void Update();
+    void Update(float deltaTime);
     void Shutdown();
 
     void SetFeedbackEntity(Entity entity) { feedbackEntity = entity; }

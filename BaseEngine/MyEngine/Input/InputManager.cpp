@@ -92,7 +92,7 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     feedbackEntity2 = entity2;
 }
 
-void InputManager::Update() {
+void InputManager::Update(float deltaTime) {
     UpdateInputStates();
 
     // Handle multiple debug toggles F1-F6
@@ -117,17 +117,24 @@ void InputManager::Update() {
     CheckForMissedBeat();
 
     auto* g_coordinator = Coordinator::GetInstance();
-    for (auto& entity : EntityMember)
-    {
-        auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
 
-        if (transform.autoHide && transform.isVisible) {
-            float dt = 0.016f;
-            transform.visibilityTimer -= dt;
-            if (transform.visibilityTimer <= 0.0f) {
-                transform.isVisible = false;
-                transform.autoHide = false;
-            }
+    // Update feedbackEntity (box 1)
+    auto& transform1 = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity);
+    if (transform1.autoHide && transform1.isVisible) {
+        transform1.visibilityTimer -= deltaTime;
+        if (transform1.visibilityTimer <= 0.0f) {
+            transform1.isVisible = false;
+            transform1.autoHide = false;
+        }
+    }
+
+    // Update feedbackEntity2 (box 2)
+    auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity2);
+    if (transform2.autoHide && transform2.isVisible) {
+        transform2.visibilityTimer -= deltaTime;
+        if (transform2.visibilityTimer <= 0.0f) {
+            transform2.isVisible = false;
+            transform2.autoHide = false;
         }
     }
 }
@@ -155,13 +162,13 @@ void InputManager::BroadcastInputEvent(const InputEvent& event) {
         // box 1
         auto& transform1 = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity);
         transform1.isVisible = true;
-        transform1.visibilityTimer = 0.5f;
+        transform1.visibilityTimer = 2.0f;
         transform1.autoHide = true;
 
         // box 2
         auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity2);
         transform2.isVisible = true;
-        transform2.visibilityTimer = 0.5f;
+        transform2.visibilityTimer = 2.0f;
         transform2.autoHide = true;
     }
 

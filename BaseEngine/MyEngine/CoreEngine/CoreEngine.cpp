@@ -205,11 +205,9 @@ void CoreEngine::Update(float dt)
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 
 	if (g_graphicsSystem) g_graphicsSystem->Update();
-	if (g_inputSystem) g_inputSystem->Update();
+	if (g_inputSystem) g_inputSystem->Update(dt);
 
 	g_coordinator->UpdateAllSystems(dt);
-
-	RenderDebugDraw();
 }
 
 
@@ -250,6 +248,8 @@ void CoreEngine::GameLoop()
         //glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
 
         //  6. ImGui rendering
+
+		RenderDebugDraw();
 
         //7. Swap Buffer(like two window)
         glfwSwapBuffers(window);
