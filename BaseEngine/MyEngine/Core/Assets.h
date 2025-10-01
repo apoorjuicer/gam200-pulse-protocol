@@ -18,7 +18,7 @@
 // -----------------------------------------------------------------------------
 struct NPC
 {
-    Vector2 pos;          // World position of the NPC (center point)
+    //Vector2 pos;          // World position of the NPC (center point)
     float width;          // Width of NPC hitbox
     float height;         // Height of NPC hitbox
 
@@ -35,7 +35,7 @@ struct NPC
     void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
         out.SetObject();
         rapidjson::Value posVal;
-        pos.Serialize(posVal, alloc);
+       // pos.Serialize(posVal, alloc);
         out.AddMember("pos", posVal, alloc);
 
         out.AddMember("width", width, alloc);
@@ -51,7 +51,7 @@ struct NPC
     void Deserialize(const rapidjson::Value& in) {
         if (!in.IsObject()) throw std::runtime_error("Invalid JSON for NPC");
 
-        if (in.HasMember("pos")) pos.Deserialize(in["pos"]);
+        //if (in.HasMember("pos")) pos.Deserialize(in["pos"]);
         if (in.HasMember("width")) width = in["width"].GetFloat();
         if (in.HasMember("height")) height = in["height"].GetFloat();
         if (in.HasMember("swordWidth")) swordWidth = in["swordWidth"].GetFloat();

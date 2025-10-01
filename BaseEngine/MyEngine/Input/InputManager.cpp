@@ -50,7 +50,7 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     auto* g_coordinator = Coordinator::GetInstance();
     Entity entity = g_coordinator->CreateEntity();
 
-   /* Framework::Transform feedbackTransform{};
+    /*Framework::Transform feedbackTransform{};
     feedbackTransform.Pos = { 100.0f, 250.0f };
     feedbackTransform.Scale = { 500.0f, 500.0f };
     feedbackTransform.mdl_ref = 1.0f;

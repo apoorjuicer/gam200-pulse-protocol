@@ -52,6 +52,7 @@
 #include "../MyEngine/Input/InputManager.h"
 #include "../MyEngine/Audio/audio.h"
 #include "../MyEngine/Graphics/GraphicsManager.h"
+#include "../MyEngine/Graphics/Transform.h"
 #include "../MyEngine/Physics/collision.h"
 #include "../MyEngine/CoreEngine/CoreEngine.h"
 #include <../MyEngine/Resources/ResourceManager.h>
