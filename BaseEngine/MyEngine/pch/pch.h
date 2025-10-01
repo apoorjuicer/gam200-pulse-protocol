@@ -40,6 +40,8 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h> // for StringBuffer
+#include <filesystem>
+
 
 // Suppress APIENTRY macro redefinition warning
 #pragma warning(push)
@@ -53,12 +55,13 @@
 #include "../MyEngine/Physics/collision.h"
 #include "../MyEngine/CoreEngine/CoreEngine.h"
 #include <../MyEngine/Resources/ResourceManager.h>
+#include "../MyEngine/Serialization/Serialization.h"
 
 // ECS
 #include "../MyEngine/Core/Types.h"
 #include "../MyEngine/Core/Window.h"
 #include "../MyEngine/Core/System.h"
-//#include "../MyEngine/Core/Assets.h"
+#include "../MyEngine/Core/Assets.h"
 #include "../MyEngine/Core/Singleton.h"
 #include "../MyEngine/Core/Coordinator.h"
 #include "../MyEngine/Core/SystemManager.h"

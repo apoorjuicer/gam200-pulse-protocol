@@ -38,6 +38,10 @@ const char WindowTitle[] = "Game Window";
 const int Game_Window_Height = 900;
 const int Game_Window_Width = 1600;
 
+Matrix3x3 beforeTranpose = {1.f,2.f,3.f,4.f,5.f,6.f,7.f,8.f,9.f};
+Matrix3x3 A{};
+
+
 // just concepts for game states, will be in GSM 
 struct GameStates {
     bool MainMenu = true;
@@ -110,6 +114,49 @@ int main() {
     //tr.currentFrame = 0;
     //tr.animationSpeed = 0.0f;        // static
 
+    std::string path = "../JSON/transform.json";
+
+    if (!Framework::SaveTransform(tr, path)) {
+        std::cerr << "Failed to save transform!\n";
+    }
+    else {
+        std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
+    }
+
+    Framework::Transform loaded;
+    if (!Framework::LoadTransform(loaded, path)) {
+        std::cerr << "Failed to load transform!\n";
+    }
+    else {
+        std::cout << "loaded from: " << std::filesystem::absolute(path) << "\n";
+    }
+    //to load into BaseEngine>MyEngine>JSON
+    //if (!Framework::SaveTransform(tr, "../../MyEngine/JSON/transform.json")) {
+    //    std::cerr << "Failed to save transform!\n";
+    //}
+
+    //Framework::Transform loaded;
+    //if (!Framework::LoadTransform(loaded, "../../MyEngine/JSON/transform.json")) {
+    //    std::cerr << "Failed to load transform!\n";
+    //}
+
+    // test it
+    std::cout << "Loaded Pos: " << loaded.Pos.x << ", " << loaded.Pos.y << "\n";
+
+    std::cout << "beforeTranpose: " << beforeTranpose;
+
+    std::cout << "after Transpose: " << beforeTranpose.GetTranspose();
+
+    beforeTranpose.SetToTranspose();
+    std::cout << "after Transpose : " << beforeTranpose;
+
+    A[0][0] = 2; A[0][1] = 3; A[0][2] = 4;
+    A[1][0] = 5; A[1][1] = 6; A[1][2] = 7;
+    A[2][0] = 8; A[2][1] = 9; A[2][2] = 10;
+
+    std::cout << "A : " << A;
+
+    std::cout << "Matrix multi : " << A*beforeTranpose;
 
     //tr.isVisible = false;
     //tr.autoHide = false;

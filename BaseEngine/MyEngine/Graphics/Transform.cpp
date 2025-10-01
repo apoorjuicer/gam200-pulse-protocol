@@ -112,7 +112,7 @@ namespace Framework
         out.AddMember("position", posVal, alloc);
         out.AddMember("scale", scaleVal, alloc);
         out.AddMember("rotation", rotVal, alloc);
-        out.AddMember("renderable", renderVal, alloc);
+        //out.AddMember("renderable", renderVal, alloc);
 
         //simple types
         out.AddMember("angle_disp", angle_disp, alloc);

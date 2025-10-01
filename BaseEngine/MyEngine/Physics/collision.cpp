@@ -41,6 +41,31 @@ void CollisionManager::Init()
             std::cout << "\n=== [Init] Hero Spawned at (400,300) ===\n";
         }
 
+        std::string hero_path = "../JSON/hero.json";
+        if (!SaveEntity(Hero, g_coordinator, hero_path)) {
+            std::cerr << "Failed to save hero_path!\n";
+        }
+        else {
+            std::cout << "Saved to: " << std::filesystem::absolute(hero_path) << "\n";
+        }
+
+
+        /**/
+        Entity new_load_hero = g_coordinator->CreateEntity();
+        g_coordinator->AddComponent<NPC>(new_load_hero, NPC{});
+        if (!LoadEntity(new_load_hero, g_coordinator, hero_path)) {
+            std::cerr << "Failed to load new_load_hero!\n";
+        }
+        else {
+            std::cout << "loaded from: " << std::filesystem::absolute(hero_path) << "\n";
+
+            auto& loaded_hero = g_coordinator->GetComponent<NPC>(new_load_hero);
+            std::cout << "NEWLY LOADED Hero HP = " << loaded_hero.hp << ", pos = ("
+                << loaded_hero.pos.x << ", " << loaded_hero.pos.y << ")\n";
+        }
+
+     
+
         // --- Monster NPC: spawns left or right ---
         float startX = SpawnLeftMonster ? 100.0f : 700.0f;
 
@@ -59,6 +84,14 @@ void CollisionManager::Init()
         {
             std::cout << "[Init] Monster spawned at x=" << startX << "\n";
             std::cout << "============================================\n\n";
+        }
+
+        std::string mons_path = "../JSON/monster.json";
+        if (!SaveEntity(Monster, g_coordinator, mons_path)) {
+            std::cerr << "Failed to save mons_path!\n";
+        }
+        else {
+            std::cout << "Saved to: " << std::filesystem::absolute(mons_path) << "\n";
         }
     }
     else
