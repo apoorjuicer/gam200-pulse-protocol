@@ -213,10 +213,10 @@ void CoreEngine::Update(float dt)
 	}
 
 
-	if (g_sceneSystem->GrabCurrentScene() == Scene::Pause)
+	/*if (g_sceneSystem->GrabCurrentScene() == Scene::Pause)
 	{
 		g_sceneSystem->LoadScene(Scene::MainMenu);
-	}
+	}*/
 
 	g_coordinator->UpdateAllSystems(dt);
 }
