@@ -12,7 +12,7 @@
 #include <fstream>
 #include <vector>
 #include <list>
-//#include "glhelper.h"
+#include "glhelper.h"
 #include "pch/pch.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -27,7 +27,7 @@ public:
     void update(GLFWwindow* window);
     void draw(std::set<Entity>);
     void cleanup();
-
+    GLuint LoadTexture(const std::string& filepath);
     void init_models_cont();
 
     GLuint vaoid; // handle to VAO

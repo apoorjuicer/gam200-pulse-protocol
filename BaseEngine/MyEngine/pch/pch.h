@@ -24,8 +24,8 @@
 #include <iomanip> //debug
 #include <algorithm>
 #include <random>
-#include <array>
-#include <sstream>
+#include <list>
+#include <filesystem>
 
 // Graphics Library Headers
 #include <GL/glew.h>
@@ -33,6 +33,13 @@
 #include <glm/glm.hpp>
 #include "Graphics/glhelper.h"
 #include "Graphics/glslshader.h"
+
+//Serialize
+#include <rapidjson/document.h>     // for Document, Value, AllocatorType
+//#include <rapidjson/writer.h>       // for Writer
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/stringbuffer.h> // for StringBuffer
 
 // Suppress APIENTRY macro redefinition warning
 #pragma warning(push)
@@ -42,7 +49,6 @@
 #include "../MyEngine/Math/math.h"
 #include "../MyEngine/Input/InputManager.h"
 #include "../MyEngine/Audio/audio.h"
-#include "../MyEngine/Math/math.h"
 #include "../MyEngine/Graphics/GraphicsManager.h"
 #include "../MyEngine/Physics/collision.h"
 #include "../MyEngine/CoreEngine/CoreEngine.h"
@@ -60,6 +66,11 @@
 #include "../MyEngine/Core/EntityManager.h"
 #include "../MyEngine/Core/ComponentArray.h"
 #include "../MyEngine/Core/ComponentManager.h"
+#include "../MyEngine/Core/Types.h"
 
+//Logging library
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 // Restore warning settings
 #pragma warning(pop)
