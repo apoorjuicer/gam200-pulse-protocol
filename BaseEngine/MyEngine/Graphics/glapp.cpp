@@ -200,9 +200,9 @@ void GLApp::update(GLFWwindow* window) {
         glfwSetWindowTitle(window, title.str().c_str());
     }
 
-    for (auto& x : transObj) {
+    /*for (auto& x : transObj) {
         x->update(GLHelper::delta_time);
-    }
+    }*/
 }
 
 void GLApp::updateAnimation(Framework::Transform& x) {
@@ -257,7 +257,7 @@ void GLApp::draw(std::set<Entity> entities) {
     glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
     glClearDepth(1.0f);
     //shdrpgms[0].Use();
-    transObj.clear();
+    //transObj.clear();
     auto* g_coordinator = Coordinator::GetInstance();
     //extern Coordinator g_coordinator;
     for (auto it : entities) // std::smthing smthing // Itererate through this list

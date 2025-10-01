@@ -4,14 +4,14 @@
 auto* g_coordinator = Coordinator::GetInstance();
 
 //Starting scene will be Main Menu
-SceneManager::SceneManager(): CurrentScene(Scene::MainMenu)
+SceneManager::SceneManager(): CurrentScene(Scene::Pause)
 {
 	
 }
 
 SceneManager::~SceneManager()
 {
-	UnloadCurrentScene();
+
 }
 
 void SceneManager::LoadScene(Scene scene)
@@ -88,20 +88,17 @@ void SceneManager::LoadMainMenu()
 #endif
 
 	Entity background = g_coordinator->CreateEntity();
-	AABB BackgroundComponent;
+	Framework::Transform BackgroundComponent;
 
 	// idk what to add here
-	BackgroundComponent.min.x = { 5 };
-	BackgroundComponent.max.y = { 5 };
+	BackgroundComponent.Scale = { 5 , 10 };
+	BackgroundComponent.Rotation =  { 5, 10} ;
+	BackgroundComponent.Pos= { 5,10 };
 	
-	//Framework::Transform BackgroundComponent;
-	// idk what to add here
-	//BackgroundComponent.Pos = {};
-	//BackgroundComponent.Scale = {};
-
 	g_coordinator->AddComponent(background, BackgroundComponent);
 	SceneEntityList.push_back(background);
 	
+
 	
 
 }
@@ -109,6 +106,11 @@ void SceneManager::LoadMainMenu()
 
 void SceneManager::LoadPause()
 {
+#ifdef _DEBUG
+	std::cout << "\n================================================" << std::endl;
+	std::cout << "           Paused menu loaded!" << std::endl;
+	std::cout << "================================================" << std::endl;
+#endif
 
 	Entity PauseButton = g_coordinator->CreateEntity();
 	Framework::Transform pause_button;
@@ -119,15 +121,13 @@ void SceneManager::LoadPause()
 
 	g_coordinator->AddComponent(PauseButton, pause_button);
 	SceneEntityList.push_back(PauseButton);
+	
 
 }
 
 void SceneManager::LoadLevel1()
 {
-	/*for (size_t i = 0; i <= SceneEntityList.size(); ++i)
-	{
-
-	}*/
+	
 }
 
 void SceneManager::LoadDead()

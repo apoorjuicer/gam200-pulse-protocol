@@ -5,7 +5,7 @@
 
 enum struct Scene { MainMenu, Pause, Level1, Dead };
 
-class SceneManager: public Singleton<SceneManager>
+class SceneManager: public Systems
 {
 public:
 	SceneManager();

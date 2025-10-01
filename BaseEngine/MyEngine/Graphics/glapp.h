@@ -19,7 +19,7 @@
 #include <algorithm>
 // External transforms list (used elsewhere)   
 namespace Framework { class Transform; }
-extern std::list<Framework::Transform*> transObj; // transforms  
+//extern std::list<Framework::Transform*> transObj; // transforms  
 
 class GLApp {
 public:

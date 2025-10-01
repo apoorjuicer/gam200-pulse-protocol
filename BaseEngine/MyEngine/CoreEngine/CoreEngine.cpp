@@ -151,7 +151,6 @@ void CoreEngine::Init()
 
     GameRunning = true;
 
-	SceneManager::GetInstance()->LoadScene(Scene::MainMenu);
 }
 
 void CoreEngine::Setup()
@@ -171,7 +170,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
     g_coordinator->RegisterSystem<CollisionManager>();
-
+	g_coordinator->RegisterSystem<SceneManager>();
 
 
     // Set signature for component and system
@@ -187,6 +186,12 @@ void CoreEngine::Setup()
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
 	g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
+
+	Signature sceneSig;
+	sceneSig.set(g_coordinator->GetComponentType<NPC>());
+	sceneSig.set(g_coordinator->GetComponentType<AABB>());
+	sceneSig.set(g_coordinator->GetComponentType<Framework::Transform>());  
+	g_coordinator->SetSystemSignature<GraphicsManager>(sceneSig);
 }
 
 void CoreEngine::Update(float dt)
@@ -195,6 +200,7 @@ void CoreEngine::Update(float dt)
 	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
+	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
 
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Update();
@@ -206,17 +212,10 @@ void CoreEngine::Update(float dt)
 		//g_audioSystem->Update();  
 	}
 
-	bool pressedalr = false;
-	int keyState = glfwGetKey(window, GLFW_KEY_M);
-	bool keypressed = (keyState == GLFW_PRESS);
-	if (keypressed && !pressedalr)
-	{
-		auto* coord = SceneManager::GetInstance();
-		if (coord->GrabCurrentScene() == Scene::MainMenu)
-		{
-			coord->LoadScene(Scene::Pause);
-		}
 
+	if (g_sceneSystem->GrabCurrentScene() == Scene::Pause)
+	{
+		g_sceneSystem->LoadScene(Scene::MainMenu);
 	}
 
 	g_coordinator->UpdateAllSystems(dt);

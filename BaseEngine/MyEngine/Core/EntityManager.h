@@ -58,6 +58,9 @@ public:
 		return SignatureID[entity];
 	}
 
+
+	// make a function for ben that returns EntityList, link with coordinator cos its not in the ecs. aka not inherite ECS
+
 private:
 	std::deque<Entity> EntityList{}; //EntityList[i]
 	std::array<Signature, MaxEntity> SignatureID{};
