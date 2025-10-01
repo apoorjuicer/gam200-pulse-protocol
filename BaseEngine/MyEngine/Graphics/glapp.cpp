@@ -192,12 +192,12 @@ void GLApp::update(GLFWwindow* window,std::set<Entity> entity) {
     //    }
     //    GLHelper::keystateP = GL_FALSE;
     //}
-
-
+    GLHelper::update_time(1.0); // updates delta_time and fps
     if (window) 
     {
         std::ostringstream title;
-        title << "Game Window - FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
+        title << "Game Window - FPS: " << std::fixed << std::setprecision(1) 
+              << GLHelper::fps;
         glfwSetWindowTitle(window, title.str().c_str());
     }
      //update(GLHelper::delta_time, entity);
