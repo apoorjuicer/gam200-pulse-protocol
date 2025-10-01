@@ -213,70 +213,70 @@ namespace Framework {
     //    }
     //}
 
-    void AssetsManager::CreateTransformsFromTextures(bool overwriteExisting) {
-        // Build a quick set of existing names/ids to avoid duplicates
-        std::unordered_set<std::string> existingNames;
-        std::unordered_set<GLuint> existingIDs;
-        existingNames.reserve(transObj.size());
-        existingIDs.reserve(transObj.size());
+    //void AssetsManager::CreateTransformsFromTextures(bool overwriteExisting) {
+    //    // Build a quick set of existing names/ids to avoid duplicates
+    //    std::unordered_set<std::string> existingNames;
+    //    std::unordered_set<GLuint> existingIDs;
+    //    existingNames.reserve(transObj.size());
+    //    existingIDs.reserve(transObj.size());
 
-        for (auto* t : transObj) {
-            if (!t) continue;
-            existingNames.insert(t->spriteName);
-            existingIDs.insert(t->textureID);
-        }
+    //    for (auto* t : transObj) {
+    //        if (!t) continue;
+    //        existingNames.insert(t->spriteName);
+    //        existingIDs.insert(t->textureID);
+    //    }
 
-        for (const auto& [key, td] : textureMap) {
-            const std::string& name = td.textureName;
-            const GLuint id = td.textureID;
+    //    for (const auto& [key, td] : textureMap) {
+    //        const std::string& name = td.textureName;
+    //        const GLuint id = td.textureID;
 
-            // If a transform with the same name already exists
-            if (!overwriteExisting && (existingNames.count(name) || existingIDs.count(id))) {
-                // If you want to *update* existing ones when overwriteExisting=true:
-                if (overwriteExisting) {
-                    for (auto* t : transObj) {
-                        if (!t) continue;
-                        if (t->spriteName == name || t->textureID == id) {
-                            t->spriteName = name;     // keep name consistent
-                            t->textureID = id;       // update to current texture ID
-                            // Optional if you store grids in TextureData:
-                            // t->columns = td.col;
-                            // t->rows    = td.row;
-                        }
-                    }
-                }
-                continue;
-            }
+    //        // If a transform with the same name already exists
+    //        if (!overwriteExisting && (existingNames.count(name) || existingIDs.count(id))) {
+    //            // If you want to *update* existing ones when overwriteExisting=true:
+    //            if (overwriteExisting) {
+    //                for (auto* t : transObj) {
+    //                    if (!t) continue;
+    //                    if (t->spriteName == name || t->textureID == id) {
+    //                        t->spriteName = name;     // keep name consistent
+    //                        t->textureID = id;       // update to current texture ID
+    //                        // Optional if you store grids in TextureData:
+    //                        // t->columns = td.col;
+    //                        // t->rows    = td.row;
+    //                    }
+    //                }
+    //            }
+    //            continue;
+    //        }
 
-            // Create a new Transform for this texture
-            auto* t = new Transform();        // make sure this matches your ctor
-            t->spriteName = name;
-            t->textureID = id;
-            // Optional defaults (uncomment if you have these fields/methods):
-            // t->SetActive(true);
-            // t->columns = td.col;
-            // t->rows    = td.row;
-            // t->position = {0.0f, 0.0f};  // or any default you like
+    //        // Create a new Transform for this texture
+    //        auto* t = new Transform();        // make sure this matches your ctor
+    //        t->spriteName = name;
+    //        t->textureID = id;
+    //        // Optional defaults (uncomment if you have these fields/methods):
+    //        // t->SetActive(true);
+    //        // t->columns = td.col;
+    //        // t->rows    = td.row;
+    //        // t->position = {0.0f, 0.0f};  // or any default you like
 
-            transObj.push_back(t);
-            existingNames.insert(name);
-            existingIDs.insert(id);
+    //        transObj.push_back(t);
+    //        existingNames.insert(name);
+    //        existingIDs.insert(id);
 
-            std::cout << "[Image] Created Transform for '"
-                << name << "' (ID: " << id << ")\n";
-        }
-    }
+    //        std::cout << "[Image] Created Transform for '"
+    //            << name << "' (ID: " << id << ")\n";
+    //    }
+    //}
 
-    void AssetsManager::DestroyAllTransforms()
-    {
-        for (auto* t : transObj)
-        {
-            delete t;   // free each Transform
-        }
-        transObj.clear();
+    //void AssetsManager::DestroyAllTransforms()
+    //{
+    //    for (auto* t : transObj)
+    //    {
+    //        delete t;   // free each Transform
+    //    }
+    //    transObj.clear();
 
-        std::cout << "[Cleanup] All transforms destroyed\n";
-    }
+    //    std::cout << "[Cleanup] All transforms destroyed\n";
+    //}
 
     
     void AssetsManager::UnloadAllImage() {

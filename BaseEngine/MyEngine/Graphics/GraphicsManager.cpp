@@ -118,21 +118,19 @@ GraphicsManager::~GraphicsManager()
 
 void GraphicsManager::Update()
 {
-    // Test text
-    RenderText(GLApp::shdrpgms[3], "HELLO", 400.0f, 300.0f, 5.0f, glm::vec3(1, 1, 1), Characters);
-    RenderText(GLApp::shdrpgms[3], "RightClickMe", 400.0f, 300.0f, 1.0f, glm::vec3(0.5f, 0.0f, 0.0f), Characters2);
-	//std::cout << "[GraphicsManager] UPDATED." << std::endl;
-	glfwPollEvents();
-	GLHelper::update_time(1.0);
-	glapp->update(Engine->GetWindow(),EntityMember);
-	glapp->draw(EntityMember);
+    glfwPollEvents();
+    GLHelper::update_time(1.0);
+    glapp->update(Engine->GetWindow(), EntityMember);
+    glapp->draw(EntityMember);                     // 1) draw your scene first
 
+    // 2) then draw text on top
+    RenderText(GLApp::shdrpgms[3], "HELLO", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
+    RenderText(GLApp::shdrpgms[3], "Testing123", 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
 }
 
 void GraphicsManager::Shutdown()
 {
     Framework::AssetsManager::Instance().UnloadAllImage();
-    transObj.clear();
     glapp->cleanup();
     delete glapp;
 

@@ -47,21 +47,6 @@ if (NOT DEFINED FMOD_API_DIR_FOUND)
   if(NOT FMOD_API_DIR_FOUND)
     message(FATAL_ERROR "FMOD_API folder not found. Set -DFMOD_API_DIR=PATH (must contain api/core/lib/x64).")
   endif()
-target_compile_definitions(MyEngine PRIVATE
-  ASSETS_DIR="${CMAKE_SOURCE_DIR}/MyEngine/Assets"
-)
-
-# Add FMOD libraries based on build type
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_libraries(${ENGINE_NAME} PUBLIC 
-        ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/core/lib/x64/fmodL_vc.lib
-        ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/studio/lib/x64/fmodstudioL_vc.lib
-    )
-else() # Release or other build types
-    target_link_libraries(${ENGINE_NAME} PUBLIC 
-        ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/core/lib/x64/fmod_vc.lib
-        ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/studio/lib/x64/fmodstudio_vc.lib
-    )
 endif()
 message(STATUS "Using FMOD at: ${FMOD_API_DIR_FOUND}")
 

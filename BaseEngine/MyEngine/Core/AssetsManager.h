@@ -60,12 +60,11 @@ namespace Framework {
         void loadImage(const char* filepath /*,int frames*/);
         void UnloadAllImage();
 
-        void CreateTransformsFromTextures(bool overwriteExisting = false);
+        /*void CreateTransformsFromTextures(bool overwriteExisting = false);*/
 
         //void TextureAssignment();
-        const TextureData* getTextureData(const char* filepath) const;
         const TextureData* getTextureDataByName(const std::string& textureName) const;
-        void DestroyAllTransforms();
+        /*void DestroyAllTransforms();*/
 
         // ---------- Getters ----------
         const std::unordered_map<std::string, FMOD::Sound*>& GetSoundMap() const {

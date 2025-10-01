@@ -60,6 +60,20 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
 
     g_coordinator->AddComponent(entity, feedbackTransform);
     SetFeedbackEntity(entity);
+
+
+    Entity entity2 = g_coordinator->CreateEntity();
+
+    Framework::Transform feedbackTransform2{};
+    feedbackTransform2.Pos = { 0.0f, 0.0f };
+    feedbackTransform2.Scale = { 500.0f, 500.0f };
+    feedbackTransform2.mdl_ref = 1.0f;
+    feedbackTransform2.shd_ref = 3.0f;
+    feedbackTransform2.isVisible = true;
+    feedbackTransform2.currentFrame = 1;
+
+    g_coordinator->AddComponent(entity2, feedbackTransform2);
+    feedbackEntuty2 = entity2;
 }
 
 void InputManager::Update() {
@@ -81,7 +95,27 @@ void InputManager::Update() {
                 transform.autoHide = false;
             }
         }
+
     }
+
+    for (auto& entity2 : EntityMember)
+    {
+        auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(entity2);
+
+        if (transform2.autoHide && transform2.isVisible) {
+            float dt = 0.016f;
+            transform2.visibilityTimer -= dt;
+            if (transform2.visibilityTimer <= 0.0f) {
+                transform2.isVisible = false;
+                transform2.autoHide = false;
+            }
+        }
+
+    }
+
+
+
+
 }
 
 void InputManager::Shutdown() {
