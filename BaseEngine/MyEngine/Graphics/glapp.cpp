@@ -111,7 +111,7 @@ GLuint GLApp::LoadTexture(const std::string& filepath) {
 }
 
 void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
-    textureID = LoadTexture("../../MyEngine/Assets/hero.jpg");
+    textureID = LoadTexture("../../MyEngine/Assets/hero.png");
     // Use local inputEditorWidth and inputEditorHeight values for calculations.
     GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth)),
         h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
@@ -200,10 +200,9 @@ void GLApp::update(GLFWwindow* window,std::set<Entity> entity) {
         title << "Game Window - FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
         glfwSetWindowTitle(window, title.str().c_str());
     }
-
-    
-     
-     //update(GLHelper::delta_time);
+     //update(GLHelper::delta_time, entity);
+    Framework::Transform transformSystem;
+    transformSystem.update(GLHelper::delta_time, entity);
     
 }
 
@@ -221,6 +220,7 @@ void GLApp::updateAnimation(Framework::Transform& x) {
 }
 
 void GLApp::drawTrans(Framework::Transform& x) {
+    
     auto& shader = shdrpgms[static_cast<uint64_t>(x.shd_ref)];
     shader.Use();
     GLuint prog = shader.GetHandle();
@@ -242,7 +242,6 @@ void GLApp::drawTrans(Framework::Transform& x) {
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, x.textureID);
-
     glDrawElements(models[static_cast<uint64_t>(x.mdl_ref)].primitive_type,
         models[static_cast<uint64_t>(x.mdl_ref)].draw_cnt,
         GL_UNSIGNED_SHORT, nullptr);
@@ -271,7 +270,7 @@ void GLApp::draw(std::set<Entity> entities) {
             if (tr.textureID == 0) tr.textureID = textureID;
             if (tr.isVisible) {
                 updateAnimation(tr);
-                glBindTexture(GL_TEXTURE_2D, tr.textureID); 
+                //glBindTexture(GL_TEXTURE_2D, tr.textureID); 
                 drawTrans(tr);
             }
     }

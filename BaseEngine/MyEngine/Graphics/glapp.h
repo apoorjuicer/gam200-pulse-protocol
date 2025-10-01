@@ -9,14 +9,11 @@
 #pragma once
 #ifndef GLAPP_H
 #define GLAPP_H
-#include <fstream>
-#include <vector>
-#include <list>
 #include "glhelper.h"
 #include "pch/pch.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <algorithm>
+#include "Transform.h"
 // External transforms list (used elsewhere)   
 namespace Framework { class Transform; }
 //extern std::list<Framework::Transform*> transObj; // transforms  
