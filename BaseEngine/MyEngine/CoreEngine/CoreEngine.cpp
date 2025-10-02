@@ -1,7 +1,5 @@
 #include <windows.h>   // for OutputDebugString, etc.
 #include "pch/pch.h"
-#include "Core/Log.h"
-#include <GLFW/glfw3.h>
 #pragma comment(lib, "winmm.lib")
 
 //Coordinator g_coordinator;
@@ -152,6 +150,7 @@ void CoreEngine::Init()
     std::cout << "Close window to exit testing" << std::endl;
 
     GameRunning = true;
+
 }
 
 void CoreEngine::Setup()
@@ -171,7 +170,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
     g_coordinator->RegisterSystem<CollisionManager>();
-
+	g_coordinator->RegisterSystem<SceneManager>();
 
 
     // Set signature for component and system
@@ -187,6 +186,12 @@ void CoreEngine::Setup()
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
 	g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
+
+	Signature sceneSig;
+	sceneSig.set(g_coordinator->GetComponentType<NPC>());
+	sceneSig.set(g_coordinator->GetComponentType<AABB>());
+	sceneSig.set(g_coordinator->GetComponentType<Framework::Transform>());  
+	g_coordinator->SetSystemSignature<GraphicsManager>(sceneSig);
 }
 
 void CoreEngine::Update(float dt)
@@ -195,6 +200,7 @@ void CoreEngine::Update(float dt)
 	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
+	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
 
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Update();
@@ -204,9 +210,13 @@ void CoreEngine::Update(float dt)
 		// Update input system
 		g_inputSystem->Update();
 		//g_audioSystem->Update();  
-
 	}
-	
+
+
+	if (g_sceneSystem->GrabCurrentScene() == Scene::Pause)
+	{
+		g_sceneSystem->LoadScene(Scene::MainMenu);
+	}
 
 	g_coordinator->UpdateAllSystems(dt);
 }
@@ -224,8 +234,6 @@ void CoreEngine::GameLoop()
     bool testBoxLineCollision = false; //true = boxline collision, false = monsterplayer
 
 	// application loop 
-	static bool keystateP = false;
-	static bool PKeyWasPressed = false;
 	while(!glfwWindowShouldClose(window) && GameRunning)
 	{
 		//Get the current time in milliseconds
@@ -238,44 +246,6 @@ void CoreEngine::GameLoop()
 
         //  1. Poll event(input key)
         glfwPollEvents();
-		// Read key state
-		bool PKeyPressed = (glfwGetKey(Engine->GetWindow(), GLFW_KEY_P) == GLFW_PRESS);
-
-		// Toggle on key press
-		if (PKeyPressed && !PKeyWasPressed) {
-			keystateP = !keystateP;
-			if (keystateP)
-				GAM200_INFO("Crash Test ENABLED (press P again to disable).");
-			else
-				GAM200_INFO("Crash Test DISABLED.");
-		}
-		PKeyWasPressed = PKeyPressed;
-
-
-		// ----------------- Execute crash test if toggle is ON -----------------
-		if (keystateP)
-		{
-			try
-			{
-				GAM200_CORE_INFO("Starting crash test triggered by P key...");
-
-				int a = 5;
-				int b = 0;
-				if (b == 0)
-					GAM200_CRITICAL("Test crash: Division by zero detected!"); // logs to CrashLog.txt
-
-				int c = a / b; // won't execute
-				(void)c;
-
-			}
-			catch (const std::exception& e)
-			{
-				GAM200_CORE_ERROR("Exception caught during crash test: {0}", e.what());
-			}
-
-			// Reset toggle to prevent repeat execution
-			//keystateP = false;
-		}
 
         //  2. update engine cpp
         Update(dt);
@@ -331,11 +301,6 @@ void CoreEngine::Exit()
 }
 
 
-//void BroadcastMessage(){}
-
-
-
-
 
 
 // STILL BUILDING IM SORRY ;-;
@@ -382,9 +347,6 @@ void CoreEngine::Exit()
 //        window_swap_buffers();
 //    }
 //}
-
-
-
 //
 //class Settings {};
 //class Preferences {};
@@ -422,8 +384,6 @@ void CoreEngine::Exit()
 //
 //    Engine() : systems(settings) {};
 //};
-
-
 // ECS setup
 //g_coordinator->init();
 //g_coordinator->RegisterComponent<Player>();

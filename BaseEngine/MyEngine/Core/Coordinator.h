@@ -107,11 +107,18 @@ public:
 
 	template<typename T>
 	bool HasComponent(Entity entity) const {
+		
+		// get entities component bit
 		auto sig = CoordEnitiyManager->GetSignature(entity);
+		
+		// get bit position of this component
 		auto type = CoordComponentManager->GetComponentType<T>();
+		
+		// check if bit is 1(true)
 		return sig.test(type);
 	}
 
+	// check if this entity has this component, if not the nullptr, if have, give component
 	template<typename T>
 	T* TryGetComponent(Entity entity) {
 		if (!HasComponent<T>(entity)) return nullptr;

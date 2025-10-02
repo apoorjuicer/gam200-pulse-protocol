@@ -9,6 +9,7 @@ public:
 	{
 		for (Entity entity = 0; entity < MaxEntity; ++entity)
 		{
+			// Just an queue of Entity ID(int)
 			EntityList.push_back(entity);
 		}
 	}
@@ -56,6 +57,9 @@ public:
 		// give entity systems bit signature
 		return SignatureID[entity];
 	}
+
+
+	// make a function for ben that returns EntityList, link with coordinator cos its not in the ecs. aka not inherite ECS
 
 private:
 	std::deque<Entity> EntityList{}; //EntityList[i]

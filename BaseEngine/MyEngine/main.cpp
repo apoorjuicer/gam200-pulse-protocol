@@ -20,14 +20,12 @@
 #include "Core/Coordinator.h"
 #include "pch/pch.h"
 #include "Core/Assets.h"
-#include "Core/Log.h" // <-- include your logging system
-#include <GLFW/glfw3.h>
 
-// ----------------- Memory leak detection for DEBUG -----------------
 #if (_DEBUG)
-#define _CRTDBG_MAP_ALLOC
+// MEM LEAKS LIBRARIES (See _CrtMemCheckpoint for examples to check for mem leaks)
+#define _CRTDBG_MAP_ALLOC //to get more details
 #include <cstdlib>  
-#include <crtdbg.h>
+#include <crtdbg.h>   //for malloc and free
 static _CrtMemState sOld;
 static _CrtMemState sNew;
 static _CrtMemState sDiff;
@@ -46,7 +44,7 @@ Matrix3x3 A{};
 struct GameStates {
     bool MainMenu = true;
     bool IsRunning = false;
-    bool IsPaused = false;
+    bool IsPaused = false;  
     bool GameOver = false;
 
     //libs that are good to use.
@@ -62,33 +60,21 @@ struct GameStates {
 } gamestate;
 
 CoreEngine* Engine = nullptr;
-
-// ----------------- Toggle key for crash test -----------------
-static std::string KeyToString(int key) {
-    switch (key) {
-    case GLFW_KEY_W: return "W";
-    case GLFW_KEY_A: return "A";
-    case GLFW_KEY_S: return "S";
-    case GLFW_KEY_D: return "D";
-    case GLFW_KEY_P: return "P";
-    default: return std::to_string(key);
-    }
-}
+//InputManager* g_inputSystem = nullptr;
+//GraphicsManager* g_graphicsSystem = nullptr;
 
 int main() {
 #ifdef _DEBUG
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    // ----------------- Initialize Logging System -----------------
-    GAM200graphics::Log::Init();
-    GAM200_CORE_INFO("Core Logger Initialized.");
-    GAM200_INFO("Client Logger Initialized.");
-
-    // ----------------- Create the Engine instance -----------------
+    // Create the Engine instance
     Engine = new CoreEngine();
 
     Engine->Setup();
+    // If CoreEngine::Init() also calls glewInit() or GraphicsManager->Initialize(),
+    // REMOVE those calls from CoreEngine::Init() or call Engine.Init() *here* only
+    // for non-GL things:
     Engine->Init(); // <-- only if it does NOT touch OpenGL
 
 
@@ -168,13 +154,8 @@ int main() {
     //int entity = g_coordinator->CreateEntity();
     //g_coordinator->AddComponent(entity, tr);  // <-- add Transform
 
-    // ----------------- Main Game Loop -----------------
-    while (!glfwWindowShouldClose(Engine->GetWindow()))
-    {
-        glfwPollEvents();
-        
-        Engine->GameLoop(); // normal engine loop
-    }
+    // this is where the update() is 
+    Engine->GameLoop();
 
     Engine->Exit();
 
@@ -183,9 +164,8 @@ int main() {
     Engine = nullptr;
 
 #if 0
-    // ----------------- Memory leak check -----------------
-    _CrtMemCheckpoint(&sNew);
-    if (_CrtMemDifference(&sDiff, &sOld, &sNew))
+    _CrtMemCheckpoint(&sNew); //take a snapshot (lock in the memory use again and now we compare :3)
+    if (_CrtMemDifference(&sDiff, &sOld, &sNew)) // if there is a difference
     {
         OutputDebugString("-----------_CrtMemDumpStatistics ---------\n");
         _CrtMemDumpStatistics(&sDiff);

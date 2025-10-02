@@ -52,7 +52,7 @@ namespace Framework
         ~Transform();
 
         virtual void Initialize();
-        void update(GLdouble delta_time);
+        void update(GLdouble delta_time, const std::set<Entity> entity);
         void draw() const;
 
         void SetSprite(std::string ref);
