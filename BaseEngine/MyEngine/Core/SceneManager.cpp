@@ -4,7 +4,7 @@
 auto* g_coordinator = Coordinator::GetInstance();
 
 //Starting scene will be Main Menu
-SceneManager::SceneManager(): CurrentScene(Scene::Level1)
+SceneManager::SceneManager(): CurrentScene(Scene::Pause)
 {
 	
 }

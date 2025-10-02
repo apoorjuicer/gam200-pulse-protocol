@@ -1,5 +1,6 @@
 #include <windows.h>   // for OutputDebugString, etc.
 #include "pch/pch.h"
+#include "Core/Log.h"
 #pragma comment(lib, "winmm.lib")
 
 //Coordinator g_coordinator;
@@ -79,26 +80,26 @@ void CoreEngine::Init()
 		return;
 	}
 
-	// --- Logging Setup ---
-	try {
-		auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-		auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-			"logs/engine.log", 1024 * 1024 * 5, 3);
-		// 5 MB max per file, keep 3 backups
+	//// --- Logging Setup ---
+	//try {
+	//	auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+	//	auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+	//		"logs/engine.log", 1024 * 1024 * 5, 3);
+	//	// 5 MB max per file, keep 3 backups
 
-		std::vector<spdlog::sink_ptr> sinks{ console_sink, file_sink };
-		auto logger = std::make_shared<spdlog::logger>("multi_sink", sinks.begin(), sinks.end());
-		spdlog::set_default_logger(logger);
+	//	std::vector<spdlog::sink_ptr> sinks{ console_sink, file_sink };
+	//	auto logger = std::make_shared<spdlog::logger>("multi_sink", sinks.begin(), sinks.end());
+	//	spdlog::set_default_logger(logger);
 
-		spdlog::set_level(spdlog::level::debug); // debug/info/warn/error
-		spdlog::flush_on(spdlog::level::info);
+	//	spdlog::set_level(spdlog::level::debug); // debug/info/warn/error
+	//	spdlog::flush_on(spdlog::level::info);
 
-		spdlog::info("=== Engine Logging Initialized ===");
-	}
-	catch (const spdlog::spdlog_ex& ex) {
-		std::cerr << "Log init failed: " << ex.what() << std::endl;
-	}
-	// ----------------------
+	//	spdlog::info("=== Engine Logging Initialized ===");
+	//}
+	//catch (const spdlog::spdlog_ex& ex) {
+	//	std::cerr << "Log init failed: " << ex.what() << std::endl;
+	//}
+	//// ----------------------
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
@@ -236,6 +237,8 @@ void CoreEngine::GameLoop()
     bool testBoxLineCollision = false; //true = boxline collision, false = monsterplayer
 
 	// application loop 
+	static bool keystateP = false;
+	static bool PKeyWasPressed = false;
 	while(!glfwWindowShouldClose(window) && GameRunning)
 	{
 		//Get the current time in milliseconds
@@ -248,7 +251,44 @@ void CoreEngine::GameLoop()
 
         //  1. Poll event(input key)
         glfwPollEvents();
+		// Read key state
+		bool PKeyPressed = (glfwGetKey(Engine->GetWindow(), GLFW_KEY_P) == GLFW_PRESS);
 
+		// Toggle on key press
+		if (PKeyPressed && !PKeyWasPressed) {
+			keystateP = !keystateP;
+			if (keystateP)
+				GAM200_INFO("Crash Test ENABLED (press P again to disable).");
+			else
+				GAM200_INFO("Crash Test DISABLED.");
+		}
+		PKeyWasPressed = PKeyPressed;
+
+
+		// ----------------- Execute crash test if toggle is ON -----------------
+		if (keystateP)
+		{
+			try
+			{
+				GAM200_CORE_INFO("Starting crash test triggered by P key...");
+
+				int a = 5;
+				int b = 0;
+				if (b == 0)
+					GAM200_CRITICAL("Test crash: Division by zero detected!"); // logs to CrashLog.txt
+
+				int c = a / b; // won't execute
+				(void)c;
+
+			}
+			catch (const std::exception& e)
+			{
+				GAM200_CORE_ERROR("Exception caught during crash test: {0}", e.what());
+			}
+
+			// Reset toggle to prevent repeat execution
+			//keystateP = false;
+		}
         //  2. update engine cpp
         Update(dt);
 

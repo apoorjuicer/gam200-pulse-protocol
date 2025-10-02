@@ -15,6 +15,7 @@ static std::string KeyToString(int key) {
     case GLFW_KEY_A: return "A";
     case GLFW_KEY_S: return "S";
     case GLFW_KEY_D: return "D";
+    case GLFW_KEY_Z: return "Z";
     default: return std::to_string(key);
     }
 }
@@ -207,6 +208,13 @@ void InputManager::ProcessRhythmInputs() {
                 BroadcastInputEvent(rhythmEvent);
             }
         }
+    }
+    
+    // Handle Z key for object visibility toggle
+    if (IsKeyJustPressed(GLFW_KEY_Z)) {
+        // Declare the function as extern to avoid linking issues
+        extern void ToggleObjectVisibility();
+        ToggleObjectVisibility();
     }
 }
 
