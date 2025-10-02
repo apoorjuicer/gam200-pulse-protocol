@@ -1,11 +1,18 @@
-// ==================================================================================
-// main.cpp
-// Authors: Team Bloop - Rachael (Window Setup), Chloe Lau Rey En (Input System)
-//          Pin Kai, Benjamin, Reginald, Carrie, Fenny, Jun Yong (TBA)
-// Brief: Main application entry point for custom game engine. Currently demonstrates
-//        window creation and input system for M1 milestone. Additional systems
-//        will be integrated as team completes their respective components.
-// ==================================================================================
+/******************************************************************************/
+/**
+ * @file       main.cpp
+ * @project    Pulse Protocol
+ * @author     Team Bloop - Chia Wei Xuan Rachael (Engine Architecture), Chloe Lau Rey En (Input System)
+ *             Pin Kai, Benjamin, Reginald, Carrie, Fenny, Jun Yong
+ * @brief      Main entry point for the Pulse Protocol engine. Initializes
+ *             memory leak detection, logging system, core engine subsystems,
+ *             and ImGui editor. Creates render objects for testing, manages
+ *             the game loop execution, and handles proper cleanup and shutdown
+ * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #if defined(_WIN32)
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -176,39 +183,6 @@ int main() {
     
     // Create 2500 objects for rendering
     CreateRenderObjects(2500);
-
-/*    Framework::Transform tr{};   */         // fill in fields as your renderer expects
-    // e.g. tr.mdl_ref = 1; tr.shd_ref = 1; tr.rows = ...; tr.columns = ...; tr.textureID = ...
-    // After registering components (including Framework::Transform) and creating the entity:
-
-    // where to draw (your update() normalizes by 1600x900)
-    //tr.Pos = { 1800.0f, 450.0f };   // center of a 1600x900 �virtual� screen
-    //tr.Scale = { 128.0f, 128.0f };   // size in pixels in that same space
-    //tr.angle_disp = 0.0f;           // degrees
-    //tr.angle_speed = 0.0f;           // no rotation
-
-    //// model & shader indices (you push models: 0=bg, 1=box; shaders: 0=test,1=bg,2=sprite,3=font)
-    //tr.mdl_ref = 0.0f;               // bg_model()
-    //tr.shd_ref = 0.0f;               // test shader
-    //// NOTE: In drawTrans() you currently check `if (x.shd_ref == 1)` before grabbing uniforms.
-    //// Either change that `1` to `2`, or set `tr.shd_ref = 1` if your bg shader has those uniforms.
-
-    //// sprite-sheet / animation
-    //tr.rows = 1;
-    //tr.columns = 1;
-    //tr.currentFrame = 0;
-    //tr.animationSpeed = 0.0f;        // static
-
-
-    //tr.isVisible = false;
-    //tr.autoHide = false;
-    //tr.visibilityTimer = 0.0f;
-
-    //// a valid GL texture id. Use your loader or 0 if you just want a colored quad.
-    ////tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
-    //auto* g_coordinator = Coordinator::GetInstance();
-    //int entity = g_coordinator->CreateEntity();
-    //g_coordinator->AddComponent(entity, tr);  // <-- add Transform
 
     // this is where the update() is 
     Engine->GameLoop();

@@ -1,3 +1,18 @@
+/******************************************************************************/
+/**
+ * @file       EntityManager.h
+ * @project    Pulse Protocol
+ * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @brief      Manages entity lifecycle and component signatures in the ECS
+ *             architecture. Maintains a pool of reusable entity IDs using a
+ *             queue-based allocation system, tracks live entity count, and
+ *             stores component signature bitsets for each entity to enable
+ *             efficient system-entity matching
+ * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 #include "pch/pch.h"
 

@@ -1,3 +1,21 @@
+/******************************************************************************/
+/**
+ * @file       CoreEngine.cpp
+ * @project    Pulse Protocol
+ * @author     Chia Wei Xuan Rachael (primary) - 50%
+ * @author     Chloe, Ben, Reginald, Pin Kai, Jun Yong (secondary) - 10% each
+ * @brief      Implementation of the core engine class that initializes all
+ *             engine subsystems (graphics, input, audio, physics), manages
+ *             the main game loop with delta time calculation, handles system
+ *             updates, integrates ImGui editor support, and provides debug
+ *             rendering utilities for development visualization
+ * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
+
+
 #include <windows.h>   // for OutputDebugString, etc.
 #include "pch/pch.h"
 #include "graphics/stb_image.h"
@@ -15,52 +33,52 @@ const char WindowTitle[] = "Game Window";
  int WindowWidth;
  int WindowHeight;
 
-void APIENTRY glDebugOutput(GLenum source,
-	GLenum type,
-	unsigned int id,
-	GLenum severity,
-	GLsizei length,
-	const char* message,
-	const void* userParam)
-{
-	// ignore non-significant error/warning codes
-	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
-
-	std::cout << "---------------" << std::endl;
-	std::cout << "Debug message (" << id << "): " << message << std::endl;
-
-	switch (source)
-	{
-	case GL_DEBUG_SOURCE_API:             std::cout << "Source: API"; break;
-	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   std::cout << "Source: Window System"; break;
-	case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cout << "Source: Shader Compiler"; break;
-	case GL_DEBUG_SOURCE_THIRD_PARTY:     std::cout << "Source: Third Party"; break;
-	case GL_DEBUG_SOURCE_APPLICATION:     std::cout << "Source: Application"; break;
-	case GL_DEBUG_SOURCE_OTHER:           std::cout << "Source: Other"; break;
-	} std::cout << std::endl;
-
-	switch (type)
-	{
-	case GL_DEBUG_TYPE_ERROR:               std::cout << "Type: Error"; break;
-	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: std::cout << "Type: Deprecated Behaviour"; break;
-	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  std::cout << "Type: Undefined Behaviour"; break;
-	case GL_DEBUG_TYPE_PORTABILITY:         std::cout << "Type: Portability"; break;
-	case GL_DEBUG_TYPE_PERFORMANCE:         std::cout << "Type: Performance"; break;
-	case GL_DEBUG_TYPE_MARKER:              std::cout << "Type: Marker"; break;
-	case GL_DEBUG_TYPE_PUSH_GROUP:          std::cout << "Type: Push Group"; break;
-	case GL_DEBUG_TYPE_POP_GROUP:           std::cout << "Type: Pop Group"; break;
-	case GL_DEBUG_TYPE_OTHER:               std::cout << "Type: Other"; break;
-	} std::cout << std::endl;
-
-	switch (severity)
-	{
-	case GL_DEBUG_SEVERITY_HIGH:         std::cout << "Severity: high"; break;
-	case GL_DEBUG_SEVERITY_MEDIUM:       std::cout << "Severity: medium"; break;
-	case GL_DEBUG_SEVERITY_LOW:          std::cout << "Severity: low"; break;
-	case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
-	} std::cout << std::endl;
-	std::cout << std::endl;
-}
+//void APIENTRY glDebugOutput(GLenum source,
+//	GLenum type,
+//	unsigned int id,
+//	GLenum severity,
+//	GLsizei length,
+//	const char* message,
+//	const void* userParam)
+//{
+//	// ignore non-significant error/warning codes
+//	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+//
+//	std::cout << "---------------" << std::endl;
+//	std::cout << "Debug message (" << id << "): " << message << std::endl;
+//
+//	switch (source)
+//	{
+//	case GL_DEBUG_SOURCE_API:             std::cout << "Source: API"; break;
+//	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   std::cout << "Source: Window System"; break;
+//	case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cout << "Source: Shader Compiler"; break;
+//	case GL_DEBUG_SOURCE_THIRD_PARTY:     std::cout << "Source: Third Party"; break;
+//	case GL_DEBUG_SOURCE_APPLICATION:     std::cout << "Source: Application"; break;
+//	case GL_DEBUG_SOURCE_OTHER:           std::cout << "Source: Other"; break;
+//	} std::cout << std::endl;
+//
+//	switch (type)
+//	{
+//	case GL_DEBUG_TYPE_ERROR:               std::cout << "Type: Error"; break;
+//	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: std::cout << "Type: Deprecated Behaviour"; break;
+//	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  std::cout << "Type: Undefined Behaviour"; break;
+//	case GL_DEBUG_TYPE_PORTABILITY:         std::cout << "Type: Portability"; break;
+//	case GL_DEBUG_TYPE_PERFORMANCE:         std::cout << "Type: Performance"; break;
+//	case GL_DEBUG_TYPE_MARKER:              std::cout << "Type: Marker"; break;
+//	case GL_DEBUG_TYPE_PUSH_GROUP:          std::cout << "Type: Push Group"; break;
+//	case GL_DEBUG_TYPE_POP_GROUP:           std::cout << "Type: Pop Group"; break;
+//	case GL_DEBUG_TYPE_OTHER:               std::cout << "Type: Other"; break;
+//	} std::cout << std::endl;
+//
+//	switch (severity)
+//	{
+//	case GL_DEBUG_SEVERITY_HIGH:         std::cout << "Severity: high"; break;
+//	case GL_DEBUG_SEVERITY_MEDIUM:       std::cout << "Severity: medium"; break;
+//	case GL_DEBUG_SEVERITY_LOW:          std::cout << "Severity: low"; break;
+//	case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
+//	} std::cout << std::endl;
+//	std::cout << std::endl;
+//}
 
 // THIS FUNCTION IS TO BE REMOVED AFTER RESOURCE MANAGER HAS BEEN TESTED AND WORKING.
 //static GLuint LoadTexture(const char* filepath) {
@@ -165,7 +183,7 @@ void CoreEngine::Init()
 	{
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback(glDebugOutput, nullptr);
+		//glDebugMessageCallback(glDebugOutput, nullptr);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 	}
 
@@ -459,88 +477,3 @@ void CoreEngine::RenderDebugDraw() {
 
 	DebugDraw::End();
 }
-
-
-
-
-// STILL BUILDING IM SORRY ;-;
-//// MyEditor.cpp
-//void imgui_update() {
-//    // imgui logic here
-//
-//    if (ImGui::Button("Butt")) {
-//        EngineCreateEntity();
-//    }
-//}
-//
-//void (*pre_game_update)() = imgui_update;
-//
-//// MyEngine.cpp
-//void engine_run() {
-//    while (window_open) {
-//        window_update();
-//        input_update();
-//        time_update();
-//
-//        // pre_game_update();
-//        imgui_update();
-//
-//        if (state == LEVEL_LOADING) {
-//            gsm_game_load();
-//            state = LEVEL_UPDATE;
-//        }
-//
-//        if (state == LEVEL_UPDATE) {
-//            gsm_game_update();
-//            // if (key_down(key_space)) {
-//            //  state = LEVEL_CHANGE;
-//            //}
-//        }
-//
-//        if (state == LEVEL_CHANGE) {
-//            gsm_game_unload();
-//            state = LEVEL_LOADING;
-//        }
-//
-//        game_render();
-//        imgui_render();
-//        window_swap_buffers();
-//    }
-//}
-
-//class Settings {};
-//class Preferences {};
-//
-//
-//class PhysicsManager
-//{
-//
-//public:
-//    PhysicsManager(Settings& _settings) : settings(_settings) {};
-//};
-//
-//class Physics
-//{
-//    Settings& settings;
-//
-//    PhysicsManager physicsManager;
-//
-//public:
-//    Physics(Settings& _settings) : physicsManager(_settings) {};
-//
-//};
-//class Systems
-//{
-//    Physics physics_System;
-//
-//public:
-//    Systems(Settings& _settings) : physics_System(_settings) {};
-//};
-//class Engine
-//{
-//    Settings settings;
-//    Preferences prefs;
-//    Systems systems;
-//
-//    Engine() : systems(settings) {};
-//};

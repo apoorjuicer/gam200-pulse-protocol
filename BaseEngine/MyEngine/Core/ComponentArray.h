@@ -1,3 +1,18 @@
+/******************************************************************************/
+/**
+ * @file       ComponentArray.h
+ * @project    Pulse Protocol
+ * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @brief      Implements a packed array storage system for ECS components with
+ *             efficient add/remove operations. Maintains bidirectional mappings
+ *             between entities and component indices, using swap-and-pop for
+ *             O(1) removal while keeping the array tightly packed for cache
+ *             efficiency and optimal iteration performance
+ * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 #include "pch/pch.h"
 

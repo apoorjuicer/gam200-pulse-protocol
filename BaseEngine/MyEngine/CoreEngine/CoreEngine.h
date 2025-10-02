@@ -1,3 +1,17 @@
+/******************************************************************************/
+/**
+ * @file       CoreEngine.h.cpp
+ * @project    Pulse Protocol
+ * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @brief      Core engine class that manages the main game loop, engine
+ *             initialization, update cycles, and provides access to the
+ *             primary game window and runtime state
+ * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
+
 #pragma once
 #include "pch/pch.h"
 #include "../MyEngine/Serialization/Serialization.h"

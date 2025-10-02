@@ -29,7 +29,7 @@ void CollisionManager::Init()
         heroTransform.Pos = { 0,0 };
         heroTransform.Scale = { 200.0f, 200.0f };
         heroTransform.mdl_ref = 1.0f;
-        heroTransform.shd_ref = 1.0f;
+        heroTransform.shd_ref = 2.0f;
         heroTransform.isVisible = true;
         heroTransform.currentFrame = 0;
         g_coordinator->AddComponent(Hero, heroTransform);

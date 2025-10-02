@@ -1,3 +1,17 @@
+/******************************************************************************/
+/**
+ * @file       System.h
+ * @project    Pulse Protocol
+ * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @brief      Base class for all ECS systems that provides a container of
+ *             entities matching the system's component signature. Defines
+ *             virtual Init() and Update() methods for derived systems to
+ *             implement their specific logic EXP: Graphics, Physics, Input
+ * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 
 #include "pch/pch.h"

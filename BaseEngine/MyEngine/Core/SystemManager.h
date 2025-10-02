@@ -1,3 +1,18 @@
+/******************************************************************************/
+/**
+ * @file       SystemManager.h
+ * @project    Pulse Protocol
+ * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @brief      Manages registration, retrieval, and lifecycle of all ECS systems.
+ *             Handles system signatures for entity-component matching, updates
+ *             entity membership across systems when signatures change, and
+ *             provides batch initialization and update methods with profiling
+ *             support for all registered systems
+ * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 #include "pch/pch.h"
 
