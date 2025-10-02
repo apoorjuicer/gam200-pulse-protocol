@@ -102,8 +102,27 @@ public:
 	{
 		for (unsigned i = 0; i < SystemType.size(); ++i)
 		{
-			SystemType[i]->Update(deltaTime);
-			//std::cout << "updating!";
+			// Get raw system type name
+			std::string rawName = typeid(*SystemType[i]).name();
+
+			// Clean up the name: remove "class " prefix and "Manager" suffix
+			std::string systemName = rawName;
+
+			// Remove "class " prefix if present
+			if (systemName.find("class ") == 0) {
+				systemName = systemName.substr(6);  // Remove first 6 characters
+			}
+
+			size_t managerPos = systemName.find("Manager");
+			if (managerPos != std::string::npos) {
+				systemName = systemName.substr(0, managerPos) + " System";
+			}
+
+			{
+				PROFILE_SCOPE(systemName);
+				SystemType[i]->Update(deltaTime);
+				// std::cout << "updating!";
+			}
 		}
 	}
 

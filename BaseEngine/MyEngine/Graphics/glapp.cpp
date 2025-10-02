@@ -219,8 +219,8 @@ void GLApp::updateAnimation(Framework::Transform& x) {
     }
 }
 
+
 void GLApp::drawTrans(Framework::Transform& x) {
-    
     auto& shader = shdrpgms[static_cast<uint64_t>(x.shd_ref)];
     shader.Use();
     GLuint prog = shader.GetHandle();

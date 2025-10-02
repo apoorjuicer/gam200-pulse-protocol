@@ -66,19 +66,24 @@ void AudioManager::Initialize()
     // Make sure this path exists relative to your exe working directory:
     //   build\MyEngine\Assets\MainMenuMusic.wav
     // If your assets live elsewhere, update this string accordingly.
-    //const char* defaultBGM = "../../MyEngine/Assets/Music/Background/GameMusic.mp3";
-    //PlayBGM(defaultBGM, 0.30f);
-
-
-
     auto defaultBGM = Framework::AssetsManager::Instance().GetSound("gamemusic");
 
     if (defaultBGM) { 
-        mSystem->playSound(defaultBGM, nullptr, false, nullptr); 
-    } 
+        // Set to loop
+        defaultBGM->setMode(FMOD_LOOP_NORMAL);
 
+        // Store the sound and get the channel
+        mBGM = defaultBGM;
+        FMOD_RESULT r = mSystem->playSound(defaultBGM, nullptr, false, &mBGMCh);
 
-
+        if (r == FMOD_OK && mBGMCh) {
+            mBGMCh->setVolume(0.05f);
+            std::cout << "[AudioManager] BGM started successfully.\n";
+        }
+        else {
+            std::cerr << "[AudioManager] Failed to play BGM: " << FMOD_ErrorString(r) << "\n";
+        }
+    }
 }
 
 void AudioManager::Update()
@@ -96,7 +101,6 @@ void AudioManager::Shutdown()
 }
 
 // ---------------------- BGM controls ----------------------
-
 
 void AudioManager::StopBGM()
 {

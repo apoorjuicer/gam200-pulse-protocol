@@ -1,6 +1,6 @@
 #pragma once
 #include "pch/pch.h"
-
+#include "../MyEngine/Serialization/Serialization.h"
 
 class CoreEngine
 {
@@ -28,11 +28,16 @@ private:
 	bool DebugMode;
 	unsigned LastTime; //The last time the game was updated
 
+	void RenderDebugDraw();
+
 	GLFWwindow* window;
 };
 
 //A global pointer to the instance of the core
 extern CoreEngine* Engine;
-constexpr int WindowWidth = 1600;
-constexpr int WindowHeight = 900;
+extern Config config;
+extern int WindowWidth;
+extern int WindowHeight;
+//constexpr int WindowWidth = 1600;
+//constexpr int WindowHeight = 900;
 

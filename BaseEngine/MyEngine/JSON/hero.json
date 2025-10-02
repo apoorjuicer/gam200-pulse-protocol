@@ -1,0 +1,12 @@
+{
+    "NPC": {
+        "width": 50.0,
+        "height": 50.0,
+        "swordWidth": 100.0,
+        "swordHeight": 50.0,
+        "swingProgress": 0.0,
+        "isSwinging": false,
+        "hp": 10,
+        "isAlive": true
+    }
+}

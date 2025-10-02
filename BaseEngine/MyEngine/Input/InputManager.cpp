@@ -5,9 +5,7 @@
 // ==================================================================================
 
 #include "pch/pch.h"
-#include <iostream>
-#include <cstring>
-#include <iomanip>
+#include "graphics/stb_image.h"
 
 static std::string KeyToString(int key) {
     switch (key) {
@@ -18,6 +16,26 @@ static std::string KeyToString(int key) {
     case GLFW_KEY_Z: return "Z";
     default: return std::to_string(key);
     }
+}
+
+static GLuint LoadTexture(const char* filepath) {
+    int width, height, channels;
+    unsigned char* data = stbi_load(filepath, &width, &height, &channels, 4);
+
+    if (!data) {
+        std::cerr << "Failed to load texture: " << filepath << std::endl;
+        return 0;
+    }
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    stbi_image_free(data);
+    return textureID;
 }
 
 InputManager::InputManager() : window(nullptr) {
@@ -49,17 +67,18 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     currentCyclePosition = 1;
 
     auto* g_coordinator = Coordinator::GetInstance();
-   // Entity entity = g_coordinator->CreateEntity();
 
-    //Framework::Transform feedbackTransform{};
-    //feedbackTransform.Pos = { 0.0f, 0.0f };
-    //feedbackTransform.Scale = { 500.0f, 500.0f };
-    //feedbackTransform.mdl_ref = 1.0f;
-    //feedbackTransform.shd_ref = 2.0f;
-    //feedbackTransform.isVisible = true;
-    //feedbackTransform.currentFrame = 1;
+    Entity fontEntityObj = g_coordinator->CreateEntity();
+    Framework::Transform fontTr{};
+    fontTr.Pos = { 0.0f, 0.0f };
+    fontTr.Scale = { 500.0f, 500.0f };
+    fontTr.mdl_ref = 1.0f;
+    fontTr.shd_ref = 3.0f;
+    fontTr.isVisible = true;
+    fontTr.currentFrame = 1;
 
-    std::string path = "../../MyEngine/JSON/transform.json";
+    g_coordinator->AddComponent(fontEntityObj, fontTr);
+    fontEntity = fontEntityObj;
 
     //if (!Framework::SaveTransform(feedbackTransform, path)) {
     //    std::cerr << "Failed to save transform!\n";
@@ -68,67 +87,87 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     //    std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
     //}
 
+    /* Loaded Transform data from transform.json */
+    std::string path = "../../MyEngine/JSON/transform.json";
     Framework::Transform new_feedbackTransform;
+  
     if (!Framework::LoadTransform(new_feedbackTransform, path)) {
-        std::cerr << "Failed to load transform!\n";
+        std::cerr << "Failed to load new_feedbackTransform!\n";
     }
     else {
-        std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
+        std::cout << "Loaded new_feedbackTransform From: " << std::filesystem::absolute(path) << "\n";
     }
+    std::cout << "Testing data loaded from transform" << "\n";
+    std::cout << "new_feedbackTransform: Pos" << new_feedbackTransform.Pos << "\n";
+    std::cout << "new_feedbackTransform: Scale" << new_feedbackTransform.Scale << "\n";
+    /* Save Transform data from transform.json */
+    std::cout << "Testing saving data loaded to save_transform" << "\n";
+    std::string saved_path = "../../MyEngine/JSON/save_transform.json";
+    new_feedbackTransform.Pos = { 50.0f, 50.0f };
+    if (!Framework::SaveTransform(new_feedbackTransform, saved_path)) {
+        std::cerr << "Failed to save save_transform!\n";
+    }
+    else {
+        std::cout << "Saved to: " << std::filesystem::absolute(saved_path) << "\n";
+    }
+    /*Testing prefab assigning new Transform objecct with original transform*/
+    Framework::Transform new_feedbackTransform4{ new_feedbackTransform };
+    std::cout << "Testing prefab" << "\n";
+    std::cout << "new_feedbackTransform4 Pos:" << new_feedbackTransform4.Pos << "\n";
+    std::cout << "new_feedbackTransform4 Scale:" << new_feedbackTransform4.Scale << "\n";
 
-    //g_coordinator->AddComponent(entity, new_feedbackTransform);
+   // g_coordinator->AddComponent(entity, new_feedbackTransform);
     //SetFeedbackEntity(entity);
 
 
-    Entity entity = g_coordinator->CreateEntity();
+    // Entity entity = g_coordinator->CreateEntity();
 
-    Framework::Transform feedbackTransform2{};
-    feedbackTransform2.Pos = { 0.0f, 0.0f };
-    feedbackTransform2.Scale = { 500.0f, 500.0f };
-    feedbackTransform2.mdl_ref = 1.0f;
-    feedbackTransform2.shd_ref = 3.0f;
-    feedbackTransform2.isVisible = true;
-    feedbackTransform2.currentFrame = 1;
+    // Framework::Transform feedbackTransform2{};
+    // feedbackTransform2.Pos = { 0.0f, 0.0f };
+    // feedbackTransform2.Scale = { 500.0f, 500.0f };
+    // feedbackTransform2.mdl_ref = 1.0f;
+    // feedbackTransform2.shd_ref = 3.0f;
+    // feedbackTransform2.isVisible = true;
+    // feedbackTransform2.currentFrame = 1;
 
-    g_coordinator->AddComponent(entity, feedbackTransform2);
-    feedbackEntity = entity;
+    // g_coordinator->AddComponent(entity, feedbackTransform2);
+    // feedbackEntity = entity;
 }
 
-void InputManager::Update() {
+void InputManager::Update(float deltaTime) {
     UpdateInputStates();
+
+    // Handle multiple debug toggles F1-F6
+    const int debugKeys[] = { GLFW_KEY_F1, GLFW_KEY_F2, GLFW_KEY_F3, GLFW_KEY_F4, GLFW_KEY_F5, GLFW_KEY_F6 };
+    bool* debugFlags[] = { &debugRectsEnabled, &debugLinesEnabled, &debugCirclesEnabled,
+                          &debugCirclesFilledEnabled, &debugPointsEnabled, &debugGridEnabled };
+    const char* debugNames[] = { "DEBUG RECTS", "DEBUG LINES", "DEBUG CIRCLES",
+                                "DEBUG CIRCLES FILLED", "DEBUG POINTS", "DEBUG GRID" };
+
+    for (int i = 0; i < 6; ++i) {
+        bool keyPressed = (glfwGetKey(window, debugKeys[i]) == GLFW_PRESS);
+
+        if (keyPressed && !debugToggleKeyPressed[i]) {
+            *debugFlags[i] = !(*debugFlags[i]);
+            std::cout << "[" << debugNames[i] << "] " << (*debugFlags[i] ? "ENABLED" : "DISABLED") << std::endl;
+        }
+        debugToggleKeyPressed[i] = keyPressed;
+    }
+
     ProcessRhythmInputs();
     ProcessComboInputs();
     CheckForMissedBeat();
 
     auto* g_coordinator = Coordinator::GetInstance();
-    for (auto& entity : EntityMember)
-    {
-        auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
 
-        if (transform.autoHide && transform.isVisible) {
-            float dt = 0.016f;
-            transform.visibilityTimer -= dt;
-            if (transform.visibilityTimer <= 0.0f) {
-                transform.isVisible = false;
-                transform.autoHide = false;
-            }
+    // Update fontEntity only
+    auto& transform1 = g_coordinator->GetComponent<Framework::Transform>(fontEntity);
+    if (transform1.autoHide && transform1.isVisible) {
+        transform1.visibilityTimer -= deltaTime;
+        if (transform1.visibilityTimer <= 0.0f) {
+            transform1.isVisible = false;
+            transform1.autoHide = false;
         }
-
-    }
-
-    for (auto& entity2 : EntityMember)
-    {
-        auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(entity2);
-
-        if (transform2.autoHide && transform2.isVisible) {
-            float dt = 0.016f;
-            transform2.visibilityTimer -= dt;
-            if (transform2.visibilityTimer <= 0.0f) {
-                transform2.isVisible = false;
-                transform2.autoHide = false;
-            }
-        }
-
     }
 
     if (IsKeyJustPressed(GLFW_KEY_O)) {
@@ -138,8 +177,9 @@ void InputManager::Update() {
         std::cout << "[Editor] ImGui " << (now ? "ON" : "OFF") << std::endl;
     }
 
-
 }
+
+
 
 void InputManager::Shutdown() {
     if (window) {
@@ -161,10 +201,10 @@ void InputManager::BroadcastInputEvent(const InputEvent& event) {
     auto* g_coordinator = Coordinator::GetInstance();
     if (event.type == InputEvent::Type::RHYTHM_INPUT)
     {
-        auto& transform = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity);  // Use feedbackEntity instead of 0
-        transform.isVisible = true;
-        transform.visibilityTimer = 0.5f;
-        transform.autoHide = true;
+        auto& transform1 = g_coordinator->GetComponent<Framework::Transform>(fontEntity);
+        transform1.isVisible = true;
+        transform1.visibilityTimer = 2.0f;
+        transform1.autoHide = true;
     }
 
     for (const auto& [systemName, callback] : inputListeners) {
@@ -335,6 +375,10 @@ void InputManager::ProcessRhythmTiming(int key) {
 
     if (comboCompleted) {
         std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << KeyToString(key) << " | Combo: " << completedComboName << std::endl;
+
+        auto* msgMgr = MessageManager::GetInstance();
+        InputComboMessage msg(completedComboName, GetInputTiming());
+        msgMgr->Publish(msg);
     }
     else {
         std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << KeyToString(key) << " | Combo: unsuccessful" << std::endl;
@@ -345,9 +389,13 @@ void InputManager::CheckForMissedBeat() {
     if (!canInput) return;
     auto* g_coordinator = Coordinator::GetInstance();
     auto audioSystem = g_coordinator->GetSystem<AudioManager>();
-    if (!audioSystem) return;
+    if (!audioSystem) {
+        std::cout << "[DEBUG] No audio system!\n";
+        return;
+    }
 
     double currentTime = audioSystem->GetMusicPosition();
+    //std::cout << "[DEBUG] Music position: " << currentTime << " | Last beat: " << lastBeatTime << "\n";
 
     if (currentTime - lastBeatTime < beatInterval) {
         return;
@@ -359,8 +407,10 @@ void InputManager::CheckForMissedBeat() {
     // Update cycle position once per beat - synchronized
     currentCyclePosition = ((currentBeatIndex - 1) % 8) + 1;
 
+    // useful to check if the currentTime and lastBeatTime is getting values
+    //std::cout << "[DEBUG] Beat " << currentBeatIndex << " | Cycle position: " << currentCyclePosition << "\n";
+
     if (currentCyclePosition >= 1 && currentCyclePosition <= 4) {
-        // Beats 1-4: INCOMING phase
         std::cout << "[INCOMING] GET READY.." << std::endl;
         inputReceivedOnThisBeat = false;
     }

@@ -45,10 +45,11 @@ public:
     ~InputManager();
 
     void Initialize(GLFWwindow* window);
-    void Update();
+    void Update(float deltaTime);
     void Shutdown();
 
-    void SetFeedbackEntity(Entity entity) { feedbackEntity = entity; }
+    void SetFontEntity(Entity entity) { fontEntity = entity; }
+    //Entity GetFeedbackEntity2() const { return feedbackEntity2; }
 
     // -------------------------------------------------
     // Rhythm game configuration
@@ -84,11 +85,23 @@ public:
     // Stats
     int GetSuccessfulCombos() const { return successfulCombos; }
 
+    // Debug helper
+    bool IsDebugRectsEnabled() const { return debugRectsEnabled; }
+    bool IsDebugLinesEnabled() const { return debugLinesEnabled; }
+    bool IsDebugCirclesEnabled() const { return debugCirclesEnabled; }
+    bool IsDebugCirclesFilledEnabled() const { return debugCirclesFilledEnabled; }
+    bool IsDebugPointsEnabled() const { return debugPointsEnabled; }
+    bool IsDebugGridEnabled() const { return debugGridEnabled; }
+
 private:
-    Entity feedbackEntity;
+
+    //Entity feedbackEntity;
+    //Entity feedbackEntity2;
+
+    Entity fontEntity;
     // -------------------------------------------------
     // Core input state
-    // -------------------------------------------------
+    // -------------------------------------------- -----
     GLFWwindow* window = nullptr;
     bool currentKeys[GLFW_KEY_LAST + 1];
     bool previousKeys[GLFW_KEY_LAST + 1];
@@ -129,6 +142,15 @@ private:
     void InitializeSwordCombos();
     std::string GetTimingFeedback();
     void CheckForMissedBeat();
+
+    bool debugRectsEnabled = false;
+    bool debugLinesEnabled = false;
+    bool debugCirclesEnabled = false;
+    bool debugCirclesFilledEnabled = false;
+    bool debugPointsEnabled = false;
+    bool debugGridEnabled = false;
+
+    bool debugToggleKeyPressed[6] = { false }; // Track F1-F6
 };
 
 // Forward declaration for external function

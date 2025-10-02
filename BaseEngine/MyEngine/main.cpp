@@ -220,6 +220,9 @@ int main() {
 
     Engine->Exit();
 
+    MessageManager::DestroyInstance();
+    ProfilingManager::DestroyInstance();
+
     // Clean up
     delete Engine;
     Engine = nullptr;

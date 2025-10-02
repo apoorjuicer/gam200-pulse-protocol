@@ -97,12 +97,10 @@ namespace Framework
         Pos.Serialize(posVal, alloc);
         Scale.Serialize(scaleVal, alloc);
         Rotation.Serialize(rotVal, alloc);
-       // Renderable.Serialize(renderVal, alloc);
 
         out.AddMember("position", posVal, alloc);
         out.AddMember("scale", scaleVal, alloc);
         out.AddMember("rotation", rotVal, alloc);
-        //out.AddMember("renderable", renderVal, alloc);
 
         //simple types
         out.AddMember("angle_disp", angle_disp, alloc);
@@ -121,6 +119,11 @@ namespace Framework
         out.AddMember("columns", columns, alloc);
         out.AddMember("rows", rows, alloc);
         out.AddMember("animationSpeed", animationSpeed, alloc);
+
+        //
+        out.AddMember("isVisible", isVisible, alloc);
+        out.AddMember("visibilityTimer", visibilityTimer, alloc);
+        out.AddMember("autoHide", autoHide, alloc);
 
         //mat3
         // Matrix3x3
@@ -153,6 +156,10 @@ namespace Framework
         if (in.HasMember("columns"))      columns = in["columns"].GetInt();
         if (in.HasMember("rows"))         rows = in["rows"].GetInt();
         if (in.HasMember("animationSpeed")) animationSpeed = in["animationSpeed"].GetFloat();
+
+        if (in.HasMember("isVisible")) isVisible = in["isVisible"].GetBool();
+        if (in.HasMember("visibilityTimer")) visibilityTimer = in["visibilityTimer"].GetFloat();
+        if (in.HasMember("autoHide")) autoHide = in["autoHide"].GetBool();
 
         if (in.HasMember("mdl_to_ndc_xform"))
             mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
@@ -213,9 +220,6 @@ namespace Framework
         t.Deserialize(d["transform"]);
         return true;
     }
-
-
-
 
 }// end of namespace
 

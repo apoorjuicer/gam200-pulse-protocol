@@ -1,5 +1,6 @@
 #include <windows.h>   // for OutputDebugString, etc.
 #include "pch/pch.h"
+#include "graphics/stb_image.h"
 #include "Core/Log.h"
 #pragma comment(lib, "winmm.lib")
 
@@ -10,6 +11,9 @@
 
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
+ Config config;
+ int WindowWidth;
+ int WindowHeight;
 
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
@@ -58,6 +62,29 @@ void APIENTRY glDebugOutput(GLenum source,
 	std::cout << std::endl;
 }
 
+// THIS FUNCTION IS TO BE REMOVED AFTER RESOURCE MANAGER HAS BEEN TESTED AND WORKING.
+//static GLuint LoadTexture(const char* filepath) {
+//	stbi_set_flip_vertically_on_load(true); // flip image vertically when loading
+//
+//	int width, height, channels;
+//	unsigned char* data = stbi_load(filepath, &width, &height, &channels, 4);
+//
+//	if (!data) {
+//		std::cerr << "Failed to load texture: " << filepath << std::endl;
+//		return 0;
+//	}
+//
+//	GLuint textureID;
+//	glGenTextures(1, &textureID);
+//	glBindTexture(GL_TEXTURE_2D, textureID);
+//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//
+//	stbi_image_free(data);
+//	return textureID;
+//}
+
 CoreEngine::CoreEngine() : window(nullptr)
 {
     LastTime = 0;
@@ -75,6 +102,20 @@ CoreEngine::~CoreEngine()
 
 void CoreEngine::Init()
 {
+	/*Config load window width and height*/
+	if (!LoadConfig(config, config.GetConfigPath())) {
+		std::cerr << "Failed to load config!\n";
+	}
+	else {
+		std::cout << "Load config From FilePath: " << std::filesystem::absolute(config.GetConfigPath()) << "\n";
+	}
+
+	WindowWidth = config.GetWindowWidth();
+	WindowHeight = config.GetWindowHeight();
+
+	std::cout << "WindowWidth is: " << WindowWidth <<"\n";
+	std::cout << "WindowHeight is: " << WindowHeight << "\n";
+
 	if (!glfwInit()) {
 		spdlog::error("Failed to initialize GLFW");
 		return;
@@ -105,6 +146,7 @@ void CoreEngine::Init()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+
 	window = glfwCreateWindow(WindowWidth, WindowHeight, WindowTitle, nullptr, nullptr);
 	if (!window) {
 		std::cerr << "Failed to create GLFW window" << std::endl;
@@ -114,6 +156,9 @@ void CoreEngine::Init()
 
     glfwMakeContextCurrent(window);
     glewInit();
+
+	// Initialize DebugDraw AFTER glewInit()
+	DebugDraw::Init();
 
 	int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
@@ -143,14 +188,13 @@ void CoreEngine::Init()
 	g_audioSystem->Initialize(); 
 	g_coordinator->InitializeAllSystems();
 
-
-
-    std::cout << "Engine initialized." << std::endl;
-    std::cout << "\n=== M1 INPUT SYSTEM DEMO ===" << std::endl;
-    std::cout << "SPACE -> Primary rhythm beat input" << std::endl;
-    std::cout << "A/S/D -> Weapon combo keys" << std::endl;
-    std::cout << "MOUSE -> UI interaction testing" << std::endl;
-    std::cout << "Close window to exit testing" << std::endl;
+	//GLuint barTexture = LoadTexture("../../MyEngine/Assets/Sprites/perfect.png");
+	//if (barTexture > 0) {
+	//	Entity box2 = g_inputSystem->GetFeedbackEntity2();  // Use getter
+	//	auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(box2);
+	//	transform2.textureID = barTexture;
+	//	std::cout << "Texture loaded and assigned to box 2: " << barTexture << std::endl;
+	//}
 
     GameRunning = true;
 
@@ -170,8 +214,8 @@ void CoreEngine::Setup()
 	
 	// Register your systems here
 	g_coordinator->RegisterSystem<InputManager>();
-	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
+	g_coordinator->RegisterSystem<AudioManager>();
     g_coordinator->RegisterSystem<CollisionManager>();
 	g_coordinator->RegisterSystem<SceneManager>();
 
@@ -205,16 +249,8 @@ void CoreEngine::Update(float dt)
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
 
-	if (g_graphicsSystem) {
-		g_graphicsSystem->Update();
-	}
-
-	if (g_inputSystem) {
-		// Update input system
-		g_inputSystem->Update();
-		//g_audioSystem->Update();  
-	}
-
+	if (g_graphicsSystem) g_graphicsSystem->Update();
+	if (g_inputSystem) g_inputSystem->Update(dt);
 
 	if (g_sceneSystem->GrabCurrentScene() == Scene::Pause)
 	{
@@ -231,10 +267,8 @@ void CoreEngine::GameLoop()
     //init
     const float printInterval = 0.2f;
     float printTimer = 0.0f;
-    
-    bool spawnFromLeft = true; //true = start left move right,  false = start right move left
-    bool automaticSwordSwing = true; // true = sword swinging, false = not swinging
-    bool testBoxLineCollision = false; //true = boxline collision, false = monsterplayer
+
+	auto profiler = ProfilingManager::GetInstance();
 
 	// application loop 
 	static bool keystateP = false;
@@ -247,6 +281,8 @@ void CoreEngine::GameLoop()
 		float dt = (currenttime - LastTime) / 1000.0f;
 		//Update the when the last update started
 		LastTime = currenttime;
+
+		profiler->StartFrame();
 
 
         //  1. Poll event(input key)
@@ -309,9 +345,20 @@ void CoreEngine::GameLoop()
 		MyEditor::Render();
 		#endif
 
+		RenderDebugDraw();
+
         //7. Swap Buffer(like two window)
         glfwSwapBuffers(window);
-        
+
+		profiler->EndFrame();
+
+		// Print profiling stats every 2 secs
+		printTimer += dt;
+		if (printTimer >= 1.0f) {
+			printTimer = 0.0f;
+			profiler->PrintStats();
+			profiler->Reset();
+		}
     }
 }
 
@@ -335,12 +382,82 @@ void CoreEngine::Exit()
 		g_graphicsSystem->Shutdown();
 	}
 
+	DebugDraw::Shutdown();
+
     if (window)
     {
         glfwDestroyWindow(window);
         window = nullptr;
     }
     glfwTerminate();
+}
+
+void CoreEngine::RenderDebugDraw() {
+	auto g_coordinator = Coordinator::GetInstance();
+	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
+
+	if (!g_inputSystem) return;
+
+	glm::mat4 projection = glm::ortho(-800.0f, 800.0f, -450.0f, 450.0f);
+	DebugDraw::Begin(projection);
+
+	// F1 - DrawRect
+	if (g_inputSystem->IsDebugRectsEnabled()) {
+		for (auto& entity : g_inputSystem->EntityMember) {
+			auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
+			glm::vec2 center = { transform.Pos.x, transform.Pos.y };
+			glm::vec2 half = 0.5f * glm::vec2(transform.Scale.x, transform.Scale.y);
+
+			glm::vec2 min = center - half;
+			glm::vec2 max = center + half;
+			if (min.x > max.x) std::swap(min.x, max.x);
+			if (min.y > max.y) std::swap(min.y, max.y);
+
+			DebugDraw::DrawRect(min, max, { 1.0f, 0.0f, 0.0f });
+		}
+	}
+
+
+	// F2 - DrawLine
+	if (g_inputSystem->IsDebugLinesEnabled()) {
+		DebugDraw::DrawLine({ -800.0f, -450.0f }, { 800.0f, 450.0f }, { 1.0f, 0.0f, 0.0f });
+		DebugDraw::DrawLine({ 800.0f, -450.0f }, { -800.0f, 450.0f }, { 0.0f, 1.0f, 0.0f });
+		DebugDraw::DrawLine({ 0.0f, -450.0f }, { 0.0f, 450.0f }, { 0.0f, 0.0f, 1.0f });
+		DebugDraw::DrawLine({ -800.0f, 0.0f }, { 800.0f, 0.0f }, { 1.0f, 1.0f, 0.0f });
+	}
+
+	// F3 - DrawCircle
+	if (g_inputSystem->IsDebugCirclesEnabled()) {
+		DebugDraw::DrawCircle({ 0.0, 0.0f }, 200.0f, { 1.0f, 0.0f, 1.0f }, 32);
+		DebugDraw::DrawCircle({ 400.0f, 300.0f }, 100.0f, { 0.0f, 1.0f, 1.0f }, 24);
+	}
+
+	// F4 - DrawCircleFilled
+	if (g_inputSystem->IsDebugCirclesFilledEnabled()) {
+		DebugDraw::DrawCircleFilled({ 100.0f, 300.0f }, 80.0f, { 1.0f, 0.5f, 0.0f }, 24);
+		DebugDraw::DrawCircleFilled({ 100.0f, -300.0f }, 60.0f, { 0.5f, 0.0f, 1.0f }, 16);
+	}
+
+	// F5 - DrawPoint
+	if (g_inputSystem->IsDebugPointsEnabled()) {
+		for (float x = -800.0f; x < 800.0f; x += 200.0f) {
+			for (float y = -450.0f; y < 450.0f; y += 200.0f) {
+				DebugDraw::DrawPoint({ x, y }, 5.0f, { 1.0f, 1.0f, 0.0f });
+			}
+		}
+	}
+
+	// F6 - Grid
+	if (g_inputSystem->IsDebugGridEnabled()) {
+		for (float x = -800.0f; x < 800.0f; x += 100.0f) {
+			DebugDraw::DrawLine({ x, -450.0f }, { x, 450.0f }, { 0.3f, 0.3f, 0.3f });
+		}
+		for (float y = -450.0f; y < 450.0f; y += 100.0f) {
+			DebugDraw::DrawLine({ -800.0f, y }, { 800.0f, y }, { 0.3f, 0.3f, 0.3f });
+		}
+	}
+
+	DebugDraw::End();
 }
 
 

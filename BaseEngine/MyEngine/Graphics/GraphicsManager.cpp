@@ -11,6 +11,7 @@
 float editorHeight;
 float editorWidth;
 Framework::Transform trans;
+
 std::map<char, Character> Characters;
 std::map<char, Character> Characters2;
 
