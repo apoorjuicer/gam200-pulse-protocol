@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <functional>
 #include "Core/System.h"
+#include "Core/AssetsManager.h"
 
 // -----------------------------------------------------------------------------
 // InputEvent structure for ECS communication
@@ -48,6 +49,7 @@ public:
     void Shutdown();
 
     void SetFeedbackEntity(Entity entity) { feedbackEntity = entity; }
+    Entity SetFeedbackEntity2() const { return feedbackEntuty2; }
 
     // -------------------------------------------------
     // Rhythm game configuration
@@ -84,7 +86,8 @@ public:
     int GetSuccessfulCombos() const { return successfulCombos; }
 
 private:
-    Entity feedbackEntity = 0;
+    Entity feedbackEntity;
+    Entity feedbackEntuty2;
     // -------------------------------------------------
     // Core input state
     // -------------------------------------------------
