@@ -5,9 +5,6 @@
 // ==================================================================================
 
 #include <pch/pch.h>
-#include <iostream>
-#include <vector>
-#include <iomanip> // for std::setw and formatting
 
 // --- Toggles (can be modified to control behavior) ---
 bool UseBoxLineTest = false;       // true = BoxLine test, false = Hero/Monster collision
@@ -23,6 +20,21 @@ void CollisionManager::Init()
 
 	if (!UseBoxLineTest)
 	{
+		// --- Background Setup ---
+		//Entity Background = g_coordinator->CreateEntity();
+		//Framework::Transform bgTransform{};
+		//bgTransform.Pos = { 0,0 };
+		//bgTransform.Scale = { 200.0f, 200.0f };
+		//bgTransform.mdl_ref = 0.0f;
+		//bgTransform.shd_ref = 1.0f;
+		//bgTransform.isVisible = true;
+		//bgTransform.totalFrames = 1;          // Total frames in the sprite sheet
+		//bgTransform.columns = 1;              // Columns in the sprite sheet
+		//bgTransform.rows = 1;
+		//bgTransform.spriteName = "../../MyEngine/Assets/Background 1.jpg";
+		//g_coordinator->AddComponent(Background, bgTransform);
+
+		//EntityNPC.push_back(Background);
 		// --- Hero NPC: stationary at center of screen ---
 		Entity Hero = g_coordinator->CreateEntity();
 		Framework::Transform heroTransform{};
@@ -34,6 +46,7 @@ void CollisionManager::Init()
 		heroTransform.totalFrames = 3;          // Total frames in the sprite sheet
 		heroTransform.columns = 3;              // Columns in the sprite sheet
 		heroTransform.rows = 1;
+		heroTransform.spriteName = "../../MyEngine/Assets/spritesheet 543px x 467px.png";
 		g_coordinator->AddComponent(Hero, heroTransform);
 
 		g_coordinator->AddComponent(Hero, NPC{
@@ -55,9 +68,12 @@ void CollisionManager::Init()
 			MonsterTransform.Pos = { startPositions[i], 0 };
 			MonsterTransform.Scale = { 200.0f, 200.0f };
 			MonsterTransform.mdl_ref = 1.0f;
-			MonsterTransform.shd_ref = 0.0f;
+			MonsterTransform.shd_ref = 2.0f;
 			MonsterTransform.isVisible = true;
-			MonsterTransform.currentFrame = 0;
+			MonsterTransform.totalFrames = 1;          // Total frames in the sprite sheet
+			MonsterTransform.columns = 1;              // Columns in the sprite sheet
+			MonsterTransform.rows = 1;
+			MonsterTransform.spriteName = "../../MyEngine/Assets/BlueGorillaEnemy.png";
 			g_coordinator->AddComponent(Monster, MonsterTransform);
 
 			g_coordinator->AddComponent(Monster, NPC{

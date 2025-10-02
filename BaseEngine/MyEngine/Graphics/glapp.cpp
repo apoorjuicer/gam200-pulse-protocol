@@ -8,10 +8,8 @@
 **********************************************************************************************/
 #include "glapp.h"
 #include "DebugDraw.h"
+#include "TextureManager.h"  
 //#include "../Managers/AssetsManager.h"
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 /*                                                   objects with file scope
 ----------------------------------------------------------------------------- */
@@ -65,52 +63,8 @@ double random() {
 GLApp::GLModel GLApp::mdl;
 GLApp::TranslationBuf GLApp::tb;
 
-GLuint GLApp::LoadTexture(const std::string& filepath) {
-	// Log working dir + file existence to catch path mistakes
-	try {
-		auto cwd = std::filesystem::current_path();
-		std::cerr << "[stbi] CWD: " << cwd.string() << "\n";
-		std::cerr << "[stbi] exists(" << filepath << "): "
-			<< (std::filesystem::exists(filepath) ? "YES" : "NO") << "\n";
-	}
-	catch (...) {
-		std::cerr << "[stbi] std::filesystem not available\n";
-	}
-
-	int width = 0, height = 0, nrChannels = 0;
-
-	const int desired_channels = 4;
-
-	stbi_set_flip_vertically_on_load(true);
-	unsigned char* data = stbi_load(filepath.c_str(), &width, &height, &nrChannels, desired_channels);
-
-	if (!data) {
-		std::cerr << "Failed to load texture: " << filepath
-			<< " | reason: " << (stbi_failure_reason() ? stbi_failure_reason() : "unknown")
-			<< "\n";
-		return 0;
-	}
-
-	GLuint texID = 0;
-	glGenTextures(1, &texID);
-	glBindTexture(GL_TEXTURE_2D, texID);
-
-	// We asked for RGBA, so upload as RGBA
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
-		GL_RGBA, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	stbi_image_free(data);
-	return texID;
-}
-
 void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
-	textureID = LoadTexture("../../MyEngine/Assets/spritesheet 543px x 467px.png");
+	//textureID = LoadTexture("../../MyEngine/Assets/spritesheet 543px x 467px.png");
 	// Use local inputEditorWidth and inputEditorHeight values for calculations.
 	GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth)),
 		h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
@@ -246,20 +200,12 @@ void GLApp::drawTrans(Framework::Transform& x) {
 }
 
 void GLApp::draw(std::set<Entity> entities) {
-	bool pm = false;
-	bool fg = false;
-	// clear back buffer as before
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
 	glClearDepth(1.0f);
-	//shdrpgms[0].Use();
-	//transObj.clear();
+
 	auto* g_coordinator = Coordinator::GetInstance();
-	//if (auto* tr = g_coordinator->TryGetComponent<Framework::Transform>(it))
-	//{
-	//    transObj.push_back(tr);
-	//    tr->textureID = textureID;
-	//}
+
 	static auto lastTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
@@ -267,15 +213,23 @@ void GLApp::draw(std::set<Entity> entities) {
 
 	for (auto it : entities) {
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
-		if (tr.textureID == 0) tr.textureID = textureID;
-		if (tr.isVisible) {
+
+		// Load texture from path if not already loaded
+		if (!tr.spriteName.empty() && tr.textureID == 0) {
+			tr.textureID = TextureManager::GetOrLoad(tr.spriteName);
+			if (tr.textureID == 0) {
+				std::cerr << "[GLApp] Failed to load texture: " << tr.spriteName << std::endl;
+				continue; // Skip this entity
+			}
+		}
+
+		if (tr.isVisible && tr.textureID != 0) {
 			updateAnimation(tr, deltaTime);
 			glBindTexture(GL_TEXTURE_2D, tr.textureID);
 			drawTrans(tr);
 		}
 	}
 }
-
 void GLApp::cleanup() {
 	// Delete VAOs, VBOs
 	for (auto& model : GLApp::models) {
@@ -293,20 +247,17 @@ void GLApp::cleanup() {
 		tb.translationBuffer = 0;
 	}
 
-	// Delete textures
+	// Use TextureManager to clean up all textures
+	TextureManager::Clear();
+
+	// Delete any standalone textures not managed by TextureManager
 	if (textureID) {
 		glDeleteTextures(1, &textureID);
 		textureID = 0;
 	}
 
-	// Clear viewport containers
 	GLApp::vps.clear();
-
-	// Debug draw shutdown
 	DebugDraw::Shutdown();
-
-
-
 
 	std::cout << "Graphics Resources successfully cleaned up." << std::endl;
 }

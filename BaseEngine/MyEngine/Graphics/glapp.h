@@ -24,7 +24,6 @@ public:
 	void update(GLFWwindow* window, std::set<Entity>);
 	void draw(std::set<Entity>);
 	void cleanup();
-	GLuint LoadTexture(const std::string& filepath);
 	void init_models_cont();
 
 	GLuint vaoid; // handle to VAO

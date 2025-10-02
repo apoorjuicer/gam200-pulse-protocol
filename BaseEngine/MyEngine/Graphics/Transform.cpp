@@ -8,7 +8,6 @@
 **********************************************************************************************/
 #include "Transform.h"
 #include <../MyEngine/Math/math.h>
-#include <pch/pch.h>
 
 
 namespace Framework
@@ -21,7 +20,10 @@ namespace Framework
     }
 
     Transform::~Transform() {}
-
+    void AssignTextureFromPath(Framework::Transform& t) {
+        if (t.textureID == 0 && !t.spriteName.empty())
+            t.textureID = TextureManager::GetOrLoad(t.spriteName);
+    }
     void Transform::Initialize() {}
 
     void Transform::update(GLdouble delta_time, const std::set<Entity> entity) {

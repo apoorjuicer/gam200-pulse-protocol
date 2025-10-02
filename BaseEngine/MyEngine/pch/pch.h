@@ -38,7 +38,6 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 #include <iomanip> //debug
 #include <algorithm>
 #include <random>
-#include <array>
 #include <sstream>
 #include <chrono> // for profiling
 #include <list>
@@ -64,7 +63,6 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h> // for StringBuffer
-#include <filesystem>
 
 
 // Suppress APIENTRY macro redefinition warning

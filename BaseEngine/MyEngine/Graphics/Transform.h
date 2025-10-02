@@ -12,7 +12,7 @@
 //#include "../Math/Vector_2D.h"
 #include "pch/pch.h"        // FIRST
 #include "Core/Coordinator.h"
-#include <vector>
+#include "TextureManager.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "glhelper.h" 
 
@@ -47,6 +47,7 @@ namespace Framework
 		int columns = 1;              // Columns in the sprite sheet
 		int rows = 1;                 // Rows in the sprite sheet
 		float animationSpeed = 2.f;
+		void AssignTextureFromPath(Framework::Transform& t);
 
 		Transform();
 		~Transform();
