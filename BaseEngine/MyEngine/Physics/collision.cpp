@@ -27,19 +27,38 @@ void CollisionManager::Init()
         // --- Hero NPC: stationary at center of screen ---
         Entity Hero = g_coordinator->CreateEntity();
         Framework::Transform heroTransform{};
-        heroTransform.Pos = { 0,0 };
-        heroTransform.Scale = { 200.0f, 200.0f };
-        heroTransform.mdl_ref = 1.0f;  // model reference
-        heroTransform.shd_ref = 0.0f;  // shader reference
-        heroTransform.isVisible = true;
-        heroTransform.currentFrame = 0;
-        g_coordinator->AddComponent(Hero, heroTransform);
+        //heroTransform.Pos = { 0,0 };
+        //heroTransform.Scale = { 200.0f, 200.0f };
+        //heroTransform.mdl_ref = 1.0f;  // model reference
+        //heroTransform.shd_ref = 0.0f;  // shader reference
+        //heroTransform.isVisible = true;
+        //heroTransform.currentFrame = 0;
 
-        g_coordinator->AddComponent(Hero, NPC{
-            50.0f, 50.0f,       // width, height
-            100.0f, 50.0f,      // swordWidth, swordHeight
-            0.0f, false, 10, true
-            });
+        NPC hero_npc{};
+
+
+        /*herotransform*/
+        std::string herotransform_path = "../../MyEngine/JSON/herotransform.json";
+        if (!Framework::LoadTransform(heroTransform, herotransform_path)) {
+            std::cerr << "Failed to load heroTransform!\n";
+        }
+        else {
+            std::cout << "load from: " << std::filesystem::absolute(herotransform_path) << "\n";
+        }
+        g_coordinator->AddComponent(Hero, heroTransform);
+        g_coordinator->AddComponent(Hero, hero_npc);
+        /*hero*/
+        std::string hero_path = "../../MyEngine/JSON/hero.json";
+        if (!LoadEntity(Hero, g_coordinator, hero_path)) {
+            std::cerr << "Failed to load hero_path!\n";
+        }
+        else {
+            std::cout << "Load from to: " << std::filesystem::absolute(hero_path) << "\n";
+        }
+
+        std::cout << "heronpc height: " << hero_npc.height << "\n";
+
+
 
         // Add hero AABB at edges
         g_coordinator->AddComponent(Hero, BuildHeroHitbox(heroTransform, g_coordinator->GetComponent<NPC>(Hero)));
@@ -51,19 +70,30 @@ void CollisionManager::Init()
 
         Entity Monster = g_coordinator->CreateEntity();
         Framework::Transform MonsterTransform{};
-        MonsterTransform.Pos = { startX, 0 };
+        std::string monstertransform_path = "../../MyEngine/JSON/monstertransform.json";
+        if (!Framework::LoadTransform(MonsterTransform, monstertransform_path)) {
+            std::cerr << "Failed to load MonsterTransform!\n";
+        }
+        else {
+            std::cout << "load from: " << std::filesystem::absolute(monstertransform_path) << "\n";
+        }
+   
+  /*      MonsterTransform.Pos = { startX, 0 };
         MonsterTransform.Scale = { 200.0f, 200.0f };
         MonsterTransform.mdl_ref = 1.0f;
         MonsterTransform.shd_ref = 0.0f;
         MonsterTransform.isVisible = true;
-        MonsterTransform.currentFrame = 0;
+        MonsterTransform.currentFrame = 0;*/
         g_coordinator->AddComponent(Monster, MonsterTransform);
 
-        g_coordinator->AddComponent(Monster, NPC{
-            50.0f, 50.0f,       // width, height
+        NPC mons_npc = { 50.0f, 50.0f,       // width, height
             100.0f, 50.0f,      // swordWidth, swordHeight
-            0.0f, false, 10, true
-            });
+            0.0f, false, 10, true };
+
+    
+
+
+        g_coordinator->AddComponent(Monster, mons_npc);
 
         // Add monster AABB at edges
         g_coordinator->AddComponent(Monster, BuildMonsterHitbox(MonsterTransform, g_coordinator->GetComponent<NPC>(Monster)));

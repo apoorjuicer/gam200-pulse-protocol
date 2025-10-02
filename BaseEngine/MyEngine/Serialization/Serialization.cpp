@@ -14,20 +14,12 @@
             d.AddMember("NPC", npcVal, alloc);
         }
 
-        //// AABB
-        //if (g->HasComponent<AABB>(e)) {
-        //    Value aabbVal;
-        //    g->GetComponent<AABB>(e).Serialize(aabbVal, alloc);
-        //    d.AddMember("AABB", aabbVal, alloc);
-        //}
-
         StringBuffer buffer;
         PrettyWriter<StringBuffer> writer(buffer);
         d.Accept(writer);
         namespace fs = std::filesystem;
-        //fs::create_directories("../../MyEngine/JSON");
-        fs::create_directories("../JSON");
-
+        fs::create_directories("../../MyEngine/JSON");
+        //fs::create_directories("../JSON");
 
         std::ofstream ofs(path);
         if (!ofs.is_open()) {
