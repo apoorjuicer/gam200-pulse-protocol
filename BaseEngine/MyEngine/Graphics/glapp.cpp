@@ -111,6 +111,7 @@ GLuint GLApp::LoadTexture(const std::string& filepath) {
 
 void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
     textureID = LoadTexture("../../MyEngine/Assets/hero.png");
+    //LoadTexture("../../MyEngine/Assets/RedGorillaEnemy.png");
     // Use local inputEditorWidth and inputEditorHeight values for calculations.
     GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth)),
         h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));

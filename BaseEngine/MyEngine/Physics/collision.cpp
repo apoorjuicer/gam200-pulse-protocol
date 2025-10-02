@@ -27,9 +27,9 @@ void CollisionManager::Init()
         Entity Hero = g_coordinator->CreateEntity();
         Framework::Transform heroTransform{};
         heroTransform.Pos = { 0,0 };
-        heroTransform.Scale = { 200.0f, 200.0f };
+        heroTransform.Scale = { 200.0f, 400.0f };
         heroTransform.mdl_ref = 1.0f;
-        heroTransform.shd_ref = 0.0f;
+        heroTransform.shd_ref = 1.0f;
         heroTransform.isVisible = true;
         heroTransform.currentFrame = 0;
         g_coordinator->AddComponent(Hero, heroTransform);
