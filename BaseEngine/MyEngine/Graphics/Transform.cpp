@@ -24,66 +24,56 @@ namespace Framework
 
     void Transform::Initialize() {}
 
-    void Transform::update(GLdouble delta_time) {
-        float PnormX = Pos.x / 1600.0f;
-        float PnormY = Pos.y / 900.0f;
+    void Transform::update(GLdouble delta_time, const std::set<Entity> entity) {
+        auto* g_coordinator = Coordinator::GetInstance();
 
-        float SnormX = Scale.x / 1600.0f;
-        float SnormY = Scale.y / 900.0f;
+        // pull the current game area; fall back if not set
+        const float gw = (GLHelper::GameWidth > 0) ? (float)GLHelper::GameWidth : 1600.0f;
+        const float gh = (GLHelper::GameHeight > 0) ? (float)GLHelper::GameHeight : 900.0f;
 
-        Matrix3x3 Scaling, Rotating, Translating/*, scalingMatrix, translationMatrix*/;
+        for (auto it : entity) {
+            // IMPORTANT: reference, not copy
+            auto& x = g_coordinator->GetComponent<Framework::Transform>(it);
 
-        // Scaling matrix
-        Scaling = Matrix3x3(
-            SnormX, 0.0f, 0.0f,
-            0.0f, SnormY, 0.0f,
-            0.0f, 0.0f, 1.0f
-        );
+            // normalize from pixels to your game space
+            const float PnormX = x.Pos.x / gw;
+            const float PnormY = x.Pos.y / gh;
+            const float SnormX = x.Scale.x / gw;
+            const float SnormY = x.Scale.y / gh;
 
-        // Rotating matrix
-        constexpr float DEG_TO_RAD = 3.14159f / 180.0f;
-        float cosA = std::cos(angle_disp * DEG_TO_RAD);
-        float sinA = std::sin(angle_disp * DEG_TO_RAD);
-        Rotating = Matrix3x3(
-            cosA, sinA, 0.0f,
-            -sinA, cosA, 0.0f,
-            0.0f, 0.0f, 1.0f
-        );
-        Translating = Matrix3x3(
-            1.0f, 0.0f, 0.0f,   // first column
-            0.0f, 1.0f, 0.0f,   // second column
-            PnormX, PnormY, 1.0f  // third column
-        );
-        //// Aspect ratio scaling
-        //float objectAspect = SnormX / SnormY;
-        //float viewportAspect = static_cast<float>(WindowWidth) / static_cast<float>(WindowHeight);
-        //float scale;
-        //if (objectAspect > viewportAspect) {
-        //    scale = static_cast<float>(WindowWidth) / static_cast<float>(WindowWidth);
-        //}
-        //else {
-        //    scale = static_cast<float>(WindowHeight) / static_cast<float>(WindowHeight);
-        //}
-        //scalingMatrix = Matrix3x3(
-        //    scale, 0.0f, 0.0f,
-        //    0.0f, scale, 0.0f,
-        //    0.0f, 0.0f, 1.0f
-        //);
+            Matrix3x3 Scaling, Rotating, Translating;
 
-        //// Translation matrix for offsets
-        //float offsetX = (WindowWidth - (SnormX * scale)) / 2;
-        //float offsetY = (WindowHeight - (SnormY * scale)) / 2;
-        //translationMatrix = Matrix3x3(
-        //    1.0f, 0.0f, offsetX,
-        //    0.0f, 1.0f, offsetY,
-        //    0.0f, 0.0f, 1.0f
-        //);
+            // S
+            Scaling = Matrix3x3(
+                SnormX, 0.0f, 0.0f,
+                0.0f, SnormY, 0.0f,
+                0.0f, 0.0f, 1.0f
+            );
 
-        // Calculate the final transformation matrix
-        //Matrix3x3 temp;
-        //Matrix3x3::Mtx33Transpose(temp, Translating);
-        mdl_to_ndc_xform = /*translationMatrix * scalingMatrix **/ Translating * Rotating * Scaling;
-        angle_disp += angle_speed * static_cast<GLfloat>(delta_time);
+            // R (use the entity’s angle)
+            constexpr float DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
+            const float cosA = std::cos(x.angle_disp * DEG_TO_RAD);
+            const float sinA = std::sin(x.angle_disp * DEG_TO_RAD);
+            Rotating = Matrix3x3(
+                cosA, sinA, 0.0f,
+                -sinA, cosA, 0.0f,
+                0.0f, 0.0f, 1.0f
+            );
+
+            // T (column-major layout for your Matrix3x3)
+            Translating = Matrix3x3(
+                1.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                PnormX, PnormY, 1.0f
+            );
+
+            // M = T * R * S
+            x.mdl_to_ndc_xform = Translating * Rotating * Scaling;
+
+            // advance entity’s angle
+            x.angle_disp += x.angle_speed * static_cast<GLfloat>(delta_time);
+            //std::cout << x.mdl_to_ndc_xform;
+        }
     }
 
     void Transform::draw() const {}
