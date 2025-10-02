@@ -1,7 +1,7 @@
 #pragma once
-
-#include <memory>
-#include <spdlog/spdlog.h>
+#include "pch/pch.h"
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/basic_file_sink.h>
 
 namespace GAM200graphics {
     class Log

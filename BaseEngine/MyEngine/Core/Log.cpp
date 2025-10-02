@@ -1,9 +1,5 @@
 #include "Log.h"
 
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <cstdlib>  // for std::abort
-
 namespace GAM200graphics {
     std::shared_ptr<spdlog::logger> Log::s_CoreLogger;
     std::shared_ptr<spdlog::logger> Log::s_ClientLogger;
@@ -13,18 +9,29 @@ namespace GAM200graphics {
         try {
             spdlog::set_pattern("%^[%T] %n: %v%$");
 
+            // Create sinks: console + file
+            auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+            //auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("Logs/FullLog.txt", true);
+            auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>("Logs/Engine.log", 1024 * 1024 * 5, 3); // 5 MB max per file, keep 3 backups
+            std::vector<spdlog::sink_ptr> sinks{ console_sink, file_sink };
+
             // Core logger (engine logs)
-            s_CoreLogger = spdlog::stdout_color_mt("GAM200graphics");
+            s_CoreLogger = std::make_shared<spdlog::logger>("GAM200graphics", sinks.begin(), sinks.end());
             s_CoreLogger->set_level(spdlog::level::trace);
+            spdlog::register_logger(s_CoreLogger);
 
             // Client logger (game logs)
-            s_ClientLogger = spdlog::stdout_color_mt("Game");
+            s_ClientLogger = std::make_shared<spdlog::logger>("Game", sinks.begin(), sinks.end());
             s_ClientLogger->set_level(spdlog::level::trace);
+            spdlog::register_logger(s_ClientLogger);
 
-            // File sink for crash/error logs
-            auto file_logger = spdlog::basic_logger_mt("FileLogger", "CrashLog.txt", true);
+            // Optional: separate crash/error-only file logger
+            //auto crash_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("Logs/CrashLog.txt", true);
+            auto crash_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>("Logs/CrashLog.log", 1024 * 1024 * 5, 3); // 5 MB max per file, keep 3 backups
+            auto file_logger = std::make_shared<spdlog::logger>("FileLogger", crash_sink);
             file_logger->set_level(spdlog::level::trace);
-            file_logger->flush_on(spdlog::level::err); // auto-flush on errors
+            file_logger->flush_on(spdlog::level::err);
+            spdlog::register_logger(file_logger);
         }
         catch (const spdlog::spdlog_ex& ex) {
             printf("Log initialization failed: %s\n", ex.what());
