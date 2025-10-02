@@ -129,34 +129,31 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 }
 
 
-void GLApp::update(GLFWwindow* window, std::set<Entity> entity) {
-	//if (GLHelper::keystateP == GL_TRUE) {
-	//    if (polygonmode == 0) {
-	//        ++polygonmode;
-	//        GLHelper::keystateP = GL_FALSE;
-	//    }
-	//    else if (polygonmode == 1) {
-	//        ++polygonmode;
-	//        GLHelper::keystateP = GL_FALSE;
-	//    }
-	//    else if (polygonmode == 2) {
-	//        polygonmode = 0;
-	//        GLHelper::keystateP = GL_FALSE;
-	//    }
-	//    GLHelper::keystateP = GL_FALSE;
-	//}
-	GLHelper::update_time(1.0); // updates delta_time and fps
-	if (window)
-	{
-		std::ostringstream title;
-		title << "Game Window - FPS: " << std::fixed << std::setprecision(1)
-			<< GLHelper::fps;
-		glfwSetWindowTitle(window, title.str().c_str());
-	}
-	//update(GLHelper::delta_time, entity);
-	Framework::Transform transformSystem;
-	transformSystem.update(GLHelper::delta_time, entity);
-
+void GLApp::update(GLFWwindow* window,std::set<Entity> entity) {
+    //if (GLHelper::keystateP == GL_TRUE) {
+    //    if (polygonmode == 0) {
+    //        ++polygonmode;
+    //        GLHelper::keystateP = GL_FALSE;
+    //    }
+    //    else if (polygonmode == 1) {
+    //        ++polygonmode;
+    //        GLHelper::keystateP = GL_FALSE;
+    //    }
+    //    else if (polygonmode == 2) {
+    //        polygonmode = 0;
+    //        GLHelper::keystateP = GL_FALSE;
+    //    }
+    //    GLHelper::keystateP = GL_FALSE;
+    //}
+    GLHelper::update_time(1.0); // updates delta_time and fps
+    if (window)
+    {
+        glfwSetWindowTitle(window, "Pulse Protocol");
+    }
+     //update(GLHelper::delta_time, entity);
+    Framework::Transform transformSystem;
+    transformSystem.update(GLHelper::delta_time, entity);
+    
 }
 void GLApp::updateAnimation(Framework::Transform& x, float deltaTime) {
 	float frameDuration = 1.0f / x.animationSpeed;

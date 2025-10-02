@@ -1,0 +1,44 @@
+Project Guide - CMake Setup and Visual Studio 2022 Regeneration
+===============================================================
+
+This guide explains how to set up and regenerate the Visual Studio 2022 solution for the custom engine project.
+
+Folder Structure
+----------------
+After unzipping `BaseEngine.zip`, you should see the following structure:
+
+BaseEngine/
+├── cmake/              (CMake helper modules, if any)
+├── imgui/              (external library)
+├── MyEditor/           (editor project source)
+├── MyEngine/           (engine project source)
+├── .gitignore
+├── clean.bat           (cleans the build folder)
+├── run.bat             (generates build folder and runs CMake)
+├── CMakeLists.txt      (root CMake configuration)
+├── projectGuide.txt or projectGuide.pdf (this file)
+
+1. Install CMake
+----------------
+CMake is required to generate Visual Studio 2022 solution files.
+
+- Download CMake from: https://cmake.org/download/
+- On Windows, use the `.msi` installer (64-bit).
+- During installation, check the option to "Add CMake to system PATH".
+
+Verify installation:
+```
+cmake --version
+```
+
+2. Regenerating the Visual Studio 2022 Solution
+-----------------------------------------------
+1. Double-click `run.bat` in the project root.
+   - This will automatically create a `build/` folder (if missing) and run CMake with the correct generator.
+2. The generated `BaseEngine.sln` file will appear inside the `build/` folder.
+3. Double-click the `.sln` file to open it in Visual Studio 2022.
+
+3. Cleaning the Project
+-----------------------
+- To remove the generated build files, run `clean.bat`.
+- This will delete the `build/` folder so you can regenerate from scratch.

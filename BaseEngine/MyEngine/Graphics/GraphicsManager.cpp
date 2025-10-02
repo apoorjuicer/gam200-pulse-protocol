@@ -55,6 +55,16 @@ void GraphicsManager::Initialize()
     //}
     //// --------------------------------------------------------
 
+    // Subscribe to combo messages - DONT REMOVE, TEST FOR MESSAGE SYSTEM
+    auto* msgMgr = MessageManager::GetInstance();
+    msgMgr->Subscribe(Message::Type::INPUT_COMBO, "GraphicsManager",
+        [this](const Message& msg) {
+            const InputComboMessage& comboMsg = static_cast<const InputComboMessage&>(msg);
+            std::cout << "[GRAPHICS] Received combo: " << comboMsg.comboName << std::endl;
+        });
+
+    std::cout << "[GraphicsManager] Successfully initialized for graphics." << std::endl;
+
 
     std::cout << "[GraphicsManager] Successfully initialized for graphics." << std::endl;
 
@@ -126,11 +136,19 @@ void GraphicsManager::Update()
 
     // 2) then draw text on top
     RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
-    RenderText(GLApp::shdrpgms[3], "Pulse Protocol", 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
+
+    // Build FPS string and render it
+    std::ostringstream fpsText;
+    fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
+    RenderText(GLApp::shdrpgms[3], fpsText.str(), 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
 }
 
 void GraphicsManager::Shutdown()
 {
+    // Unsubscribe from messages DONT REMOVE
+    auto* msgMgr = MessageManager::GetInstance();
+    msgMgr->Unsubscribe(Message::Type::INPUT_COMBO, "GraphicsManager");
+
     Framework::AssetsManager::Instance().UnloadAllImage();
     glapp->cleanup();
     delete glapp;
