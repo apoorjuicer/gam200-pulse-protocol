@@ -130,3 +130,6 @@ private:
     std::string GetTimingFeedback();
     void CheckForMissedBeat();
 };
+
+// Forward declaration for external function
+void ToggleObjectVisibility();
