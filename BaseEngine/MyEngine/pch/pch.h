@@ -34,6 +34,13 @@
 #include "Graphics/glhelper.h"
 #include "Graphics/glslshader.h"
 
+// FMOD Headers
+#include "../MyEngine/FMOD_API/api/core/inc/fmod.hpp"
+#include "../MyEngine/FMOD_API/api/core/inc/fmod_errors.h"
+
+// Editor Header
+#include "../MyEditor/Editor.h"
+
 //Serialize
 #include <rapidjson/document.h>     // for Document, Value, AllocatorType
 //#include <rapidjson/writer.h>       // for Writer
@@ -57,6 +64,7 @@
 #include "../MyEngine/CoreEngine/CoreEngine.h"
 #include <../MyEngine/Resources/ResourceManager.h>
 #include "../MyEngine/Serialization/Serialization.h"
+#include <../MyEngine/Core/AssetsManager.h>
 
 // ECS
 #include "../MyEngine/Core/Types.h"

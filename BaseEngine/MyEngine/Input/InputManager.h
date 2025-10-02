@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <functional>
 #include "Core/System.h"
+#include "Core/AssetsManager.h"
 
 // -----------------------------------------------------------------------------
 // InputEvent structure for ECS communication
@@ -84,7 +85,7 @@ public:
     int GetSuccessfulCombos() const { return successfulCombos; }
 
 private:
-    Entity feedbackEntity = 0;
+    Entity feedbackEntity;
     // -------------------------------------------------
     // Core input state
     // -------------------------------------------------

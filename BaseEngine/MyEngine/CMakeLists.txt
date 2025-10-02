@@ -1,67 +1,88 @@
 set(ENGINE_NAME MyEngine)
-set(EXPORT_INSTALLER_NAME "Find${ENGINE_NAME}")
 
-file(GLOB_RECURSE GRAPHICS_ABSTRACTION_LAYER_SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
-    ${CMAKE_CURRENT_LIST_DIR}/*.[ch]pp
-    ${CMAKE_CURRENT_LIST_DIR}/*.h
+# Auto-collect sources (keeps Solution Explorer in sync)
+file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_LIST_DIR}/**/*.c"
+    "${CMAKE_CURRENT_LIST_DIR}/**/*.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/**/*.h"
+    "${CMAKE_CURRENT_LIST_DIR}/**/*.hpp"
 )
 
-set(ALL_FILES
-    ${GRAPHICS_ABSTRACTION_LAYER_SRC_FILES} 
-)
+list(APPEND ENGINE_SRC "${CMAKE_CURRENT_LIST_DIR}/main.cpp")
 
-# Call the macro to group files by folder
-GROUP_FILES_BY_FOLDER(${ALL_FILES})
+add_executable(${ENGINE_NAME} ${ENGINE_SRC})
+source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${ENGINE_SRC})
 
-# Create the executable (or library)
-add_executable(${ENGINE_NAME} ${ALL_FILES})
-
-set_property(TARGET ${ENGINE_NAME}  PROPERTY CXX_STANDARD 20) 
+# C++ standard / warnings
+set_property(TARGET ${ENGINE_NAME} PROPERTY CXX_STANDARD 20)
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(${ENGINE_NAME} PRIVATE -Wall ${DisableWarnings})
+    target_compile_options(${ENGINE_NAME} PRIVATE -Wall)
 elseif (MSVC)
     target_compile_options(${ENGINE_NAME} PRIVATE /W4 /WX-)
 endif()
 
-target_include_directories(${ENGINE_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories(${ENGINE_NAME} PUBLIC ${GLEW_SOURCE_DIR}/include)
+# Define for static GLEW usage
+target_compile_definitions(${ENGINE_NAME} PUBLIC GLEW_STATIC)
 
-# Link GLFW and GLEW to the engine
-target_link_libraries(${ENGINE_NAME} PUBLIC glfw libglew_static)
-
-# Link Freetype to the engine
-target_link_libraries(MyEngine PRIVATE Freetype::Freetype)
-
-# Include directories for FMOD
-target_include_directories(${ENGINE_NAME} PUBLIC 
-    ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/core/inc
-    ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/studio/inc
+# Includes owned by this target (3rd-party includes are carried by their targets)
+target_include_directories(${ENGINE_NAME} PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}   # Engine headers
 )
 
-target_compile_definitions(MyEngine PRIVATE
-  ASSETS_DIR="${CMAKE_SOURCE_DIR}/MyEngine/Assets"
-)
-
-# Add FMOD libraries based on build type
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_libraries(${ENGINE_NAME} PUBLIC 
-        ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/core/lib/x64/fmodL_vc.lib
-        ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/studio/lib/x64/fmodstudioL_vc.lib
-    )
-else() # Release or other build types
-    target_link_libraries(${ENGINE_NAME} PUBLIC 
-        ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/core/lib/x64/fmod_vc.lib
-        ${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/studio/lib/x64/fmodstudio_vc.lib
-    )
+# ---- Robust FMOD discovery (once) ----
+if (NOT DEFINED FMOD_API_DIR_FOUND)
+  set(_FMOD_CANDIDATES
+      "${FMOD_API_DIR}"                                   # user-provided -DFMOD_API_DIR=...
+      "${CMAKE_CURRENT_LIST_DIR}/../FMOD_API"             # project root / FMOD_API
+      "${CMAKE_CURRENT_LIST_DIR}/FMOD_API"                # MyEngine/FMOD_API
+      "${CMAKE_SOURCE_DIR}/FMOD_API"                      # top-level / FMOD_API
+      "${CMAKE_SOURCE_DIR}/ThirdParty/FMOD_API"           # typical thirdparty layout
+  )
+  foreach(_cand IN LISTS _FMOD_CANDIDATES)
+    if(_cand AND EXISTS "${_cand}/api/core/lib/x64")
+      set(FMOD_API_DIR_FOUND "${_cand}" CACHE PATH "FMOD API root" FORCE)
+      break()
+    endIF()
+  endforeach()
+  if(NOT FMOD_API_DIR_FOUND)
+    message(FATAL_ERROR "FMOD_API folder not found. Set -DFMOD_API_DIR=PATH (must contain api/core/lib/x64).")
+  endif()
 endif()
+message(STATUS "Using FMOD at: ${FMOD_API_DIR_FOUND}")
 
+# FMOD includes
+target_include_directories(${ENGINE_NAME} PUBLIC
+    "${FMOD_API_DIR_FOUND}/api/core/inc"
+    "${FMOD_API_DIR_FOUND}/api/studio/inc"
+)
 
-# Copy FMOD DLLs after build (Windows only)
+# Core deps (PUBLIC so MyEditor inherits them via MyEngine link)
+target_link_libraries(${ENGINE_NAME} PUBLIC
+    glfw
+    libglew_static
+    imgui
+    imgui_backend
+    Freetype::Freetype
+)
+
+# FMOD libraries (multi-config safe for MSVC)
+target_link_libraries(${ENGINE_NAME} PUBLIC
+    debug     "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmodL_vc.lib"
+    optimized "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmod_vc.lib"
+    debug     "${FMOD_API_DIR_FOUND}/api/studio/lib/x64/fmodstudioL_vc.lib"
+    optimized "${FMOD_API_DIR_FOUND}/api/studio/lib/x64/fmodstudio_vc.lib"
+)
+
+# Copy the correct FMOD DLLs next to the EXE
 if (WIN32)
-    add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-	"${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/core/lib/x64/fmod.dll"
-	"${CMAKE_CURRENT_LIST_DIR}/FMOD_API/api/studio/lib/x64/fmodstudio.dll"
-        $<TARGET_FILE_DIR:${ENGINE_NAME}>
-    )
+  add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${FMOD_API_DIR_FOUND}/api/core/lib/x64/$<IF:$<CONFIG:Debug>,fmodL.dll,fmod.dll>"
+      $<TARGET_FILE_DIR:${ENGINE_NAME}>
+  )
+  add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${FMOD_API_DIR_FOUND}/api/studio/lib/x64/$<IF:$<CONFIG:Debug>,fmodstudioL.dll,fmodstudio.dll>"
+      $<TARGET_FILE_DIR:${ENGINE_NAME}>
+  )
 endif()

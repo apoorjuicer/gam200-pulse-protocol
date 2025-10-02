@@ -77,85 +77,18 @@ int main() {
     // for non-GL things:
     Engine->Init(); // <-- only if it does NOT touch OpenGL
 
-
-/*    Framework::Transform tr{};   */         // fill in fields as your renderer expects
-    // e.g. tr.mdl_ref = 1; tr.shd_ref = 1; tr.rows = ...; tr.columns = ...; tr.textureID = ...
-    // After registering components (including Framework::Transform) and creating the entity:
-
-    // where to draw (your update() normalizes by 1600x900)
-    //tr.Pos = { 1800.0f, 450.0f };   // center of a 1600x900 �virtual� screen
-    //tr.Scale = { 128.0f, 128.0f };   // size in pixels in that same space
-    //tr.angle_disp = 0.0f;           // degrees
-    //tr.angle_speed = 0.0f;           // no rotation
-
-    //// model & shader indices (you push models: 0=bg, 1=box; shaders: 0=test,1=bg,2=sprite,3=font)
-    //tr.mdl_ref = 0.0f;               // bg_model()
-    //tr.shd_ref = 0.0f;               // test shader
-    //// NOTE: In drawTrans() you currently check `if (x.shd_ref == 1)` before grabbing uniforms.
-    //// Either change that `1` to `2`, or set `tr.shd_ref = 1` if your bg shader has those uniforms.
-
-    //// sprite-sheet / animation
-    //tr.rows = 1;
-    //tr.columns = 1;
-    //tr.currentFrame = 0;
-    //tr.animationSpeed = 0.0f;        // static
-
-    /*std::string path = "../JSON/transform.json";
-
-    if (!Framework::SaveTransform(tr, path)) {
-        std::cerr << "Failed to save transform!\n";
-    }
-    else {
-        std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
-    }
-
-    Framework::Transform loaded;
-    if (!Framework::LoadTransform(loaded, path)) {
-        std::cerr << "Failed to load transform!\n";
-    }
-    else {
-        std::cout << "loaded from: " << std::filesystem::absolute(path) << "\n";
-    }*/
-    //to load into BaseEngine>MyEngine>JSON
-    //if (!Framework::SaveTransform(tr, "../../MyEngine/JSON/transform.json")) {
-    //    std::cerr << "Failed to save transform!\n";
-    //}
-
-    //Framework::Transform loaded;
-    //if (!Framework::LoadTransform(loaded, "../../MyEngine/JSON/transform.json")) {
-    //    std::cerr << "Failed to load transform!\n";
-    //}
-
-    // test it
-    //std::cout << "Loaded Pos: " << loaded.Pos.x << ", " << loaded.Pos.y << "\n";
-
-    std::cout << "beforeTranpose: " << beforeTranpose;
-
-    std::cout << "after Transpose: " << beforeTranpose.GetTranspose();
-
-    beforeTranpose.SetToTranspose();
-    std::cout << "after Transpose : " << beforeTranpose;
-
-    A[0][0] = 2; A[0][1] = 3; A[0][2] = 4;
-    A[1][0] = 5; A[1][1] = 6; A[1][2] = 7;
-    A[2][0] = 8; A[2][1] = 9; A[2][2] = 10;
-
-    std::cout << "A : " << A;
-
-    std::cout << "Matrix multi : " << A*beforeTranpose;
-
-    //tr.isVisible = false;
-    //tr.autoHide = false;
-    //tr.visibilityTimer = 0.0f;
-
-    //// a valid GL texture id. Use your loader or 0 if you just want a colored quad.
-    ////tr.textureID = /* loadTexture("Assets/sprites/hero.png") */ 0;
-    //auto* g_coordinator = Coordinator::GetInstance();
-    //int entity = g_coordinator->CreateEntity();
-    //g_coordinator->AddComponent(entity, tr);  // <-- add Transform
+    // After you create the GLFW window and GL context
+    #ifdef ENABLE_EDITOR
+    MyEditor::Init(Engine->GetWindow());  // or your window pointer
+    #endif
 
     // this is where the update() is 
     Engine->GameLoop();
+
+
+    #ifdef ENABLE_EDITOR
+    MyEditor::Shutdown();
+    #endif
 
     Engine->Exit();
 
