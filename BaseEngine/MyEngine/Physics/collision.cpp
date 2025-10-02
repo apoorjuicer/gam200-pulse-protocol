@@ -12,7 +12,7 @@
 // --- Toggles (can be modified to control behavior) ---
 bool UseBoxLineTest = false;       // true = BoxLine test, false = Hero/Monster collision
 bool SwordEnabled = false;         // true = sword swings, false = sword disabled
-bool EnableTestCases = true;       // true = print test case output, false = silent
+bool EnableTestCases = false;       // true = print test case output, false = silent
 
 // ==================================================================================
 // CollisionManager Initialization
@@ -29,7 +29,7 @@ void CollisionManager::Init()
         heroTransform.Pos = { 0,0 };
         heroTransform.Scale = { 200.0f, 200.0f };
         heroTransform.mdl_ref = 1.0f;
-        heroTransform.shd_ref = 0.0f;
+        heroTransform.shd_ref = 2.0f;
         heroTransform.isVisible = true;
         heroTransform.currentFrame = 0;
         g_coordinator->AddComponent(Hero, heroTransform);

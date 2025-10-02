@@ -1,5 +1,6 @@
 #include <windows.h>   // for OutputDebugString, etc.
 #include "pch/pch.h"
+#include "Core/Log.h"
 #pragma comment(lib, "winmm.lib")
 
 //Coordinator g_coordinator;
@@ -236,6 +237,8 @@ void CoreEngine::GameLoop()
     bool testBoxLineCollision = false; //true = boxline collision, false = monsterplayer
 
 	// application loop 
+	static bool keystateP = false;
+	static bool PKeyWasPressed = false;
 	while(!glfwWindowShouldClose(window) && GameRunning)
 	{
 		//Get the current time in milliseconds
@@ -248,7 +251,44 @@ void CoreEngine::GameLoop()
 
         //  1. Poll event(input key)
         glfwPollEvents();
+		// Read key state
+		bool PKeyPressed = (glfwGetKey(Engine->GetWindow(), GLFW_KEY_P) == GLFW_PRESS);
 
+		// Toggle on key press
+		if (PKeyPressed && !PKeyWasPressed) {
+			keystateP = !keystateP;
+			if (keystateP)
+				GAM200_INFO("Crash Test ENABLED (press P again to disable).");
+			else
+				GAM200_INFO("Crash Test DISABLED.");
+		}
+		PKeyWasPressed = PKeyPressed;
+
+
+		// ----------------- Execute crash test if toggle is ON -----------------
+		if (keystateP)
+		{
+			try
+			{
+				GAM200_CORE_INFO("Starting crash test triggered by P key...");
+
+				int a = 5;
+				int b = 0;
+				if (b == 0)
+					GAM200_CRITICAL("Test crash: Division by zero detected!"); // logs to CrashLog.txt
+
+				int c = a / b; // won't execute
+				(void)c;
+
+			}
+			catch (const std::exception& e)
+			{
+				GAM200_CORE_ERROR("Exception caught during crash test: {0}", e.what());
+			}
+
+			// Reset toggle to prevent repeat execution
+			//keystateP = false;
+		}
         //  2. update engine cpp
         Update(dt);
 
