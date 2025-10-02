@@ -131,7 +131,7 @@ void InputManager::Update() {
 
     }
 
-    if (IsKeyJustPressed(GLFW_KEY_F1)) {
+    if (IsKeyJustPressed(GLFW_KEY_O)) {
         // Flip ImGui state
         bool now = !MyEditor::IsEnabled();
         MyEditor::SetEnabled(now);
