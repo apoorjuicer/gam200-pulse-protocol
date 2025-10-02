@@ -66,73 +66,28 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     currentCyclePosition = 1;
 
     auto* g_coordinator = Coordinator::GetInstance();
-    //// ---------------- BOX 1 ----------------
-    //Entity entity1 = g_coordinator->CreateEntity();
-    //Framework::Transform feedbackTransform1{};
-    //feedbackTransform1.Pos = { 200.0f, 450.0f };
-    //feedbackTransform1.Scale = { 150.0f, 150.0f };
-    //feedbackTransform1.mdl_ref = 1.0f;
-    //feedbackTransform1.shd_ref = 0.0f;
-    //feedbackTransform1.isVisible = true;  // Make visible to test
-    //feedbackTransform1.currentFrame = 0;
-    //g_coordinator->AddComponent(entity1, feedbackTransform1);
-    //SetFeedbackEntity(entity1);
 
-    //// ---------------- BOX 2 ----------------
-    //Entity entity2 = g_coordinator->CreateEntity();
-    //Framework::Transform feedbackTransform2{};
-    //feedbackTransform2.Pos = { -1000.0f, -450.0f };
-    //feedbackTransform2.Scale = { 300.0f, 300.0f };
-    //feedbackTransform2.mdl_ref = 1.0f;
-    //feedbackTransform2.shd_ref = 2.0f;
-    //feedbackTransform2.isVisible = false;  // Make visible to test
-    //feedbackTransform2.currentFrame = 0;
-    //g_coordinator->AddComponent(entity2, feedbackTransform2);
-    //feedbackEntity2 = entity2;
+    //std::string path = "../../MyEngine/JSON/transform.json";
 
-   // Entity entity = g_coordinator->CreateEntity();
-
-    //Framework::Transform feedbackTransform{};
-    //feedbackTransform.Pos = { 0.0f, 0.0f };
-    //feedbackTransform.Scale = { 500.0f, 500.0f };
-    //feedbackTransform.mdl_ref = 1.0f;
-    //feedbackTransform.shd_ref = 2.0f;
-    //feedbackTransform.isVisible = true;
-    //feedbackTransform.currentFrame = 1;
-
-    std::string path = "../../MyEngine/JSON/transform.json";
-
-    //if (!Framework::SaveTransform(feedbackTransform, path)) {
-    //    std::cerr << "Failed to save transform!\n";
+    //Framework::Transform new_feedbackTransform;
+    //if (!Framework::LoadTransform(new_feedbackTransform, path)) {
+    //    std::cerr << "Failed to load transform!\n";
     //}
     //else {
     //    std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
     //}
 
-    Framework::Transform new_feedbackTransform;
-    if (!Framework::LoadTransform(new_feedbackTransform, path)) {
-        std::cerr << "Failed to load transform!\n";
-    }
-    else {
-        std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
-    }
+    Entity fontEntityObj = g_coordinator->CreateEntity();
+    Framework::Transform fontTr{};
+    fontTr.Pos = { 0.0f, 0.0f };
+    fontTr.Scale = { 500.0f, 500.0f };
+    fontTr.mdl_ref = 1.0f;
+    fontTr.shd_ref = 3.0f;
+    fontTr.isVisible = true;
+    fontTr.currentFrame = 1;
 
-    //g_coordinator->AddComponent(entity, new_feedbackTransform);
-    //SetFeedbackEntity(entity);
-
-
-    Entity entity = g_coordinator->CreateEntity();
-
-    Framework::Transform feedbackTransform2{};
-    feedbackTransform2.Pos = { 0.0f, 0.0f };
-    feedbackTransform2.Scale = { 500.0f, 500.0f };
-    feedbackTransform2.mdl_ref = 1.0f;
-    feedbackTransform2.shd_ref = 3.0f;
-    feedbackTransform2.isVisible = true;
-    feedbackTransform2.currentFrame = 1;
-
-    g_coordinator->AddComponent(entity, feedbackTransform2);
-    feedbackEntity = entity;
+    g_coordinator->AddComponent(fontEntityObj, fontTr);
+    fontEntity = fontEntityObj;
 }
 
 void InputManager::Update(float deltaTime) {
@@ -161,8 +116,8 @@ void InputManager::Update(float deltaTime) {
 
     auto* g_coordinator = Coordinator::GetInstance();
 
-    // Update feedbackEntity (box 1)
-    auto& transform1 = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity);
+    // Update fontEntity only
+    auto& transform1 = g_coordinator->GetComponent<Framework::Transform>(fontEntity);
     if (transform1.autoHide && transform1.isVisible) {
         transform1.visibilityTimer -= deltaTime;
         if (transform1.visibilityTimer <= 0.0f) {
@@ -171,35 +126,19 @@ void InputManager::Update(float deltaTime) {
         }
     }
 
-    // Update feedbackEntity2 (box 2)
-    auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity2);
-    if (transform2.autoHide && transform2.isVisible) {
-        transform2.visibilityTimer -= deltaTime;
-        if (transform2.visibilityTimer <= 0.0f) {
-            transform2.isVisible = false;
-            transform2.autoHide = false;
-        }
+    //// Update EntityMember entities
+    //for (auto& entity2 : EntityMember)
+    //{
+    //    auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(entity2);
 
-    }
-
-    for (auto& entity2 : EntityMember)
-    {
-        auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(entity2);
-
-        if (transform2.autoHide && transform2.isVisible) {
-            float dt = 0.016f;
-            transform2.visibilityTimer -= dt;
-            if (transform2.visibilityTimer <= 0.0f) {
-                transform2.isVisible = false;
-                transform2.autoHide = false;
-            }
-        }
-
-    }
-
-
-
-
+    //    if (transform2.autoHide && transform2.isVisible) {
+    //        transform2.visibilityTimer -= deltaTime;
+    //        if (transform2.visibilityTimer <= 0.0f) {
+    //            transform2.isVisible = false;
+    //            transform2.autoHide = false;
+    //        }
+    //    }
+    //}
 }
 
 void InputManager::Shutdown() {
@@ -222,17 +161,10 @@ void InputManager::BroadcastInputEvent(const InputEvent& event) {
     auto* g_coordinator = Coordinator::GetInstance();
     if (event.type == InputEvent::Type::RHYTHM_INPUT)
     {
-        // box 1
-        auto& transform1 = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity);
+        auto& transform1 = g_coordinator->GetComponent<Framework::Transform>(fontEntity);
         transform1.isVisible = true;
         transform1.visibilityTimer = 2.0f;
         transform1.autoHide = true;
-
-        // box 2
-        auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(feedbackEntity2);
-        transform2.isVisible = true;
-        transform2.visibilityTimer = 2.0f;
-        transform2.autoHide = true;
     }
 
     for (const auto& [systemName, callback] : inputListeners) {
@@ -410,9 +342,13 @@ void InputManager::CheckForMissedBeat() {
     if (!canInput) return;
     auto* g_coordinator = Coordinator::GetInstance();
     auto audioSystem = g_coordinator->GetSystem<AudioManager>();
-    if (!audioSystem) return;
+    if (!audioSystem) {
+        std::cout << "[DEBUG] No audio system!\n";
+        return;
+    }
 
     double currentTime = audioSystem->GetMusicPosition();
+    //std::cout << "[DEBUG] Music position: " << currentTime << " | Last beat: " << lastBeatTime << "\n";
 
     if (currentTime - lastBeatTime < beatInterval) {
         return;
@@ -424,8 +360,10 @@ void InputManager::CheckForMissedBeat() {
     // Update cycle position once per beat - synchronized
     currentCyclePosition = ((currentBeatIndex - 1) % 8) + 1;
 
+    // useful to check if the currentTime and lastBeatTime is getting values
+    //std::cout << "[DEBUG] Beat " << currentBeatIndex << " | Cycle position: " << currentCyclePosition << "\n";
+
     if (currentCyclePosition >= 1 && currentCyclePosition <= 4) {
-        // Beats 1-4: INCOMING phase
         std::cout << "[INCOMING] GET READY.." << std::endl;
         inputReceivedOnThisBeat = false;
     }

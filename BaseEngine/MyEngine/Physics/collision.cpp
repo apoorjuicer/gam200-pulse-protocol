@@ -70,6 +70,22 @@ void CollisionManager::Init()
         }
 
         std::cout << "============================================\n\n";
+
+        // ---------------- BOX 1 ----------------
+        Entity inputEntity = g_coordinator->CreateEntity();
+        Framework::Transform inputObject{};
+        inputObject.Pos = { 0.0f, -550.0f };
+        inputObject.Scale = { 600.0f, 200.0f };
+        inputObject.mdl_ref = 1.0f;
+        inputObject.shd_ref = 0.0f;
+        inputObject.isVisible = false;  // Make visible to test
+        inputObject.currentFrame = 0;
+        g_coordinator->AddComponent(inputEntity, inputObject);
+        
+        auto inputMgr = g_coordinator->GetSystem<InputManager>();
+        if (inputMgr) {
+            inputMgr->SetFontEntity(inputEntity);
+        }
     }
     else
     {

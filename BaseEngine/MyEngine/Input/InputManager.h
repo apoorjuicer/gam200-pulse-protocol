@@ -48,8 +48,8 @@ public:
     void Update(float deltaTime);
     void Shutdown();
 
-    void SetFeedbackEntity(Entity entity) { feedbackEntity = entity; }
-    Entity GetFeedbackEntity2() const { return feedbackEntity2; }
+    void SetFontEntity(Entity entity) { fontEntity = entity; }
+    //Entity GetFeedbackEntity2() const { return feedbackEntity2; }
 
     // -------------------------------------------------
     // Rhythm game configuration
@@ -98,7 +98,7 @@ private:
     //Entity feedbackEntity;
     //Entity feedbackEntity2;
 
-    Entity feedbackEntity;
+    Entity fontEntity;
     // -------------------------------------------------
     // Core input state
     // -------------------------------------------- -----

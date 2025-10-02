@@ -66,14 +66,23 @@ void AudioManager::Initialize()
     // Make sure this path exists relative to your exe working directory:
     //   build\MyEngine\Assets\MainMenuMusic.wav
     // If your assets live elsewhere, update this string accordingly.
-
-    const char* defaultBGM = "../../MyEngine/Assets/Music/Background/GameMusic.mp3";
-    PlayBGM(defaultBGM, 0.30f);
-
     auto defaultBGM = Framework::AssetsManager::Instance().GetSound("gamemusic");
 
     if (defaultBGM) { 
-        mSystem->playSound(defaultBGM, nullptr, false, nullptr); 
+        // Set to loop
+        defaultBGM->setMode(FMOD_LOOP_NORMAL);
+
+        // Store the sound and get the channel
+        mBGM = defaultBGM;
+        FMOD_RESULT r = mSystem->playSound(defaultBGM, nullptr, false, &mBGMCh);
+
+        if (r == FMOD_OK && mBGMCh) {
+            mBGMCh->setVolume(0.30f);
+            std::cout << "[AudioManager] BGM started successfully.\n";
+        }
+        else {
+            std::cerr << "[AudioManager] Failed to play BGM: " << FMOD_ErrorString(r) << "\n";
+        }
     }
 }
 
@@ -92,44 +101,6 @@ void AudioManager::Shutdown()
 }
 
 // ---------------------- BGM controls ----------------------
-
-bool AudioManager::PlayBGM(const std::string& path, float volume)
-{
-    if (!initCore()) return false;
-
-#ifdef _DEBUG
-    try {
-        std::cerr << "[AudioManager] Try BGM: " << path
-            << "  exists? " << (fs::exists(path) ? "YES" : "NO") << "\n";
-    }
-    catch (...) {}
-#endif
-
-    // Stop & release old BGM if needed
-    StopBGM();
-    if (mBGM) { mBGM->release(); mBGM = nullptr; }
-
-    // Stream + loop (2D)
-    FMOD_MODE mode = FMOD_DEFAULT | FMOD_CREATESTREAM | FMOD_LOOP_OFF | FMOD_2D;
-
-    FMOD_RESULT r = mSystem->createSound(path.c_str(), mode, nullptr, &mBGM);
-    FMOD_CHECK(r, "createSound(BGM)");
-    if (r != FMOD_OK || !mBGM) {
-        std::cerr << "[AudioManager] Failed to load BGM (bad path or unsupported format?).\n";
-        return false;
-    }
-
-    r = mSystem->playSound(mBGM, nullptr, false, &mBGMCh);
-    FMOD_CHECK(r, "playSound(BGM)");
-    if (r != FMOD_OK || !mBGMCh) {
-        std::cerr << "[AudioManager] Failed to play BGM.\n";
-        return false;
-    }
-
-    SetBGMVolume(volume);
-    std::cout << "[AudioManager] BGM started: " << path << " (vol=" << volume << ")\n";
-    return true;
-}
 
 void AudioManager::StopBGM()
 {
