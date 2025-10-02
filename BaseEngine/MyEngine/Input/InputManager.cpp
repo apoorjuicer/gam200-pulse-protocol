@@ -65,7 +65,7 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     //else {
     //    std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
     //}
-
+    std::string path = "../../MyEngine/JSON/transform.json";
     Framework::Transform new_feedbackTransform;
     if (!Framework::LoadTransform(new_feedbackTransform, path)) {
         std::cerr << "Failed to load transform!\n";

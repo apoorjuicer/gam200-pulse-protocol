@@ -6,9 +6,35 @@
 
 class Coordinator;          // forward-declare (global namespace)
 
+class Config {
+private:
+	float WindowWidth = 0;
+	float WindowHeight = 0;
+	std::string ConfigPath = "../../MyEngine/JSON/config.json";
+public:
+	float GetWindowWidth() const {
+		return WindowWidth;
+	}
+	float GetWindowHeight() const {
+		return WindowHeight;
+	}
+	std::string GetConfigPath() const {
+		return ConfigPath;
+	}
 
-    bool SaveEntity(Entity e, Coordinator* g, std::string const& path);
-    bool LoadEntity(Entity e, Coordinator* g, std::string const& path);
+	void SetWindowWidth(float w) { WindowWidth = w; }
+	void SetWindowHeight(float h) { WindowHeight = h; }
+	void SetConfigPath(std::string path) { ConfigPath = std::move(path); }
+
+	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
+	void Deserialize(const rapidjson::Value& in);
+};
+
+bool SaveConfig(Config const& config, std::string const& path);
+bool LoadConfig(Config& config, std::string const& path);
+
+bool SaveEntity(Entity e, Coordinator* g, std::string const& path);
+bool LoadEntity(Entity e, Coordinator* g, std::string const& path);
 
    // bool SaveScene(const std::vector<Entity>& entities, Coordinator* g, const std::string& path);
    // bool LoadScene(std::vector<Entity>& entities, Coordinator* g, const std::string& path);
