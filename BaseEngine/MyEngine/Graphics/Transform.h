@@ -52,7 +52,7 @@ namespace Framework
         ~Transform();
 
         virtual void Initialize();
-        void update(GLdouble delta_time);
+        void update(GLdouble delta_time, const std::set<Entity> entity);
         void draw() const;
 
         void SetSprite(std::string ref);
@@ -65,11 +65,11 @@ namespace Framework
         // Register these components in your initialization code:
         //void Serialize(Value& data, Document::AllocatorType& alloc) override;
         //void Deserialize(Value& data);
-        //void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
-        //void Deserialize(const rapidjson::Value& in);
+        void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
+        void Deserialize(const rapidjson::Value& in);
     };
 
-    //bool SaveTransform(Transform const& t, std::string const& path);
-    //bool LoadTransform(Transform& t, std::string const& path);
+    bool SaveTransform(Transform const& t, std::string const& path);
+    bool LoadTransform(Transform& t, std::string const& path);
 }
 #endif // FRAMEWORK_TRANSFORM_H

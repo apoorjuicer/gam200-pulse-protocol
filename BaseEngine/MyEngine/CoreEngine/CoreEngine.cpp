@@ -59,27 +59,27 @@ void APIENTRY glDebugOutput(GLenum source,
 }
 
 // THIS FUNCTION IS TO BE REMOVED AFTER RESOURCE MANAGER HAS BEEN TESTED AND WORKING.
-static GLuint LoadTexture(const char* filepath) {
-	stbi_set_flip_vertically_on_load(true); // flip image vertically when loading
-
-	int width, height, channels;
-	unsigned char* data = stbi_load(filepath, &width, &height, &channels, 4);
-
-	if (!data) {
-		std::cerr << "Failed to load texture: " << filepath << std::endl;
-		return 0;
-	}
-
-	GLuint textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	stbi_image_free(data);
-	return textureID;
-}
+//static GLuint LoadTexture(const char* filepath) {
+//	stbi_set_flip_vertically_on_load(true); // flip image vertically when loading
+//
+//	int width, height, channels;
+//	unsigned char* data = stbi_load(filepath, &width, &height, &channels, 4);
+//
+//	if (!data) {
+//		std::cerr << "Failed to load texture: " << filepath << std::endl;
+//		return 0;
+//	}
+//
+//	GLuint textureID;
+//	glGenTextures(1, &textureID);
+//	glBindTexture(GL_TEXTURE_2D, textureID);
+//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//
+//	stbi_image_free(data);
+//	return textureID;
+//}
 
 CoreEngine::CoreEngine() : window(nullptr)
 {
@@ -98,12 +98,31 @@ CoreEngine::~CoreEngine()
 
 void CoreEngine::Init()
 {
+	if (!glfwInit()) {
+		spdlog::error("Failed to initialize GLFW");
+		return;
+	}
 
-    if (!glfwInit()) {
-        std::cerr << "Failed to initialize GLFW" << std::endl;
-        return;
-    }
+	// --- Logging Setup ---
+	try {
+		auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+		auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+			"logs/engine.log", 1024 * 1024 * 5, 3);
+		// 5 MB max per file, keep 3 backups
 
+		std::vector<spdlog::sink_ptr> sinks{ console_sink, file_sink };
+		auto logger = std::make_shared<spdlog::logger>("multi_sink", sinks.begin(), sinks.end());
+		spdlog::set_default_logger(logger);
+
+		spdlog::set_level(spdlog::level::debug); // debug/info/warn/error
+		spdlog::flush_on(spdlog::level::info);
+
+		spdlog::info("=== Engine Logging Initialized ===");
+	}
+	catch (const spdlog::spdlog_ex& ex) {
+		std::cerr << "Log init failed: " << ex.what() << std::endl;
+	}
+	// ----------------------
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
@@ -143,23 +162,23 @@ void CoreEngine::Init()
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
     auto g_CollisionManager = g_coordinator->GetSystem<CollisionManager>();
 
+
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
 	g_graphicsSystem->Initialize();
 	g_audioSystem->Initialize(); 
-
 	g_coordinator->InitializeAllSystems();
 
-	GLuint barTexture = LoadTexture("../../MyEngine/Assets/Sprites/perfect.png");
-	if (barTexture > 0) {
-		Entity box2 = g_inputSystem->GetFeedbackEntity2();  // Use getter
-		auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(box2);
-		transform2.textureID = barTexture;
-		std::cout << "Texture loaded and assigned to box 2: " << barTexture << std::endl;
-	}
-
+	//GLuint barTexture = LoadTexture("../../MyEngine/Assets/Sprites/perfect.png");
+	//if (barTexture > 0) {
+	//	Entity box2 = g_inputSystem->GetFeedbackEntity2();  // Use getter
+	//	auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(box2);
+	//	transform2.textureID = barTexture;
+	//	std::cout << "Texture loaded and assigned to box 2: " << barTexture << std::endl;
+	//}
 
     GameRunning = true;
+
 }
 
 void CoreEngine::Setup()
@@ -179,7 +198,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterSystem<GraphicsManager>();
 	g_coordinator->RegisterSystem<AudioManager>();
     g_coordinator->RegisterSystem<CollisionManager>();
-
+	g_coordinator->RegisterSystem<SceneManager>();
 
 
     // Set signature for component and system
@@ -195,6 +214,12 @@ void CoreEngine::Setup()
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
 	g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
+
+	Signature sceneSig;
+	sceneSig.set(g_coordinator->GetComponentType<NPC>());
+	sceneSig.set(g_coordinator->GetComponentType<AABB>());
+	sceneSig.set(g_coordinator->GetComponentType<Framework::Transform>());  
+	g_coordinator->SetSystemSignature<GraphicsManager>(sceneSig);
 }
 
 void CoreEngine::Update(float dt)
@@ -203,9 +228,15 @@ void CoreEngine::Update(float dt)
 	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
+	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
 
 	if (g_graphicsSystem) g_graphicsSystem->Update();
 	if (g_inputSystem) g_inputSystem->Update(dt);
+
+	if (g_sceneSystem->GrabCurrentScene() == Scene::Pause)
+	{
+		g_sceneSystem->LoadScene(Scene::MainMenu);
+	}
 
 	g_coordinator->UpdateAllSystems(dt);
 }
@@ -240,6 +271,9 @@ void CoreEngine::GameLoop()
         Update(dt);
 
         //  3. ImGui update
+		#ifdef ENABLE_EDITOR
+		MyEditor::NewFrame();
+		#endif
 
         //  4. game update(NOT A WHILE LOOP) gsm
 
@@ -248,6 +282,10 @@ void CoreEngine::GameLoop()
         //glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
 
         //  6. ImGui rendering
+		#ifdef ENABLE_EDITOR
+		MyEditor::Draw();
+		MyEditor::Render();
+		#endif
 
 		RenderDebugDraw();
 
@@ -276,20 +314,14 @@ void CoreEngine::Exit()
 
 	if (g_inputSystem) {
 		g_inputSystem->Shutdown();
-		//delete g_inputSystem;
-		//g_inputSystem = nullptr;
 	}
 
 	if (g_audioSystem) {
 		g_audioSystem->Shutdown();
-		//delete g_audioSystem;
-		//g_audioSystem = nullptr;
 	}
 
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Shutdown();
-		//delete g_graphicsSystem;
-		//g_graphicsSystem = nullptr;
 	}
 
 	DebugDraw::Shutdown();
@@ -366,11 +398,6 @@ void CoreEngine::RenderDebugDraw() {
 }
 
 
-//void BroadcastMessage(){}
-
-
-
-
 
 
 // STILL BUILDING IM SORRY ;-;
@@ -418,9 +445,6 @@ void CoreEngine::RenderDebugDraw() {
 //    }
 //}
 
-
-
-//
 //class Settings {};
 //class Preferences {};
 //
@@ -457,21 +481,3 @@ void CoreEngine::RenderDebugDraw() {
 //
 //    Engine() : systems(settings) {};
 //};
-
-
-// ECS setup
-//g_coordinator->init();
-//g_coordinator->RegisterComponent<Player>();
-//g_coordinator->RegisterComponent<Framework::Transform>();
-//
-//g_coordinator->RegisterSystem<InputManager>();
-//g_coordinator->RegisterSystem<GraphicsManager>();
-// 
-// Signature signature;
-// signature.set(g_coordinator->GetComponentType<Player>());
-// g_coordinator->SetSystemSignature<InputManager>(signature);
-//
-//Engine.Init(); // <-- only if it does NOT touch OpenGL
-//
-//int entity = g_coordinator->CreateEntity();
-//g_coordinator->AddComponent(entity, Player{ 100, 200 });

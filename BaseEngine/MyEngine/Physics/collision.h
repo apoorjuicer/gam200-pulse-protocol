@@ -8,6 +8,7 @@
 #define COLLISION_H
 
 #include "../Core/Assets.h"
+#include "pch/pch.h"
 
 // -----------------------------------------------------------------------------
 // CollisionManager
@@ -29,9 +30,9 @@ public:
     // -------------------------------------------------------------------------
     // Utility Functions for Hitbox Construction
     // -------------------------------------------------------------------------
-    AABB BuildSwordHitbox(const NPC& npc);     // Build AABB for NPC's sword
-    AABB BuildHeroHitbox(const NPC& npc);      // Build AABB for central NPC
-    AABB BuildMonsterHitbox(const NPC& npc);   // Build AABB for moving monster
+    AABB BuildSwordHitbox(Framework::Transform& heroPos, const NPC& hero, const Vector2& targetPos); // dynamic sword hitbox
+    AABB BuildHeroHitbox(Framework::Transform& pos, const NPC& npc);      // Build AABB for central NPC
+    AABB BuildMonsterHitbox(Framework::Transform& pos, const NPC& npc);   // Build AABB for moving monster
 
     // -------------------------------------------------------------------------
     // Collision Checks
@@ -45,14 +46,6 @@ public:
     // -------------------------------------------------------------------------
     enum class LineHitResult { None, Bad, Good, Excellent };
 
-    // Checks if a box collides with a horizontal line segment.
-    // Parameters:
-    //   box        -> The AABB of the moving box
-    //   lineY      -> Y position of the line
-    //   lineStartX -> Start X of the line
-    //   lineEndX   -> End X of the line
-    // Returns:
-    //   LineHitResult::Bad / Good / Excellent depending on relative position
     LineHitResult CheckBoxLineCollision(const AABB& box, float lineY,
         float lineStartX, float lineEndX);
 

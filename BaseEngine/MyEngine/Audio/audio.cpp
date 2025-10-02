@@ -6,7 +6,6 @@
 #include "audio.h"
 #include <iostream>
 #include <filesystem>   // for debug path logs (safe to keep)
-#include "fmod.hpp"
 
 // If you want convenience linking on MSVC, you can uncomment this:
 // #ifdef _MSC_VER
@@ -24,55 +23,42 @@ static inline void FMOD_CHECK(FMOD_RESULT r, const char* where)
 }
 
 AudioManager::AudioManager() {}
-AudioManager::~AudioManager() { Shutdown(); }
+AudioManager::~AudioManager() {}
 
-bool AudioManager::initCore()
-{
-    if (mSystem) return true; // already initialized
-
-    FMOD_RESULT r = FMOD::System_Create(&mSystem);
-    FMOD_CHECK(r, "System_Create");
-    if (r != FMOD_OK || !mSystem) return false;
-
-    unsigned int version = 0;
-    r = mSystem->getVersion(&version);
-    FMOD_CHECK(r, "getVersion");
-
-    // 32 channels is plenty for now
-    r = mSystem->init(32, FMOD_INIT_NORMAL, nullptr);
-    FMOD_CHECK(r, "init");
-    if (r != FMOD_OK) return false;
-
-#ifdef _DEBUG
-    try {
-        std::cerr << "[AudioManager] FMOD initialized. CWD = " << fs::current_path().string() << "\n";
-    }
-    catch (...) {}
-#endif
-    return true;
-}
 
 void AudioManager::releaseAll()
 {
-    StopBGM();
+    if (!mSystem) return;
 
-    if (mBGM) {
-        mBGM->release();
-        mBGM = nullptr;
+    // 1) Stop anything that might still be playing
+    if (FMOD::ChannelGroup* master = nullptr;
+        mSystem->getMasterChannelGroup(&master) == FMOD_OK && master) {
+        master->stop();
     }
-    if (mSystem) {
-        mSystem->close();
-        mSystem->release();
-        mSystem = nullptr;
-    }
+
+    // 2) Unload all sounds (does not require the system to be closed yet)
+    Framework::AssetsManager::Instance().UnloadAllSound();
+
+    // 3) Tear down FMOD
+    mSystem->close();
+    mSystem->release();
+    mSystem = nullptr;
 }
+
 
 void AudioManager::Initialize()
 {
-    if (!initCore()) {
-        std::cerr << "[AudioManager] Init FAILED (check fmod.dll next to the exe and correct architecture).\n";
-        return;
+    // Create and initialize the FMOD system
+    FMOD::System_Create(&mSystem);
+    if (mSystem) {
+        mSystem->init(32, FMOD_INIT_NORMAL, nullptr);
     }
+    else {
+        std::cerr << "FMOD system initialization failed." << std::endl;
+    }
+
+    Framework::AssetsManager::Instance().SetFMODSystem(mSystem);
+    Framework::AssetsManager::Instance().LoadAllSound();
 
     std::cout << "[AudioManager] Successfully initialized.\n";
 
@@ -80,14 +66,14 @@ void AudioManager::Initialize()
     // Make sure this path exists relative to your exe working directory:
     //   build\MyEngine\Assets\MainMenuMusic.wav
     // If your assets live elsewhere, update this string accordingly.
-    //const char* defaultBGM = "../../MyEngine/Assets/GameplayMusic.wav";
+
     const char* defaultBGM = "../../MyEngine/Assets/Music/Background/GameMusic.mp3";
     PlayBGM(defaultBGM, 0.30f);
 
-    // preloads sfx sound for beat
-    const char* defaultInputSFX = "../../MyEngine/Assets/SFX/Rhythm_Feedback/beat_placeholder.wav";
-    if (!LoadInputSFX(defaultInputSFX)) {
-        std::cerr << "[AudioManager] Failed to load default input SFX: " << defaultInputSFX << "\n";
+    auto defaultBGM = Framework::AssetsManager::Instance().GetSound("gamemusic");
+
+    if (defaultBGM) { 
+        mSystem->playSound(defaultBGM, nullptr, false, nullptr); 
     }
 }
 
@@ -177,13 +163,18 @@ bool AudioManager::LoadInputSFX(const std::string& path) {
     if (!mSystem) return false;
     return (mSystem->createSound(path.c_str(), FMOD_DEFAULT, 0, &mInputSFX) == FMOD_OK);
 }
-void AudioManager::PlayInputSFX(float volume) {
-    if (!mSystem || !mInputSFX) return;
 
-    FMOD::Channel* channel = nullptr;
-    FMOD_RESULT result = mSystem->playSound(mInputSFX, 0, false, &channel);
-    if (result == FMOD_OK && channel) {
-        channel->setVolume(volume); // applies only to this SFX
+void AudioManager::PlaySound(const std::string& key, float volume) {
+    if (!mSystem) return;
+
+    if (FMOD::Sound* s = Framework::AssetsManager::Instance().GetSound(key)) {
+        FMOD::Channel* ch = nullptr;
+        FMOD_RESULT r = mSystem->playSound(s, nullptr, false, &ch);
+        if (r == FMOD_OK && ch) ch->setVolume(volume);
+        else std::cerr << "[Audio] playSound failed: " << FMOD_ErrorString(r) << "\n";
+    }
+    else {
+        std::cerr << "[Audio] Sound not found: " << key << "\n";
     }
 }
 
