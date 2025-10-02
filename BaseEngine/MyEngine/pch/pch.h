@@ -38,7 +38,6 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 #include <iomanip> //debug
 #include <algorithm>
 #include <random>
-#include <array>
 #include <sstream>
 #include <chrono> // for profiling
 #include <list>
@@ -49,6 +48,8 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+
+#include "../MyEngine/Graphics/glapp.h"
 #include "Graphics/glhelper.h"
 #include "Graphics/glslshader.h"
 
@@ -56,15 +57,21 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 #include "../MyEngine/FMOD_API/api/core/inc/fmod.hpp"
 #include "../MyEngine/FMOD_API/api/core/inc/fmod_errors.h"
 
-// Editor Header
+// Editor Header (for ImGUI)
 #include "../MyEditor/Editor.h"
+#include "../MyEditor/Message.h"
+#include "../MyEditor/ISystem.h"
+#include "../MyEditor/Precompiled.h"
+
+#include "../../imgui/imgui.h"
+#include "../../imgui/backends/imgui_impl_glfw.h"
+#include "../../imgui/backends/imgui_impl_opengl3.h"
 
 //Serialize
 #include <rapidjson/document.h>     // for Document, Value, AllocatorType
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h> // for StringBuffer
-#include <filesystem>
 
 
 // Suppress APIENTRY macro redefinition warning
@@ -79,11 +86,12 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 #include "../MyEngine/Graphics/GraphicsManager.h"
 #include "../MyEngine/Graphics/DebugDraw.h"
 #include "../MyEngine/Graphics/Transform.h"
+#include "../MyEngine/Graphics/Font.h"
 #include "../MyEngine/Physics/collision.h"
 #include "../MyEngine/CoreEngine/CoreEngine.h"
-#include <../MyEngine/Resources/ResourceManager.h>
+#include "../MyEngine/Resources/ResourceManager.h"
 #include "../MyEngine/Serialization/Serialization.h"
-#include <../MyEngine/Core/AssetsManager.h>
+#include "../MyEngine/Core/AssetsManager.h"
 
 // ECS
 #include "../MyEngine/Core/Types.h"

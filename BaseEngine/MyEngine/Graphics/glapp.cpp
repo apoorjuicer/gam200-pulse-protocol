@@ -1,11 +1,15 @@
-/*********************************************************************************************
- \file      glapp.cpp
- \par		Bloop
- \author	Goh Pin Kai (pinkai.g@digipen.edu)
+/******************************************************************************/
+/**
+ * @file            glapp.cpp
+ * @project			Pulse Protocol
+ * @author          Goh Pin Kai
+ * @brief			Update the brief of this file
+ * @copyright		Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 
-
-\copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
-**********************************************************************************************/
 #include "glapp.h"
 #include "DebugDraw.h"
 //#include "../Managers/AssetsManager.h"
@@ -193,13 +197,21 @@ void GLApp::update(GLFWwindow* window,std::set<Entity> entity) {
     //    GLHelper::keystateP = GL_FALSE;
     //}
     GLHelper::update_time(1.0); // updates delta_time and fps
-    if (window) 
+
+    // removed, moved to rendering as text instead in window so easier to see the fps
+   /* if (window) 
     {
         std::ostringstream title;
         title << "Game Window - FPS: " << std::fixed << std::setprecision(1) 
               << GLHelper::fps;
         glfwSetWindowTitle(window, title.str().c_str());
+    }*/
+
+    if (window)
+    {
+        glfwSetWindowTitle(window, "Pulse Protocol");
     }
+
      //update(GLHelper::delta_time, entity);
     Framework::Transform transformSystem;
     transformSystem.update(GLHelper::delta_time, entity);
