@@ -10,7 +10,10 @@ prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
 #pragma once //Makes sure this header is only included once
-#include "pch/pch.h"
+
+#include "ISystem.h"
+#include "Message.h"
+#include "Precompiled.h"
 
 
 namespace Editor

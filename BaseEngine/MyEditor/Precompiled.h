@@ -1,13 +1,13 @@
-/******************************************************************************/
-/**
- * @file            Precompiled.h
- * @project			Pulse Protocol
- * @author          Leu Jun Yong
- * @brief			Update the brief of this file
- * @copyright		Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
- */
- /******************************************************************************/
+/*********************************************************************************************
+ \file      Precompiled.h
+ \par		Cat Feeders
+ \author	Michelle Han Jian Ping (m.han@digipen.edu) 100%
 
-#include "pch/pch.h"
+
+\copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.
+**********************************************************************************************/
+
+#include <string>
+#include <vector>
+#include <ctime>
+#include <memory>

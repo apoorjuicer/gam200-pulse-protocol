@@ -1,15 +1,8 @@
-/******************************************************************************/
-/**
- * @file            Assets.h
- * @project			Pulse Protocol
- * @author          Reginald Lew Yee Ren
- * @brief			Core asset data structures used by the ECS system
- * @copyright		Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
- */
- /******************************************************************************/
-
+// ==================================================================================
+// File: Assets.h
+// Author: Reginald
+// Brief: Core asset data structures used by the ECS system
+// ==================================================================================
 #pragma once
 
 #include <pch/pch.h>

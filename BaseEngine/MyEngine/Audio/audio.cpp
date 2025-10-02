@@ -1,16 +1,11 @@
-/******************************************************************************/
-/**
- * @file            audio.cpp
- * @project			Pulse Protocol
- * @author          Leu Jun Yong
- * @brief			Update the brief of this file
- * @copyright		Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
- */
- /******************************************************************************/
+// ==================================================================================
+// audio.cpp
+// Author: Leu Jun Yong
+// ==================================================================================
 
-#include "pch/pch.h"
+#include "audio.h"
+#include <iostream>
+#include <filesystem>   // for debug path logs (safe to keep)
 
 // If you want convenience linking on MSVC, you can uncomment this:
 // #ifdef _MSC_VER
@@ -82,7 +77,7 @@ void AudioManager::Initialize()
         FMOD_RESULT r = mSystem->playSound(defaultBGM, nullptr, false, &mBGMCh);
 
         if (r == FMOD_OK && mBGMCh) {
-            mBGMCh->setVolume(1.0f);
+            mBGMCh->setVolume(0.05f);
             std::cout << "[AudioManager] BGM started successfully.\n";
         }
         else {

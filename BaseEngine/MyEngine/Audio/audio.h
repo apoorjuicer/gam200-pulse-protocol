@@ -1,17 +1,14 @@
-/******************************************************************************/
-/**
- * @file            audio.h
- * @project			Pulse Protocol
- * @author          Leu Jun Yong
- * @brief			Update the brief of this file
- * @copyright		Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
- */
- /******************************************************************************/
+// ==================================================================================
+// audio.h
+// Author: Leu Jun Yong
+// ==================================================================================
 
 #pragma once
 #include "pch/pch.h"
+#include <GLFW/glfw3.h>
+#include "Core/System.h"
+#include "Core/SystemManager.h"
+#include <string>
 
 extern FMOD::System* mSystem;
 
@@ -42,6 +39,7 @@ public:
     // gets path from source file and plays it at wanted volume, default volume is 1.0f
     bool LoadInputSFX(const std::string& path);
     void PlaySound(const std::string& key, float volume);
+    //void PlayInputSFX(float volume = 1.0f);
 
     // checks how far into the song the music has played
     double GetMusicPosition() const;

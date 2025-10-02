@@ -1,17 +1,12 @@
-/******************************************************************************/
-/**
- * @file            GraphicsManager.cpp
- * @project			Pulse Protocol
- * @author          Goh Pin Kai (50%)  - fill in wht u did in this file
- * @author          Leu Jun Yong (50%) - fill in wht u did in this file
- * @brief			Update the brief of this file (overall what is being done in this file)
- * @copyright		Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
- */
- /******************************************************************************/
+/*********************************************************************************************
+// GraphicsManager.cpp
+\par        Bloop
+\author     Goh pin Kai(pinkai.g@digipen.edu)
+\copyright  All content 2025 DigiPen Institute of Technology Singapore.
+*********************************************************************************************/
 
-#include "pch/pch.h"
+#include "GraphicsManager.h"
+#include "Font.h"
 
 float editorHeight;
 float editorWidth;
@@ -131,11 +126,7 @@ void GraphicsManager::Update()
 
     // 2) then draw text on top
     RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
-
-    // this is the text for FPS and render it
-    std::ostringstream fpsText;
-    fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
-    RenderText(GLApp::shdrpgms[3], fpsText.str(), 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
+    RenderText(GLApp::shdrpgms[3], "Pulse Protocol", 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
 }
 
 void GraphicsManager::Shutdown()

@@ -10,7 +10,9 @@ prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
 
-#include "pch/pch.h"
+#include "../MyEngine/Graphics/glapp.h"
+#include "../MyEngine/Graphics/glhelper.h"
+#include "Core.h"
 
 //GLOBAL VARIABLES FOR EDITOR
 

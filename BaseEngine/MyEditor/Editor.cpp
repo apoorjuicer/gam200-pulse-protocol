@@ -1,16 +1,6 @@
-﻿/******************************************************************************/
-/**
- * @file            Editor.cpp
- * @project			Pulse Protocol
- * @author          Leu Jun Yong
- * @brief			Update the brief of this file
- * @copyright		Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
- */
-/******************************************************************************/
-
-#include "pch/pch.h"
+﻿#include "../../imgui/imgui.h"
+#include "../../imgui/backends/imgui_impl_glfw.h"
+#include "../../imgui/backends/imgui_impl_opengl3.h"
 
 namespace MyEditor {
     static GLFWwindow* s_Window = nullptr;
@@ -41,7 +31,7 @@ namespace MyEditor {
         ImGui::Begin("Editor");
         ImGui::TextUnformatted("Hello from MyEditor!");
         ImGui::Separator();
-        ImGui::TextUnformatted("Press O to toggle ImGui.");
+        ImGui::TextUnformatted("Press F1 to toggle ImGui.");
         ImGui::End();
     }
 
