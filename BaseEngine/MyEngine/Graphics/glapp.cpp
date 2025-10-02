@@ -110,7 +110,7 @@ GLuint GLApp::LoadTexture(const std::string& filepath) {
 }
 
 void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
-    textureID = LoadTexture("../../MyEngine/Assets/hero.jpg");
+    textureID = LoadTexture("../../MyEngine/Assets/hero.png");
     // Use local inputEditorWidth and inputEditorHeight values for calculations.
     GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth)),
         h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
@@ -175,7 +175,7 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 }
 
 
-void GLApp::update(GLFWwindow* window) {
+void GLApp::update(GLFWwindow* window,std::set<Entity> entity) {
     //if (GLHelper::keystateP == GL_TRUE) {
     //    if (polygonmode == 0) {
     //        ++polygonmode;
@@ -191,18 +191,18 @@ void GLApp::update(GLFWwindow* window) {
     //    }
     //    GLHelper::keystateP = GL_FALSE;
     //}
-
-
+    GLHelper::update_time(1.0); // updates delta_time and fps
     if (window) 
     {
         std::ostringstream title;
-        title << "Game Window - FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
+        title << "Game Window - FPS: " << std::fixed << std::setprecision(1) 
+              << GLHelper::fps;
         glfwSetWindowTitle(window, title.str().c_str());
     }
-
-    /*for (auto& x : transObj) {
-        x->update(GLHelper::delta_time);
-    }*/
+     //update(GLHelper::delta_time, entity);
+    Framework::Transform transformSystem;
+    transformSystem.update(GLHelper::delta_time, entity);
+    
 }
 
 void GLApp::updateAnimation(Framework::Transform& x) {
@@ -219,6 +219,7 @@ void GLApp::updateAnimation(Framework::Transform& x) {
 }
 
 void GLApp::drawTrans(Framework::Transform& x) {
+    
     auto& shader = shdrpgms[static_cast<uint64_t>(x.shd_ref)];
     shader.Use();
     GLuint prog = shader.GetHandle();
@@ -240,7 +241,6 @@ void GLApp::drawTrans(Framework::Transform& x) {
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, x.textureID);
-
     glDrawElements(models[static_cast<uint64_t>(x.mdl_ref)].primitive_type,
         models[static_cast<uint64_t>(x.mdl_ref)].draw_cnt,
         GL_UNSIGNED_SHORT, nullptr);
@@ -259,34 +259,34 @@ void GLApp::draw(std::set<Entity> entities) {
     //shdrpgms[0].Use();
     //transObj.clear();
     auto* g_coordinator = Coordinator::GetInstance();
-    //extern Coordinator g_coordinator;
-    for (auto it : entities) // std::smthing smthing // Itererate through this list
-    {
-        auto x = g_coordinator->GetComponent<Framework::Transform>(it);
-
-        //x->textureID = textureID;
-
-        if (x.isVisible) {
-            updateAnimation(x);
-            glBindTexture(GL_TEXTURE_2D, x.textureID);
-            drawTrans(x);
-        }
         //if (auto* tr = g_coordinator->TryGetComponent<Framework::Transform>(it))
         //{
         //    transObj.push_back(tr);
+        //    tr->textureID = textureID;
         //}
-        //
-        //auto pos_x = g_coordinator->GetComponent<Framework::Transform>(it).Pos.x;
-
+        for (auto it : entities) {
+            auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
+            if (tr.textureID == 0) tr.textureID = textureID;
+            if (tr.isVisible) {
+                updateAnimation(tr);
+                //glBindTexture(GL_TEXTURE_2D, tr.textureID); 
+                drawTrans(tr);
+            }
     }
 
-    //for (auto x : transObj) {
-    //    if (x->isVisible) {
-    //        updateAnimation(*x);
-    //        glBindTexture(GL_TEXTURE_2D, x->textureID);
-    //        drawTrans(*x);
-    //    }
-    //}
+    for (auto x : entities) {
+        //if (x->isVisible) {
+        //    updateAnimation(*x);
+        //    glBindTexture(GL_TEXTURE_2D, x->textureID);
+        //    drawTrans(*x);
+        //}
+        auto y = g_coordinator->GetComponent<Framework::Transform>(x);
+        if (y.isVisible) {
+            updateAnimation(y);
+            glBindTexture(GL_TEXTURE_2D, y.textureID);
+            drawTrans(y);
+        }
+    }
 
 	//Polygon mode
     //if (polygonmode == 0)

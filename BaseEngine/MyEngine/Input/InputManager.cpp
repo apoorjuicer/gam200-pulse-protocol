@@ -50,13 +50,13 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     auto* g_coordinator = Coordinator::GetInstance();
     Entity entity = g_coordinator->CreateEntity();
 
-    /*Framework::Transform feedbackTransform{};
-    feedbackTransform.Pos = { 100.0f, 250.0f };
+    Framework::Transform feedbackTransform{};
+    feedbackTransform.Pos = { 0.0f, 0.0f };
     feedbackTransform.Scale = { 500.0f, 500.0f };
     feedbackTransform.mdl_ref = 1.0f;
     feedbackTransform.shd_ref = 2.0f;
     feedbackTransform.isVisible = true;
-    feedbackTransform.currentFrame = 0;*/
+    feedbackTransform.currentFrame = 1;
 
     std::string path = "../../MyEngine/JSON/transform.json";
 
