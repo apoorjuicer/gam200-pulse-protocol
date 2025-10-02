@@ -1,8 +1,14 @@
-// ==================================================================================
-// File: collision.h
-// Author: Reginald
-// Brief: Collision management system (NPC, Monster, Sword, and Box-to-Line logic)
-// ==================================================================================
+/******************************************************************************/
+/**
+ * @file            collision.h
+ * @project         Pulse Protocol
+ * @author          Reginald Lew Yee Ren
+ * @brief           Collision management system (NPC, Monster, Sword, and Box-to-Line logic)
+ * @copyright       Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 
 #ifndef COLLISION_H
 #define COLLISION_H
@@ -53,6 +59,9 @@ public:
     // ECS Data
     // -------------------------------------------------------------------------
     std::vector<Entity> EntityNPC; // List of NPC entities in the world
+
+private:
+    bool monsterCanMove = false; // at the start, is static
 };
 
 #endif // COLLISION_H

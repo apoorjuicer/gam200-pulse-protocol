@@ -193,12 +193,9 @@ void GLApp::update(GLFWwindow* window,std::set<Entity> entity) {
     //    GLHelper::keystateP = GL_FALSE;
     //}
     GLHelper::update_time(1.0); // updates delta_time and fps
-    if (window) 
+    if (window)
     {
-        std::ostringstream title;
-        title << "Game Window - FPS: " << std::fixed << std::setprecision(1) 
-              << GLHelper::fps;
-        glfwSetWindowTitle(window, title.str().c_str());
+        glfwSetWindowTitle(window, "Pulse Protocol");
     }
      //update(GLHelper::delta_time, entity);
     Framework::Transform transformSystem;

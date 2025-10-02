@@ -31,7 +31,7 @@ namespace MyEditor {
         ImGui::Begin("Editor");
         ImGui::TextUnformatted("Hello from MyEditor!");
         ImGui::Separator();
-        ImGui::TextUnformatted("Press F1 to toggle ImGui.");
+        ImGui::TextUnformatted("Press O to toggle ImGui.");
         ImGui::End();
     }
 

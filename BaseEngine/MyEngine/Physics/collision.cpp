@@ -1,8 +1,14 @@
-// ==================================================================================
-// collision.cpp  
-// Author: Reginald
-// Brief: AABB collision handling between NPCs, Monsters, and BoxLine tests
-// ==================================================================================
+/******************************************************************************/
+/**
+ * @file            collision.cpp
+ * @project         Pulse Protocol
+ * @author          Reginald Lew Yee Ren
+ * @brief           AABB collision handling between NPCs, Monsters, and BoxLine tests
+ * @copyright       Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 
 #include <pch/pch.h>
 #include <iostream>
@@ -27,7 +33,7 @@ void CollisionManager::Init()
         Entity Hero = g_coordinator->CreateEntity();
         Framework::Transform heroTransform{};
         heroTransform.Pos = { 0,0 };
-        heroTransform.Scale = { 200.0f, 200.0f };
+        heroTransform.Scale = { 200.0f, 400.0f };
         heroTransform.mdl_ref = 1.0f;
         heroTransform.shd_ref = 2.0f;
         heroTransform.isVisible = true;
@@ -45,7 +51,7 @@ void CollisionManager::Init()
         std::cout << "Hero spawned at center.\n";
 
         // --- Spawn Two Monster NPCs ---
-        float startPositions[2] = { -500.0f, 500.0f }; // left and right
+        float startPositions[2] = { -1000.0f, 1000.0f }; // left and right
         for (int i = 0; i < 2; ++i)
         {
             Entity Monster = g_coordinator->CreateEntity();
@@ -74,7 +80,7 @@ void CollisionManager::Init()
         // ---------------- BOX 1 ----------------
         Entity inputEntity = g_coordinator->CreateEntity();
         Framework::Transform inputObject{};
-        inputObject.Pos = { 0.0f, 0.0f };
+        inputObject.Pos = { 0.0f, -500.0f };
         inputObject.Scale = { 600.0f, 200.0f };
         inputObject.mdl_ref = 1.0f;
         inputObject.shd_ref = 0.0f;
@@ -117,6 +123,83 @@ void CollisionManager::Update(float dt)
 
     if (UseBoxLineTest) return; // BoxLine logic unchanged
 
+    // *------------------------------------ TRIGGER MOVEMENT --------------------------------*//
+
+    // checking for 'M' key press to enable monster movement
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_M) == GLFW_PRESS) {
+        if (!monsterCanMove) {
+            monsterCanMove = true;
+        }
+    }
+
+    // *------------------------------------ SCALING UP / DOWN --------------------------------*//
+
+    // 'K' key to scale UP
+    static bool kKeyPressed = false;
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_K) == GLFW_PRESS) {
+        if (!kKeyPressed) {
+            auto& hero_transform = g_coordinator->GetComponent<Framework::Transform>(EntityNPC[0]);
+            hero_transform.Scale.x *= 1.1f;  // 10% larger
+            hero_transform.Scale.y *= 1.1f;
+            std::cout << "[CollisionManager] Hero scaled UP to: " << hero_transform.Scale.x << "x" << hero_transform.Scale.y << "\n";
+            kKeyPressed = true;
+        }
+    }
+    else {
+        kKeyPressed = false;
+    }
+
+    // 'L' key to scale DOWN
+    static bool lKeyPressed = false;
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_L) == GLFW_PRESS) {
+        if (!lKeyPressed) {
+            auto& hero_transform = g_coordinator->GetComponent<Framework::Transform>(EntityNPC[0]);
+            hero_transform.Scale.x *= 0.9f;  // 10% smaller
+            hero_transform.Scale.y *= 0.9f;
+            std::cout << "[CollisionManager] Hero scaled DOWN to: " << hero_transform.Scale.x << "x" << hero_transform.Scale.y << "\n";
+            lKeyPressed = true;
+        }
+    }
+    else {
+        lKeyPressed = false;
+    }
+
+    // *------------------------------------ ROTATION --------------------------------*//
+    
+    // Rotate monsters with 'H' (counter-clockwise) and 'J' (clockwise)
+    static bool hKeyPressed = false;
+    static bool jKeyPressed = false;
+
+    // 'J' key to rotate monsters clockwise
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_J) == GLFW_PRESS) {
+        if (!jKeyPressed) {
+            for (size_t i = 1; i < EntityNPC.size(); ++i) {
+                auto& monster_transform = g_coordinator->GetComponent<Framework::Transform>(EntityNPC[i]);
+                monster_transform.angle_disp -= 20.0f;  // 20 deg
+            }
+            jKeyPressed = true;
+        }
+    }
+    else {
+        jKeyPressed = false;
+    }
+
+    // H key rotates counter-clockwise
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_H) == GLFW_PRESS) {
+        if (!hKeyPressed) {
+            for (size_t i = 1; i < EntityNPC.size(); ++i) {
+                auto& monster_transform = g_coordinator->GetComponent<Framework::Transform>(EntityNPC[i]);
+                monster_transform.angle_disp += 20.0f; // 20 deg
+            }
+            hKeyPressed = true;
+        }
+    }
+    else {
+        hKeyPressed = false;
+    }
+
+    // *------------------------------------ ORIGINAL LOGIC --------------------------------*//
+
     auto& centre = g_coordinator->GetComponent<NPC>(EntityNPC[0]);
     auto& hero_pos = g_coordinator->GetComponent<Framework::Transform>(EntityNPC[0]);
 
@@ -133,12 +216,14 @@ void CollisionManager::Update(float dt)
         AABB movingBox = BuildMonsterHitbox(monster_pos, moving);
 
         // --- Move Monster ---
-        float speed = (monster_pos.Pos.x < 0) ? 100.0f : -100.0f; // left->right, right->left
-        monster_pos.Pos.x += speed * dt;
+        if (monsterCanMove) {
+            float speed = (monster_pos.Pos.x < 0) ? 100.0f : -100.0f; // left->right, right->left
+            monster_pos.Pos.x += speed * dt;
 
-        if (EnableTestCases)
-            std::cout << std::setw(12) << "[Move] "
-            << "Monster at x=" << monster_pos.Pos.x << "\n";
+            if (EnableTestCases)
+                std::cout << std::setw(12) << "[Move] "
+                << "Monster at x=" << monster_pos.Pos.x << "\n";
+        }
 
         // --- Sword Auto-Swing Check ---
         if (SwordEnabled)
