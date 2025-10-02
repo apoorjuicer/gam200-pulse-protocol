@@ -12,7 +12,7 @@
 // --- Toggles (can be modified to control behavior) ---
 bool UseBoxLineTest = false;       // true = BoxLine test, false = Hero/Monster collision
 bool SwordEnabled = false;         // true = sword swings, false = sword disabled
-bool EnableTestCases = true;       // true = print test case output, false = silent
+bool EnableTestCases = false;       // true = print test case output, false = silent
 
 // ==================================================================================
 // CollisionManager Initialization

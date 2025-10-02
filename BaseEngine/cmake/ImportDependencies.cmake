@@ -1,3 +1,4 @@
+set(CMAKE_FOLDER "Libraries")
 include(FetchContent)
 
 # Macro to import GLFW

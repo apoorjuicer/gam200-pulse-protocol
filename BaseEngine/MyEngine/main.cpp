@@ -20,6 +20,8 @@
 #include "Core/Coordinator.h"
 #include "pch/pch.h"
 #include "Core/Assets.h"
+#include "Core/Log.h" // <-- include your logging system
+#include <GLFW/glfw3.h>
 
 #if (_DEBUG)
 // MEM LEAKS LIBRARIES (See _CrtMemCheckpoint for examples to check for mem leaks)
@@ -62,13 +64,30 @@ struct GameStates {
 CoreEngine* Engine = nullptr;
 //InputManager* g_inputSystem = nullptr;
 //GraphicsManager* g_graphicsSystem = nullptr;
+// 
+// ----------------- Toggle key for crash test -----------------
+static std::string KeyToString(int key) {
+    switch (key) {
+    case GLFW_KEY_W: return "W";
+    case GLFW_KEY_A: return "A";
+    case GLFW_KEY_S: return "S";
+    case GLFW_KEY_D: return "D";
+    case GLFW_KEY_P: return "P";
+    default: return std::to_string(key);
+    }
+}
 
 int main() {
 #ifdef _DEBUG
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    // Create the Engine instance
+     // ----------------- Initialize Logging System -----------------
+    GAM200graphics::Log::Init();
+    GAM200_CORE_INFO("Core Logger Initialized.");
+    GAM200_INFO("Client Logger Initialized.");
+
+    // ----------------- Create the Engine instance -----------------
     Engine = new CoreEngine();
 
     Engine->Setup();
