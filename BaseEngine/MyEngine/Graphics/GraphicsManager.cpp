@@ -124,8 +124,8 @@ void GraphicsManager::Update()
     glapp->draw(EntityMember);                     // 1) draw your scene first
 
     // 2) then draw text on top
-    RenderText(GLApp::shdrpgms[3], "HELLO", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
-    RenderText(GLApp::shdrpgms[3], "Testing123", 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
+    RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
+    RenderText(GLApp::shdrpgms[3], "Pulse Protocol", 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
 }
 
 void GraphicsManager::Shutdown()

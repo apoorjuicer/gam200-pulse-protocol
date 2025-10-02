@@ -49,7 +49,6 @@ public:
     void Shutdown();
 
     void SetFeedbackEntity(Entity entity) { feedbackEntity = entity; }
-    Entity SetFeedbackEntity2() const { return feedbackEntuty2; }
 
     // -------------------------------------------------
     // Rhythm game configuration
@@ -87,7 +86,6 @@ public:
 
 private:
     Entity feedbackEntity;
-    Entity feedbackEntuty2;
     // -------------------------------------------------
     // Core input state
     // -------------------------------------------------

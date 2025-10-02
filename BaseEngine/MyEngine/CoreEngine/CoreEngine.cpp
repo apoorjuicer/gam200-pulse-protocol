@@ -285,20 +285,14 @@ void CoreEngine::Exit()
 
 	if (g_inputSystem) {
 		g_inputSystem->Shutdown();
-		//delete g_inputSystem;
-		//g_inputSystem = nullptr;
 	}
 
 	if (g_audioSystem) {
 		g_audioSystem->Shutdown();
-		//delete g_audioSystem;
-		//g_audioSystem = nullptr;
 	}
 
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Shutdown();
-		//delete g_graphicsSystem;
-		//g_graphicsSystem = nullptr;
 	}
 
     if (window)
@@ -356,7 +350,7 @@ void CoreEngine::Exit()
 //        window_swap_buffers();
 //    }
 //}
-//
+
 //class Settings {};
 //class Preferences {};
 //
@@ -393,19 +387,3 @@ void CoreEngine::Exit()
 //
 //    Engine() : systems(settings) {};
 //};
-// ECS setup
-//g_coordinator->init();
-//g_coordinator->RegisterComponent<Player>();
-//g_coordinator->RegisterComponent<Framework::Transform>();
-//
-//g_coordinator->RegisterSystem<InputManager>();
-//g_coordinator->RegisterSystem<GraphicsManager>();
-// 
-// Signature signature;
-// signature.set(g_coordinator->GetComponentType<Player>());
-// g_coordinator->SetSystemSignature<InputManager>(signature);
-//
-//Engine.Init(); // <-- only if it does NOT touch OpenGL
-//
-//int entity = g_coordinator->CreateEntity();
-//g_coordinator->AddComponent(entity, Player{ 100, 200 });
