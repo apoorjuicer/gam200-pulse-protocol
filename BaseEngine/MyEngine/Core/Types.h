@@ -1,3 +1,17 @@
+/******************************************************************************/
+/**
+ * @file       Types.h
+ * @project    Pulse Protocol
+ * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @brief      Defines core ECS type aliases and constants including Entity
+ *             identifiers, ComponentType indices, maximum entity/component
+ *             limits, and Signature bitsets used for system-component matching
+ *             throughout the Entity-Component-System architecture
+ * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 #include "pch/pch.h"
 
