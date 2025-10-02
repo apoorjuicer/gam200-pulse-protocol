@@ -4,7 +4,6 @@
  * @project    Pulse Protocol
  * @author     Team Bloop - Chia Wei Xuan Rachael (Engine Architecture), Chloe Lau Rey En (Input System)
  *             Pin Kai, Benjamin, Reginald, Carrie, Fenny, Jun Yong
- * @author     Chloe, Ben, Reginald, Pin Kai, Jun Yong (secondary) - 10% each
  * @brief      Main entry point for the Pulse Protocol engine. Initializes
  *             memory leak detection, logging system, core engine subsystems,
  *             and ImGui editor. Creates render objects for testing, manages
