@@ -81,9 +81,11 @@ void CreateRenderObjects(int count) {
         
         // Spawn within the game area, leaving some margin
         float margin = 50.0f;
+        float halfW = Game_Window_Width * 0.5f;
+        float halfH = Game_Window_Height * 0.5f;
         transform.Pos = Vector2(
-           rand() % static_cast<int>(Game_Window_Width),
-            rand() % static_cast<int>(Game_Window_Height)
+           (rand() % Game_Window_Width) - halfW,
+            (rand() % Game_Window_Height) - halfH
         );
         
         // Random size between 20x20 and 60x60 pixels
