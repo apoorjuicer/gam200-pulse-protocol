@@ -35,10 +35,16 @@ public:
 
 	// All system can have a init() and update(), just need to override
 	virtual void Update(float dt) {};
-
+	
 	virtual void Init() {};
 
 };
+
+
+
+
+
+
 
 
 
