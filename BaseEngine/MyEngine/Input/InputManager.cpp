@@ -130,7 +130,12 @@ void InputManager::Update() {
 
     }
 
-
+    if (IsKeyJustPressed(GLFW_KEY_F1)) {
+        // Flip ImGui state
+        bool now = !MyEditor::IsEnabled();
+        MyEditor::SetEnabled(now);
+        std::cout << "[Editor] ImGui " << (now ? "ON" : "OFF") << std::endl;
+    }
 
 
 }
