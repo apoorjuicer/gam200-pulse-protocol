@@ -11,20 +11,20 @@
 /********************ctor/dtor******************** */
 /************************************************* */
 // default ctor
-Vector2::Vector2() : m{ 0.0f, 0.0f },
-x(m[0]), y(m[1])
+Vector2::Vector2() : m{0.0f, 0.0f},
+                     x(m[0]), y(m[1])
 { /*empty by design*/
 }
 
 // 2 float param ctor
-Vector2::Vector2(float x_, float y_) : m{ x_, y_ },
-x(m[0]), y(m[1])
+Vector2::Vector2(float x_, float y_) : m{x_, y_},
+                                       x(m[0]), y(m[1])
 { /*empty by design*/
 }
 
 // copy ctor
-Vector2::Vector2(Vector2 const& v) : m{ v.m[0], v.m[1] },
-x(m[0]), y(m[1])
+Vector2::Vector2(Vector2 const &v) : m{v.m[0], v.m[1]},
+                                     x(m[0]), y(m[1])
 { /*empty by design*/
 }
 
@@ -36,7 +36,7 @@ Vector2::~Vector2() = default;
 /************************************************* */
 
 // copy assignment
-Vector2& Vector2::operator=(Vector2 v)
+Vector2 &Vector2::operator=(Vector2 v)
 {
     if (this != &v)
     {
@@ -47,7 +47,7 @@ Vector2& Vector2::operator=(Vector2 v)
 }
 
 // element access
-float& Vector2::operator[](size_t i)
+float &Vector2::operator[](size_t i)
 {
     assert(i < 2);
     return m[i];
@@ -58,26 +58,26 @@ float Vector2::operator[](size_t i) const
     return m[i];
 }
 
-Vector2& Vector2::operator+=(Vector2 v)
+Vector2 &Vector2::operator+=(Vector2 v)
 {
     m[0] += v.m[0];
     m[1] += v.m[1];
     return *this;
 }
-Vector2& Vector2::operator-=(Vector2 v)
+Vector2 &Vector2::operator-=(Vector2 v)
 {
     m[0] -= v.m[0];
     m[1] -= v.m[1];
     return *this;
 }
 
-Vector2& Vector2::operator*=(float s)
+Vector2 &Vector2::operator*=(float s)
 {
     m[0] *= s;
     m[1] *= s;
     return *this;
 }
-Vector2& Vector2::operator/=(float s)
+Vector2 &Vector2::operator/=(float s)
 {
     assert(s != 0.0f); // divison by zero
     m[0] /= s;
@@ -147,26 +147,26 @@ Vector2 operator+(Vector2 v0, Vector2 v1)
 }
 Vector2 operator-(Vector2 v0, Vector2 v1)
 {
-    Vector2 tmp{ v0 };
+    Vector2 tmp{v0};
     return tmp -= v1;
 }
 Vector2 operator*(Vector2 v, float s)
 { // vector * scalar
-    Vector2 tmp{ v };
+    Vector2 tmp{v};
     return tmp *= s;
 }
 Vector2 operator*(float s, Vector2 v)
 { // scalar * vector
-    Vector2 tmp{ v };
+    Vector2 tmp{v};
     return tmp *= s;
 }
 Vector2 operator/(Vector2 v, float s)
 {
-    Vector2 tmp{ v };
+    Vector2 tmp{v};
     return tmp /= s;
 }
 
-std::ostream& operator<<(std::ostream& os, Vector2 const& vec)
+std::ostream &operator<<(std::ostream &os, Vector2 const &vec)
 {
     os << std::fixed << std::setprecision(3);
     return os << "Vector2(" << vec[0] << ", " << vec[1] << ")";
@@ -176,8 +176,8 @@ std::ostream& operator<<(std::ostream& os, Vector2 const& vec)
 Matrix3x3::Matrix3x3() { SetToIdentity(); }
 
 Matrix3x3::Matrix3x3(float e00, float e10, float e20,
-    float e01, float e11, float e21,
-    float e02, float e12, float e22)
+                     float e01, float e11, float e21,
+                     float e02, float e12, float e22)
 {
     m[0] = e00;
     m[1] = e10;
@@ -189,14 +189,14 @@ Matrix3x3::Matrix3x3(float e00, float e10, float e20,
     m[7] = e12;
     m[8] = e22;
 }
-Matrix3x3::Matrix3x3(Matrix3x3 const& copied)
+Matrix3x3::Matrix3x3(Matrix3x3 const &copied)
 {
     std::memcpy(m, copied.Begin(), sizeof(m));
 }
 
 Matrix3x3::~Matrix3x3() = default;
 
-Matrix3x3& Matrix3x3::operator=(Matrix3x3 const& other)
+Matrix3x3 &Matrix3x3::operator=(Matrix3x3 const &other)
 {
     if (this != &other)
     {
@@ -206,26 +206,26 @@ Matrix3x3& Matrix3x3::operator=(Matrix3x3 const& other)
 }
 
 // () operators: component access
-float& Matrix3x3::operator()(size_t  column, size_t  row)
+float &Matrix3x3::operator()(size_t  column, size_t  row)
 {
     assert(column < 3 && row < 3);
     return m[column * 3 + row];
 }
-const float& Matrix3x3::operator()(size_t  column, size_t  row) const
+const float &Matrix3x3::operator()(size_t  column, size_t  row) const
 {
     assert(column < 3 && row < 3);
     return m[column * 3 + row];
 }
 
 // iterators
-float* Matrix3x3::Begin() { return &m[0]; }
-float const* Matrix3x3::Begin() const { return &m[0]; }
-float* Matrix3x3::End() { return &m[9]; }
-float const* Matrix3x3::End() const { return &m[9]; }
+float *Matrix3x3::Begin() { return &m[0]; }
+float const *Matrix3x3::Begin() const { return &m[0]; }
+float *Matrix3x3::End() { return &m[9]; }
+float const *Matrix3x3::End() const { return &m[9]; }
 
 void Matrix3x3::SetTo(float e00, float e10, float e20,
-    float e01, float e11, float e21,
-    float e02, float e12, float e22)
+                      float e01, float e11, float e21,
+                      float e02, float e12, float e22)
 {
     m[0] = e00;
     m[1] = e10;
@@ -290,7 +290,7 @@ Matrix3x3 Matrix3x3::GetTranspose() const
 }
 
 // * operator: matrix multiplication
-Matrix3x3 operator*(Matrix3x3 const& L, Matrix3x3 const& R)
+Matrix3x3 operator*(Matrix3x3 const &L, Matrix3x3 const &R)
 {
 
     Matrix3x3 tmp{};
@@ -312,10 +312,10 @@ Matrix3x3 operator*(Matrix3x3 const& L, Matrix3x3 const& R)
 }
 
 // * operator: scalar multiplication
-Matrix3x3 operator*(float s, Matrix3x3 const& mat)
+Matrix3x3 operator*(float s, Matrix3x3 const &mat)
 {
-    Matrix3x3 tmp{ mat };
-    for (float* p = tmp.Begin(); p != tmp.End(); ++p)
+    Matrix3x3 tmp{mat};
+    for (float *p = tmp.Begin(); p != tmp.End(); ++p)
     {
         *p *= s;
     }
@@ -358,7 +358,7 @@ Matrix3x3::operator glm::mat3() const {
 }
 
 
-std::ostream& operator<<(std::ostream& os, Matrix3x3 const& M)
+std::ostream &operator<<(std::ostream &os, Matrix3x3 const &M)
 {
     os << "Printing Matrix\n";
     for (unsigned int row = 0; row < 3; ++row)
@@ -375,7 +375,7 @@ std::ostream& operator<<(std::ostream& os, Matrix3x3 const& M)
 
 /*Serialization && Deserialization */
 // vector2
-void Vector2::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
+void Vector2::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
 {
     // using namespace rapidjson;
     out.SetObject();
@@ -383,7 +383,7 @@ void Vector2::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorTyp
     out.AddMember("y", y, alloc);
 }
 
-void Vector2::Deserialize(rapidjson::Value const& in)
+void Vector2::Deserialize(rapidjson::Value const &in)
 {
     // not an obj and doesnt have the members x y
     if (!in.IsObject() || !in.HasMember("x") || !in.HasMember("y"))
@@ -395,7 +395,7 @@ void Vector2::Deserialize(rapidjson::Value const& in)
 }
 
 // matrix3
-void Matrix3x3::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
+void Matrix3x3::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
 {
     out.SetArray();
     for (int i = 0; i < 9; ++i)
@@ -404,7 +404,7 @@ void Matrix3x3::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorT
     }
 }
 
-void Matrix3x3::Deserialize(rapidjson::Value const& in)
+void Matrix3x3::Deserialize(rapidjson::Value const &in)
 {
     if (!in.IsArray() || in.Size() != 9)
     {

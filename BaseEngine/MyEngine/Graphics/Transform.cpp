@@ -8,6 +8,8 @@
 **********************************************************************************************/
 #include "Transform.h"
 #include <../MyEngine/Math/math.h>
+#include <pch/pch.h>
+
 
 namespace Framework
 {
@@ -84,168 +86,137 @@ namespace Framework
         return spriteName;
     }
 
-    //void Transform::Serialize(Value& data, Document::AllocatorType& alloc) {
-    //    data.SetObject();
-    //    Value value;
-    //    Pos.Serialize(value, alloc);
-    //    data.AddMember("PosVec", value, alloc);
+  
+    /*Serialization && Deserialization */
+    void Transform::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
+        using namespace rapidjson;
+        out.SetObject();
 
-    //    Scale.Serialize(value, alloc);
-    //    data.AddMember("ScaleVec", value, alloc);
+        //Vector2s
+        Value posVal, scaleVal, rotVal, renderVal;
+        Pos.Serialize(posVal, alloc);
+        Scale.Serialize(scaleVal, alloc);
+        Rotation.Serialize(rotVal, alloc);
+       // Renderable.Serialize(renderVal, alloc);
 
-    //    Rotation.Serialize(value, alloc);
-    //    data.AddMember("RotaVec", value, alloc);
+        out.AddMember("position", posVal, alloc);
+        out.AddMember("scale", scaleVal, alloc);
+        out.AddMember("rotation", rotVal, alloc);
+        //out.AddMember("renderable", renderVal, alloc);
 
-    //    Renderable.Serialize(value, alloc);
-    //    data.AddMember("RendVec", value, alloc);
+        //simple types
+        out.AddMember("angle_disp", angle_disp, alloc);
+        out.AddMember("angle_speed", angle_speed, alloc);
+        out.AddMember("mdl_ref", mdl_ref, alloc);
+        out.AddMember("shd_ref", shd_ref, alloc);
+        out.AddMember("textureID", static_cast<uint64_t>(textureID), alloc);
 
-    //    data.AddMember("spriteName", StringRef(spriteName.c_str()), alloc);
-    //    data.AddMember("angle_disp", angle_disp, alloc);
-    //    data.AddMember("angle_speed", angle_speed, alloc);
-    //    data.AddMember("mdl_ref", mdl_ref, alloc);
-    //    data.AddMember("shd_ref", shd_ref, alloc);
-    //}
+        Value spriteNameVal;
+        spriteNameVal.SetString(spriteName.c_str(), static_cast<SizeType>(spriteName.length()), alloc);
+        out.AddMember("spriteName", spriteNameVal, alloc);
 
-    //void Transform::Deserialize(Value& data) {
-    //    Pos.Deserialize(data["PosVec"]);
-    //    Scale.Deserialize(data["ScaleVec"]);
-    //    Rotation.Deserialize(data["RotaVec"]);
-    //    Renderable.Deserialize(data["RendVec"]);
+        out.AddMember("currentFrame", currentFrame, alloc);
+        out.AddMember("elapsedTime", elapsedTime, alloc);
+        out.AddMember("totalFrames", totalFrames, alloc);
+        out.AddMember("columns", columns, alloc);
+        out.AddMember("rows", rows, alloc);
+        out.AddMember("animationSpeed", animationSpeed, alloc);
 
-    //    spriteName = data["spriteName"].GetString();
-    //    angle_disp = data["angle_disp"].GetFloat();
-    //    angle_speed = data["angle_speed"].GetFloat();
-    //    mdl_ref = data["mdl_ref"].GetFloat();
-    //    shd_ref = data["shd_ref"].GetFloat();
-    //}
-}
+        //mat3
+        // Matrix3x3
+        Value matVal;
+        mdl_to_ndc_xform.Serialize(matVal, alloc);
+        out.AddMember("mdl_to_ndc_xform", matVal, alloc);
+
+    }
+
+    void Transform::Deserialize(const rapidjson::Value& in) {
+        if (!in.IsObject()) {
+            throw std::runtime_error("Invalid JSON for Transform");
+        }
+
+        if (in.HasMember("position"))    Pos.Deserialize(in["position"]);
+        if (in.HasMember("scale"))       Scale.Deserialize(in["scale"]);
+        if (in.HasMember("rotation"))    Rotation.Deserialize(in["rotation"]);
+
+        if (in.HasMember("angle_disp"))  angle_disp = in["angle_disp"].GetFloat();
+        if (in.HasMember("angle_speed")) angle_speed = in["angle_speed"].GetFloat();
+        if (in.HasMember("mdl_ref"))     mdl_ref = in["mdl_ref"].GetFloat();
+        if (in.HasMember("shd_ref"))     shd_ref = in["shd_ref"].GetFloat();
+        if (in.HasMember("textureID"))   textureID = static_cast<GLuint>(in["textureID"].GetUint64());
+
+        if (in.HasMember("spriteName"))  spriteName = in["spriteName"].GetString();
+
+        if (in.HasMember("currentFrame")) currentFrame = in["currentFrame"].GetInt();
+        if (in.HasMember("elapsedTime"))  elapsedTime = in["elapsedTime"].GetFloat();
+        if (in.HasMember("totalFrames"))  totalFrames = in["totalFrames"].GetInt();
+        if (in.HasMember("columns"))      columns = in["columns"].GetInt();
+        if (in.HasMember("rows"))         rows = in["rows"].GetInt();
+        if (in.HasMember("animationSpeed")) animationSpeed = in["animationSpeed"].GetFloat();
+
+        if (in.HasMember("mdl_to_ndc_xform"))
+            mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
+    }
+
+    bool SaveTransform(Transform const& t, std::string const& path) {
+        rapidjson::Document d;
+        d.SetObject();
+        auto& alloc = d.GetAllocator();
+
+        rapidjson::Value tVal;
+        t.Serialize(tVal, alloc);
+        d.AddMember("transform", tVal, alloc);
+
+        rapidjson::StringBuffer buffer;
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        d.Accept(writer);
+
+        // Ensure directory exists
+        namespace fs = std::filesystem;
+        fs::create_directories("../../MyEngine/JSON");
+        //fs::create_directories("../JSON");
+
+        std::ofstream ofs(path);
+        if (!ofs.is_open()) {
+            std::cerr << "Error: Cannot open file for writing: " << path << "\n";
+            return false;
+        }
+        ofs << buffer.GetString();
+        if (!ofs.good()) {
+            std::cerr << "Error: Failed to write JSON to file: " << path << "\n";
+            return false;
+        }
+        return true;
+    }
 
 
-///*Serialization && Deserialization */
-//void Transform::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
-//    using namespace rapidjson;
-//    out.SetObject();
-//
-//    //Vector2s
-//    Value posVal, scaleVal, rotVal, renderVal;
-//    Pos.Serialize(posVal, alloc);
-//    Scale.Serialize(scaleVal, alloc);
-//    Rotation.Serialize(rotVal, alloc);
-//    Renderable.Serialize(renderVal, alloc);
-//
-//    out.AddMember("position", posVal, alloc);
-//    out.AddMember("scale", scaleVal, alloc);
-//    out.AddMember("rotation", rotVal, alloc);
-//    out.AddMember("renderable", renderVal, alloc);
-//
-//    //simple types
-//    out.AddMember("angle_disp", angle_disp, alloc);
-//    out.AddMember("angle_speed", angle_speed, alloc);
-//    out.AddMember("mdl_ref", mdl_ref, alloc);
-//    out.AddMember("shd_ref", shd_ref, alloc);
-//    out.AddMember("textureID", static_cast<uint64_t>(textureID), alloc);
-//
-//    Value spriteNameVal;
-//    spriteNameVal.SetString(spriteName.c_str(), static_cast<SizeType>(spriteName.length()), alloc);
-//    out.AddMember("spriteName", spriteNameVal, alloc);
-//
-//    out.AddMember("currentFrame", currentFrame, alloc);
-//    out.AddMember("elapsedTime", elapsedTime, alloc);
-//    out.AddMember("totalFrames", totalFrames, alloc);
-//    out.AddMember("columns", columns, alloc);
-//    out.AddMember("rows", rows, alloc);
-//    out.AddMember("animationSpeed", animationSpeed, alloc);
-//
-//    //mat3
-//    // Matrix3x3
-//    Value matVal;
-//    mdl_to_ndc_xform.Serialize(matVal, alloc);
-//    out.AddMember("mdl_to_ndc_xform", matVal, alloc);
-//
-//}
-//
-//void Transform::Deserialize(const rapidjson::Value& in) {
-//    if (!in.IsObject()) {
-//        throw std::runtime_error("Invalid JSON for Transform");
-//    }
-//
-//    if (in.HasMember("position"))    Pos.Deserialize(in["position"]);
-//    if (in.HasMember("scale"))       Scale.Deserialize(in["scale"]);
-//    if (in.HasMember("rotation"))    Rotation.Deserialize(in["rotation"]);
-//    if (in.HasMember("renderable"))  Renderable.Deserialize(in["renderable"]);
-//
-//    if (in.HasMember("angle_disp"))  angle_disp = in["angle_disp"].GetFloat();
-//    if (in.HasMember("angle_speed")) angle_speed = in["angle_speed"].GetFloat();
-//    if (in.HasMember("mdl_ref"))     mdl_ref = in["mdl_ref"].GetFloat();
-//    if (in.HasMember("shd_ref"))     shd_ref = in["shd_ref"].GetFloat();
-//    if (in.HasMember("textureID"))   textureID = static_cast<GLuint>(in["textureID"].GetUint64());
-//
-//    if (in.HasMember("spriteName"))  spriteName = in["spriteName"].GetString();
-//
-//    if (in.HasMember("currentFrame")) currentFrame = in["currentFrame"].GetInt();
-//    if (in.HasMember("elapsedTime"))  elapsedTime = in["elapsedTime"].GetFloat();
-//    if (in.HasMember("totalFrames"))  totalFrames = in["totalFrames"].GetInt();
-//    if (in.HasMember("columns"))      columns = in["columns"].GetInt();
-//    if (in.HasMember("rows"))         rows = in["rows"].GetInt();
-//    if (in.HasMember("animationSpeed")) animationSpeed = in["animationSpeed"].GetFloat();
-//
-//    if (in.HasMember("mdl_to_ndc_xform"))
-//        mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
-//}
-//
-//bool SaveTransform(Transform const& t, std::string const& path) {
-//    rapidjson::Document d;
-//    d.SetObject();
-//    auto& alloc = d.GetAllocator();
-//
-//    rapidjson::Value tVal;
-//    t.Serialize(tVal, alloc);
-//    d.AddMember("transform", tVal, alloc);
-//
-//    rapidjson::StringBuffer buffer;
-//    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-//    d.Accept(writer);
-//
-//    // Ensure directory exists
-//    namespace fs = std::filesystem;
-//    //fs::create_directories("../../MyEngine/JSON");
-//    fs::create_directories("../JSON");
-//
-//    std::ofstream ofs(path);
-//    if (!ofs.is_open()) {
-//        std::cerr << "Error: Cannot open file for writing: " << path << "\n";
-//        return false;
-//    }
-//    ofs << buffer.GetString();
-//    if (!ofs.good()) {
-//        std::cerr << "Error: Failed to write JSON to file: " << path << "\n";
-//        return false;
-//    }
-//    return true;
-//}
-//
-//
-//bool LoadTransform(Transform& t, std::string const& path) {
-//    std::ifstream ifs(path);
-//    if (!ifs.is_open()) {
-//        std::cerr << "Error: Cannot open file for reading: " << path << "\n";
-//        return false;
-//    }
-//    rapidjson::IStreamWrapper isw(ifs);
-//    rapidjson::Document d;
-//    d.ParseStream(isw);
-//
-//    if (d.HasParseError()) {
-//        std::cerr << "Error: Failed to parse JSON in file: " << path << "\n";
-//        return false;
-//    }
-//
-//    if (!d.HasMember("transform")) {
-//        std::cerr << "Error: No 'transform' field in file: " << path << "\n";
-//        return false;
-//    }
-//
-//    t.Deserialize(d["transform"]);
-//    return true;
-//}
-//}
+    bool LoadTransform(Transform& t, std::string const& path) {
+        std::ifstream ifs(path);
+        if (!ifs.is_open()) {
+            std::cerr << "Error: Cannot open file for reading: " << path << "\n";
+            return false;
+        }
+        rapidjson::IStreamWrapper isw(ifs);
+        rapidjson::Document d;
+        d.ParseStream(isw);
+
+        if (d.HasParseError()) {
+            std::cerr << "Error: Failed to parse JSON in file: " << path << "\n";
+            return false;
+        }
+
+        if (!d.HasMember("transform")) {
+            std::cerr << "Error: No 'transform' field in file: " << path << "\n";
+            return false;
+        }
+
+        t.Deserialize(d["transform"]);
+        return true;
+    }
+
+
+
+
+}// end of namespace
+
+

@@ -91,7 +91,7 @@ public:
 		assert(it != MappedSystems.end() && "System has not been registered yet!");
 
 		// pointing at that system instance
-		return std::static_pointer_cast<T>(it->second);;
+		return std::static_pointer_cast<T>(it->second);
 
 		//const char* ComponentTypeName = typeid(T).name();
 		//assert(ComponentTypes.find(ComponentTypeName) != ComponentTypes.end() && "Component has not been registered!");

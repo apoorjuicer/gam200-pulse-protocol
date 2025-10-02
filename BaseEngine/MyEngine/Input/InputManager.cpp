@@ -48,21 +48,38 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     currentCyclePosition = 1;
 
     auto* g_coordinator = Coordinator::GetInstance();
+   // Entity entity = g_coordinator->CreateEntity();
+
+    //Framework::Transform feedbackTransform{};
+    //feedbackTransform.Pos = { 0.0f, 0.0f };
+    //feedbackTransform.Scale = { 500.0f, 500.0f };
+    //feedbackTransform.mdl_ref = 1.0f;
+    //feedbackTransform.shd_ref = 2.0f;
+    //feedbackTransform.isVisible = true;
+    //feedbackTransform.currentFrame = 1;
+
+    std::string path = "../../MyEngine/JSON/transform.json";
+
+    //if (!Framework::SaveTransform(feedbackTransform, path)) {
+    //    std::cerr << "Failed to save transform!\n";
+    //}
+    //else {
+    //    std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
+    //}
+
+    Framework::Transform new_feedbackTransform;
+    if (!Framework::LoadTransform(new_feedbackTransform, path)) {
+        std::cerr << "Failed to load transform!\n";
+    }
+    else {
+        std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
+    }
+
+    //g_coordinator->AddComponent(entity, new_feedbackTransform);
+    //SetFeedbackEntity(entity);
+
+
     Entity entity = g_coordinator->CreateEntity();
-
-    Framework::Transform feedbackTransform{};
-    feedbackTransform.Pos = { 0.0f, 0.0f };
-    feedbackTransform.Scale = { 500.0f, 500.0f };
-    feedbackTransform.mdl_ref = 1.0f;
-    feedbackTransform.shd_ref = 2.0f;
-    feedbackTransform.isVisible = true;
-    feedbackTransform.currentFrame = 1;
-
-    g_coordinator->AddComponent(entity, feedbackTransform);
-    SetFeedbackEntity(entity);
-
-
-    Entity entity2 = g_coordinator->CreateEntity();
 
     Framework::Transform feedbackTransform2{};
     feedbackTransform2.Pos = { 0.0f, 0.0f };
@@ -72,8 +89,8 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     feedbackTransform2.isVisible = true;
     feedbackTransform2.currentFrame = 1;
 
-    g_coordinator->AddComponent(entity2, feedbackTransform2);
-    feedbackEntuty2 = entity2;
+    g_coordinator->AddComponent(entity, feedbackTransform2);
+    feedbackEntity = entity;
 }
 
 void InputManager::Update() {

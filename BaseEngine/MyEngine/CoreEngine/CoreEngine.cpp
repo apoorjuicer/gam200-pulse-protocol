@@ -152,6 +152,7 @@ void CoreEngine::Init()
     std::cout << "Close window to exit testing" << std::endl;
 
     GameRunning = true;
+
 }
 
 void CoreEngine::Setup()
@@ -171,7 +172,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
     g_coordinator->RegisterSystem<CollisionManager>();
-
+	g_coordinator->RegisterSystem<SceneManager>();
 
 
     // Set signature for component and system
@@ -187,6 +188,12 @@ void CoreEngine::Setup()
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
 	g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
+
+	Signature sceneSig;
+	sceneSig.set(g_coordinator->GetComponentType<NPC>());
+	sceneSig.set(g_coordinator->GetComponentType<AABB>());
+	sceneSig.set(g_coordinator->GetComponentType<Framework::Transform>());  
+	g_coordinator->SetSystemSignature<GraphicsManager>(sceneSig);
 }
 
 void CoreEngine::Update(float dt)
@@ -195,6 +202,7 @@ void CoreEngine::Update(float dt)
 	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
+	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
 
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Update();
@@ -204,9 +212,13 @@ void CoreEngine::Update(float dt)
 		// Update input system
 		g_inputSystem->Update();
 		//g_audioSystem->Update();  
-
 	}
-	
+
+
+	if (g_sceneSystem->GrabCurrentScene() == Scene::Pause)
+	{
+		g_sceneSystem->LoadScene(Scene::MainMenu);
+	}
 
 	g_coordinator->UpdateAllSystems(dt);
 }
@@ -273,20 +285,14 @@ void CoreEngine::Exit()
 
 	if (g_inputSystem) {
 		g_inputSystem->Shutdown();
-		//delete g_inputSystem;
-		//g_inputSystem = nullptr;
 	}
 
 	if (g_audioSystem) {
 		g_audioSystem->Shutdown();
-		//delete g_audioSystem;
-		//g_audioSystem = nullptr;
 	}
 
 	if (g_graphicsSystem) {
 		g_graphicsSystem->Shutdown();
-		//delete g_graphicsSystem;
-		//g_graphicsSystem = nullptr;
 	}
 
     if (window)
@@ -296,11 +302,6 @@ void CoreEngine::Exit()
     }
     glfwTerminate();
 }
-
-
-//void BroadcastMessage(){}
-
-
 
 
 
@@ -350,9 +351,6 @@ void CoreEngine::Exit()
 //    }
 //}
 
-
-
-//
 //class Settings {};
 //class Preferences {};
 //
@@ -389,21 +387,3 @@ void CoreEngine::Exit()
 //
 //    Engine() : systems(settings) {};
 //};
-
-
-// ECS setup
-//g_coordinator->init();
-//g_coordinator->RegisterComponent<Player>();
-//g_coordinator->RegisterComponent<Framework::Transform>();
-//
-//g_coordinator->RegisterSystem<InputManager>();
-//g_coordinator->RegisterSystem<GraphicsManager>();
-// 
-// Signature signature;
-// signature.set(g_coordinator->GetComponentType<Player>());
-// g_coordinator->SetSystemSignature<InputManager>(signature);
-//
-//Engine.Init(); // <-- only if it does NOT touch OpenGL
-//
-//int entity = g_coordinator->CreateEntity();
-//g_coordinator->AddComponent(entity, Player{ 100, 200 });

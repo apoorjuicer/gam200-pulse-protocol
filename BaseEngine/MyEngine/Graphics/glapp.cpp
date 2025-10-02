@@ -19,7 +19,6 @@
 std::vector<GLSLShader> GLApp::shdrpgms;
 std::vector<GLApp::GLModel> GLApp::models;
 std::vector<GLApp::GLViewport> GLApp::vps;
-//std::list<Framework::Transform*> transObj;
 
 //other containers
 const float PI = 3.14159265358979323846f;
@@ -112,6 +111,7 @@ GLuint GLApp::LoadTexture(const std::string& filepath) {
 
 void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
     textureID = LoadTexture("../../MyEngine/Assets/hero.png");
+    //LoadTexture("../../MyEngine/Assets/RedGorillaEnemy.png");
     // Use local inputEditorWidth and inputEditorHeight values for calculations.
     GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth)),
         h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
@@ -192,12 +192,12 @@ void GLApp::update(GLFWwindow* window,std::set<Entity> entity) {
     //    }
     //    GLHelper::keystateP = GL_FALSE;
     //}
-
-
+    GLHelper::update_time(1.0); // updates delta_time and fps
     if (window) 
     {
         std::ostringstream title;
-        title << "Game Window - FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
+        title << "Game Window - FPS: " << std::fixed << std::setprecision(1) 
+              << GLHelper::fps;
         glfwSetWindowTitle(window, title.str().c_str());
     }
      //update(GLHelper::delta_time, entity);
@@ -307,7 +307,7 @@ void GLApp::draw(std::set<Entity> entities) {
 
     // -------------------*Debug draw sample (NDC space)*----------------------
 	//glm::mat4 mvp = MakeOrthoMvp(-1.0f, 1.0f, -1.0f, 1.0f);   //  create the ndc space
-    //DebugDraw::Begin(mvp);
+ //   DebugDraw::Begin(mvp);
 	//DebugDraw::DrawLine({-0.5f, -0.5f}, {0.5f, -0.5f}, {1,1,0}); // yellow line
 	//DebugDraw::DrawRect({-0.2f,-0.2f}, {0.2f,0.2f}, {0,1,0}); // green rect
 	//DebugDraw::DrawCircle({0.0f,0.0f}, 0.3f, {0,0,1}, 48);    // (more segments = smoother)
