@@ -1,3 +1,16 @@
+/******************************************************************************/
+/**
+ * @file       pch.h
+ * @project    Pulse Protocol
+ * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @brief      This is a precompiled header file that centralizes all standard library,
+ *             external library, and internal engine headers for optimized
+ *             compilation. We do this to make code clean and organization. :]
+ * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 
 // pch.h: This is a precompiled header file.
@@ -7,6 +20,7 @@
 // Standard Library Headers
 #include <fstream>
 #include <iostream>
+#include <functional>
 #include <string>
 #include <cstring>
 #include <memory>		 // for std::shared_ptr
@@ -24,6 +38,9 @@
 #include <iomanip> //debug
 #include <algorithm>
 #include <random>
+#include <array>
+#include <sstream>
+#include <chrono> // for profiling
 #include <list>
 #include <filesystem>
 #include <cstdlib> 
@@ -44,7 +61,6 @@
 
 //Serialize
 #include <rapidjson/document.h>     // for Document, Value, AllocatorType
-//#include <rapidjson/writer.h>       // for Writer
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h> // for StringBuffer
@@ -56,10 +72,12 @@
 #pragma warning(disable: 4005)
 
 // System Library Headers
+#include "../MyEngine/Profiling/Profiling.h"
 #include "../MyEngine/Math/math.h"
 #include "../MyEngine/Input/InputManager.h"
 #include "../MyEngine/Audio/audio.h"
 #include "../MyEngine/Graphics/GraphicsManager.h"
+#include "../MyEngine/Graphics/DebugDraw.h"
 #include "../MyEngine/Graphics/Transform.h"
 #include "../MyEngine/Physics/collision.h"
 #include "../MyEngine/CoreEngine/CoreEngine.h"
@@ -79,7 +97,7 @@
 #include "../MyEngine/Core/EntityManager.h"
 #include "../MyEngine/Core/ComponentArray.h"
 #include "../MyEngine/Core/ComponentManager.h"
-#include "../MyEngine/Core/Types.h"
+#include "../MyEngine/Core/MessageManager.h"
 
 //Logging library
 #include <spdlog/spdlog.h>

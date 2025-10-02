@@ -1,3 +1,17 @@
+/******************************************************************************/
+/**
+ * @file       SceneManager.cpp
+ * @project    Pulse Protocol
+ * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @brief      Implementation of scene management system that handles loading,
+ *             unloading, and transitioning between game scenes (MainMenu, Pause,
+ *             Level1, Dead). Manages scene-specific entity creation/destruction
+ *             and maintains a list of entities belonging to the current scene
+ * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
 #pragma once
 #include "pch/pch.h"
 
@@ -87,16 +101,16 @@ void SceneManager::LoadMainMenu()
 	std::cout << "================================================" << std::endl;
 #endif
 
-	Entity background = g_coordinator->CreateEntity();
-	Framework::Transform BackgroundComponent;
+	//Entity background = g_coordinator->CreateEntity();
+	//Framework::Transform BackgroundComponent;
 
-	// idk what to add here
-	BackgroundComponent.Scale = { 5 , 10 };
-	BackgroundComponent.Rotation =  { 5, 10} ;
-	BackgroundComponent.Pos= { 5,10 };
-	
-	g_coordinator->AddComponent(background, BackgroundComponent);
-	SceneEntityList.push_back(background);
+	//// idk what to add here
+	//BackgroundComponent.Scale = { 5 , 10 };
+	//BackgroundComponent.Rotation =  { 5, 10} ;
+	//BackgroundComponent.Pos= { 5,10 };
+	//
+	//g_coordinator->AddComponent(background, BackgroundComponent);
+	//SceneEntityList.push_back(background);
 	
 
 	

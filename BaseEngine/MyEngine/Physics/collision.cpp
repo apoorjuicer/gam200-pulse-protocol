@@ -71,20 +71,36 @@ void CollisionManager::Init()
 			std::cout << "[Init] Monster spawned at x=" << startPositions[i] << "\n";
 		}
 
-		std::cout << "============================================\n\n";
-	}
-	else
-	{
-		// --- BoxLine Test ---
-		Entity boxNPC = g_coordinator->CreateEntity();
-		g_coordinator->AddComponent(boxNPC, NPC{
-			50.0f, 50.0f, 0.0f, 0.0f, 0.0f, false, 1, true
-			});
-		g_coordinator->AddComponent(boxNPC, AABB{
-			Vector2(0.0f, 250.0f),
-			Vector2(50.0f, 300.0f)
-			});
-		EntityNPC.push_back(boxNPC);
+        std::cout << "============================================\n\n";
+
+        // ---------------- BOX 1 ----------------
+        Entity inputEntity = g_coordinator->CreateEntity();
+        Framework::Transform inputObject{};
+        inputObject.Pos = { 0.0f, 0.0f };
+        inputObject.Scale = { 600.0f, 200.0f };
+        inputObject.mdl_ref = 1.0f;
+        inputObject.shd_ref = 0.0f;
+        inputObject.isVisible = false;  // Make visible to test
+        inputObject.currentFrame = 0;
+        g_coordinator->AddComponent(inputEntity, inputObject);
+        
+        auto inputMgr = g_coordinator->GetSystem<InputManager>();
+        if (inputMgr) {
+            inputMgr->SetFontEntity(inputEntity);
+        }
+    }
+    else
+    {
+        // --- BoxLine Test ---
+        Entity boxNPC = g_coordinator->CreateEntity();
+        g_coordinator->AddComponent(boxNPC, NPC{
+            50.0f, 50.0f, 0.0f, 0.0f, 0.0f, false, 1, true
+            });
+        g_coordinator->AddComponent(boxNPC, AABB{
+            Vector2(0.0f, 250.0f),
+            Vector2(50.0f, 300.0f)
+            });
+        EntityNPC.push_back(boxNPC);
 
 		if (EnableTestCases)
 		{

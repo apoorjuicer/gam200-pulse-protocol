@@ -1,3 +1,18 @@
+/******************************************************************************/
+/**
+ * @file       SystemManager.h
+ * @project    Pulse Protocol
+ * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @brief      Manages registration, retrieval, and lifecycle of all ECS systems.
+ *             Handles system signatures for entity-component matching, updates
+ *             entity membership across systems when signatures change, and
+ *             provides batch initialization and update methods with profiling
+ *             support for all registered systems
+ * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 #include "pch/pch.h"
 
@@ -102,8 +117,27 @@ public:
 	{
 		for (unsigned i = 0; i < SystemType.size(); ++i)
 		{
-			SystemType[i]->Update(deltaTime);
-			//std::cout << "updating!";
+			// Get raw system type name
+			std::string rawName = typeid(*SystemType[i]).name();
+
+			// Clean up the name: remove "class " prefix and "Manager" suffix
+			std::string systemName = rawName;
+
+			// Remove "class " prefix if present
+			if (systemName.find("class ") == 0) {
+				systemName = systemName.substr(6);  // Remove first 6 characters
+			}
+
+			size_t managerPos = systemName.find("Manager");
+			if (managerPos != std::string::npos) {
+				systemName = systemName.substr(0, managerPos) + " System";
+			}
+
+			{
+				PROFILE_SCOPE(systemName);
+				SystemType[i]->Update(deltaTime);
+				// std::cout << "updating!";
+			}
 		}
 	}
 

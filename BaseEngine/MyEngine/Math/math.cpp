@@ -360,16 +360,19 @@ Matrix3x3::operator glm::mat3() const {
 
 std::ostream &operator<<(std::ostream &os, Matrix3x3 const &M)
 {
+    // Disabled matrix printing for performance
+    /*
     os << "Printing Matrix\n";
     for (unsigned int row = 0; row < 3; ++row)
     {
         os << "[ ";
         for (unsigned int col = 0; col < 3; ++col)
         {
-            os << M(col, row) << ' '; // <-- (col,row)
+            os << M(col, row) << ' ';
         }
         os << "]\n";
     }
+    */
     return os;
 }
 

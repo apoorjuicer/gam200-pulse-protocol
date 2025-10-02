@@ -9,7 +9,7 @@
 **********************************************************************************************/
 
 #pragma once
-#include "AssetsManager.h"  
+#include "AssetsManager.h"
 
 namespace fs = std::filesystem;
 

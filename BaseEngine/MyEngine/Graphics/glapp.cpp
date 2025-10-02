@@ -214,6 +214,7 @@ void GLApp::updateAnimation(Framework::Transform& x, float deltaTime) {
 	}
 }
 
+
 void GLApp::drawTrans(Framework::Transform& x) {
 
 	auto& shader = shdrpgms[static_cast<uint64_t>(x.shd_ref)];
