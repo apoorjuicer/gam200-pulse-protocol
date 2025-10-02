@@ -117,8 +117,6 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     std::cout << "new_feedbackTransform4 Scale:" << new_feedbackTransform4.Scale << "\n";
 
    // g_coordinator->AddComponent(entity, new_feedbackTransform);
-    
-    
     //SetFeedbackEntity(entity);
 
 
