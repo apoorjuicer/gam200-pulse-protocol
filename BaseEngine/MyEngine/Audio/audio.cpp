@@ -77,7 +77,7 @@ void AudioManager::Initialize()
         FMOD_RESULT r = mSystem->playSound(defaultBGM, nullptr, false, &mBGMCh);
 
         if (r == FMOD_OK && mBGMCh) {
-            mBGMCh->setVolume(0.30f);
+            mBGMCh->setVolume(0.05f);
             std::cout << "[AudioManager] BGM started successfully.\n";
         }
         else {

@@ -87,16 +87,16 @@ void SceneManager::LoadMainMenu()
 	std::cout << "================================================" << std::endl;
 #endif
 
-	Entity background = g_coordinator->CreateEntity();
-	Framework::Transform BackgroundComponent;
+	//Entity background = g_coordinator->CreateEntity();
+	//Framework::Transform BackgroundComponent;
 
-	// idk what to add here
-	BackgroundComponent.Scale = { 5 , 10 };
-	BackgroundComponent.Rotation =  { 5, 10} ;
-	BackgroundComponent.Pos= { 5,10 };
-	
-	g_coordinator->AddComponent(background, BackgroundComponent);
-	SceneEntityList.push_back(background);
+	//// idk what to add here
+	//BackgroundComponent.Scale = { 5 , 10 };
+	//BackgroundComponent.Rotation =  { 5, 10} ;
+	//BackgroundComponent.Pos= { 5,10 };
+	//
+	//g_coordinator->AddComponent(background, BackgroundComponent);
+	//SceneEntityList.push_back(background);
 	
 
 	

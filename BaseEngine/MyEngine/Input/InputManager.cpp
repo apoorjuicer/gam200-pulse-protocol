@@ -67,16 +67,6 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
 
     auto* g_coordinator = Coordinator::GetInstance();
 
-    //std::string path = "../../MyEngine/JSON/transform.json";
-
-    //Framework::Transform new_feedbackTransform;
-    //if (!Framework::LoadTransform(new_feedbackTransform, path)) {
-    //    std::cerr << "Failed to load transform!\n";
-    //}
-    //else {
-    //    std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
-    //}
-
     Entity fontEntityObj = g_coordinator->CreateEntity();
     Framework::Transform fontTr{};
     fontTr.Pos = { 0.0f, 0.0f };
@@ -125,20 +115,6 @@ void InputManager::Update(float deltaTime) {
             transform1.autoHide = false;
         }
     }
-
-    //// Update EntityMember entities
-    //for (auto& entity2 : EntityMember)
-    //{
-    //    auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(entity2);
-
-    //    if (transform2.autoHide && transform2.isVisible) {
-    //        transform2.visibilityTimer -= deltaTime;
-    //        if (transform2.visibilityTimer <= 0.0f) {
-    //            transform2.isVisible = false;
-    //            transform2.autoHide = false;
-    //        }
-    //    }
-    //}
 }
 
 void InputManager::Shutdown() {

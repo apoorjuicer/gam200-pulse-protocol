@@ -380,45 +380,50 @@ void CoreEngine::RenderDebugDraw() {
 
 	if (!g_inputSystem) return;
 
-	glm::mat4 projection = glm::ortho(0.0f, 1600.0f, 900.0f, 0.0f);
+	glm::mat4 projection = glm::ortho(-800.0f, 800.0f, -450.0f, 450.0f);
 	DebugDraw::Begin(projection);
 
 	// F1 - DrawRect
 	if (g_inputSystem->IsDebugRectsEnabled()) {
 		for (auto& entity : g_inputSystem->EntityMember) {
 			auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
-			glm::vec2 min(transform.Pos.x - transform.Scale.x * 0.5f,
-				transform.Pos.y - transform.Scale.y * 0.5f);
-			glm::vec2 max(transform.Pos.x + transform.Scale.x * 0.5f,
-				transform.Pos.y + transform.Scale.y * 0.5f);
+			glm::vec2 center = { transform.Pos.x, transform.Pos.y };
+			glm::vec2 half = 0.5f * glm::vec2(transform.Scale.x, transform.Scale.y);
+
+			glm::vec2 min = center - half;
+			glm::vec2 max = center + half;
+			if (min.x > max.x) std::swap(min.x, max.x);
+			if (min.y > max.y) std::swap(min.y, max.y);
+
 			DebugDraw::DrawRect(min, max, { 1.0f, 0.0f, 0.0f });
 		}
 	}
 
+
 	// F2 - DrawLine
 	if (g_inputSystem->IsDebugLinesEnabled()) {
-		DebugDraw::DrawLine({ 0.0f, 0.0f }, { 1600.0f, 900.0f }, { 1.0f, 0.0f, 0.0f });
-		DebugDraw::DrawLine({ 1600.0f, 0.0f }, { 0.0f, 900.0f }, { 0.0f, 1.0f, 0.0f });
-		DebugDraw::DrawLine({ 800.0f, 0.0f }, { 800.0f, 900.0f }, { 0.0f, 0.0f, 1.0f });
-		DebugDraw::DrawLine({ 0.0f, 450.0f }, { 1600.0f, 450.0f }, { 1.0f, 1.0f, 0.0f });
+		DebugDraw::DrawLine({ -800.0f, -450.0f }, { 800.0f, 450.0f }, { 1.0f, 0.0f, 0.0f });
+		DebugDraw::DrawLine({ 800.0f, -450.0f }, { -800.0f, 450.0f }, { 0.0f, 1.0f, 0.0f });
+		DebugDraw::DrawLine({ 0.0f, -450.0f }, { 0.0f, 450.0f }, { 0.0f, 0.0f, 1.0f });
+		DebugDraw::DrawLine({ -800.0f, 0.0f }, { 800.0f, 0.0f }, { 1.0f, 1.0f, 0.0f });
 	}
 
 	// F3 - DrawCircle
 	if (g_inputSystem->IsDebugCirclesEnabled()) {
-		DebugDraw::DrawCircle({ 800.0f, 450.0f }, 200.0f, { 1.0f, 0.0f, 1.0f }, 32);
+		DebugDraw::DrawCircle({ 0.0, 0.0f }, 200.0f, { 1.0f, 0.0f, 1.0f }, 32);
 		DebugDraw::DrawCircle({ 400.0f, 300.0f }, 100.0f, { 0.0f, 1.0f, 1.0f }, 24);
 	}
 
 	// F4 - DrawCircleFilled
 	if (g_inputSystem->IsDebugCirclesFilledEnabled()) {
-		DebugDraw::DrawCircleFilled({ 1200.0f, 450.0f }, 80.0f, { 1.0f, 0.5f, 0.0f }, 24);
-		DebugDraw::DrawCircleFilled({ 300.0f, 600.0f }, 60.0f, { 0.5f, 0.0f, 1.0f }, 16);
+		DebugDraw::DrawCircleFilled({ 100.0f, 300.0f }, 80.0f, { 1.0f, 0.5f, 0.0f }, 24);
+		DebugDraw::DrawCircleFilled({ 100.0f, -300.0f }, 60.0f, { 0.5f, 0.0f, 1.0f }, 16);
 	}
 
 	// F5 - DrawPoint
 	if (g_inputSystem->IsDebugPointsEnabled()) {
-		for (float x = 100.0f; x < 1600.0f; x += 200.0f) {
-			for (float y = 100.0f; y < 900.0f; y += 200.0f) {
+		for (float x = -800.0f; x < 800.0f; x += 200.0f) {
+			for (float y = -450.0f; y < 450.0f; y += 200.0f) {
 				DebugDraw::DrawPoint({ x, y }, 5.0f, { 1.0f, 1.0f, 0.0f });
 			}
 		}
@@ -426,11 +431,11 @@ void CoreEngine::RenderDebugDraw() {
 
 	// F6 - Grid
 	if (g_inputSystem->IsDebugGridEnabled()) {
-		for (float x = 0; x < 1600.0f; x += 100.0f) {
-			DebugDraw::DrawLine({ x, 0.0f }, { x, 900.0f }, { 0.3f, 0.3f, 0.3f });
+		for (float x = -800.0f; x < 800.0f; x += 100.0f) {
+			DebugDraw::DrawLine({ x, -450.0f }, { x, 450.0f }, { 0.3f, 0.3f, 0.3f });
 		}
-		for (float y = 0; y < 900.0f; y += 100.0f) {
-			DebugDraw::DrawLine({ 0.0f, y }, { 1600.0f, y }, { 0.3f, 0.3f, 0.3f });
+		for (float y = -450.0f; y < 450.0f; y += 100.0f) {
+			DebugDraw::DrawLine({ -800.0f, y }, { 800.0f, y }, { 0.3f, 0.3f, 0.3f });
 		}
 	}
 
