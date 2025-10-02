@@ -1,12 +1,14 @@
-/*********************************************************************************************
- \file      Core.cpp
- \par		Cat Feeders
- \author	Michelle Han Jian Ping (m.han@digipen.edu) 50%
-			Leu Jun Yong (l.junyong@digipen.edu) 50%
-
-
-\copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.
-**********************************************************************************************/
+/******************************************************************************/
+/**
+ * @file            Core.cpp
+ * @project			Pulse Protocol
+ * @author          Leu Jun Yong 
+ * @brief			Update the brief of this file
+ * @copyright		Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 
 #include "../MyEngine/Graphics/glapp.h"
 #include "../MyEngine/Graphics/glhelper.h"
