@@ -77,12 +77,12 @@ CoreEngine::~CoreEngine()
 
 void CoreEngine::Init()
 {
-	/**/
+	/*Config load window width and height*/
 	if (!LoadConfig(config, config.GetConfigPath())) {
 		std::cerr << "Failed to load config!\n";
 	}
 	else {
-		std::cout << "Saved to: " << std::filesystem::absolute(config.GetConfigPath()) << "\n";
+		std::cout << "Load config From FilePath: " << std::filesystem::absolute(config.GetConfigPath()) << "\n";
 	}
 
 	WindowWidth = config.GetWindowWidth();

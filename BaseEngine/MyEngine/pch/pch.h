@@ -43,7 +43,6 @@
 
 //Serialize
 #include <rapidjson/document.h>     // for Document, Value, AllocatorType
-//#include <rapidjson/writer.h>       // for Writer
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h> // for StringBuffer

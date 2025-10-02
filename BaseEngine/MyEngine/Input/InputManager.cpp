@@ -65,16 +65,39 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     //else {
     //    std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
     //}
+
+    /* Loaded Transform data from transform.json */
     std::string path = "../../MyEngine/JSON/transform.json";
     Framework::Transform new_feedbackTransform;
+  
     if (!Framework::LoadTransform(new_feedbackTransform, path)) {
-        std::cerr << "Failed to load transform!\n";
+        std::cerr << "Failed to load new_feedbackTransform!\n";
     }
     else {
-        std::cout << "Saved to: " << std::filesystem::absolute(path) << "\n";
+        std::cout << "Loaded new_feedbackTransform From: " << std::filesystem::absolute(path) << "\n";
     }
+    std::cout << "Testing data loaded from transform" << "\n";
+    std::cout << "new_feedbackTransform: Pos" << new_feedbackTransform.Pos << "\n";
+    std::cout << "new_feedbackTransform: Scale" << new_feedbackTransform.Scale << "\n";
+    /* Save Transform data from transform.json */
+    std::cout << "Testing saving data loaded to save_transform" << "\n";
+    std::string saved_path = "../../MyEngine/JSON/save_transform.json";
+    new_feedbackTransform.Pos = { 50.0f, 50.0f };
+    if (!Framework::SaveTransform(new_feedbackTransform, saved_path)) {
+        std::cerr << "Failed to save save_transform!\n";
+    }
+    else {
+        std::cout << "Saved to: " << std::filesystem::absolute(saved_path) << "\n";
+    }
+    /*Testing prefab assigning new Transform objecct with original transform*/
+    Framework::Transform new_feedbackTransform4{ new_feedbackTransform };
+    std::cout << "Testing prefab" << "\n";
+    std::cout << "new_feedbackTransform4 Pos:" << new_feedbackTransform4.Pos << "\n";
+    std::cout << "new_feedbackTransform4 Scale:" << new_feedbackTransform4.Scale << "\n";
 
-    //g_coordinator->AddComponent(entity, new_feedbackTransform);
+   // g_coordinator->AddComponent(entity, new_feedbackTransform);
+    
+    
     //SetFeedbackEntity(entity);
 
 
