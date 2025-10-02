@@ -1,6 +1,6 @@
 #pragma once
 #include "pch/pch.h"
-
+#include "../MyEngine/Serialization/Serialization.h"
 
 class CoreEngine
 {
@@ -35,6 +35,9 @@ private:
 
 //A global pointer to the instance of the core
 extern CoreEngine* Engine;
-constexpr int WindowWidth = 1600;
-constexpr int WindowHeight = 900;
+extern Config config;
+extern int WindowWidth;
+extern int WindowHeight;
+//constexpr int WindowWidth = 1600;
+//constexpr int WindowHeight = 900;
 

@@ -11,6 +11,9 @@
 
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
+ Config config;
+ int WindowWidth;
+ int WindowHeight;
 
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
@@ -99,6 +102,20 @@ CoreEngine::~CoreEngine()
 
 void CoreEngine::Init()
 {
+	/*Config load window width and height*/
+	if (!LoadConfig(config, config.GetConfigPath())) {
+		std::cerr << "Failed to load config!\n";
+	}
+	else {
+		std::cout << "Load config From FilePath: " << std::filesystem::absolute(config.GetConfigPath()) << "\n";
+	}
+
+	WindowWidth = config.GetWindowWidth();
+	WindowHeight = config.GetWindowHeight();
+
+	std::cout << "WindowWidth is: " << WindowWidth <<"\n";
+	std::cout << "WindowHeight is: " << WindowHeight << "\n";
+
 	if (!glfwInit()) {
 		spdlog::error("Failed to initialize GLFW");
 		return;
@@ -128,6 +145,7 @@ void CoreEngine::Init()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 
 	window = glfwCreateWindow(WindowWidth, WindowHeight, WindowTitle, nullptr, nullptr);
 	if (!window) {
