@@ -524,7 +524,7 @@ void GLHelper::update_time(double fps_calc_interval) {
   // get elapsed time (in seconds) between previous and current frames
   static double prev_time = glfwGetTime();
   double curr_time = glfwGetTime();
-  delta_time = curr_time - prev_time;
+  GLHelper::delta_time = curr_time - prev_time;
   prev_time = curr_time;
 
   // fps calculations

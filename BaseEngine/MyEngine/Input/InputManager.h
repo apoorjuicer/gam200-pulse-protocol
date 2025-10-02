@@ -152,3 +152,6 @@ private:
 
     bool debugToggleKeyPressed[6] = { false }; // Track F1-F6
 };
+
+// Forward declaration for external function
+void ToggleObjectVisibility();
