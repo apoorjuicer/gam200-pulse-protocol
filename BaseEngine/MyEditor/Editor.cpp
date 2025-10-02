@@ -27,7 +27,7 @@ namespace MyEditor {
     }
 
     void Render() {
-        ImGui::Render();                                      // ✅ produce draw data
+        ImGui::Render();                                      // produce draw data
         if (ImDrawData* dd = ImGui::GetDrawData()) {          // guard against null
             ImGui_ImplOpenGL3_RenderDrawData(dd);
         }
