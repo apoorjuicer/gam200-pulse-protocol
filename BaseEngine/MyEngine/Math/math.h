@@ -1,38 +1,43 @@
-// ==================================================================================
-// math.h  
-// Author: Benjamin Ban
-// Brief: Vector2 and Matrix3x3 class
-//        
-//        
-// ==================================================================================
+/******************************************************************************/
+/**
+ * @file            math.h
+ * @project         Pulse Protocol
+ * @author          Ban Kai Wei Benjamin
+ * @brief           This file manages math library instances
+ *                  Vector2 and Matrix3x3 with serialization/deserialization
+ *                  features
+ * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
 #pragma once
 #include "pch/pch.h"
 #include "Core/system.h"
 
-
-class Vector2 :public Systems
+class Vector2 : public Systems
 {
 public:
 	// ctr and dtr
 	Vector2();
 	Vector2(float x_compo, float y_compo);
-	Vector2(Vector2 const& v);
+	Vector2(Vector2 const &v);
 	~Vector2();
 
 	// copy assignment operator= - assign vector to another
-	Vector2& operator=(Vector2  vec);
+	Vector2 &operator=(Vector2 vec);
 
 	// subscript operator[] - access element of vector
-	float& operator[](size_t i);
+	float &operator[](size_t i);
 	float operator[](size_t i) const;
 
 	// arithmetic operators: vector operations +-
-	Vector2& operator+=(Vector2 vec);
-	Vector2& operator-=(Vector2 vec);
+	Vector2 &operator+=(Vector2 vec);
+	Vector2 &operator-=(Vector2 vec);
 
 	// arithmetic operators: scalar operations */
-	Vector2& operator*=(float scalar);
-	Vector2& operator/=(float scalar);
+	Vector2 &operator*=(float scalar);
+	Vector2 &operator/=(float scalar);
 
 	// arithmetic operators: negation
 	Vector2 operator-(void) const;
@@ -45,92 +50,94 @@ public:
 
 	// normalization
 	Vector2 Norm() const; // non-mutating, returns a normalized copy
-	void       Normalize(); // mutating, normalizes in place
+	void Normalize();	  // mutating, normalizes in place
 	//
 
-	//Serialize
-	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
-	void Deserialize(rapidjson::Value const& in);
+	// Serialize
+	void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
+	void Deserialize(rapidjson::Value const &in);
 
 private:
 	float m[2];
+
 public:
 	// delegates
-	float& x;  //!< Access to X component.
-	float& y;  //!< Access to Y component.
+	float &x; //!< Access to X component.
+	float &y; //!< Access to Y component.
 }; // end of vector class
 
-float distance(Vector2   v0, Vector2  v1);
-float distanceSq(Vector2   v0, Vector2  v1);
-float dot(Vector2   v0, Vector2  v1);
-float cross(Vector2   v0, Vector2  v1);
+float distance(Vector2 v0, Vector2 v1);
+float distanceSq(Vector2 v0, Vector2 v1);
+float dot(Vector2 v0, Vector2 v1);
+float cross(Vector2 v0, Vector2 v1);
 
-Vector2 operator+(Vector2   v0, Vector2  v1);
-Vector2 operator-(Vector2   v0, Vector2  v1);
-Vector2 operator*(Vector2  v, float s);     // vector * scalar
-Vector2 operator*(float s, Vector2  v);         // scalar * vector
-Vector2 operator/(Vector2  v, float s);     // vector / scalar
-std::ostream& operator<<(std::ostream& os, Vector2 const& vec);
+Vector2 operator+(Vector2 v0, Vector2 v1);
+Vector2 operator-(Vector2 v0, Vector2 v1);
+Vector2 operator*(Vector2 v, float s); // vector * scalar
+Vector2 operator*(float s, Vector2 v); // scalar * vector
+Vector2 operator/(Vector2 v, float s); // vector / scalar
+std::ostream &operator<<(std::ostream &os, Vector2 const &vec);
 
-class Matrix3x3 {
+class Matrix3x3
+{
 private:
-	float m[9];      // column-major flat array
+	float m[9]; // column-major flat array
 public:
-	Matrix3x3(); //default identity
+	Matrix3x3(); // default identity
 	Matrix3x3(float e00, float e10, float e20,
-		float e01, float e11, float e21,
-		float e02, float e12, float e22);
-	Matrix3x3(Matrix3x3 const& m);
+			  float e01, float e11, float e21,
+			  float e02, float e12, float e22);
+	Matrix3x3(Matrix3x3 const &m);
 	~Matrix3x3();
 
-	class ProxyClass {
+	class ProxyClass
+	{
 	public:
-		ProxyClass(Matrix3x3& m, size_t c);
-		ProxyClass(Matrix3x3 const& m, size_t c);
+		ProxyClass(Matrix3x3 &m, size_t c);
+		ProxyClass(Matrix3x3 const &m, size_t c);
 
-		float& operator[](size_t r);
-		float const& operator[](size_t r) const;
+		float &operator[](size_t r);
+		float const &operator[](size_t r) const;
 
 	private:
-		Matrix3x3 const* outer_; // pointer to const works for both
+		Matrix3x3 const *outer_; // pointer to const works for both
 		size_t col_;
 	};
-	ProxyClass       operator[](size_t c);
+	ProxyClass operator[](size_t c);
 	ProxyClass const operator[](size_t c) const;
 
 	// = operator: assignment
-	Matrix3x3& operator=(Matrix3x3 const& copied);
+	Matrix3x3 &operator=(Matrix3x3 const &copied);
 	// () operators: component access
-	float& operator()(size_t column, size_t row);
-	const float& operator()(size_t column, size_t row) const;
+	float &operator()(size_t column, size_t row);
+	const float &operator()(size_t column, size_t row) const;
 	// glm conversion operator
 	explicit operator glm::mat3() const;
 
 	// iterators
-	float* Begin();
-	const float* Begin() const;
-	float* End();
-	const float* End() const;
+	float *Begin();
+	const float *Begin() const;
+	float *End();
+	const float *End() const;
 
-	void	SetTo(float e00, float e10, float e20,
-		float e01, float e11, float e21,
-		float e02, float e12, float e22);
-	void	SetToZero();			// zero all 9 elements
-	void	SetToIdentity();	// set 9 elements to define an identity matrix
-	void    SetToTranspose();
+	void SetTo(float e00, float e10, float e20,
+			   float e01, float e11, float e21,
+			   float e02, float e12, float e22);
+	void SetToZero();	  // zero all 9 elements
+	void SetToIdentity(); // set 9 elements to define an identity matrix
+	void SetToTranspose();
 	Matrix3x3 GetTranspose() const;
 
-	//Serialize
-	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
-	void Deserialize(rapidjson::Value const& in);
-
+	// Serialize
+	void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
+	void Deserialize(rapidjson::Value const &in);
 
 }; // end of matrix 3 class
 
 // * operator: matrix multiplication
-Matrix3x3 operator*(Matrix3x3 const& l, Matrix3x3 const& r);
+Matrix3x3 operator*(Matrix3x3 const &l, Matrix3x3 const &r);
 
 // * operator: scalar multiplication
-Matrix3x3 operator*(float s, Matrix3x3 const& mat);
+Matrix3x3 operator*(float s, Matrix3x3 const &mat);
 
-std::ostream& operator<<(std::ostream& os, Matrix3x3 const& mat3);
+std::ostream &operator<<(std::ostream &os, Matrix3x3 const &mat3);

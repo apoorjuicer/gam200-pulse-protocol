@@ -1,10 +1,16 @@
-// ==================================================================================
-// math.cpp
-// Author: Benjamin Ban
-// Brief: Vector2 and Matrix3x3 class
-//
-//
-// ==================================================================================
+/******************************************************************************/
+/**
+ * @file            math.cpp
+ * @project         Pulse Protocol
+ * @author          Ban Kai Wei Benjamin
+ * @brief           This file manages math library instances
+ *                  Vector2 and Matrix3x3 with serialization/deserialization
+ *                  features
+ * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
 #include "pch/pch.h"
 
 /************************************************* */
@@ -142,7 +148,7 @@ float cross(Vector2 v0, Vector2 v1)
 
 Vector2 operator+(Vector2 v0, Vector2 v1)
 {
-    Vector2 tmp{ v0 };
+    Vector2 tmp{v0};
     return tmp += v1;
 }
 Vector2 operator-(Vector2 v0, Vector2 v1)
@@ -206,12 +212,12 @@ Matrix3x3 &Matrix3x3::operator=(Matrix3x3 const &other)
 }
 
 // () operators: component access
-float &Matrix3x3::operator()(size_t  column, size_t  row)
+float &Matrix3x3::operator()(size_t column, size_t row)
 {
     assert(column < 3 && row < 3);
     return m[column * 3 + row];
 }
-const float &Matrix3x3::operator()(size_t  column, size_t  row) const
+const float &Matrix3x3::operator()(size_t column, size_t row) const
 {
     assert(column < 3 && row < 3);
     return m[column * 3 + row];
@@ -322,22 +328,20 @@ Matrix3x3 operator*(float s, Matrix3x3 const &mat)
     return tmp;
 }
 
-Matrix3x3::ProxyClass::ProxyClass(Matrix3x3& m, size_t c) : outer_(&m), col_(c) {}
-Matrix3x3::ProxyClass::ProxyClass(Matrix3x3 const& m, size_t c) : outer_(&m), col_(c) {}
+Matrix3x3::ProxyClass::ProxyClass(Matrix3x3 &m, size_t c) : outer_(&m), col_(c) {}
+Matrix3x3::ProxyClass::ProxyClass(Matrix3x3 const &m, size_t c) : outer_(&m), col_(c) {}
 
-float& Matrix3x3::ProxyClass::operator[](size_t r)
+float &Matrix3x3::ProxyClass::operator[](size_t r)
 {
     // access element at (col = c, row = inner_mat_row)
-    //return outer_mat.m[inner_mat_col * 3 + r];
-    return const_cast<float&>((*outer_)(col_, r));
+    // return outer_mat.m[inner_mat_col * 3 + r];
+    return const_cast<float &>((*outer_)(col_, r));
 }
 
-
-float const& Matrix3x3::ProxyClass::operator[](size_t r) const
+float const &Matrix3x3::ProxyClass::operator[](size_t r) const
 {
     return (*outer_)(col_, r);
 }
-
 
 typename Matrix3x3::ProxyClass Matrix3x3::operator[](size_t c)
 {
@@ -346,17 +350,16 @@ typename Matrix3x3::ProxyClass Matrix3x3::operator[](size_t c)
 
 typename Matrix3x3::ProxyClass const Matrix3x3::operator[](size_t c) const
 {
-    return ProxyClass(static_cast<Matrix3x3 const&>(*this), c); // allows const element access
+    return ProxyClass(static_cast<Matrix3x3 const &>(*this), c); // allows const element access
 }
 
-Matrix3x3::operator glm::mat3() const {
+Matrix3x3::operator glm::mat3() const
+{
     return glm::mat3(
         m[0], m[3], m[6],
         m[1], m[4], m[7],
-        m[2], m[5], m[8]
-    );
+        m[2], m[5], m[8]);
 }
-
 
 std::ostream &operator<<(std::ostream &os, Matrix3x3 const &M)
 {
