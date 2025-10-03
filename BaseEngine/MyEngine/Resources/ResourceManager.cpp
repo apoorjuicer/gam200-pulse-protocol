@@ -1,14 +1,18 @@
 /******************************************************************************/
-/*!
-\file   ResourceManager.cpp
-\author [Your Name]
-\date   [Current Date]
-
-\brief
-    Implementation of basic text resource manager with caching capabilities.
-    Manages text files, configuration files, and provides data-driven loading.
-*/
-/******************************************************************************/
+/**
+ * @file        ResourceManager.cpp
+ * @project     Pulse Protocol
+ * @author      Chloe Lau Rey En
+ * @brief       Implementation of a basic text resource manager with caching
+ *              capabilities. Handles text and configuration file loading,
+ *              provides data-driven access, and supports resource lifecycle
+ *              management including unloading and logging utilities.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without
+ *              the prior written consent of DigiPen Institute of Technology
+ *              is prohibited.
+ */
+ /******************************************************************************/
 
 #include "ResourceManager.h"
 #include <iostream>

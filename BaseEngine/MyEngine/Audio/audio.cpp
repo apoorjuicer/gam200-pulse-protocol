@@ -1,13 +1,12 @@
 /******************************************************************************/
 /**
- * @file            audio.cpp
- * @project         Pulse Protocol
- * @author          Leu Jun Yong (primary) - 100%
-         
- * @brief         This file does the Audio manager for the engine
- * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file       audio.cpp
+ * @project    Pulse Protocol
+ * @author     Leu Jun Yong
+ * @brief      Manages FMOD audio system for BGM and SFX.
+ * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
 
@@ -85,7 +84,7 @@ void AudioManager::Initialize()
         FMOD_RESULT r = mSystem->playSound(defaultBGM, nullptr, false, &mBGMCh);
 
         if (r == FMOD_OK && mBGMCh) {
-            mBGMCh->setVolume(0.05f);
+            mBGMCh->setVolume(1.0f);
             std::cout << "[AudioManager] BGM started successfully.\n";
         }
         else {

@@ -1,13 +1,13 @@
 /******************************************************************************/
 /**
- * @file            Editor.h
- * @project         Pulse Protocol
- * @author          Leu Jun Yong (primary) - 100%
-
- * @brief         This file is the header file for Editor.cpp
- * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        Editor.h
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong
+ * @brief       Initializes, updates, renders, and manages the ImGui
+                editor interface with toggle support.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
 

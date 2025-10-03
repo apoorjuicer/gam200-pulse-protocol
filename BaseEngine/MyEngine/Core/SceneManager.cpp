@@ -2,7 +2,7 @@
 /**
  * @file       SceneManager.cpp
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @author     Chia Wei Xuan Rachael
  * @brief      Implementation of scene management system that handles loading,
  *             unloading, and transitioning between game scenes (MainMenu, Pause,
  *             Level1, Dead). Manages scene-specific entity creation/destruction

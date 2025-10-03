@@ -2,7 +2,7 @@
 /**
  * @file       System.h
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @author     Chia Wei Xuan Rachael
  * @brief      Base class for all ECS systems that provides a container of
  *             entities matching the system's component signature. Defines
  *             virtual Init() and Update() methods for derived systems to
@@ -34,18 +34,8 @@ public:
 	std::set<Entity> EntityMember;
 
 	// All system can have a init() and update(), just need to override
-	virtual void Update(float dt) {};
+	virtual void Update(float) {};
 	
 	virtual void Init() {};
 
 };
-
-
-
-
-
-
-
-
-
-

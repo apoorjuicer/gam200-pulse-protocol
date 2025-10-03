@@ -1,17 +1,17 @@
 /******************************************************************************/
 /**
- * @file       CoreEngine.cpp
- * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael (primary) - 50%
- * @author     Chloe, Ben, Reginald, Pin Kai, Jun Yong (secondary) - 10% each
- * @brief      Implementation of the core engine class that initializes all
- *             engine subsystems (graphics, input, audio, physics), manages
- *             the main game loop with delta time calculation, handles system
- *             updates, integrates ImGui editor support, and provides debug
- *             rendering utilities for development visualization
- * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        CoreEngine.cpp
+ * @project     Pulse Protocol
+ * @author		Chia Wei Xuan Rachael (primary) - 50%
+ * @author		Chloe, Ben, Reginald, Pin Kai, Jun Yong (secondary) - 10% each
+ * @brief		Implementation of the core engine class that initializes all
+ *				engine subsystems (graphics, input, audio, physics), manages
+ *				the main game loop with delta time calculation, handles system
+ *				updates, integrates ImGui editor support, and provides debug
+ *				rendering utilities for development visualization.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
 
@@ -103,7 +103,7 @@ const char WindowTitle[] = "Game Window";
 //	return textureID;
 //}
 
-CoreEngine::CoreEngine() : window(nullptr)
+CoreEngine::CoreEngine() : window(nullptr), DebugMode(false)
 {
     LastTime = 0;
     GameRunning = false;
@@ -283,7 +283,6 @@ void CoreEngine::GameLoop()
 {
     LastTime = timeGetTime();
     //init
-    const float printInterval = 0.2f;
     float printTimer = 0.0f;
 
 	auto profiler = ProfilingManager::GetInstance();
@@ -421,17 +420,14 @@ void CoreEngine::RenderDebugDraw() {
 
 	// F1 - DrawRect
 	if (g_inputSystem->IsDebugRectsEnabled()) {
-		for (auto& entity : g_inputSystem->EntityMember) {
+		for (auto& entity : g_inputSystem->DebugEntities) {
 			auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
 			glm::vec2 center = { transform.Pos.x, transform.Pos.y };
 			glm::vec2 half = 0.5f * glm::vec2(transform.Scale.x, transform.Scale.y);
-
 			glm::vec2 min = center - half;
 			glm::vec2 max = center + half;
-			if (min.x > max.x) std::swap(min.x, max.x);
-			if (min.y > max.y) std::swap(min.y, max.y);
 
-			DebugDraw::DrawRect(min, max, { 1.0f, 0.0f, 0.0f });
+			DebugDraw::DrawRect(min, max, { 1.0f, 1.0f, 0.0f });  // Yellow
 		}
 	}
 

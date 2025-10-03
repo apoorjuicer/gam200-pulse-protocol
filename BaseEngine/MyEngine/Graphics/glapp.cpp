@@ -1,11 +1,15 @@
-	/*********************************************************************************************
- \file      glapp.cpp
- \par		Bloop
- \author	Goh Pin Kai (pinkai.g@digipen.edu)
-
-
-\copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
-**********************************************************************************************/
+/******************************************************************************/
+/**
+ * @file        glapp.cpp
+ * @project     Pulse Protocol
+ * @author      Goh Pin Kai
+ * @brief		Implements OpenGL application utilities for initializing 
+				shaders, models, viewports, and rendering textured entities.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #include "glapp.h"
 #include "DebugDraw.h"
 //#include "../Managers/AssetsManager.h"

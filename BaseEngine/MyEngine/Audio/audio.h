@@ -1,13 +1,13 @@
 /******************************************************************************/
 /**
- * @file            audio.h
- * @project         Pulse Protocol
- * @author          Leu Jun Yong (primary) - 100%
-
- * @brief         This file is the headerfile for audio.cpp
- * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        audio.h
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong
+ * @brief       Provides initialization, playback, control, and shutdown of
+                FMOD-based audio for BGM and sound effects.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
 

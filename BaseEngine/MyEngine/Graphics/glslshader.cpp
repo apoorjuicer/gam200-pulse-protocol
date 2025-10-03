@@ -1,11 +1,15 @@
-/*********************************************************************************************
- \file      glshader.cpp
- \par		Bloop
- \author	Goh Pin Kai ( pinkai.g@digipen.edu )
-
-
-\copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
-**********************************************************************************************/
+/******************************************************************************/
+/**
+ * @file        glslshader.cpp
+ * @project     Pulse Protocol
+ * @author      Goh Pin Kai
+ * @brief       Implements an OpenGL GLSL shader wrapper for compiling,
+                linking, validating, and managing shader programs.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #include "glslshader.h"
 #include <iostream>
 #include <fstream>

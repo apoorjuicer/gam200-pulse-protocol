@@ -1,34 +1,15 @@
-// ==================================================================================
-// MessageManager.h
-// Authors: Chloe Lau Rey En
-// Brief: Generic messaging system for inter-system communication using observer pattern
-// 
-// USAGE GUIDE:
-// ------------
-// 1. Define your message type in Message::Type enum
-// 2. Create a message class that inherits from Message
-// 3. Publisher: Get MessageManager instance and call Publish()
-// 4. Subscriber: Get MessageManager instance and call Subscribe() with a callback
-//
-// EXAMPLE - Sending a message:
-//    auto* msgMgr = MessageManager::GetInstance();
-//    InputComboMessage msg("Basic Strike", glfwGetTime());
-//    msgMgr->Publish(msg);
-//
-// EXAMPLE - Receiving a message:
-//    auto* msgMgr = MessageManager::GetInstance();
-//    msgMgr->Subscribe(Message::Type::INPUT_COMBO, "MySystemName", 
-//        [](const Message& msg) {
-//            const InputComboMessage& combo = static_cast<const InputComboMessage&>(msg);
-//            // Handle the message here
-//            std::cout << "Received: " << combo.comboName << std::endl;
-//        });
-//
-// ADDING NEW MESSAGE TYPES:
-// 1. Add enum value to Message::Type (e.g., ENTITY_SPAWNED)
-// 2. Create new message class inheriting from Message
-// 3. Systems can now publish/subscribe to this new type
-// ==================================================================================
+/******************************************************************************/
+/**
+ * @file        MessageManager.h
+ * @project     Pulse Protocol
+ * @author      Chloe Lau Rey En
+ * @brief		Defines the messaging system and central manager for
+                subscribing, publishing, and broadcasting engine events.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 #include "pch/pch.h"
 

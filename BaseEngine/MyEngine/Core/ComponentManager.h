@@ -1,18 +1,20 @@
 /******************************************************************************/
 /**
- * @file       ComponentManager.h
- * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael (primary) - 100%
- * @brief      Manages registration and access to all component types in the ECS
- *             architecture. Maintains mappings between component type names and
- *             their unique IDs, handles component arrays for each type, and
- *             provides type-safe add/remove/get operations while coordinating
- *             entity-wide component cleanup on entity destruction
- * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
- *             Reproduction or disclosure of this file or its contents without the
- *             prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        ComponentManager.h
+ * @project     Pulse Protocol
+ * @author      Chia Wei Xuan Rachael
+ * @brief		Manages registration and access to all component types in the ECS
+ *				architecture. Maintains mappings between component type names and
+ *				their unique IDs, handles component arrays for each type, and
+ *				provides type-safe add/remove/get operations while coordinating
+ *				entity-wide component cleanup on entity destruction
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
+
+
 #pragma once
 #include "pch/pch.h"
 #include "ComponentArray.h"

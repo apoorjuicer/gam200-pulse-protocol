@@ -2,7 +2,7 @@
 /**
  * @file       Singleton.h
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @author     Chia Wei Xuan Rachael
  * @brief      Template-based Singleton pattern implementation that ensures only
  *             one instance of a class exists throughout the application lifetime.
  *             Provides thread-safe lazy initialization and prevents multiple

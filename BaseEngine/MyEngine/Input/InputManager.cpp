@@ -1,8 +1,18 @@
-// ==================================================================================
-// InputManager.cpp  
-// Author: Chloe Lau Rey En
-// Brief: Implementation of InputManager class with synchronized cycle timing
-// ==================================================================================
+/******************************************************************************/
+/**
+ * @file        InputManager.cpp
+ * @project     Pulse Protocol
+ * @author      Chloe Lau Rey En
+ * @brief       Implements the InputManager system, handling GLFW-based
+ *              keyboard input for rhythm gameplay. Provides real-time input
+ *              state tracking, combo detection, rhythm timing feedback,
+ *              event broadcasting to subscribed systems, debug toggles,
+ *              and integration with the ECS Transform and AudioManager.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 
 #include "pch/pch.h"
 #include "graphics/stb_image.h"
@@ -16,26 +26,6 @@ static std::string KeyToString(int key) {
 	case GLFW_KEY_Z: return "Z";
 	default: return std::to_string(key);
 	}
-}
-
-static GLuint LoadTexture(const char* filepath) {
-    int width, height, channels;
-    unsigned char* data = stbi_load(filepath, &width, &height, &channels, 4);
-
-    if (!data) {
-        std::cerr << "Failed to load texture: " << filepath << std::endl;
-        return 0;
-    }
-
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    stbi_image_free(data);
-    return textureID;
 }
 
 InputManager::InputManager() : window(nullptr) {

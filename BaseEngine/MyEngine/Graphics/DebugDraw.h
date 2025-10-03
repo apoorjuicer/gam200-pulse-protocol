@@ -1,11 +1,15 @@
-/*********************************************************************************************
- \file      DebugDraw.h
- \par       Bloop
- \author    Goh Pin Kai (pinkai.g@digipen.edu) 
-
-
-\copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
-**********************************************************************************************/
+/******************************************************************************/
+/**
+ * @file        DebugDraw.h
+ * @project     Pulse Protocol
+ * @author		Goh Pin Kai
+ * @brief		Declares OpenGL-based debug drawing utilities for rendering
+                points, lines, shapes, and primitives to aid development visualization.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 
 #ifndef DEBUG_DRAW_H

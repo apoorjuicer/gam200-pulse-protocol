@@ -1,44 +1,55 @@
 /******************************************************************************/
 /**
- * @file            collision.cpp
- * @project         Pulse Protocol
- * @author          Reginald Lew Yee Ren
- * @brief           AABB collision handling between NPCs, Monsters, and BoxLine tests
- * @copyright       Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        collision.cpp
+ * @project     Pulse Protocol
+ * @author      Reginald Lew Yee Ren
+ * @brief       AABB collision handling between NPCs, Monsters, and BoxLine tests.
+ *              Implements the CollisionManager system that sets up hero/monster
+ *              entities, processes per-frame updates for movement, scaling,
+ *              rotation, and sword swings, and performs hitbox overlap checks
+ *              using AABB and distance methods.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
+
 
 #include <pch/pch.h>
 
 // --- Toggles (can be modified to control behavior) ---
 bool UseBoxLineTest = false;       // true = BoxLine test, false = Hero/Monster collision
 bool SwordEnabled = false;         // true = sword swings, false = sword disabled
-bool EnableTestCases = false;       // true = print test case output, false = silent
+bool EnableTestCases = true;       // true = print test case output, false = silent
 
 // ==================================================================================
 // CollisionManager Initialization
 // ==================================================================================
 void CollisionManager::Init()
-{
+{	
 	auto* g_coordinator = Coordinator::GetInstance();
+	auto inputMgr = g_coordinator->GetSystem<InputManager>();
+
+	if (!inputMgr) {
+		std::cout << "[ERROR] InputSystem is NULL!\n";
+		return;
+	}
 
 	if (!UseBoxLineTest)
 	{
 		// --- Background Setup ---
-		//Entity Background = g_coordinator->CreateEntity();
-		//Framework::Transform bgTransform{};
-		//bgTransform.Pos = { 0,0 };
-		//bgTransform.Scale = { 200.0f, 200.0f };
-		//bgTransform.mdl_ref = 0.0f;
-		//bgTransform.shd_ref = 1.0f;
-		//bgTransform.isVisible = true;
-		//bgTransform.totalFrames = 1;          // Total frames in the sprite sheet
-		//bgTransform.columns = 1;              // Columns in the sprite sheet
-		//bgTransform.rows = 1;
-		//bgTransform.spriteName = "../../MyEngine/Assets/Background 1.jpg";
-		//g_coordinator->AddComponent(Background, bgTransform);
+		Entity Background = g_coordinator->CreateEntity();
+		Framework::Transform bgTransform{};
+		bgTransform.Pos = { 0,0 };
+		bgTransform.Scale = { 1600.0f, 900.0f };
+		bgTransform.mdl_ref = 0.0f;
+		bgTransform.shd_ref = 1.0f;
+		bgTransform.isVisible = true;
+		bgTransform.totalFrames = 1;          // Total frames in the sprite sheet
+		bgTransform.columns = 1;              // Columns in the sprite sheet
+		bgTransform.rows = 1;
+		bgTransform.spriteName = "../../MyEngine/Assets/Background 1.jpg";
+		g_coordinator->AddComponent(Background, bgTransform);
 
 		//EntityNPC.push_back(Background);
 		// --- Hero NPC: stationary at center of screen ---
@@ -65,8 +76,12 @@ void CollisionManager::Init()
 		EntityNPC.push_back(Hero);
 		std::cout << "Hero spawned at center.\n";
 
+		if (inputMgr) {
+			inputMgr->DebugEntities.insert(Hero);
+		}
+
         // --- Spawn Two Monster NPCs ---
-        float startPositions[2] = { -1000.0f, 1000.0f }; // left and right
+        float startPositions[2] = { -500.0f, 500 }; // left and right
         for (int i = 0; i < 2; ++i)
         {
             Entity Monster = g_coordinator->CreateEntity();
@@ -90,6 +105,11 @@ void CollisionManager::Init()
 
 			g_coordinator->AddComponent(Monster, BuildMonsterHitbox(MonsterTransform, g_coordinator->GetComponent<NPC>(Monster)));
 			EntityNPC.push_back(Monster);
+
+			if (inputMgr) {
+				inputMgr->DebugEntities.insert(Monster);
+			}
+
 			std::cout << "[Init] Monster spawned at x=" << startPositions[i] << "\n";
 		}
 
@@ -107,7 +127,6 @@ void CollisionManager::Init()
 		inputObject.spriteName = "../../MyEngine/Assets/Sprites/bar.png";
         g_coordinator->AddComponent(inputEntity, inputObject);
         
-        auto inputMgr = g_coordinator->GetSystem<InputManager>();
         if (inputMgr) {
             inputMgr->SetFontEntity(inputEntity);
         }
@@ -131,6 +150,8 @@ void CollisionManager::Init()
 			std::cout << "============================================\n\n";
 		}
 	}
+
+	std::cout << "[DEBUG] EntityMember.size() = " << inputMgr->EntityMember.size() << "\n";
 }
 
 // ==================================================================================

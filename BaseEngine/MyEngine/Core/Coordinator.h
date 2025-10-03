@@ -1,18 +1,21 @@
 /******************************************************************************/
 /**
- * @file       Coordinator.h
- * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael (primary) - 100%
+/******************************************************************************/
+/**
+ * @file        Coordinator.h
+ * @project     Pulse Protocol
+ * @author      Chia Wei Xuan Rachael
  * @brief      Central coordinator class implementing the Singleton pattern that
  *             acts as a unified interface for the ECS architecture. Manages
  *             entity creation/destruction, component registration/access, and
  *             system management by coordinating between EntityManager,
  *             ComponentManager, and SystemManager
- * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
- *             Reproduction or disclosure of this file or its contents without the
- *             prior written consent of DigiPen Institute of Technology is prohibited.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
+
 #pragma once
 #include "pch/pch.h"
 #include "SystemManager.h"

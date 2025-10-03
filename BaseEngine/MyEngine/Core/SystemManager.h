@@ -2,7 +2,7 @@
 /**
  * @file       SystemManager.h
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @author     Chia Wei Xuan Rachael
  * @brief      Manages registration, retrieval, and lifecycle of all ECS systems.
  *             Handles system signatures for entity-component matching, updates
  *             entity membership across systems when signatures change, and
