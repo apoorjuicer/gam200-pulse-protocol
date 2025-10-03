@@ -99,11 +99,12 @@ void CollisionManager::Init()
         Entity inputEntity = g_coordinator->CreateEntity();
         Framework::Transform inputObject{};
         inputObject.Pos = { 0.0f, -500.0f };
-        inputObject.Scale = { 600.0f, 200.0f };
+        inputObject.Scale = { 800.0f, 200.0f };
         inputObject.mdl_ref = 1.0f;
-        inputObject.shd_ref = 0.0f;
+        inputObject.shd_ref = 2.0f;
         inputObject.isVisible = false;  // Make visible to test
         inputObject.currentFrame = 0;
+		inputObject.spriteName = "../../MyEngine/Assets/Sprites/bar.png";
         g_coordinator->AddComponent(inputEntity, inputObject);
         
         auto inputMgr = g_coordinator->GetSystem<InputManager>();
