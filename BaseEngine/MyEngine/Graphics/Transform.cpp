@@ -1,11 +1,18 @@
-/*********************************************************************************************
- \file      Transform.cpp
- \par       Bloop
- \author    Goh Pin Kai (pinkai.g@digipen.edu)
-
-
-\copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
-**********************************************************************************************/
+/******************************************************************************/
+/**
+ * @file        Transform.cpp
+ * @project     Pulse Protocol
+ * @author      Goh Pin Kai
+ * @brief       Implements the Transform component, providing position,
+ *              scale, rotation, animation, and sprite management. Includes
+ *              update logic for entity transforms, matrix composition,
+ *              and JSON-based serialization/deserialization for saving
+ *              and loading transform state.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #include "Transform.h"
 #include <../MyEngine/Math/math.h>
 

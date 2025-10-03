@@ -1,16 +1,16 @@
 /******************************************************************************/
 /**
- * @file            math.cpp
- * @project         Pulse Protocol
- * @author          Ban Kai Wei Benjamin
- * @brief           This file manages math library instances
- *                  Vector2 and Matrix3x3 with serialization/deserialization
- *                  features
- * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        math.cpp
+ * @project     Pulse Protocol
+ * @author      Ban Kai Wei Benjamin
+ * @brief       This file manages math library instances Vector2 and Matrix3x3
+ *              with serialization/deserialization featuresling, linking, validating,
+ *              and managing shader programs.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 #include "pch/pch.h"
 
 /************************************************* */
@@ -361,7 +361,7 @@ Matrix3x3::operator glm::mat3() const
         m[2], m[5], m[8]);
 }
 
-std::ostream &operator<<(std::ostream &os, Matrix3x3 const &M)
+std::ostream &operator<<(std::ostream &os, Matrix3x3 const & /*M*/)
 {
     // Disabled matrix printing for performance
     /*

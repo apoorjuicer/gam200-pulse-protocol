@@ -1,18 +1,22 @@
 /******************************************************************************/
 /**
- * @file       main.cpp
- * @project    Pulse Protocol
- * @author     Team Bloop - Chia Wei Xuan Rachael (Engine Architecture), Chloe Lau Rey En (Input System)
- *             Pin Kai, Benjamin, Reginald, Carrie, Fenny, Jun Yong
- * @brief      Main entry point for the Pulse Protocol engine. Initializes
- *             memory leak detection, logging system, core engine subsystems,
- *             and ImGui editor. Creates render objects for testing, manages
- *             the game loop execution, and handles proper cleanup and shutdown
- * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        main.cpp
+ * @project     Pulse Protocol
+ * @author      Chia Wei Xuan Rachael (primary) - 50%
+ * @author      Chloe Lau Rey En, Ban Kai Wei Benjamin,
+ *              Reginald Lew Yee Ren, Goh Pin Kai, Leu Jun Yong (secondary) - 10% each
+ * @brief       Entry point of the Pulse Protocol engine. Initializes the
+ *              CoreEngine, logging, and editor (ImGui), sets up game objects,
+ *              and runs the main game loop. Includes debug utilities for
+ *              performance profiling, memory leak detection, and object
+ *              visibility toggling.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without
+ *              the prior written consent of DigiPen Institute of Technology is
+ *              prohibited.
  */
  /******************************************************************************/
+
 #if defined(_WIN32)
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -93,7 +97,7 @@ void CreateRenderObjects(int count) {
         // We'll spawn objects within a reasonable area of the viewport
         
         // Spawn within the game area, leaving some margin
-        float margin = 50.0f;
+        //float margin = 50.0f;
         float halfW = Game_Window_Width * 0.5f;
         float halfH = Game_Window_Height * 0.5f;
         transform.Pos = Vector2(
@@ -108,6 +112,8 @@ void CreateRenderObjects(int count) {
         // Random rotation
         transform.angle_disp = static_cast<float>(rand() % 360);
         transform.angle_speed = static_cast<float>(rand() % 10) - 5.0f; // -5 to +5 degrees per frame
+
+        transform.spriteName = "../../MyEngine/Assets/hero.png";
         
         // Set model and shader references for sprite rendering
         transform.mdl_ref = 1.0f;  // Use box model (1) instead of background (0)
@@ -143,17 +149,6 @@ CoreEngine* Engine = nullptr;
 //InputManager* g_inputSystem = nullptr;
 //GraphicsManager* g_graphicsSystem = nullptr;
 // 
-// ----------------- Toggle key for crash test -----------------
-static std::string KeyToString(int key) {
-    switch (key) {
-    case GLFW_KEY_W: return "W";
-    case GLFW_KEY_A: return "A";
-    case GLFW_KEY_S: return "S";
-    case GLFW_KEY_D: return "D";
-    case GLFW_KEY_P: return "P";
-    default: return std::to_string(key);
-    }
-}
 
 int main() {
 #ifdef _DEBUG

@@ -1,11 +1,15 @@
-/*********************************************************************************************
- \file      glhelper.h
- \par		Bloop
- \author    Goh pin Kai (pinkai.g@digipen.edu) 
-
-
-\copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.
-**********************************************************************************************/
+/******************************************************************************/
+/**
+ * @file        glhelper.h
+ * @project     Pulse Protocol
+ * @author      Goh Pin Kai
+ * @brief		Declares OpenGL helper utilities for window management,
+                input handling, timing, and context setup.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 
 #ifndef GLHELPER_H
 #define GLHELPER_H

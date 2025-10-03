@@ -1,8 +1,16 @@
-// ==================================================================================
-// MessageManager.cpp
-// Authors: Chloe Lau Rey En
-// Brief: Implementation of generic messaging system with type-filtered subscriptions
-// ==================================================================================
+/******************************************************************************/
+/**
+ * @file        MessageManager.cpp
+ * @project     Pulse Protocol
+ * @author      Chloe Lau Rey En
+ * @brief		Implements a singleton message manager that allows subscribing,
+                unsubscribing, publishing, and broadcasting engine messages.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
+
 #include "pch/pch.h"
 
 MessageManager* MessageManager::instance = nullptr;

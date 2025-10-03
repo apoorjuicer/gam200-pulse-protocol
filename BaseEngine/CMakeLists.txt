@@ -1,6 +1,15 @@
 ﻿cmake_minimum_required(VERSION 3.20)
 project(MyEngine VERSION 0.1 LANGUAGES C CXX)
 
+# Suppress warnings from external libraries (MSVC only)
+if(MSVC)
+    add_compile_options(
+        /experimental:external
+        /external:W0
+        /external:anglebrackets
+    )
+endif()
+
 # Put FetchContent downloads in build/libraries/
 set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/libraries")
 include(FetchContent)

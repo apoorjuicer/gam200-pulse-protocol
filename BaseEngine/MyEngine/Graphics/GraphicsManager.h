@@ -1,15 +1,18 @@
 /******************************************************************************/
 /**
- * @file            GraphicsManager.h
- * @project         Pulse Protocol
- * @author          Goh Pin Kai (primary) - 70%
- * @author          Leu Jun Yong (secondary) - 30%
- * @brief         This file is the headerfile the GraphicsManager.cpp
- * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        GraphicsManager.cpp
+ * @project     Pulse Protocol
+ * @author		Goh Pin Kai (primary) - 70%
+ * @author		Leu Jun Yong (secondary) - 30% each
+ * @brief       Declares the GraphicsManager, which sets up and manages
+ *              OpenGL rendering, FreeType-based text rendering, message
+ *              subscriptions, and the interface for initialization,
+ *              per-frame updates, and cleanup of graphics resources.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/
+ /******************************************************************************/ 
 
 #pragma once
 #include "pch/pch.h"

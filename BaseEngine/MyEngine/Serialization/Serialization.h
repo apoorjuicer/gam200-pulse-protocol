@@ -1,15 +1,19 @@
 /******************************************************************************/
 /**
- * @file            Serialization.h
- * @project         Pulse Protocol
- * @author          Ban Kai Wei Benjamin
- * @brief               This file manages serialization and deserialization of config
- *                          and entity
- * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        Serialization.h
+ * @project     Pulse Protocol
+ * @author      Ban Kai Wei Benjamin
+ * @brief       Declares serialization and deserialization interfaces for engine
+ *              configuration (Config) and entities (e.g., NPC). Provides
+ *              save/load utility function prototypes for writing and reading
+ *              JSON-based game data files.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without
+ *              the prior written consent of DigiPen Institute of Technology is
+ *              prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
+
 #pragma once
 #include <pch/pch.h>
 #include <string>
@@ -46,8 +50,8 @@ public:
 	void Deserialize(const rapidjson::Value &in);
 };
 
-bool SaveConfig(Config const &config, std::string const &path);
-bool LoadConfig(Config &config, std::string const &path);
+bool SaveConfig(Config const &cfg, std::string const &path);
+bool LoadConfig(Config &cfg, std::string const &path);
 
 bool SaveEntity(Entity e, Coordinator *g, std::string const &path);
 bool LoadEntity(Entity e, Coordinator *g, std::string const &path);

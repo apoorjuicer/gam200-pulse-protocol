@@ -1,12 +1,13 @@
 /******************************************************************************/
 /**
- * @file            Log.h
- * @project         Pulse Protocol
- * @author          Reginald Lew Yee Ren
- * @brief           Capturing of crash logs into txt through SPDLOG
- * @copyright       Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        Log.h
+ * @project     Pulse Protocol
+ * @author      Reginald Lew Yee Ren
+ * @brief		Provides initialization and access to spdlog-based core, client,
+                and crash loggers for engine and game debugging.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
 /******************************************************************************/
 

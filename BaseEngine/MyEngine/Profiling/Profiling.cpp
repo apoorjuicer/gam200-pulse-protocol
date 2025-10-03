@@ -1,9 +1,19 @@
-// ==================================================================================
-// Profiling.cpp
-// Author: Chloe Lau Rey En
-// Brief: Implementation of performance profiling system with high-precision timing
-//        and percentage-based reporting for system performance analysis.
-// ==================================================================================
+/******************************************************************************/
+/**
+ * @file        Profiling.cpp
+ * @project     Pulse Protocol
+ * @author      Chloe Lau Rey En
+ * @brief       Implements the performance profiling system with high-precision
+ *              timing and percentage-based reporting. Provides per-frame FPS
+ *              calculation, system-level time tracking, and formatted console
+ *              output for performance analysis and debugging.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without
+ *              the prior written consent of DigiPen Institute of Technology
+ *              is prohibited.
+ */
+ /******************************************************************************/
+
 #include "pch/pch.h"
 
 ProfilingManager* ProfilingManager::instance = nullptr;

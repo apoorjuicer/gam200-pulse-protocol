@@ -1,13 +1,14 @@
 /******************************************************************************/
 /**
- * @file            AssetsManager.h
- * @project         Pulse Protocol
- * @author          Leu Jun Yong (primary) - 60%
- * @author          Goh Pin Kai (secondary) - 40%     
- * @brief         This file is the headerfile for AssetsManager.cpp
- * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        AssetsManager.h
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 60%
+ * @author      Goh Pin Kai (secondary) - 40%
+ * @brief       Central manager for loading, accessing, and releasing audio (FMOD)
+                and texture (OpenGL) assets.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
 
@@ -25,7 +26,6 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 #include <unordered_map>
 #include <unordered_set>
 #include <string>
-#include <filesystem>
 
 
 namespace Framework {

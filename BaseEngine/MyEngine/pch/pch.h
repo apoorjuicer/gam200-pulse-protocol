@@ -1,14 +1,14 @@
 /******************************************************************************/
 /**
- * @file       pch.h
- * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael (primary) - 100%
- * @brief      This is a precompiled header file that centralizes all standard library,
- *             external library, and internal engine headers for optimized
- *             compilation. We do this to make code clean and organization. :]
- * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        pch.h
+ * @project     Pulse Protocol
+ * @author      Chia Wei Xuan Rachael 
+ * @brief       This is a precompiled header file that centralizes all standard library,
+ *				external library, and internal engine headers for optimized
+ *				compilation. We do this to make code clean and organization. :]
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
 #pragma once
@@ -16,6 +16,18 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 // pch.h: This is a precompiled header file.
 // I'm doing this as we only need to compile it once and make  the files neater, we will put all our lib that we are using here. 
 // Just put #include "pch/pch.h" and you will have acces to it
+// Suppress third-party library warnings
+#pragma warning(disable: 4146)  // unary minus on unsigned
+#pragma warning(disable: 26495) // uninitialized member
+#pragma warning(disable: 26451) // arithmetic overflow  
+#pragma warning(disable: 26498) // constexpr functions
+#pragma warning(disable: 4244)  // conversion warnings
+#pragma warning(disable: 26812) // enum type preference
+#pragma warning(disable: 6285)
+#pragma warning(disable: 28800)
+#pragma warning(disable: 26819)  // fallthrough annotation
+#pragma warning(disable: 6262)   // stack usage
+
 
 // Standard Library Headers
 #include <fstream>
@@ -47,29 +59,38 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 // Graphics Library Headers
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#pragma warning(push, 0)
 #include <glm/glm.hpp>
-#include "Graphics/glhelper.h"
-#include "Graphics/glslshader.h"
+#pragma warning(pop)
 
 // FMOD Headers
+#pragma warning(push, 0)
 #include "../MyEngine/FMOD_API/api/core/inc/fmod.hpp"
 #include "../MyEngine/FMOD_API/api/core/inc/fmod_errors.h"
+#pragma warning(pop)
 
 // Editor Header
 #include "../MyEditor/Editor.h"
 
 //Serialize
+#pragma warning(push, 0)
 #include <rapidjson/document.h>     // for Document, Value, AllocatorType
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h> // for StringBuffer
+#pragma warning(pop)
 
-
-// Suppress APIENTRY macro redefinition warning
-#pragma warning(push)
-#pragma warning(disable: 4005)
+//Logging library
+#pragma warning(push, 0)  // Disable all warnings
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#pragma warning(pop)  // Restore warnings
 
 // System Library Headers
+#include "Graphics/glhelper.h"
+#include "Graphics/glslshader.h"
+
 #include "../MyEngine/Profiling/Profiling.h"
 #include "../MyEngine/Math/math.h"
 #include "../MyEngine/Input/InputManager.h"
@@ -96,10 +117,3 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 #include "../MyEngine/Core/ComponentArray.h"
 #include "../MyEngine/Core/ComponentManager.h"
 #include "../MyEngine/Core/MessageManager.h"
-
-//Logging library
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/rotating_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-// Restore warning settings
-#pragma warning(pop)

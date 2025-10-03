@@ -1,15 +1,18 @@
 /******************************************************************************/
 /**
- * @file            Serialization.cpp
- * @project         Pulse Protocol
- * @author          Ban Kai Wei Benjamin
- * @brief               This file manages serialization and deserialization of config
- *                          and entity
- * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        Serialization.cpp
+ * @project     Pulse Protocol
+ * @author      Ban Kai Wei Benjamin
+ * @brief       Implements JSON serialization and deserialization for engine
+ *              configuration and entities (e.g., Config, NPC). Provides
+ *              save/load utilities for writing and reading game data files.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without
+ *              the prior written consent of DigiPen Institute of Technology is
+ *              prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
+
 #include <pch/pch.h>
 
 void Config::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
@@ -46,14 +49,14 @@ void Config::Deserialize(const rapidjson::Value &in)
     }
 }
 
-bool SaveConfig(Config const &config, std::string const &path)
+bool SaveConfig(Config const &cfg, std::string const &path)
 {
     rapidjson::Document d;
     d.SetObject();
     auto &alloc = d.GetAllocator();
 
     rapidjson::Value configVal;
-    config.Serialize(configVal, alloc);
+    cfg.Serialize(configVal, alloc);
     d.AddMember("config", configVal, alloc);
 
     rapidjson::StringBuffer buffer;
@@ -79,7 +82,7 @@ bool SaveConfig(Config const &config, std::string const &path)
     }
     return true;
 }
-bool LoadConfig(Config &config, std::string const &path)
+bool LoadConfig(Config &cfg, std::string const &path)
 {
     std::ifstream ifs(path);
     if (!ifs.is_open())
@@ -103,7 +106,7 @@ bool LoadConfig(Config &config, std::string const &path)
         return false;
     }
 
-    config.Deserialize(d["config"]);
+    cfg.Deserialize(d["config"]);
     return true;
 }
 

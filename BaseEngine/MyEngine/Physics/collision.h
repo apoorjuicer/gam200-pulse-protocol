@@ -1,14 +1,20 @@
 /******************************************************************************/
 /**
- * @file            collision.h
- * @project         Pulse Protocol
- * @author          Reginald Lew Yee Ren
- * @brief           Collision management system (NPC, Monster, Sword, and Box-to-Line logic)
- * @copyright       Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        collision.h
+ * @project     Pulse Protocol
+ * @author      Reginald Lew Yee Ren
+ * @brief       Collision management system (NPC, Monster, Sword, and Box-to-Line logic).
+ *              Provides CollisionManager class which handles:
+ *                  - NPC vs Monster collisions using AABB
+ *                  - NPC sword swing detection against Monsters
+ *                  - Box-to-Line collision checks for timing systems
+ *              Used by the ECS engine to manage gameplay collisions and tests.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
+
 
 #ifndef COLLISION_H
 #define COLLISION_H

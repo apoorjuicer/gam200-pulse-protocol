@@ -1,11 +1,17 @@
-/*********************************************************************************************
- \file      Transform.h
- \par       Bloop
- \author    Goh Pin Kai (pinkai.g@digipen.edu) 100%
-
-
-\copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
-**********************************************************************************************/
+/******************************************************************************/
+/**
+ * @file        Transform.h
+ * @project     Pulse Protocol
+ * @author      Goh Pin Kai
+ * @brief       Declares the Transform component for the ECS framework,
+ *              storing position, scale, rotation, animation state,
+ *              and sprite data. Provides interfaces for updating,
+ *              serializing, and deserializing transform properties.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 //#include "../ComponentJson/Component_System.h"
 //#include "../Math/Matrix_3x3.h"

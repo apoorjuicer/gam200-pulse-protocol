@@ -1,16 +1,16 @@
 /******************************************************************************/
 /**
- * @file            math.h
- * @project         Pulse Protocol
- * @author          Ban Kai Wei Benjamin
- * @brief           This file manages math library instances
- *                  Vector2 and Matrix3x3 with serialization/deserialization
- *                  features
- * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        math.h
+ * @project     Pulse Protocol
+ * @author      Ban Kai Wei Benjamin
+ * @brief       This file manages math library instances Vector2 and Matrix3x3
+ *				with serialization/deserialization featuresling, linking, validating,
+ *				and managing shader programs.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 #pragma once
 #include "pch/pch.h"
 #include "Core/system.h"

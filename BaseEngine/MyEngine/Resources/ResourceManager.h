@@ -1,17 +1,19 @@
 /******************************************************************************/
-/*!
-\file   ResourceManager.h
-\author [Your Name]
-\date   [Current Date]
+/**
+ * @file        ResourceManager.h
+ * @project     Pulse Protocol
+ * @author      Chloe Lau Rey En
+ * @brief       Basic text resource manager for loading, caching, and managing
+ *              text-based resources. Supports configuration files, game data,
+ *              and provides the foundation for data-driven workflows. Includes
+ *              utilities for reading, writing, and logging text resources.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without
+ *              the prior written consent of DigiPen Institute of Technology
+ *              is prohibited.
+ */
+ /******************************************************************************/
 
-\brief
-    Basic text resource manager for loading, caching, and managing text-based
-    game resources. Supports configuration files, game object data, and
-    provides foundation for M1 data-driven requirements.
-
-STL Used: std::string, std::unordered_map, std::ifstream, std::ofstream
-*/
-/******************************************************************************/
 
 #pragma once
 

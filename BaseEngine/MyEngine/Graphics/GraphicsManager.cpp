@@ -1,15 +1,17 @@
 /******************************************************************************/
 /**
- * @file            GraphicsManager.cpp
- * @project         Pulse Protocol
- * @author          Goh Pin Kai (primary) - 70%
- * @author          Leu Jun Yong (secondary) - 30%       
- * @brief         This file does the GraphicsManager for the Engine
- * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        GraphicsManager.cpp
+ * @project     Pulse Protocol
+ * @author		Goh Pin Kai (primary) - 70%
+ * @author		Leu Jun Yong (secondary) - 30% each
+ * @brief       Implements the GraphicsManager, handling OpenGL graphics setup,
+ *              text rendering via FreeType, message subscriptions, per-frame
+ *              updates, and cleanup of rendering resources.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/
+ /******************************************************************************/ 
 
 #include "GraphicsManager.h"
 
@@ -115,6 +117,22 @@ void GraphicsManager::Update()
     std::ostringstream fpsText;
     fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
     RenderText(GLApp::shdrpgms[3], fpsText.str(), 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
+
+    // Controls display - right side or top corner
+    int width, height;
+    glfwGetFramebufferSize(Engine->GetWindow(), &width, &height);
+
+    float startX = width - 350.0f;  // 350 pixels from right edge
+    float startY = height - 200.0f; // Start 250 pixels from bottom
+    float lineHeight = 25.0f;
+
+    RenderText(GLApp::shdrpgms[3], "Controls:", startX, startY, 0.5f, glm::vec3(1, 1, 0), Characters2);
+    RenderText(GLApp::shdrpgms[3], "M - Start monsters", startX, startY + lineHeight * 1, 0.4f, glm::vec3(1, 1, 1), Characters2);
+    RenderText(GLApp::shdrpgms[3], "W/A/S/D - Input", startX, startY + lineHeight * 2, 0.4f, glm::vec3(1, 1, 1), Characters2);
+    RenderText(GLApp::shdrpgms[3], "K/L - Scale hero", startX, startY + lineHeight * 3, 0.4f, glm::vec3(1, 1, 1), Characters2);
+    RenderText(GLApp::shdrpgms[3], "H/J - Rotate monsters", startX, startY + lineHeight * 4, 0.4f, glm::vec3(1, 1, 1), Characters2);
+    RenderText(GLApp::shdrpgms[3], "O - Toggle editor", startX, startY + lineHeight * 5, 0.4f, glm::vec3(1, 1, 1), Characters2);
+    RenderText(GLApp::shdrpgms[3], "F1-F6 - Debug draw", startX, startY + lineHeight * 6, 0.4f, glm::vec3(1, 1, 1), Characters2);
 }
 
 void GraphicsManager::Shutdown()

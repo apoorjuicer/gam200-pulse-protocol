@@ -1,9 +1,24 @@
-// ==================================================================================
-// InputManager.h
-// Author: Chloe Lau Rey En
-// Brief: InputManager handles rhythm inputs and sword combos.
-//        ECS-compatible but can also operate independently.
-// ==================================================================================
+/******************************************************************************/
+/**
+ * @file        InputManager.h
+ * @project     Pulse Protocol
+ * @author      Chloe Lau Rey En
+ * @brief       Declares the InputManager system, responsible for managing
+ *              GLFW keyboard inputs with rhythm-based timing. Provides:
+ *                - Real-time input state tracking (per-frame key states).
+ *                - Rhythm gameplay support with beat synchronization.
+ *                - Sword combo detection (multi-key sequences).
+ *                - Debug draw toggles via F1–F6 keys.
+ *                - Integration with ECS (Transform + AudioManager).
+ *                - Event broadcasting to subscribed systems (InputEvent).
+ *
+ *              Functions as a standalone input manager for non-ECS contexts.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
+
 
 #pragma once
 #include <GLFW/glfw3.h>
@@ -84,6 +99,9 @@ public:
 
     // Stats
     int GetSuccessfulCombos() const { return successfulCombos; }
+
+    // Debug helper
+    std::set<Entity> DebugEntities;
 
     // Debug helper
     bool IsDebugRectsEnabled() const { return debugRectsEnabled; }

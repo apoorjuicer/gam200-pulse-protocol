@@ -1,11 +1,15 @@
-/*********************************************************************************************
- \file      FontObj.h
- \par		Bloop
- \author	Goh Pin Kai (pinkai.g@digipen.edu)
-			Leu Jun Yong (l.junyong)
-
-\copyright All content   2025 DigiPen Institute of Technology Singapore. All rights reserved.
-**********************************************************************************************/
+/******************************************************************************/
+/**
+ * @file        FontObj.h
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong
+ * @brief       Declares a simple font resource class for storing font
+				identifiers and file paths.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 #include "pch/pch.h"
 

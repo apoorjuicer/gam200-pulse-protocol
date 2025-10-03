@@ -1,9 +1,20 @@
-// ==================================================================================
-// Profiling.h
-// Author: Chloe Lau Rey En
-// Brief: Standalone performance profiling system for measuring and displaying
-//        system execution times as percentages of total frame time.
-// ==================================================================================
+/******************************************************************************/
+/**
+ * @file        Profiling.h
+ * @project     Pulse Protocol
+ * @author      Chloe Lau Rey En
+ * @brief       Standalone performance profiling system for measuring and
+ *              displaying execution times of systems as percentages of total
+ *              frame time. Provides ProfilingManager for per-frame tracking
+ *              and ScopedProfiler (RAII) helper for automatic profiling of
+ *              code regions.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without
+ *              the prior written consent of DigiPen Institute of Technology
+ *              is prohibited.
+ */
+ /******************************************************************************/
+
 #pragma once
 #include "pch/pch.h"
 

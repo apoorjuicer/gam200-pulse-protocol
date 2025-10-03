@@ -2,7 +2,7 @@
 /**
  * @file       SceneManager.h
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael (primary) - 100%
+ * @author     Chia Wei Xuan Rachael
  * @brief      Scene management system class that inherits from Systems base class.
  *             Defines Scene enum for game states and provides interface for
  *             scene loading, unloading, and transitioning. Maintains current

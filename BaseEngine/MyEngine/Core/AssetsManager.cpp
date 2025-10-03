@@ -1,13 +1,14 @@
 ﻿/******************************************************************************/
 /**
- * @file            AssetsManager.cpp
- * @project         Pulse Protocol
- * @author          Leu Jun Yong (primary) - 60%
- * @author          Goh Pin Kai (secondary) - 40%     
- * @brief         This file is the AssetsManager that manages all assets
- * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
-Reproduction or disclosure of this file or its contents without the
-prior written consent of DigiPen Institute of Technology is prohibited.
+ * @file        AssetsManager.cpp
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 60%
+ * @author      Goh Pin Kai (secondary) - 40%
+ * @brief       Handles loading, retrieving, and unloading of audio (FMOD) 
+                and texture (OpenGL) assets.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
 
