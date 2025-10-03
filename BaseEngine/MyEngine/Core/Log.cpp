@@ -1,3 +1,15 @@
+/******************************************************************************/
+/**
+ * @file            Log.cpp
+ * @project         Pulse Protocol
+ * @author          Reginald Lew Yee Ren
+ * @brief           Capturing of crash logs into txt through SPDLOG
+ * @copyright       Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
+
 #include "Log.h"
 
 namespace GAM200graphics {
