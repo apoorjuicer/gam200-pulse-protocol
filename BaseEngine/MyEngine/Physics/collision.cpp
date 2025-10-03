@@ -106,10 +106,6 @@ void CollisionManager::Init()
 			g_coordinator->AddComponent(Monster, BuildMonsterHitbox(MonsterTransform, g_coordinator->GetComponent<NPC>(Monster)));
 			EntityNPC.push_back(Monster);
 
-			if (inputMgr) {
-				inputMgr->DebugEntities.insert(Monster);
-			}
-
 			std::cout << "[Init] Monster spawned at x=" << startPositions[i] << "\n";
 		}
 
@@ -285,8 +281,12 @@ void CollisionManager::Update(float dt)
 					std::cout << std::setw(12) << "[SwordHit] "
 					<< "Monster killed by sword at edge!\n";
 
-				g_coordinator->DestroyEntity(EntityNPC[i]);
+				// Save entity ID before destroying
+				Entity monsterToDestroy = EntityNPC[i];
+
+				g_coordinator->DestroyEntity(monsterToDestroy);
 				EntityNPC.erase(EntityNPC.begin() + i);
+
 				--i; // adjust index after erase
 				continue; // skip further collision for this monster
 			}
