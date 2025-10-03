@@ -1,9 +1,15 @@
-/*********************************************************************************************
-// GraphicsManager.cpp
-\par        Bloop
-\author     Goh pin Kai(pinkai.g@digipen.edu)
-\copyright  All content 2025 DigiPen Institute of Technology Singapore.
-*********************************************************************************************/
+/******************************************************************************/
+/**
+ * @file            GraphicsManager.cpp
+ * @project         Pulse Protocol
+ * @author          Goh Pin Kai (primary) - 70%
+ * @author          Leu Jun Yong (secondary) - 30%       
+ * @brief         This file does the GraphicsManager for the Engine
+ * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 
 #include "GraphicsManager.h"
 #include "Font.h"

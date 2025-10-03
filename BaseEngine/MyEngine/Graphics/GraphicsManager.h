@@ -1,11 +1,15 @@
-/*********************************************************************************************
-// GraphicsManager.h
-\par		Bloop
-\author    Goh pin Kai(pinkai.g@digipen.edu)
-
-
-\copyright All content   2025 DigiPen Institute of Technology Singapore.All rights reserved.
-* *********************************************************************************************/
+/******************************************************************************/
+/**
+ * @file            GraphicsManager.h
+ * @project         Pulse Protocol
+ * @author          Goh Pin Kai (primary) - 70%
+ * @author          Leu Jun Yong (secondary) - 30%
+ * @brief         This file is the headerfile the GraphicsManager.cpp
+ * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 
 #pragma once
 #include "pch/pch.h"

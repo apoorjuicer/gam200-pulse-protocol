@@ -1,7 +1,15 @@
-// ==================================================================================
-// audio.cpp
-// Author: Leu Jun Yong
-// ==================================================================================
+/******************************************************************************/
+/**
+ * @file            audio.cpp
+ * @project         Pulse Protocol
+ * @author          Leu Jun Yong (primary) - 100%
+         
+ * @brief         This file does the Audio manager for the engine
+ * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 
 #include "audio.h"
 #include <iostream>

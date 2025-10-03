@@ -1,12 +1,15 @@
-﻿/*********************************************************************************************
- \file      AssetsManager.cpp
- \par
- \author    Leu Jun Yong (l.junyong@digipen.edu) 60%
-            Goh Pin Kai (pinkai.g@digipen.edu) 40%
-
-
-\copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.
-**********************************************************************************************/
+﻿/******************************************************************************/
+/**
+ * @file            AssetsManager.cpp
+ * @project         Pulse Protocol
+ * @author          Leu Jun Yong (primary) - 60%
+ * @author          Goh Pin Kai (secondary) - 40%     
+ * @brief         This file is the AssetsManager that manages all assets
+ * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 
 #pragma once
 #include "AssetsManager.h"
