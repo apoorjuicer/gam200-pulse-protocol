@@ -12,7 +12,6 @@ prior written consent of DigiPen Institute of Technology is prohibited.
  /******************************************************************************/
 
 #include "GraphicsManager.h"
-#include "Font.h"
 
 float editorHeight;
 float editorWidth;
