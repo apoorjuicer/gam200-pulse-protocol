@@ -1,7 +1,19 @@
+/******************************************************************************/
+/**
+ * @file            Serialization.cpp
+ * @project         Pulse Protocol
+ * @author          Ban Kai Wei Benjamin
+ * @brief               This file manages serialization and deserialization of config
+ *                          and entity
+ * @copyright     Copyright (C) 2025 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
 #include <pch/pch.h>
 
-
-void Config::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
+void Config::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
+{
     using namespace rapidjson;
     out.SetObject();
 
@@ -9,24 +21,36 @@ void Config::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType
     out.AddMember("WindowHeight", GetWindowHeight(), alloc);
     Value pathVal;
     pathVal.SetString(GetConfigPath().c_str(),
-        static_cast<SizeType>(GetConfigPath().length()),
-        alloc);
+                      static_cast<SizeType>(GetConfigPath().length()),
+                      alloc);
     out.AddMember("ConfigPath", pathVal, alloc);
 }
-void Config::Deserialize(const rapidjson::Value& in) {
-    if (!in.IsObject()) {
+void Config::Deserialize(const rapidjson::Value &in)
+{
+    if (!in.IsObject())
+    {
         throw std::runtime_error("Invalid JSON for Config");
     }
 
-    if (in.HasMember("WindowWidth") && in["WindowWidth"].IsNumber()) { SetWindowWidth(in["WindowWidth"].GetFloat()); }
-    if (in.HasMember("WindowHeight") && in["WindowHeight"].IsNumber()) { SetWindowHeight(in["WindowHeight"].GetFloat()); }
-    if (in.HasMember("ConfigPath") && in["ConfigPath"].IsString()) { SetConfigPath(in["ConfigPath"].GetString()); }
+    if (in.HasMember("WindowWidth") && in["WindowWidth"].IsNumber())
+    {
+        SetWindowWidth(in["WindowWidth"].GetFloat());
+    }
+    if (in.HasMember("WindowHeight") && in["WindowHeight"].IsNumber())
+    {
+        SetWindowHeight(in["WindowHeight"].GetFloat());
+    }
+    if (in.HasMember("ConfigPath") && in["ConfigPath"].IsString())
+    {
+        SetConfigPath(in["ConfigPath"].GetString());
+    }
 }
 
-bool SaveConfig(Config const& config, std::string const& path) {
+bool SaveConfig(Config const &config, std::string const &path)
+{
     rapidjson::Document d;
     d.SetObject();
-    auto& alloc = d.GetAllocator();
+    auto &alloc = d.GetAllocator();
 
     rapidjson::Value configVal;
     config.Serialize(configVal, alloc);
@@ -39,23 +63,27 @@ bool SaveConfig(Config const& config, std::string const& path) {
     // Ensure directory exists
     namespace fs = std::filesystem;
     fs::create_directories("../../MyEngine/JSON");
-    //fs::create_directories("../JSON");
+    // fs::create_directories("../JSON");
 
     std::ofstream ofs(path);
-    if (!ofs.is_open()) {
+    if (!ofs.is_open())
+    {
         std::cerr << "Error: Cannot open file for writing: " << path << "\n";
         return false;
     }
     ofs << buffer.GetString();
-    if (!ofs.good()) {
+    if (!ofs.good())
+    {
         std::cerr << "Error: Failed to write JSON to file: " << path << "\n";
         return false;
     }
     return true;
 }
-bool LoadConfig(Config& config, std::string const& path) {
+bool LoadConfig(Config &config, std::string const &path)
+{
     std::ifstream ifs(path);
-    if (!ifs.is_open()) {
+    if (!ifs.is_open())
+    {
         std::cerr << "Error: Cannot open file for reading: " << path << "\n";
         return false;
     }
@@ -63,12 +91,14 @@ bool LoadConfig(Config& config, std::string const& path) {
     rapidjson::Document d;
     d.ParseStream(isw);
 
-    if (d.HasParseError()) {
+    if (d.HasParseError())
+    {
         std::cerr << "Error: Failed to parse JSON in file: " << path << "\n";
         return false;
     }
 
-    if (!d.HasMember("config")) {
+    if (!d.HasMember("config"))
+    {
         std::cerr << "Error: No -config- field in file : " << path << "\n";
         return false;
     }
@@ -77,63 +107,69 @@ bool LoadConfig(Config& config, std::string const& path) {
     return true;
 }
 
-    bool SaveEntity(Entity e, Coordinator* g, std::string const& path) {
-        using namespace rapidjson;
-        Document d;
-        d.SetObject();
-        auto& alloc = d.GetAllocator();
+bool SaveEntity(Entity e, Coordinator *g, std::string const &path)
+{
+    using namespace rapidjson;
+    Document d;
+    d.SetObject();
+    auto &alloc = d.GetAllocator();
 
-        // NPC
-        if (g->HasComponent<NPC>(e)) {
-            //Value npcVal;
-            Value npcVal(kObjectType);
-            g->GetComponent<NPC>(e).Serialize(npcVal, alloc);
-            d.AddMember("NPC", npcVal, alloc);
-        }
-
-        StringBuffer buffer;
-        PrettyWriter<StringBuffer> writer(buffer);
-        d.Accept(writer);
-        namespace fs = std::filesystem;
-        fs::create_directories("../../MyEngine/JSON");
-        //fs::create_directories("../JSON");
-
-        std::ofstream ofs(path);
-        if (!ofs.is_open()) {
-            std::cerr << "Error: Cannot open file for writing: " << path << "\n";
-            return false;
-        }
-        ofs << buffer.GetString();
-    
-
-        if (!ofs.good()) {
-            std::cerr << "Error: Failed to write JSON to file: " << path << "\n";
-            return false;
-        }
-
-        return true;
+    // NPC
+    if (g->HasComponent<NPC>(e))
+    {
+        // Value npcVal;
+        Value npcVal(kObjectType);
+        g->GetComponent<NPC>(e).Serialize(npcVal, alloc);
+        d.AddMember("NPC", npcVal, alloc);
     }
 
-    bool LoadEntity(Entity e, Coordinator* g, std::string const& path) {
-        using namespace rapidjson;
-        std::ifstream ifs(path);
-        if (!ifs.is_open()) return false;
+    StringBuffer buffer;
+    PrettyWriter<StringBuffer> writer(buffer);
+    d.Accept(writer);
+    namespace fs = std::filesystem;
+    fs::create_directories("../../MyEngine/JSON");
+    // fs::create_directories("../JSON");
 
-        IStreamWrapper isw(ifs);
-        Document d;
-        d.ParseStream(isw);
+    std::ofstream ofs(path);
+    if (!ofs.is_open())
+    {
+        std::cerr << "Error: Cannot open file for writing: " << path << "\n";
+        return false;
+    }
+    ofs << buffer.GetString();
 
-        if (!d.IsObject()) return false;
+    if (!ofs.good())
+    {
+        std::cerr << "Error: Failed to write JSON to file: " << path << "\n";
+        return false;
+    }
 
-        if (d.HasMember("NPC")) {
-            auto& npc = g->GetComponent<NPC>(e);
-            npc.Deserialize(d["NPC"]);
-        }
+    return true;
+}
+
+bool LoadEntity(Entity e, Coordinator *g, std::string const &path)
+{
+    using namespace rapidjson;
+    std::ifstream ifs(path);
+    if (!ifs.is_open())
+        return false;
+
+    IStreamWrapper isw(ifs);
+    Document d;
+    d.ParseStream(isw);
+
+    if (!d.IsObject())
+        return false;
+
+    if (d.HasMember("NPC"))
+    {
+        auto &npc = g->GetComponent<NPC>(e);
+        npc.Deserialize(d["NPC"]);
+    }
     /*    if (d.HasMember("AABB")) {
             auto& aabb = g->GetComponent<AABB>(e);
             aabb.Deserialize(d["AABB"]);
         }*/
 
-        return true;
-    }
-
+    return true;
+}
