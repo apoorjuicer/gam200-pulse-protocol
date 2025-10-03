@@ -1,0 +1,34 @@
+Project Info - BaseEngine
+=========================
+
+1. Solution Structure
+---------------------
+The generated solution (BaseEngine.sln) contains multiple projects:
+- MyEngine : Core engine (game loop, rendering, input, etc.)
+- MyEditor : Editor tools (level editor, debug tools, etc.)
+- imgui    : External library for UI overlay
+- (Optional) cmake helpers : Utility scripts included in build
+
+2. Configurations
+-----------------
+Available build configurations in Visual Studio:
+- Debug (x64)
+  • Includes debug symbols
+  • Memory leak detection enabled
+- Release (x64)
+  • Optimized build
+  • No debug symbols
+
+3. Project Differences
+----------------------
+- MyEngine : Implements the core game engine.
+- MyEditor : Implements the editor with ImGui support.
+- imgui    : Third-party library, included as source, no modifications.
+
+4. ImGui Windows
+----------------
+ImGui overlay is enabled by default in MyEditor project.
+
+To toggle ImGui windows on/off during runtime:
+- **Press `O` (capital O)** → Turns ImGui overlay OFF
+- Press `O` again → Turns ImGui overlay ON

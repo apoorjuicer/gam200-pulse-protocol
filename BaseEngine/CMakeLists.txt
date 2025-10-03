@@ -70,3 +70,5 @@ endif()
 
 # Visual Studio startup project
 set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MyEngine)
+
+

@@ -74,15 +74,15 @@ target_link_libraries(${ENGINE_NAME} PUBLIC
 )
 
 # Copy the correct FMOD DLLs next to the EXE
-if (WIN32)
-  add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${FMOD_API_DIR_FOUND}/api/core/lib/x64/$<IF:$<CONFIG:Debug>,fmodL.dll,fmod.dll>"
-      $<TARGET_FILE_DIR:${ENGINE_NAME}>
+add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${FMOD_API_DIR_FOUND}/api/core/lib/x64/$<IF:$<CONFIG:Debug>,fmodL.dll,fmod.dll>"
+    $<TARGET_FILE_DIR:${ENGINE_NAME}>
   )
-  add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${FMOD_API_DIR_FOUND}/api/studio/lib/x64/$<IF:$<CONFIG:Debug>,fmodstudioL.dll,fmodstudio.dll>"
-      $<TARGET_FILE_DIR:${ENGINE_NAME}>
+add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${FMOD_API_DIR_FOUND}/api/studio/lib/x64/$<IF:$<CONFIG:Debug>,fmodstudioL.dll,fmodstudio.dll>"
+    $<TARGET_FILE_DIR:${ENGINE_NAME}>
   )
-endif()
+
+
