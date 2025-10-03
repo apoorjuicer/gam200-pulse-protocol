@@ -48,8 +48,6 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include "Graphics/glhelper.h"
-#include "Graphics/glslshader.h"
 
 // FMOD Headers
 #include "../MyEngine/FMOD_API/api/core/inc/fmod.hpp"
@@ -64,12 +62,19 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h> // for StringBuffer
 
+//Logging library
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
-// Suppress APIENTRY macro redefinition warning
-#pragma warning(push)
-#pragma warning(disable: 4005)
+#ifdef _MSC_VER
+#pragma warning(pop)  // Restore warnings for YOUR code below
+#endif
 
 // System Library Headers
+#include "Graphics/glhelper.h"
+#include "Graphics/glslshader.h"
+
 #include "../MyEngine/Profiling/Profiling.h"
 #include "../MyEngine/Math/math.h"
 #include "../MyEngine/Input/InputManager.h"
@@ -96,10 +101,3 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 #include "../MyEngine/Core/ComponentArray.h"
 #include "../MyEngine/Core/ComponentManager.h"
 #include "../MyEngine/Core/MessageManager.h"
-
-//Logging library
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/rotating_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-// Restore warning settings
-#pragma warning(pop)
