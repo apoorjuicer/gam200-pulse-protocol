@@ -12,7 +12,7 @@
 //#include "../Math/Vector_2D.h"
 #include "pch/pch.h"        // FIRST
 #include "Core/Coordinator.h"
-#include "TextureManager.h"
+#include "../Core/AssetsManager.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "glhelper.h" 
 

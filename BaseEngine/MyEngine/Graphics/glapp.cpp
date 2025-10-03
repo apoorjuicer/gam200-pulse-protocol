@@ -1,4 +1,4 @@
-/*********************************************************************************************
+	/*********************************************************************************************
  \file      glapp.cpp
  \par		Bloop
  \author	Goh Pin Kai (pinkai.g@digipen.edu)
@@ -8,7 +8,6 @@
 **********************************************************************************************/
 #include "glapp.h"
 #include "DebugDraw.h"
-#include "TextureManager.h"  
 //#include "../Managers/AssetsManager.h"
 
 /*                                                   objects with file scope
@@ -213,7 +212,7 @@ void GLApp::draw(std::set<Entity> entities) {
 
 		// Load texture from path if not already loaded
 		if (!tr.spriteName.empty() && tr.textureID == 0) {
-			tr.textureID = TextureManager::GetOrLoad(tr.spriteName);
+			tr.textureID = Framework::AssetsManager::GetOrLoad(tr.spriteName); 
 			if (tr.textureID == 0) {
 				std::cerr << "[GLApp] Failed to load texture: " << tr.spriteName << std::endl;
 				continue; // Skip this entity
@@ -244,8 +243,8 @@ void GLApp::cleanup() {
 		tb.translationBuffer = 0;
 	}
 
-	// Use TextureManager to clean up all textures
-	TextureManager::Clear();
+	// Use AssetsManager to clean up all textures
+	Framework::AssetsManager::Clear();
 
 	// Delete any standalone textures not managed by TextureManager
 	if (textureID) {

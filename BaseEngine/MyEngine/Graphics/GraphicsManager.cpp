@@ -24,37 +24,6 @@ void GraphicsManager::Initialize()
     GLHelper::print_specs();
     glapp->init(editorWidth, editorHeight);
 
-    Framework::AssetsManager::Instance().LoadAllImage();
-    //Framework::AssetsManager::Instance().CreateTransformsFromTextures(false);
-
-    //// ---- DEBUG: print once to verify transObj contents ----
-    //{
-    //    static bool printed = false;
-    //    if (!printed) {
-    //        auto& AM = Framework::AssetsManager::Instance();
-    //        std::cout << "[Debug] transObj.size() = " << transObj.size() << "\n";
-    //        size_t i = 0;
-    //        for (auto* t : transObj) {
-    //            if (!t) continue;
-    //            const auto* td = AM.getTextureDataByName(t->spriteName);
-    //            std::cout << "  [" << i++ << "] name='" << t->spriteName
-    //                << "' storedID=" << t->textureID;
-    //            if (td) {
-    //                std::cout << " mapID=" << td->textureID
-    //                    << " size=" << td->width << "x" << td->height
-    //                    << " path=" << td->filePath;
-    //                if (td->textureID != t->textureID) std::cout << "  <-- MISMATCH";
-    //            }
-    //            else {
-    //                std::cout << "  <-- not found in textureMap by name";
-    //            }
-    //            std::cout << "\n";
-    //        }
-    //        printed = true;
-    //    }
-    //}
-    //// --------------------------------------------------------
-
     // Subscribe to combo messages - DONT REMOVE, TEST FOR MESSAGE SYSTEM
     auto* msgMgr = MessageManager::GetInstance();
     msgMgr->Subscribe(Message::Type::INPUT_COMBO, "GraphicsManager",
@@ -149,7 +118,6 @@ void GraphicsManager::Shutdown()
     auto* msgMgr = MessageManager::GetInstance();
     msgMgr->Unsubscribe(Message::Type::INPUT_COMBO, "GraphicsManager");
 
-    Framework::AssetsManager::Instance().UnloadAllImage();
     glapp->cleanup();
     delete glapp;
 

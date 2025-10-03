@@ -1,8 +1,8 @@
-/*********************************************************************************************
+ï»¿/*********************************************************************************************
  \file      AssetsManager.cpp
- \par		
- \author    Leu Jun Yong (l.junyong@digipen.edu) 
-        
+ \par
+ \author    Leu Jun Yong (l.junyong@digipen.edu) 60%
+            Goh Pin Kai (pinkai.g@digipen.edu) 40%
 
 
 \copyright All content   2024 DigiPen Institute of Technology Singapore. All rights reserved.
@@ -10,15 +10,12 @@
 
 #pragma once
 #include "AssetsManager.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "../Graphics/stb_image.h"
 
 namespace fs = std::filesystem;
 
 namespace Framework {
-
-    void AssetsManager::LoadAllAssets() {
-        LoadAllSound();
-        LoadAllImage();
-    }
 
 
     void AssetsManager::LoadAllSound()
@@ -44,7 +41,7 @@ namespace Framework {
             std::string soundKey = filePath.stem().string();
             for (auto& c : soundKey) c = (char)tolower(c);
 
-            bool loop = (ext == ".mp3"); // example rule: mp3 loops, wav doesn’t
+            bool loop = (ext == ".mp3"); // example rule: mp3 loops, wav doesnï¿½t
 
             if (LoadSound(soundKey, filePath.string(), loop)) {
                 std::cout << "[Audio] Loaded: " << soundKey
@@ -106,208 +103,54 @@ namespace Framework {
     }
 
 
-    void AssetsManager::LoadAllImage()
-    {
-        const fs::path root = "../../MyEngine/Assets/Image";
-
-        if (!fs::exists(root)) {
-            std::cerr << "[Image] Folder not found: " << root.string() << "\n";
-            return;
-        }
-
-        size_t count = 0;
-
-        for (const auto& entry : fs::recursive_directory_iterator(root)) {
-            if (!entry.is_regular_file()) continue;
-
-            const fs::path& p = entry.path();
-            std::string ext = p.extension().string();
-            for (auto& c : ext) c = (char)std::tolower((unsigned char)c);
-            if (ext != ".png") continue;
-
-            const std::string pathStr = p.generic_string(); // forward slashes
-            loadImage(pathStr.c_str());
-            ++count;
-        }
-
-        std::cout << "[Image] Scan complete. Attempted to load " << count
-            << " .png file(s) from " << root.generic_string() << "\n";
+    static GLuint upload_rgba8(int w, int h, unsigned char* data) {
+        GLuint tex = 0;
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        return tex;
     }
 
-    void AssetsManager::loadImage(const char* filepath /*,int frames*/) {
-        // Check if the texture is already loaded
-        if (textureMap.find(filepath) != textureMap.end()) {
-            std::cout << "Texture already loaded: " << filepath << std::endl;
-            return;
-        }
-
- /*       int col = 1;
-        int row = 1;
-
-        col = (frames == 6) ? 3 : ((frames == 4) ? 4 : 1);
-        row = (frames == 6) ? 2 : ((frames == 4) ? 1 : 1); */
-
-
-        // Extract the texture name from the file path
-        std::string fullPath(filepath);
-        std::string textureName = fullPath.substr(fullPath.find_last_of("\\/") + 1); // Get the file name
-        textureName = textureName.substr(0, textureName.find_last_of('.'));         // Remove the extension
-
-        // Load image using stb_image
+    GLuint AssetsManager::LoadTextureFile(const std::string& path) {
+        int w = 0, h = 0, n = 0;
         stbi_set_flip_vertically_on_load(true);
-        int width, height, nrChannels;
-        unsigned char* data = stbi_load(filepath, &width, &height, &nrChannels, 4);
-
-        if (data) {
-            GLuint textureID;
-            glGenTextures(1, &textureID);  
-            glBindTexture(GL_TEXTURE_2D, textureID);   
-                
-            // Set texture parameters
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            // Upload the texture data based on number of channels
-            if (nrChannels == 3)
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-            else if (nrChannels == 4)
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); 
-
-            glGenerateMipmap(GL_TEXTURE_2D);
-            stbi_image_free(data); 
-
-            // Store texture data in the map, including file path
-            textureMap[filepath] = { textureID, width, height, nrChannels, data, textureName, /*col, row,*/ filepath };
-
-            // assignment of textures to current objects ( background only for now) 
+        unsigned char* data = stbi_load(path.c_str(), &w, &h, &n, 4);
+        if (!data) {
+            std::cerr << "Failed to load texture: " << path
+                << " reason: " << (stbi_failure_reason() ? stbi_failure_reason() : "unknown") << "\n";
+            return 0;
         }
-        else {
-            std::cerr << "Failed to load texture from: " << filepath << std::endl;
-        }
-    }
-    
-    //void Framework::AssetsManager::TextureAssignment() {
-    //    // For each transform, find a texture with the same name and assign its ID
-    //    for (auto& x : transObj) {
-    //        if (!x) continue;
-    //        // If your spriteName/file names differ in case, consider lowercasing both strings
-    //        const AssetsManager::TextureData* td = getTextureDataByName(x->spriteName);
-    //        if (td) {
-    //            x->textureID = td->textureID;
-    //            // If you later store animation grids, set them here:
-    //            // x->columns = td->col;
-    //            // x->rows    = td->row;
-
-    //            std::cout << "Assigned texture '" << td->textureName
-    //                << "' (ID: " << td->textureID
-    //                << ") to object with spriteName '" << x->spriteName << "'\n";
-    //        }
-    //        else {
-    //            // Optional: set a fallback (e.g., "ScreenPng") if no matching texture name found
-    //            // auto* fallback = getTextureDataByName("ScreenPng");
-    //            // if (fallback) { x->textureID = fallback->textureID; x->spriteName = "ScreenPng"; }
-    //            std::cerr << "No texture found for spriteName '" << x->spriteName << "'\n";
-    //        }
-    //    }
-    //}
-
-    //void AssetsManager::CreateTransformsFromTextures(bool overwriteExisting) {
-    //    // Build a quick set of existing names/ids to avoid duplicates
-    //    std::unordered_set<std::string> existingNames;
-    //    std::unordered_set<GLuint> existingIDs;
-    //    existingNames.reserve(transObj.size());
-    //    existingIDs.reserve(transObj.size());
-
-    //    for (auto* t : transObj) {
-    //        if (!t) continue;
-    //        existingNames.insert(t->spriteName);
-    //        existingIDs.insert(t->textureID);
-    //    }
-
-    //    for (const auto& [key, td] : textureMap) {
-    //        const std::string& name = td.textureName;
-    //        const GLuint id = td.textureID;
-
-    //        // If a transform with the same name already exists
-    //        if (!overwriteExisting && (existingNames.count(name) || existingIDs.count(id))) {
-    //            // If you want to *update* existing ones when overwriteExisting=true:
-    //            if (overwriteExisting) {
-    //                for (auto* t : transObj) {
-    //                    if (!t) continue;
-    //                    if (t->spriteName == name || t->textureID == id) {
-    //                        t->spriteName = name;     // keep name consistent
-    //                        t->textureID = id;       // update to current texture ID
-    //                        // Optional if you store grids in TextureData:
-    //                        // t->columns = td.col;
-    //                        // t->rows    = td.row;
-    //                    }
-    //                }
-    //            }
-    //            continue;
-    //        }
-
-    //        // Create a new Transform for this texture
-    //        auto* t = new Transform();        // make sure this matches your ctor
-    //        t->spriteName = name;
-    //        t->textureID = id;
-    //        // Optional defaults (uncomment if you have these fields/methods):
-    //        // t->SetActive(true);
-    //        // t->columns = td.col;
-    //        // t->rows    = td.row;
-    //        // t->position = {0.0f, 0.0f};  // or any default you like
-
-    //        transObj.push_back(t);
-    //        existingNames.insert(name);
-    //        existingIDs.insert(id);
-
-    //        std::cout << "[Image] Created Transform for '"
-    //            << name << "' (ID: " << id << ")\n";
-    //    }
-    //}
-
-    //void AssetsManager::DestroyAllTransforms()
-    //{
-    //    for (auto* t : transObj)
-    //    {
-    //        delete t;   // free each Transform
-    //    }
-    //    transObj.clear();
-
-    //    std::cout << "[Cleanup] All transforms destroyed\n";
-    //}
-
-    
-    void AssetsManager::UnloadAllImage() {
-        // Must be called while a valid OpenGL context is current!
-        // If you shut the window/GL first, glDeleteTextures is undefined.
-
-        // Collect texture IDs first (avoid iterator pitfalls)
-        std::vector<GLuint> ids;
-        ids.reserve(textureMap.size());
-        for (const auto& kv : textureMap) {
-            if (kv.second.textureID != 0) ids.push_back(kv.second.textureID);
-        }
-
-        if (!ids.empty()) {
-            // Unbind to be safe
-            glBindTexture(GL_TEXTURE_2D, 0);
-            glDeleteTextures(static_cast<GLsizei>(ids.size()), ids.data());
-        }
-
-        textureMap.clear();
-        std::cout << "[Image] Unloaded " << ids.size() << " texture(s).\n";
+        GLuint id = upload_rgba8(w, h, data);
+        stbi_image_free(data);
+        return id;
     }
 
-    const AssetsManager::TextureData* AssetsManager::getTextureDataByName(const std::string& textureName) const {
-        for (const auto& pair : textureMap) {
-            if (pair.second.textureName == textureName) {
-                return &pair.second; // Return a pointer to the TextureData
-            }
+    GLuint AssetsManager::GetOrLoad(const std::string& path) {
+        if (auto it = s_pathToID.find(path); it != s_pathToID.end()) return it->second;
+        GLuint id = LoadTextureFile(path);
+        if (id) {
+            s_pathToID[path] = id;
+            s_idToPath[id] = path;
         }
-        std::cerr << "Texture not found by name: " << textureName << std::endl;
-        return nullptr; // Return nullptr if the texture name is not found
+        return id;
     }
+
+    const std::string& AssetsManager::PathFromID(GLuint texID) {
+        return s_idToPath.at(texID); // throws if not found (use .find if you prefer no-throw)
+    }
+
+    void AssetsManager::Clear() {
+        for (auto& kv : s_pathToID) glDeleteTextures(1, &kv.second);
+        s_pathToID.clear();
+        s_idToPath.clear();
+    }
+
+
+
 
 } // namespace Framework

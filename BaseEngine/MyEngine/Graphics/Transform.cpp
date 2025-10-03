@@ -22,7 +22,7 @@ namespace Framework
     Transform::~Transform() {}
     void AssignTextureFromPath(Framework::Transform& t) {
         if (t.textureID == 0 && !t.spriteName.empty())
-            t.textureID = TextureManager::GetOrLoad(t.spriteName);
+            t.textureID = Framework::AssetsManager::GetOrLoad(t.spriteName);
     }
     void Transform::Initialize() {}
 

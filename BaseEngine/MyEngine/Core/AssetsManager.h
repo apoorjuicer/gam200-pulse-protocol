@@ -34,8 +34,8 @@ namespace Framework {
             int nrChannels;
             unsigned char* data;
             std::string textureName;
- /*           int col;
-            int row;*/
+            /*           int col;
+                       int row;*/
             std::string filePath;
         };
 
@@ -45,9 +45,6 @@ namespace Framework {
             return instance;
         }
 
-        // ---------- Assets management ----------
-        void LoadAllAssets();
-        void UnloadAllAssets();
 
         // ---------- Sound management ----------
         void LoadAllSound();
@@ -56,9 +53,10 @@ namespace Framework {
         FMOD::Sound* GetSound(const std::string& soundName);
 
         // ---------- Texture management ----------
-        void LoadAllImage();
-        void loadImage(const char* filepath /*,int frames*/);
-        void UnloadAllImage();
+        static GLuint GetOrLoad(const std::string& path);
+
+        static const std::string& PathFromID(GLuint texID);   // optional reverse lookup
+        static void Clear();
 
         /*void CreateTransformsFromTextures(bool overwriteExisting = false);*/
 
@@ -77,6 +75,8 @@ namespace Framework {
         // Allow FMOD system to be injected after initialization
         void SetFMODSystem(FMOD::System* system) { mSystem = system; }
 
+
+
     private:
         AssetsManager() = default;
         ~AssetsManager() = default;
@@ -89,6 +89,11 @@ namespace Framework {
 
         // FMOD system instance pointer
         FMOD::System* mSystem = nullptr;
+
+        static GLuint LoadTextureFile(const std::string& path);
+
+        static inline std::unordered_map<std::string, GLuint> s_pathToID{};
+        static inline std::unordered_map<GLuint, std::string> s_idToPath{};
     };
 
 } // namespace Framework
