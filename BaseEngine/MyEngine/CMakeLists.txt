@@ -85,4 +85,11 @@ add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
     $<TARGET_FILE_DIR:${ENGINE_NAME}>
   )
 
+add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/JSON
+    ${CMAKE_BINARY_DIR}/MyEngine/JSON
+    COMMENT "Copying JSON config files to build directory"
+)
+
 
