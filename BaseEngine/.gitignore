@@ -37,3 +37,6 @@ Debug/
 Engine.Dir/
 CMakeFiles/
 
+# ---- CMake build outputs ----
+build/
+build*/

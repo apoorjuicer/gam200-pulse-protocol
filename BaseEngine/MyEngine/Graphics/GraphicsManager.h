@@ -17,8 +17,8 @@
 #pragma once
 #include "pch/pch.h"
 #include "glapp.h"
-#include "Core/System.h"
-#include "Core/SystemManager.h"
+#include "CoreEngine/ECS/System.h"
+#include "CoreEngine/ECS/SystemManager.h"
 #include <iostream>
 #include <filesystem>
 #include "stb_image.h"

@@ -30,10 +30,10 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-#include "Core/Coordinator.h"
+#include "CoreEngine/ECS/Coordinator.h"
 #include "pch/pch.h"
-#include "Core/Assets.h"
-#include "Core/Log.h" // <-- include your logging system
+#include "CoreEngine/Assets.h"
+#include "CoreEngine/Log/Log.h" // <-- include your logging system
 #include <GLFW/glfw3.h>
 
 #if (_DEBUG)

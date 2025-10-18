@@ -19,7 +19,7 @@
 #ifndef COLLISION_H
 #define COLLISION_H
 
-#include "../Core/Assets.h"
+#include "../CoreEngine/Assets.h"
 #include "pch/pch.h"
 
 // -----------------------------------------------------------------------------

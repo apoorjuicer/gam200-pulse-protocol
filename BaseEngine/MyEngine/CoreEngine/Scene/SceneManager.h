@@ -14,7 +14,7 @@
 /******************************************************************************/
 #pragma once
 #include "pch/pch.h"
-#include "Singleton.h"
+#include "CoreEngine/ECS/Singleton.h"
 
 
 enum struct Scene { MainMenu, Pause, Level1, Dead };
