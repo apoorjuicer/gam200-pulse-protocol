@@ -17,7 +17,7 @@
 #pragma once
 #include <pch/pch.h>
 #include <string>
-#include "../MyEngine/Core/Types.h" // ensures Entity/Signature are known  <-- (from Types.h)
+#include "../MyEngine/CoreEngine/ECS/Types.h" // ensures Entity/Signature are known  <-- (from Types.h)
 
 class Coordinator; // forward-declare (global namespace)
 

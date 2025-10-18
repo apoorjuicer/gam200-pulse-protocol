@@ -26,8 +26,8 @@
 #include <string>
 #include <unordered_map>
 #include <functional>
-#include "Core/System.h"
-#include "Core/AssetsManager.h"
+#include "CoreEngine/ECS/System.h"
+#include "CoreEngine/Asset/AssetsManager.h"
 
 // -----------------------------------------------------------------------------
 // InputEvent structure for ECS communication

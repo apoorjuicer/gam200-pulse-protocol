@@ -99,21 +99,26 @@
 #include "../MyEngine/Graphics/DebugDraw.h"
 #include "../MyEngine/Graphics/Transform.h"
 #include "../MyEngine/Physics/collision.h"
-#include "../MyEngine/CoreEngine/CoreEngine.h"
 #include <../MyEngine/Resources/ResourceManager.h>
 #include "../MyEngine/Serialization/Serialization.h"
-#include <../MyEngine/Core/AssetsManager.h>
+
+// Core Engine
+#include "../MyEngine/CoreEngine/Core/CoreEngine.h"
 
 // ECS
-#include "../MyEngine/Core/Types.h"
-#include "../MyEngine/Core/Window.h"
-#include "../MyEngine/Core/System.h"
-#include "../MyEngine/Core/SceneManager.h"
-#include "../MyEngine/Core/Assets.h"
-#include "../MyEngine/Core/Singleton.h"
-#include "../MyEngine/Core/Coordinator.h"
-#include "../MyEngine/Core/SystemManager.h"
-#include "../MyEngine/Core/EntityManager.h"
-#include "../MyEngine/Core/ComponentArray.h"
-#include "../MyEngine/Core/ComponentManager.h"
-#include "../MyEngine/Core/MessageManager.h"
+#include "../MyEngine/CoreEngine/ECS/Types.h"
+#include "../MyEngine/CoreEngine/ECS/System.h"
+#include "../MyEngine/CoreEngine/ECS/Singleton.h"
+#include "../MyEngine/CoreEngine/ECS/Coordinator.h"
+#include "../MyEngine/CoreEngine/ECS/SystemManager.h"
+#include "../MyEngine/CoreEngine/ECS/EntityManager.h"
+#include "../MyEngine/CoreEngine/ECS/ComponentArray.h"
+#include "../MyEngine/CoreEngine/ECS/ComponentManager.h"
+
+// Systems
+#include "../MyEngine/CoreEngine/Window.h"
+#include "../MyEngine/CoreEngine/Assets.h"
+#include "../MyEngine/CoreEngine/Scene/SceneManager.h"
+#include <../MyEngine/CoreEngine/Asset/AssetsManager.h>
+#include "../MyEngine/CoreEngine/Message/MessageManager.h"
+

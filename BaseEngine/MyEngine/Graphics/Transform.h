@@ -17,8 +17,8 @@
 //#include "../Math/Matrix_3x3.h"
 //#include "../Math/Vector_2D.h"
 #include "pch/pch.h"        // FIRST
-#include "Core/Coordinator.h"
-#include "../Core/AssetsManager.h"
+#include "CoreEngine/ECS/Coordinator.h"
+#include "CoreEngine/Asset/AssetsManager.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "glhelper.h" 
 

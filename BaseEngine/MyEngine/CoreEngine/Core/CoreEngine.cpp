@@ -19,7 +19,7 @@
 #include <windows.h>   // for OutputDebugString, etc.
 #include "pch/pch.h"
 #include "graphics/stb_image.h"
-#include "Core/Log.h"
+#include "CoreEngine/Log/Log.h"
 #pragma comment(lib, "winmm.lib")
 
 //Coordinator g_coordinator;
