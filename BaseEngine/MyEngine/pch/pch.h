@@ -15,7 +15,8 @@
 
 // pch.h: This is a precompiled header file.
 // I'm doing this as we only need to compile it once and make  the files neater, we will put all our lib that we are using here. 
-// Just put #include "pch/pch.h" and you will have acces to it
+// Just put #include "pch/pch.h" and you will have access to it
+
 // Suppress third-party library warnings
 #pragma warning(disable: 4146)  // unary minus on unsigned
 #pragma warning(disable: 26495) // uninitialized member
@@ -94,12 +95,13 @@
 #include "../MyEngine/Profiling/Profiling.h"
 #include "../MyEngine/Math/math.h"
 #include "../MyEngine/Input/InputManager.h"
+#include "../MyEngine/Input/RhythmGameplayInput.h"
 #include "../MyEngine/Audio/audio.h"
 #include "../MyEngine/Graphics/GraphicsManager.h"
 #include "../MyEngine/Graphics/DebugDraw.h"
 #include "../MyEngine/Graphics/Transform.h"
 #include "../MyEngine/Physics/collision.h"
-#include <../MyEngine/Resources/ResourceManager.h>
+#include "../MyEngine/Resources/ResourceManager.h"
 #include "../MyEngine/Serialization/Serialization.h"
 
 // Core Engine

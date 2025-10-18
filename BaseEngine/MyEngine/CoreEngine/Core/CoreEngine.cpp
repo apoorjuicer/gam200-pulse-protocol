@@ -9,6 +9,7 @@
  *				the main game loop with delta time calculation, handles system
  *				updates, integrates ImGui editor support, and provides debug
  *				rendering utilities for development visualization.
+ * 
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
@@ -21,11 +22,6 @@
 #include "graphics/stb_image.h"
 #include "CoreEngine/Log/Log.h"
 #pragma comment(lib, "winmm.lib")
-
-//Coordinator g_coordinator;
-//extern InputManager* g_inputSystem;
-//extern GraphicsManager* g_graphicsSystem;
-
 
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
@@ -78,29 +74,6 @@ const char WindowTitle[] = "Game Window";
 //	case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
 //	} std::cout << std::endl;
 //	std::cout << std::endl;
-//}
-
-// THIS FUNCTION IS TO BE REMOVED AFTER RESOURCE MANAGER HAS BEEN TESTED AND WORKING.
-//static GLuint LoadTexture(const char* filepath) {
-//	stbi_set_flip_vertically_on_load(true); // flip image vertically when loading
-//
-//	int width, height, channels;
-//	unsigned char* data = stbi_load(filepath, &width, &height, &channels, 4);
-//
-//	if (!data) {
-//		std::cerr << "Failed to load texture: " << filepath << std::endl;
-//		return 0;
-//	}
-//
-//	GLuint textureID;
-//	glGenTextures(1, &textureID);
-//	glBindTexture(GL_TEXTURE_2D, textureID);
-//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//
-//	stbi_image_free(data);
-//	return textureID;
 //}
 
 CoreEngine::CoreEngine() : window(nullptr), DebugMode(false)
@@ -195,6 +168,7 @@ void CoreEngine::Init()
     auto g_coordinator = Coordinator::GetInstance();
 
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
+	auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
 	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
     auto g_CollisionManager = g_coordinator->GetSystem<CollisionManager>();
@@ -202,6 +176,7 @@ void CoreEngine::Init()
 
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
+	g_rhythmSystem->Initialize();
 	g_graphicsSystem->Initialize();
 	g_audioSystem->Initialize(); 
 	g_coordinator->InitializeAllSystems();
@@ -232,6 +207,7 @@ void CoreEngine::Setup()
 	
 	// Register your systems here
 	g_coordinator->RegisterSystem<InputManager>();
+	g_coordinator->RegisterSystem<RhythmGameplayInput>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
 	g_coordinator->RegisterSystem<AudioManager>();
     g_coordinator->RegisterSystem<CollisionManager>();
@@ -247,6 +223,10 @@ void CoreEngine::Setup()
 	Signature inputSig;
 	inputSig.set(g_coordinator->GetComponentType<Framework::Transform>());
 	g_coordinator->SetSystemSignature<InputManager>(inputSig);
+
+	Signature rhythmSig;
+	rhythmSig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	g_coordinator->SetSystemSignature<RhythmGameplayInput>(rhythmSig);
 
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
@@ -264,11 +244,13 @@ void CoreEngine::Update(float dt)
     auto g_coordinator = Coordinator::GetInstance();
 	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
+	auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
 
 	if (g_graphicsSystem) g_graphicsSystem->Update();
 	if (g_inputSystem) g_inputSystem->Update(dt);
+	if (g_rhythmSystem) g_rhythmSystem->Update(dt);
 
 	if (g_sceneSystem->GrabCurrentScene() == Scene::Pause)
 	{
@@ -384,11 +366,16 @@ void CoreEngine::Exit()
     auto g_coordinator = Coordinator::GetInstance();
 
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
+	auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
 	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 
 	if (g_inputSystem) {
 		g_inputSystem->Shutdown();
+	}
+
+	if (g_rhythmSystem) {
+		g_rhythmSystem->Shutdown();
 	}
 
 	if (g_audioSystem) {
@@ -419,7 +406,7 @@ void CoreEngine::RenderDebugDraw() {
 	DebugDraw::Begin(projection);
 
 	// F1 - DrawRect
-	if (g_inputSystem->IsDebugRectsEnabled()) {
+	if (g_inputSystem->isDebugRectsEnabled()) {
 		for (auto& entity : g_inputSystem->DebugEntities) {
 			auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
 			glm::vec2 center = { transform.Pos.x, transform.Pos.y };
@@ -431,9 +418,8 @@ void CoreEngine::RenderDebugDraw() {
 		}
 	}
 
-
 	// F2 - DrawLine
-	if (g_inputSystem->IsDebugLinesEnabled()) {
+	if (g_inputSystem->isDebugLinesEnabled()) {
 		DebugDraw::DrawLine({ -800.0f, -450.0f }, { 800.0f, 450.0f }, { 1.0f, 0.0f, 0.0f });
 		DebugDraw::DrawLine({ 800.0f, -450.0f }, { -800.0f, 450.0f }, { 0.0f, 1.0f, 0.0f });
 		DebugDraw::DrawLine({ 0.0f, -450.0f }, { 0.0f, 450.0f }, { 0.0f, 0.0f, 1.0f });
@@ -441,19 +427,19 @@ void CoreEngine::RenderDebugDraw() {
 	}
 
 	// F3 - DrawCircle
-	if (g_inputSystem->IsDebugCirclesEnabled()) {
+	if (g_inputSystem->isDebugCirclesEnabled()) {
 		DebugDraw::DrawCircle({ 0.0, 0.0f }, 200.0f, { 1.0f, 0.0f, 1.0f }, 32);
 		DebugDraw::DrawCircle({ 400.0f, 300.0f }, 100.0f, { 0.0f, 1.0f, 1.0f }, 24);
 	}
 
 	// F4 - DrawCircleFilled
-	if (g_inputSystem->IsDebugCirclesFilledEnabled()) {
+	if (g_inputSystem->isDebugCirclesFilledEnabled()) {
 		DebugDraw::DrawCircleFilled({ 100.0f, 300.0f }, 80.0f, { 1.0f, 0.5f, 0.0f }, 24);
 		DebugDraw::DrawCircleFilled({ 100.0f, -300.0f }, 60.0f, { 0.5f, 0.0f, 1.0f }, 16);
 	}
 
 	// F5 - DrawPoint
-	if (g_inputSystem->IsDebugPointsEnabled()) {
+	if (g_inputSystem->isDebugPointsEnabled()) {
 		for (float x = -800.0f; x < 800.0f; x += 200.0f) {
 			for (float y = -450.0f; y < 450.0f; y += 200.0f) {
 				DebugDraw::DrawPoint({ x, y }, 5.0f, { 1.0f, 1.0f, 0.0f });
@@ -462,7 +448,7 @@ void CoreEngine::RenderDebugDraw() {
 	}
 
 	// F6 - Grid
-	if (g_inputSystem->IsDebugGridEnabled()) {
+	if (g_inputSystem->isDebugGridEnabled()) {
 		for (float x = -800.0f; x < 800.0f; x += 100.0f) {
 			DebugDraw::DrawLine({ x, -450.0f }, { x, 450.0f }, { 0.3f, 0.3f, 0.3f });
 		}

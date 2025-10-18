@@ -8,6 +8,7 @@
  *              entities, processes per-frame updates for movement, scaling,
  *              rotation, and sword swings, and performs hitbox overlap checks
  *              using AABB and distance methods.
+ * 
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
@@ -15,7 +16,7 @@
  /******************************************************************************/
 
 
-#include <pch/pch.h>
+#include "pch/pch.h"
 
 // --- Toggles (can be modified to control behavior) ---
 bool UseBoxLineTest = false;       // true = BoxLine test, false = Hero/Monster collision
@@ -29,6 +30,7 @@ void CollisionManager::Init()
 {	
 	auto* g_coordinator = Coordinator::GetInstance();
 	auto inputMgr = g_coordinator->GetSystem<InputManager>();
+	auto rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
 
 	if (!inputMgr) {
 		std::cout << "[ERROR] InputSystem is NULL!\n";
@@ -123,8 +125,8 @@ void CollisionManager::Init()
 		inputObject.spriteName = "../../MyEngine/Assets/Sprites/bar.png";
         g_coordinator->AddComponent(inputEntity, inputObject);
         
-        if (inputMgr) {
-            inputMgr->SetFontEntity(inputEntity);
+        if (rhythmSystem) {
+			rhythmSystem->setFontEntity(inputEntity);
         }
     }
     else
