@@ -38,9 +38,18 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
     std::cout << "[InputManager] Successfully initialized." << std::endl;
 }
 
-void InputManager::Update(float deltaTime) {
+void InputManager::Update(float) {
     updateInputStates();
     processDebugToggles();
+
+    // Test delayed message (Advanced Feature: Message Queuing)
+    if (isKeyTriggered(GLFW_KEY_SPACE)) {
+        auto* msgMgr = MessageManager::GetInstance();
+        InputComboMessage* delayed = new InputComboMessage("DELAYED_COMBO", glfwGetTime());
+        delayed->delay = 5.0;
+        msgMgr->QueueMessage(delayed);
+        std::cout << "[INPUT] Queued delayed combo (5s)" << std::endl;
+    }
 
     // PURELY FOR MOUSE TESTING; TO REMOVE AFTER MAIN MENU IS IMPLEMENTED
     if (isMouseButtonTriggered(0)) {

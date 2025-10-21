@@ -22,7 +22,7 @@ public:
     ~InputManager();
 
     void Initialize(GLFWwindow* window);
-    void Update(float deltaTime);
+    void Update(float);
     void Shutdown();
 
     // -------------------------------------------------

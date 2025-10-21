@@ -41,9 +41,6 @@ void GraphicsManager::Initialize()
 
     std::cout << "[GraphicsManager] Successfully initialized for graphics." << std::endl;
 
-
-    std::cout << "[GraphicsManager] Successfully initialized for graphics." << std::endl;
-
     // Initialize FreeType
     if (FT_Init_FreeType(&ft)) {
         std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;

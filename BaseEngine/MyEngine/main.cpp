@@ -113,7 +113,7 @@ void CreateRenderObjects(int count) {
         transform.angle_disp = static_cast<float>(rand() % 360);
         transform.angle_speed = static_cast<float>(rand() % 10) - 5.0f; // -5 to +5 degrees per frame
 
-        transform.spriteName = "../../MyEngine/Assets/hero.png";
+        transform.spriteName = "../../MyEngine/Assets/Textures/Characters/hero.png";
         
         // Set model and shader references for sprite rendering
         transform.mdl_ref = 1.0f;  // Use box model (1) instead of background (0)

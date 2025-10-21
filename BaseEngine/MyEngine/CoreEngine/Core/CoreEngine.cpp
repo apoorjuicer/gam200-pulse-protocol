@@ -173,6 +173,8 @@ void CoreEngine::Init()
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
     auto g_CollisionManager = g_coordinator->GetSystem<CollisionManager>();
 
+	MessageManager::GetInstance();
+	std::cout << "[MessageManager] Initialized" << std::endl;
 
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
@@ -247,6 +249,8 @@ void CoreEngine::Update(float dt)
 	auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
+
+	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
 
 	if (g_graphicsSystem) g_graphicsSystem->Update();
 	if (g_inputSystem) g_inputSystem->Update(dt);
@@ -370,23 +374,13 @@ void CoreEngine::Exit()
 	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 
-	if (g_inputSystem) {
-		g_inputSystem->Shutdown();
-	}
-
-	if (g_rhythmSystem) {
-		g_rhythmSystem->Shutdown();
-	}
-
-	if (g_audioSystem) {
-		g_audioSystem->Shutdown();
-	}
-
-	if (g_graphicsSystem) {
-		g_graphicsSystem->Shutdown();
-	}
+	if (g_inputSystem) g_inputSystem->Shutdown();
+	if (g_rhythmSystem) g_rhythmSystem->Shutdown();
+	if (g_audioSystem) g_audioSystem->Shutdown();
+	if (g_graphicsSystem) g_graphicsSystem->Shutdown();
 
 	DebugDraw::Shutdown();
+	MessageManager::DestroyInstance();
 
     if (window)
     {
