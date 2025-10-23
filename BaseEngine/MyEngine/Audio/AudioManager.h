@@ -14,8 +14,8 @@
 #pragma once
 #include "pch/pch.h"
 #include <GLFW/glfw3.h>
-#include "Core/System.h"
-#include "Core/SystemManager.h"
+#include "CoreEngine/ECS/System.h"
+#include "CoreEngine/ECS/SystemManager.h"
 #include <string>
 
 extern FMOD::System* mSystem;

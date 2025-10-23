@@ -22,9 +22,9 @@ namespace fs = std::filesystem;
 namespace Framework {
 
 
-    void AssetsManager::LoadAllSound()
+    void AssetsManager::LoadAllSound(const std::string& folder)
     {
-        const fs::path root = "../../MyEngine/Assets/Sound";
+        const fs::path root = folder;
 
         if (!fs::exists(root)) {
             std::cerr << "[Audio] Sound folder not found: " << root << std::endl;
