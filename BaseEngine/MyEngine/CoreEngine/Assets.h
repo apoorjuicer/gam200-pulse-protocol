@@ -81,5 +81,5 @@ struct AABB
 {
     Vector2 min; // Minimum corner (bottom-left)
     Vector2 max; // Maximum corner (top-right)
-}
+};
 
