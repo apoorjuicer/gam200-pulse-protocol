@@ -112,6 +112,14 @@ public:
 		//assert(ComponentTypes.find(ComponentTypeName) != ComponentTypes.end() && "Component has not been registered!");
 	}
 
+	void InitializeAllSystems()
+	{
+		for (unsigned i = 0; i < SystemType.size(); ++i)
+		{
+			SystemType[i]->Init();
+			//std::cout << "init done";
+		}
+	}
 
 	void UpdateAllSystems(float deltaTime)
 	{
@@ -141,14 +149,14 @@ public:
 		}
 	}
 
-	void InitializeAllSystems()
+	void ExitAllSystems()
 	{
 		for (unsigned i = 0; i < SystemType.size(); ++i)
 		{
-			SystemType[i]->Init();
-			//std::cout << "init done";
+			SystemType[i]->Exit();
 		}
 	}
+	
 
 
 	// add one for all the system added already to console

@@ -15,9 +15,6 @@
 
 #include <pch/pch.h>
 
-#ifndef ASSETS_H
-#define ASSETS_H
-
 // -----------------------------------------------------------------------------
 // NPC Structure
 // -----------------------------------------------------------------------------
@@ -86,4 +83,3 @@ struct AABB
     Vector2 max; // Maximum corner (top-right)
 }
 
-#endif
