@@ -226,7 +226,6 @@ void CoreEngine::Setup()
     g_coordinator->RegisterSystem<CollisionManager>();
 	g_coordinator->RegisterSystem<SceneManager>();
 	g_coordinator->RegisterSystem<LogicSystem>();
-	g_coordinator->RegisterSystem<GraphicsManager>();
 
 
     // Set signature for component and system
