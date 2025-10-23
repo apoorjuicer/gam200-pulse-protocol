@@ -15,18 +15,7 @@
 #pragma once
 
 
-#include "../MyEngine/pch/pch.h"
-#include <GL/glew.h>
-#include "../Audio/Audio.h"
-#include "../Graphics/GraphicsManager.h"
-#include "../Graphics/glapp.h"
-#include <filesystem>
-#include <algorithm>
-#include <cctype>
-#include <unordered_map>
-#include <unordered_set>
-#include <string>
-
+#include "pch/pch.h"
 
 namespace Framework {
 
@@ -52,7 +41,7 @@ namespace Framework {
 
 
         // ---------- Sound management ----------
-        void LoadAllSound();
+        void LoadAllSound(const std::string& folder = "../../MyEngine/Assets/Sound");
         bool LoadSound(const std::string& soundName, const std::string& filePath, bool loop);
         void UnloadAllSound();
         FMOD::Sound* GetSound(const std::string& soundName);
@@ -66,7 +55,7 @@ namespace Framework {
         /*void CreateTransformsFromTextures(bool overwriteExisting = false);*/
 
         //void TextureAssignment();
-        const TextureData* getTextureDataByName(const std::string& textureName) const;
+        /*const TextureData* getTextureDataByName(const std::string& textureName) const;*/
         /*void DestroyAllTransforms();*/
 
         // ---------- Getters ----------

@@ -8,6 +8,7 @@
  *              entities, processes per-frame updates for movement, scaling,
  *              rotation, and sword swings, and performs hitbox overlap checks
  *              using AABB and distance methods.
+ * 
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
@@ -15,7 +16,7 @@
  /******************************************************************************/
 
 
-#include <pch/pch.h>
+#include "pch/pch.h"
 
 // --- Toggles (can be modified to control behavior) ---
 bool UseBoxLineTest = false;       // true = BoxLine test, false = Hero/Monster collision
@@ -29,6 +30,7 @@ void CollisionManager::Init()
 {	
 	auto* g_coordinator = Coordinator::GetInstance();
 	auto inputMgr = g_coordinator->GetSystem<InputManager>();
+	auto rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
 
 	if (!inputMgr) {
 		std::cout << "[ERROR] InputSystem is NULL!\n";
@@ -48,7 +50,7 @@ void CollisionManager::Init()
 		bgTransform.totalFrames = 1;          // Total frames in the sprite sheet
 		bgTransform.columns = 1;              // Columns in the sprite sheet
 		bgTransform.rows = 1;
-		bgTransform.spriteName = "../../MyEngine/Assets/Background 1.jpg";
+		bgTransform.spriteName = "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg";
 		g_coordinator->AddComponent(Background, bgTransform);
 
 		//EntityNPC.push_back(Background);
@@ -63,7 +65,7 @@ void CollisionManager::Init()
 		heroTransform.totalFrames = 3;          // Total frames in the sprite sheet
 		heroTransform.columns = 3;              // Columns in the sprite sheet
 		heroTransform.rows = 1;
-		heroTransform.spriteName = "../../MyEngine/Assets/spritesheet 543px x 467px.png";
+		heroTransform.spriteName = "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png";
 		g_coordinator->AddComponent(Hero, heroTransform);
 
 		g_coordinator->AddComponent(Hero, NPC{
@@ -94,7 +96,7 @@ void CollisionManager::Init()
 			MonsterTransform.totalFrames = 1;          // Total frames in the sprite sheet
 			MonsterTransform.columns = 1;              // Columns in the sprite sheet
 			MonsterTransform.rows = 1;
-			MonsterTransform.spriteName = "../../MyEngine/Assets/BlueGorillaEnemy.png";
+			MonsterTransform.spriteName = "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png";
             g_coordinator->AddComponent(Monster, MonsterTransform);
 
 			g_coordinator->AddComponent(Monster, NPC{
@@ -120,11 +122,11 @@ void CollisionManager::Init()
         inputObject.shd_ref = 2.0f;
         inputObject.isVisible = false;  // Make visible to test
         inputObject.currentFrame = 0;
-		inputObject.spriteName = "../../MyEngine/Assets/Sprites/bar.png";
+		inputObject.spriteName = "../../MyEngine/Assets/Textures/UI/bar.png";
         g_coordinator->AddComponent(inputEntity, inputObject);
         
-        if (inputMgr) {
-            inputMgr->SetFontEntity(inputEntity);
+        if (rhythmSystem) {
+			rhythmSystem->setFontEntity(inputEntity);
         }
     }
     else
