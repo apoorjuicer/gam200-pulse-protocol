@@ -14,32 +14,44 @@
 /******************************************************************************/
 #pragma once
 #include "pch/pch.h"
+#include "CoreEngine/Factory/Factory.h"
 
-auto* g_coordinator = Coordinator::GetInstance();
 
 //Starting scene will be Main Menu
-SceneManager::SceneManager(): CurrentScene(Scene::Pause)
+SceneManager::SceneManager(): CurrentScene(Scene::MainMenu), PreviousScene(Scene::MainMenu)
 {
 	
 }
 
-SceneManager::~SceneManager()
-{
-
-}
-
-void SceneManager::LoadScene(Scene scene)
+void SceneManager::LoadScene(Scene scene)//,const std::string& path)
 {
 #ifdef _DEBUG
 	std::cout << "\n================================================" << std::endl;
 	std::cout << "    [SceneManager] Successfully initialized." << std::endl;
 	std::cout << "================================================" << std::endl;
 #endif
-
+	// unload previous scene first
 	UnloadCurrentScene();
 
-	CurrentScene = scene;
+	// check if there was a saved scene that current scene is not the same as previous scene
 
+	//std::optional<Scene> SavedScene = GrabSavedScene();
+	//if(SavedScene.has_value() && GrabCurrentScene() != GrabPreviousScene())
+	//{
+	//	std::cout << "Found saved scene. Loading saved scene instead!" << std::endl;
+	//	LoadSavedScene(SavedScene.value());
+	//}
+
+	//std::ifstream ifs(path);
+	//if (!ifs.is_open()) 
+	//{
+	//	std::cerr << "[LoadScene] Error: Cannot open file: " << path << "\n";
+	//	return;
+	//}
+
+
+
+	CurrentScene = scene;
 	switch (scene)
 	{
 	case Scene::MainMenu:
@@ -50,24 +62,51 @@ void SceneManager::LoadScene(Scene scene)
 		LoadPause();
 		break;
 
-	case Scene::Level1:
-		LoadLevel1();
-		break;
-
-	case Scene::Dead:
-		LoadDead();
-		break;
-
 	default:
 		assert("Input was not a scene!");
 		break;
 	}
 
+	PreviousScene = CurrentScene;
 #ifdef _DEBUG
 	std::cout << "\n Scene was loaded successfully" << std::endl;
 #endif
 }
 
+void SceneManager::LoadSavedScene(Scene scene)
+{
+
+}
+
+void SceneManager::SaveCurrentScene()
+{
+	// go thru all of the entity and save them to json file
+	for (auto& x: EntityMember)
+	{
+		if ("type" == "Hero")
+		{
+			//call serialize 
+		}
+
+		if ("type" == "Monster")
+		{
+
+		}
+	}
+
+	////auto component = ;
+
+	//std::string saved_path = "../../MyEngine/JSON/SavedScene.json";
+	//if (!Framework::SaveTransform(component, saved_path)) 
+	//{
+	//	std::cerr << "Failed to save CurrentScene!\n";
+	//}
+	//
+	//else 
+	//{
+	//	std::cout << "Saved to: " << std::filesystem::absolute(saved_path) << "\n";
+	//}
+}
 
 void SceneManager::UnloadCurrentScene()
 {
@@ -76,7 +115,7 @@ void SceneManager::UnloadCurrentScene()
 	std::cout << "    [SceneManager] Unloading in progress!" << std::endl;
 	std::cout << "================================================" << std::endl;
 #endif
-
+	auto* g_coordinator = Coordinator::GetInstance();
 	for(auto & entity: SceneEntityList)
 	{
 		g_coordinator->DestroyEntity(entity);
@@ -126,28 +165,43 @@ void SceneManager::LoadPause()
 	std::cout << "================================================" << std::endl;
 #endif
 
+	auto* g_coordinator = Coordinator::GetInstance();
 	Entity PauseButton = g_coordinator->CreateEntity();
 	Framework::Transform pause_button;
 
+	//std::string path = "../../MyEngine/JSON/save_PauseButton.json";
+
+	//if (!Framework::LoadTransform(pause_button, path)) {
+	//	std::cerr << "Failed to load new_feedbackTransform!\n";
+	//}
+	//else {
+	//	std::cout << "Loaded new_feedbackTransform From: " << std::filesystem::absolute(path) << "\n";
+	//}
+
 	// idk what to add here
-	pause_button.Pos = {};
-	pause_button.Scale = {};
+	 pause_button.Pos = { 0,0};
+	 pause_button.Scale = {50,50};
 
 	g_coordinator->AddComponent(PauseButton, pause_button);
 	SceneEntityList.push_back(PauseButton);
 	
+	std::cout << pause_button.Pos;
+	std::cout << pause_button.Scale;
 
-}
 
-void SceneManager::LoadLevel1()
-{
+	std::string saved_path = "../../MyEngine/JSON/save_PauseButton.json";
+	if (!Framework::SaveTransform(pause_button, saved_path)) 
+	{
+		std::cerr << "Failed to save save_PauseButton!\n";
+	}
 	
+	else 
+	{
+		std::cout << "Saved to: " << std::filesystem::absolute(saved_path) << "\n";
+	}
 }
 
-void SceneManager::LoadDead()
-{
 
-}
 
 
 

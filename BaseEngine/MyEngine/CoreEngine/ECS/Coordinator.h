@@ -113,14 +113,19 @@ public:
 		CoordSystemManager->SetSignature<T>(signature);
 	}
 
+	void InitializeAllSystems()
+	{
+		CoordSystemManager->InitializeAllSystems();
+	}
+
 	void UpdateAllSystems(float dt)
 	{
 		CoordSystemManager->UpdateAllSystems(dt);
 	}
 
-	void InitializeAllSystems()
+	void ExitAllSystems()
 	{
-		CoordSystemManager->InitializeAllSystems();
+		CoordSystemManager->ExitAllSystems();
 	}
 
 	template<typename T>

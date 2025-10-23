@@ -1,0 +1,21 @@
+{
+    "prefabs":{
+        "Player":{
+            "components:":[ {"type": "transform", "x": 0, "y": 0}, 
+                            {"type": "health", "health": 5}, 
+                            {"type": "script", "scriptname": "PlayerScript"},
+                            {"type": "AABB", "min": 10, "max":10}
+                          ]
+        },
+
+        "Enemy":{
+            "components:":[ {"type": "transform", "x": 0, "y": 0}, 
+                            {"type": "health", "health": 1}, 
+                            {"type": "script", "scriptname": "EnemyScript"},
+                            {"type": "AABB", "min": 10, "max":10}
+                          ]
+            }
+
+        }
+}
+

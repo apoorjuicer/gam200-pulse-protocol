@@ -212,9 +212,9 @@ namespace Framework
             std::cerr << "Error: Cannot open file for reading: " << path << "\n";
             return false;
         }
-        rapidjson::IStreamWrapper isw(ifs);
-        rapidjson::Document d;
-        d.ParseStream(isw);
+        rapidjson::IStreamWrapper isw(ifs); //must have
+        rapidjson::Document d;                  //must have
+        d.ParseStream(isw);                       //must have
 
         if (d.HasParseError()) {
             std::cerr << "Error: Failed to parse JSON in file: " << path << "\n";

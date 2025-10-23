@@ -36,4 +36,22 @@
             1.0
         ]
     }
+
+{
+    "prefabs": {
+        "Player": {
+            "components": [
+                {  "type": "Transform",
+                    "x": 0.0,
+                    "y": 0.0}
+                ]}}
+             ,
+            "Monster": {
+            "components": [
+                {  "type": "Transform",
+                    "x": 0.0,
+                    "y": 0.0}
+                ]}}}
+
+
 }

@@ -16,27 +16,36 @@
 #include "pch/pch.h"
 #include "CoreEngine/ECS/Singleton.h"
 
-
 enum struct Scene { MainMenu, Pause, Level1, Dead };
 
 class SceneManager: public Systems
 {
 public:
 	SceneManager();
-	~SceneManager();
 
-	void LoadScene(Scene scene);
+	//void Init() override;              
+	//void Update(float dt) override;    
+	//void Exit() override;
+
+	void LoadScene(Scene scene);//, const std::string& path);
+	void LoadSavedScene(Scene scene);
+	void SaveCurrentScene();
+	void UnloadCurrentScene();
 
 	Scene GrabCurrentScene() const { return CurrentScene; };
+	Scene GrabPreviousScene() const { return PreviousScene; };
+	std::optional<Scene> GrabSavedScene() const { return SavedScene; };
 
 private:
 	Scene CurrentScene;
-	std::vector<Entity> SceneEntityList;
+	Scene PreviousScene;
+	std::optional<Scene> SavedScene;
 
-	void UnloadCurrentScene();
+	// Hard coding pathway to file that will always be available to save scene and load prefab.
+	std::string SaveEntityPathway = "../../MyEngine/JSON/SavedScene.json";// where to save data
+
 	void LoadMainMenu();
 	void LoadPause();
-	void LoadLevel1();
-	void LoadDead();
+	std::vector<Entity> SceneEntityList;
 };
 

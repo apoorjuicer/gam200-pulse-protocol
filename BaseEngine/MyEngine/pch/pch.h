@@ -55,6 +55,7 @@
 #include <list>
 #include <filesystem>
 #include <cstdlib> 
+#include <functional>
 
 // Graphics Library Headers
 #include <GL/glew.h>
@@ -116,9 +117,9 @@
 #include "../MyEngine/CoreEngine/ECS/ComponentManager.h"
 
 // Systems
+#include "../MyEngine/GameLogic/GameLogic.h"
 #include "../MyEngine/CoreEngine/Window.h"
 #include "../MyEngine/CoreEngine/Assets.h"
 #include "../MyEngine/CoreEngine/Scene/SceneManager.h"
 #include <../MyEngine/CoreEngine/Asset/AssetsManager.h>
 #include "../MyEngine/CoreEngine/Message/MessageManager.h"
-
