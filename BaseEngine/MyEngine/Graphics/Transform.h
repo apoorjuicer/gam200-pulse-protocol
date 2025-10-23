@@ -2,7 +2,8 @@
 /**
  * @file        Transform.h
  * @project     Pulse Protocol
- * @author      Goh Pin Kai
+ * @author      Goh Pin Kai (primary) - 90%
+ * @author 		Ban Kai Wei Benjamin (secondary) - 10%
  * @brief       Declares the Transform component for the ECS framework,
  *              storing position, scale, rotation, animation state,
  *              and sprite data. Provides interfaces for updating,
@@ -11,16 +12,16 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/
+/******************************************************************************/
 #pragma once
-//#include "../ComponentJson/Component_System.h"
-//#include "../Math/Matrix_3x3.h"
-//#include "../Math/Vector_2D.h"
-#include "pch/pch.h"        // FIRST
+// #include "../ComponentJson/Component_System.h"
+// #include "../Math/Matrix_3x3.h"
+// #include "../Math/Vector_2D.h"
+#include "pch/pch.h" // FIRST
 #include "CoreEngine/ECS/Coordinator.h"
 #include "CoreEngine/Asset/AssetsManager.h"
 #include <glm/gtc/type_ptr.hpp>
-#include "glhelper.h" 
+#include "glhelper.h"
 
 #ifndef FRAMEWORK_TRANSFORM_H
 #define FRAMEWORK_TRANSFORM_H
@@ -31,29 +32,29 @@ namespace Framework
 	{
 		Vector2 Pos;
 		Vector2 Scale;
-
 	};
 
-	class Transform  /* : public GameCom*/ {
+	class Transform /* : public GameCom*/
+	{
 	public:
-		//ComponentTypeID typeID = Com_Trans;
+		// ComponentTypeID typeID = Com_Trans;
 		Vector2 Pos;
 		Vector2 Scale;
 		Vector2 Rotation;
 		float angle_disp = 0.f;
 		float angle_speed = 0.f;
-		float mdl_ref = 0.f;    // Model no    
-		float shd_ref = 0.f;    // Shader no
-		Matrix3x3 mdl_to_ndc_xform;  // Initialize as identity matrix
-		GLuint textureID = 0;         // Texture ID
+		float mdl_ref = 0.f;		// Model no
+		float shd_ref = 0.f;		// Shader no
+		Matrix3x3 mdl_to_ndc_xform; // Initialize as identity matrix
+		GLuint textureID = 0;		// Texture ID
 		std::string spriteName;
 		int currentFrame = 0;
-		float elapsedTime = 0.0f;     // Time accumulator for animation
-		int totalFrames = 1;          // Total frames in the sprite sheet
-		int columns = 1;              // Columns in the sprite sheet
-		int rows = 1;                 // Rows in the sprite sheet
+		float elapsedTime = 0.0f; // Time accumulator for animation
+		int totalFrames = 1;	  // Total frames in the sprite sheet
+		int columns = 1;		  // Columns in the sprite sheet
+		int rows = 1;			  // Rows in the sprite sheet
 		float animationSpeed = 2.f;
-		void AssignTextureFromPath(Framework::Transform& t);
+		void AssignTextureFromPath(Framework::Transform &t);
 
 		Transform();
 		~Transform();
@@ -65,18 +66,18 @@ namespace Framework
 		void SetSprite(std::string ref);
 		std::string GetSprite() const;
 
-		bool isVisible = true; // Used for input detect purpose
+		bool isVisible = true;		  // Used for input detect purpose
 		float visibilityTimer = 0.0f; // Used for input detect purpose
-		bool autoHide = false; // Used for input detect purpose
+		bool autoHide = false;		  // Used for input detect purpose
 
 		// Register these components in your initialization code:
-		//void Serialize(Value& data, Document::AllocatorType& alloc) override;
-		//void Deserialize(Value& data);
-		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
-		void Deserialize(const rapidjson::Value& in);
+		// void Serialize(Value& data, Document::AllocatorType& alloc) override;
+		// void Deserialize(Value& data);
+		void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
+		void Deserialize(const rapidjson::Value &in);
 	};
 
-	bool SaveTransform(Transform const& t, std::string const& path);
-	bool LoadTransform(Transform& t, std::string const& path);
+	bool SaveTransform(Transform const &t, std::string const &path);
+	bool LoadTransform(Transform &t, std::string const &path);
 }
 #endif // FRAMEWORK_TRANSFORM_H

@@ -2,7 +2,8 @@
 /**
  * @file        Transform.cpp
  * @project     Pulse Protocol
- * @author      Goh Pin Kai
+ * @author      Goh Pin Kai (primary) - 50%
+ * @author 		Ban Kai Wei Benjamin (secondary) - 50%
  * @brief       Implements the Transform component, providing position,
  *              scale, rotation, animation, and sprite management. Includes
  *              update logic for entity transforms, matrix composition,
@@ -12,37 +13,40 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/
+/******************************************************************************/
 #include "Transform.h"
 #include <../MyEngine/Math/math.h>
 
-
 namespace Framework
 {
-    Transform::Transform() {
+    Transform::Transform()
+    {
         Rotation = Vector2(angle_disp, angle_speed);
-        //Renderable = Vector2(mdl_ref, shd_ref);
-        //Matrix3x3::Mtx33Identity(mdl_to_ndc_xform);
+        // Renderable = Vector2(mdl_ref, shd_ref);
+        // Matrix3x3::Mtx33Identity(mdl_to_ndc_xform);
         mdl_to_ndc_xform.SetToIdentity();
     }
 
     Transform::~Transform() {}
-    void AssignTextureFromPath(Framework::Transform& t) {
+    void AssignTextureFromPath(Framework::Transform &t)
+    {
         if (t.textureID == 0 && !t.spriteName.empty())
             t.textureID = Framework::AssetsManager::GetOrLoad(t.spriteName);
     }
     void Transform::Initialize() {}
 
-    void Transform::update(GLdouble delta_time, const std::set<Entity> entity) {
-        auto* g_coordinator = Coordinator::GetInstance();
+    void Transform::update(GLdouble delta_time, const std::set<Entity> entity)
+    {
+        auto *g_coordinator = Coordinator::GetInstance();
 
         // pull the current game area; fall back if not set
         const float gw = (GLHelper::GameWidth > 0) ? (float)GLHelper::GameWidth : 1600.0f;
         const float gh = (GLHelper::GameHeight > 0) ? (float)GLHelper::GameHeight : 900.0f;
 
-        for (auto it : entity) {
+        for (auto it : entity)
+        {
             // IMPORTANT: reference, not copy
-            auto& x = g_coordinator->GetComponent<Framework::Transform>(it);
+            auto &x = g_coordinator->GetComponent<Framework::Transform>(it);
 
             // normalize from pixels to your game space
             const float PnormX = x.Pos.x / gw;
@@ -56,52 +60,51 @@ namespace Framework
             Scaling = Matrix3x3(
                 SnormX, 0.0f, 0.0f,
                 0.0f, SnormY, 0.0f,
-                0.0f, 0.0f, 1.0f
-            );
+                0.0f, 0.0f, 1.0f);
 
-            // R (use the entity’s angle)
+            // R (use the entityï¿½s angle)
             constexpr float DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
             const float cosA = std::cos(x.angle_disp * DEG_TO_RAD);
             const float sinA = std::sin(x.angle_disp * DEG_TO_RAD);
             Rotating = Matrix3x3(
                 cosA, sinA, 0.0f,
                 -sinA, cosA, 0.0f,
-                0.0f, 0.0f, 1.0f
-            );
+                0.0f, 0.0f, 1.0f);
 
             // T (column-major layout for your Matrix3x3)
             Translating = Matrix3x3(
                 1.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f,
-                PnormX, PnormY, 1.0f
-            );
+                PnormX, PnormY, 1.0f);
 
             // M = T * R * S
             x.mdl_to_ndc_xform = Translating * Rotating * Scaling;
 
-            // advance entity’s angle
+            // advance entityï¿½s angle
             x.angle_disp += x.angle_speed * static_cast<GLfloat>(delta_time);
-            //std::cout << x.mdl_to_ndc_xform;
+            // std::cout << x.mdl_to_ndc_xform;
         }
     }
 
     void Transform::draw() const {}
 
-    void Transform::SetSprite(std::string ref) {
+    void Transform::SetSprite(std::string ref)
+    {
         spriteName = ref;
     }
 
-    std::string Transform::GetSprite() const {
+    std::string Transform::GetSprite() const
+    {
         return spriteName;
     }
 
-  
     /*Serialization && Deserialization */
-    void Transform::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
+    void Transform::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
+    {
         using namespace rapidjson;
         out.SetObject();
 
-        //Vector2s
+        // Vector2s
         Value posVal, scaleVal, rotVal, renderVal;
         Pos.Serialize(posVal, alloc);
         Scale.Serialize(scaleVal, alloc);
@@ -111,7 +114,7 @@ namespace Framework
         out.AddMember("scale", scaleVal, alloc);
         out.AddMember("rotation", rotVal, alloc);
 
-        //simple types
+        // simple types
         out.AddMember("angle_disp", angle_disp, alloc);
         out.AddMember("angle_speed", angle_speed, alloc);
         out.AddMember("mdl_ref", mdl_ref, alloc);
@@ -134,50 +137,70 @@ namespace Framework
         out.AddMember("visibilityTimer", visibilityTimer, alloc);
         out.AddMember("autoHide", autoHide, alloc);
 
-        //mat3
-        // Matrix3x3
+        // mat3
+        //  Matrix3x3
         Value matVal;
         mdl_to_ndc_xform.Serialize(matVal, alloc);
         out.AddMember("mdl_to_ndc_xform", matVal, alloc);
-
     }
 
-    void Transform::Deserialize(const rapidjson::Value& in) {
-        if (!in.IsObject()) {
+    void Transform::Deserialize(const rapidjson::Value &in)
+    {
+        if (!in.IsObject())
+        {
             throw std::runtime_error("Invalid JSON for Transform");
         }
 
-        if (in.HasMember("position"))    Pos.Deserialize(in["position"]);
-        if (in.HasMember("scale"))       Scale.Deserialize(in["scale"]);
-        if (in.HasMember("rotation"))    Rotation.Deserialize(in["rotation"]);
+        if (in.HasMember("position"))
+            Pos.Deserialize(in["position"]);
+        if (in.HasMember("scale"))
+            Scale.Deserialize(in["scale"]);
+        if (in.HasMember("rotation"))
+            Rotation.Deserialize(in["rotation"]);
 
-        if (in.HasMember("angle_disp"))  angle_disp = in["angle_disp"].GetFloat();
-        if (in.HasMember("angle_speed")) angle_speed = in["angle_speed"].GetFloat();
-        if (in.HasMember("mdl_ref"))     mdl_ref = in["mdl_ref"].GetFloat();
-        if (in.HasMember("shd_ref"))     shd_ref = in["shd_ref"].GetFloat();
-        if (in.HasMember("textureID"))   textureID = static_cast<GLuint>(in["textureID"].GetUint64());
+        if (in.HasMember("angle_disp"))
+            angle_disp = in["angle_disp"].GetFloat();
+        if (in.HasMember("angle_speed"))
+            angle_speed = in["angle_speed"].GetFloat();
+        if (in.HasMember("mdl_ref"))
+            mdl_ref = in["mdl_ref"].GetFloat();
+        if (in.HasMember("shd_ref"))
+            shd_ref = in["shd_ref"].GetFloat();
+        if (in.HasMember("textureID"))
+            textureID = static_cast<GLuint>(in["textureID"].GetUint64());
 
-        if (in.HasMember("spriteName"))  spriteName = in["spriteName"].GetString();
+        if (in.HasMember("spriteName"))
+            spriteName = in["spriteName"].GetString();
 
-        if (in.HasMember("currentFrame")) currentFrame = in["currentFrame"].GetInt();
-        if (in.HasMember("elapsedTime"))  elapsedTime = in["elapsedTime"].GetFloat();
-        if (in.HasMember("totalFrames"))  totalFrames = in["totalFrames"].GetInt();
-        if (in.HasMember("columns"))      columns = in["columns"].GetInt();
-        if (in.HasMember("rows"))         rows = in["rows"].GetInt();
-        if (in.HasMember("animationSpeed")) animationSpeed = in["animationSpeed"].GetFloat();
+        if (in.HasMember("currentFrame"))
+            currentFrame = in["currentFrame"].GetInt();
+        if (in.HasMember("elapsedTime"))
+            elapsedTime = in["elapsedTime"].GetFloat();
+        if (in.HasMember("totalFrames"))
+            totalFrames = in["totalFrames"].GetInt();
+        if (in.HasMember("columns"))
+            columns = in["columns"].GetInt();
+        if (in.HasMember("rows"))
+            rows = in["rows"].GetInt();
+        if (in.HasMember("animationSpeed"))
+            animationSpeed = in["animationSpeed"].GetFloat();
 
-        if (in.HasMember("isVisible")) isVisible = in["isVisible"].GetBool();
-        if (in.HasMember("visibilityTimer")) visibilityTimer = in["visibilityTimer"].GetFloat();
-        if (in.HasMember("autoHide")) autoHide = in["autoHide"].GetBool();
+        if (in.HasMember("isVisible"))
+            isVisible = in["isVisible"].GetBool();
+        if (in.HasMember("visibilityTimer"))
+            visibilityTimer = in["visibilityTimer"].GetFloat();
+        if (in.HasMember("autoHide"))
+            autoHide = in["autoHide"].GetBool();
 
         if (in.HasMember("mdl_to_ndc_xform"))
             mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
     }
 
-    bool SaveTransform(Transform const& t, std::string const& path) {
+    bool SaveTransform(Transform const &t, std::string const &path)
+    {
         rapidjson::Document d;
         d.SetObject();
-        auto& alloc = d.GetAllocator();
+        auto &alloc = d.GetAllocator();
 
         rapidjson::Value tVal;
         t.Serialize(tVal, alloc);
@@ -190,38 +213,43 @@ namespace Framework
         // Ensure directory exists
         namespace fs = std::filesystem;
         fs::create_directories("../../MyEngine/JSON");
-        //fs::create_directories("../JSON");
+        // fs::create_directories("../JSON");
 
         std::ofstream ofs(path);
-        if (!ofs.is_open()) {
+        if (!ofs.is_open())
+        {
             std::cerr << "Error: Cannot open file for writing: " << path << "\n";
             return false;
         }
         ofs << buffer.GetString();
-        if (!ofs.good()) {
+        if (!ofs.good())
+        {
             std::cerr << "Error: Failed to write JSON to file: " << path << "\n";
             return false;
         }
         return true;
     }
 
-
-    bool LoadTransform(Transform& t, std::string const& path) {
+    bool LoadTransform(Transform &t, std::string const &path)
+    {
         std::ifstream ifs(path);
-        if (!ifs.is_open()) {
+        if (!ifs.is_open())
+        {
             std::cerr << "Error: Cannot open file for reading: " << path << "\n";
             return false;
         }
-        rapidjson::IStreamWrapper isw(ifs);
-        rapidjson::Document d;
-        d.ParseStream(isw);
+        rapidjson::IStreamWrapper isw(ifs); //must have
+        rapidjson::Document d;                  //must have
+        d.ParseStream(isw);                       //must have
 
-        if (d.HasParseError()) {
+        if (d.HasParseError())
+        {
             std::cerr << "Error: Failed to parse JSON in file: " << path << "\n";
             return false;
         }
 
-        if (!d.HasMember("transform")) {
+        if (!d.HasMember("transform"))
+        {
             std::cerr << "Error: No 'transform' field in file: " << path << "\n";
             return false;
         }
@@ -230,6 +258,4 @@ namespace Framework
         return true;
     }
 
-}// end of namespace
-
-
+} // end of namespace

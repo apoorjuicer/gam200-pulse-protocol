@@ -146,9 +146,6 @@ void ToggleObjectVisibility() {
 }
 
 CoreEngine* Engine = nullptr;
-//InputManager* g_inputSystem = nullptr;
-//GraphicsManager* g_graphicsSystem = nullptr;
-// 
 
 int main() {
 #ifdef _DEBUG

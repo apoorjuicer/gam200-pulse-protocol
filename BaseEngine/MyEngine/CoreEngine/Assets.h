@@ -2,20 +2,18 @@
 /**
  * @file        Assets.h
  * @project     Pulse Protocol
- * @author      Reginald Lew Yee Ren
+ * @author      Reginald Lew Yee Ren (primary)- 40%
+ * @author      Ban Kai Wei Benjamin (secondary) - 60%
  * @brief       Core asset data structures used by the ECS system for collision entity
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/
+/******************************************************************************/
 
 #pragma once
 
 #include <pch/pch.h>
-
-#ifndef ASSETS_H
-#define ASSETS_H
 
 // -----------------------------------------------------------------------------
 // NPC Structure
@@ -25,21 +23,22 @@
 // -----------------------------------------------------------------------------
 struct NPC
 {
-    //Vector2 pos;          // World position of the NPC (center point)
-    float width;          // Width of NPC hitbox
-    float height;         // Height of NPC hitbox
+    // Vector2 pos;          // World position of the NPC (center point)
+    float width;  // Width of NPC hitbox
+    float height; // Height of NPC hitbox
 
     // Sword parameters
-    float swordWidth;     // Width of the sword hitbox
-    float swordHeight;    // Height of the sword hitbox
-    float swingProgress;  // Current swing progress (0.0 - 1.0 normalized)
-    bool isSwinging;      // True if NPC is currently swinging its sword
+    float swordWidth;    // Width of the sword hitbox
+    float swordHeight;   // Height of the sword hitbox
+    float swingProgress; // Current swing progress (0.0 - 1.0 normalized)
+    bool isSwinging;     // True if NPC is currently swinging its sword
 
     // Health and status
-    int hp;               // Health points (e.g., Hero = 10 HP, Monster = 1 HP)
-    bool isAlive;         // True if NPC is alive, false if defeated
+    int hp;       // Health points (e.g., Hero = 10 HP, Monster = 1 HP)
+    bool isAlive; // True if NPC is alive, false if defeated
 
-    void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
+    void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
+    {
         out.SetObject();
         out.AddMember("width", width, alloc);
         out.AddMember("height", height, alloc);
@@ -50,16 +49,26 @@ struct NPC
         out.AddMember("hp", hp, alloc);
         out.AddMember("isAlive", isAlive, alloc);
     }
-    void Deserialize(const rapidjson::Value& in) {
-        if (!in.IsObject()) throw std::runtime_error("Invalid JSON for NPC");
-        if (in.HasMember("width")) width = in["width"].GetFloat();
-        if (in.HasMember("height")) height = in["height"].GetFloat();
-        if (in.HasMember("swordWidth")) swordWidth = in["swordWidth"].GetFloat();
-        if (in.HasMember("swordHeight")) swordHeight = in["swordHeight"].GetFloat();
-        if (in.HasMember("swingProgress")) swingProgress = in["swingProgress"].GetFloat();
-        if (in.HasMember("isSwinging")) isSwinging = in["isSwinging"].GetBool();
-        if (in.HasMember("hp")) hp = in["hp"].GetInt();
-        if (in.HasMember("isAlive")) isAlive = in["isAlive"].GetBool();
+    void Deserialize(const rapidjson::Value &in)
+    {
+        if (!in.IsObject())
+            throw std::runtime_error("Invalid JSON for NPC");
+        if (in.HasMember("width"))
+            width = in["width"].GetFloat();
+        if (in.HasMember("height"))
+            height = in["height"].GetFloat();
+        if (in.HasMember("swordWidth"))
+            swordWidth = in["swordWidth"].GetFloat();
+        if (in.HasMember("swordHeight"))
+            swordHeight = in["swordHeight"].GetFloat();
+        if (in.HasMember("swingProgress"))
+            swingProgress = in["swingProgress"].GetFloat();
+        if (in.HasMember("isSwinging"))
+            isSwinging = in["isSwinging"].GetBool();
+        if (in.HasMember("hp"))
+            hp = in["hp"].GetInt();
+        if (in.HasMember("isAlive"))
+            isAlive = in["isAlive"].GetBool();
     }
 };
 
@@ -70,24 +79,7 @@ struct NPC
 // -----------------------------------------------------------------------------
 struct AABB
 {
-    Vector2 min;          // Minimum corner (bottom-left)
-    Vector2 max;          // Maximum corner (top-right)
-
-    //void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
-    //    out.SetObject();
-    //    rapidjson::Value minVal, maxVal;
-    //    min.Serialize(minVal, alloc);
-    //    max.Serialize(maxVal, alloc);
-    //    out.AddMember("min", minVal, alloc);
-    //    out.AddMember("max", maxVal, alloc);
-    //}
-
-    //void Deserialize(const rapidjson::Value& in) {
-    //    if (!in.IsObject()) throw std::runtime_error("Invalid JSON for AABB");
-    //    if (in.HasMember("min")) min.Deserialize(in["min"]);
-    //    if (in.HasMember("max")) max.Deserialize(in["max"]);
-    //}
+    Vector2 min; // Minimum corner (bottom-left)
+    Vector2 max; // Maximum corner (top-right)
 };
-
-#endif
 

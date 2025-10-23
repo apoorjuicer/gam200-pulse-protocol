@@ -125,6 +125,8 @@ bool SaveEntity(Entity e, Coordinator *g, std::string const &path)
         g->GetComponent<NPC>(e).Serialize(npcVal, alloc);
         d.AddMember("NPC", npcVal, alloc);
     }
+    // transform
+    //other components
 
     StringBuffer buffer;
     PrettyWriter<StringBuffer> writer(buffer);

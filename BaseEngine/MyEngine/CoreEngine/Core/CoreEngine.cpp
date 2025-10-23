@@ -21,6 +21,7 @@
 #include "pch/pch.h"
 #include "graphics/stb_image.h"
 #include "CoreEngine/Log/Log.h"
+#include "CoreEngine/Factory/Factory.h"
 #pragma comment(lib, "winmm.lib")
 
 // Game window dimensions and title
@@ -192,6 +193,15 @@ void CoreEngine::Init()
 	//}
 
     GameRunning = true;
+	std::string filePath = "../../MyEngine/JSON/test.json";//AssetManager.mPrefabMap[path];
+	Factory factory;
+	factory.CreateEntityFromJson(filePath);
+	std::string filePath2 = "../../MyEngine/JSON/test2.json";
+	Entity entity = factory.DefaultObj();
+	LogicComponent l;
+	l.ScriptName = "IT WORKS!!!!";
+	g_coordinator->AddComponent(entity, l);
+	factory.SaveEntityToJson(entity, filePath2);
 
 }
 
@@ -206,14 +216,16 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<Framework::Transform>();
     g_coordinator->RegisterComponent<NPC>();
     g_coordinator->RegisterComponent<AABB>();
+	g_coordinator->RegisterComponent<LogicComponent>();
 	
-	// Register your systems here
+	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
 	g_coordinator->RegisterSystem<RhythmGameplayInput>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
 	g_coordinator->RegisterSystem<AudioManager>();
     g_coordinator->RegisterSystem<CollisionManager>();
 	g_coordinator->RegisterSystem<SceneManager>();
+	g_coordinator->RegisterSystem<LogicSystem>();
 
 
     // Set signature for component and system
@@ -239,6 +251,10 @@ void CoreEngine::Setup()
 	sceneSig.set(g_coordinator->GetComponentType<AABB>());
 	sceneSig.set(g_coordinator->GetComponentType<Framework::Transform>());  
 	g_coordinator->SetSystemSignature<GraphicsManager>(sceneSig);
+
+	Signature LogicSig;
+	LogicSig.set(g_coordinator->GetComponentType<LogicComponent>());
+	g_coordinator->SetSystemSignature<GraphicsManager>(LogicSig);
 }
 
 void CoreEngine::Update(float dt)
@@ -256,9 +272,9 @@ void CoreEngine::Update(float dt)
 	if (g_inputSystem) g_inputSystem->Update(dt);
 	if (g_rhythmSystem) g_rhythmSystem->Update(dt);
 
-	if (g_sceneSystem->GrabCurrentScene() == Scene::Pause)
+	if (g_sceneSystem->GrabCurrentScene() == Scene::MainMenu)
 	{
-		g_sceneSystem->LoadScene(Scene::MainMenu);
+		//g_sceneSystem->LoadScene(Scene::Pause);
 	}
 
 	g_coordinator->UpdateAllSystems(dt);
@@ -378,6 +394,8 @@ void CoreEngine::Exit()
 	if (g_rhythmSystem) g_rhythmSystem->Shutdown();
 	if (g_audioSystem) g_audioSystem->Shutdown();
 	if (g_graphicsSystem) g_graphicsSystem->Shutdown();
+
+	g_coordinator->ExitAllSystems();
 
 	DebugDraw::Shutdown();
 	MessageManager::DestroyInstance();
