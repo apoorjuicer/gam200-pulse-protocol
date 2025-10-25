@@ -34,7 +34,7 @@ void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
 	unsigned int id,
 	GLenum severity,
-	GLsizei length,
+	GLsizei,
 	const char* message,
 	const void* userParam)
 {

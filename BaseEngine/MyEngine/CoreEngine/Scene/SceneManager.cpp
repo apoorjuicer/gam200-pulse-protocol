@@ -67,13 +67,13 @@ void SceneManager::LoadScene(Scene scene)//,const std::string& path)
 		break;
 	}
 
-	PreviousScene = CurrentScene;
+	PreviousScene = CurrentScene; 
 #ifdef _DEBUG
 	std::cout << "\n Scene was loaded successfully" << std::endl;
 #endif
 }
 
-void SceneManager::LoadSavedScene(Scene scene)
+void SceneManager::LoadSavedScene([[maybe_unused]] Scene scene)
 {
 
 }
@@ -81,7 +81,7 @@ void SceneManager::LoadSavedScene(Scene scene)
 void SceneManager::SaveCurrentScene()
 {
 	// go thru all of the entity and save them to json file
-	for (auto& x: EntityMember)
+	for (auto& entity : EntityMember)
 	{
 		if ("type" == "Hero")
 		{
