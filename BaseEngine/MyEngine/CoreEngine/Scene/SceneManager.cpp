@@ -83,15 +83,16 @@ void SceneManager::SaveCurrentScene()
 	// go thru all of the entity and save them to json file
 	for (auto& entity : EntityMember)
 	{
-		if ("type" == "Hero")
-		{
-			//call serialize 
-		}
+		// these are causing the warnings
+		//if ("type" == "Hero")
+		//{
+		//	//call serialize 
+		//}
 
-		if ("type" == "Monster")
-		{
+		//if ("type" == "Monster")
+		//{
 
-		}
+		//}
 	}
 
 	////auto component = ;
