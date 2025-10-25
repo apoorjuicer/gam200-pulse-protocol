@@ -237,29 +237,33 @@ void GLApp::drawTrans(Framework::Transform& x) {
 }
 
 void GLApp::draw(std::set<Entity> entities) {
+	GLFWwindow* window = glfwGetCurrentContext();
 
 	if (MyEditor::IsEnabled()) {
-		auto vp = MyEditor::ComputeGameViewportPixels(glfwGetCurrentContext(), true);
+		// Editor ON - render in ImGui panel
+		auto vp = MyEditor::ComputeGameViewportPixels(window, true);
 		glViewport(vp.x, vp.y, vp.w, vp.h);
+
 		GLHelper::GameOffsetX = vp.x;
 		GLHelper::GameOffsetY = vp.y;
 		GLHelper::GameWidth = vp.w;
 		GLHelper::GameHeight = vp.h;
 	}
 	else {
+		// Editor OFF - use full screen with letterboxing
 		int fbW = 0, fbH = 0;
-		glfwGetFramebufferSize(glfwGetCurrentContext(), &fbW, &fbH);
-		glViewport(0, 0, fbW, fbH);
-		GLHelper::GameOffsetX = 0;
-		GLHelper::GameOffsetY = 0;
-		GLHelper::GameWidth = fbW;
-		GLHelper::GameHeight = fbH;
+		glfwGetFramebufferSize(window, &fbW, &fbH);
+
+		// Re-apply the correct fullscreen scaling immediately
+		ComputeLetterbox(fbW, fbH);
 	}
 
+	// Clear
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
 	glClearDepth(1.0f);
 
+	// Timing
 	auto* g_coordinator = Coordinator::GetInstance();
 
 	static auto lastTime = std::chrono::high_resolution_clock::now();
@@ -267,15 +271,15 @@ void GLApp::draw(std::set<Entity> entities) {
 	float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
 	lastTime = currentTime;
 
+	// Draw entities
 	for (auto it : entities) {
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
 
-		// Load texture from path if not already loaded
 		if (!tr.spriteName.empty() && tr.textureID == 0) {
 			tr.textureID = Framework::AssetsManager::GetOrLoad(tr.spriteName);
 			if (tr.textureID == 0) {
 				std::cerr << "[GLApp] Failed to load texture: " << tr.spriteName << std::endl;
-				continue; // Skip this entity
+				continue;
 			}
 		}
 
@@ -286,6 +290,8 @@ void GLApp::draw(std::set<Entity> entities) {
 		}
 	}
 }
+
+
 
 
 void GLApp::cleanup() {
