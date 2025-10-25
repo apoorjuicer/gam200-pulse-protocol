@@ -36,6 +36,17 @@ public:
 	void drawTrans(Framework::Transform& x);
 	void updateAnimation(Framework::Transform& x, float deltaTime);
 
+	static inline constexpr int VIRTUAL_W = 1600;
+	static inline constexpr int VIRTUAL_H = 900;
+
+	static inline int GameWidth = VIRTUAL_W;  // actual GL viewport width after letterbox
+	static inline int GameHeight = VIRTUAL_H;  // actual GL viewport height after letterbox
+	static inline int GameOffsetX = 0;         // viewport X in framebuffer
+	static inline int GameOffsetY = 0;         // viewport Y in framebuffer
+	static inline float PixelScale = 1.0f;     // uniform scale = min(fbw/VW, fbh/VH)
+	static void ComputeLetterbox(int fbw, int fbh);
+	static void OnResize(int width, int height);
+
 	// encapsulates state required to render a geometrical model
 	struct GLModel {
 		GLenum primitive_type; // which OpenGL primitive to be rendered?

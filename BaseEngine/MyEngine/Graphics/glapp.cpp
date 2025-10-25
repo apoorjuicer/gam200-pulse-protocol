@@ -3,7 +3,7 @@
  * @file        glapp.cpp
  * @project     Pulse Protocol
  * @author      Goh Pin Kai
- * @brief		Implements OpenGL application utilities for initializing 
+ * @brief		Implements OpenGL application utilities for initializing
 				shaders, models, viewports, and rendering textured entities.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
@@ -67,7 +67,6 @@ GLApp::GLModel GLApp::mdl;
 GLApp::TranslationBuf GLApp::tb;
 
 void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
-	//textureID = LoadTexture("../../MyEngine/Assets/spritesheet 543px x 467px.png");
 	// Use local inputEditorWidth and inputEditorHeight values for calculations.
 	GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth)),
 		h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
@@ -132,31 +131,16 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 }
 
 
-void GLApp::update(GLFWwindow* window,std::set<Entity> entity) {
-    //if (GLHelper::keystateP == GL_TRUE) {
-    //    if (polygonmode == 0) {
-    //        ++polygonmode;
-    //        GLHelper::keystateP = GL_FALSE;
-    //    }
-    //    else if (polygonmode == 1) {
-    //        ++polygonmode;
-    //        GLHelper::keystateP = GL_FALSE;
-    //    }
-    //    else if (polygonmode == 2) {
-    //        polygonmode = 0;
-    //        GLHelper::keystateP = GL_FALSE;
-    //    }
-    //    GLHelper::keystateP = GL_FALSE;
-    //}
-    GLHelper::update_time(1.0); // updates delta_time and fps
-    if (window)
-    {
-        glfwSetWindowTitle(window, "Pulse Protocol");
-    }
-     //update(GLHelper::delta_time, entity);
-    Framework::Transform transformSystem;
-    transformSystem.update(GLHelper::delta_time, entity);
-    
+void GLApp::update(GLFWwindow* window, std::set<Entity> entity) {
+	GLHelper::update_time(1.0); // updates delta_time and fps
+	if (window)
+	{
+		glfwSetWindowTitle(window, "Pulse Protocol");
+	}
+	//update(GLHelper::delta_time, entity);
+	Framework::Transform transformSystem;
+	transformSystem.update(GLHelper::delta_time, entity);
+
 }
 void GLApp::updateAnimation(Framework::Transform& x, float deltaTime) {
 	float frameDuration = 1.0f / x.animationSpeed;
@@ -216,7 +200,7 @@ void GLApp::draw(std::set<Entity> entities) {
 
 		// Load texture from path if not already loaded
 		if (!tr.spriteName.empty() && tr.textureID == 0) {
-			tr.textureID = Framework::AssetsManager::GetOrLoad(tr.spriteName); 
+			tr.textureID = Framework::AssetsManager::GetOrLoad(tr.spriteName);
 			if (tr.textureID == 0) {
 				std::cerr << "[GLApp] Failed to load texture: " << tr.spriteName << std::endl;
 				continue; // Skip this entity
@@ -265,7 +249,6 @@ void GLApp::cleanup() {
 void GLApp::init_models_cont() {
 	GLApp::models.emplace_back(GLApp::bg_model());
 	GLApp::models.emplace_back(GLApp::box_model());
-	//GLApp::models.emplace_back(GLApp::mystery_model());
 }
 
 //Shader Program Container
@@ -394,86 +377,24 @@ GLApp::GLModel GLApp::box_model() {
 	quad.primitive_cnt = 2;
 	return quad;
 }
+void GLApp::ComputeLetterbox(int fbw, int fbh)
+{
+	const float sx = static_cast<float>(fbw) / static_cast<float>(GLApp::VIRTUAL_W);
+	const float sy = static_cast<float>(fbh) / static_cast<float>(GLApp::VIRTUAL_H);
+	GLApp::PixelScale = std::min(sx, sy);
 
-//GLApp::GLModel GLApp::mystery_model()
-//{
-//    // Define the vertices to create a hexagon
-//    std::array<glm::vec2, 7> vertPos{
-//        glm::vec2(-0.5f, -0.86f),  // Bottom left
-//        glm::vec2(0.5f, -0.86f),   // Bottom right
-//        glm::vec2(1.0f, 0.0f),     // Right
-//        glm::vec2(0.5f, 0.86f),    // Top right
-//        glm::vec2(-0.5f, 0.86f),   // Top left
-//        glm::vec2(-1.0f, 0.0f),    // Left
-//        glm::vec2(0.0f, 0.0f)      // Center
-//    };
-//
-//    // Define the indices to draw the hexagon using triangles
-//    std::array<GLushort, 18> indices{
-//        0, 1, 6,   // Bottom triangle
-//        1, 2, 6,   // Bottom right triangle
-//        2, 3, 6,   // Top right triangle
-//        3, 4, 6,   // Top triangle
-//        4, 5, 6,   // Top left triangle
-//        5, 0, 6    // Bottom left triangle
-//    };
-//
-//    // Define colors for each vertex
-//    std::array<glm::vec3, 7> clr_vtx{
-//        glm::vec3(random(), random(), random()),
-//        glm::vec3(random(), random(), random()),
-//        glm::vec3(random(), random(), random()),
-//        glm::vec3(random(), random(), random()),
-//        glm::vec3(random(), random(), random()),
-//        glm::vec3(random(), random(), random()),
-//        glm::vec3(random(), random(), random())
-//    };
-//    // create GL Unsigned Int
-//    GLuint vbo1;
-//
-//    // Create 1 Buffer using vbo1
-//    glCreateBuffers(1, &vbo1);
-//
-//    // assign memory
-//    glNamedBufferStorage(vbo1,
-//        sizeof(glm::vec2) * vertPos.size() + sizeof(glm::vec3) * clr_vtx.size(),
-//        nullptr, GL_DYNAMIC_STORAGE_BIT);
-//
-//    glNamedBufferSubData(vbo1, 0,
-//        sizeof(glm::vec2) * vertPos.size(), vertPos.data());
-//
-//    glNamedBufferSubData(vbo1, sizeof(glm::vec2) * vertPos.size(),
-//        sizeof(glm::vec3) * clr_vtx.size(), clr_vtx.data());
-//
-//    // create GL Unsigned Int
-//    GLuint qaoid;
-//    // set instructions for position 0
-//    glCreateVertexArrays(1, &qaoid);
-//    glEnableVertexArrayAttrib(qaoid, 0);
-//    glVertexArrayVertexBuffer(qaoid, 0, vbo1, 0, sizeof(glm::vec2));
-//
-//    glVertexArrayAttribFormat(qaoid, 0, 2, GL_FLOAT, GL_FALSE, 0);
-//    glVertexArrayAttribBinding(qaoid, 0, 0);
-//
-//    // set instructions for colour 1
-//    glEnableVertexArrayAttrib(qaoid, 1);
-//    glVertexArrayVertexBuffer(qaoid, 1, vbo1, 0, sizeof(glm::vec3));
-//    // set value to 3 because RGB
-//    glVertexArrayAttribFormat(qaoid, 1, 3, GL_FLOAT, GL_FALSE, 0);
-//    glVertexArrayAttribBinding(qaoid, 1, 1);
-//
-//    GLuint ebo;
-//    glCreateBuffers(1, &ebo);
-//    glNamedBufferStorage(ebo, sizeof(GLushort) * indices.size(),
-//        reinterpret_cast<GLvoid*>(indice_images.data()),
-//        GL_DYNAMIC_STORAGE_BIT);
-//    glVertexArrayElementBuffer(qaoid, ebo);
-//    glBindVertexArray(0);
-//
-//    GLApp::GLModel quad{};
-//    quad.vaoid = vaoid;
-//    quad.primitive_type = GL_TRIANGLES;
-//    quad.draw_cnt = static_cast<GLuint>(indices.size());
-//    quad.primitive_cnt = 4;
-//    return quad;
-//}
+	const int vw = static_cast<int>(GLApp::VIRTUAL_W * GLApp::PixelScale);
+	const int vh = static_cast<int>(GLApp::VIRTUAL_H * GLApp::PixelScale);
+
+	GLApp::GameOffsetX = (fbw - vw) / 2;
+	GLApp::GameOffsetY = (fbh - vh) / 2;
+	GLApp::GameWidth = vw;
+	GLApp::GameHeight = vh;
+
+	glViewport(GLApp::GameOffsetX, GLApp::GameOffsetY, GLApp::GameWidth, GLApp::GameHeight);
+}
+
+void GLApp::OnResize(int width, int height)
+{
+	ComputeLetterbox(width, height);
+}
