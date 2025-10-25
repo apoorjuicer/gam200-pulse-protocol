@@ -15,6 +15,7 @@
 #include "../../imgui/backends/imgui_impl_glfw.h"
 #include "../../imgui/backends/imgui_impl_opengl3.h"
 #include "Editor.h"
+#include <Graphics/glhelper.h>
 
 namespace MyEditor {
     static GLFWwindow* s_Window = nullptr;
@@ -45,7 +46,46 @@ namespace MyEditor {
         ImGui::Begin("Editor");
         ImGui::TextUnformatted("Hello from MyEditor!");
         ImGui::Separator();
+
         ImGui::TextUnformatted("Press O to toggle ImGui.");
+        ImGui::Separator();
+
+        // ===== PROFILER TAB =====
+        if (ImGui::BeginTabBar("##BottomTabs", ImGuiTabBarFlags_None)) {
+            if (ImGui::BeginTabItem("Profiler")) {
+                // Get profiling data
+                auto* profiler = ProfilingManager::GetInstance();
+                const auto& profiles = profiler->GetDisplayProfiles();
+
+                ImGui::TextUnformatted("Performance Metrics:");
+                ImGui::Separator();
+                ImGui::Text("FPS: %.1f", GLHelper::fps);
+                ImGui::Text("Frame Time: %.2f ms", profiler->GetCachedFrameTime() * 1000.0);
+                //ImGui::Text("Memory Usage: TBD");
+                ImGui::Separator();
+                ImGui::TextUnformatted("System Stats:");
+
+                // Display profiling data for each system
+                if (!profiles.empty()) {
+                    ImGui::BeginChild("ProfilesChild", ImVec2(0, 200), true);
+                    for (const auto& [systemName, profile] : profiles) {
+                        ImGui::Text("%s: %.2f%% (%.3f ms)",
+                            systemName.c_str(),
+                            profile.percentage,
+                            profile.totalTime * 1000.0);
+                    }
+                    ImGui::EndChild();
+                }
+                else {
+                    ImGui::TextColored(ImVec4(1, 1, 0, 1), "No profiling data yet...");
+                }
+
+                ImGui::EndTabItem();
+            }
+
+            ImGui::EndTabBar();
+        }
+
         ImGui::End();
     }
 

@@ -81,17 +81,15 @@ void SceneManager::LoadSavedScene([[maybe_unused]] Scene scene)
 void SceneManager::SaveCurrentScene()
 {
 	// go thru all of the entity and save them to json file
-	for (auto& entity : EntityMember)
+	for ([[maybe_unused]] auto& x: EntityMember)
 	{
-		// these are causing the warnings
+		//these are causing the warnings
 		//if ("type" == "Hero")
 		//{
 		//	//call serialize 
 		//}
-
 		//if ("type" == "Monster")
 		//{
-
 		//}
 	}
 

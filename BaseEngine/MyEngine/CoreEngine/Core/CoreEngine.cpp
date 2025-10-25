@@ -208,6 +208,9 @@ void CoreEngine::Init()
 	g_audioSystem->Initialize();
 	g_coordinator->InitializeAllSystems();
 
+	ProfilingManager::GetInstance()->SetResetInterval(60.0);
+	ProfilingManager::GetInstance()->SetDisplayUpdateInterval(1.0);
+
 	//GLuint barTexture = LoadTexture("../../MyEngine/Assets/Sprites/perfect.png");
 	//if (barTexture > 0) {
 	//	Entity box2 = g_inputSystem->GetFeedbackEntity2();  // Use getter
@@ -320,13 +323,14 @@ void CoreEngine::GameLoop()
 	{
 		//Get the current time in milliseconds
 		unsigned currenttime = timeGetTime();
+
 		//Convert it to the time passed since the last frame (in seconds)
 		float dt = (currenttime - LastTime) / 1000.0f;
+
 		//Update the when the last update started
 		LastTime = currenttime;
 
 		profiler->StartFrame();
-
 
 		//  1. Poll event(input key)
 		glfwPollEvents();
@@ -382,6 +386,8 @@ void CoreEngine::GameLoop()
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
 
+		profiler->EndFrame();
+
 		//  6. ImGui rendering
 #ifdef ENABLE_EDITOR
 		MyEditor::Draw();
@@ -393,15 +399,7 @@ void CoreEngine::GameLoop()
 		//7. Swap Buffer(like two window)
 		glfwSwapBuffers(window);
 
-		profiler->EndFrame();
-
-		// Print profiling stats every 2 secs
-		printTimer += dt;
-		if (printTimer >= 1.0f) {
-			printTimer = 0.0f;
-			profiler->PrintStats();
-			profiler->Reset();
-		}
+		profiler->Reset();
 	}
 }
 
