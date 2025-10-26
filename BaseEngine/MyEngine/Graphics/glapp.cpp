@@ -103,8 +103,7 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 	GLApp::init_shdrpgms_cont(shdr_strs);
 	GLApp::init_models_cont();
 
-	// Initialize debug draw
-	DebugDraw::Init();
+
 
 	bool fixed_seed = true;
 	std::random_device rd;
@@ -241,7 +240,6 @@ void GLApp::cleanup() {
 	}
 
 	GLApp::vps.clear();
-	DebugDraw::Shutdown();
 
 	std::cout << "Graphics Resources successfully cleaned up." << std::endl;
 }

@@ -75,7 +75,7 @@ void SceneManager::LoadScene(Scene scene)//,const std::string& path)
 
 void SceneManager::LoadSavedScene(Scene scene)
 {
-
+	(void)scene;
 }
 
 void SceneManager::SaveCurrentScene()
@@ -83,12 +83,14 @@ void SceneManager::SaveCurrentScene()
 	// go thru all of the entity and save them to json file
 	for (auto& x: EntityMember)
 	{
-		if ("type" == "Hero")
+		(void)x;
+		std::string type = "type";// get type from component
+		if (type == "Hero")
 		{
 			//call serialize 
 		}
 
-		if ("type" == "Monster")
+		if (type == "Monster")
 		{
 
 		}
