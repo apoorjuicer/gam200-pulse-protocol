@@ -1,13 +1,10 @@
 /******************************************************************************/
 /**
- * @file        ResourceManager.h
+ * @file        AssetRegistry.h
  * @project     Pulse Protocol
  * @author		Ban Kai Wei Benjamin
  * @author      Chloe Lau Rey En
- * @brief       Basic text resource manager for loading, caching, and managing
- *              text-based resources. Supports configuration files, game data,
- *              and provides the foundation for data-driven workflows. Includes
- *              utilities for reading, writing, and logging text resources.
+ * @brief       Implementation of a basic asset manager
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without
  *              the prior written consent of DigiPen Institute of Technology
@@ -50,7 +47,7 @@ struct FontResource {
 	void Deserialize( rapidjson::Value const& in);
 };
 
-class ResourceManager {
+class AssetRegistry {
 private:
 	//[key,value]
 	std::unordered_map<std::string, AudioResource> audioResources;
@@ -63,7 +60,7 @@ private:
 	std::string fontjsonfilepath = "../../MyEngine/JSON/font.json";
 
 public:
-	//ResourceManager(); for debugging shouldn't use. due to Rule of Zero
+	//AssetRegistry(); for debugging shouldn't use. due to Rule of Zero
 	std::unordered_map<std::string, AudioResource> const& getAudioContainer() const;
 	std::unordered_map<std::string, TextureResource> const& getTexContainer() const;
 	std::unordered_map<std::string, FontResource> const& getFontContainer() const;
@@ -72,6 +69,7 @@ public:
 	std::string const& GetTextureJSONfilepath() const;
 	std::string const& GetFontJSONfilepath() const;
 
+	//findXXX use like this rm.FindXXX(id), e.g. rm.FindAudio("bgm");
 	AudioResource  const* FindAudio(std::string const& id)  const;
 	TextureResource const* FindTexture(std::string const& id) const;
 	FontResource   const* FindFont(std::string const& id)   const;
@@ -90,5 +88,5 @@ public:
 	bool LoadFontManifest();
 };
 
-std::ostream& operator<<(std::ostream& os, ResourceManager const& rm);
+std::ostream& operator<<(std::ostream& os, AssetRegistry const& rm);
 

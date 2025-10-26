@@ -14,7 +14,7 @@
 #pragma once
 #include "pch/pch.h"
 #include "../MyEngine/Serialization/Serialization.h"
-#include "../MyEngine/Resources/ResourceManager.h"
+#include "../MyEngine/Resources/AssetRegistry.h"
 
 class CoreEngine
 {
@@ -50,7 +50,7 @@ private:
 //A global pointer to the instance of the core
 extern CoreEngine* Engine;
 extern Config config; //global scope
-extern ResourceManager rm; //global scope
+extern AssetRegistry ar; //global scope
 extern int WindowWidth;
 extern int WindowHeight;
 //constexpr int WindowWidth = 1600;

@@ -1,12 +1,10 @@
 /******************************************************************************/
 /**
- * @file        ResourceManager.cpp
+ * @file        AssetRegistry.cpp
  * @project     Pulse Protocol
  * @author		Ban Kai Wei Benjamin
  * @author      Chloe Lau Rey En
- * @brief       Implementation of a basic text resource manager with caching
- *              capabilities. Handles text and configuration file loading,
- *              provides data-driven access, and supports resource lifecycle
+ * @brief       Implementation of a basic asset manager
  *              management including unloading and logging utilities.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without
@@ -15,7 +13,7 @@
  */
  /******************************************************************************/
 
-#include "ResourceManager.h"
+#include "AssetRegistry.h"
 
 
 	inline void printSeparator(std::ostream& os) {
@@ -73,50 +71,50 @@ void FontResource::Deserialize(const rapidjson::Value& in_obj) {
 	if (in_obj.HasMember("path") && in_obj["path"].IsString()) { path = in_obj["path"].GetString(); }
 }
 
-/*Resource Manager*/
+/*Asset Registry*/
 
 /*accessor*/
-std::unordered_map<std::string, FontResource> const& ResourceManager::getFontContainer() const {
+std::unordered_map<std::string, FontResource> const& AssetRegistry::getFontContainer() const {
 	return fontResources;
 }
-std::unordered_map<std::string, AudioResource> const& ResourceManager::getAudioContainer() const {
+std::unordered_map<std::string, AudioResource> const& AssetRegistry::getAudioContainer() const {
 	return audioResources;
 }
-std::unordered_map<std::string, TextureResource> const& ResourceManager::getTexContainer() const {
+std::unordered_map<std::string, TextureResource> const& AssetRegistry::getTexContainer() const {
 	return textureResources;
 }
 
-std::string const& ResourceManager::GetAudioJSONfilepath() const {
+std::string const& AssetRegistry::GetAudioJSONfilepath() const {
 	return audiojsonfilepath;
 }
 
-std::string const& ResourceManager::GetTextureJSONfilepath() const {
+std::string const& AssetRegistry::GetTextureJSONfilepath() const {
 	return texturejsonfilepath;
 }
 
-std::string const& ResourceManager::GetFontJSONfilepath() const {
+std::string const& AssetRegistry::GetFontJSONfilepath() const {
 	return fontjsonfilepath;
 }
 
-AudioResource  const* ResourceManager::FindAudio(std::string const& id)  const {
+AudioResource  const* AssetRegistry::FindAudio(std::string const& id)  const {
 	if (auto it = audioResources.find(id); it != audioResources.end()) return &it->second;
 	return nullptr;
 }
-TextureResource const* ResourceManager::FindTexture(std::string const& id) const {
+TextureResource const* AssetRegistry::FindTexture(std::string const& id) const {
 	if (auto it = textureResources.find(id); it != textureResources.end()) return &it->second;
 	return nullptr;
 }
-FontResource   const* ResourceManager::FindFont(std::string const& id)   const {
+FontResource   const* AssetRegistry::FindFont(std::string const& id)   const {
 	if (auto it = fontResources.find(id); it != fontResources.end()) return &it->second;
 	return nullptr;
 }
 
 /*default cons for debug*/
-//ResourceManager::ResourceManager() {
-//	std::cout << "Resource Manager Initialised" << "\n";
+//AssetRegistry::AssetRegistry() {
+//	std::cout << "AssetRegistry Initialised" << "\n";
 //}
 
-bool ResourceManager::LoadAudioManifest( std::string const& jsonPath) {
+bool AssetRegistry::LoadAudioManifest( std::string const& jsonPath) {
 	std::ifstream ifs(jsonPath);
 	if (!ifs.is_open()) {
 		std::cerr << "Error: Cannot open file for reading: " << jsonPath << "\n";
@@ -175,7 +173,7 @@ bool ResourceManager::LoadAudioManifest( std::string const& jsonPath) {
 	return true;
 }
 
-bool ResourceManager::LoadTextureManifest( std::string const& jsonPath) {
+bool AssetRegistry::LoadTextureManifest( std::string const& jsonPath) {
 	std::ifstream ifs(jsonPath);
 	if (!ifs.is_open()) {
 		std::cerr << "Error: Cannot open file for reading: " << jsonPath << "\n";
@@ -228,7 +226,7 @@ bool ResourceManager::LoadTextureManifest( std::string const& jsonPath) {
 
 
 
-bool ResourceManager::LoadFontManifest(std::string const& jsonPath) {
+bool AssetRegistry::LoadFontManifest(std::string const& jsonPath) {
 	std::ifstream ifs(jsonPath);
 	if (!ifs.is_open()) {
 		std::cerr << "Error: Cannot open file for reading: " << jsonPath << "\n";
@@ -279,24 +277,24 @@ bool ResourceManager::LoadFontManifest(std::string const& jsonPath) {
 	return true;
 }
 
-bool ResourceManager::LoadAudioManifest() {
+bool AssetRegistry::LoadAudioManifest() {
 	return LoadAudioManifest(audiojsonfilepath);
 }
-bool ResourceManager::LoadTextureManifest() {
+bool AssetRegistry::LoadTextureManifest() {
 	return LoadTextureManifest(texturejsonfilepath);
 }
-bool ResourceManager::LoadFontManifest() {
+bool AssetRegistry::LoadFontManifest() {
 	return LoadFontManifest(fontjsonfilepath);
 }
 
 
 /*For Debug and Console Init print all container element*/
-std::ostream& operator<<(std::ostream& os, ResourceManager const& rm) {
+std::ostream& operator<<(std::ostream& os, AssetRegistry const& ar) {
 
-	os << "===Resource Manager Loaded: ===\n";
+	os << "===Asset Registry Loaded: ===\n";
 	os << "Audio:  \n";
 	printSeparator(os);
-	for (auto const& [id, aud] : rm.getAudioContainer()) {
+	for (auto const& [id, aud] : ar.getAudioContainer()) {
 		os << id << "->" << aud.path << "\n";
 		os << "loop: " << aud.loop << "\n";
 		os << "volume: " << aud.volume << "\n";
@@ -304,13 +302,13 @@ std::ostream& operator<<(std::ostream& os, ResourceManager const& rm) {
 	printSeparator(os);
 	os << "Texture:  \n";
 	printSeparator(os);
-	for (auto const& [id, tex] : rm.getTexContainer()) {
+	for (auto const& [id, tex] : ar.getTexContainer()) {
 		os << id << "->" << tex.path << "\n";
 	}
 	printSeparator(os);
 	os << "Fonts: \n";
 	printSeparator(os);
-	for (auto const& [id, font] : rm.getFontContainer()) {
+	for (auto const& [id, font] : ar.getFontContainer()) {
 		os << id << "->" << font.path << "\n";
 	}
 	printSeparator(os);

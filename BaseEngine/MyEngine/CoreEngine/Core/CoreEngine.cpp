@@ -27,7 +27,7 @@
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
  Config config;
- ResourceManager rm;
+ AssetRegistry ar;
  int WindowWidth;
  int WindowHeight;
 
@@ -115,10 +115,10 @@ void CoreEngine::Init()
 	}
 
 	//loading metadata for audio,texture,font into 
-	//resource manager's container each respectively
-	rm.LoadAudioManifest();
-	rm.LoadTextureManifest();
-	rm.LoadFontManifest();
+	//ASset reg's container each respectively
+	ar.LoadAudioManifest();
+	ar.LoadTextureManifest();
+	ar.LoadFontManifest();
 
 	//// --- Logging Setup ---
 	//try {
