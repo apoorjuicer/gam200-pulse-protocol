@@ -105,50 +105,6 @@ namespace MyEditor {
 
     void Draw() {
         if (!s_enabled) return;
-        // ImGui::Begin("Editor");
-        // ImGui::TextUnformatted("Hello from MyEditor!");
-        // ImGui::Separator();
-
-        // ImGui::TextUnformatted("Press O to toggle ImGui.");
-        // ImGui::Separator();
-
-        // // ===== PROFILER TAB =====
-        // if (ImGui::BeginTabBar("##BottomTabs", ImGuiTabBarFlags_None)) {
-        //     if (ImGui::BeginTabItem("Profiler")) {
-        //         // Get profiling data
-        //         auto* profiler = ProfilingManager::GetInstance();
-        //         const auto& profiles = profiler->GetDisplayProfiles();
-
-        //         ImGui::TextUnformatted("Performance Metrics:");
-        //         ImGui::Separator();
-        //         ImGui::Text("FPS: %.1f", GLHelper::fps);
-        //         ImGui::Text("Frame Time: %.2f ms", profiler->GetCachedFrameTime() * 1000.0);
-        //         //ImGui::Text("Memory Usage: TBD");
-        //         ImGui::Separator();
-        //         ImGui::TextUnformatted("System Stats:");
-
-        //         // Display profiling data for each system
-        //         if (!profiles.empty()) {
-        //             ImGui::BeginChild("ProfilesChild", ImVec2(0, 200), true);
-        //             for (const auto& [systemName, profile] : profiles) {
-        //                 ImGui::Text("%s: %.2f%% (%.3f ms)",
-        //                     systemName.c_str(),
-        //                     profile.percentage,
-        //                     profile.totalTime * 1000.0);
-        //             }
-        //             ImGui::EndChild();
-        //         }
-        //         else {
-        //             ImGui::TextColored(ImVec4(1, 1, 0, 1), "No profiling data yet...");
-        //         }
-
-        //         ImGui::EndTabItem();
-        //     }
-
-        //     ImGui::EndTabBar();
-        // }
-
-
         ImGuiIO& io = ImGui::GetIO();
         const float W = io.DisplaySize.x;
         const float H = io.DisplaySize.y;
@@ -158,7 +114,7 @@ namespace MyEditor {
         const float top_h = H - assets_h;
         const float left_w = W * s_left_ratio;
         const float right_w = W * s_right_ratio;
-        const float center_w = (std::max)(0.0f, W - left_w - right_w);
+        //const float center_w = (std::max)(0.0f, W - left_w - right_w);
 
 
         ImGuiWindowFlags panel_flags =
@@ -197,15 +153,48 @@ namespace MyEditor {
         ImGui::SetNextWindowSize(ImVec2(W, assets_h));
         if (ImGui::Begin("Bottom", nullptr, panel_flags)) {
             if (ImGui::BeginTabBar("BottomTabs")) {
+                // ===== ASSETS TAB =====
                 if (ImGui::BeginTabItem("Assets")) {
                     ImGui::TextUnformatted("Asset browser / thumbnails / filters.");
                     ImGui::EndTabItem();
                 }
+
+                // ===== DEBUG TAB =====
                 if (ImGui::BeginTabItem("Debug")) {
                     ImGui::TextUnformatted("Debug info / logs / toggles...");
                     // put your debug UI here
                     ImGui::EndTabItem();
                 }
+
+                // ===== PROFILER TAB =====
+                if (ImGui::BeginTabItem("Profiler")) {
+                    auto* profiler = ProfilingManager::GetInstance();
+                    const auto& profiles = profiler->GetDisplayProfiles();
+
+                    ImGui::TextUnformatted("Performance Metrics:");
+                    ImGui::Separator();
+                    ImGui::Text("FPS: %.1f", GLHelper::fps);
+                    ImGui::Text("Frame Time: %.2f ms", profiler->GetCachedFrameTime() * 1000.0);
+                    ImGui::Separator();
+                    ImGui::TextUnformatted("System Stats:");
+
+                    if (!profiles.empty()) {
+                        ImGui::BeginChild("ProfilesChild", ImVec2(0, 200), true);
+                        for (const auto& [systemName, profile] : profiles) {
+                            ImGui::Text("%s: %.2f%% (%.3f ms)",
+                                systemName.c_str(),
+                                profile.percentage,
+                                profile.totalTime * 1000.0);
+                        }
+                        ImGui::EndChild();
+                    }
+                    else {
+                        ImGui::TextColored(ImVec4(1, 1, 0, 1), "No profiling data yet...");
+                    }
+
+                    ImGui::EndTabItem();
+                }
+
                 ImGui::EndTabBar();
             }
         }
