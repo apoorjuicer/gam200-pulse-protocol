@@ -111,9 +111,11 @@ void GraphicsManager::Update()
 	RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
 
 	// Build FPS string and render it
-	std::ostringstream fpsText;
-	fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
-	RenderText(GLApp::shdrpgms[3], fpsText.str(), 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
+	if (!MyEditor::IsEnabled()) {
+		std::ostringstream fpsText;
+		fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
+		RenderText(GLApp::shdrpgms[3], fpsText.str(), 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
+	}
 
 	// Controls display - right side or top corner
 	int width, height;
