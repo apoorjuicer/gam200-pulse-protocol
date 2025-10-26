@@ -1,0 +1,12 @@
+{
+    "fontFilePaths": [
+        {
+            "id": "liberation_font",
+            "path": "../../MyEngine/Assets/Font/liberation-mono.ttf"
+        },
+        {
+            "id": "PatrickHand_font",
+            "path": "../../MyEngine/Assets/Font/PatrickHand-Regular.ttf"
+        }
+    ]
+}

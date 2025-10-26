@@ -1,0 +1,32 @@
+{
+    "textureFilePaths": [
+        {
+            "id": "background",
+            "path": "../../MyEngine/Assets/Textures/Characters/Background1.jpg"
+        },
+        {
+            "id": "hero",
+            "path": "../../MyEngine/Assets/Textures/Characters/hero.png"
+        },
+        {
+            "id": "hero_spritesheet",
+            "path": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png"
+        },
+        {
+            "id": "BlueGorillaEnemy",
+            "path": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png"
+        },
+        {
+            "id": "RedGorillaEnemy",
+            "path": "../../MyEngine/Assets/Textures/Enemies/RedGorillaEnemy.png"
+        },
+        {
+            "id": "bar_ui",
+            "path": "../../MyEngine/Assets/Textures/UI/bar.png"
+        },
+        {
+            "id": "perfect_ui",
+            "path": "../../MyEngine/Assets/Textures/UI/perfect.png"
+        }
+    ]
+}

@@ -144,7 +144,8 @@ namespace Framework
 
     void Transform::Deserialize(const rapidjson::Value& in) {
         if (!in.IsObject()) {
-            throw std::runtime_error("Invalid JSON for Transform");
+            std::cerr << "[Transform] Invalid JSON format\n";
+            return;
         }
 
         if (in.HasMember("position"))    Pos.Deserialize(in["position"]);

@@ -2,6 +2,7 @@
 /**
  * @file        ResourceManager.cpp
  * @project     Pulse Protocol
+ * @author		Ban Kai Wei Benjamin
  * @author      Chloe Lau Rey En
  * @brief       Implementation of a basic text resource manager with caching
  *              capabilities. Handles text and configuration file loading,
@@ -15,130 +16,296 @@
  /******************************************************************************/
 
 #include "ResourceManager.h"
-#include <iostream>
-#include <sstream>
 
-// ============================= TEXT RESOURCES ============================= //
-bool ResourceManager::LoadTextResource(const std::string& name, const std::string& filename) {
-    std::string content = ReadFile(filename);
-    if (content.empty()) {
-        std::cout << "[ResourceManager] Failed to load text resource: " << filename << std::endl;
-        return false;
-    }
-
-    // saves the text in memory under given name
-    textResources[name] = content;
-    std::cout << "[ResourceManager] Loaded text resource '" << name << "' from " << filename << std::endl;
-    return true;
+namespace {
+	void printSeparator(std::ostream& os) {
+		os << "=============================\n";
+	}
 }
 
-std::string ResourceManager::GetTextResource(const std::string& name) {
-    // looks up resources by name
-    auto it = textResources.find(name);
-    if (it != textResources.end()) {
-        return it->second; // returns content that is found
-    }
+/*Audio Resource*/
 
-    std::cout << "[ResourceManager] Warning: Text resource '" << name << "' not found" << std::endl;
-    return "";
+void AudioResource::Deserialize(const rapidjson::Value& in_obj) {
+	if (!in_obj.IsObject()) {
+		std::cerr << "[AudioResource] Invalid JSON format\n";
+		return;
+	}
+
+	//***Essential metadata, must exist and validated 
+	if (in_obj.HasMember("id") && in_obj["id"].IsString()) { audio_id = in_obj["id"].GetString(); }
+	if (in_obj.HasMember("path") && in_obj["path"].IsString()){ path = in_obj["path"].GetString(); }
+
+	//***optional metadata, 
+	if (in_obj.HasMember("loop") && in_obj["loop"].IsBool()) { 
+		if (in_obj["loop"].IsBool())
+			loop = in_obj["loop"].GetBool();
+		else
+			std::cerr << "[AudioResource] 'loop' has wrong type for " << audio_id << "\n";
+	}
+	else {
+		std::cerr << "[AudioResource] Missing 'loop' field, using default (false) for " << audio_id << "\n";
+	}
+	if (in_obj.HasMember("volume") && in_obj["volume"].IsNumber()) { 
+		if (in_obj["volume"].IsNumber())
+			volume = static_cast<float>(in_obj["volume"].GetDouble());
+		else
+			std::cerr << "[AudioResource] 'volume' has wrong type for " << audio_id << "\n";
+	}
+	else {
+		std::cerr << "[AudioResource] Missing 'volume' field, using default value (1.0) for " 
+			<< audio_id << "\n";
+	}
+}
+/*Texture Resource*/
+void TextureResource::Deserialize(const rapidjson::Value& in_obj) {
+	if (!in_obj.IsObject()) {
+		std::cerr << "[TextureResource] Invalid JSON format\n";
+		return;
+	}
+
+	//***Essential metadata, must exist and validated 
+	if (in_obj.HasMember("id") && in_obj["id"].IsString()) { tex_id = in_obj["id"].GetString(); }
+	if (in_obj.HasMember("path") && in_obj["path"].IsString()) { path = in_obj["path"].GetString(); }
+}
+/*Font Resource*/
+void FontResource::Deserialize(const rapidjson::Value& in_obj) {
+	if (!in_obj.IsObject()) {
+		std::cerr << "[FontResource] Invalid JSON format\n";
+		return;
+	}
+
+	//***Essential metadata, must exist and validated 
+	if (in_obj.HasMember("id") && in_obj["id"].IsString()) { font_id = in_obj["id"].GetString(); }
+	if (in_obj.HasMember("path") && in_obj["path"].IsString()) { path = in_obj["path"].GetString(); }
 }
 
-// ============================= CONFIG RESOURCES =========================== //
-bool ResourceManager::LoadConfig(const std::string& configName, const std::string& filename) {
-    std::string content = ReadFile(filename);
-    if (content.empty()) {
-        std::cout << "[ResourceManager] Failed to load config: " << filename << std::endl;
-        return false;
-    }
+/*Resource Manager*/
 
-    configResources[configName] = ParseConfig(content);
-    std::cout << "[ResourceManager] Loaded config '" << configName << "' from " << filename << std::endl;
-    return true;
+/*accessor*/
+std::unordered_map<std::string, FontResource> const& ResourceManager::getFontContainer() const {
+	return fontResources;
+}
+std::unordered_map<std::string, AudioResource> const& ResourceManager::getAudioContainer() const {
+	return audioResources;
+}
+std::unordered_map<std::string, TextureResource> const& ResourceManager::getTexContainer() const {
+	return textureResources;
 }
 
-std::string ResourceManager::GetConfigValue(const std::string& configName, const std::string& key) {
-    auto configIt = configResources.find(configName);
-    if (configIt != configResources.end()) {
-        auto valueIt = configIt->second.find(key);
-        if (valueIt != configIt->second.end()) {
-            return valueIt->second;
-        }
-    }
-
-    std::cout << "[ResourceManager] Warning: Config value '" << key << "' not found in '" << configName << "'" << std::endl;
-    return "";
+std::string const& ResourceManager::GetAudioJSONfilepath() const {
+	return audiojsonfilepath;
 }
 
-// ============================= RESOURCE MANAGEMENT ======================== //
-bool ResourceManager::IsResourceLoaded(const std::string& name) {
-    return textResources.find(name) != textResources.end();
+std::string const& ResourceManager::GetTextureJSONfilepath() const {
+	return texturejsonfilepath;
 }
 
-void ResourceManager::UnloadResource(const std::string& name) {
-    textResources.erase(name);
-    configResources.erase(name);
-    std::cout << "[ResourceManager] Unloaded resource: " << name << std::endl;
+std::string const& ResourceManager::GetFontJSONfilepath() const {
+	return fontjsonfilepath;
 }
 
-void ResourceManager::UnloadAll() {
-    textResources.clear();
-    configResources.clear();
-    std::cout << "[ResourceManager] All resources unloaded" << std::endl;
+/*default cons for debug*/
+//ResourceManager::ResourceManager() {
+//	std::cout << "Resource Manager Initialised" << "\n";
+//}
+
+bool ResourceManager::LoadAudioManifest( std::string const& jsonPath) {
+	std::ifstream ifs(jsonPath);
+	if (!ifs.is_open()) {
+		std::cerr << "Error: Cannot open file for reading: " << jsonPath << "\n";
+		return false;
+	}
+	rapidjson::IStreamWrapper isw(ifs); 
+	rapidjson::Document d;                  
+	d.ParseStream(isw);                       
+	if (d.HasParseError()) {
+		std::cerr << "Error: Failed to parse JSON in file: " << jsonPath << "\n";
+		return false;
+	}
+
+	if (!d.HasMember("audioFilePaths")) {
+		std::cerr << "Error: No 'audioFilePaths' field in file: " << jsonPath << "\n";
+		return false;
+	}
+
+	//get the array of json file
+	auto const& arr = d["audioFilePaths"].GetArray();
+	//variables to count successful parsing and failed parsing
+	size_t added = 0, skipped = 0;
+
+	for (const auto& entry : arr) {
+		
+		AudioResource aud_res;
+		aud_res.Deserialize(entry);
+
+	/*	if (!aud_res.audio_id.empty()) {
+			audioResources.emplace(aud_res.audio_id, std::move(aud_res));
+		}*/
+
+		if (aud_res.audio_id.empty() || aud_res.path.empty()) {
+			++skipped;
+			std::cerr << "[Audio] Skipping entry with missing id/path\n";
+			continue;
+		}
+		//insert into map assign into variable type
+		//std::pair<std::unordered_map<std::string, AudioResource>::iterator, bool>
+		//ok refers to successful flag
+		auto [it, ok] = audioResources.emplace(aud_res.audio_id, std::move(aud_res));
+		if (!ok) {
+			++skipped;
+			std::cerr << "[Audio] Duplicate id =" << it->first << "= error skipping\n";
+		}
+		else {
+			++added;
+		}
+	}// end of for-range to load data into container
+
+
+	std::cout << "No. of [Audio] Loaded :" << added << "\n"
+			  << "No. item(s), skipped " << skipped << "\n"
+		      << "Loaded from :" << jsonPath << "\n";
+
+	return true;
 }
 
-// ============================= FILE UTILITIES ============================= //
-bool ResourceManager::WriteTextFile(const std::string& filename, const std::string& content) {
-    std::ofstream file(filename);
-    if (!file.is_open()) {
-        return false;
-    }
-    file << content;
-    file.close();
-    return true;
+bool ResourceManager::LoadTextureManifest( std::string const& jsonPath) {
+	std::ifstream ifs(jsonPath);
+	if (!ifs.is_open()) {
+		std::cerr << "Error: Cannot open file for reading: " << jsonPath << "\n";
+		return false;
+	}
+	rapidjson::IStreamWrapper isw(ifs);
+	rapidjson::Document d;
+	d.ParseStream(isw);
+	if (d.HasParseError()) {
+		std::cerr << "Error: Failed to parse JSON in file: " << jsonPath << "\n";
+		return false;
+	}
+
+	if (!d.HasMember("textureFilePaths")) {
+		std::cerr << "Error: No 'textureFilePaths' field in file: " << jsonPath << "\n";
+		return false;
+	}
+
+	//get the array of json file
+	auto const& arr = d["textureFilePaths"].GetArray();
+	//variables to count successful parsing and failed parsing
+	size_t added = 0, skipped = 0;
+
+	for (const auto& entry : arr) {
+
+		TextureResource tex_res;
+		tex_res.Deserialize(entry);
+
+		if (tex_res.tex_id.empty() || tex_res.path.empty()) {
+			++skipped;
+			std::cerr << "[Texture] Skipping entry with missing id/path\n";
+			continue;
+		}
+		auto [it, ok] = textureResources.emplace(tex_res.tex_id, std::move(tex_res));
+		if (!ok) {
+			++skipped;
+			std::cerr << "[Texture] Duplicate id =" << it->first << "= error skipping\n";
+		}
+		else {
+			++added;
+		}
+	}// end of for-range to load data into container
+
+	std::cout << "No. of [Texture] Loaded :" << added << "\n"
+	<< "No. item(s), skipped " << skipped << "\n"
+	<< "Loaded from :" << jsonPath << "\n";
+
+	return true;
 }
 
-bool ResourceManager::AppendToLog(const std::string& filename, const std::string& message) {
-    std::ofstream file(filename, std::ios::app);
-    if (!file.is_open()) {
-        return false;
-    }
-    file << message << std::endl;
-    file.close();
-    return true;
+
+
+bool ResourceManager::LoadFontManifest(std::string const& jsonPath) {
+	std::ifstream ifs(jsonPath);
+	if (!ifs.is_open()) {
+		std::cerr << "Error: Cannot open file for reading: " << jsonPath << "\n";
+		return false;
+	}
+	rapidjson::IStreamWrapper isw(ifs);
+	rapidjson::Document d;
+	d.ParseStream(isw);
+	if (d.HasParseError()) {
+		std::cerr << "Error: Failed to parse JSON in file: " << jsonPath << "\n";
+		return false;
+	}
+
+	if (!d.HasMember("fontFilePaths")) {
+		std::cerr << "Error: No 'fontFilePaths' field in file: " << jsonPath << "\n";
+		return false;
+	}
+
+	//get the array of json file
+	auto const& arr = d["fontFilePaths"].GetArray();
+	//variables to count successful parsing and failed parsing
+	size_t added = 0, skipped = 0;
+
+	for (const auto& entry : arr) {
+
+		FontResource font_res;
+		font_res.Deserialize(entry);
+
+		if (font_res.font_id.empty() || font_res.path.empty()) {
+			++skipped;
+			std::cerr << "[Font] Skipping entry with missing id/path\n";
+			continue;
+		}
+		auto [it, ok] = fontResources.emplace(font_res.font_id, std::move(font_res));
+		if (!ok) {
+			++skipped;
+			std::cerr << "[Font] Duplicate id =" << it->first << "= error skipping\n";
+		}
+		else {
+			++added;
+		}
+	}// end of for-range to load data into container
+
+	std::cout << "No. of [Font] Loaded :" << added << "\n"
+		<< "No. item(s), skipped " << skipped << "\n"
+		<< "Loaded from :" << jsonPath << "\n";
+
+	return true;
 }
 
-// ============================= HELPER FUNCS ============================ //
-std::string ResourceManager::ReadFile(const std::string& filename) {
-    std::ifstream file(filename);
-    if (!file.is_open()) {
-        return "";
-    }
-
-    std::string content;
-    std::string line;
-    while (std::getline(file, line)) {
-        content += line + "\n";
-    }
-
-    file.close();
-    return content;
+bool ResourceManager::LoadAudioManifest() {
+	return LoadAudioManifest(audiojsonfilepath);
+}
+bool ResourceManager::LoadTextureManifest() {
+	return LoadTextureManifest(texturejsonfilepath);
+}
+bool ResourceManager::LoadFontManifest() {
+	return LoadFontManifest(fontjsonfilepath);
 }
 
-std::unordered_map<std::string, std::string> ResourceManager::ParseConfig(const std::string& content) {
-    std::unordered_map<std::string, std::string> config;
-    std::istringstream stream(content);
-    std::string line;
 
-    while (std::getline(stream, line)) {
-        if (line.empty() || line[0] == '#') continue;
+/*For Debug and Console Init print all container element*/
+std::ostream& operator<<(std::ostream& os, ResourceManager const& rm) {
 
-        size_t pos = line.find('=');
-        if (pos != std::string::npos) {
-            std::string key = line.substr(0, pos);
-            std::string value = line.substr(pos + 1);
-            config[key] = value;
-        }
-    }
-
-    return config;
+	os << "===Resource Manager Loaded: ===\n";
+	os << "Audio:  \n";
+	printSeparator(os);
+	for (auto const& [id, aud] : rm.getAudioContainer()) {
+		os << id << "->" << aud.path << "\n";
+		os << "loop: " << aud.loop << "\n";
+		os << "volume: " << aud.volume << "\n";
+	}
+	printSeparator(os);
+	os << "Texture:  \n";
+	printSeparator(os);
+	for (auto const& [id, tex] : rm.getTexContainer()) {
+		os << id << "->" << tex.path << "\n";
+	}
+	printSeparator(os);
+	os << "Fonts: \n";
+	printSeparator(os);
+	for (auto const& [id, font] : rm.getFontContainer()) {
+		os << id << "->" << font.path << "\n";
+	}
+	printSeparator(os);
+	return os;
 }

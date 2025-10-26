@@ -1,0 +1,16 @@
+{
+    "audioFilePaths": [
+        {
+            "id": "bgm",
+            "path": "../../MyEngine/Assets/Music/Background/GameMusic.mp3",
+            "loop": true,
+            "volume": 1.0
+        },
+        {
+            "id": "rhythm_feedback",
+            "path": "../../MyEngine/Assets/SFX/Rhythm_Feedback/Gamebeat_placeholderMusic.wav",
+            "loop": false,
+            "volume": 1.0
+        }
+    ]
+}

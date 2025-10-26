@@ -27,6 +27,7 @@
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
  Config config;
+ ResourceManager rm;
  int WindowWidth;
  int WindowHeight;
 
@@ -112,6 +113,12 @@ void CoreEngine::Init()
 		spdlog::error("Failed to initialize GLFW");
 		return;
 	}
+
+	//loading metadata for audio,texture,font into 
+	//resource manager's container each respectively
+	rm.LoadAudioManifest();
+	rm.LoadTextureManifest();
+	rm.LoadFontManifest();
 
 	//// --- Logging Setup ---
 	//try {
@@ -372,12 +379,12 @@ void CoreEngine::GameLoop()
 		profiler->EndFrame();
 
 		// Print profiling stats every 2 secs
-		printTimer += dt;
+	/*	printTimer += dt;
 		if (printTimer >= 1.0f) {
 			printTimer = 0.0f;
 			profiler->PrintStats();
 			profiler->Reset();
-		}
+		}*/
     }
 }
 
