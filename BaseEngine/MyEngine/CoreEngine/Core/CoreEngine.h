@@ -49,8 +49,8 @@ private:
 
 //A global pointer to the instance of the core
 extern CoreEngine* Engine;
-extern Config config;
-extern ResourceManager rm;
+extern Config config; //global scope
+extern ResourceManager rm; //global scope
 extern int WindowWidth;
 extern int WindowHeight;
 //constexpr int WindowWidth = 1600;

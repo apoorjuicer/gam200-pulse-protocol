@@ -72,6 +72,9 @@ public:
 	std::string const& GetTextureJSONfilepath() const;
 	std::string const& GetFontJSONfilepath() const;
 
+	AudioResource  const* FindAudio(std::string const& id)  const;
+	TextureResource const* FindTexture(std::string const& id) const;
+	FontResource   const* FindFont(std::string const& id)   const;
 
 	//A manifest describes
 	//existing assets(id,path)
@@ -89,6 +92,3 @@ public:
 
 std::ostream& operator<<(std::ostream& os, ResourceManager const& rm);
 
-namespace {
-	void printSeparator(std::ostream& os); 
-}

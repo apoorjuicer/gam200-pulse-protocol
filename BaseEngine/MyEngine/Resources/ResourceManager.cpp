@@ -17,11 +17,11 @@
 
 #include "ResourceManager.h"
 
-namespace {
-	void printSeparator(std::ostream& os) {
+
+	inline void printSeparator(std::ostream& os) {
 		os << "=============================\n";
 	}
-}
+
 
 /*Audio Resource*/
 
@@ -36,20 +36,14 @@ void AudioResource::Deserialize(const rapidjson::Value& in_obj) {
 	if (in_obj.HasMember("path") && in_obj["path"].IsString()){ path = in_obj["path"].GetString(); }
 
 	//***optional metadata, 
-	if (in_obj.HasMember("loop") && in_obj["loop"].IsBool()) { 
-		if (in_obj["loop"].IsBool())
-			loop = in_obj["loop"].GetBool();
-		else
-			std::cerr << "[AudioResource] 'loop' has wrong type for " << audio_id << "\n";
+	if (in_obj.HasMember("loop") && in_obj["loop"].IsBool()) {
+		loop = in_obj["loop"].GetBool();
 	}
 	else {
 		std::cerr << "[AudioResource] Missing 'loop' field, using default (false) for " << audio_id << "\n";
 	}
 	if (in_obj.HasMember("volume") && in_obj["volume"].IsNumber()) { 
-		if (in_obj["volume"].IsNumber())
 			volume = static_cast<float>(in_obj["volume"].GetDouble());
-		else
-			std::cerr << "[AudioResource] 'volume' has wrong type for " << audio_id << "\n";
 	}
 	else {
 		std::cerr << "[AudioResource] Missing 'volume' field, using default value (1.0) for " 
@@ -102,6 +96,19 @@ std::string const& ResourceManager::GetTextureJSONfilepath() const {
 
 std::string const& ResourceManager::GetFontJSONfilepath() const {
 	return fontjsonfilepath;
+}
+
+AudioResource  const* ResourceManager::FindAudio(std::string const& id)  const {
+	if (auto it = audioResources.find(id); it != audioResources.end()) return &it->second;
+	return nullptr;
+}
+TextureResource const* ResourceManager::FindTexture(std::string const& id) const {
+	if (auto it = textureResources.find(id); it != textureResources.end()) return &it->second;
+	return nullptr;
+}
+FontResource   const* ResourceManager::FindFont(std::string const& id)   const {
+	if (auto it = fontResources.find(id); it != fontResources.end()) return &it->second;
+	return nullptr;
 }
 
 /*default cons for debug*/
