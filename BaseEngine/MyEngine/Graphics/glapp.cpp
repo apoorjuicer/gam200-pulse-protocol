@@ -63,37 +63,95 @@ double random() {
 }
 
 
+// Match ImGui panel ratios
+static constexpr float kLeftRatio   = 0.20f; // 20% width
+static constexpr float kRightRatio  = 0.25f; // 25% width
+static constexpr float kBottomRatio = 0.25f; // 25% height
+
+static void ApplyEditorViewportPixels(int fbW, int fbH)
+{
+    // derive middle-blank area where the game renders
+    const int assets_h = static_cast<int>(fbH * kBottomRatio);
+    const int top_h    = fbH - assets_h;
+
+    const int left_w   = static_cast<int>(fbW * kLeftRatio);
+    const int right_w  = static_cast<int>(fbW * kRightRatio);
+    const int center_w = fbW - left_w - right_w;
+
+    // OpenGL Y=0 is bottom ? shift up by bottom bar height
+    glViewport(left_w, assets_h, center_w, top_h);
+
+    // Update your globals for any code that needs them
+    GLHelper::GameWidth  = center_w;
+    GLHelper::GameHeight = top_h;
+    GLHelper::GameOffsetX = left_w;
+    GLHelper::GameOffsetY = assets_h;
+
+}
+
+
+
 GLApp::GLModel GLApp::mdl;
 GLApp::TranslationBuf GLApp::tb;
 
 void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
-	// Use local inputEditorWidth and inputEditorHeight values for calculations.
+	// --- Compute middle rectangle from window size using fixed ratios ---
+	const float kLeftRatio = 0.20f; // 20% width
+	const float kRightRatio = 0.25f; // 25% width
+	const float kBottomRatio = 0.25f; // 25% height
+
 	GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth)),
 		h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
 
-	float a = (9.0f / 16.0f) * w;
-	float b = (16.0f / 9.0f) * h;
+	// Use your existing globals for window size
+	const int fbW = static_cast<int>(WindowWidth);
+	const int fbH = static_cast<int>(WindowHeight);
 
-	if (h > a) {
-		h = static_cast<GLint>(a);
+	// Panels in framebuffer pixels
+	const int assets_h = static_cast<int>(fbH * kBottomRatio);
+	const int top_h = fbH - assets_h;
+	const int left_w = static_cast<int>(fbW * kLeftRatio);
+	const int right_w = static_cast<int>(fbW * kRightRatio);
+	const int center_w = fbW - left_w - right_w;
+
+	// --- Fit a 16:9 viewport INSIDE the middle area and center it ---
+	// Desired aspect = 16:9 ? width/height = 16/9
+	const float targetAspect = 16.0f / 9.0f;
+
+	// Start with full middle area
+	int vpW = center_w;
+	int vpH = top_h;
+
+	// Adjust to preserve 16:9
+	if (static_cast<float>(vpH) > static_cast<float>(vpW) / targetAspect) {
+		// Too tall ? clamp height
+		vpH = static_cast<int>(std::round(vpW / targetAspect));
 	}
-	else if (w > b) {
-		w = static_cast<GLint>(b);
+	else {
+		// Too wide ? clamp width
+		vpW = static_cast<int>(std::round(vpH * targetAspect));
 	}
 
-	// Set OpenGL viewport using the editor width and height provided in the arguments
-	glViewport(static_cast<GLint>(inputEditorWidth / 2.f), static_cast<GLint>(inputEditorHeight), w, h);
+	// Center the viewport within the middle rect
+	const int vpX = left_w + (center_w - vpW) / 2;
+	const int vpY = assets_h + (top_h - vpH) / 2;
 
-	// Update GLHelper static members with the values calculated
-	GLHelper::GameWidth = w;
-	GLHelper::GameHeight = h;
-	GLHelper::GameOffsetX = static_cast<GLint>(inputEditorWidth / 2.f);
-	GLHelper::GameOffsetY = static_cast<GLint>(inputEditorHeight);
-	GLHelper::EditorWidth = static_cast<GLint>(inputEditorWidth);
-	GLHelper::EditorHeight = static_cast<GLint>(inputEditorHeight);
+	// Apply to GL
+	glViewport(vpX, vpY, vpW, vpH);
 
-	GLApp::vps.push_back({ 300, 200, w, h });
-	// Shader Strings Storage
+	// Update GLHelper for anyone who needs these numbers
+	GLHelper::GameWidth = vpW;
+	GLHelper::GameHeight = vpH;
+	GLHelper::GameOffsetX = vpX;
+	GLHelper::GameOffsetY = vpY;
+
+	// (Optional) keep editor panel sizes if other code references them
+	GLHelper::EditorWidth = left_w + right_w;   // total UI width if you need it
+	GLHelper::EditorHeight = assets_h;           // bottom bar height if you need it
+
+	// Keep your existing init below
+	GLApp::vps.push_back({ 300, 200, vpW, vpH });
+
 	GLApp::VPSS shdr_strs{
 		std::make_pair(test_vs, test_fs),
 		std::make_pair(bg_vs, bg_fs),
@@ -108,25 +166,20 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 
 	bool fixed_seed = true;
 	std::random_device rd;
-	std::mt19937 gen((fixed_seed ? 123 : rd())); // Fixed seed for taking screenshot and comparison
+	std::mt19937 gen((fixed_seed ? 123 : rd())); // Fixed seed for reproducibility
 	std::uniform_real_distribution<float> dis_translate(-tb.boundaryRange, tb.boundaryRange);
 	std::uniform_real_distribution<float> dis_delta(-0.01f, 0.01f);
 
-	// Generate and print random values
+	// Generate instance data
 	for (int i = 0; i < tb.instance_count; ++i) {
 		tb.position_scale.push_back(glm::vec4(dis_translate(gen), dis_translate(gen), tb.quad_scale, tb.quad_scale));
 		tb.velocity.push_back(glm::vec2(dis_delta(gen), dis_delta(gen)));
 	}
 
 	glCreateBuffers(1, &tb.translationBuffer);
-
 	glNamedBufferStorage(tb.translationBuffer, tb.translationBufferSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
-
-
 	GLuint bindingIndex = 0; // Set binding index in shader program
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingIndex, tb.translationBuffer);
-
-
 	glNamedBufferSubData(tb.translationBuffer, 0, tb.translationBufferSize, tb.position_scale.data());
 }
 
@@ -184,10 +237,33 @@ void GLApp::drawTrans(Framework::Transform& x) {
 }
 
 void GLApp::draw(std::set<Entity> entities) {
+	GLFWwindow* window = glfwGetCurrentContext();
+
+	if (MyEditor::IsEnabled()) {
+		// Editor ON - render in ImGui panel
+		auto vp = MyEditor::ComputeGameViewportPixels(window, true);
+		glViewport(vp.x, vp.y, vp.w, vp.h);
+
+		GLHelper::GameOffsetX = vp.x;
+		GLHelper::GameOffsetY = vp.y;
+		GLHelper::GameWidth = vp.w;
+		GLHelper::GameHeight = vp.h;
+	}
+	else {
+		// Editor OFF - use full screen with letterboxing
+		int fbW = 0, fbH = 0;
+		glfwGetFramebufferSize(window, &fbW, &fbH);
+
+		// Re-apply the correct fullscreen scaling immediately
+		ComputeLetterbox(fbW, fbH);
+	}
+
+	// Clear
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
 	glClearDepth(1.0f);
 
+	// Timing
 	auto* g_coordinator = Coordinator::GetInstance();
 
 	static auto lastTime = std::chrono::high_resolution_clock::now();
@@ -195,15 +271,15 @@ void GLApp::draw(std::set<Entity> entities) {
 	float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
 	lastTime = currentTime;
 
+	// Draw entities
 	for (auto it : entities) {
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
 
-		// Load texture from path if not already loaded
 		if (!tr.spriteName.empty() && tr.textureID == 0) {
 			tr.textureID = Framework::AssetsManager::GetOrLoad(tr.spriteName);
 			if (tr.textureID == 0) {
 				std::cerr << "[GLApp] Failed to load texture: " << tr.spriteName << std::endl;
-				continue; // Skip this entity
+				continue;
 			}
 		}
 
@@ -214,6 +290,10 @@ void GLApp::draw(std::set<Entity> entities) {
 		}
 	}
 }
+
+
+
+
 void GLApp::cleanup() {
 	// Delete VAOs, VBOs
 	for (auto& model : GLApp::models) {
