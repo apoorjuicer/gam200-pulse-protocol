@@ -3,6 +3,7 @@
  * @file        Editor.cpp
  * @project     Pulse Protocol
  * @author      Leu Jun Yong
+ * @author      Goh Pin Kai
  * @brief       Initializes, updates, renders, and manages the ImGui
                 editor interface with toggle support.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
@@ -244,22 +245,40 @@ namespace MyEditor {
         ImGuiIO& io = ImGui::GetIO();
 
         // ImGui logical size
-        const float w = io.DisplaySize.x;
-        const float h = io.DisplaySize.y;
+        float w = io.DisplaySize.x;
+        float h = io.DisplaySize.y;
+
+        if (w <= 0.f || h <= 0.f) {
+            // Fallback to window size if ImGui hasn't populated yet
+            int winW = 0, winH = 0;
+            glfwGetWindowSize(window, &winW, &winH);
+            w = (float)std::max(1, winW);
+            h = (float)std::max(1, winH);
+        }
+
+        const float left_r = std::clamp(s_left_ratio, 0.0f, 0.95f);
+        const float right_r = std::clamp(s_right_ratio, 0.0f, 0.95f);
+        const float bottom_r = std::clamp(s_bottom_ratio, 0.0f, 0.95f);
 
         // Current panel sizes from live ratios
-        const float assets_h = h * s_bottom_ratio;
-        const float top_h = h - assets_h;
+        const float assets_h = h * bottom_r;
+        const float top_h = std::max(1.0f, h - assets_h);
 
-        const float left_w = w * s_left_ratio;
-        const float right_w = w * s_right_ratio;
-        const float center_w = std::max(0.0f, w - left_w - right_w);
+        const float left_w = w * left_r;
+        const float right_w = w * right_r;
+        const float center_w = std::max(1.0f, w - left_w - right_w);
 
-        // Convert to framebuffer pixels (HiDPI aware)
+        // converts to framebuffer pixels 
         int fbW = 0, fbH = 0;
         glfwGetFramebufferSize(window, &fbW, &fbH);
-        const float sx = io.DisplayFramebufferScale.x;
-        const float sy = io.DisplayFramebufferScale.y;
+        if (fbW <= 0 || fbH <= 0) {
+            static int lastW = 1280, lastH = 720;
+            fbW = lastW; fbH = lastH;
+        }
+
+        // derive scale from the framebuffer
+        const float sx = (w > 0.f) ? (float)fbW / w : 1.f;
+        const float sy = (h > 0.f) ? (float)fbH / h : 1.f;
 
         int vx = (int)std::round(left_w * sx);
         int vy = (int)std::round(assets_h * sy);
@@ -280,6 +299,11 @@ namespace MyEditor {
             vx += (midW - vw) / 2;
             vy += (midH - vh) / 2;
         }
+
+        vw = std::clamp(vw, 1, fbW);
+        vh = std::clamp(vh, 1, fbH);
+        vx = std::clamp(vx, 0, std::max(0, fbW - vw));
+        vy = std::clamp(vy, 0, std::max(0, fbH - vh));
 
         return { vx, vy, vw, vh };
     }
