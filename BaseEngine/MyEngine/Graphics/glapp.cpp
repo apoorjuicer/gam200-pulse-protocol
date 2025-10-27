@@ -100,8 +100,8 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 	const float kRightRatio = 0.25f; // 25% width
 	const float kBottomRatio = 0.25f; // 25% height
 
-	GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth)),
-		h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
+	GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth));
+	GLint h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
 
 	// Use your existing globals for window size
 	const int fbW = static_cast<int>(WindowWidth);

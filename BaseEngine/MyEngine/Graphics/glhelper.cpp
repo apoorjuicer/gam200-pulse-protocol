@@ -543,7 +543,10 @@ void GLHelper::update_time(double fps_calc_interval) {
   fps_calc_interval = (fps_calc_interval < 0.0) ? 0.0 : fps_calc_interval;
   fps_calc_interval = (fps_calc_interval > 10.0) ? 10.0 : fps_calc_interval;
   if (elapsed_time > fps_calc_interval) {
-    GLHelper::fps = count / elapsed_time;
+      if (count / elapsed_time > 120.f)
+        GLHelper::fps = 120.f;
+	  else
+        GLHelper::fps = count / elapsed_time;
     start_time = curr_time;
     count = 0.0;
   }

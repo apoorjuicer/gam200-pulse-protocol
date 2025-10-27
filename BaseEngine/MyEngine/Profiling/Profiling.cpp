@@ -34,7 +34,7 @@ void ProfilingManager::EndFrame() {
     double totalFrameTime = std::chrono::duration<double>(frameEndTime - frameStartTime).count();
 
     if (totalFrameTime > 0.0) {
-        double fps = 1.0 / totalFrameTime;
+        //double fps = 1.0 / totalFrameTime;
 
         // Calculate percentages
         for (auto& [name, profile] : profiles) {
