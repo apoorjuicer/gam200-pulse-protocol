@@ -16,7 +16,6 @@
 #include "pch/pch.h"
 #include "CoreEngine/ECS/Singleton.h"
 
-enum struct Scene { MainMenu, Pause, Level1, Dead };
 
 class SceneManager: public Systems
 {
@@ -27,25 +26,19 @@ public:
 	//void Update(float dt) override;    
 	//void Exit() override;
 
-	void LoadScene(Scene scene);//, const std::string& path);
-	void LoadSavedScene(Scene scene);
+	void LoadSceneFromJson(std::string const& path);
 	void SaveCurrentScene();
 	void UnloadCurrentScene();
 
-	Scene GrabCurrentScene() const { return CurrentScene; };
-	Scene GrabPreviousScene() const { return PreviousScene; };
-	std::optional<Scene> GrabSavedScene() const { return SavedScene; };
+	
+	std::string GrabCurrentScene() const { return CurrentScene; }
+	void ChangeCurrentScene(std::string const& str) { CurrentScene = str; }
 
 private:
-	Scene CurrentScene;
-	Scene PreviousScene;
-	std::optional<Scene> SavedScene;
-
-	// Hard coding pathway to file that will always be available to save scene and load prefab.
-	std::string SaveEntityPathway = "../../MyEngine/JSON/SavedScene.json";// where to save data
-
-	void LoadMainMenu();
-	void LoadPause();
+	std::string CurrentScene;
 	std::vector<Entity> SceneEntityList;
-};
 
+	void Deserialize(const rapidjson::Value& in);
+	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
+};
+//ALL ENTITY IN THE ARRAY MUST BE EXACTLY LIKE A PREFAB. But it is not a prefab, just all its component. (for scene json)

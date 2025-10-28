@@ -222,6 +222,7 @@ void CoreEngine::Init()
 	GameRunning = true;
 	std::string filePath = "../../MyEngine/JSON/test.json";//AssetManager.mPrefabMap[path];
 	Factory factory;
+	SceneManager SM;
 	factory.CreateEntityFromJson(filePath);
 	std::string filePath2 = "../../MyEngine/JSON/test2.json";
 	Entity entity = factory.DefaultObj();
@@ -229,6 +230,11 @@ void CoreEngine::Init()
 	l.ScriptName = "IT WORKS!!!!";
 	g_coordinator->AddComponent(entity, l);
 	factory.SaveEntityToJson(entity, filePath2);
+
+	std::string filePath3 = "../../MyEngine/JSON/MainMenu.json";
+	SM.LoadSceneFromJson(filePath3);
+	SM.SaveCurrentScene();
+	
 
 }
 
@@ -298,11 +304,6 @@ void CoreEngine::Update(float dt)
 	if (g_graphicsSystem) g_graphicsSystem->Update();
 	if (g_inputSystem) g_inputSystem->Update(dt);
 	if (g_rhythmSystem) g_rhythmSystem->Update(dt);
-
-	if (g_sceneSystem->GrabCurrentScene() == Scene::MainMenu)
-	{
-		//g_sceneSystem->LoadScene(Scene::Pause);
-	}
 
 	g_coordinator->UpdateAllSystems(dt);
 }
