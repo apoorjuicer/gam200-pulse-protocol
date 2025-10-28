@@ -23,10 +23,17 @@ endmacro()
 # --- GLEW ---
 macro(import_glew)
     if(NOT TARGET GLEW::glew AND NOT TARGET glew)
-        FetchContent_Declare(
+    #currently not in use due to broken GLEW master branch on github
+        #FetchContent_Declare(
+        #    glew
+        #    GIT_REPOSITORY https://github.com/Perlmint/glew-cmake
+        #    GIT_TAG master
+        #)
+
+       FetchContent_Declare(
             glew
-            GIT_REPOSITORY https://github.com/Perlmint/glew-cmake
-            GIT_TAG master
+            GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
+            GIT_TAG d06782b910213d675925e6e51a69ad0fd1fe1f23
         )
         FetchContent_MakeAvailable(glew)
         # no include_directories()

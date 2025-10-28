@@ -23,6 +23,8 @@ namespace Framework { class Transform; }
 
 class GLApp {
 public:
+	static inline int VIRTUAL_W = 1920;
+	static inline int VIRTUAL_H = 1080;
 	void init(float inputEditorWidth, float inputEditorHeight);
 	//void update(GLFWwindow* window);
 	void update(GLFWwindow* window, std::set<Entity>);
@@ -35,9 +37,6 @@ public:
 	GLenum primitive_type;
 	void drawTrans(Framework::Transform& x);
 	void updateAnimation(Framework::Transform& x, float deltaTime);
-
-	static inline constexpr int VIRTUAL_W = 1600;
-	static inline constexpr int VIRTUAL_H = 900;
 
 	static inline int GameWidth = VIRTUAL_W;  // actual GL viewport width after letterbox
 	static inline int GameHeight = VIRTUAL_H;  // actual GL viewport height after letterbox

@@ -164,7 +164,7 @@ bool GraphicsManager::LoadFont(const std::string& fontPath,
 
 	for (unsigned char c = 0; c < 128; ++c) {
 		if (FT_Load_Char(fontFace, c, FT_LOAD_RENDER)) continue;
-		if (FT_Render_Glyph(fontFace->glyph, FT_RENDER_MODE_NORMAL)) continue;
+		//if (FT_Render_Glyph(fontFace->glyph, FT_RENDER_MODE_NORMAL)) continue;
 
 		GLuint texture;
 		glGenTextures(1, &texture);
