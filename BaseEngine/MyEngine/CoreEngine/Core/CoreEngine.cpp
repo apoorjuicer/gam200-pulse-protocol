@@ -313,8 +313,6 @@ void CoreEngine::Update(float dt)
 void CoreEngine::GameLoop()
 {
 	LastTime = timeGetTime();
-	//init
-	float printTimer = 0.0f;
 
 	auto profiler = ProfilingManager::GetInstance();
 
