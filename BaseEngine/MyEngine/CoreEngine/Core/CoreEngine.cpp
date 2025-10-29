@@ -251,6 +251,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<NPC>();
 	g_coordinator->RegisterComponent<AABB>();
 	g_coordinator->RegisterComponent<LogicComponent>();
+	g_coordinator->RegisterComponent<GUIButton>();
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();

@@ -82,6 +82,15 @@ private:
 	bool debugGridEnabled = false;
 	bool debugToggleKeyPressed[6] = { false };
 
+	// for guibuttons
+	//Entity lastCreatedEntityByGUI = 0;
+
+	//void LoadGUIButtons();
+	//void UpdateGUIButtons();
+	//bool IsMouseOverButton(const glm::vec2& buttonPos, const glm::vec2& buttonSize) const;
+	//void ExecuteButtonAction(const GUIButton& button);
+
+	// for raw input functions
 	void updateInputStates();
 	void processDebugToggles();
 };

@@ -40,18 +40,18 @@ void CollisionManager::Init()
 	if (!UseBoxLineTest)
 	{
 		// --- Background Setup ---
-		Entity Background = g_coordinator->CreateEntity();
-		Framework::Transform bgTransform{};
-		bgTransform.Pos = { 0,0 };
-		bgTransform.Scale = { 1600.0f, 900.0f };
-		bgTransform.mdl_ref = 0.0f;
-		bgTransform.shd_ref = 1.0f;
-		bgTransform.isVisible = true;
-		bgTransform.totalFrames = 1;          // Total frames in the sprite sheet
-		bgTransform.columns = 1;              // Columns in the sprite sheet
-		bgTransform.rows = 1;
-		bgTransform.spriteName = "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg";
-		g_coordinator->AddComponent(Background, bgTransform);
+		//Entity Background = g_coordinator->CreateEntity();
+		//Framework::Transform bgTransform{};
+		//bgTransform.Pos = { 0,0 };
+		//bgTransform.Scale = { 1600.0f, 900.0f };
+		//bgTransform.mdl_ref = 0.0f;
+		//bgTransform.shd_ref = 1.0f;
+		//bgTransform.isVisible = true;
+		//bgTransform.totalFrames = 1;          // Total frames in the sprite sheet
+		//bgTransform.columns = 1;              // Columns in the sprite sheet
+		//bgTransform.rows = 1;
+		//bgTransform.spriteName = "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg";
+		//g_coordinator->AddComponent(Background, bgTransform);
 
 		//EntityNPC.push_back(Background);
 		// --- Hero NPC: stationary at center of screen ---
