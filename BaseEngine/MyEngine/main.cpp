@@ -39,7 +39,6 @@
 #if (_DEBUG)
 // MEM LEAKS LIBRARIES (See _CrtMemCheckpoint for examples to check for mem leaks)
 #define _CRTDBG_MAP_ALLOC //to get more details
-#include <cstdlib>  
 #include <crtdbg.h>   //for malloc and free
 static _CrtMemState sOld;
 static _CrtMemState sNew;
@@ -91,6 +90,7 @@ void CreateRenderObjects(int count) {
         
         // Create a Transform component with random properties
         Framework::Transform transform;
+        Framework::Renderable renderable;
         
         // Random position within the game window bounds (accounting for viewport)
         // The game viewport is centered and has aspect ratio 16:9
@@ -113,11 +113,11 @@ void CreateRenderObjects(int count) {
         transform.angle_disp = static_cast<float>(rand() % 360);
         transform.angle_speed = static_cast<float>(rand() % 10) - 5.0f; // -5 to +5 degrees per frame
 
-        transform.spriteName = "../../MyEngine/Assets/Textures/Characters/hero.png";
+        renderable.spriteName = "../../MyEngine/Assets/Textures/Characters/hero.png";
         
         // Set model and shader references for sprite rendering
-        transform.mdl_ref = 1.0f;  // Use box model (1) instead of background (0)
-        transform.shd_ref = 2.0f;  // Use sprite shader (2) for texture rendering
+        renderable.mdl_ref = 1.0f;  // Use box model (1) instead of background (0)
+        renderable.shd_ref = 2.0f;  // Use sprite shader (2) for texture rendering
         
         // Initially hidden - will be toggled with Z key
         transform.isVisible = objectsVisible;

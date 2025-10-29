@@ -31,14 +31,31 @@ void ProfilingManager::StartFrame() {
 
 void ProfilingManager::EndFrame() {
     auto frameEndTime = std::chrono::high_resolution_clock::now();
-    totalFrameTime = std::chrono::duration<double>(frameEndTime - frameStartTime).count();
+    double totalFrameTime = std::chrono::duration<double>(frameEndTime - frameStartTime).count();
 
     if (totalFrameTime > 0.0) {
-        fps = 1.0 / totalFrameTime;
+        //double fps = 1.0 / totalFrameTime;
 
         // Calculate percentages
         for (auto& [name, profile] : profiles) {
             profile.percentage = (profile.totalTime / totalFrameTime) * 100.0;
+        }
+
+        // Only update display every displayUpdateInterval seconds
+        timeSinceDisplay += totalFrameTime;
+
+        if (timeSinceDisplay >= displayUpdateInterval) {
+            displayProfiles = profiles;
+            cachedFrameTime = totalFrameTime;
+
+            // Reset profiles after displaying, to make sure that it does not exceed 100
+            for (auto& [name, profile] : profiles) {
+                profile.totalTime = 0.0;
+                profile.percentage = 0.0;
+                profile.callCount = 0;
+            }
+
+            timeSinceDisplay = 0.0;
         }
     }
 }
@@ -65,27 +82,14 @@ ProfilingManager::GetProfiles() const {
 }
 
 void ProfilingManager::Reset() {
-    for (auto& [name, profile] : profiles) {
-        profile.totalTime = 0.0;
-        profile.percentage = 0.0;
-        profile.callCount = 0;
+    if (timeSinceReset >= resetInterval) {
+        for (auto& [name, profile] : profiles) {
+            profile.totalTime = 0.0;
+            profile.percentage = 0.0;
+            profile.callCount = 0;
+        }
+        timeSinceReset = 0.0;
     }
-}
-
-void ProfilingManager::PrintStats() {
-    std::cout << "\n========== PERFORMANCE PROFILE ==========\n";
-    std::cout << "FPS: " << std::fixed << std::setprecision(1) << fps << " | ";
-    std::cout << "Frame Time: " << std::setprecision(3)
-        << totalFrameTime * 1000.0 << " ms\n";
-    std::cout << "-----------------------------------------\n";
-
-    for (const auto& [name, profile] : profiles) {
-        std::cout << std::setw(20) << name << ": "
-            << std::setw(6) << std::setprecision(2)
-            << profile.percentage << "%  ("
-            << std::setprecision(3) << profile.totalTime * 1000.0 << " ms)\n";
-    }
-    std::cout << "=========================================\n\n";
 }
 
 void ProfilingManager::DestroyInstance() {

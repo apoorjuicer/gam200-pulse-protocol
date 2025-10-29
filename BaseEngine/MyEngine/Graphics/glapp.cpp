@@ -3,7 +3,7 @@
  * @file        glapp.cpp
  * @project     Pulse Protocol
  * @author      Goh Pin Kai
- * @brief		Implements OpenGL application utilities for initializing 
+ * @brief		Implements OpenGL application utilities for initializing
 				shaders, models, viewports, and rendering textured entities.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
@@ -63,38 +63,95 @@ double random() {
 }
 
 
+// Match ImGui panel ratios
+static constexpr float kLeftRatio   = 0.20f; // 20% width
+static constexpr float kRightRatio  = 0.25f; // 25% width
+static constexpr float kBottomRatio = 0.25f; // 25% height
+
+static void ApplyEditorViewportPixels(int fbW, int fbH)
+{
+    // derive middle-blank area where the game renders
+    const int assets_h = static_cast<int>(fbH * kBottomRatio);
+    const int top_h    = fbH - assets_h;
+
+    const int left_w   = static_cast<int>(fbW * kLeftRatio);
+    const int right_w  = static_cast<int>(fbW * kRightRatio);
+    const int center_w = fbW - left_w - right_w;
+
+    // OpenGL Y=0 is bottom ? shift up by bottom bar height
+    glViewport(left_w, assets_h, center_w, top_h);
+
+    // Update your globals for any code that needs them
+    GLHelper::GameWidth  = center_w;
+    GLHelper::GameHeight = top_h;
+    GLHelper::GameOffsetX = left_w;
+    GLHelper::GameOffsetY = assets_h;
+
+}
+
+
+
 GLApp::GLModel GLApp::mdl;
 GLApp::TranslationBuf GLApp::tb;
 
 void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
-	//textureID = LoadTexture("../../MyEngine/Assets/spritesheet 543px x 467px.png");
-	// Use local inputEditorWidth and inputEditorHeight values for calculations.
-	GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth)),
-		h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
+	// --- Compute middle rectangle from window size using fixed ratios ---
+	const float kLeftRatio = 0.20f; // 20% width
+	const float kRightRatio = 0.25f; // 25% width
+	const float kBottomRatio = 0.25f; // 25% height
 
-	float a = (9.0f / 16.0f) * w;
-	float b = (16.0f / 9.0f) * h;
+	GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth));
+	GLint h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
 
-	if (h > a) {
-		h = static_cast<GLint>(a);
+	// Use your existing globals for window size
+	const int fbW = static_cast<int>(WindowWidth);
+	const int fbH = static_cast<int>(WindowHeight);
+
+	// Panels in framebuffer pixels
+	const int assets_h = static_cast<int>(fbH * kBottomRatio);
+	const int top_h = fbH - assets_h;
+	const int left_w = static_cast<int>(fbW * kLeftRatio);
+	const int right_w = static_cast<int>(fbW * kRightRatio);
+	const int center_w = fbW - left_w - right_w;
+
+	// --- Fit a 16:9 viewport INSIDE the middle area and center it ---
+	// Desired aspect = 16:9 ? width/height = 16/9
+	const float targetAspect = 16.0f / 9.0f;
+
+	// Start with full middle area
+	int vpW = center_w;
+	int vpH = top_h;
+
+	// Adjust to preserve 16:9
+	if (static_cast<float>(vpH) > static_cast<float>(vpW) / targetAspect) {
+		// Too tall ? clamp height
+		vpH = static_cast<int>(std::round(vpW / targetAspect));
 	}
-	else if (w > b) {
-		w = static_cast<GLint>(b);
+	else {
+		// Too wide ? clamp width
+		vpW = static_cast<int>(std::round(vpH * targetAspect));
 	}
 
-	// Set OpenGL viewport using the editor width and height provided in the arguments
-	glViewport(static_cast<GLint>(inputEditorWidth / 2.f), static_cast<GLint>(inputEditorHeight), w, h);
+	// Center the viewport within the middle rect
+	const int vpX = left_w + (center_w - vpW) / 2;
+	const int vpY = assets_h + (top_h - vpH) / 2;
 
-	// Update GLHelper static members with the values calculated
-	GLHelper::GameWidth = w;
-	GLHelper::GameHeight = h;
-	GLHelper::GameOffsetX = static_cast<GLint>(inputEditorWidth / 2.f);
-	GLHelper::GameOffsetY = static_cast<GLint>(inputEditorHeight);
-	GLHelper::EditorWidth = static_cast<GLint>(inputEditorWidth);
-	GLHelper::EditorHeight = static_cast<GLint>(inputEditorHeight);
+	// Apply to GL
+	glViewport(vpX, vpY, vpW, vpH);
 
-	GLApp::vps.push_back({ 300, 200, w, h });
-	// Shader Strings Storage
+	// Update GLHelper for anyone who needs these numbers
+	GLHelper::GameWidth = vpW;
+	GLHelper::GameHeight = vpH;
+	GLHelper::GameOffsetX = vpX;
+	GLHelper::GameOffsetY = vpY;
+
+	// (Optional) keep editor panel sizes if other code references them
+	GLHelper::EditorWidth = left_w + right_w;   // total UI width if you need it
+	GLHelper::EditorHeight = assets_h;           // bottom bar height if you need it
+
+	// Keep your existing init below
+	GLApp::vps.push_back({ 300, 200, vpW, vpH });
+
 	GLApp::VPSS shdr_strs{
 		std::make_pair(test_vs, test_fs),
 		std::make_pair(bg_vs, bg_fs),
@@ -104,61 +161,40 @@ void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
 	GLApp::init_shdrpgms_cont(shdr_strs);
 	GLApp::init_models_cont();
 
-	// Initialize debug draw
-	DebugDraw::Init();
+
 
 	bool fixed_seed = true;
 	std::random_device rd;
-	std::mt19937 gen((fixed_seed ? 123 : rd())); // Fixed seed for taking screenshot and comparison
+	std::mt19937 gen((fixed_seed ? 123 : rd())); // Fixed seed for reproducibility
 	std::uniform_real_distribution<float> dis_translate(-tb.boundaryRange, tb.boundaryRange);
 	std::uniform_real_distribution<float> dis_delta(-0.01f, 0.01f);
 
-	// Generate and print random values
+	// Generate instance data
 	for (int i = 0; i < tb.instance_count; ++i) {
 		tb.position_scale.push_back(glm::vec4(dis_translate(gen), dis_translate(gen), tb.quad_scale, tb.quad_scale));
 		tb.velocity.push_back(glm::vec2(dis_delta(gen), dis_delta(gen)));
 	}
 
 	glCreateBuffers(1, &tb.translationBuffer);
-
 	glNamedBufferStorage(tb.translationBuffer, tb.translationBufferSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
-
-
 	GLuint bindingIndex = 0; // Set binding index in shader program
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingIndex, tb.translationBuffer);
-
-
 	glNamedBufferSubData(tb.translationBuffer, 0, tb.translationBufferSize, tb.position_scale.data());
 }
 
 
-void GLApp::update(GLFWwindow* window,std::set<Entity> entity) {
-    //if (GLHelper::keystateP == GL_TRUE) {
-    //    if (polygonmode == 0) {
-    //        ++polygonmode;
-    //        GLHelper::keystateP = GL_FALSE;
-    //    }
-    //    else if (polygonmode == 1) {
-    //        ++polygonmode;
-    //        GLHelper::keystateP = GL_FALSE;
-    //    }
-    //    else if (polygonmode == 2) {
-    //        polygonmode = 0;
-    //        GLHelper::keystateP = GL_FALSE;
-    //    }
-    //    GLHelper::keystateP = GL_FALSE;
-    //}
-    GLHelper::update_time(1.0); // updates delta_time and fps
-    if (window)
-    {
-        glfwSetWindowTitle(window, "Pulse Protocol");
-    }
-     //update(GLHelper::delta_time, entity);
-    Framework::Transform transformSystem;
-    transformSystem.update(GLHelper::delta_time, entity);
-    
+void GLApp::update(GLFWwindow* window, std::set<Entity> entity) {
+	GLHelper::update_time(1.0); // updates delta_time and fps
+	if (window)
+	{
+		glfwSetWindowTitle(window, "Pulse Protocol");
+	}
+	//update(GLHelper::delta_time, entity);
+	Framework::Transform transformSystem;
+	transformSystem.update(GLHelper::delta_time, entity);
+
 }
-void GLApp::updateAnimation(Framework::Transform& x, float deltaTime) {
+void GLApp::updateAnimation(Framework::Animation& x, float deltaTime) {
 	float frameDuration = 1.0f / x.animationSpeed;
 	x.elapsedTime += deltaTime;
 
@@ -169,7 +205,7 @@ void GLApp::updateAnimation(Framework::Transform& x, float deltaTime) {
 }
 
 
-void GLApp::drawTrans(Framework::Transform& x) {
+void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y, Framework::Transform& z) {
 
 	auto& shader = shdrpgms[static_cast<uint64_t>(x.shd_ref)];
 	shader.Use();
@@ -179,14 +215,14 @@ void GLApp::drawTrans(Framework::Transform& x) {
 	GLint uOffsetLoc = glGetUniformLocation(prog, "uOffset");
 	GLint uScaleLoc = glGetUniformLocation(prog, "uScale");
 
-	float frameWidth = 1.0f / x.columns;
-	float frameHeight = 1.0f / x.rows;
-	float uOffsetX = (x.currentFrame % x.columns) * frameWidth;
-	float uOffsetY = 1.0f - ((x.currentFrame / x.columns + 1) * frameHeight);
+	float frameWidth = 1.0f / y.columns;
+	float frameHeight = 1.0f / y.rows;
+	float uOffsetX = (y.currentFrame % y.columns) * frameWidth;
+	float uOffsetY = 1.0f - ((y.currentFrame / y.columns + 1) * frameHeight);
 
 	if (uOffsetLoc >= 0) glUniform2f(uOffsetLoc, uOffsetX, uOffsetY);
 	if (uScaleLoc >= 0) glUniform2f(uScaleLoc, frameWidth, frameHeight);
-	if (uModelLoc >= 0) glUniformMatrix3fv(uModelLoc, 1, GL_FALSE, x.mdl_to_ndc_xform.Begin());
+	if (uModelLoc >= 0) glUniformMatrix3fv(uModelLoc, 1, GL_FALSE, z.mdl_to_ndc_xform.Begin());
 
 	glBindVertexArray(models[static_cast<uint64_t>(x.mdl_ref)].vaoid);
 	glActiveTexture(GL_TEXTURE0);
@@ -200,10 +236,33 @@ void GLApp::drawTrans(Framework::Transform& x) {
 }
 
 void GLApp::draw(std::set<Entity> entities) {
+	GLFWwindow* window = glfwGetCurrentContext();
+
+	if (MyEditor::IsEnabled()) {
+		// Editor ON - render in ImGui panel
+		auto vp = MyEditor::ComputeGameViewportPixels(window, true);
+		glViewport(vp.x, vp.y, vp.w, vp.h);
+
+		GLHelper::GameOffsetX = vp.x;
+		GLHelper::GameOffsetY = vp.y;
+		GLHelper::GameWidth = vp.w;
+		GLHelper::GameHeight = vp.h;
+	}
+	else {
+		// Editor OFF - use full screen with letterboxing
+		int fbW = 0, fbH = 0;
+		glfwGetFramebufferSize(window, &fbW, &fbH);
+
+		// Re-apply the correct fullscreen scaling immediately
+		ComputeLetterbox(fbW, fbH);
+	}
+
+	// Clear
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
 	glClearDepth(1.0f);
 
+	// Timing
 	auto* g_coordinator = Coordinator::GetInstance();
 
 	static auto lastTime = std::chrono::high_resolution_clock::now();
@@ -211,25 +270,31 @@ void GLApp::draw(std::set<Entity> entities) {
 	float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
 	lastTime = currentTime;
 
+	// Draw entities
 	for (auto it : entities) {
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
+		auto& re = g_coordinator->GetComponent<Framework::Renderable>(it);
+		auto& an = g_coordinator->GetComponent<Framework::Animation>(it);
 
-		// Load texture from path if not already loaded
-		if (!tr.spriteName.empty() && tr.textureID == 0) {
-			tr.textureID = Framework::AssetsManager::GetOrLoad(tr.spriteName); 
-			if (tr.textureID == 0) {
-				std::cerr << "[GLApp] Failed to load texture: " << tr.spriteName << std::endl;
-				continue; // Skip this entity
+		if (!re.spriteName.empty() && re.textureID == 0) {
+			re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+			if (re.textureID == 0) {
+				std::cerr << "[GLApp] Failed to load texture: " << re.spriteName << std::endl;
+				continue;
 			}
 		}
 
-		if (tr.isVisible && tr.textureID != 0) {
-			updateAnimation(tr, deltaTime);
-			glBindTexture(GL_TEXTURE_2D, tr.textureID);
-			drawTrans(tr);
+		if (tr.isVisible && re.textureID != 0) {
+			updateAnimation(an, deltaTime);
+			glBindTexture(GL_TEXTURE_2D, re.textureID);
+			drawTrans(re, an, tr);
 		}
 	}
 }
+
+
+
+
 void GLApp::cleanup() {
 	// Delete VAOs, VBOs
 	for (auto& model : GLApp::models) {
@@ -257,7 +322,6 @@ void GLApp::cleanup() {
 	}
 
 	GLApp::vps.clear();
-	DebugDraw::Shutdown();
 
 	std::cout << "Graphics Resources successfully cleaned up." << std::endl;
 }
@@ -265,7 +329,6 @@ void GLApp::cleanup() {
 void GLApp::init_models_cont() {
 	GLApp::models.emplace_back(GLApp::bg_model());
 	GLApp::models.emplace_back(GLApp::box_model());
-	//GLApp::models.emplace_back(GLApp::mystery_model());
 }
 
 //Shader Program Container
@@ -394,86 +457,24 @@ GLApp::GLModel GLApp::box_model() {
 	quad.primitive_cnt = 2;
 	return quad;
 }
+void GLApp::ComputeLetterbox(int fbw, int fbh)
+{
+	const float sx = static_cast<float>(fbw) / static_cast<float>(GLApp::VIRTUAL_W);
+	const float sy = static_cast<float>(fbh) / static_cast<float>(GLApp::VIRTUAL_H);
+	GLApp::PixelScale = std::min(sx, sy);
 
-//GLApp::GLModel GLApp::mystery_model()
-//{
-//    // Define the vertices to create a hexagon
-//    std::array<glm::vec2, 7> vertPos{
-//        glm::vec2(-0.5f, -0.86f),  // Bottom left
-//        glm::vec2(0.5f, -0.86f),   // Bottom right
-//        glm::vec2(1.0f, 0.0f),     // Right
-//        glm::vec2(0.5f, 0.86f),    // Top right
-//        glm::vec2(-0.5f, 0.86f),   // Top left
-//        glm::vec2(-1.0f, 0.0f),    // Left
-//        glm::vec2(0.0f, 0.0f)      // Center
-//    };
-//
-//    // Define the indices to draw the hexagon using triangles
-//    std::array<GLushort, 18> indices{
-//        0, 1, 6,   // Bottom triangle
-//        1, 2, 6,   // Bottom right triangle
-//        2, 3, 6,   // Top right triangle
-//        3, 4, 6,   // Top triangle
-//        4, 5, 6,   // Top left triangle
-//        5, 0, 6    // Bottom left triangle
-//    };
-//
-//    // Define colors for each vertex
-//    std::array<glm::vec3, 7> clr_vtx{
-//        glm::vec3(random(), random(), random()),
-//        glm::vec3(random(), random(), random()),
-//        glm::vec3(random(), random(), random()),
-//        glm::vec3(random(), random(), random()),
-//        glm::vec3(random(), random(), random()),
-//        glm::vec3(random(), random(), random()),
-//        glm::vec3(random(), random(), random())
-//    };
-//    // create GL Unsigned Int
-//    GLuint vbo1;
-//
-//    // Create 1 Buffer using vbo1
-//    glCreateBuffers(1, &vbo1);
-//
-//    // assign memory
-//    glNamedBufferStorage(vbo1,
-//        sizeof(glm::vec2) * vertPos.size() + sizeof(glm::vec3) * clr_vtx.size(),
-//        nullptr, GL_DYNAMIC_STORAGE_BIT);
-//
-//    glNamedBufferSubData(vbo1, 0,
-//        sizeof(glm::vec2) * vertPos.size(), vertPos.data());
-//
-//    glNamedBufferSubData(vbo1, sizeof(glm::vec2) * vertPos.size(),
-//        sizeof(glm::vec3) * clr_vtx.size(), clr_vtx.data());
-//
-//    // create GL Unsigned Int
-//    GLuint qaoid;
-//    // set instructions for position 0
-//    glCreateVertexArrays(1, &qaoid);
-//    glEnableVertexArrayAttrib(qaoid, 0);
-//    glVertexArrayVertexBuffer(qaoid, 0, vbo1, 0, sizeof(glm::vec2));
-//
-//    glVertexArrayAttribFormat(qaoid, 0, 2, GL_FLOAT, GL_FALSE, 0);
-//    glVertexArrayAttribBinding(qaoid, 0, 0);
-//
-//    // set instructions for colour 1
-//    glEnableVertexArrayAttrib(qaoid, 1);
-//    glVertexArrayVertexBuffer(qaoid, 1, vbo1, 0, sizeof(glm::vec3));
-//    // set value to 3 because RGB
-//    glVertexArrayAttribFormat(qaoid, 1, 3, GL_FLOAT, GL_FALSE, 0);
-//    glVertexArrayAttribBinding(qaoid, 1, 1);
-//
-//    GLuint ebo;
-//    glCreateBuffers(1, &ebo);
-//    glNamedBufferStorage(ebo, sizeof(GLushort) * indices.size(),
-//        reinterpret_cast<GLvoid*>(indice_images.data()),
-//        GL_DYNAMIC_STORAGE_BIT);
-//    glVertexArrayElementBuffer(qaoid, ebo);
-//    glBindVertexArray(0);
-//
-//    GLApp::GLModel quad{};
-//    quad.vaoid = vaoid;
-//    quad.primitive_type = GL_TRIANGLES;
-//    quad.draw_cnt = static_cast<GLuint>(indices.size());
-//    quad.primitive_cnt = 4;
-//    return quad;
-//}
+	const int vw = static_cast<int>(GLApp::VIRTUAL_W * GLApp::PixelScale);
+	const int vh = static_cast<int>(GLApp::VIRTUAL_H * GLApp::PixelScale);
+
+	GLApp::GameOffsetX = (fbw - vw) / 2;
+	GLApp::GameOffsetY = (fbh - vh) / 2;
+	GLApp::GameWidth = vw;
+	GLApp::GameHeight = vh;
+
+	glViewport(GLApp::GameOffsetX, GLApp::GameOffsetY, GLApp::GameWidth, GLApp::GameHeight);
+}
+
+void GLApp::OnResize(int width, int height)
+{
+	ComputeLetterbox(width, height);
+}

@@ -19,10 +19,12 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Transform.h"
 // External transforms list (used elsewhere)   
-namespace Framework { class Transform; }
+namespace Framework { class Transform; class Animation; class Renderable;}
 
 class GLApp {
 public:
+	static inline int VIRTUAL_W = 1920;
+	static inline int VIRTUAL_H = 1080;
 	void init(float inputEditorWidth, float inputEditorHeight);
 	//void update(GLFWwindow* window);
 	void update(GLFWwindow* window, std::set<Entity>);
@@ -33,8 +35,16 @@ public:
 	GLuint vaoid; // handle to VAO
 	GLuint idx_elem_cnt;
 	GLenum primitive_type;
-	void drawTrans(Framework::Transform& x);
-	void updateAnimation(Framework::Transform& x, float deltaTime);
+	void drawTrans(Framework::Renderable& x, Framework::Animation& y, Framework::Transform& z);
+	void updateAnimation(Framework::Animation& x, float deltaTime);
+
+	static inline int GameWidth = VIRTUAL_W;  // actual GL viewport width after letterbox
+	static inline int GameHeight = VIRTUAL_H;  // actual GL viewport height after letterbox
+	static inline int GameOffsetX = 0;         // viewport X in framebuffer
+	static inline int GameOffsetY = 0;         // viewport Y in framebuffer
+	static inline float PixelScale = 1.0f;     // uniform scale = min(fbw/VW, fbh/VH)
+	static void ComputeLetterbox(int fbw, int fbh);
+	static void OnResize(int width, int height);
 
 	// encapsulates state required to render a geometrical model
 	struct GLModel {

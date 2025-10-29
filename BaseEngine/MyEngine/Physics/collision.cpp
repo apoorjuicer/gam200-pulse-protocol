@@ -42,31 +42,39 @@ void CollisionManager::Init()
 		// --- Background Setup ---
 		Entity Background = g_coordinator->CreateEntity();
 		Framework::Transform bgTransform{};
+		Framework::Renderable bgRenderable{};
+		Framework::Animation bgAnimation{};
 		bgTransform.Pos = { 0,0 };
 		bgTransform.Scale = { 1600.0f, 900.0f };
-		bgTransform.mdl_ref = 0.0f;
-		bgTransform.shd_ref = 1.0f;
+		bgRenderable.mdl_ref = 0.0f;
+		bgRenderable.shd_ref = 1.0f;
 		bgTransform.isVisible = true;
-		bgTransform.totalFrames = 1;          // Total frames in the sprite sheet
-		bgTransform.columns = 1;              // Columns in the sprite sheet
-		bgTransform.rows = 1;
-		bgTransform.spriteName = "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg";
+		bgAnimation.totalFrames = 1;          // Total frames in the sprite sheet
+		bgAnimation.columns = 1;              // Columns in the sprite sheet
+		bgAnimation.rows = 1;
+		bgRenderable.spriteName = "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg";
 		g_coordinator->AddComponent(Background, bgTransform);
+		g_coordinator->AddComponent(Background, bgRenderable);
+		g_coordinator->AddComponent(Background, bgAnimation);
 
 		//EntityNPC.push_back(Background);
 		// --- Hero NPC: stationary at center of screen ---
 		Entity Hero = g_coordinator->CreateEntity();
 		Framework::Transform heroTransform{};
+		Framework::Renderable heroRenderable{};
+		Framework::Animation heroAnimation{};
 		heroTransform.Pos = { 0,0 };
 		heroTransform.Scale = { 200.0f, 200.0f };
-		heroTransform.mdl_ref = 1.0f;
-		heroTransform.shd_ref = 2.0f;
+		heroRenderable.mdl_ref = 1.0f;
+		heroRenderable.shd_ref = 2.0f;
 		heroTransform.isVisible = true;
-		heroTransform.totalFrames = 3;          // Total frames in the sprite sheet
-		heroTransform.columns = 3;              // Columns in the sprite sheet
-		heroTransform.rows = 1;
-		heroTransform.spriteName = "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png";
+		heroAnimation.totalFrames = 3;          // Total frames in the sprite sheet
+		heroAnimation.columns = 3;              // Columns in the sprite sheet
+		heroAnimation.rows = 1;
+		heroRenderable.spriteName = "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png";
 		g_coordinator->AddComponent(Hero, heroTransform);
+		g_coordinator->AddComponent(Hero, heroRenderable);
+		g_coordinator->AddComponent(Hero, heroAnimation);
 
 		g_coordinator->AddComponent(Hero, NPC{
 			100.0f, 100.0f,       // width, height
@@ -88,16 +96,20 @@ void CollisionManager::Init()
         {
             Entity Monster = g_coordinator->CreateEntity();
             Framework::Transform MonsterTransform{};
+			Framework::Renderable MonsterRenderable{};
+			Framework::Animation MonsterAnimation{};
             MonsterTransform.Pos = { startPositions[i], 0 };
             MonsterTransform.Scale = { 200.0f, 200.0f };
-            MonsterTransform.mdl_ref = 1.0f;
-			MonsterTransform.shd_ref = 2.0f;
+			MonsterRenderable.mdl_ref = 1.0f;
+			MonsterRenderable.shd_ref = 2.0f;
 			MonsterTransform.isVisible = true;
-			MonsterTransform.totalFrames = 1;          // Total frames in the sprite sheet
-			MonsterTransform.columns = 1;              // Columns in the sprite sheet
-			MonsterTransform.rows = 1;
-			MonsterTransform.spriteName = "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png";
+			MonsterAnimation.totalFrames = 1;          // Total frames in the sprite sheet
+			MonsterAnimation.columns = 1;              // Columns in the sprite sheet
+			MonsterAnimation.rows = 1;
+			MonsterRenderable.spriteName = "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png";
             g_coordinator->AddComponent(Monster, MonsterTransform);
+			g_coordinator->AddComponent(Monster, MonsterRenderable);
+			g_coordinator->AddComponent(Monster, MonsterAnimation);
 
 			g_coordinator->AddComponent(Monster, NPC{
 				100.0f, 100.0f,       // width, height
@@ -116,14 +128,18 @@ void CollisionManager::Init()
         // ---------------- BOX 1 ----------------
         Entity inputEntity = g_coordinator->CreateEntity();
         Framework::Transform inputObject{};
+		Framework::Renderable inputObject1{};
+		Framework::Animation inputObject2{};
         inputObject.Pos = { 0.0f, -500.0f };
         inputObject.Scale = { 800.0f, 200.0f };
-        inputObject.mdl_ref = 1.0f;
-        inputObject.shd_ref = 2.0f;
+		inputObject1.mdl_ref = 1.0f;
+		inputObject1.shd_ref = 2.0f;
         inputObject.isVisible = false;  // Make visible to test
-        inputObject.currentFrame = 0;
-		inputObject.spriteName = "../../MyEngine/Assets/Textures/UI/bar.png";
+		inputObject2.currentFrame = 0;
+		inputObject1.spriteName = "../../MyEngine/Assets/Textures/UI/bar.png";
         g_coordinator->AddComponent(inputEntity, inputObject);
+        g_coordinator->AddComponent(inputEntity, inputObject1);
+        g_coordinator->AddComponent(inputEntity, inputObject2);
         
         if (rhythmSystem) {
 			rhythmSystem->setFontEntity(inputEntity);

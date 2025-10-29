@@ -36,22 +36,31 @@ public:
     void EndSystem(const std::string& systemName);
 
     const std::unordered_map<std::string, SystemProfile>& GetProfiles() const;
-    double GetTotalFrameTime() const { return totalFrameTime; }
-    double GetFPS() const { return fps; }
+    const std::unordered_map<std::string, SystemProfile>& GetDisplayProfiles() const { return displayProfiles; }
+
+    double GetCachedFrameTime() const { return cachedFrameTime; }
 
     void Reset();
-    void PrintStats();
+
+    void SetResetInterval(double interval) { resetInterval = interval; }
+    void SetDisplayUpdateInterval(double interval) { displayUpdateInterval = interval; }
 
 private:
     ProfilingManager() = default;
     static ProfilingManager* instance;
 
     std::unordered_map<std::string, SystemProfile> profiles;
+    std::unordered_map<std::string, SystemProfile> displayProfiles; // for ImGui
     std::unordered_map<std::string, std::chrono::high_resolution_clock::time_point> startTimes;
 
     std::chrono::high_resolution_clock::time_point frameStartTime;
-    double totalFrameTime = 0.0;
-    double fps = 0.0;
+
+    double cachedFrameTime = 0.0;
+
+    double resetInterval = 60.0;
+    double timeSinceReset = 0.0;
+    double displayUpdateInterval = 1.0;
+    double timeSinceDisplay = 0.0;
 };
 
 // RAII helper - use only in CoreEngine, NOT in individual systems

@@ -12,7 +12,7 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/ 
+ /******************************************************************************/
 
 #pragma once
 #include "pch/pch.h"
@@ -55,7 +55,7 @@ public:
 	void Initialize();
 	void Update();
 	void Shutdown();
-
+	void OnResize(int width, int height);
 	bool LoadFont(const std::string& fontPath, FT_Face& fontFace, std::map<char, Character>& characterMap);
 	void RenderText(GLSLShader& shader, std::string text, float x, float y, float scale, glm::vec3 color, std::map<char, Character>& fontCharacters);
 
