@@ -153,6 +153,21 @@ void CoreEngine::Init()
 	std::cout << "WindowWidth is: " << WindowWidth << "\n";
 	std::cout << "WindowHeight is: " << WindowHeight << "\n";
 
+	///*saving config data*/ //tested saving works
+	//std::string newConfigPath = "../../MyEngine/JSON/config2.json";
+	//config.SetWindowWidth(800);
+	//config.SetWindowHeight(600);
+	//std::cout << "set WindowWidth is: " << config.GetWindowWidth() << "\n";
+	//std::cout << "set WindowHeight is: " << config.GetWindowHeight() << "\n";
+	//if (!SaveConfig(config, newConfigPath))
+	//{
+	//	std::cerr << "Failed to load config!\n";
+	//}
+	//else
+	//{
+	//	std::cout << "save config to FilePath: " << std::filesystem::absolute(newConfigPath) << "\n";
+	//}
+
 	if (!glfwInit())
 	{
 		spdlog::error("Failed to initialize GLFW");

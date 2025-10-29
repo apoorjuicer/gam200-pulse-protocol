@@ -117,22 +117,23 @@ namespace Framework
         out.AddMember("angle_disp", angle_disp, alloc);
         out.AddMember("angle_speed", angle_speed, alloc);
 
-        out.AddMember("isVisible", isVisible, alloc);
-        out.AddMember("visibilityTimer", visibilityTimer, alloc);
-        out.AddMember("autoHide", autoHide, alloc);
+        //out.AddMember("isVisible", isVisible, alloc);
+        //out.AddMember("visibilityTimer", visibilityTimer, alloc);
+        //out.AddMember("autoHide", autoHide, alloc);
 
         // mat3
         //  Matrix3x3
-        Value matVal;
-        mdl_to_ndc_xform.Serialize(matVal, alloc);
-        out.AddMember("mdl_to_ndc_xform", matVal, alloc);
+        //Value matVal;
+        //mdl_to_ndc_xform.Serialize(matVal, alloc);
+        //out.AddMember("mdl_to_ndc_xform", matVal, alloc);
     }
 
     void Transform::Deserialize(const rapidjson::Value &in)
     {
         if (!in.IsObject())
         {
-            throw std::runtime_error("Invalid JSON for Transform");
+            std::cerr << "[Transform] Invalid JSON format\n";
+            return;
         }
 
         if (in.HasMember("position"))
@@ -147,15 +148,15 @@ namespace Framework
         if (in.HasMember("angle_speed"))
             angle_speed = in["angle_speed"].GetFloat();
 
-        if (in.HasMember("isVisible"))
-            isVisible = in["isVisible"].GetBool();
-        if (in.HasMember("visibilityTimer"))
-            visibilityTimer = in["visibilityTimer"].GetFloat();
-        if (in.HasMember("autoHide"))
-            autoHide = in["autoHide"].GetBool();
+        //if (in.HasMember("isVisible"))
+        //    isVisible = in["isVisible"].GetBool();
+        //if (in.HasMember("visibilityTimer"))
+        //    visibilityTimer = in["visibilityTimer"].GetFloat();
+        //if (in.HasMember("autoHide"))
+        //    autoHide = in["autoHide"].GetBool();
 
-        if (in.HasMember("mdl_to_ndc_xform"))
-            mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
+        //if (in.HasMember("mdl_to_ndc_xform"))
+        //    mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
     }
 
     /*Serialization && Deserialization */
@@ -177,7 +178,8 @@ namespace Framework
     {
         if (!in.IsObject())
         {
-            throw std::runtime_error("Invalid JSON for Transform");
+            std::cerr << "[Renderable] Invalid JSON format\n";
+            return;
         }
 
         if (in.HasMember("mdl_ref"))
@@ -288,5 +290,7 @@ namespace Framework
         t.Deserialize(d["transform"]);
         return true;
     }
+
+      
 
 } // end of namespace

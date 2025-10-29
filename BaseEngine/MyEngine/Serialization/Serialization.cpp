@@ -13,7 +13,13 @@
  */
  /******************************************************************************/
 
-#include <pch/pch.h>
+#include "Serialization.h"
+#include <fstream>
+#include <iostream>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/prettywriter.h>
+#include <filesystem>
 
 void Config::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
 {
@@ -32,16 +38,17 @@ void Config::Deserialize(const rapidjson::Value &in)
 {
     if (!in.IsObject())
     {
-        throw std::runtime_error("Invalid JSON for Config");
+        std::cerr << "[Config] Invalid JSON format\n";
+        return;
     }
 
     if (in.HasMember("WindowWidth") && in["WindowWidth"].IsNumber())
     {
-        SetWindowWidth(in["WindowWidth"].GetFloat());
+        SetWindowWidth(in["WindowWidth"].GetInt());
     }
     if (in.HasMember("WindowHeight") && in["WindowHeight"].IsNumber())
     {
-        SetWindowHeight(in["WindowHeight"].GetFloat());
+        SetWindowHeight(in["WindowHeight"].GetInt());
     }
     if (in.HasMember("ConfigPath") && in["ConfigPath"].IsString())
     {
@@ -49,38 +56,11 @@ void Config::Deserialize(const rapidjson::Value &in)
     }
 }
 
-bool SaveConfig(Config const &cfg, std::string const &path)
+bool SaveConfig(Config const &cfg, std::string const &path, bool pretty)
 {
-    rapidjson::Document d;
-    d.SetObject();
-    auto &alloc = d.GetAllocator();
-
-    rapidjson::Value configVal;
-    cfg.Serialize(configVal, alloc);
-    d.AddMember("config", configVal, alloc);
-
-    rapidjson::StringBuffer buffer;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-    d.Accept(writer);
-
-    // Ensure directory exists
-    namespace fs = std::filesystem;
-    fs::create_directories("../../MyEngine/JSON");
-    // fs::create_directories("../JSON");
-
-    std::ofstream ofs(path);
-    if (!ofs.is_open())
-    {
-        std::cerr << "Error: Cannot open file for writing: " << path << "\n";
-        return false;
-    }
-    ofs << buffer.GetString();
-    if (!ofs.good())
-    {
-        std::cerr << "Error: Failed to write JSON to file: " << path << "\n";
-        return false;
-    }
-    return true;
+    // {"config": { ... }}
+   rapidjson::Document d = JSONUtils::MakeObjDocument(cfg, "config");
+   return JSONUtils::WriteJSONToFile(d, path, pretty);
 }
 bool LoadConfig(Config &cfg, std::string const &path)
 {
@@ -110,71 +90,82 @@ bool LoadConfig(Config &cfg, std::string const &path)
     return true;
 }
 
-bool SaveEntity(Entity e, Coordinator *g, std::string const &path)
-{
+namespace JSONUtils {
     using namespace rapidjson;
-    Document d;
-    d.SetObject();
-    auto &alloc = d.GetAllocator();
-
-    // NPC
-    if (g->HasComponent<NPC>(e))
-    {
-        // Value npcVal;
-        Value npcVal(kObjectType);
-        g->GetComponent<NPC>(e).Serialize(npcVal, alloc);
-        d.AddMember("NPC", npcVal, alloc);
-    }
-    // transform
-    //other components
-
-    StringBuffer buffer;
-    PrettyWriter<StringBuffer> writer(buffer);
-    d.Accept(writer);
-    namespace fs = std::filesystem;
-    fs::create_directories("../../MyEngine/JSON");
-    // fs::create_directories("../JSON");
-
-    std::ofstream ofs(path);
-    if (!ofs.is_open())
-    {
-        std::cerr << "Error: Cannot open file for writing: " << path << "\n";
-        return false;
-    }
-    ofs << buffer.GetString();
-
-    if (!ofs.good())
-    {
-        std::cerr << "Error: Failed to write JSON to file: " << path << "\n";
-        return false;
+    //bool pretty means use PrettyWriter or just Writer
+    //PrettyWriter takes more file space but more readable
+    //Writer makes everything one liner
+    std::string JSONToString(Document const& d, bool pretty) {
+        StringBuffer buffer;
+        if (pretty) {
+            PrettyWriter<StringBuffer> w(buffer);
+            w.SetIndent(' ', 2); //space after : for Key :"indent size" Value
+            d.Accept(w);
+        }
+        else {
+            Writer<StringBuffer> w(buffer);
+            d.Accept(w);
+        }
+        return buffer.GetString();
     }
 
-    return true;
-}
+    //bool pretty means use PrettyWriter or just Writer
+    //PrettyWriter takes more file space but more readable
+    //Writer makes everything one liner
+    bool WriteJSONToFile(Document const& d, std::filesystem::path const& path, bool pretty) {
+        namespace fs = std::filesystem;
+        std::error_code ec;
+        //fs::create_directories("../../MyEngine/JSON", ec);
+        //path.parent_path() gets ../../MyEngine/JSON
+        //error code so dont throw exception
+        fs::create_directories(path.parent_path(), ec);
 
-bool LoadEntity(Entity e, Coordinator *g, std::string const &path)
-{
-    using namespace rapidjson;
-    std::ifstream ifs(path);
-    if (!ifs.is_open())
-        return false;
+        std::ofstream ofs(path);
+        if (!ofs) {
+            std::cerr << "Error: Cannot open file for writing: " << path << "\n";
+            return false;
+        }
 
-    IStreamWrapper isw(ifs);
-    Document d;
-    d.ParseStream(isw);
+        //rapidjson::StringBuffer buffer;
+        //rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        //d.Accept(writer);
+        //ostreamwrapper vs stringbuffer
+        //ostreamwrapper use less memory not easily grab string after
+        //stringbuffer use extra memory but can inspect reuse,log json
+        //StringBuffer sbuffer;
+        //bool writter_success = false;
+        //if (pretty) {
 
-    if (!d.IsObject())
-        return false;
+        //   PrettyWriter<StringBuffer> pw(sbuffer);
+        //   //adds 2 spaces at \n, before {} or kv pairs
+        //   pw.SetIndent(' ', 2);
+        //   writter_success = d.Accept(pw);
+        //}
+        //else {
+        //    Writer<StringBuffer> w(sbuffer);
+        //    writter_success = d.Accept(w);
+        //}
 
-    if (d.HasMember("NPC"))
-    {
-        auto &npc = g->GetComponent<NPC>(e);
-        npc.Deserialize(d["NPC"]);
+        //if (!writter_success) {
+        //    std::cerr << "Error: RapidJSON Accept() failed\n";
+        //    return false;
+        //}
+
+
+        std::string json = JSONToString(d, pretty);
+        //ofs << sbuffer.GetString();
+
+        //low-level way to write bytes
+        ofs.write(json.data(), static_cast<std::streamsize>(json.size()));
+        ofs.flush(); //write data in buffer now
+        if (!ofs.good())
+        {
+            std::cerr << "Error: Failed to write JSON to file: " << path << "\n";
+            return false;
+        }
+        return true;
     }
-    /*    if (d.HasMember("AABB")) {
-            auto& aabb = g->GetComponent<AABB>(e);
-            aabb.Deserialize(d["AABB"]);
-        }*/
 
-    return true;
-}
+    /*loading/parsing*/
+
+}//end of namespace JSONUtils
