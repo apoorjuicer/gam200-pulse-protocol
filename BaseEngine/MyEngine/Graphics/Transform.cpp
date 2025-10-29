@@ -45,7 +45,6 @@ namespace Framework
         {
             // IMPORTANT: reference, not copy
             auto &x = g_coordinator->GetComponent<Framework::Transform>(it);
-            auto &y = g_coordinator->GetComponent<Framework::Renderable>(it);
 
             // normalize from pixels to your game space
             const float PnormX = x.Pos.x / gw;
@@ -55,13 +54,13 @@ namespace Framework
 
             Matrix3x3 Scaling, Rotating, Translating;
 
-            // S
+            // Scale
             Scaling = Matrix3x3(
                 SnormX, 0.0f, 0.0f,
                 0.0f, SnormY, 0.0f,
                 0.0f, 0.0f, 1.0f);
 
-            // R (use the entity�s angle)
+            // Rotate
             constexpr float DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
             const float cosA = std::cos(x.angle_disp * DEG_TO_RAD);
             const float sinA = std::sin(x.angle_disp * DEG_TO_RAD);
@@ -70,7 +69,7 @@ namespace Framework
                 -sinA, cosA, 0.0f,
                 0.0f, 0.0f, 1.0f);
 
-            // T (column-major layout for your Matrix3x3)
+            // Translate (column-major layout for your Matrix3x3)
             Translating = Matrix3x3(
                 1.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f,
@@ -79,7 +78,6 @@ namespace Framework
             // M = T * R * S
             x.mdl_to_ndc_xform = Translating * Rotating * Scaling;
 
-            // advance entity�s angle
             x.angle_disp += x.angle_speed * static_cast<GLfloat>(delta_time);
             // std::cout << x.mdl_to_ndc_xform;
         }
