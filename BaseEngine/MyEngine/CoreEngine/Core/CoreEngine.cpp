@@ -300,7 +300,7 @@ void CoreEngine::Setup()
 
 	Signature LogicSig;
 	LogicSig.set(g_coordinator->GetComponentType<LogicComponent>());
-	g_coordinator->SetSystemSignature<GraphicsManager>(LogicSig);
+	g_coordinator->SetSystemSignature<LogicSystem>(LogicSig);
 }
 
 void CoreEngine::Update(float dt)

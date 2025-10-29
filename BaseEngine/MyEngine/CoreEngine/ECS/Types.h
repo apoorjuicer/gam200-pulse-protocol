@@ -13,9 +13,7 @@
  */
  /******************************************************************************/
 #pragma once
-#include "pch/pch.h"
-
-
+#include "pch/pch_temp.h"
 
 // ECS
 // JUST KNOW THAT ENTITY IS JUST A NUMBER. (1,2,3,4,5)
