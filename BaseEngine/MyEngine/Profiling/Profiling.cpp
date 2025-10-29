@@ -47,6 +47,14 @@ void ProfilingManager::EndFrame() {
         if (timeSinceDisplay >= displayUpdateInterval) {
             displayProfiles = profiles;
             cachedFrameTime = totalFrameTime;
+
+            // Reset profiles after displaying, to make sure that it does not exceed 100
+            for (auto& [name, profile] : profiles) {
+                profile.totalTime = 0.0;
+                profile.percentage = 0.0;
+                profile.callCount = 0;
+            }
+
             timeSinceDisplay = 0.0;
         }
     }

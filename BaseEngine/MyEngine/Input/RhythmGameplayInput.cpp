@@ -51,12 +51,14 @@ void RhythmGameplayInput::Initialize() {
 
     Entity fontEntityObj = g_coordinator->CreateEntity();
     Framework::Transform fontTr{};
+    Framework::Renderable fontRe{};
+    Framework::Animation fontAn{};
     fontTr.Pos = { 0.0f, 0.0f };
     fontTr.Scale = { 500.0f, 500.0f };
-    fontTr.mdl_ref = 1.0f;
-    fontTr.shd_ref = 3.0f;
+    fontRe.mdl_ref = 1.0f;
+    fontRe.shd_ref = 3.0f;
     fontTr.isVisible = true;
-    fontTr.currentFrame = 1;
+    fontAn.currentFrame = 1;
 
     g_coordinator->AddComponent(fontEntityObj, fontTr);
     fontEntity = fontEntityObj;

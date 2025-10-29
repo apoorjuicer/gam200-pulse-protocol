@@ -158,6 +158,43 @@ void GraphicsManager::Update()
 
     // 2) Draw overlay text last
     auto& textShader = GLApp::shdrpgms[3];
+	// Build FPS string and heaviest system string and render it
+    if (!MyEditor::IsEnabled()) {
+        auto& AM = Framework::AssetsManager::Instance();
+        const Framework::FontData* debugFont = AM.GetFont("liberation-mono_48");
+
+        if (debugFont) {
+            std::ostringstream fpsText;
+            fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
+
+            RenderText(GLApp::shdrpgms[3], fpsText.str(), 100.0f, 850.0f,
+                1.0f, glm::vec3(0.5f, 0, 0), debugFont);
+
+            // Add top system below FPS
+            auto* profiler = ProfilingManager::GetInstance();
+            const auto& profiles = profiler->GetDisplayProfiles();
+
+            std::string topSystem = "None";
+            double topPercentage = 0.0;
+            for (const auto& [systemName, profile] : profiles) {
+                if (profile.percentage > topPercentage) {
+                    topPercentage = profile.percentage;
+                    topSystem = systemName;
+                }
+            }
+
+            std::ostringstream topText;
+            topText << topSystem << ": " << std::fixed
+                << std::setprecision(2) << topPercentage << "%";
+
+            RenderText(GLApp::shdrpgms[3], topText.str(), 100.0f, 880.0f,
+                0.8f, glm::vec3(0.5f, 0.5f, 0), debugFont);
+        }
+        else {
+            std::cerr << "[GraphicsManager] WARNING: debugFont not found!\n";
+        }
+    }
+
 
     // Team label
     RenderText(

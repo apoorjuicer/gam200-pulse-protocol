@@ -194,7 +194,7 @@ void GLApp::update(GLFWwindow* window, std::set<Entity> entity) {
 	transformSystem.update(GLHelper::delta_time, entity);
 
 }
-void GLApp::updateAnimation(Framework::Transform& x, float deltaTime) {
+void GLApp::updateAnimation(Framework::Animation& x, float deltaTime) {
 	float frameDuration = 1.0f / x.animationSpeed;
 	x.elapsedTime += deltaTime;
 
@@ -205,7 +205,7 @@ void GLApp::updateAnimation(Framework::Transform& x, float deltaTime) {
 }
 
 
-void GLApp::drawTrans(Framework::Transform& x) {
+void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y, Framework::Transform& z) {
 
 	auto& shader = shdrpgms[static_cast<uint64_t>(x.shd_ref)];
 	shader.Use();
@@ -215,14 +215,14 @@ void GLApp::drawTrans(Framework::Transform& x) {
 	GLint uOffsetLoc = glGetUniformLocation(prog, "uOffset");
 	GLint uScaleLoc = glGetUniformLocation(prog, "uScale");
 
-	float frameWidth = 1.0f / x.columns;
-	float frameHeight = 1.0f / x.rows;
-	float uOffsetX = (x.currentFrame % x.columns) * frameWidth;
-	float uOffsetY = 1.0f - ((x.currentFrame / x.columns + 1) * frameHeight);
+	float frameWidth = 1.0f / y.columns;
+	float frameHeight = 1.0f / y.rows;
+	float uOffsetX = (y.currentFrame % y.columns) * frameWidth;
+	float uOffsetY = 1.0f - ((y.currentFrame / y.columns + 1) * frameHeight);
 
 	if (uOffsetLoc >= 0) glUniform2f(uOffsetLoc, uOffsetX, uOffsetY);
 	if (uScaleLoc >= 0) glUniform2f(uScaleLoc, frameWidth, frameHeight);
-	if (uModelLoc >= 0) glUniformMatrix3fv(uModelLoc, 1, GL_FALSE, x.mdl_to_ndc_xform.Begin());
+	if (uModelLoc >= 0) glUniformMatrix3fv(uModelLoc, 1, GL_FALSE, z.mdl_to_ndc_xform.Begin());
 
 	glBindVertexArray(models[static_cast<uint64_t>(x.mdl_ref)].vaoid);
 	glActiveTexture(GL_TEXTURE0);
@@ -273,19 +273,21 @@ void GLApp::draw(std::set<Entity> entities) {
 	// Draw entities
 	for (auto it : entities) {
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
+		auto& re = g_coordinator->GetComponent<Framework::Renderable>(it);
+		auto& an = g_coordinator->GetComponent<Framework::Animation>(it);
 
-		if (!tr.spriteName.empty() && tr.textureID == 0) {
-			tr.textureID = Framework::AssetsManager::GetOrLoad(tr.spriteName);
-			if (tr.textureID == 0) {
-				std::cerr << "[GLApp] Failed to load texture: " << tr.spriteName << std::endl;
+		if (!re.spriteName.empty() && re.textureID == 0) {
+			re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+			if (re.textureID == 0) {
+				std::cerr << "[GLApp] Failed to load texture: " << re.spriteName << std::endl;
 				continue;
 			}
 		}
 
-		if (tr.isVisible && tr.textureID != 0) {
-			updateAnimation(tr, deltaTime);
-			glBindTexture(GL_TEXTURE_2D, tr.textureID);
-			drawTrans(tr);
+		if (tr.isVisible && re.textureID != 0) {
+			updateAnimation(an, deltaTime);
+			glBindTexture(GL_TEXTURE_2D, re.textureID);
+			drawTrans(re, an, tr);
 		}
 	}
 }
