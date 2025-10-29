@@ -33,8 +33,34 @@ namespace Framework
 		Vector2 Pos;
 		Vector2 Scale;
 	};
+	class Renderable 
+	{
+	public:
+		float mdl_ref = 0.f;		// Model no
+		float shd_ref = 0.f;		// Shader no
+		GLuint textureID = 0;		// Texture ID
+		std::string spriteName;
+		void SetSprite(std::string ref);
+		std::string GetSprite() const;
+		void AssignTextureFromPath(Framework::Renderable& t);
+		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
+		void Deserialize(const rapidjson::Value& in);
+	};
 
-	class Transform /* : public GameCom*/
+	class Animation 
+	{
+	public:
+		int currentFrame = 0;
+		float elapsedTime = 0.0f; // Time accumulator for animation
+		int totalFrames = 1;	  // Total frames in the sprite sheet
+		int columns = 1;		  // Columns in the sprite sheet
+		int rows = 1;			  // Rows in the sprite sheet
+		float animationSpeed = 2.f;
+		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
+		void Deserialize(const rapidjson::Value& in);
+	};
+
+	class Transform
 	{
 	public:
 		// ComponentTypeID typeID = Com_Trans;
@@ -43,19 +69,7 @@ namespace Framework
 		Vector2 Rotation;
 		float angle_disp = 0.f;
 		float angle_speed = 0.f;
-		float mdl_ref = 0.f;		// Model no
-		float shd_ref = 0.f;		// Shader no
 		Matrix3x3 mdl_to_ndc_xform; // Initialize as identity matrix
-		GLuint textureID = 0;		// Texture ID
-		std::string spriteName;
-		int currentFrame = 0;
-		float elapsedTime = 0.0f; // Time accumulator for animation
-		int totalFrames = 1;	  // Total frames in the sprite sheet
-		int columns = 1;		  // Columns in the sprite sheet
-		int rows = 1;			  // Rows in the sprite sheet
-		float animationSpeed = 2.f;
-		void AssignTextureFromPath(Framework::Transform &t);
-
 		Transform();
 		~Transform();
 
@@ -63,8 +77,7 @@ namespace Framework
 		void update(GLdouble delta_time, const std::set<Entity> entity);
 		void draw() const;
 
-		void SetSprite(std::string ref);
-		std::string GetSprite() const;
+
 
 		bool isVisible = true;		  // Used for input detect purpose
 		float visibilityTimer = 0.0f; // Used for input detect purpose

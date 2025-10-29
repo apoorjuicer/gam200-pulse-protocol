@@ -22,6 +22,7 @@
 #include "graphics/stb_image.h"
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
+#include "../TestCases/TestCase.h"
 #pragma comment(lib, "winmm.lib")
 
 // Game window dimensions and title
@@ -29,6 +30,8 @@ const char WindowTitle[] = "Game Window";
 Config config;
 int WindowWidth;
 int WindowHeight;
+
+TestCase Test;
 
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
@@ -176,7 +179,7 @@ void CoreEngine::Init()
 
 	// Initialize DebugDraw AFTER glewInit()
 	DebugDraw::Init();
-
+	
 	int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
 	{
@@ -225,6 +228,7 @@ void CoreEngine::Init()
 	Factory factory;
 	SceneManager SM;
 	factory.CreateEntityFromJson(filePath);
+
 	std::string filePath2 = "../../MyEngine/JSON/test2.json";
 	Entity entity = factory.DefaultObj();
 	LogicComponent l;
@@ -235,7 +239,8 @@ void CoreEngine::Init()
 	std::string filePath3 = "../../MyEngine/JSON/MainMenu.json";
 	SM.LoadSceneFromJson(filePath3);
 	SM.SaveCurrentScene();
-	
+
+	Test.Init();
 
 }
 
@@ -248,6 +253,8 @@ void CoreEngine::Setup()
 
 	// Register your component here
 	g_coordinator->RegisterComponent<Framework::Transform>();
+	g_coordinator->RegisterComponent<Framework::Renderable>();
+	g_coordinator->RegisterComponent<Framework::Animation>();
 	g_coordinator->RegisterComponent<NPC>();
 	g_coordinator->RegisterComponent<AABB>();
 	g_coordinator->RegisterComponent<LogicComponent>();
@@ -271,25 +278,34 @@ void CoreEngine::Setup()
 
 	Signature inputSig;
 	inputSig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	inputSig.set(g_coordinator->GetComponentType<Framework::Renderable>());
+	inputSig.set(g_coordinator->GetComponentType<Framework::Animation>());
 	g_coordinator->SetSystemSignature<InputManager>(inputSig);
 
 	Signature rhythmSig;
 	rhythmSig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	rhythmSig.set(g_coordinator->GetComponentType<Framework::Renderable>());
+	rhythmSig.set(g_coordinator->GetComponentType<Framework::Animation>());
 	g_coordinator->SetSystemSignature<RhythmGameplayInput>(rhythmSig);
 
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
+	graphicsSig.set(g_coordinator->GetComponentType<Framework::Renderable>());  // <-- needs Renderable
+	graphicsSig.set(g_coordinator->GetComponentType<Framework::Animation>());  // <-- needs Animation
 	g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
+
 
 	Signature sceneSig;
 	sceneSig.set(g_coordinator->GetComponentType<NPC>());
 	sceneSig.set(g_coordinator->GetComponentType<AABB>());
 	sceneSig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	sceneSig.set(g_coordinator->GetComponentType<Framework::Renderable>());
+	sceneSig.set(g_coordinator->GetComponentType<Framework::Animation>());
 	g_coordinator->SetSystemSignature<GraphicsManager>(sceneSig);
 
 	Signature LogicSig;
 	LogicSig.set(g_coordinator->GetComponentType<LogicComponent>());
-	g_coordinator->SetSystemSignature<GraphicsManager>(LogicSig);
+	g_coordinator->SetSystemSignature<LogicSystem>(LogicSig);
 }
 
 void CoreEngine::Update(float dt)
@@ -308,6 +324,7 @@ void CoreEngine::Update(float dt)
 	if (g_rhythmSystem) g_rhythmSystem->Update(dt);
 
 	g_coordinator->UpdateAllSystems(dt);
+	Test.Update(dt);
 }
 
 
@@ -335,44 +352,7 @@ void CoreEngine::GameLoop()
 
 		//  1. Poll event(input key)
 		glfwPollEvents();
-		// Read key state
-		bool PKeyPressed = (glfwGetKey(Engine->GetWindow(), GLFW_KEY_P) == GLFW_PRESS);
 
-		// Toggle on key press
-		if (PKeyPressed && !PKeyWasPressed) {
-			keystateP = !keystateP;
-			if (keystateP)
-				GAM200_INFO("Crash Test ENABLED (press P again to disable).");
-			else
-				GAM200_INFO("Crash Test DISABLED.");
-		}
-		PKeyWasPressed = PKeyPressed;
-
-
-		// ----------------- Execute crash test if toggle is ON -----------------
-		if (keystateP)
-		{
-			try
-			{
-				GAM200_CORE_INFO("Starting crash test triggered by P key...");
-
-				int a = 5;
-				int b = 0;
-				if (b == 0)
-					GAM200_CRITICAL("Test crash: Division by zero detected!"); // logs to CrashLog.txt
-
-				int c = a / b; // won't execute
-				(void)c;
-
-			}
-			catch (const std::exception& e)
-			{
-				GAM200_CORE_ERROR("Exception caught during crash test: {0}", e.what());
-			}
-
-			// Reset toggle to prevent repeat execution
-			//keystateP = false;
-		}
 		//  2. update engine cpp
 		Update(dt);
 

@@ -17,12 +17,13 @@
  /******************************************************************************/
 
 #pragma once
-#include "pch/pch.h"
+#include "Types.h"
+#include "System.h"
+#include "pch/pch_temp.h"
 #include "SystemManager.h"
 #include "EntityManager.h"
-#include "ComponentManager.h"
 #include "ComponentArray.h"
-
+#include "ComponentManager.h"
 #include "../MyEngine/CoreEngine/ECS/Singleton.h"
 
 //  Acts as a mediator that allows us to have a single instance of the coordinator to use for all 3 manager :D
