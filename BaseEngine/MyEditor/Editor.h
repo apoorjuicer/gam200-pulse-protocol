@@ -27,5 +27,7 @@ namespace MyEditor {
 
     struct GameViewport { int x, y, w, h; };
     // Returns the middle "game" rectangle in FRAMEBUFFER PIXELS, computed from current panel sizes
-    GameViewport ComputeGameViewportPixels(GLFWwindow* window, bool keep_16x9 = true);
+    GameViewport ComputeMiddleGameViewportPixels(GLFWwindow* window, bool keep_16x9 = true);
+
+
 }

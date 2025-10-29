@@ -240,7 +240,7 @@ void GLApp::draw(std::set<Entity> entities) {
 
 	if (MyEditor::IsEnabled()) {
 		// Editor ON - render in ImGui panel
-		auto vp = MyEditor::ComputeGameViewportPixels(window, true);
+		auto vp = MyEditor::ComputeMiddleGameViewportPixels(window, true);
 		glViewport(vp.x, vp.y, vp.w, vp.h);
 
 		GLHelper::GameOffsetX = vp.x;
