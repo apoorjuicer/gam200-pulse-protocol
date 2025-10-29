@@ -225,6 +225,7 @@ void CoreEngine::Init()
 	Factory factory;
 	SceneManager SM;
 	factory.CreateEntityFromJson(filePath);
+
 	std::string filePath2 = "../../MyEngine/JSON/test2.json";
 	Entity entity = factory.DefaultObj();
 	LogicComponent l;
