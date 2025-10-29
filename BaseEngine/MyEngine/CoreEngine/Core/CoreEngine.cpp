@@ -22,6 +22,7 @@
 #include "graphics/stb_image.h"
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
+#include "../TestCases/TestCase.h"
 #pragma comment(lib, "winmm.lib")
 
 // Game window dimensions and title
@@ -29,6 +30,8 @@ const char WindowTitle[] = "Game Window";
 Config config;
 int WindowWidth;
 int WindowHeight;
+
+TestCase Test;
 
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
@@ -176,7 +179,7 @@ void CoreEngine::Init()
 
 	// Initialize DebugDraw AFTER glewInit()
 	DebugDraw::Init();
-
+	
 	int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
 	{
@@ -235,7 +238,8 @@ void CoreEngine::Init()
 	std::string filePath3 = "../../MyEngine/JSON/MainMenu.json";
 	SM.LoadSceneFromJson(filePath3);
 	SM.SaveCurrentScene();
-	
+
+	Test.Init();
 
 }
 
@@ -318,6 +322,7 @@ void CoreEngine::Update(float dt)
 	if (g_rhythmSystem) g_rhythmSystem->Update(dt);
 
 	g_coordinator->UpdateAllSystems(dt);
+	Test.Update(dt);
 }
 
 
