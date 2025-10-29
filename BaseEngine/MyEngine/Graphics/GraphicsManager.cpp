@@ -110,11 +110,28 @@ void GraphicsManager::Update()
 	// 2) then draw text on top
 	RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
 
-	// Build FPS string and render it
+	// Build FPS string and heaviest system string and render it
 	if (!MyEditor::IsEnabled()) {
 		std::ostringstream fpsText;
 		fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
 		RenderText(GLApp::shdrpgms[3], fpsText.str(), 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
+
+		// Add top system below FPS
+		auto* profiler = ProfilingManager::GetInstance();
+		const auto& profiles = profiler->GetDisplayProfiles();
+
+		std::string topSystem = "None";
+		double topPercentage = 0.0;
+		for (const auto& [systemName, profile] : profiles) {
+			if (profile.percentage > topPercentage) {
+				topPercentage = profile.percentage;
+				topSystem = systemName;
+			}
+		}
+
+		std::ostringstream topText;
+		topText << topSystem << ": " << std::fixed << std::setprecision(2) << topPercentage << "%";
+		RenderText(GLApp::shdrpgms[3], topText.str(), 100.0f, 880.0f, 0.8f, glm::vec3(0.5f, 0.5f, 0), Characters2);
 	}
 
 	// Controls display - right side or top corner

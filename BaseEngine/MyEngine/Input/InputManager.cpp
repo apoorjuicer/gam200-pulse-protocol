@@ -51,7 +51,7 @@ void InputManager::Update(float) {
 		std::cout << "[INPUT] Queued delayed combo (5s)" << std::endl;
 	}
 
-	// PURELY FOR MOUSE TESTING; TO REMOVE AFTER MAIN MENU IS IMPLEMENTED
+	// FOR MOUSE TESTING; CAN USE FOR MAIN MENU
 	if (isMouseButtonTriggered(0)) {
 		std::cout << "[MOUSE] Left Click at " << getMousePosition().x << ", " << getMousePosition().y << std::endl;
 	}

@@ -249,6 +249,8 @@ void CoreEngine::Setup()
 
 	// Register your component here
 	g_coordinator->RegisterComponent<Framework::Transform>();
+	g_coordinator->RegisterComponent<Framework::Renderable>();
+	g_coordinator->RegisterComponent<Framework::Animation>();
 	g_coordinator->RegisterComponent<NPC>();
 	g_coordinator->RegisterComponent<AABB>();
 	g_coordinator->RegisterComponent<LogicComponent>();
@@ -271,20 +273,29 @@ void CoreEngine::Setup()
 
 	Signature inputSig;
 	inputSig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	inputSig.set(g_coordinator->GetComponentType<Framework::Renderable>());
+	inputSig.set(g_coordinator->GetComponentType<Framework::Animation>());
 	g_coordinator->SetSystemSignature<InputManager>(inputSig);
 
 	Signature rhythmSig;
 	rhythmSig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	rhythmSig.set(g_coordinator->GetComponentType<Framework::Renderable>());
+	rhythmSig.set(g_coordinator->GetComponentType<Framework::Animation>());
 	g_coordinator->SetSystemSignature<RhythmGameplayInput>(rhythmSig);
 
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
+	graphicsSig.set(g_coordinator->GetComponentType<Framework::Renderable>());  // <-- needs Renderable
+	graphicsSig.set(g_coordinator->GetComponentType<Framework::Animation>());  // <-- needs Animation
 	g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
+
 
 	Signature sceneSig;
 	sceneSig.set(g_coordinator->GetComponentType<NPC>());
 	sceneSig.set(g_coordinator->GetComponentType<AABB>());
 	sceneSig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	sceneSig.set(g_coordinator->GetComponentType<Framework::Renderable>());
+	sceneSig.set(g_coordinator->GetComponentType<Framework::Animation>());
 	g_coordinator->SetSystemSignature<GraphicsManager>(sceneSig);
 
 	Signature LogicSig;
@@ -314,8 +325,6 @@ void CoreEngine::Update(float dt)
 void CoreEngine::GameLoop()
 {
 	LastTime = timeGetTime();
-	//init
-	float printTimer = 0.0f;
 
 	auto profiler = ProfilingManager::GetInstance();
 
