@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "GameLogic.h"
-#include "pch/pch.h"
 
 LogicSystem::LogicSystem()
 {
@@ -12,14 +11,14 @@ LogicSystem::~LogicSystem()
 
 }
 
-void LogicSystem::init()
+void LogicSystem::Init()
 {
 	//register scripts here. I think it it will be the Csharp / Lua game code here. Ask Eli if i did it right 
 }
 
-void LogicSystem::update()
+void LogicSystem::Update(float dt)
 {
-	auto g_coordinator = Coordinator::GetInstance();
+	auto* g_coordinator = Coordinator::GetInstance();
 
 	// only update all entity that has scripts
 	for (auto const& entity : EntityMember)
@@ -28,22 +27,23 @@ void LogicSystem::update()
 		auto& scriptname = g_coordinator->GetComponent<LogicComponent>(entity);
 
 		// find reward (script update function) using script name
-		auto function = map_of_scripts.find(scriptname.ScriptName);
+		auto func = map_of_scripts.find(scriptname.ScriptName);
 
 		// if we can find it then good, we did it right XD. and now we call said function
-		if (function != map_of_scripts.end())
+		if (func != map_of_scripts.end())
 		{
-			function->second(entity);
+            func->second(entity);
 		}
 
 		else
 		{
-			std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
+            // THIS IS WHERE U LEFT OFF DUMBASS: CheeseBuger
+			//std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
 		}
 	}
 }
 
-void LogicSystem::exit()
+void LogicSystem::Exit()
 {
 	// clear it just incase of mem leak. TBH im not sure if it will happen but just to be safe :p
 	map_of_scripts.clear();
@@ -60,10 +60,10 @@ void LogicSystem::AddScript(std::string const& ScriptName, std::function<void(En
 std::function<void(Entity)> LogicSystem::GrabScriptUpdate(std::string const& ScriptName)
 {
 	// grab reward(script update function)
-	auto function = map_of_scripts.find(ScriptName);
-	if(function != map_of_scripts.end())
+	auto func = map_of_scripts.find(ScriptName);
+	if(func != map_of_scripts.end())
 	{
-		return function->second;
+		return func->second;
 	}
 
 	else

@@ -1,7 +1,5 @@
 #pragma once
 #include "Factory.h"
-#include "pch/pch.h"
-
 
 using namespace rapidjson;
 

@@ -13,17 +13,7 @@
  */
 /******************************************************************************/
 #pragma once
-#include "pch/pch.h"
 #include "SceneManager.h"
-#include "CoreEngine/Factory/Factory.h"
-
-#pragma warning(push, 0)
-#include <rapidjson/document.h>     
-#include <rapidjson/prettywriter.h>
-#include <rapidjson/stringbuffer.h> 
-#include <rapidjson/istreamwrapper.h>
-#pragma warning(pop)
-
 
 //Starting scene will be Main Menu
 SceneManager::SceneManager()
