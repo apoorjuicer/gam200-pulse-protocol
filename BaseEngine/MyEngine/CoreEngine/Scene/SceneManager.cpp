@@ -13,17 +13,7 @@
  */
 /******************************************************************************/
 #pragma once
-#include "pch/pch.h"
 #include "SceneManager.h"
-#include "CoreEngine/Factory/Factory.h"
-
-#pragma warning(push, 0)
-#include <rapidjson/document.h>     
-#include <rapidjson/prettywriter.h>
-#include <rapidjson/stringbuffer.h> 
-#include <rapidjson/istreamwrapper.h>
-#pragma warning(pop)
-
 
 //Starting scene will be Main Menu
 SceneManager::SceneManager()
@@ -49,6 +39,7 @@ void SceneManager::SaveCurrentScene()
 
 	// grab scene name for the json file name
 	std::string path = "../../MyEngine/JSON/Saved" + CurrentScene + "Scene.json"; // file we want to save data into
+	//std::string path = "../../MyEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
 
 	// Save scene name first
 	Value SceneName;

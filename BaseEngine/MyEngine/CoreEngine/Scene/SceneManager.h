@@ -13,9 +13,19 @@
  */
 /******************************************************************************/
 #pragma once
-#include "pch/pch.h"
-#include "CoreEngine/ECS/Singleton.h"
+#include "pch/pch_temp.h"
+#include "../Graphics/Transform.h"
+#include "../GameLogic/GameLogic.h"
+#include "../CoreEngine/ECS/Types.h"
+#include "CoreEngine/ECS/Coordinator.h"
+#include "CoreEngine/Factory/Factory.h"
 
+#pragma warning(push, 0)
+#include <rapidjson/document.h>     
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h> 
+#include <rapidjson/istreamwrapper.h>
+#pragma warning(pop)
 
 class SceneManager: public Systems
 {
