@@ -22,13 +22,11 @@ namespace Framework
     Transform::Transform()
     {
         Rotation = Vector2(angle_disp, angle_speed);
-        // Renderable = Vector2(mdl_ref, shd_ref);
-        // Matrix3x3::Mtx33Identity(mdl_to_ndc_xform);
         mdl_to_ndc_xform.SetToIdentity();
     }
-
     Transform::~Transform() {}
-    void AssignTextureFromPath(Framework::Transform &t)
+
+    void AssignTextureFromPath(Framework::Renderable &t)
     {
         if (t.textureID == 0 && !t.spriteName.empty())
             t.textureID = Framework::AssetsManager::GetOrLoad(t.spriteName);
@@ -47,6 +45,7 @@ namespace Framework
         {
             // IMPORTANT: reference, not copy
             auto &x = g_coordinator->GetComponent<Framework::Transform>(it);
+            auto &y = g_coordinator->GetComponent<Framework::Renderable>(it);
 
             // normalize from pixels to your game space
             const float PnormX = x.Pos.x / gw;
@@ -88,12 +87,12 @@ namespace Framework
 
     void Transform::draw() const {}
 
-    void Transform::SetSprite(std::string ref)
+    void Renderable::SetSprite(std::string ref)
     {
         spriteName = ref;
     }
 
-    std::string Transform::GetSprite() const
+    std::string Renderable::GetSprite() const
     {
         return spriteName;
     }
@@ -117,22 +116,7 @@ namespace Framework
         // simple types
         out.AddMember("angle_disp", angle_disp, alloc);
         out.AddMember("angle_speed", angle_speed, alloc);
-        out.AddMember("mdl_ref", mdl_ref, alloc);
-        out.AddMember("shd_ref", shd_ref, alloc);
-        out.AddMember("textureID", static_cast<uint64_t>(textureID), alloc);
 
-        Value spriteNameVal;
-        spriteNameVal.SetString(spriteName.c_str(), static_cast<SizeType>(spriteName.length()), alloc);
-        out.AddMember("spriteName", spriteNameVal, alloc);
-
-        out.AddMember("currentFrame", currentFrame, alloc);
-        out.AddMember("elapsedTime", elapsedTime, alloc);
-        out.AddMember("totalFrames", totalFrames, alloc);
-        out.AddMember("columns", columns, alloc);
-        out.AddMember("rows", rows, alloc);
-        out.AddMember("animationSpeed", animationSpeed, alloc);
-
-        //
         out.AddMember("isVisible", isVisible, alloc);
         out.AddMember("visibilityTimer", visibilityTimer, alloc);
         out.AddMember("autoHide", autoHide, alloc);
@@ -162,6 +146,40 @@ namespace Framework
             angle_disp = in["angle_disp"].GetFloat();
         if (in.HasMember("angle_speed"))
             angle_speed = in["angle_speed"].GetFloat();
+
+        if (in.HasMember("isVisible"))
+            isVisible = in["isVisible"].GetBool();
+        if (in.HasMember("visibilityTimer"))
+            visibilityTimer = in["visibilityTimer"].GetFloat();
+        if (in.HasMember("autoHide"))
+            autoHide = in["autoHide"].GetBool();
+
+        if (in.HasMember("mdl_to_ndc_xform"))
+            mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
+    }
+
+    /*Serialization && Deserialization */
+    void Renderable::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
+    {
+        using namespace rapidjson;
+        out.SetObject();
+
+        out.AddMember("mdl_ref", mdl_ref, alloc);
+        out.AddMember("shd_ref", shd_ref, alloc);
+        out.AddMember("textureID", static_cast<uint64_t>(textureID), alloc);
+
+        Value spriteNameVal;
+        spriteNameVal.SetString(spriteName.c_str(), static_cast<SizeType>(spriteName.length()), alloc);
+        out.AddMember("spriteName", spriteNameVal, alloc);
+    }
+
+    void Renderable::Deserialize(const rapidjson::Value& in)
+    {
+        if (!in.IsObject())
+        {
+            throw std::runtime_error("Invalid JSON for Transform");
+        }
+
         if (in.HasMember("mdl_ref"))
             mdl_ref = in["mdl_ref"].GetFloat();
         if (in.HasMember("shd_ref"))
@@ -171,6 +189,29 @@ namespace Framework
 
         if (in.HasMember("spriteName"))
             spriteName = in["spriteName"].GetString();
+    }
+
+    /*Serialization && Deserialization */
+    void Animation::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
+    {
+        using namespace rapidjson;
+        out.SetObject();
+
+        out.AddMember("currentFrame", currentFrame, alloc);
+        out.AddMember("elapsedTime", elapsedTime, alloc);
+        out.AddMember("totalFrames", totalFrames, alloc);
+        out.AddMember("columns", columns, alloc);
+        out.AddMember("rows", rows, alloc);
+        out.AddMember("animationSpeed", animationSpeed, alloc);
+
+    }
+
+    void Animation::Deserialize(const rapidjson::Value& in)
+    {
+        if (!in.IsObject())
+        {
+            throw std::runtime_error("Invalid JSON for Transform");
+        }
 
         if (in.HasMember("currentFrame"))
             currentFrame = in["currentFrame"].GetInt();
@@ -184,16 +225,6 @@ namespace Framework
             rows = in["rows"].GetInt();
         if (in.HasMember("animationSpeed"))
             animationSpeed = in["animationSpeed"].GetFloat();
-
-        if (in.HasMember("isVisible"))
-            isVisible = in["isVisible"].GetBool();
-        if (in.HasMember("visibilityTimer"))
-            visibilityTimer = in["visibilityTimer"].GetFloat();
-        if (in.HasMember("autoHide"))
-            autoHide = in["autoHide"].GetBool();
-
-        if (in.HasMember("mdl_to_ndc_xform"))
-            mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
     }
 
     bool SaveTransform(Transform const &t, std::string const &path)

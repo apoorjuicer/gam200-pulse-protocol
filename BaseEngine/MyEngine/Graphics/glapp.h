@@ -19,7 +19,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Transform.h"
 // External transforms list (used elsewhere)   
-namespace Framework { class Transform; }
+namespace Framework { class Transform; class Animation; class Renderable;}
 
 class GLApp {
 public:
@@ -35,8 +35,8 @@ public:
 	GLuint vaoid; // handle to VAO
 	GLuint idx_elem_cnt;
 	GLenum primitive_type;
-	void drawTrans(Framework::Transform& x);
-	void updateAnimation(Framework::Transform& x, float deltaTime);
+	void drawTrans(Framework::Renderable& x, Framework::Animation& y, Framework::Transform& z);
+	void updateAnimation(Framework::Animation& x, float deltaTime);
 
 	static inline int GameWidth = VIRTUAL_W;  // actual GL viewport width after letterbox
 	static inline int GameHeight = VIRTUAL_H;  // actual GL viewport height after letterbox
