@@ -36,14 +36,14 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
 		return;
 	}
 
-	LoadGUIButtons();
+	//LoadGUIButtons();
 
 	std::cout << "[InputManager] Successfully initialized." << std::endl;
 }
 
 void InputManager::Update(float) {
 	updateInputStates();
-	UpdateGUIButtons();
+	//UpdateGUIButtons();
 	processDebugToggles();
 
 	// Test delayed message (Advanced Feature: Message Queuing)
