@@ -251,8 +251,45 @@ namespace MyEditor {
             float entity_h = safe_middle_h - scene_h;
 
             ImGui::BeginChild("Scene", ImVec2(-FLT_MIN, scene_h), true);
-            ImGui::TextUnformatted("Scene hierarchy goes here...");
+            ImGui::TextUnformatted("Scene Hierarchy:");
+            ImGui::Separator();
+
+            // Access your ECS Coordinator
+            auto* g_coordinator = Coordinator::GetInstance();
+            if (g_coordinator)
+            {
+                for (auto entity : g_coordinator->GetAllEntities())
+                {
+                    std::string display;
+
+                    if (g_coordinator->HasComponent<Framework::Renderable>(entity))
+                    {
+                        auto& rend = g_coordinator->GetComponent<Framework::Renderable>(entity);
+
+                        // Correct field name from your struct
+                        if (!rend.spriteName.empty())
+                            display = rend.spriteName;
+                        else
+                            display = "Unnamed Renderable";
+                    }
+                    else
+                    {
+                        display = "Entity " + std::to_string((int)entity);
+                    }
+
+                    ImGui::Selectable(display.c_str());
+                }
+            }
+            else
+            {
+                ImGui::TextColored(ImVec4(1, 0, 0, 1), "Coordinator not found!");
+            }
+
+
+
+
             ImGui::EndChild();
+
 
             ImGui::Separator();
 
@@ -578,6 +615,8 @@ namespace MyEditor {
         }
         return {};
     }
+
+
 
 
 
