@@ -44,6 +44,10 @@ namespace MyEditor {
     template<typename T>
     static T clamp_val(T v, T lo, T hi) { return (v < lo) ? lo : (v > hi) ? hi : v; }
 
+    constexpr Entity INVALID_ENTITY = static_cast<Entity>(-1);
+    static Entity selectedEntity = INVALID_ENTITY;
+
+
     // helper to draw a 1px line
     static void DrawGuideLine(ImVec2 a, ImVec2 b) {
         ImGui::GetForegroundDrawList()->AddLine(
@@ -240,24 +244,21 @@ namespace MyEditor {
         }
 
 
-        // ----------------------------
-        // LEFT PANEL (Scene/Entity)
-        // spans the MIDDLE region vertically
-        // ----------------------------
+    // ----------------------------
+    // SCENE HIERARCHY PANEL (LeftPanel)
+    // ----------------------------
         ImGui::SetNextWindowPos(ImVec2(left_x, middle_y));
         ImGui::SetNextWindowSize(ImVec2(left_w, safe_middle_h));
-        if (ImGui::Begin("LeftPanel", nullptr, panel_flags)) {
-            float scene_h = safe_middle_h * 0.5f;
-            float entity_h = safe_middle_h - scene_h;
-
-            ImGui::BeginChild("Scene", ImVec2(-FLT_MIN, scene_h), true);
-            ImGui::TextUnformatted("Scene Hierarchy:");
-            ImGui::Separator();
-
-            // Access your ECS Coordinator
+        if (ImGui::Begin("Scene Hierarchy", nullptr, panel_flags))
+        {
+            // Access ECS Coordinator
             auto* g_coordinator = Coordinator::GetInstance();
+
             if (g_coordinator)
             {
+                // Use full available size for the scrollable list
+                ImGui::BeginChild("HierarchyList", ImVec2(-FLT_MIN, -FLT_MIN), true);
+
                 for (auto entity : g_coordinator->GetAllEntities())
                 {
                     std::string display;
@@ -265,50 +266,117 @@ namespace MyEditor {
                     if (g_coordinator->HasComponent<Framework::Renderable>(entity))
                     {
                         auto& rend = g_coordinator->GetComponent<Framework::Renderable>(entity);
-
-                        // Correct field name from your struct
-                        if (!rend.spriteName.empty())
-                            display = rend.spriteName;
-                        else
-                            display = "Unnamed Renderable";
+                        display = rend.spriteName.empty() ? "Unnamed Renderable" : rend.spriteName;
                     }
                     else
                     {
                         display = "Entity " + std::to_string((int)entity);
                     }
 
-                    ImGui::Selectable(display.c_str());
+                    // Highlight if currently selected
+                    bool isSelected = (selectedEntity == entity);
+                    if (ImGui::Selectable(display.c_str(), isSelected))
+                    {
+                        selectedEntity = entity;
+                    }
                 }
+
+                ImGui::EndChild();
             }
             else
             {
                 ImGui::TextColored(ImVec4(1, 0, 0, 1), "Coordinator not found!");
             }
-
-
-
-
-            ImGui::EndChild();
-
-
-            ImGui::Separator();
-
-            ImGui::BeginChild("Entity", ImVec2(-FLT_MIN, entity_h), true);
-            ImGui::TextUnformatted("Selected entity list/details...");
-            ImGui::EndChild();
         }
         ImGui::End();
 
-        // ----------------------------
-        // RIGHT PANEL (Inspector)
-        // spans the MIDDLE region vertically
-        // ----------------------------
+         // ----------------------------
+         // RIGHT PANEL (Inspector)
+         // spans the MIDDLE region vertically
+         // ----------------------------
+
         ImGui::SetNextWindowPos(ImVec2(right_x, middle_y));
         ImGui::SetNextWindowSize(ImVec2(right_w, safe_middle_h));
-        if (ImGui::Begin("Component", nullptr, panel_flags)) {
-            ImGui::TextUnformatted("Inspector: Transform, Sprite, etc.");
+        if (ImGui::Begin("Inspector", nullptr, panel_flags))
+        {
+            ImGui::TextUnformatted("Entity Inspector");
+            ImGui::Separator();
+
+            auto* g_coordinator = Coordinator::GetInstance();
+            if (!g_coordinator)
+            {
+                ImGui::TextColored(ImVec4(1, 0, 0, 1), "Coordinator not found!");
+            }
+            else if (selectedEntity == INVALID_ENTITY)
+            {
+                ImGui::TextUnformatted("No entity selected.");
+            }
+            else
+            {
+                ImGui::Text("Entity ID: %d", (int)selectedEntity);
+                ImGui::Separator();
+
+                // ============================
+                // TRANSFORM COMPONENT
+                // ============================
+                if (g_coordinator->HasComponent<Framework::Transform>(selectedEntity))
+                {
+                    auto& tr = g_coordinator->GetComponent<Framework::Transform>(selectedEntity);
+                    ImGui::TextUnformatted("Transform");
+                    ImGui::Separator();
+
+                    float pos[2] = { tr.Pos.x, tr.Pos.y };
+                    if (ImGui::DragFloat2("Position", pos, 0.5f))
+                    {
+                        tr.Pos.x = pos[0];
+                        tr.Pos.y = pos[1];
+                    }
+
+                    float scale[2] = { tr.Scale.x, tr.Scale.y };
+                    if (ImGui::DragFloat2("Scale", scale, 0.5f))
+                    {
+                        tr.Scale.x = scale[0];
+                        tr.Scale.y = scale[1];
+                    }
+
+                    if (ImGui::DragFloat("Rotation (deg)", &tr.angle_disp, 1.0f, -360.f, 360.f)) {}
+                    ImGui::DragFloat("Rotation Speed", &tr.angle_speed, 0.1f, -10.0f, 10.0f);
+
+                    ImGui::Checkbox("Visible", &tr.isVisible);
+                    ImGui::SameLine();
+                    ImGui::Checkbox("Auto Hide", &tr.autoHide);
+                    ImGui::Separator();
+                }
+
+                // ============================
+                // RENDERABLE COMPONENT
+                // ============================
+                if (g_coordinator->HasComponent<Framework::Renderable>(selectedEntity))
+                {
+                    auto& rend = g_coordinator->GetComponent<Framework::Renderable>(selectedEntity);
+                    ImGui::TextUnformatted("Renderable");
+                    ImGui::Separator();
+
+                    ImGui::Text("Model Ref: %.1f", rend.mdl_ref);
+                    ImGui::Text("Shader Ref: %.1f", rend.shd_ref);
+                    ImGui::Text("Texture ID: %u", rend.textureID);
+
+                    static char spriteBuf[256];
+                    strncpy(spriteBuf, rend.spriteName.c_str(), sizeof(spriteBuf));
+                    spriteBuf[sizeof(spriteBuf) - 1] = '\0';
+
+                    if (ImGui::InputText("Sprite Name", spriteBuf, IM_ARRAYSIZE(spriteBuf)))
+                        rend.spriteName = spriteBuf;
+
+                    if (ImGui::Button("Reload Texture"))
+                        rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
+
+                    ImGui::Separator();
+                }
+            }
         }
         ImGui::End();
+
 
         // ----------------------------
         // BOTTOM PANEL (Assets/Debug/Profiler)
