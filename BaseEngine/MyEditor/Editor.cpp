@@ -18,6 +18,7 @@
 #include "Editor.h"
 #include <Graphics/glhelper.h>
 #include <GLFW/glfw3.h> 
+#include "DebugConsole.h"
 
 namespace MyEditor {
 
@@ -161,10 +162,17 @@ namespace MyEditor {
                 }
 
                 // ===== DEBUG TAB =====
+                static DebugConsole debugConsole;
                 if (ImGui::BeginTabItem("Debug")) {
                     ImGui::TextUnformatted("Debug info / logs / toggles...");
+                    debugConsole.Draw("Debug Console", nullptr);
                     // put your debug UI here
-                    ImGui::EndTabItem();
+
+                    // Example on logging usage
+                    debugConsole.AddLog("Player position: %.2f, %.2f", 23.f, 23.f);
+                    debugConsole.AddLog("Loaded %d textures", 10);
+                    debugConsole.AddLog("Error: %s", "hello");
+                    ImGui::EndTabItem();    
                 }
 
                 // ===== PROFILER TAB =====
