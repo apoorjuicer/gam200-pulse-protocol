@@ -239,8 +239,8 @@ Framework::Transform& z, const glm::mat3& ZoomNDC) {
 static glm::mat3 BuildZoomNDC(float zoom) {
 	const float s = glm::max(zoom, 0.0001f);   // use zoom, not 1/zoom
 	return glm::mat3(s, 0, 0,
-		0, s, 0,
-		0, 0, 1);
+					 0, s, 0,
+					 0, 0, 1);
 }
 
 void GLApp::draw(std::set<Entity> entities) {
@@ -265,6 +265,15 @@ void GLApp::draw(std::set<Entity> entities) {
 		// Re-apply the correct fullscreen scaling immediately
 		ComputeLetterbox(fbW, fbH);
 		gCamera.zoom = 1.0f;     // normal gameplay zoom
+	}
+	auto* input = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
+
+	// Option A: wheel zoom only in editor (gameplay fixed to 1.0)
+	if (MyEditor::IsEnabled()) {
+		if (input) gCamera.zoom = input->getZoomLevel();   // wheel controls zoom
+	}
+	else {
+		gCamera.zoom = 1.0f;
 	}
 	glm::mat3 ZoomNDC = BuildZoomNDC(gCamera.zoom);
 
