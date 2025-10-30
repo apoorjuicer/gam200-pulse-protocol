@@ -20,7 +20,7 @@ public:
     void AddLogColored(const ImVec4& col, const char* fmt, ...);
     void AddLogLevel(ConsoleLevel lvl, const char* fmt, ...);
 
-    void Draw(const char* title, bool* p_open);
+    void Draw();
 
 private:
     struct Item {

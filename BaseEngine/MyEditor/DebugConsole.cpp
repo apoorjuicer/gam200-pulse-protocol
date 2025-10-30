@@ -135,7 +135,7 @@ void DebugConsole::ExecCommand(const char* command_line)
     History.push_back(STRDUP(command_line));
 }
 
-void DebugConsole::Draw(const char* title, bool* p_open)
+void DebugConsole::Draw()
 {
     // Filter + controls row (optional)
     ImGui::AlignTextToFramePadding();

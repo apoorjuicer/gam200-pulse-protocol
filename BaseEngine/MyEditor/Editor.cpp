@@ -402,7 +402,7 @@ namespace MyEditor {
                 // ===== DEBUG TAB =====
                 static DebugConsole debugConsole;
                 if (ImGui::BeginTabItem("Debug")) {
-                    debugConsole.Draw("Debug Console", nullptr);
+                    debugConsole.Draw();
                     // put your debug UI here
 
                     // Example on logging usage
