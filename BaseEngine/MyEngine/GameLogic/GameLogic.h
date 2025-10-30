@@ -26,7 +26,7 @@ public:
 
 // ALL THIS IS JUST TEMP, LATER ON WE WILL SHIFT TO LUA SCRIPTING INSTEAD. ALL GAMELOGIC SYSTEM DOES IS 
 // TO UPDATE ALL THE ENTITIES INIT, UPDATE, EXIT SCRIPTS
-class TestScript : public Iscript
+class PlayerScript : public Iscript
 {
 	virtual void Init(Entity ID) override
 	{
@@ -50,6 +50,25 @@ class TestScript : public Iscript
 
 	}
 };
+
+class EnemyScript : public Iscript
+{
+	virtual void Init(Entity ID) override
+	{
+
+	}
+
+	virtual void Update(Entity ID) override
+	{
+		
+	}
+
+	virtual void Exit(Entity ID) override
+	{
+
+	}
+};
+
 
 class LogicSystem: public Systems
 {

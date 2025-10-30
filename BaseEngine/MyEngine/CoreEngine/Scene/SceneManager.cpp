@@ -66,7 +66,8 @@ void SceneManager::SaveCurrentScene()
 	auto& alloc = d.GetAllocator();
 
 	// grab scene name for the json file name
-	std::string path = "../../MyEngine/JSON/Saved" + PreviousScene + "Scene.json"; // file we want to save data into
+	//std::filesystem::path path = static_cast<std::filesystem::path>("../../MyEngine/JSON/Saved" + PreviousScene + "Scene.json"); 
+	std::filesystem::path path = "../../MyEngine/JSON/Saved" + PreviousScene + "Scene.json"; // file we want to save data into
 	//std::string path = "../../MyEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
 
 	// Save scene name first
@@ -150,7 +151,8 @@ void SceneManager::SaveCurrentScene()
 	d.Accept(writer);
 
 	namespace fs = std::filesystem;
-	fs::create_directories("../../MyEngine/JSON");  // store in folder Json
+	//fs::create_directories("../../MyEngine/JSON");  // store in folder Json
+	fs::create_directories(path.parent_path());  // store in folder 
 
 	// check if can open, if can then put data into Json file
 	std::ofstream ofs{ path };

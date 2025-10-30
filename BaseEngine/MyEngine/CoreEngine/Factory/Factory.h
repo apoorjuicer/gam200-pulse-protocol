@@ -30,7 +30,7 @@ public:
 	void DeleteEntity(Entity entity);
 
 	// Save this entity into the json file, might make a save then delete function if needed.
-	bool SaveEntityToJson(Entity entity, std::string const& path);
+	bool SaveEntityToJson(Entity entity, std::filesystem::path const& path);
 
 private:
 
