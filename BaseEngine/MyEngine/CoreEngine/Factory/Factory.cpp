@@ -43,10 +43,9 @@ bool Factory::CreateEntityFromJson(std::string const& path)
 		const auto& component = components[i];
 
 		if (component.HasMember("transform") && component["transform"].IsObject()) { g_coordinator->GetComponent<Framework::Transform>(entity).Deserialize(component["transform"]); }
-		if (component.HasMember("script") && component["script"].IsObject()) 
-		{
-			g_coordinator->GetComponent<LogicComponent>(entity).Deserialize(component["script"]); 
-		}
+		if (component.HasMember("script") && component["script"].IsObject()) { g_coordinator->GetComponent<LogicComponent>(entity).Deserialize(component["script"]); }
+		if (component.HasMember("render") && component["render"].IsObject()) { g_coordinator->GetComponent<Framework::Renderable>(entity).Deserialize(component["render"]); }
+		if (component.HasMember("animation") && component["animation"].IsObject()) { g_coordinator->GetComponent<Framework::Animation>(entity).Deserialize(component["animation"]); }
 	}
 
 	return true;
@@ -111,17 +110,30 @@ bool Factory::SaveEntityToJson(Entity entity, std::string const& path)
 
 
 	// check if entity have these compoennts, if have then serialize to json file
-	if (g_coordinator->HasComponent<LogicComponent>(entity))
+	if (g_coordinator->HasComponent<Framework::Renderable>(entity))
 	{
 		Value ComponentObj(rapidjson::kObjectType);
-		Value ScriptVal;
+		Value RenderVal;
 
-		auto& script = g_coordinator->GetComponent<LogicComponent>(entity);
-		script.Serialize(ScriptVal, alloc);
+		auto& render = g_coordinator->GetComponent<Framework::Renderable>(entity);
+		render.Serialize(RenderVal, alloc);
 
-		ComponentObj.AddMember("script", ScriptVal, alloc);	
+		ComponentObj.AddMember("render", RenderVal, alloc);	
 		componentsArray.PushBack(ComponentObj, alloc);		
 	}
+	
+	if (g_coordinator->HasComponent<Framework::Animation>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value AnimationVal;
+
+		auto& animation = g_coordinator->GetComponent<Framework::Animation>(entity);
+		animation.Serialize(AnimationVal, alloc);
+
+		ComponentObj.AddMember("animation", AnimationVal, alloc);
+		componentsArray.PushBack(ComponentObj, alloc);
+	}
+
 
 	// ADD AS ONE BIG ARRAY WITH ALL THE COMPONENTS AVAILABLE ABOVE! >:]
 	d.AddMember("components", componentsArray, alloc);
