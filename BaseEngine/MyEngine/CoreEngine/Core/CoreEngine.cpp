@@ -311,14 +311,21 @@ void CoreEngine::Update(float dt)
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
 
+	// Always allow internal messages (just in case, for safe shutdown)
 	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
 
+	// --- If paused, completely skip all systems ---
+	if (m_paused)
+		return;
+
+	// --- Normal (running) update path ---
 	if (g_graphicsSystem) g_graphicsSystem->Update();
-	if (g_inputSystem) g_inputSystem->Update(dt);
-	if (g_rhythmSystem) g_rhythmSystem->Update(dt);
+	if (g_inputSystem)    g_inputSystem->Update(dt);
+	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);
 
 	g_coordinator->UpdateAllSystems(dt);
 }
+
 
 
 void CoreEngine::GameLoop()
@@ -512,3 +519,20 @@ void CoreEngine::RenderDebugDraw() {
 
 	DebugDraw::End();
 }
+
+void CoreEngine::SetPaused(bool paused)
+{
+	if (m_paused == paused) return;
+	m_paused = paused;
+
+	// Pause/resume audio, too
+	if (auto audio = Coordinator::GetInstance()->GetSystem<AudioManager>()) {
+		audio->SetPaused(paused);
+	}
+}
+
+void CoreEngine::TogglePaused()
+{
+	SetPaused(!m_paused);
+}
+

@@ -28,7 +28,9 @@ public:
 	void GameLoop();
 	void Exit();
 
-
+	void SetPaused(bool p);
+	void TogglePaused();
+	bool IsPaused() const { return m_paused; }
 	// One of the ways to glue systems tgt. 
 	//void BroadcastMessage(Message* message);
 
@@ -40,6 +42,8 @@ private:
 	bool GameRunning;
 	bool DebugMode = false;
 	unsigned LastTime; //The last time the game was updated
+	bool m_paused = false;
+
 
 	void RenderDebugDraw();
 

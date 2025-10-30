@@ -155,6 +155,23 @@ void AudioManager::PlaySound(const std::string& key, float volume) {
     }
 }
 
+void AudioManager::SetPaused(bool paused)
+{
+    mPaused = paused;
+
+    if (!mSystem) return;
+
+    FMOD::ChannelGroup* master = nullptr;
+    if (mSystem->getMasterChannelGroup(&master) == FMOD_OK && master) {
+        master->setPaused(paused);      // <-- pauses ALL audio
+    }
+    else {
+        // Fallback: at least pause the BGM channel if master group not available
+        if (mBGMCh) mBGMCh->setPaused(paused);
+    }
+}
+
+
 double AudioManager::GetMusicPosition() const
 {
     if (!mBGMCh) return 0.0;

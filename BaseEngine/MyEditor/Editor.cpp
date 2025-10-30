@@ -187,11 +187,11 @@ namespace MyEditor {
                 // toolbar row
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
                 if (ImGui::Button("Play")) {
-                    // TODO hook
+                    Engine->SetPaused(false);
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Pause")) {
-                    // TODO hook
+                    Engine->SetPaused(true);
                 }
                 ImGui::SameLine();
                 ImGui::TextUnformatted("| Game View");
