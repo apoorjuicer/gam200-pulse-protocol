@@ -19,6 +19,9 @@
 #include <Graphics/glhelper.h>
 #include <GLFW/glfw3.h> 
 #include "DebugConsole.h"
+#include "pch/pch.h"
+#include "CoreEngine/ECS/System.h" // For Entity type: debugConsole.AddLogLevel(ConsoleLevel::Info, "Loaded %d textures", &Systems::EntityMember);
+#include "Graphics/Transform.h"
 
 namespace MyEditor {
 
@@ -169,9 +172,16 @@ namespace MyEditor {
                     // put your debug UI here
 
                     // Example on logging usage
-                    debugConsole.AddLog("Player position: %.2f, %.2f", 23.f, 23.f);
-                    debugConsole.AddLog("Loaded %d textures", 10);
-                    debugConsole.AddLog("Error: %s", "hello");
+                    // Plain text
+                    debugConsole.AddLog("Hello plain text");
+
+                    // With level (colored automatically)
+                    debugConsole.AddLogLevel(ConsoleLevel::Info, "Loaded %d textures", &Systems::EntityMember);
+                    debugConsole.AddLogLevel(ConsoleLevel::Warn, "FPS is low: %.1f", GLHelper::fps);
+                    debugConsole.AddLogLevel(ConsoleLevel::Error, "Failed to open '%s'", "[filename]");
+
+                    // With explicit color (custom)
+                    debugConsole.AddLogColored(ImVec4(0.6f, 1.0f, 0.6f, 1.0f), "Green success message");
                     ImGui::EndTabItem();    
                 }
 
