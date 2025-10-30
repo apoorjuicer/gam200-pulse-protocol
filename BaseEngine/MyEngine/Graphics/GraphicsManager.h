@@ -66,6 +66,7 @@ private:
 	// For In-Game GUI System
 	void RenderGUIButtons();
 	void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
+
 private:
     GLApp* glapp = nullptr;
 
