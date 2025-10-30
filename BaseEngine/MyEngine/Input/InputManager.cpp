@@ -43,7 +43,7 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
 
 void InputManager::Update(float) {
 	updateInputStates();
-	//UpdateGUIButtons();
+	updateGUIButtons();
 	processDebugToggles();
 
 	// Test delayed message (Advanced Feature: Message Queuing)

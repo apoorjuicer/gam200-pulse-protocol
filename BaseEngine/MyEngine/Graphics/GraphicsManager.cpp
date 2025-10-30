@@ -102,6 +102,9 @@ GraphicsManager::~GraphicsManager()
 
 void GraphicsManager::Update()
 {
+	int width, height;
+	glfwGetFramebufferSize(Engine->GetWindow(), &width, &height);
+
 	glfwPollEvents();
 	GLHelper::update_time(1.0);
 	glapp->update(Engine->GetWindow(), EntityMember);
@@ -111,6 +114,32 @@ void GraphicsManager::Update()
 
 	// 2) then draw text on top
 	RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
+
+	// Render button labels
+	auto* coordinator = Coordinator::GetInstance();
+	auto inputMgr = coordinator->GetSystem<InputManager>();
+
+	if (inputMgr) {
+		for (auto entity : inputMgr->GUIButtonEntities) {
+			if (!coordinator->HasComponent<GUIButton>(entity)) continue;
+			if (!coordinator->HasComponent<Framework::Transform>(entity)) continue;
+
+			auto& button = coordinator->GetComponent<GUIButton>(entity);
+			auto& transform = coordinator->GetComponent<Framework::Transform>(entity);
+
+			// Use SAME coordinate conversion as RenderGUIButtons
+			// World: (-800..800, -450..450) -> Virtual: (0..1600, 0..900)
+			float virtualX = transform.Pos.x + 800.0f;
+			float virtualY = 450.0f - transform.Pos.y;  // Flip Y
+
+			// Render button label (centered on button)
+			RenderText(GLApp::shdrpgms[3], button.label,
+				virtualX + 10.0f,   // Offset from left edge of button
+				virtualY + 30.0f,   // Offset from top edge of button  
+				0.4f,               // Text scale
+				glm::vec3(1, 1, 1), Characters2);
+		}
+	}
 
 	// Build FPS string and heaviest system string and render it
 	if (!MyEditor::IsEnabled()) {
@@ -136,11 +165,7 @@ void GraphicsManager::Update()
 		RenderText(GLApp::shdrpgms[3], topText.str(), 100.0f, 880.0f, 0.8f, glm::vec3(0.5f, 0.5f, 0), Characters2);
 	}
 
-
 	// Controls display - right side or top corner
-	int width, height;
-	glfwGetFramebufferSize(Engine->GetWindow(), &width, &height);
-
 	float startX = width - 350.0f;  // 350 pixels from right edge
 	float startY = height - 200.0f; // Start 250 pixels from bottom
 	float lineHeight = 25.0f;

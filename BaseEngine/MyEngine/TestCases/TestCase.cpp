@@ -357,9 +357,8 @@ void TestCase::LoadGUIButtons() {
         // Renderable Component
         Framework::Renderable renderable;
         renderable.mdl_ref = 1.0f;
-        renderable.shd_ref = 2.0f;
-        // Using existing texture so you can see it immediately
-        renderable.spriteName = "";
+        renderable.shd_ref = 2.0f;  // test shader (solid color)
+        renderable.spriteName = "../../MyEngine/Assets/Textures/UI/normal_btn_placeholder.png";
         g_coordinator->AddComponent(buttonEntity, renderable);
 
         // Animation Component
