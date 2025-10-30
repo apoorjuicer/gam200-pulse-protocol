@@ -86,6 +86,13 @@ void GraphicsManager::Initialize()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
+	unsigned char whitePixel[4] = { 255, 255, 255, 255 };
+	glGenTextures(1, &whiteTexture);
+	glBindTexture(GL_TEXTURE_2D, whiteTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 	auto& textShader = GLApp::shdrpgms[3]; // this must be your text shader
 	textShader.Use();
 	GLint loc = glGetUniformLocation(textShader.GetHandle(), "text");
@@ -119,7 +126,22 @@ void GraphicsManager::Update()
 	auto* coordinator = Coordinator::GetInstance();
 	auto inputMgr = coordinator->GetSystem<InputManager>();
 
+	// TEMPORARY: Apply zoom to projection for visual test
 	if (inputMgr) {
+		float zoom = inputMgr->getZoomLevel();
+		float viewWidth = GLApp::VIRTUAL_W / zoom;
+		float viewHeight = GLApp::VIRTUAL_H / zoom;
+
+		projection = glm::ortho(0.0f, viewWidth, viewHeight, 0.0f);
+	}
+
+	if (inputMgr) {
+		float zoom = inputMgr->getZoomLevel();
+		float viewWidth = GLApp::VIRTUAL_W / zoom;
+		float viewHeight = GLApp::VIRTUAL_H / zoom;
+
+		projection = glm::ortho(0.0f, viewWidth, viewHeight, 0.0f);
+
 		for (auto entity : inputMgr->GUIButtonEntities) {
 			if (!coordinator->HasComponent<GUIButton>(entity)) continue;
 			if (!coordinator->HasComponent<Framework::Transform>(entity)) continue;
@@ -232,21 +254,35 @@ void GraphicsManager::RenderGUIButtons()
 
 void GraphicsManager::RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color)
 {
-	// Use immediate mode or VBO to render a colored quad
-	// This is a simple implementation using glBegin/glEnd
-	// (You can optimize this later with VBOs)
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glDisable(GL_TEXTURE_2D);
-	glColor4f(color.r, color.g, color.b, color.a);
+	auto& shader = GLApp::shdrpgms[3];
+	shader.Use();
 
-	glBegin(GL_QUADS);
-	glVertex2f(x, y);                    // Top-left
-	glVertex2f(x + width, y);           // Top-right
-	glVertex2f(x + width, y + height);  // Bottom-right
-	glVertex2f(x, y + height);          // Bottom-left
-	glEnd();
+	glUniformMatrix4fv(glGetUniformLocation(shader.GetHandle(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	glUniform3f(glGetUniformLocation(shader.GetHandle(), "textColor"), color.r, color.g, color.b);
 
-	glEnable(GL_TEXTURE_2D);
+	// Bind white texture instead of unbinding
+	glBindTexture(GL_TEXTURE_2D, whiteTexture);
+	glBindVertexArray(VAO);
+
+	float vertices[6][4] = {
+		{ x,         y,          0.0f, 0.0f },
+		{ x,         y + height, 0.0f, 1.0f },
+		{ x + width, y + height, 1.0f, 1.0f },
+		{ x,         y,          0.0f, 0.0f },
+		{ x + width, y + height, 1.0f, 1.0f },
+		{ x + width, y,          1.0f, 0.0f }
+	};
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 bool GraphicsManager::LoadFont(const std::string& fontPath,

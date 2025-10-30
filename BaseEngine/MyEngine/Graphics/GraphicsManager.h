@@ -77,6 +77,6 @@ private:
 
 	// Shader and rendering details
 	GLuint VAO, VBO;
-
+	GLuint whiteTexture;
 };
 

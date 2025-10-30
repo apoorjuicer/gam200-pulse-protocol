@@ -350,16 +350,16 @@ void TestCase::LoadGUIButtons() {
         Framework::Transform transform;
         transform.Pos.y = startY - (i * verticalSpacing);
         transform.Pos.x = -600.0f;  // Left side of screen (world coords)
-        transform.Scale = { 150.0f, 50.0f };
+        transform.Scale = { 200.0f, 50.0f };
         transform.isVisible = true;
         g_coordinator->AddComponent(buttonEntity, transform);
 
-        // Renderable Component
-        Framework::Renderable renderable;
-        renderable.mdl_ref = 1.0f;
-        renderable.shd_ref = 2.0f;  // test shader (solid color)
-        renderable.spriteName = "../../MyEngine/Assets/Textures/UI/normal_btn_placeholder.png";
-        g_coordinator->AddComponent(buttonEntity, renderable);
+        //// Renderable Component
+        //Framework::Renderable renderable;
+        //renderable.mdl_ref = 1.0f;
+        //renderable.shd_ref = 2.0f;  // test shader (solid color)
+        //renderable.spriteName = "";
+        //g_coordinator->AddComponent(buttonEntity, renderable);
 
         // Animation Component
         Framework::Animation animation;
