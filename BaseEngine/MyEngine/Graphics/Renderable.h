@@ -4,10 +4,12 @@
  * @project     Pulse Protocol
  * @author      Goh Pin Kai (primary) - 90%
  * @author 		Ban Kai Wei Benjamin (secondary) - 10%
- * @brief       Declares the Transform component for the ECS framework,
- *              storing position, scale, rotation, animation state,
- *              and sprite data. Provides interfaces for updating,
- *              serializing, and deserializing transform properties.
+ * @brief       Declares the Renderable component used by the ECS framework.
+ *              This component stores references to the model, shader, and
+ *              texture used during rendering, along with sprite name for
+ *              texture atlas / asset lookup. Provides helper functions for
+ *              assigning textures from asset paths, and supports 
+ *              serialization and deserialization for scene saving/loading.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.

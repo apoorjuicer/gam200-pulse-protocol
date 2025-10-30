@@ -4,11 +4,11 @@
  * @project     Pulse Protocol
  * @author      Goh Pin Kai (primary) - 50%
  * @author 		Ban Kai Wei Benjamin (secondary) - 50%
- * @brief       Implements the Renderable component, providing position,
- *              scale, rotation, animation, and sprite management. Includes
- *              update logic for entity transforms, matrix composition,
- *              and JSON-based serialization/deserialization for saving
- *              and loading transform state.
+ * @brief       Implements the Renderable component defined in Renderable.h.
+ *              Provides texture assignment from asset paths and handles
+ *              serialization and deserialization of Renderable data for
+ *              scene saving and loading. This includes model reference,
+ *              shader reference, texture ID, and sprite/texture lookup name.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.

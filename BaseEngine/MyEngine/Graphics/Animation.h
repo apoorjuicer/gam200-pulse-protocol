@@ -4,10 +4,11 @@
  * @project     Pulse Protocol
  * @author      Goh Pin Kai (primary) - 90%
  * @author 		Ban Kai Wei Benjamin (secondary) - 10%
- * @brief       Declares the Transform component for the ECS framework,
- *              storing position, scale, rotation, animation state,
- *              and sprite data. Provides interfaces for updating,
- *              serializing, and deserializing transform properties.
+ * @brief       Declares the Animation component for the ECS framework.
+ *              This component stores sprite sheet animation playback state,
+ *              including frame indices, timing, and atlas layout information.
+ *              Provides serialization and deserialization support for
+ *              saving and loading animation settings in scene files.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.

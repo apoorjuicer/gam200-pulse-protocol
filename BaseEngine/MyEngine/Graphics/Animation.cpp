@@ -4,11 +4,10 @@
  * @project     Pulse Protocol
  * @author      Goh Pin Kai (primary) - 50%
  * @author 		Ban Kai Wei Benjamin (secondary) - 50%
- * @brief       Implements the Transform component, providing position,
- *              scale, rotation, animation, and sprite management. Includes
- *              update logic for entity transforms, matrix composition,
- *              and JSON-based serialization/deserialization for saving
- *              and loading transform state.
+ * @brief       Implements the Animation component defined in Animation.h.
+ *              Handles serialization and deserialization of animation state,
+ *              including frame index, animation timing, and sprite sheet
+ *              layout parameters for scene saving and loading.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
