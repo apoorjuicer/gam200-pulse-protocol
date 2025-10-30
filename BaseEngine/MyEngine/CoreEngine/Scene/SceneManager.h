@@ -13,17 +13,27 @@
  */
 /******************************************************************************/
 #pragma once
-#include "pch/pch.h"
-#include "CoreEngine/ECS/Singleton.h"
+#include "pch/pch_temp.h"
+#include "../Graphics/Transform.h"
+#include "../GameLogic/GameLogic.h"
+#include "../CoreEngine/ECS/Types.h"
+#include "CoreEngine/ECS/Coordinator.h"
+#include "CoreEngine/Factory/Factory.h"
 
+#pragma warning(push, 0)
+#include <rapidjson/document.h>     
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h> 
+#include <rapidjson/istreamwrapper.h>
+#pragma warning(pop)
 
 class SceneManager: public Systems
 {
 public:
 	SceneManager();
 
-	//void Init() override;              
-	//void Update(float dt) override;    
+	void Init() override;              
+	void Update(float dt) override;    
 	//void Exit() override;
 
 	void LoadSceneFromJson(std::string const& path);
@@ -36,7 +46,10 @@ public:
 
 private:
 	std::string CurrentScene;
+	std::string PreviousScene;
 	std::vector<Entity> SceneEntityList;
+
+	std::string StartingScene = "../../MyEngine/JSON/MainMenu.json";
 
 	void Deserialize(const rapidjson::Value& in);
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;

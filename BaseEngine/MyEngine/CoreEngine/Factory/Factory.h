@@ -1,5 +1,18 @@
 #pragma once
-#include "pch/pch.h"	
+#include "pch/pch_temp.h"	
+#include "../Graphics/Transform.h"
+#include "../GameLogic/GameLogic.h"
+#include "../CoreEngine/ECS/Types.h"
+#include "../CoreEngine/ECS/Coordinator.h"
+
+//Serialize
+#pragma warning(push, 0)
+#include <rapidjson/document.h>     // for Document, Value, AllocatorType
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/stringbuffer.h> // for StringBuffer
+#pragma warning(pop)
+
 
 class Factory
 {

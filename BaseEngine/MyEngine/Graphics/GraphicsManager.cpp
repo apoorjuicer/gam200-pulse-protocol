@@ -34,6 +34,71 @@ namespace {
 GraphicsManager::GraphicsManager()
 {
     glapp = new GLApp;
+	GLHelper::print_specs();
+	glapp->init(/*editorWidth, editorHeight*/);
+
+	// Subscribe to combo messages - DONT REMOVE, TEST FOR MESSAGE SYSTEM
+	auto* msgMgr = MessageManager::GetInstance();
+	msgMgr->Subscribe(Message::Type::INPUT_COMBO, "GraphicsManager",
+		[this](const Message& msg) {
+			const InputComboMessage& comboMsg = static_cast<const InputComboMessage&>(msg);
+			std::cout << "[GRAPHICS] Received combo: " << comboMsg.comboName << std::endl;
+		});
+
+	std::cout << "[GraphicsManager] Successfully initialized for graphics." << std::endl;
+
+	// Initialize FreeType
+	if (FT_Init_FreeType(&ft)) {
+		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+		return;
+	}
+
+	// Blending for transparent text
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_CULL_FACE);
+
+	// Ortho projection, top-left origin
+	int width, height;
+	glfwGetFramebufferSize(Engine->GetWindow(), &width, &height);
+	projection = glm::ortho(0.0f, static_cast<float>(GLApp::VIRTUAL_W), static_cast<float>(GLApp::VIRTUAL_H), 0.0f);
+
+	// Load fonts
+	if (!LoadFont("../../MyEngine/Assets/Font/PatrickHand-Regular.ttf", face, Characters)) {
+		std::cout << "ERROR::FREETYPE: Failed to load first font" << std::endl;
+		return;
+	}
+	if (!LoadFont("../../MyEngine/Assets/Font/liberation-mono.ttf", face2, Characters2)) {
+		std::cout << "ERROR::FREETYPE: Failed to load second font" << std::endl;
+		return;
+	}
+
+	// VAO/VBO setup: pos.xy + uv.xy
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+
+	// position -> location 0
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+	// uv -> location 1
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	auto& textShader = GLApp::shdrpgms[3]; // this must be your text shader
+	textShader.Use();
+	GLint loc = glGetUniformLocation(textShader.GetHandle(), "text");
+
+	if (loc != -1) glUniform1i(loc, 0); // bind 'text' sampler to GL_TEXTURE0
+
+
 }
 
 GraphicsManager::~GraphicsManager()

@@ -25,7 +25,7 @@ class GLApp {
 public:
 	static inline int VIRTUAL_W = 1920;
 	static inline int VIRTUAL_H = 1080;
-	void init(float inputEditorWidth, float inputEditorHeight);
+	void init(/*float inputEditorWidth, float inputEditorHeight*/);
 	//void update(GLFWwindow* window);
 	void update(GLFWwindow* window, std::set<Entity>);
 	void draw(std::set<Entity>);
@@ -35,7 +35,7 @@ public:
 	GLuint vaoid; // handle to VAO
 	GLuint idx_elem_cnt;
 	GLenum primitive_type;
-	void drawTrans(Framework::Renderable& x, Framework::Animation& y, Framework::Transform& z);
+	void drawTrans(Framework::Renderable& x, Framework::Animation& y, Framework::Transform& z, const glm::mat3& VP);
 	void updateAnimation(Framework::Animation& x, float deltaTime);
 
 	static inline int GameWidth = VIRTUAL_W;  // actual GL viewport width after letterbox
@@ -46,6 +46,11 @@ public:
 	static void ComputeLetterbox(int fbw, int fbh);
 	static void OnResize(int width, int height);
 
+	struct Camera2D {
+		glm::vec2 center{ 0.0f, 0.0f };
+		float zoom = 1.0f; // 1.0f = normal, >1 = zoom in, <1 = zoom out
+	};
+	static Camera2D gCamera;
 	// encapsulates state required to render a geometrical model
 	struct GLModel {
 		GLenum primitive_type; // which OpenGL primitive to be rendered?
@@ -99,12 +104,5 @@ public:
 	};
 	static std::vector<GLViewport> vps; // container for viewports
 };
-
-// Simple orthographic MVP helper for DebugDraw usage
-inline glm::mat4 MakeOrthoMvp(float left, float right, float bottom, float top) {
-	// Z range -1..1
-	glm::mat4 proj = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
-	return proj; // No view/model yet
-}
 
 #endif /* GLAPP_H */

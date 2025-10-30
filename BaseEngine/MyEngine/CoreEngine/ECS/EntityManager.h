@@ -15,7 +15,9 @@
  /******************************************************************************/
 
 #pragma once
-#include "pch/pch.h"
+#include "Types.h"
+#include "System.h"
+#include "pch/pch_temp.h"
 
 
 class EntityManager

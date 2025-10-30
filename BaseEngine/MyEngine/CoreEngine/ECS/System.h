@@ -14,8 +14,7 @@
  /******************************************************************************/
 #pragma once
 
-#include "pch/pch.h"
-#include <set>
+#include "pch/pch_temp.h"
 #include "Types.h"
 // Each system can inherit from this class which allows the System Manager
 // to keep a list of pointers to systems.

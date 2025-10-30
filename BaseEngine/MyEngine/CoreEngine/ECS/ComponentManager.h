@@ -16,7 +16,10 @@
 
 
 #pragma once
-#include "pch/pch.h"
+#include "Types.h"
+#include "System.h"
+#include "pch/pch_temp.h"
+#include "EntityManager.h"
 #include "ComponentArray.h"
 
 class ComponentManager

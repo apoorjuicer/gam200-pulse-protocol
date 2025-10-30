@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "GameLogic.h"
-#include "pch/pch.h"
 
 LogicSystem::LogicSystem()
 {
@@ -12,14 +11,17 @@ LogicSystem::~LogicSystem()
 
 }
 
-void LogicSystem::init()
+void LogicSystem::Init()
 {
 	//register scripts here. I think it it will be the Csharp / Lua game code here. Ask Eli if i did it right 
+    // AddScript("PlayerScript", std::function<void(Entity)> function);
+    
+    AddScript("PlayerScript", std::make_shared<TestScript>());
 }
 
-void LogicSystem::update()
+void LogicSystem::Update(float dt)
 {
-	auto g_coordinator = Coordinator::GetInstance();
+	auto* g_coordinator = Coordinator::GetInstance();
 
 	// only update all entity that has scripts
 	for (auto const& entity : EntityMember)
@@ -28,47 +30,61 @@ void LogicSystem::update()
 		auto& scriptname = g_coordinator->GetComponent<LogicComponent>(entity);
 
 		// find reward (script update function) using script name
-		auto function = map_of_scripts.find(scriptname.ScriptName);
+		auto func = map_of_scripts.find(scriptname.ScriptName);
 
 		// if we can find it then good, we did it right XD. and now we call said function
-		if (function != map_of_scripts.end())
+		if (func != map_of_scripts.end())
 		{
-			function->second(entity);
+            func->second->Update(entity);
 		}
 
 		else
 		{
-			std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
+            // THIS IS WHERE U LEFT OFF DUMBASS: CheeseBuger
+			//std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
 		}
 	}
 }
 
-void LogicSystem::exit()
+void LogicSystem::Exit()
 {
-	// clear it just incase of mem leak. TBH im not sure if it will happen but just to be safe :p
-	map_of_scripts.clear();
+    auto* g_coordinator = Coordinator::GetInstance();
+
+    for (auto const& entity : EntityMember)
+    {
+        auto& scriptname = g_coordinator->GetComponent<LogicComponent>(entity);
+        auto func = map_of_scripts.find(scriptname.ScriptName);
+
+        if (func != map_of_scripts.end())
+        {
+            func->second->Exit(entity);
+        }
+    }
+
+    // Clear the script map
+    map_of_scripts.clear();
 }
 
 // Might change std::function to a class of the init(), update(), and exit(). Smth like Iscript, can i sub in Iscript for std::function
-void LogicSystem::AddScript(std::string const& ScriptName, std::function<void(Entity)> function)
+void LogicSystem::AddScript(std::string const& ScriptName, std::shared_ptr<Iscript> script)
 {
 	// add this type of script to unlock this kind of update function. 
-	// exp: name = monsterscript. Unlocks => monsters script update function  
-	map_of_scripts[ScriptName] = function;
+	// exp: name = monsterscript. Unlocks => monsters script class functions  
+    map_of_scripts[ScriptName] = script;
 }
 
-std::function<void(Entity)> LogicSystem::GrabScriptUpdate(std::string const& ScriptName)
+std::shared_ptr<Iscript> LogicSystem::GrabScript(std::string const& ScriptName)
 {
 	// grab reward(script update function)
-	auto function = map_of_scripts.find(ScriptName);
-	if(function != map_of_scripts.end())
+	auto func = map_of_scripts.find(ScriptName);
+	if(func != map_of_scripts.end())
 	{
-		return function->second;
+		return func->second;
 	}
 
 	else
 	{
-		std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
+		//std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
 		return nullptr;
 	}
 }
