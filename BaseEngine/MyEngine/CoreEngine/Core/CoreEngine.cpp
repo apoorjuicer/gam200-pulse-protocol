@@ -241,7 +241,7 @@ void CoreEngine::Init()
 	//SM.LoadSceneFromJson(filePath3);
 	//SM.SaveCurrentScene();
 
-	Test.Init();
+	//Test.Init();
 }
 
 void CoreEngine::Setup()
@@ -331,7 +331,7 @@ void CoreEngine::Update(float dt)
 	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);
 
 	g_coordinator->UpdateAllSystems(dt);
-	Test.Update(dt);
+	//Test.Update(dt);
 }
 
 
