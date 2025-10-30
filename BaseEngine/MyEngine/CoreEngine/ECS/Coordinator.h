@@ -129,6 +129,12 @@ public:
 		CoordSystemManager->ExitAllSystems();
 	}
 
+	std::deque<Entity> GetAllEntities() const
+	{
+		return CoordEnitiyManager->GetActiveEntities();
+	}
+
+
 	template<typename T>
 	bool HasComponent(Entity entity) const {
 		

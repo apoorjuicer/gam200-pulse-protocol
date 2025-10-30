@@ -43,10 +43,9 @@ bool Factory::CreateEntityFromJson(std::string const& path)
 		const auto& component = components[i];
 
 		if (component.HasMember("transform") && component["transform"].IsObject()) { g_coordinator->GetComponent<Framework::Transform>(entity).Deserialize(component["transform"]); }
-		if (component.HasMember("script") && component["script"].IsObject()) 
-		{
-			g_coordinator->GetComponent<LogicComponent>(entity).Deserialize(component["script"]); 
-		}
+		if (component.HasMember("script") && component["script"].IsObject()) { g_coordinator->GetComponent<LogicComponent>(entity).Deserialize(component["script"]); }
+		if (component.HasMember("render") && component["render"].IsObject()) { g_coordinator->GetComponent<Framework::Renderable>(entity).Deserialize(component["render"]); }
+		if (component.HasMember("animation") && component["animation"].IsObject()) { g_coordinator->GetComponent<Framework::Animation>(entity).Deserialize(component["animation"]); }
 	}
 
 	return true;
@@ -62,18 +61,16 @@ Entity Factory::DefaultObj()
 	t.Rotation = {0,0};
 	t.Pos = {0,0};
 
-	/*
-	Render r;
-	r.angle_disp = 0.f;
-	r.angle_speed = 0.f;
+	
+	Framework::Renderable r;
 	r.mdl_ref = 0.f;
 	r.shd_ref = 0.f;
 	r.textureID = 0;
 	r.spriteName;
-	*/
+	
 
 	g_coordinator->AddComponent(entity, t);
-	//g_coordinator->AddComponent(entity, r);
+	g_coordinator->AddComponent(entity, r);
 	return entity;
 }
 
@@ -85,7 +82,7 @@ void Factory::DeleteEntity(Entity entity)
 }
 
 // check if entity has what components, then just serialize to Json file
-bool Factory::SaveEntityToJson(Entity entity, std::string const& path)
+bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const& path)
 {
 	using namespace rapidjson;
 	auto* g_coordinator = Coordinator::GetInstance();
@@ -111,17 +108,30 @@ bool Factory::SaveEntityToJson(Entity entity, std::string const& path)
 
 
 	// check if entity have these compoennts, if have then serialize to json file
-	if (g_coordinator->HasComponent<LogicComponent>(entity))
+	if (g_coordinator->HasComponent<Framework::Renderable>(entity))
 	{
 		Value ComponentObj(rapidjson::kObjectType);
-		Value ScriptVal;
+		Value RenderVal;
 
-		auto& script = g_coordinator->GetComponent<LogicComponent>(entity);
-		script.Serialize(ScriptVal, alloc);
+		auto& render = g_coordinator->GetComponent<Framework::Renderable>(entity);
+		render.Serialize(RenderVal, alloc);
 
-		ComponentObj.AddMember("script", ScriptVal, alloc);	
+		ComponentObj.AddMember("render", RenderVal, alloc);	
 		componentsArray.PushBack(ComponentObj, alloc);		
 	}
+	
+	if (g_coordinator->HasComponent<Framework::Animation>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value AnimationVal;
+
+		auto& animation = g_coordinator->GetComponent<Framework::Animation>(entity);
+		animation.Serialize(AnimationVal, alloc);
+
+		ComponentObj.AddMember("animation", AnimationVal, alloc);
+		componentsArray.PushBack(ComponentObj, alloc);
+	}
+
 
 	// ADD AS ONE BIG ARRAY WITH ALL THE COMPONENTS AVAILABLE ABOVE! >:]
 	d.AddMember("components", componentsArray, alloc);
@@ -130,7 +140,7 @@ bool Factory::SaveEntityToJson(Entity entity, std::string const& path)
 	PrettyWriter<StringBuffer> writer(buffer); // make it nice
 	d.Accept(writer);
 	namespace fs = std::filesystem;
-	fs::create_directories("../../MyEngine/JSON"); // make sure u save in Json and not build 
+	fs::create_directories(path.parent_path()); // make sure u save in Json and not build 
 
 	std::ofstream ofs{ path };
 

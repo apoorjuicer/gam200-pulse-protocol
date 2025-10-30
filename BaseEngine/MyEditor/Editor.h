@@ -13,7 +13,8 @@
 #pragma once
 struct GLFWwindow;
 #include <algorithm>
-#include <cmath> 
+#include <cmath>
+#include <string>
 
 
 namespace MyEditor {
@@ -24,8 +25,11 @@ namespace MyEditor {
     void Shutdown();
     void SetEnabled(bool enabled);
     bool IsEnabled();
+    static std::string OpenJsonFileDialog(); 
 
     struct GameViewport { int x, y, w, h; };
     // Returns the middle "game" rectangle in FRAMEBUFFER PIXELS, computed from current panel sizes
-    GameViewport ComputeGameViewportPixels(GLFWwindow* window, bool keep_16x9 = true);
+    GameViewport ComputeMiddleGameViewportPixels(GLFWwindow* window, bool keep_16x9 = true);
+
+
 }

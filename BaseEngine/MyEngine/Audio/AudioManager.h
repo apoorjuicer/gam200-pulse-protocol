@@ -44,6 +44,10 @@ public:
     void SetBGMVolume(float volume);                 // 0..1
     bool IsBGMPlaying(bool* outPlaying = nullptr) const;
 
+    // Pause and Play 
+    void SetPaused(bool paused);
+    bool IsPaused() const { return mPaused; }
+
     // gets path from source file and plays it at wanted volume, default volume is 1.0f
     bool LoadInputSFX(const std::string& path);
     void PlaySound(const std::string& key, float volume);
@@ -58,6 +62,7 @@ private:
     FMOD::Sound* mBGM = nullptr;
     FMOD::Channel* mBGMCh = nullptr;
     FMOD::Sound* mInputSFX = nullptr;
+    bool mPaused = true;
 
     void releaseAll(); // stop channel, release sound/system
 

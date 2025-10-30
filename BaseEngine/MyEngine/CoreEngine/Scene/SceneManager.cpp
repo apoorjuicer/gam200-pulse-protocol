@@ -21,6 +21,40 @@ SceneManager::SceneManager()
 	
 }
 
+void SceneManager::Init()
+{
+	// Starting scene will be main menu
+	LoadSceneFromJson(StartingScene);
+	PreviousScene = CurrentScene;
+
+	// testing for it it works 
+	//std::string testpath = "MainMenu";
+	//CurrentScene = testpath;
+}
+
+void SceneManager::Update(float dt)
+{
+	(void)dt;
+	/*if (dt == 0)
+	{
+		std::cout << dt << std::endl;
+	}*/
+
+	if (CurrentScene != PreviousScene)
+	{
+		SaveCurrentScene(); // normally just for ImGui but can use here for testing 
+		UnloadCurrentScene();
+
+		std::string NewScenePath = "../../MyEngine/JSON/" + CurrentScene +".json";
+		LoadSceneFromJson(NewScenePath);
+	}
+
+	// update previous scene for the next loop
+	PreviousScene = CurrentScene;
+
+}
+
+
 void SceneManager::SaveCurrentScene()
 {
 #ifdef _DEBUG
@@ -38,12 +72,13 @@ void SceneManager::SaveCurrentScene()
 	auto& alloc = d.GetAllocator();
 
 	// grab scene name for the json file name
-	std::string path = "../../MyEngine/JSON/Saved" + CurrentScene + "Scene.json"; // file we want to save data into
+	//std::filesystem::path path = static_cast<std::filesystem::path>("../../MyEngine/JSON/Saved" + PreviousScene + "Scene.json"); 
+	std::filesystem::path path = "../../MyEngine/JSON/Saved" + PreviousScene + "Scene.json"; // file we want to save data into
 	//std::string path = "../../MyEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
 
 	// Save scene name first
 	Value SceneName;
-	SceneName.SetString(CurrentScene.c_str(), static_cast<SizeType>(CurrentScene.length()), alloc);
+	SceneName.SetString(PreviousScene.c_str(), static_cast<SizeType>(PreviousScene.length()), alloc);
 	d.AddMember("scene", SceneName, alloc);
 
 	// First we make a container for entity
@@ -83,6 +118,30 @@ void SceneManager::SaveCurrentScene()
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
+		if (g_coordinator->HasComponent<Framework::Renderable>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value RenderVal;
+
+			auto& render = g_coordinator->GetComponent<Framework::Renderable>(entity);
+			render.Serialize(RenderVal, alloc);
+
+			ComponentObj.AddMember("render", RenderVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		if (g_coordinator->HasComponent<Framework::Animation>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value AnimationVal;
+
+			auto& animation = g_coordinator->GetComponent<Framework::Animation>(entity);
+			animation.Serialize(AnimationVal, alloc);
+
+			ComponentObj.AddMember("animation", AnimationVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
 		// So for this entity, we add compoennt array
 		entityObj.AddMember("components", componentsArray, alloc);
 
@@ -98,7 +157,8 @@ void SceneManager::SaveCurrentScene()
 	d.Accept(writer);
 
 	namespace fs = std::filesystem;
-	fs::create_directories("../../MyEngine/JSON");  // store in folder Json
+	//fs::create_directories("../../MyEngine/JSON");  // store in folder Json
+	fs::create_directories(path.parent_path());  // store in folder 
 
 	// check if can open, if can then put data into Json file
 	std::ofstream ofs{ path };
@@ -117,7 +177,7 @@ void SceneManager::SaveCurrentScene()
 	
 #ifdef _DEBUG
 	std::cout << "\n================================================" << std::endl;
-	std::cout << "  [SceneManager]: " << CurrentScene << " has been saved!" << std::endl;
+	std::cout << "  [SceneManager]: " << PreviousScene << " has been saved!" << std::endl;
 	std::cout << "================================================" << std::endl;
 #endif
 }
@@ -139,7 +199,9 @@ void SceneManager::UnloadCurrentScene()
 	//This class owns entity container is cleared
 	SceneEntityList.clear();
 	#ifdef _DEBUG
-		std::cout << "Scene Unloaded" << std::endl;
+		std::cout << "\n================================================" << std::endl;
+		std::cout << "    [SceneManager] Scene successfully unloaded!" << std::endl;
+		std::cout << "================================================" << std::endl;
 	#endif
 }
 
@@ -223,6 +285,20 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				l.Deserialize(component["script"]);
 				g_coordinator->AddComponent<LogicComponent>(entity, l);
 			}
+
+			if (component.HasMember("render") && component["render"].IsObject())
+			{
+				auto& change = g_coordinator->GetComponent<Framework::Renderable>(entity);
+				change.Deserialize(component["render"]);
+			}
+			
+			if (component.HasMember("animation") && component["animation"].IsObject())
+			{
+				Framework::Animation a;
+				a.Deserialize(component["animation"]);
+				g_coordinator->AddComponent<Framework::Animation>(entity, a);
+			}
+			
 
 		}
 

@@ -224,24 +224,24 @@ void CoreEngine::Init()
 	//}
 
 	GameRunning = true;
-	std::string filePath = "../../MyEngine/JSON/test.json";//AssetManager.mPrefabMap[path];
-	Factory factory;
-	SceneManager SM;
-	factory.CreateEntityFromJson(filePath);
 
-	std::string filePath2 = "../../MyEngine/JSON/test2.json";
-	Entity entity = factory.DefaultObj();
-	LogicComponent l;
-	l.ScriptName = "IT WORKS!!!!";
-	g_coordinator->AddComponent(entity, l);
-	factory.SaveEntityToJson(entity, filePath2);
+	//std::string filePath = "../../MyEngine/JSON/test.json";//AssetManager.mPrefabMap[path];
+	//Factory factory;
+	//SceneManager SM;
+	//factory.CreateEntityFromJson(filePath);
 
-	std::string filePath3 = "../../MyEngine/JSON/MainMenu.json";
-	SM.LoadSceneFromJson(filePath3);
-	SM.SaveCurrentScene();
+	//std::string filePath2 = "../../MyEngine/JSON/test2.json";
+	//Entity entity = factory.DefaultObj();
+	//LogicComponent l;
+	//l.ScriptName = "IT WORKS!!!!";
+	//g_coordinator->AddComponent(entity, l);
+	//factory.SaveEntityToJson(entity, filePath2);
 
-	Test.Init();
+	//std::string filePath3 = "../../MyEngine/JSON/MainMenu.json";
+	//SM.LoadSceneFromJson(filePath3);
+	//SM.SaveCurrentScene();
 
+	//Test.Init();
 }
 
 void CoreEngine::Setup()
@@ -294,7 +294,6 @@ void CoreEngine::Setup()
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Animation>());  // <-- needs Animation
 	g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
 
-
 	Signature sceneSig;
 	sceneSig.set(g_coordinator->GetComponentType<NPC>());
 	sceneSig.set(g_coordinator->GetComponentType<AABB>());
@@ -322,7 +321,7 @@ void CoreEngine::Update(float dt)
 	profiler->StartSystem("Input System");
 	if (g_inputSystem) g_inputSystem->Update(dt);
 	profiler->EndSystem("Input System");
-
+	
 	profiler->StartSystem("Scene System");
 	if (g_sceneSystem) g_sceneSystem->Update(dt);
 	profiler->EndSystem("Scene System");
@@ -346,6 +345,22 @@ void CoreEngine::Update(float dt)
 	profiler->StartSystem("Collision System");
 	// If collision is in UpdateAllSystems, remove this
 	profiler->EndSystem("Collision System");
+	//Test.Update(dt);
+
+	// Always process engine / message stuff
+	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
+
+	// Always draw/update graphics once per frame
+	if (g_graphicsSystem)
+		g_graphicsSystem->Update();
+
+	// 2) If paused, stop here � no gameplay / input / scene logic
+	if (m_paused)
+		return;
+
+	// 3) Normal running path
+	if (g_inputSystem)    g_inputSystem->Update(dt);
+	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);	
 }
 
 
@@ -483,3 +498,20 @@ void CoreEngine::RenderDebugDraw() {
 
 	DebugDraw::End();
 }
+
+void CoreEngine::SetPaused(bool paused)
+{
+	if (m_paused == paused) return;
+	m_paused = paused;
+
+	// Pause/resume audio, too
+	if (auto audio = Coordinator::GetInstance()->GetSystem<AudioManager>()) {
+		audio->SetPaused(paused);
+	}
+}
+
+void CoreEngine::TogglePaused()
+{
+	SetPaused(!m_paused);
+}
+
