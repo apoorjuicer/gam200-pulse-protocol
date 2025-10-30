@@ -62,50 +62,50 @@ namespace MyEditor {
     }
 
     // Left splitter: drags the RIGHT edge of the Left panel => modifies left_ratio
-    static void SplitterV_Left(const char* id, float x_px, float top_h_px, float full_w_px, float& left_ratio,
-        float right_ratio_limit)
-    {
-        ImGui::SetCursorScreenPos(ImVec2(x_px - SPLIT_THICK * 0.5f, 0.0f));
-        ImGui::InvisibleButton(id, ImVec2(SPLIT_THICK, top_h_px));
-        if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-        if (ImGui::IsItemActive()) {
-            left_ratio += ImGui::GetIO().MouseDelta.x / full_w_px;
-            left_ratio = clamp_val(left_ratio, MIN_RATIO_W, 1.0f - right_ratio_limit - MIN_RATIO_W);
-        }
-        ImGui::GetForegroundDrawList()->AddLine(ImVec2(x_px, 0.0f), ImVec2(x_px, top_h_px),
-            IM_COL32(180, 180, 180, 160), 1.0f);
-    }
+    //static void SplitterV_Left(const char* id, float x_px, float top_h_px, float full_w_px, float& left_ratio,
+    //    float right_ratio_limit)
+    //{
+    //    ImGui::SetCursorScreenPos(ImVec2(x_px - SPLIT_THICK * 0.5f, 0.0f));
+    //    ImGui::InvisibleButton(id, ImVec2(SPLIT_THICK, top_h_px));
+    //    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+    //    if (ImGui::IsItemActive()) {
+    //        left_ratio += ImGui::GetIO().MouseDelta.x / full_w_px;
+    //        left_ratio = clamp_val(left_ratio, MIN_RATIO_W, 1.0f - right_ratio_limit - MIN_RATIO_W);
+    //    }
+    //    ImGui::GetForegroundDrawList()->AddLine(ImVec2(x_px, 0.0f), ImVec2(x_px, top_h_px),
+    //        IM_COL32(180, 180, 180, 160), 1.0f);
+    //}
 
     // Right splitter: drags the LEFT edge of the Right panel => modifies right_ratio
-    static void SplitterV_Right(const char* id, float x_px, float top_h_px, float full_w_px, float& right_ratio,
-        float left_ratio_limit)
-    {
-        ImGui::SetCursorScreenPos(ImVec2(x_px - SPLIT_THICK * 0.5f, 0.0f));
-        ImGui::InvisibleButton(id, ImVec2(SPLIT_THICK, top_h_px));
-        if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-        if (ImGui::IsItemActive()) {
-            float edge = x_px + ImGui::GetIO().MouseDelta.x;        // new x of right panel’s left edge
-            right_ratio = (full_w_px - edge) / full_w_px;           // convert to ratio
-            right_ratio = clamp_val(right_ratio, MIN_RATIO_W, 1.0f - left_ratio_limit - MIN_RATIO_W);
-        }
-        ImGui::GetForegroundDrawList()->AddLine(ImVec2(x_px, 0.0f), ImVec2(x_px, top_h_px),
-            IM_COL32(180, 180, 180, 160), 1.0f);
-    }
+    //static void SplitterV_Right(const char* id, float x_px, float top_h_px, float full_w_px, float& right_ratio,
+    //    float left_ratio_limit)
+    //{
+    //    ImGui::SetCursorScreenPos(ImVec2(x_px - SPLIT_THICK * 0.5f, 0.0f));
+    //    ImGui::InvisibleButton(id, ImVec2(SPLIT_THICK, top_h_px));
+    //    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+    //    if (ImGui::IsItemActive()) {
+    //        float edge = x_px + ImGui::GetIO().MouseDelta.x;        // new x of right panel’s left edge
+    //        right_ratio = (full_w_px - edge) / full_w_px;           // convert to ratio
+    //        right_ratio = clamp_val(right_ratio, MIN_RATIO_W, 1.0f - left_ratio_limit - MIN_RATIO_W);
+    //    }
+    //    ImGui::GetForegroundDrawList()->AddLine(ImVec2(x_px, 0.0f), ImVec2(x_px, top_h_px),
+    //        IM_COL32(180, 180, 180, 160), 1.0f);
+    //}
 
     // Bottom splitter: drags the TOP edge of the bottom area => modifies bottom_ratio
-    static void SplitterH_Bottom(const char* id, float y_px, float full_w_px, float full_h_px, float& bottom_ratio)
-    {
-        ImGui::SetCursorScreenPos(ImVec2(0.0f, y_px - SPLIT_THICK * 0.5f));
-        ImGui::InvisibleButton(id, ImVec2(full_w_px, SPLIT_THICK));
-        if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
-        if (ImGui::IsItemActive()) {
-            float edge = y_px + ImGui::GetIO().MouseDelta.y; // new y of top of bottom area
-            bottom_ratio = (full_h_px - edge) / full_h_px;
-            bottom_ratio = clamp_val(bottom_ratio, MIN_RATIO_H, 0.7f);
-        }
-        ImGui::GetForegroundDrawList()->AddLine(ImVec2(0.0f, y_px), ImVec2(full_w_px, y_px),
-            IM_COL32(180, 180, 180, 160), 1.0f);
-    }
+    //static void SplitterH_Bottom(const char* id, float y_px, float full_w_px, float full_h_px, float& bottom_ratio)
+    //{
+    //    ImGui::SetCursorScreenPos(ImVec2(0.0f, y_px - SPLIT_THICK * 0.5f));
+    //    ImGui::InvisibleButton(id, ImVec2(full_w_px, SPLIT_THICK));
+    //    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+    //    if (ImGui::IsItemActive()) {
+    //        float edge = y_px + ImGui::GetIO().MouseDelta.y; // new y of top of bottom area
+    //        bottom_ratio = (full_h_px - edge) / full_h_px;
+    //        bottom_ratio = clamp_val(bottom_ratio, MIN_RATIO_H, 0.7f);
+    //    }
+    //    ImGui::GetForegroundDrawList()->AddLine(ImVec2(0.0f, y_px), ImVec2(full_w_px, y_px),
+    //        IM_COL32(180, 180, 180, 160), 1.0f);
+    //}
 
 
     void Init(GLFWwindow* w) {
@@ -174,7 +174,6 @@ namespace MyEditor {
         const float bottom_y = top_h + safe_middle_h;
 
         const float left_x = 0.0f;
-        const float mid_x = left_w;
         const float right_x = left_w + safe_mid_w;
 
         // common flags
@@ -502,7 +501,6 @@ namespace MyEditor {
                 float new_edge = bar_y + ImGui::GetIO().MouseDelta.y;
                 // bottom_y = top_h + middle_h
                 // => middle_h = new_edge - top_h
-                float new_middle_h = new_edge - top_h;
                 float new_bottom_h = H - new_edge;
                 // convert new_bottom_h back to a ratio
                 s_bottom_ratio = new_bottom_h / H;
