@@ -42,7 +42,7 @@ private:
 	bool GameRunning;
 	bool DebugMode = false;
 	unsigned LastTime; //The last time the game was updated
-	bool m_paused = false;
+	bool m_paused = true;
 
 
 	void RenderDebugDraw();

@@ -62,7 +62,7 @@ private:
     FMOD::Sound* mBGM = nullptr;
     FMOD::Channel* mBGMCh = nullptr;
     FMOD::Sound* mInputSFX = nullptr;
-    bool mPaused = false;
+    bool mPaused = true;
 
     void releaseAll(); // stop channel, release sound/system
 

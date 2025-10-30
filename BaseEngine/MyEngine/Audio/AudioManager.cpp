@@ -69,12 +69,9 @@ void AudioManager::Initialize()
     std::cout << "[AudioManager] Successfully initialized.\n";
 
     // Auto-start BGM here so your CoreEngine::Init() "just works".
-    // Make sure this path exists relative to your exe working directory:
-    //   build\MyEngine\Assets\MainMenuMusic.wav
-    // If your assets live elsewhere, update this string accordingly.
     auto defaultBGM = Framework::AssetsManager::Instance().GetSound("gamemusic");
 
-    if (defaultBGM) { 
+    if (defaultBGM) {
         // Set to loop
         defaultBGM->setMode(FMOD_LOOP_NORMAL);
 
@@ -85,12 +82,20 @@ void AudioManager::Initialize()
         if (r == FMOD_OK && mBGMCh) {
             mBGMCh->setVolume(1.0f);
             std::cout << "[AudioManager] BGM started successfully.\n";
+
+            // if engine is already paused at startup, pause FMOD too
+            if (Engine && Engine->IsPaused()) {
+                mBGMCh->setPaused(true);
+            }
+
         }
         else {
-            std::cerr << "[AudioManager] Failed to play BGM: " << FMOD_ErrorString(r) << "\n";
+            std::cerr << "[AudioManager] Failed to play BGM: "
+                << FMOD_ErrorString(r) << "\n";
         }
     }
 }
+
 
 void AudioManager::Update()
 {
@@ -141,35 +146,47 @@ bool AudioManager::LoadInputSFX(const std::string& path) {
     return (mSystem->createSound(path.c_str(), FMOD_DEFAULT, 0, &mInputSFX) == FMOD_OK);
 }
 
-void AudioManager::PlaySound(const std::string& key, float volume) {
+void AudioManager::PlaySound(const std::string& key, float volume)
+{
     if (!mSystem) return;
 
     if (FMOD::Sound* s = Framework::AssetsManager::Instance().GetSound(key)) {
         FMOD::Channel* ch = nullptr;
         FMOD_RESULT r = mSystem->playSound(s, nullptr, false, &ch);
-        if (r == FMOD_OK && ch) ch->setVolume(volume);
-        else std::cerr << "[Audio] playSound failed: " << FMOD_ErrorString(r) << "\n";
+        if (r == FMOD_OK && ch) {
+            ch->setVolume(volume);
+
+            if (mPaused) {
+                ch->setPaused(true);
+            }
+        }
+        else {
+            std::cerr << "[Audio] playSound failed: " << FMOD_ErrorString(r) << "\n";
+        }
     }
     else {
         std::cerr << "[Audio] Sound not found: " << key << "\n";
     }
 }
 
+
 void AudioManager::SetPaused(bool paused)
 {
     mPaused = paused;
 
-    if (!mSystem) return;
+    if (!mSystem)
+        return;
 
     FMOD::ChannelGroup* master = nullptr;
     if (mSystem->getMasterChannelGroup(&master) == FMOD_OK && master) {
-        master->setPaused(paused);      // <-- pauses ALL audio
+        master->setPaused(paused);
     }
-    else {
-        // Fallback: at least pause the BGM channel if master group not available
-        if (mBGMCh) mBGMCh->setPaused(paused);
+
+    if (mBGMCh) {
+        mBGMCh->setPaused(paused);
     }
 }
+
 
 
 double AudioManager::GetMusicPosition() const

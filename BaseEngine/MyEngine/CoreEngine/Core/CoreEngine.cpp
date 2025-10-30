@@ -311,20 +311,24 @@ void CoreEngine::Update(float dt)
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
 
-	// Always allow internal messages (just in case, for safe shutdown)
+	// Always process engine / message stuff
 	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
 
-	// --- If paused, completely skip all systems ---
+	// Always draw/update graphics once per frame
+	if (g_graphicsSystem)
+		g_graphicsSystem->Update();
+
+	// 2) If paused, stop here – no gameplay / input / scene logic
 	if (m_paused)
 		return;
 
-	// --- Normal (running) update path ---
-	if (g_graphicsSystem) g_graphicsSystem->Update();
+	// 3) Normal running path
 	if (g_inputSystem)    g_inputSystem->Update(dt);
 	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);
 
 	g_coordinator->UpdateAllSystems(dt);
 }
+
 
 
 
