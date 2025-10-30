@@ -16,7 +16,8 @@ void LogicSystem::Init()
 	//register scripts here. I think it it will be the Csharp / Lua game code here. Ask Eli if i did it right 
     // AddScript("PlayerScript", std::function<void(Entity)> function);
     
-    AddScript("PlayerScript", std::make_shared<TestScript>());
+    AddScript("PlayerScript", std::make_shared<PlayerScript>());
+    AddScript("EnemyScript", std::make_shared<EnemyScript>());
 }
 
 void LogicSystem::Update(float dt)

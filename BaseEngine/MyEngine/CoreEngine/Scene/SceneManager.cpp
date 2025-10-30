@@ -28,12 +28,17 @@ void SceneManager::Init()
 	PreviousScene = CurrentScene;
 
 	// testing for it it works 
-	std::string testpath = "Level1";
-	CurrentScene = testpath;
+	//std::string testpath = "MainMenu";
+	//CurrentScene = testpath;
 }
 
 void SceneManager::Update(float dt)
 {
+	/*if (dt == 0)
+	{
+		std::cout << dt << std::endl;
+	}*/
+
 	if (CurrentScene != PreviousScene)
 	{
 		SaveCurrentScene(); // normally just for ImGui but can use here for testing 
@@ -66,7 +71,8 @@ void SceneManager::SaveCurrentScene()
 	auto& alloc = d.GetAllocator();
 
 	// grab scene name for the json file name
-	std::string path = "../../MyEngine/JSON/Saved" + PreviousScene + "Scene.json"; // file we want to save data into
+	//std::filesystem::path path = static_cast<std::filesystem::path>("../../MyEngine/JSON/Saved" + PreviousScene + "Scene.json"); 
+	std::filesystem::path path = "../../MyEngine/JSON/Saved" + PreviousScene + "Scene.json"; // file we want to save data into
 	//std::string path = "../../MyEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
 
 	// Save scene name first
@@ -150,7 +156,8 @@ void SceneManager::SaveCurrentScene()
 	d.Accept(writer);
 
 	namespace fs = std::filesystem;
-	fs::create_directories("../../MyEngine/JSON");  // store in folder Json
+	//fs::create_directories("../../MyEngine/JSON");  // store in folder Json
+	fs::create_directories(path.parent_path());  // store in folder 
 
 	// check if can open, if can then put data into Json file
 	std::ofstream ofs{ path };
@@ -280,9 +287,8 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 			if (component.HasMember("render") && component["render"].IsObject())
 			{
-				Framework::Renderable r;
-				r.Deserialize(component["render"]);
-				g_coordinator->AddComponent<Framework::Renderable>(entity, r);
+				auto& change = g_coordinator->GetComponent<Framework::Renderable>(entity);
+				change.Deserialize(component["render"]);
 			}
 			
 			if (component.HasMember("animation") && component["animation"].IsObject())

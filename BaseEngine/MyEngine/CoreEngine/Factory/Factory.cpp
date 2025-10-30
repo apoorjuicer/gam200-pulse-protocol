@@ -61,18 +61,16 @@ Entity Factory::DefaultObj()
 	t.Rotation = {0,0};
 	t.Pos = {0,0};
 
-	/*
-	Render r;
-	r.angle_disp = 0.f;
-	r.angle_speed = 0.f;
+	
+	Framework::Renderable r;
 	r.mdl_ref = 0.f;
 	r.shd_ref = 0.f;
 	r.textureID = 0;
 	r.spriteName;
-	*/
+	
 
 	g_coordinator->AddComponent(entity, t);
-	//g_coordinator->AddComponent(entity, r);
+	g_coordinator->AddComponent(entity, r);
 	return entity;
 }
 
@@ -84,7 +82,7 @@ void Factory::DeleteEntity(Entity entity)
 }
 
 // check if entity has what components, then just serialize to Json file
-bool Factory::SaveEntityToJson(Entity entity, std::string const& path)
+bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const& path)
 {
 	using namespace rapidjson;
 	auto* g_coordinator = Coordinator::GetInstance();
@@ -142,7 +140,7 @@ bool Factory::SaveEntityToJson(Entity entity, std::string const& path)
 	PrettyWriter<StringBuffer> writer(buffer); // make it nice
 	d.Accept(writer);
 	namespace fs = std::filesystem;
-	fs::create_directories("../../MyEngine/JSON"); // make sure u save in Json and not build 
+	fs::create_directories(path.parent_path()); // make sure u save in Json and not build 
 
 	std::ofstream ofs{ path };
 

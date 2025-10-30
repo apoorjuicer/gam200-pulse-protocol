@@ -39,6 +39,14 @@
                     "script": {
                         "ScriptName": "PlayerScript"
                     }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "textureID": 0,
+                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png"
+                    }
                 }
             ]
         },
@@ -79,6 +87,14 @@
                 {
                     "script": {
                         "ScriptName": "EnemyScript"
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "textureID": 0,
+                        "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png"
                     }
                 }
             ]

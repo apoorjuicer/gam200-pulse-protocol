@@ -6,14 +6,14 @@
         "components":
         [
             {
-                "transfrom": {
+                "transform": {
                         "position": {
-                            "x": -50.0,
-                            "y": -50.0
+                            "x": -800.0,
+                            "y": 0.0
                         },
                         "scale": {
-                            "x": 200.0,
-                            "y": 200.0
+                            "x": 500.0,
+                            "y": 500.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -37,6 +37,24 @@
                         ]
                     }
             },
+
+            {
+                "render": 
+                {
+                    "mdl_ref": 1.0,
+                    "shd_ref": 2.0,
+                    "textureID": 0,
+                    "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png"
+                }
+            },
+
+            {
+                "animation": {
+                    "totalFrames": 3,
+                    "columns": 3,
+                    "rows": 1
+                }
+            },
             
             {
                 "script":  
@@ -51,14 +69,14 @@
         "components":
             [
                 {
-                    "transfrom": {
+                    "transform": {
                         "position": {
-                            "x": 50.0,
-                            "y": 50.0
+                            "x": 800.0,
+                            "y": 0.0
                         },
                         "scale": {
-                            "x": 200.0,
-                            "y": 200.0
+                            "x": 500.0,
+                            "y": 500.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -83,6 +101,21 @@
                     }
                 },
                 
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "textureID": 0,
+                        "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png"
+                    }
+                },
+
+                {
+                    "animation": {
+                        "currentFrame": 0
+                    }
+                },
+
                 {
                 "script":  
                     {
