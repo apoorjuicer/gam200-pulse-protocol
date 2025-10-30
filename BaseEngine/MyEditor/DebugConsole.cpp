@@ -137,12 +137,6 @@ void DebugConsole::ExecCommand(const char* command_line)
 
 void DebugConsole::Draw(const char* title, bool* p_open)
 {
-    if (!ImGui::Begin(title, p_open))
-    {
-        ImGui::End();
-        return;
-    }
-
     // Filter + controls row (optional)
     ImGui::AlignTextToFramePadding();
     Filter.Draw("Filter", 180);
@@ -176,6 +170,4 @@ void DebugConsole::Draw(const char* title, bool* p_open)
         ExecCommand(InputBuf);
         strcpy(InputBuf, "");
     }
-
-    ImGui::End();
 }

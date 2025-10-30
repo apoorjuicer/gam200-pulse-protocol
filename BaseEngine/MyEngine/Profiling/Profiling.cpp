@@ -14,7 +14,8 @@
  */
  /******************************************************************************/
 
-#include "pch/pch.h"
+#include "pch/pch_temp.h"
+#include "Profiling.h"
 
 ProfilingManager* ProfilingManager::instance = nullptr;
 
