@@ -50,16 +50,6 @@ public:
     void Initialize();
     void Update();
     void Shutdown();
-
-
-	void Initialize();
-	void Update();
-	void Shutdown();
-	void OnResize(int width, int height);
-
-	// For font
-	bool LoadFont(const std::string& fontPath, FT_Face& fontFace, std::map<char, Character>& characterMap);
-	void RenderText(GLSLShader& shader, std::string text, float x, float y, float scale, glm::vec3 color, std::map<char, Character>& fontCharacters);
     void OnResize(int width, int height);
 
 private:

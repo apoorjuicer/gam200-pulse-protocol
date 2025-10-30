@@ -500,9 +500,6 @@ void GraphicsManager::RenderColoredQuad(float x, float y, float width, float hei
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-bool GraphicsManager::LoadFont(const std::string& fontPath,
-	FT_Face& fontFace,
-	std::map<char, Character>& characterMap)
 void GraphicsManager::RenderText(
     GLSLShader& shader,
     const std::string& text,
