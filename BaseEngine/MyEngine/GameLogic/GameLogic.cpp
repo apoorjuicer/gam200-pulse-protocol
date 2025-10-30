@@ -14,6 +14,9 @@ LogicSystem::~LogicSystem()
 void LogicSystem::Init()
 {
 	//register scripts here. I think it it will be the Csharp / Lua game code here. Ask Eli if i did it right 
+    // AddScript("PlayerScript", std::function<void(Entity)> function);
+    
+    AddScript("PlayerScript", std::make_shared<TestScript>());
 }
 
 void LogicSystem::Update(float dt)
@@ -32,7 +35,7 @@ void LogicSystem::Update(float dt)
 		// if we can find it then good, we did it right XD. and now we call said function
 		if (func != map_of_scripts.end())
 		{
-            func->second(entity);
+            func->second->Update(entity);
 		}
 
 		else
@@ -45,19 +48,32 @@ void LogicSystem::Update(float dt)
 
 void LogicSystem::Exit()
 {
-	// clear it just incase of mem leak. TBH im not sure if it will happen but just to be safe :p
-	map_of_scripts.clear();
+    auto* g_coordinator = Coordinator::GetInstance();
+
+    for (auto const& entity : EntityMember)
+    {
+        auto& scriptname = g_coordinator->GetComponent<LogicComponent>(entity);
+        auto func = map_of_scripts.find(scriptname.ScriptName);
+
+        if (func != map_of_scripts.end())
+        {
+            func->second->Exit(entity);
+        }
+    }
+
+    // Clear the script map
+    map_of_scripts.clear();
 }
 
 // Might change std::function to a class of the init(), update(), and exit(). Smth like Iscript, can i sub in Iscript for std::function
-void LogicSystem::AddScript(std::string const& ScriptName, std::function<void(Entity)> function)
+void LogicSystem::AddScript(std::string const& ScriptName, std::shared_ptr<Iscript> script)
 {
 	// add this type of script to unlock this kind of update function. 
-	// exp: name = monsterscript. Unlocks => monsters script update function  
-	map_of_scripts[ScriptName] = function;
+	// exp: name = monsterscript. Unlocks => monsters script class functions  
+    map_of_scripts[ScriptName] = script;
 }
 
-std::function<void(Entity)> LogicSystem::GrabScriptUpdate(std::string const& ScriptName)
+std::shared_ptr<Iscript> LogicSystem::GrabScript(std::string const& ScriptName)
 {
 	// grab reward(script update function)
 	auto func = map_of_scripts.find(ScriptName);
@@ -68,7 +84,7 @@ std::function<void(Entity)> LogicSystem::GrabScriptUpdate(std::string const& Scr
 
 	else
 	{
-		std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
+		//std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
 		return nullptr;
 	}
 }

@@ -32,8 +32,8 @@ class SceneManager: public Systems
 public:
 	SceneManager();
 
-	//void Init() override;              
-	//void Update(float dt) override;    
+	void Init() override;              
+	void Update(float dt) override;    
 	//void Exit() override;
 
 	void LoadSceneFromJson(std::string const& path);
@@ -46,7 +46,10 @@ public:
 
 private:
 	std::string CurrentScene;
+	std::string PreviousScene;
 	std::vector<Entity> SceneEntityList;
+
+	std::string StartingScene = "../../MyEngine/JSON/MainMenu.json";
 
 	void Deserialize(const rapidjson::Value& in);
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;

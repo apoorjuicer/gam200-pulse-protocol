@@ -224,24 +224,24 @@ void CoreEngine::Init()
 	//}
 
 	GameRunning = true;
-	std::string filePath = "../../MyEngine/JSON/test.json";//AssetManager.mPrefabMap[path];
-	Factory factory;
-	SceneManager SM;
-	factory.CreateEntityFromJson(filePath);
 
-	std::string filePath2 = "../../MyEngine/JSON/test2.json";
-	Entity entity = factory.DefaultObj();
-	LogicComponent l;
-	l.ScriptName = "IT WORKS!!!!";
-	g_coordinator->AddComponent(entity, l);
-	factory.SaveEntityToJson(entity, filePath2);
+	//std::string filePath = "../../MyEngine/JSON/test.json";//AssetManager.mPrefabMap[path];
+	//Factory factory;
+	//SceneManager SM;
+	//factory.CreateEntityFromJson(filePath);
 
-	std::string filePath3 = "../../MyEngine/JSON/MainMenu.json";
-	SM.LoadSceneFromJson(filePath3);
-	SM.SaveCurrentScene();
+	//std::string filePath2 = "../../MyEngine/JSON/test2.json";
+	//Entity entity = factory.DefaultObj();
+	//LogicComponent l;
+	//l.ScriptName = "IT WORKS!!!!";
+	//g_coordinator->AddComponent(entity, l);
+	//factory.SaveEntityToJson(entity, filePath2);
+
+	//std::string filePath3 = "../../MyEngine/JSON/MainMenu.json";
+	//SM.LoadSceneFromJson(filePath3);
+	//SM.SaveCurrentScene();
 
 	Test.Init();
-
 }
 
 void CoreEngine::Setup()
@@ -292,7 +292,6 @@ void CoreEngine::Setup()
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Renderable>());  // <-- needs Renderable
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Animation>());  // <-- needs Animation
 	g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
-
 
 	Signature sceneSig;
 	sceneSig.set(g_coordinator->GetComponentType<NPC>());
