@@ -17,7 +17,12 @@
 #include "../../imgui/backends/imgui_impl_opengl3.h"
 #include "Editor.h"
 #include <Graphics/glhelper.h>
-#include <GLFW/glfw3.h> 
+#include <GLFW/glfw3.h>
+
+#define NOMINMAX        
+#include <windows.h>
+#include <commdlg.h>
+
 
 namespace MyEditor {
 
@@ -172,8 +177,8 @@ namespace MyEditor {
             ImGuiWindowFlags_NoSavedSettings;
 
         // ----------------------------
-        // TOP BAR (Play/Pause)
-        // ----------------------------
+ // TOP BAR (Play / Pause / Scene Controls)
+ // ----------------------------
         {
             ImGuiWindowFlags top_flags =
                 ImGuiWindowFlags_NoTitleBar |
@@ -183,22 +188,57 @@ namespace MyEditor {
 
             ImGui::SetNextWindowPos(ImVec2(0.0f, top_y));
             ImGui::SetNextWindowSize(ImVec2(W, top_h));
+
             if (ImGui::Begin("TopBar", nullptr, top_flags)) {
-                // toolbar row
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
-                if (ImGui::Button("Play")) {
+
+                // --- Play / Pause ---
+                if (ImGui::Button("Play", ImVec2(70, 0))) {  // fixed width looks neat
                     Engine->SetPaused(false);
                 }
                 ImGui::SameLine();
-                if (ImGui::Button("Pause")) {
+                if (ImGui::Button("Pause", ImVec2(70, 0))) {
                     Engine->SetPaused(true);
                 }
+
+                // --- Visual spacing gap before scene controls ---
+                ImGui::SameLine();
+                ImGui::Dummy(ImVec2(30, 0));  // neat separation
+                ImGui::SameLine();
+
+                // --- Scene controls ---
+                if (ImGui::Button("Save Scene", ImVec2(120, 0))) {
+                    auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>();
+                    if (sceneMgr) {
+                        sceneMgr->SaveCurrentScene();
+                    }
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Load Scene", ImVec2(120, 0))) {
+                    std::string path = OpenJsonFileDialog();
+                    if (!path.empty()) {
+                        auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>();
+                        if (sceneMgr) {
+                            sceneMgr->LoadSceneFromJson(path);
+                        }
+                    }
+                    else {
+                        std::cout << "[Editor] Load scene cancelled.\n";
+                    }
+                }
+
+                // --- Right-aligned label ---
+                ImGui::SameLine();
+                ImGui::Dummy(ImVec2(30, 0));
                 ImGui::SameLine();
                 ImGui::TextUnformatted("| Game View");
+
                 ImGui::PopStyleVar();
             }
             ImGui::End();
         }
+
 
         // ----------------------------
         // LEFT PANEL (Scene/Entity)
@@ -514,7 +554,30 @@ namespace MyEditor {
 
         return { vx, vy, vw, vh };
     }
+    
+    std::string MyEditor::OpenJsonFileDialog()
+    {
+        char fileBuf[MAX_PATH] = { 0 };
 
+        OPENFILENAMEA ofn{};
+        ofn.lStructSize = sizeof(OPENFILENAMEA);
+        ofn.hwndOwner = nullptr;
+        ofn.lpstrFilter = "JSON Files\0*.json\0All Files\0*.*\0";
+        ofn.lpstrFile = fileBuf;
+        ofn.nMaxFile = MAX_PATH;
+        ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+        ofn.lpstrTitle = "Select scene JSON";
+
+        namespace fs = std::filesystem;
+        std::string dir = (fs::current_path() / "../../MyEngine/JSON").lexically_normal().string();
+        ofn.lpstrInitialDir = dir.c_str();
+
+
+        if (GetOpenFileNameA(&ofn)) {
+            return std::string(fileBuf);
+        }
+        return {};
+    }
 
 
 
