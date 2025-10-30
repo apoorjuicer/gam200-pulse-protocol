@@ -74,8 +74,8 @@ private:
     GLuint VBO = 0;
 
 	// Shader and rendering details
-	GLuint VAO, VBO;
 	GLuint whiteTexture;
+
     // Screen-space ortho for text drawing
     glm::mat4 projection{ 1.0f };
 
