@@ -38,6 +38,7 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
 
 	// Set scroll callback for zoom
 	glfwSetScrollCallback(window, [](GLFWwindow* win, double xoffset, double yoffset) {
+		(void)xoffset;
 		auto* inputMgr = static_cast<InputManager*>(glfwGetWindowUserPointer(win));
 		if (inputMgr) {
 			inputMgr->scrollOffset += static_cast<float>(yoffset);

@@ -26,11 +26,6 @@ namespace Framework
     }
     Transform::~Transform() {}
 
-    void AssignTextureFromPath(Framework::Renderable &t)
-    {
-        if (t.textureID == 0 && !t.spriteName.empty())
-            t.textureID = Framework::AssetsManager::GetOrLoad(t.spriteName);
-    }
     void Transform::Initialize() {}
 
     void Transform::update(GLdouble delta_time, const std::set<Entity> entity)
@@ -84,16 +79,6 @@ namespace Framework
     }
 
     void Transform::draw() const {}
-
-    void Renderable::SetSprite(std::string ref)
-    {
-        spriteName = ref;
-    }
-
-    std::string Renderable::GetSprite() const
-    {
-        return spriteName;
-    }
 
     /*Serialization && Deserialization */
     void Transform::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
@@ -154,75 +139,6 @@ namespace Framework
 
         if (in.HasMember("mdl_to_ndc_xform"))
             mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
-    }
-
-    /*Serialization && Deserialization */
-    void Renderable::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
-    {
-        using namespace rapidjson;
-        out.SetObject();
-
-        out.AddMember("mdl_ref", mdl_ref, alloc);
-        out.AddMember("shd_ref", shd_ref, alloc);
-        out.AddMember("textureID", static_cast<uint64_t>(textureID), alloc);
-
-        Value spriteNameVal;
-        spriteNameVal.SetString(spriteName.c_str(), static_cast<SizeType>(spriteName.length()), alloc);
-        out.AddMember("spriteName", spriteNameVal, alloc);
-    }
-
-    void Renderable::Deserialize(const rapidjson::Value& in)
-    {
-        if (!in.IsObject())
-        {
-            throw std::runtime_error("Invalid JSON for Transform");
-        }
-
-        if (in.HasMember("mdl_ref"))
-            mdl_ref = in["mdl_ref"].GetFloat();
-        if (in.HasMember("shd_ref"))
-            shd_ref = in["shd_ref"].GetFloat();
-        if (in.HasMember("textureID"))
-            textureID = static_cast<GLuint>(in["textureID"].GetUint64());
-
-        if (in.HasMember("spriteName"))
-            spriteName = in["spriteName"].GetString();
-    }
-
-    /*Serialization && Deserialization */
-    void Animation::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
-    {
-        using namespace rapidjson;
-        out.SetObject();
-
-        out.AddMember("currentFrame", currentFrame, alloc);
-        out.AddMember("elapsedTime", elapsedTime, alloc);
-        out.AddMember("totalFrames", totalFrames, alloc);
-        out.AddMember("columns", columns, alloc);
-        out.AddMember("rows", rows, alloc);
-        out.AddMember("animationSpeed", animationSpeed, alloc);
-
-    }
-
-    void Animation::Deserialize(const rapidjson::Value& in)
-    {
-        if (!in.IsObject())
-        {
-            throw std::runtime_error("Invalid JSON for Transform");
-        }
-
-        if (in.HasMember("currentFrame"))
-            currentFrame = in["currentFrame"].GetInt();
-        if (in.HasMember("elapsedTime"))
-            elapsedTime = in["elapsedTime"].GetFloat();
-        if (in.HasMember("totalFrames"))
-            totalFrames = in["totalFrames"].GetInt();
-        if (in.HasMember("columns"))
-            columns = in["columns"].GetInt();
-        if (in.HasMember("rows"))
-            rows = in["rows"].GetInt();
-        if (in.HasMember("animationSpeed"))
-            animationSpeed = in["animationSpeed"].GetFloat();
     }
 
     bool SaveTransform(Transform const &t, std::string const &path)

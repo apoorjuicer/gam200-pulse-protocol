@@ -18,6 +18,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Transform.h"
+#include "Renderable.h"
+#include "Animation.h"
 // External transforms list (used elsewhere)   
 namespace Framework { class Transform; class Animation; class Renderable;}
 

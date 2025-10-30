@@ -1,0 +1,44 @@
+/******************************************************************************/
+/**
+ * @file        Animation.h
+ * @project     Pulse Protocol
+ * @author      Goh Pin Kai (primary) - 90%
+ * @author 		Ban Kai Wei Benjamin (secondary) - 10%
+ * @brief       Declares the Transform component for the ECS framework,
+ *              storing position, scale, rotation, animation state,
+ *              and sprite data. Provides interfaces for updating,
+ *              serializing, and deserializing transform properties.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
+#pragma once
+// #include "../ComponentJson/Component_System.h"
+// #include "../Math/Matrix_3x3.h"
+// #include "../Math/Vector_2D.h"
+#include "pch/pch.h" // FIRST
+#include "CoreEngine/ECS/Coordinator.h"
+#include "CoreEngine/Asset/AssetsManager.h"
+#include <glm/gtc/type_ptr.hpp>
+#include "glhelper.h"
+
+#ifndef FRAMEWORK_ANIMATION_H
+#define FRAMEWORK_ANIMATION_H
+
+namespace Framework
+{
+	class Animation 
+	{
+	public:
+		int currentFrame = 0;
+		float elapsedTime = 0.0f; // Time accumulator for animation
+		int totalFrames = 1;	  // Total frames in the sprite sheet
+		int columns = 1;		  // Columns in the sprite sheet
+		int rows = 1;			  // Rows in the sprite sheet
+		float animationSpeed = 2.f;
+		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
+		void Deserialize(const rapidjson::Value& in);
+	};
+}
+#endif // FRAMEWORK_ANIMATION_H
