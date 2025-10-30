@@ -34,6 +34,7 @@ void SceneManager::Init()
 
 void SceneManager::Update(float dt)
 {
+	(void)dt;
 	/*if (dt == 0)
 	{
 		std::cout << dt << std::endl;

@@ -34,7 +34,7 @@ class PlayerScript : public Iscript
 {
 	virtual void Init(Entity ID) override
 	{
-		
+		(void)ID;
 	}
 
 	virtual void Update(Entity ID) override
@@ -47,11 +47,12 @@ class PlayerScript : public Iscript
 		//		move entity
 
 		//}
+		(void)ID;
 	}
 
 	virtual void Exit(Entity ID) override
 	{
-
+		(void)ID;
 	}
 };
 
@@ -59,17 +60,17 @@ class EnemyScript : public Iscript
 {
 	virtual void Init(Entity ID) override
 	{
-
+		(void)ID;
 	}
 
 	virtual void Update(Entity ID) override
 	{
-		
+		(void)ID;
 	}
 
 	virtual void Exit(Entity ID) override
 	{
-
+		(void)ID;
 	}
 };
 

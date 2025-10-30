@@ -90,7 +90,6 @@ void GraphicsManager::Initialize()
 
     // Grab fonts from AssetsManager (must have been loaded already in engine bootstrap)
     {
-        auto& AM = Framework::AssetsManager::Instance();
         m_uiFont = AM.GetFont(UI_FONT_KEY);
         m_debugFont = AM.GetFont(DEBUG_FONT_KEY);
 

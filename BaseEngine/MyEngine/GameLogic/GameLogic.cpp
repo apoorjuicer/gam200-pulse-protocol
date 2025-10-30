@@ -22,6 +22,7 @@ void LogicSystem::Init()
 
 void LogicSystem::Update(float dt)
 {
+	(void)dt;
 	auto* g_coordinator = Coordinator::GetInstance();
 
 	// only update all entity that has scripts
