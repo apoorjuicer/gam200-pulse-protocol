@@ -29,7 +29,7 @@ GraphicsManager::GraphicsManager() : ft(nullptr), face(nullptr), face2(nullptr),
 void GraphicsManager::Initialize()
 {
 	GLHelper::print_specs();
-	glapp->init(editorWidth, editorHeight);
+	glapp->init(/*editorWidth, editorHeight*/);
 
 	// Subscribe to combo messages - DONT REMOVE, TEST FOR MESSAGE SYSTEM
 	auto* msgMgr = MessageManager::GetInstance();
