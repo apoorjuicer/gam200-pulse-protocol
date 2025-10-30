@@ -113,6 +113,8 @@ void TestCase::Init()
 
     std::cout << "============================================\n\n";
 
+    LoadGUIButtons();
+
     // --- UI entity for rhythm system (hidden bar) ---
     Entity inputEntity = g_coordinator->CreateEntity();
     Framework::Transform inputObj{};
@@ -302,4 +304,84 @@ void TestCase::Update(float dt)
         }
     }
 
+}
+
+// ==================================================================================
+// Load GUI Buttons from JSON
+// ==================================================================================
+void TestCase::LoadGUIButtons() {
+    auto* g_coordinator = Coordinator::GetInstance();
+    auto inputMgr = g_coordinator->GetSystem<InputManager>();
+
+    std::ifstream ifs("../../MyEngine/JSON/GUIButtons.json");
+    if (!ifs.is_open()) {
+        std::cerr << "[TestCase] Cannot open GUIButtons.json - trying alternate path\n";
+        ifs.open("../../MyEngine/JSON/GuiButtons.json");
+        if (!ifs.is_open()) {
+            std::cerr << "[TestCase] Failed to open GUI buttons JSON file\n";
+            return;
+        }
+    }
+
+    rapidjson::IStreamWrapper isw(ifs);
+    rapidjson::Document d;
+    d.ParseStream(isw);
+
+    if (d.HasParseError()) {
+        std::cerr << "[TestCase] JSON parse error\n";
+        return;
+    }
+
+    if (!d.HasMember("buttons") || !d["buttons"].IsArray()) {
+        std::cerr << "[TestCase] No buttons array\n";
+        return;
+    }
+
+    const auto& buttonsArray = d["buttons"];
+    float verticalSpacing = 100.0f;
+    float startY = 350.0f;
+
+    for (rapidjson::SizeType i = 0; i < buttonsArray.Size(); ++i) {
+        const auto& buttonJson = buttonsArray[i];
+
+        Entity buttonEntity = g_coordinator->CreateEntity();
+
+        // Transform Component
+        Framework::Transform transform;
+        transform.Pos.y = startY - (i * verticalSpacing);
+        transform.Pos.x = -600.0f;  // Left side of screen (world coords)
+        transform.Scale = { 200.0f, 50.0f };
+        transform.isVisible = true;
+        g_coordinator->AddComponent(buttonEntity, transform);
+
+        //// Renderable Component
+        //Framework::Renderable renderable;
+        //renderable.mdl_ref = 1.0f;
+        //renderable.shd_ref = 2.0f;  // test shader (solid color)
+        //renderable.spriteName = "";
+        //g_coordinator->AddComponent(buttonEntity, renderable);
+
+        // Animation Component
+        Framework::Animation animation;
+        animation.totalFrames = 1;
+        animation.columns = 1;
+        animation.rows = 1;
+        g_coordinator->AddComponent(buttonEntity, animation);
+
+        // GUIButton Component
+        GUIButton button;
+        button.Deserialize(buttonJson);
+        g_coordinator->AddComponent(buttonEntity, button);
+
+        // Register button with InputManager for input handling
+        if (inputMgr)
+            inputMgr->GUIButtonEntities.insert(buttonEntity);
+
+        guiButtonEntities.push_back(buttonEntity);
+
+        std::cout << "[TestCase] Created GUI button: " << button.buttonID
+            << " at (" << transform.Pos.x << ", " << transform.Pos.y << ")\n";
+    }
+
+    std::cout << "[TestCase] Loaded " << guiButtonEntities.size() << " GUI buttons\n";
 }

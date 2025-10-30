@@ -24,6 +24,7 @@
 
 #include <GLFW/glfw3.h> 
 #include "DebugConsole.h"
+#include "ProfilingTab.h"
 #include "pch/pch.h"
 #include "CoreEngine/ECS/System.h" // For Entity type: debugConsole.AddLogLevel(ConsoleLevel::Info, "Loaded %d textures", &Systems::EntityMember);
 #include "Graphics/Transform.h"
@@ -112,6 +113,8 @@ namespace MyEditor {
         s_Window = w;
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+
+        //ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;  // Enable docking
 
         ImGui::StyleColorsDark();
         ImGui_ImplGlfw_InitForOpenGL(s_Window, true);
@@ -398,8 +401,7 @@ namespace MyEditor {
                 // ===== DEBUG TAB =====
                 static DebugConsole debugConsole;
                 if (ImGui::BeginTabItem("Debug")) {
-                    ImGui::TextUnformatted("Debug info / logs / toggles...");
-                    debugConsole.Draw("Debug Console", nullptr);
+                    debugConsole.Draw();
                     // put your debug UI here
 
                     // Example on logging usage
@@ -411,36 +413,16 @@ namespace MyEditor {
                     debugConsole.AddLogLevel(ConsoleLevel::Warn, "FPS is low: %.1f", GLHelper::fps);
                     debugConsole.AddLogLevel(ConsoleLevel::Error, "Failed to open '%s'", "[filename]");
 
-                    // With explicit color (custom)
+                    //// With explicit color (custom)
                     debugConsole.AddLogColored(ImVec4(0.6f, 1.0f, 0.6f, 1.0f), "Green success message");
+
                     ImGui::EndTabItem();    
                 }
 
+                // ===== PROFILER TAB =====
+                static ProfilingPanel profilingPanel;
                 if (ImGui::BeginTabItem("Profiler")) {
-                    auto* profiler = ProfilingManager::GetInstance();
-                    const auto& profiles = profiler->GetDisplayProfiles();
-
-                    ImGui::TextUnformatted("Performance Metrics:");
-                    ImGui::Separator();
-                    ImGui::Text("FPS: %.1f", GLHelper::fps);
-                    ImGui::Text("Frame Time: %.2f ms", profiler->GetCachedFrameTime() * 1000.0);
-                    ImGui::Separator();
-                    ImGui::TextUnformatted("System Stats:");
-
-                    if (!profiles.empty()) {
-                        ImGui::BeginChild("ProfilesChild", ImVec2(0, 200), true);
-                        for (const auto& [systemName, profile] : profiles) {
-                            ImGui::Text("%s: %.2f%% (%.3f ms)",
-                                systemName.c_str(),
-                                profile.percentage,
-                                profile.totalTime * 1000.0);
-                        }
-                        ImGui::EndChild();
-                    }
-                    else {
-                        ImGui::TextColored(ImVec4(1, 1, 0, 1), "No profiling data yet...");
-                    }
-
+                    profilingPanel.Draw();
                     ImGui::EndTabItem();
                 }
 
@@ -701,10 +683,4 @@ namespace MyEditor {
         }
         return {};
     }
-
-
-
-
-
-
 }

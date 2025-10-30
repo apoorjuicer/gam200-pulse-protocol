@@ -50,7 +50,6 @@ public:
     void Initialize();
     void Update();
     void Shutdown();
-
     void OnResize(int width, int height);
 
 private:
@@ -64,12 +63,19 @@ private:
         const Framework::FontData* fontData
     );
 
+	// For In-Game GUI System
+	void RenderGUIButtons();
+	void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
+
 private:
     GLApp* glapp = nullptr;
 
     // Shared quad VAO/VBO for glyph rendering
     GLuint VAO = 0;
     GLuint VBO = 0;
+
+	// Shader and rendering details
+	GLuint whiteTexture;
 
     // Screen-space ortho for text drawing
     glm::mat4 projection{ 1.0f };

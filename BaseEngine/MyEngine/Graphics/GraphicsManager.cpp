@@ -42,7 +42,7 @@ GraphicsManager::~GraphicsManager()
 }
 
 void GraphicsManager::Initialize()
-{   
+{
     auto& AM = Framework::AssetsManager::Instance();
 
     AM.InitFonts();
@@ -154,12 +154,12 @@ void GraphicsManager::Update()
     // 1) Update and draw world (sprites etc.)
     glapp->update(Engine->GetWindow(), EntityMember);
     glapp->draw(EntityMember);
-	// 2) then draw text on top
-	//RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
+    // 2) then draw text on top
+    //RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
 
     // 2) Draw overlay text last
     auto& textShader = GLApp::shdrpgms[3];
-	// Build FPS string and heaviest system string and render it
+    // Build FPS string and heaviest system string and render it
     if (!MyEditor::IsEnabled()) {
         auto& AM = Framework::AssetsManager::Instance();
         const Framework::FontData* debugFont = AM.GetFont("liberation-mono_48");
@@ -174,28 +174,28 @@ void GraphicsManager::Update()
             // Add top system below FPS
             auto* profiler = ProfilingManager::GetInstance();
             const auto& profiles = profiler->GetDisplayProfiles();
-	//if (!MyEditor::IsEnabled()) {
-	//	std::ostringstream fpsText;
-	//	fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
-	//	RenderText(GLApp::shdrpgms[3], fpsText.str(), 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
+            //if (!MyEditor::IsEnabled()) {
+            //	std::ostringstream fpsText;
+            //	fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
+            //	RenderText(GLApp::shdrpgms[3], fpsText.str(), 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
 
-	//	// Add top system below FPS
-	//	auto* profiler = ProfilingManager::GetInstance();
-	//	const auto& profiles = profiler->GetDisplayProfiles();
+            //	// Add top system below FPS
+            //	auto* profiler = ProfilingManager::GetInstance();
+            //	const auto& profiles = profiler->GetDisplayProfiles();
 
-	//	std::string topSystem = "None";
-	//	double topPercentage = 0.0;
-	//	for (const auto& [systemName, profile] : profiles) {
-	//		if (profile.percentage > topPercentage) {
-	//			topPercentage = profile.percentage;
-	//			topSystem = systemName;
-	//		}
-	//	}
+            //	std::string topSystem = "None";
+            //	double topPercentage = 0.0;
+            //	for (const auto& [systemName, profile] : profiles) {
+            //		if (profile.percentage > topPercentage) {
+            //			topPercentage = profile.percentage;
+            //			topSystem = systemName;
+            //		}
+            //	}
 
-	//	std::ostringstream topText;
-	//	topText << topSystem << ": " << std::fixed << std::setprecision(2) << topPercentage << "%";
-	//	RenderText(GLApp::shdrpgms[3], topText.str(), 100.0f, 880.0f, 0.8f, glm::vec3(0.5f, 0.5f, 0), Characters2);
-	//}
+            //	std::ostringstream topText;
+            //	topText << topSystem << ": " << std::fixed << std::setprecision(2) << topPercentage << "%";
+            //	RenderText(GLApp::shdrpgms[3], topText.str(), 100.0f, 880.0f, 0.8f, glm::vec3(0.5f, 0.5f, 0), Characters2);
+            //}
 
             std::string topSystem = "None";
             double topPercentage = 0.0;
@@ -408,4 +408,69 @@ void GraphicsManager::OnResize(int width, int height)
 
     // If you want the projection to react to new size (dynamic UI scaling),
     // you can rebuild 'projection' here too.
+}
+
+void GraphicsManager::RenderGUIButtons()
+{
+    auto* coordinator = Coordinator::GetInstance();
+    auto inputMgr = coordinator->GetSystem<InputManager>();
+
+    if (!inputMgr) return;
+
+    auto& shader = GLApp::shdrpgms[2]; // Adjust if needed
+    shader.Use();
+
+    for (auto entity : inputMgr->GUIButtonEntities) {
+        if (!coordinator->HasComponent<GUIButton>(entity)) continue;
+        if (!coordinator->HasComponent<Framework::Transform>(entity)) continue;
+
+        auto& button = coordinator->GetComponent<GUIButton>(entity);
+        auto& transform = coordinator->GetComponent<Framework::Transform>(entity);
+
+        // Choose color based on button state
+        glm::vec4 color = (button.currentState == ButtonState::Hover)
+            ? button.hoverColor
+            : button.normalColor;
+
+        // Convert world coords to screen coords
+        // World: (-800..800, -450..450), Screen: (0..1600, 0..900)
+        float screenX = transform.Pos.x + 800.0f;
+        float screenY = 450.0f - transform.Pos.y; // Flip Y
+
+        // Draw colored rectangle
+        RenderColoredQuad(screenX, screenY, transform.Scale.x, transform.Scale.y, color);
+    }
+}
+
+void GraphicsManager::RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color)
+{
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    auto& shader = GLApp::shdrpgms[3];
+    shader.Use();
+
+    glUniformMatrix4fv(glGetUniformLocation(shader.GetHandle(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform3f(glGetUniformLocation(shader.GetHandle(), "textColor"), color.r, color.g, color.b);
+
+    // Bind white texture instead of unbinding
+    glBindTexture(GL_TEXTURE_2D, whiteTexture);
+    glBindVertexArray(VAO);
+
+    float vertices[6][4] = {
+        { x,         y,          0.0f, 0.0f },
+        { x,         y + height, 0.0f, 1.0f },
+        { x + width, y + height, 1.0f, 1.0f },
+        { x,         y,          0.0f, 0.0f },
+        { x + width, y + height, 1.0f, 1.0f },
+        { x + width, y,          1.0f, 0.0f }
+    };
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }

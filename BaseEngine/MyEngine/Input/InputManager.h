@@ -16,6 +16,8 @@
 #pragma once
 #include "pch/pch.h"
 
+struct GUIButton;
+
 class InputManager : public Systems {
 public:
 	InputManager();
@@ -47,6 +49,32 @@ public:
 	bool isMouseInGameViewport() const { return mouseInGameViewport; }
 
 	// -------------------------------------------------
+	// Scroll (For zoom)
+	// -------------------------------------------------
+	float scrollOffset = 0.0f;
+	float zoomLevel = 1.0f;
+	float zoomSpeed = 0.1f;
+	float minZoom = 0.1f;
+	float maxZoom = 5.0f;
+
+	// Getters
+	float getZoomLevel() const { return zoomLevel; }
+	float getScrollOffset() const { return scrollOffset; }
+
+	// Setters (for configuration)
+	void setZoomSpeed(float speed) { zoomSpeed = speed; }
+	void setZoomRange(float min, float max) {
+		minZoom = min;
+		maxZoom = max;
+	}
+	void setZoomLevel(float level) {
+		zoomLevel = std::clamp(level, minZoom, maxZoom);
+	}
+
+	// Utilities
+	void resetZoom() { zoomLevel = 1.0f; scrollOffset = 0.0f; }
+
+	// -------------------------------------------------
 	// Debug toggles
 	// -------------------------------------------------
 	bool isDebugRectsEnabled() const { return debugRectsEnabled; }
@@ -57,6 +85,7 @@ public:
 	bool isDebugGridEnabled() const { return debugGridEnabled; }
 
 	std::set<Entity> DebugEntities;
+	std::set<Entity> GUIButtonEntities;
 
 private:
 	GLFWwindow* window = nullptr;
@@ -82,9 +111,16 @@ private:
 	bool debugGridEnabled = false;
 	bool debugToggleKeyPressed[6] = { false };
 
+	// -------------------------------------------------
+	// In-Game GUI System
+	// -------------------------------------------------
+	Entity lastCreatedEntityByGUI = 0;
+
+	void updateGUIButtons();
+	bool isMouseOverButton(const glm::vec2& buttonPos, const glm::vec2& buttonSize, const glm::vec2& mouseWorld) const;
+	void executeButtonAction(const GUIButton& button);
+
+	// for raw input functions
 	void updateInputStates();
 	void processDebugToggles();
 };
-
-//// Forward declaration for external function
-//void ToggleObjectVisibility();

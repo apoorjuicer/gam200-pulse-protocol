@@ -36,6 +36,9 @@ public:
 
     // --- Mouse Collision ---
     bool CheckMouseCollision(const Vector2& mousePos, const AABB& box);
+
+    // --- In-Game GUI System Collision Usage (Virtual/Screen Space) -> M2 Rubric ---
+    bool CheckGUIButtonCollision(const glm::vec2& mouseVirtual, const glm::vec2& buttonPos, const glm::vec2& buttonSize);
 };
 
 #endif // COLLISION_H

@@ -68,3 +68,17 @@ bool CollisionManager::CheckMouseCollision(const Vector2& mousePos, const AABB& 
     return (mousePos.x >= box.min.x && mousePos.x <= box.max.x &&
         mousePos.y >= box.min.y && mousePos.y <= box.max.y);
 }
+
+bool CollisionManager::CheckGUIButtonCollision(const glm::vec2& mouseVirtual,
+    const glm::vec2& buttonPos,
+    const glm::vec2& buttonSize)
+{
+    // Button is centered at buttonPos with size buttonSize
+    float left = buttonPos.x - buttonSize.x * 0.5f;
+    float right = buttonPos.x + buttonSize.x * 0.5f;
+    float bottom = buttonPos.y - buttonSize.y * 0.5f;
+    float top = buttonPos.y + buttonSize.y * 0.5f;
+
+    return (mouseVirtual.x >= left && mouseVirtual.x <= right &&
+        mouseVirtual.y >= bottom && mouseVirtual.y <= top);
+}

@@ -17,9 +17,9 @@
  /******************************************************************************/
 
 #pragma once
+#include "pch/pch_temp.h"
 #include "Types.h"
 #include "System.h"
-#include "pch/pch_temp.h"
 #include "SystemManager.h"
 #include "EntityManager.h"
 #include "ComponentArray.h"
