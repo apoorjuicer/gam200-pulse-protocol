@@ -188,117 +188,107 @@ glm::vec2 InputManager::getMousePosition() const {
 	return mousePosition;
 }
 
-// FOR GUI BUTTON SECTION
-//void InputManager::LoadGUIButtons() {
-//    auto* g_coordinator = Coordinator::GetInstance();
-//    
-//    std::ifstream ifs("../../MyEngine/JSON/GUIButtons.json");
-//    if (!ifs.is_open()) {
-//        std::cerr << "[InputManager] Cannot open GUIButtons.json" << std::endl;
-//        return;
-//    }
-//    
-//    rapidjson::IStreamWrapper isw(ifs);
-//    rapidjson::Document d;
-//    d.ParseStream(isw);
-//    
-//    if (!d.HasMember("buttons") || !d["buttons"].IsArray()) {
-//        std::cerr << "[InputManager] No buttons array in config" << std::endl;
-//        return;
-//    }
-//    
-//    const auto& buttonsArray = d["buttons"];
-//    for (rapidjson::SizeType i = 0; i < buttonsArray.Size(); ++i) {
-//        const auto& buttonJson = buttonsArray[i];
-//        
-//        Entity entity = g_coordinator->CreateEntity();
-//        
-//        Framework::Transform transform;
-//        if (buttonJson.HasMember("position") && buttonJson["position"].IsObject()) {
-//            auto& pos = buttonJson["position"];
-//            if (pos.HasMember("x")) transform.Pos.x = pos["x"].GetFloat();
-//            if (pos.HasMember("y")) transform.Pos.y = pos["y"].GetFloat();
-//        }
-//        if (buttonJson.HasMember("size") && buttonJson["size"].IsObject()) {
-//            auto& size = buttonJson["size"];
-//            if (size.HasMember("x")) transform.Scale.x = size["x"].GetFloat();
-//            if (size.HasMember("y")) transform.Scale.y = size["y"].GetFloat();
-//        }
-//        transform.isVisible = true;
-//        g_coordinator->AddComponent(entity, transform);
-//        
-//        GUIButton button;
-//        button.Deserialize(buttonJson);
-//        g_coordinator->AddComponent(entity, button);
-//        
-//        std::cout << "[InputManager] Created button: " << button.buttonID << std::endl;
-//    }
-//}
-//
-//void InputManager::UpdateGUIButtons() {
-//    auto* g_coordinator = Coordinator::GetInstance();
-//    glm::vec2 mousePos = mousePositionVirtual;
-//    
-//    for (auto const& entity : g_coordinator->GetEntitiesWithComponent<GUIButton>()) {
-//        if (!g_coordinator->HasComponent<GUIButton>(entity)) continue;
-//        if (!g_coordinator->HasComponent<Framework::Transform>(entity)) continue;
-//        
-//        auto& button = g_coordinator->GetComponent<GUIButton>(entity);
-//        auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
-//        
-//        if (!button.isEnabled) {
-//            button.currentState = GUIButton::State::Normal;
-//            continue;
-//        }
-//        
-//        glm::vec2 buttonPos(transform.Pos.x, transform.Pos.y);
-//        glm::vec2 buttonSize(transform.Scale.x, transform.Scale.y);
-//        bool isMouseOver = IsMouseOverButton(buttonPos, buttonSize);
-//        
-//        if (isMouseOver) {
-//            button.currentState = GUIButton::State::Hover;
-//            if (isMouseButtonReleased(0)) {
-//                ExecuteButtonAction(button);
-//            }
-//        } else {
-//            button.currentState = GUIButton::State::Normal;
-//        }
-//    }
-//}
-//
-//bool InputManager::IsMouseOverButton(const glm::vec2& buttonPos, const glm::vec2& buttonSize) const {
-//    glm::vec2 mousePos = mousePositionVirtual;
-//    
-//    float left = buttonPos.x - buttonSize.x * 0.5f;
-//    float right = buttonPos.x + buttonSize.x * 0.5f;
-//    float bottom = buttonPos.y - buttonSize.y * 0.5f;
-//    float top = buttonPos.y + buttonSize.y * 0.5f;
-//    
-//    return (mousePos.x >= left && mousePos.x <= right &&
-//            mousePos.y >= bottom && mousePos.y <= top &&
-//            mouseInGameViewport);
-//}
-//
-//void InputManager::ExecuteButtonAction(const GUIButton& button) {
-//    auto* g_coordinator = Coordinator::GetInstance();
-//    Factory factory;
-//    
-//    std::cout << "[InputManager] Button clicked: " << button.buttonID << std::endl;
-//    
-//    if (button.actionType == "CreateEntity") {
-//        if (!button.entityJsonPath.empty()) {
-//            Entity newEntity = factory.CreateEntityFromJson(button.entityJsonPath);
-//            lastCreatedEntityByGUI = newEntity;
-//            std::cout << "[InputManager] Created entity (ID: " << newEntity << ")" << std::endl;
-//        }
-//    } 
-//    else if (button.actionType == "DestroyEntity") {
-//        if (lastCreatedEntityByGUI != 0) {
-//            g_coordinator->DestroyEntity(lastCreatedEntityByGUI);
-//            std::cout << "[InputManager] Destroyed entity: " << lastCreatedEntityByGUI << std::endl;
-//            lastCreatedEntityByGUI = 0;
-//        } else {
-//            std::cout << "[InputManager] No entity to destroy!" << std::endl;
-//        }
-//    }
-//}
+// =====================================================================
+// IN-GAME GUI SYSTEM (M2 Rubric)
+// =====================================================================
+
+void InputManager::updateGUIButtons() {
+	auto* g_coordinator = Coordinator::GetInstance();
+	glm::vec2 mouseVirtual = mousePositionVirtual;
+
+	// Convert virtual mouse to world space for button collision
+	// Virtual: (0..1600, 0..900), World: (-800..800, -450..450)
+	float worldX = mouseVirtual.x - 800.0f;
+	float worldY = mouseVirtual.y - 450.0f;
+	glm::vec2 mouseWorld(worldX, worldY);
+
+	for (auto const& entity : GUIButtonEntities) {
+		if (!g_coordinator->HasComponent<GUIButton>(entity)) continue;
+		if (!g_coordinator->HasComponent<Framework::Transform>(entity)) continue;
+
+		auto& button = g_coordinator->GetComponent<GUIButton>(entity);
+		auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
+
+		if (!button.isEnabled) {
+			button.currentState = ButtonState::Normal;
+			continue;
+		}
+
+		glm::vec2 buttonPos(transform.Pos.x, transform.Pos.y);
+		glm::vec2 buttonSize(transform.Scale.x, transform.Scale.y);
+		bool isMouseOver = isMouseOverButton(buttonPos, buttonSize, mouseWorld);
+
+		// Update button state based on mouse interaction
+		button.wasClickedThisFrame = false;
+
+		if (isMouseOver) {
+			button.currentState = ButtonState::Hover;
+
+			if (isMouseButtonTriggered(0)) {
+				std::cout << "[GUI Button] Button clicked: " << button.buttonID << std::endl;
+				button.wasClickedThisFrame = true;
+				executeButtonAction(button);
+			}
+		}
+		else {
+			button.currentState = ButtonState::Normal;
+		}
+	}
+}
+
+bool InputManager::isMouseOverButton(const glm::vec2& buttonPos, const glm::vec2& buttonSize,
+	const glm::vec2& mouseWorld) const {
+	float left = buttonPos.x - buttonSize.x * 0.5f;
+	float right = buttonPos.x + buttonSize.x * 0.5f;
+	float bottom = buttonPos.y - buttonSize.y * 0.5f;
+	float top = buttonPos.y + buttonSize.y * 0.5f;
+
+	return (mouseWorld.x >= left && mouseWorld.x <= right &&
+		mouseWorld.y >= bottom && mouseWorld.y <= top &&
+		mouseInGameViewport);
+}
+
+void InputManager::executeButtonAction(const GUIButton& button) {
+	auto* g_coordinator = Coordinator::GetInstance();
+
+	std::cout << "[InputManager] Executing action: " << button.actionType
+		<< " for button: " << button.buttonID << std::endl;
+
+	if (button.actionType == "CreateEntity") {
+		// Create entity at center
+		Entity newEntity = g_coordinator->CreateEntity();
+
+		Framework::Transform transform{};
+		Framework::Renderable renderable{};
+		Framework::Animation animation{};
+
+		transform.Pos = { 0.0f, 0.0f };
+		transform.Scale = { 150.0f, 150.0f };
+		transform.isVisible = true;
+
+		renderable.mdl_ref = 1.0f;
+		renderable.shd_ref = 2.0f;
+		renderable.spriteName = "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png";
+
+		animation.totalFrames = 1;
+		animation.columns = 1;
+		animation.rows = 1;
+
+		g_coordinator->AddComponent(newEntity, transform);
+		g_coordinator->AddComponent(newEntity, renderable);
+		g_coordinator->AddComponent(newEntity, animation);
+
+		lastCreatedEntityByGUI = newEntity;
+		std::cout << "[InputManager] Created entity (ID: " << newEntity << ") at center\n";
+	}
+	else if (button.actionType == "DestroyEntity") {
+		if (lastCreatedEntityByGUI != 0) {
+			g_coordinator->DestroyEntity(lastCreatedEntityByGUI);
+			std::cout << "[InputManager] Destroyed entity: " << lastCreatedEntityByGUI << std::endl;
+			lastCreatedEntityByGUI = 0;
+		}
+		else {
+			std::cout << "[InputManager] No entity to destroy!\n";
+		}
+	}
+}

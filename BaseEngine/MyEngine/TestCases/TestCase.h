@@ -21,8 +21,11 @@ public:
     void Update(float dt) override;
 
 private:
+    void LoadGUIButtons();
+
     CollisionManager collision;              // for hitbox and collision utility
     std::vector<Entity> EntityNPC;           // hero and monsters
+    std::vector<Entity> guiButtonEntities;   // for the in-game gui system (button)
     bool monsterCanMove = false;
 };
 

@@ -107,6 +107,8 @@ void GraphicsManager::Update()
 	glapp->update(Engine->GetWindow(), EntityMember);
 	glapp->draw(EntityMember);                     // 1) draw your scene first
 
+	RenderGUIButtons();
+
 	// 2) then draw text on top
 	RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
 
@@ -133,6 +135,7 @@ void GraphicsManager::Update()
 		topText << topSystem << ": " << std::fixed << std::setprecision(2) << topPercentage << "%";
 		RenderText(GLApp::shdrpgms[3], topText.str(), 100.0f, 880.0f, 0.8f, glm::vec3(0.5f, 0.5f, 0), Characters2);
 	}
+
 
 	// Controls display - right side or top corner
 	int width, height;
@@ -168,6 +171,57 @@ void GraphicsManager::Shutdown()
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	std::cout << "[GraphicsManager] Shutdown completed" << std::endl;
+}
+
+void GraphicsManager::RenderGUIButtons()
+{
+	auto* coordinator = Coordinator::GetInstance();
+	auto inputMgr = coordinator->GetSystem<InputManager>();
+
+	if (!inputMgr) return;
+
+	auto& shader = GLApp::shdrpgms[2]; // Adjust if needed
+	shader.Use();
+
+	for (auto entity : inputMgr->GUIButtonEntities) {
+		if (!coordinator->HasComponent<GUIButton>(entity)) continue;
+		if (!coordinator->HasComponent<Framework::Transform>(entity)) continue;
+
+		auto& button = coordinator->GetComponent<GUIButton>(entity);
+		auto& transform = coordinator->GetComponent<Framework::Transform>(entity);
+
+		// Choose color based on button state
+		glm::vec4 color = (button.currentState == ButtonState::Hover)
+			? button.hoverColor
+			: button.normalColor;
+
+		// Convert world coords to screen coords
+		// World: (-800..800, -450..450), Screen: (0..1600, 0..900)
+		float screenX = transform.Pos.x + 800.0f;
+		float screenY = 450.0f - transform.Pos.y; // Flip Y
+
+		// Draw colored rectangle
+		RenderColoredQuad(screenX, screenY, transform.Scale.x, transform.Scale.y, color);
+	}
+}
+
+void GraphicsManager::RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color)
+{
+	// Use immediate mode or VBO to render a colored quad
+	// This is a simple implementation using glBegin/glEnd
+	// (You can optimize this later with VBOs)
+
+	glDisable(GL_TEXTURE_2D);
+	glColor4f(color.r, color.g, color.b, color.a);
+
+	glBegin(GL_QUADS);
+	glVertex2f(x, y);                    // Top-left
+	glVertex2f(x + width, y);           // Top-right
+	glVertex2f(x + width, y + height);  // Bottom-right
+	glVertex2f(x, y + height);          // Bottom-left
+	glEnd();
+
+	glEnable(GL_TEXTURE_2D);
 }
 
 bool GraphicsManager::LoadFont(const std::string& fontPath,

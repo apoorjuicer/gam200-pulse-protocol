@@ -16,6 +16,8 @@
 #pragma once
 #include "pch/pch.h"
 
+struct GUIButton;
+
 class InputManager : public Systems {
 public:
 	InputManager();
@@ -57,6 +59,7 @@ public:
 	bool isDebugGridEnabled() const { return debugGridEnabled; }
 
 	std::set<Entity> DebugEntities;
+	std::set<Entity> GUIButtonEntities;
 
 private:
 	GLFWwindow* window = nullptr;
@@ -82,18 +85,16 @@ private:
 	bool debugGridEnabled = false;
 	bool debugToggleKeyPressed[6] = { false };
 
-	// for guibuttons
-	//Entity lastCreatedEntityByGUI = 0;
+	// -------------------------------------------------
+	// In-Game GUI System
+	// -------------------------------------------------
+	Entity lastCreatedEntityByGUI = 0;
 
-	//void LoadGUIButtons();
-	//void UpdateGUIButtons();
-	//bool IsMouseOverButton(const glm::vec2& buttonPos, const glm::vec2& buttonSize) const;
-	//void ExecuteButtonAction(const GUIButton& button);
+	void updateGUIButtons();
+	bool isMouseOverButton(const glm::vec2& buttonPos, const glm::vec2& buttonSize, const glm::vec2& mouseWorld) const;
+	void executeButtonAction(const GUIButton& button);
 
 	// for raw input functions
 	void updateInputStates();
 	void processDebugToggles();
 };
-
-//// Forward declaration for external function
-//void ToggleObjectVisibility();

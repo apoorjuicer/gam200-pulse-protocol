@@ -317,67 +317,68 @@ void CoreEngine::Update(float dt)
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
 
-	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
+	auto profiler = ProfilingManager::GetInstance();
 
-	if (g_graphicsSystem) g_graphicsSystem->Update();
+	profiler->StartSystem("Input System");
 	if (g_inputSystem) g_inputSystem->Update(dt);
-	if (g_rhythmSystem) g_rhythmSystem->Update(dt);
+	profiler->EndSystem("Input System");
 
+	profiler->StartSystem("Scene System");
+	if (g_sceneSystem) g_sceneSystem->Update(dt);
+	profiler->EndSystem("Scene System");
+
+	profiler->StartSystem("LogicSystem");
 	g_coordinator->UpdateAllSystems(dt);
-	Test.Update(dt);
+	profiler->EndSystem("LogicSystem");
+
+	profiler->StartSystem("RhythmGameplayInput");
+	if (g_rhythmSystem) g_rhythmSystem->Update(dt);
+	profiler->EndSystem("RhythmGameplayInput");
+
+	profiler->StartSystem("Graphics System");
+	if (g_graphicsSystem) g_graphicsSystem->Update();
+	profiler->EndSystem("Graphics System");
+
+	profiler->StartSystem("Audio System");
+	if (g_audioSystem) g_audioSystem->Update();
+	profiler->EndSystem("Audio System");
+
+	profiler->StartSystem("Collision System");
+	// If collision is in UpdateAllSystems, remove this
+	profiler->EndSystem("Collision System");
 }
 
 
 void CoreEngine::GameLoop()
 {
 	LastTime = timeGetTime();
-
 	auto profiler = ProfilingManager::GetInstance();
 
-	// application loop 
-	static bool keystateP = false;
-	static bool PKeyWasPressed = false;
 	while (!glfwWindowShouldClose(window) && GameRunning)
 	{
-		//Get the current time in milliseconds
 		unsigned currenttime = timeGetTime();
-
-		//Convert it to the time passed since the last frame (in seconds)
 		float dt = (currenttime - LastTime) / 1000.0f;
-
-		//Update the when the last update started
 		LastTime = currenttime;
 
-		profiler->StartFrame();
-
-		//  1. Poll event(input key)
+		// Don't start frame here
 		glfwPollEvents();
 
-		//  2. update engine cpp
-		Update(dt);
+		// Start profiling ONLY for ECS systems
+		profiler->StartFrame();
+		Update(dt);  // This contains all your ECS system profiling
+		profiler->EndFrame();
 
-		//  3. ImGui update
 #ifdef ENABLE_EDITOR
 		MyEditor::NewFrame();
 #endif
 
-		//  4. game update(NOT A WHILE LOOP) gsm
-
-		//  5. game rendering
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
-
-		profiler->EndFrame();
-
-		//  6. ImGui rendering
+		// These are NOT profiled (outside StartFrame/EndFrame)
 #ifdef ENABLE_EDITOR
 		MyEditor::Draw();
 		MyEditor::Render();
 #endif
 
 		RenderDebugDraw();
-
-		//7. Swap Buffer(like two window)
 		glfwSwapBuffers(window);
 
 		profiler->Reset();
