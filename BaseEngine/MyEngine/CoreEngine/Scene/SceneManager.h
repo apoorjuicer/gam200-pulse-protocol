@@ -49,7 +49,8 @@ private:
 	std::string PreviousScene;
 	std::vector<Entity> SceneEntityList;
 
-	std::string StartingScene = "../../MyEngine/JSON/MainMenu.json";
+	//std::string StartingScene = "../../MyEngine/JSON/MainMenu.json"; 
+	std::string StartingScene = "../../MyEngine/JSON/Level1.json"; // level 1 for reg to test scripts 
 
 	void Deserialize(const rapidjson::Value& in);
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;

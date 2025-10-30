@@ -28,12 +28,17 @@ void SceneManager::Init()
 	PreviousScene = CurrentScene;
 
 	// testing for it it works 
-	std::string testpath = "Level1";
-	CurrentScene = testpath;
+	//std::string testpath = "MainMenu";
+	//CurrentScene = testpath;
 }
 
 void SceneManager::Update(float dt)
 {
+	/*if (dt == 0)
+	{
+		std::cout << dt << std::endl;
+	}*/
+
 	if (CurrentScene != PreviousScene)
 	{
 		SaveCurrentScene(); // normally just for ImGui but can use here for testing 
@@ -282,9 +287,8 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 			if (component.HasMember("render") && component["render"].IsObject())
 			{
-				Framework::Renderable r;
-				r.Deserialize(component["render"]);
-				g_coordinator->AddComponent<Framework::Renderable>(entity, r);
+				auto& change = g_coordinator->GetComponent<Framework::Renderable>(entity);
+				change.Deserialize(component["render"]);
 			}
 			
 			if (component.HasMember("animation") && component["animation"].IsObject())

@@ -5,6 +5,10 @@
 #include "../CoreEngine/ECS/Coordinator.h"
 //#include "../MyEngine/Components/ScriptName.h"
 
+//components:
+#include "../Graphics/Transform.h"
+#include "../GameLogic/GameLogic.h"
+
 //Serialize
 #pragma warning(push, 0)
 #include <rapidjson/document.h>     // for Document, Value, AllocatorType

@@ -61,18 +61,16 @@ Entity Factory::DefaultObj()
 	t.Rotation = {0,0};
 	t.Pos = {0,0};
 
-	/*
-	Render r;
-	r.angle_disp = 0.f;
-	r.angle_speed = 0.f;
+	
+	Framework::Renderable r;
 	r.mdl_ref = 0.f;
 	r.shd_ref = 0.f;
 	r.textureID = 0;
 	r.spriteName;
-	*/
+	
 
 	g_coordinator->AddComponent(entity, t);
-	//g_coordinator->AddComponent(entity, r);
+	g_coordinator->AddComponent(entity, r);
 	return entity;
 }
 
