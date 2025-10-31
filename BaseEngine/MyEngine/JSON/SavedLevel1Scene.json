@@ -7,7 +7,7 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": 0.0
+                            "y": -821.0
                         },
                         "scale": {
                             "x": 1600.0,
@@ -40,7 +40,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.3737323582172394,
+                        "elapsedTime": 0.17849530279636384,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
@@ -54,8 +54,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -350.0,
-                            "y": 0.0
+                            "x": -800.0,
+                            "y": -191.5
                         },
                         "scale": {
                             "x": 500.0,
@@ -87,8 +87,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 2,
-                        "elapsedTime": 0.3737323582172394,
+                        "currentFrame": 0,
+                        "elapsedTime": 0.17849530279636384,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -102,7 +102,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 800.0,
+                            "x": 28.5,
                             "y": 0.0
                         },
                         "scale": {
@@ -136,7 +136,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.3737323582172394,
+                        "elapsedTime": 0.17849530279636384,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,

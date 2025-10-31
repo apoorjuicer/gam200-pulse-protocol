@@ -42,7 +42,7 @@ void SceneManager::Update(float dt)
 
 	if (CurrentScene != PreviousScene)
 	{
-		SaveCurrentScene(); // normally just for ImGui but can use here for testing
+		//SaveCurrentScene(); // normally just for ImGui but can use here for testing
 
 		std::string NewScenePath = "../../MyEngine/JSON/" + CurrentScene +".json";
 		LoadSceneFromJson(NewScenePath);
