@@ -115,7 +115,7 @@ private:
 	// -------------------------------------------------
 	// In-Game GUI System
 	// -------------------------------------------------
-	Entity lastCreatedEntityByGUI = 0;
+	std::vector<Entity> createdEntitiesByGUI;
 
 	void updateGUIButtons();
 	bool isMouseOverButton(const glm::vec2& buttonPos, const glm::vec2& buttonSize, const glm::vec2& mouseWorld) const;

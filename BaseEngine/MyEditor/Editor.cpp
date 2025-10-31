@@ -192,7 +192,7 @@ namespace MyEditor {
         {
             ImGuiWindowFlags top_flags =
                 ImGuiWindowFlags_NoTitleBar |
-                ImGuiWindowFlags_NoScrollbar |
+                ImGuiWindowFlags_NoScrollbar |  
                 ImGuiWindowFlags_NoScrollWithMouse |
                 panel_flags;
 

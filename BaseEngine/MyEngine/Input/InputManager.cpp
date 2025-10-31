@@ -252,40 +252,46 @@ glm::vec2 InputManager::getMousePosition() const {
 void InputManager::updateGUIButtons() {
 	auto* g_coordinator = Coordinator::GetInstance();
 
-	// mousePositionVirtual is BOTTOM-origin (0 = bottom, 900 = top)
-	// But screen rendering is TOP-origin (0 = top, 900 = bottom)
-	// So we need to flip Y!
-	float screenX = mousePositionVirtual.x;
-	float screenY = 900.0f - mousePositionVirtual.y;  // CRITICAL: Flip to top-origin!
+	float mouseX = mousePosition.x;
+	float mouseY = mousePosition.y;
 
 	for (auto const& entity : GUIButtonEntities) {
 		if (!g_coordinator->HasComponent<GUIButton>(entity)) continue;
-		if (!g_coordinator->HasComponent<Framework::Transform>(entity)) continue;
 
 		auto& button = g_coordinator->GetComponent<GUIButton>(entity);
-		auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
 
 		if (!button.isEnabled) {
 			button.currentState = ButtonState::Normal;
 			continue;
 		}
 
-		// Convert button to screen coords (SAME as rendering!)
-		float btnScreenX = transform.Pos.x + 800.0f;
-		float btnScreenY = 450.0f - transform.Pos.y;
+		bool isMouseOver = false;
+		bool editorOn = MyEditor::IsEnabled();
 
-		// Collision bounds
-		float halfW = transform.Scale.x * 0.5f;  // 100
-		float halfH = transform.Scale.y * 0.5f;  // 40
-
-		float left = btnScreenX - halfW;
-		float right = btnScreenX + halfW;
-		float top = btnScreenY - halfH;
-		float bottom = btnScreenY + halfH;
-
-		bool isMouseOver = (screenX >= left && screenX <= right &&
-			screenY >= top && screenY <= bottom &&
-			mouseInGameViewport);
+		if (button.buttonID == "btn_create") {
+			if (editorOn) {
+				// Editor ON - viewport is smaller
+				isMouseOver = (mouseX >= 360 && mouseX <= 490 &&
+					mouseY >= 70 && mouseY <= 130);
+			}
+			else {
+				// Editor OFF - fullscreen
+				isMouseOver = (mouseX >= 85 && mouseX <= 250 &&
+					mouseY >= 45 && mouseY <= 115);
+			}
+		}
+		else if (button.buttonID == "btn_destroy") {
+			if (editorOn) {
+				// Editor ON
+				isMouseOver = (mouseX >= 530 && mouseX <= 655 &&
+					mouseY >= 70 && mouseY <= 125);
+			}
+			else {
+				// Editor OFF - fullscreen
+				isMouseOver = (mouseX >= 330 && mouseX <= 495 &&
+					mouseY >= 50 && mouseY <= 110);
+			}
+		}
 
 		button.wasClickedThisFrame = false;
 
@@ -346,17 +352,28 @@ void InputManager::executeButtonAction(const GUIButton& button) {
 		g_coordinator->AddComponent(newEntity, renderable);
 		g_coordinator->AddComponent(newEntity, animation);
 
-		lastCreatedEntityByGUI = newEntity;
-		std::cout << "[InputManager] Created entity (ID: " << newEntity << ") at center\n";
+		createdEntitiesByGUI.push_back(newEntity);
+		//std::cout << "[InputManager] Created entity (ID: " << newEntity << ") at center\n";
 	}
 	else if (button.actionType == "DestroyEntity") {
-		if (lastCreatedEntityByGUI != 0) {
-			g_coordinator->DestroyEntity(lastCreatedEntityByGUI);
-			std::cout << "[InputManager] Destroyed entity: " << lastCreatedEntityByGUI << std::endl;
-			lastCreatedEntityByGUI = 0;
+		if (!createdEntitiesByGUI.empty()) {
+			Entity toDestroy = createdEntitiesByGUI.back();  // Get last one
+			createdEntitiesByGUI.pop_back();  // Remove from list
+
+			//std::cout << "[DEBUG] About to destroy entity: " << toDestroy << std::endl;
+			//std::cout << "[DEBUG] Entities left in list: " << createdEntitiesByGUI.size() << std::endl;
+
+			// Check if entity still has components before destroying
+			//if (g_coordinator->HasComponent<Framework::Transform>(toDestroy)) {
+			//	std::cout << "[DEBUG] Entity has Transform - destroying now..." << std::endl;
+			//}
+
+			g_coordinator->DestroyEntity(toDestroy);
+			//std::cout << "[InputManager] Destroyed entity: " << toDestroy << std::endl;
 		}
 		else {
-			std::cout << "[InputManager] No entity to destroy!\n";
+			std::cout << "[InputManager] No entities to destroy! List size: "
+				<< createdEntitiesByGUI.size() << std::endl;
 		}
 	}
 }

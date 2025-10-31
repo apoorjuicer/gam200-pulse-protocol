@@ -462,17 +462,38 @@ void GraphicsManager::RenderGUIButtons()
         float screenX = transform.Pos.x + 800.0f;
         float screenY = 450.0f - transform.Pos.y;
 
-        // ADD THIS DEBUG OUTPUT
-        static int frameCount = 0;
-        if (frameCount++ < 60) {  // Print for first 60 frames
-            std::cout << "[RenderButton] '" << button.buttonID
-                << "' World: (" << transform.Pos.x << ", " << transform.Pos.y
-                << ") Screen: (" << screenX << ", " << screenY
-                << ") Size: (" << transform.Scale.x << ", " << transform.Scale.y << ")"
-                << std::endl;
-        }
-
+        // Draw colored rectangle
         RenderColoredQuad(screenX, screenY, transform.Scale.x, transform.Scale.y, color);
+
+        // ADD TEXT LABEL ON THE BUTTON
+        if (m_uiFont) {
+            // Calculate text size to center it properly
+            float textScale = 0.8f;
+
+            float estimatedTextWidth = button.label.length() * 10.0f * textScale;
+            float textX = screenX - (estimatedTextWidth * 0.5f) - 30.0f;
+            float textY = screenY + 5.0f;
+
+            // Different adjustments for each button, prevents both text from moving together
+            if (button.buttonID == "btn_create") {
+                textX -= 10.0f;  // Move "Create Hero" left
+                textY += 6.0f;   // Move down
+            }
+            else if (button.buttonID == "btn_destroy") {
+                textX -= 10.0f;  // Move "Destroy Hero" left
+                textY += 6.0f;   // Move down
+            }
+
+            RenderText(
+                GLApp::shdrpgms[3],
+                button.label,
+                textX,
+                textY,
+                textScale,
+                glm::vec3(1.0f, 1.0f, 1.0f),  // White text
+                m_uiFont
+            );
+        }
     }
 }
 
