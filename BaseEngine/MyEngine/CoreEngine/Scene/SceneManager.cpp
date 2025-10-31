@@ -42,8 +42,7 @@ void SceneManager::Update(float dt)
 
 	if (CurrentScene != PreviousScene)
 	{
-		SaveCurrentScene(); // normally just for ImGui but can use here for testing 
-		UnloadCurrentScene();
+		//SaveCurrentScene(); // normally just for ImGui but can use here for testing
 
 		std::string NewScenePath = "../../MyEngine/JSON/" + CurrentScene +".json";
 		LoadSceneFromJson(NewScenePath);
@@ -102,7 +101,7 @@ void SceneManager::SaveCurrentScene()
 			auto& script = g_coordinator->GetComponent<Framework::Transform>(entity);
 			script.Serialize(TransfromVal, alloc);
 
-			ComponentObj.AddMember("transfrom", TransfromVal, alloc);
+			ComponentObj.AddMember("transform", TransfromVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
@@ -220,6 +219,8 @@ void SceneManager::UnloadCurrentScene()
 
 void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE JSON FILE 
 {
+	UnloadCurrentScene();
+
 #ifdef _DEBUG
 	std::cout << "\n================================================" << std::endl;
 	std::cout << "       [SceneManager] Loading in progress!" << std::endl;
@@ -270,7 +271,8 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			continue;
 		}
 
-		Entity entity = factory.DefaultObj();	   // create entity with transform and render component.
+		//Entity entity = factory.DefaultObj();	   // create entity with transform and render component.
+		Entity entity = g_coordinator->CreateEntity();
 		const auto& components = JsonEntity["components"];  // Get the components array
 
 		// array of all the component in this entity
@@ -293,11 +295,12 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				/*void AddTransformComponent(Entity entity);
 				{
 					Framework::Transform t;
-					t.Deserialize(component["script"]);
+					t.Deserialize(component["transform"]);
 					g_coordinator->AddComponent<Framework::Transform>(entity, t);
 				}*/
-				auto& change = g_coordinator->GetComponent<Framework::Transform>(entity);
-				change.Deserialize(component["transform"]);
+				Framework::Transform t;
+				t.Deserialize(component["transform"]);
+				g_coordinator->AddComponent<Framework::Transform>(entity, t);
 			}
 
 			if (component.HasMember("script") && component["script"].IsObject())
@@ -309,8 +312,9 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 			if (component.HasMember("render") && component["render"].IsObject())
 			{
-				auto& change = g_coordinator->GetComponent<Framework::Renderable>(entity);
-				change.Deserialize(component["render"]);
+				Framework::Renderable r;
+				r.Deserialize(component["render"]);
+				g_coordinator->AddComponent<Framework::Renderable>(entity, r);
 			}
 			
 			if (component.HasMember("animation") && component["animation"].IsObject())

@@ -2,6 +2,50 @@
     "scene": "Level1",
     "entities": 
     [       
+        {"Type": "Background",
+        "components":
+        [
+            {
+                "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 1600.0,
+                            "y": 900.0
+                        },
+                        "isVisible": true
+                    }
+            },
+
+            {
+                "render": 
+                {
+                    "mdl_ref": 0.0,
+                    "shd_ref": 1.0,
+                    "textureID": 0,
+                    "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg"
+                }
+            },
+
+            {
+                "animation": {
+                    "totalFrames": 1,
+                    "columns": 1,
+                    "rows": 1
+                }
+            },
+            
+            {
+                "script":  
+                    {
+                        "ScriptName": "PlayerScript"
+                    }
+            }
+        ]
+        },
+
         {"Type": "Player",
         "components":
         [
@@ -125,5 +169,7 @@
 
             ]
         }
+
+        
     ]
 }

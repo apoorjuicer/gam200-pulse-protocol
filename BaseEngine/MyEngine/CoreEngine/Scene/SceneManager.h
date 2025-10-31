@@ -14,8 +14,11 @@
 /******************************************************************************/
 #pragma once
 #include "pch/pch_temp.h"
-#include "../Graphics/Transform.h"
 #include "../GameLogic/GameLogic.h"
+#include "../Graphics/Transform.h"
+#include "../Graphics/Animation.h"
+#include "../Graphics/Renderable.h"
+
 #include "../CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
 #include "CoreEngine/Factory/Factory.h"
