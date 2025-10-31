@@ -2,54 +2,116 @@
     "scene": "MainMenu",
     "entities": 
     [       
-        {"Type": "Hero",
+        {"Type": "Background",
         "components":
         [
             {
-                "transform": 
-                {
-                    "position": 
-                    {
-                        "x": -50.0,
-                        "y": -50.0
+                "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 1600.0,
+                            "y": 900.0
+                        },
+                        "isVisible": true
                     }
+            },
+
+            {
+                "render": 
+                {
+                    "mdl_ref": 0.0,
+                    "shd_ref": 1.0,
+                    "textureID": 0,
+                    "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg"
                 }
             },
-            
+
             {
-                "script":  
-                    {
-                        "ScriptName": "BossScript"
+                "animation": {
+                    "totalFrames": 1,
+                    "columns": 1,
+                    "rows": 1
+                }
+            }
+           
+        ]
+        },
+
+        {"Type": "Button",
+        "components":
+        [
+            {
+                "transform": {
+                        "position": {
+                            "x": -200.0,
+                            "y": -500.0
+                        },
+                        "scale": {
+                            "x": 800.0,
+                            "y": 200.0
+                        },
+                        "isVisible": true
                     }
+            },
+
+            {
+                "render": 
+                {
+                    "mdl_ref": 1.0,
+                    "shd_ref": 2.0,
+                    "textureID": 0,
+                    "spriteName": "../../MyEngine/Assets/Textures/UI/bar.png"
+                }
+            },
+
+            {
+                "animation": {
+                    "totalFrames": 1,
+                    "columns": 1,
+                    "rows": 1
+                }
             }
         ]
         },
 
-        {"Type": "Boss",
+        {"Type": "Button",
         "components":
-            [
-                {"transform": {
-                "position": {
-                    "x": 50.0,
-                    "y": 50.0
-                },
-                "scale": {
-                    "x": 200.0,
-                    "y": 200.0
-                },
-                "rotation": {
-                    "x": 0.0,
-                    "y": 0.0
-                }}},
-                
-                {
-                "script":  
-                    {
-                        "ScriptName": "BossScript"
+        [
+            {
+                "transform": {
+                        "position": {
+                            "x": 200.0,
+                            "y": -500.0
+                        },
+                        "scale": {
+                            "x": 800.0,
+                            "y": 200.0
+                        },
+                        "isVisible": true
                     }
-                }
+            },
 
-            ]
+            {
+                "render": 
+                {
+                    "mdl_ref": 1.0,
+                    "shd_ref": 2.0,
+                    "textureID": 0,
+                    "spriteName": "../../MyEngine/Assets/Textures/UI/perfect.png"
+                }
+            },
+
+            {
+                "animation": {
+                    "totalFrames": 1,
+                    "columns": 1,
+                    "rows": 1
+                }
+            }
+        ]
         }
     ]
 }

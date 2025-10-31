@@ -106,9 +106,9 @@ namespace Framework
 
         // mat3
         //  Matrix3x3
-        Value matVal;
-        mdl_to_ndc_xform.Serialize(matVal, alloc);
-        out.AddMember("mdl_to_ndc_xform", matVal, alloc);
+        //Value matVal;
+        //mdl_to_ndc_xform.Serialize(matVal, alloc);
+        //out.AddMember("mdl_to_ndc_xform", matVal, alloc);
     }
 
     void Transform::Deserialize(const rapidjson::Value &in)
@@ -137,8 +137,8 @@ namespace Framework
         if (in.HasMember("autoHide"))
             autoHide = in["autoHide"].GetBool();
 
-        if (in.HasMember("mdl_to_ndc_xform"))
-            mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
+        //if (in.HasMember("mdl_to_ndc_xform"))
+          //  mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
     }
 
     bool SaveTransform(Transform const &t, std::string const &path)

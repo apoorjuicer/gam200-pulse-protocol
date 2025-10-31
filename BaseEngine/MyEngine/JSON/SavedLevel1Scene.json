@@ -4,10 +4,58 @@
         {
             "components": [
                 {
-                    "transfrom": {
+                    "transform": {
                         "position": {
-                            "x": -645.0,
-                            "y": -67.0
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 1600.0,
+                            "y": 900.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "angle_disp": 0.0,
+                        "angle_speed": 0.0,
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "PlayerScript"
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "textureID": 257,
+                        "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg"
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.3737323582172394,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -350.0,
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 500.0,
@@ -21,18 +69,7 @@
                         "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
-                        "autoHide": false,
-                        "mdl_to_ndc_xform": [
-                            0.48076921701431277,
-                            0.0,
-                            0.0,
-                            0.0,
-                            0.8547008633613586,
-                            0.0,
-                            -0.620192289352417,
-                            -0.11452991515398026,
-                            1.0
-                        ]
+                        "autoHide": false
                     }
                 },
                 {
@@ -44,14 +81,14 @@
                     "render": {
                         "mdl_ref": 1.0,
                         "shd_ref": 2.0,
-                        "textureID": 257,
+                        "textureID": 258,
                         "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png"
                     }
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.33794012665748598,
+                        "currentFrame": 2,
+                        "elapsedTime": 0.3737323582172394,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -63,7 +100,7 @@
         {
             "components": [
                 {
-                    "transfrom": {
+                    "transform": {
                         "position": {
                             "x": 800.0,
                             "y": 0.0
@@ -80,18 +117,7 @@
                         "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
-                        "autoHide": false,
-                        "mdl_to_ndc_xform": [
-                            0.48076921701431277,
-                            0.0,
-                            0.0,
-                            0.0,
-                            0.8547008633613586,
-                            0.0,
-                            0.7692307829856873,
-                            0.0,
-                            1.0
-                        ]
+                        "autoHide": false
                     }
                 },
                 {
@@ -103,14 +129,14 @@
                     "render": {
                         "mdl_ref": 1.0,
                         "shd_ref": 2.0,
-                        "textureID": 258,
+                        "textureID": 259,
                         "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png"
                     }
                 },
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.33794012665748598,
+                        "elapsedTime": 0.3737323582172394,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
