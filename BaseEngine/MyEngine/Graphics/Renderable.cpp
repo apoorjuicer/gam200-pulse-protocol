@@ -34,10 +34,19 @@ namespace Framework
         out.AddMember("mdl_ref", mdl_ref, alloc);
         out.AddMember("shd_ref", shd_ref, alloc);
         out.AddMember("textureID", static_cast<uint64_t>(textureID), alloc);
+        out.AddMember("useTexture", useTexture, alloc);
 
         Value spriteNameVal;
         spriteNameVal.SetString(spriteName.c_str(), static_cast<SizeType>(spriteName.length()), alloc);
         out.AddMember("spriteName", spriteNameVal, alloc);
+
+        /* Color Serialization part */
+        Value colorVal(kObjectType);
+        colorVal.AddMember("r", tintColor.r, alloc);
+        colorVal.AddMember("g", tintColor.g, alloc);
+        colorVal.AddMember("b", tintColor.b, alloc);
+        colorVal.AddMember("a", tintColor.a, alloc);
+        out.AddMember("tintColor", colorVal, alloc);
     }
 
     void Renderable::Deserialize(const rapidjson::Value& in)
@@ -56,6 +65,19 @@ namespace Framework
 
         if (in.HasMember("spriteName"))
             spriteName = in["spriteName"].GetString();
+
+        if (in.HasMember("useTexture"))
+            useTexture = in["useTexture"].GetBool();
+
+        /* color deserialization part */
+        if (in.HasMember("tintColor") && in["tintColor"].IsObject())
+        {
+            auto& col = in["tintColor"];
+            if (col.HasMember("r")) tintColor.r = col["r"].GetFloat();
+            if (col.HasMember("g")) tintColor.g = col["g"].GetFloat();
+            if (col.HasMember("b")) tintColor.b = col["b"].GetFloat();
+            if (col.HasMember("a")) tintColor.a = col["a"].GetFloat();
+        }
     }
 
 } // end of namespace

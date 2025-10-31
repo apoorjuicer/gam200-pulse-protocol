@@ -144,6 +144,7 @@ void GraphicsManager::Initialize()
         }
     }
 
+    // create white texture for colored quads
     glGenTextures(1, &whiteTexture);
     glBindTexture(GL_TEXTURE_2D, whiteTexture);
 
@@ -158,6 +159,7 @@ void GraphicsManager::Initialize()
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    std::cout << "[GraphicsManager] White texture created for GUI buttons\n";
 }
 
 void GraphicsManager::Update()
@@ -172,10 +174,10 @@ void GraphicsManager::Update()
     // 2) then draw text on top
     //RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
 
-    // 2) DRAW GUI BUTTONS
+    // 3) Draw in-game gui system
     RenderGUIButtons();
 
-    // 2) Draw overlay text last
+    // 4) Draw overlay text last
     auto& textShader = GLApp::shdrpgms[3];
 
     // Build FPS string and heaviest system string and render it

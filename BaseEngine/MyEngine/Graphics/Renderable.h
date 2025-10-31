@@ -27,6 +27,20 @@
 
 namespace Framework
 {
+	// for solid color support
+	struct Color {
+		float r = 1.0f;
+		float g = 1.0f;
+		float b = 1.0f;
+		float a = 1.0f;
+
+		Color() = default;
+		Color(float red, float green, float blue, float alpha = 1.0f)
+			: r(red), g(green), b(blue), a(alpha) {
+		}
+	};
+
+
 	class Renderable 
 	{
 	public:
@@ -34,8 +48,12 @@ namespace Framework
 		float shd_ref = 0.f;		// Shader no
 		GLuint textureID = 0;		// Texture ID
 		std::string spriteName;
-		void SetSprite(std::string ref);
-		std::string GetSprite() const;
+
+		Color tintColor = Color(1.0f, 1.0f, 1.0f, 1.0f); // Default white
+		bool useTexture = true;     // Flag: true = use texture, false = use solid color
+
+		//void SetSprite(std::string ref);
+		//std::string GetSprite() const;
 		void AssignTextureFromPath(Framework::Renderable& t);
 		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
 		void Deserialize(const rapidjson::Value& in);
