@@ -114,7 +114,7 @@ namespace MyEditor {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
 
-        //ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;  // Enable docking
+        //ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;  // Enable docking, currently no docking feature so this does not work
 
         ImGui::StyleColorsDark();
         ImGui_ImplGlfw_InitForOpenGL(s_Window, true);

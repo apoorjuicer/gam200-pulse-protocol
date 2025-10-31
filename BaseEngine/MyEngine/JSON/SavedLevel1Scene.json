@@ -6,8 +6,8 @@
                 {
                     "transfrom": {
                         "position": {
-                            "x": -645.0,
-                            "y": -67.0
+                            "x": -800.0,
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 500.0,
@@ -29,8 +29,8 @@
                             0.0,
                             0.8547008633613586,
                             0.0,
-                            -0.620192289352417,
-                            -0.11452991515398026,
+                            -0.7692307829856873,
+                            0.0,
                             1.0
                         ]
                     }
@@ -50,8 +50,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.33794012665748598,
+                        "currentFrame": 1,
+                        "elapsedTime": 0.358441025018692,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -110,11 +110,141 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.33794012665748598,
+                        "elapsedTime": 0.358441025018692,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
                         "animationSpeed": 2.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transfrom": {
+                        "position": {
+                            "x": 400.0,
+                            "y": 500.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 80.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "angle_disp": 0.0,
+                        "angle_speed": 0.0,
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false,
+                        "mdl_to_ndc_xform": [
+                            1.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                        ]
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "textureID": 0,
+                        "spriteName": "button_bg.png"
+                    }
+                },
+                {
+                    "button": {
+                        "buttonID": "create_btn",
+                        "label": "Create Entity",
+                        "normalColor": {
+                            "r": 0.30000001192092898,
+                            "g": 0.6000000238418579,
+                            "b": 0.8999999761581421,
+                            "a": 1.0
+                        },
+                        "hoverColor": {
+                            "r": 0.5,
+                            "g": 0.800000011920929,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "actionType": "CreateEntity",
+                        "entityJsonPath": "",
+                        "isEnabled": true
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transfrom": {
+                        "position": {
+                            "x": 400.0,
+                            "y": 350.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 80.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "angle_disp": 0.0,
+                        "angle_speed": 0.0,
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false,
+                        "mdl_to_ndc_xform": [
+                            1.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                        ]
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "textureID": 0,
+                        "spriteName": "button_bg.png"
+                    }
+                },
+                {
+                    "button": {
+                        "buttonID": "destroy_btn",
+                        "label": "Destroy Entity",
+                        "normalColor": {
+                            "r": 0.8999999761581421,
+                            "g": 0.30000001192092898,
+                            "b": 0.30000001192092898,
+                            "a": 1.0
+                        },
+                        "hoverColor": {
+                            "r": 1.0,
+                            "g": 0.5,
+                            "b": 0.5,
+                            "a": 1.0
+                        },
+                        "actionType": "DestroyEntity",
+                        "entityJsonPath": "",
+                        "isEnabled": true
                     }
                 }
             ]

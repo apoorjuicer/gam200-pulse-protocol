@@ -142,6 +142,19 @@ void SceneManager::SaveCurrentScene()
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
+		// purely for testing in-game GUI system
+		if (g_coordinator->HasComponent<GUIButton>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value ButtonVal;
+
+			auto& btn = g_coordinator->GetComponent<GUIButton>(entity);
+			btn.Serialize(ButtonVal, alloc);
+
+			ComponentObj.AddMember("button", ButtonVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
 		// So for this entity, we add compoennt array
 		entityObj.AddMember("components", componentsArray, alloc);
 
@@ -265,6 +278,14 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 		{
 			const auto& component = components[j];
 
+			// this is purely for the in-game basic GUI system
+			if (component.HasMember("button") && component["button"].IsObject())
+			{
+				GUIButton btn;
+				btn.Deserialize(component["button"]);
+				g_coordinator->AddComponent<GUIButton>(entity, btn);
+			}
+
 			if (component.HasMember("transform") && component["transform"].IsObject())
 			{
 				//void AddTransformComponent(entity)
@@ -307,6 +328,26 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	}
 
 		ChangeCurrentScene(d["scene"].GetString());
+
+		auto* coordinator = Coordinator::GetInstance();
+		auto inputMgr = coordinator->GetSystem<InputManager>();
+
+		if (inputMgr) {
+			inputMgr->GUIButtonEntities.clear();
+
+			for (auto entity : SceneEntityList) {
+				if (coordinator->HasComponent<GUIButton>(entity)) {
+					inputMgr->GUIButtonEntities.insert(entity);
+#ifdef _DEBUG
+					std::cout << "[SceneManager] Registered GUI button entity: " << entity << std::endl;
+#endif
+				}
+			}
+
+#ifdef _DEBUG
+			std::cout << "[SceneManager] Total GUI buttons: " << inputMgr->GUIButtonEntities.size() << std::endl;
+#endif
+		}
 		
 #ifdef _DEBUG
 		std::cout << "\n===================================================" << std::endl;

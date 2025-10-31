@@ -143,6 +143,21 @@ void GraphicsManager::Initialize()
             glUniform1i(loc, 0); // sampler "text" uses texture unit 0
         }
     }
+
+    glGenTextures(1, &whiteTexture);
+    glBindTexture(GL_TEXTURE_2D, whiteTexture);
+
+    // 1x1 white pixel
+    unsigned char whitePixel[4] = { 255, 255, 255, 255 };
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
 }
 
 void GraphicsManager::Update()
@@ -157,8 +172,12 @@ void GraphicsManager::Update()
     // 2) then draw text on top
     //RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
 
+    // 2) DRAW GUI BUTTONS
+    RenderGUIButtons();
+
     // 2) Draw overlay text last
     auto& textShader = GLApp::shdrpgms[3];
+
     // Build FPS string and heaviest system string and render it
     if (!MyEditor::IsEnabled()) {
         auto& AM = Framework::AssetsManager::Instance();
@@ -320,6 +339,11 @@ void GraphicsManager::Shutdown()
     VAO = 0;
     VBO = 0;
 
+    if (whiteTexture) {
+        glDeleteTextures(1, &whiteTexture);
+        whiteTexture = 0;
+    }
+
     std::cout << "[GraphicsManager] Shutdown completed\n";
 }
 
@@ -448,23 +472,32 @@ void GraphicsManager::RenderColoredQuad(float x, float y, float width, float hei
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    auto& shader = GLApp::shdrpgms[3];
+    auto& shader = GLApp::shdrpgms[3]; // Text shader
     shader.Use();
 
     glUniformMatrix4fv(glGetUniformLocation(shader.GetHandle(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+    // Pass vec4 color including alpha
     glUniform3f(glGetUniformLocation(shader.GetHandle(), "textColor"), color.r, color.g, color.b);
 
-    // Bind white texture instead of unbinding
+    // if shader supports vec4:
+    // glUniform4f(glGetUniformLocation(shader.GetHandle(), "color"), color.r, color.g, color.b, color.a);
+
     glBindTexture(GL_TEXTURE_2D, whiteTexture);
     glBindVertexArray(VAO);
 
+    // Center the quad around the position
+    float halfWidth = width * 0.5f;
+    float halfHeight = height * 0.5f;
+
     float vertices[6][4] = {
-        { x,         y,          0.0f, 0.0f },
-        { x,         y + height, 0.0f, 1.0f },
-        { x + width, y + height, 1.0f, 1.0f },
-        { x,         y,          0.0f, 0.0f },
-        { x + width, y + height, 1.0f, 1.0f },
-        { x + width, y,          1.0f, 0.0f }
+        { x - halfWidth, y - halfHeight, 0.0f, 0.0f },
+        { x - halfWidth, y + halfHeight, 0.0f, 1.0f },
+        { x + halfWidth, y + halfHeight, 1.0f, 1.0f },
+
+        { x - halfWidth, y - halfHeight, 0.0f, 0.0f },
+        { x + halfWidth, y + halfHeight, 1.0f, 1.0f },
+        { x + halfWidth, y - halfHeight, 1.0f, 0.0f }
     };
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
