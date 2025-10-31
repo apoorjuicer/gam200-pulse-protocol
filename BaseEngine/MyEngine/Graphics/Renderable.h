@@ -16,7 +16,7 @@
  */
 /******************************************************************************/
 #pragma once
-#include "pch/pch.h" // FIRST
+#include "pch/pch_temp.h" // FIRST
 #include "CoreEngine/ECS/Coordinator.h"
 #include "CoreEngine/Asset/AssetsManager.h"
 #include <glm/gtc/type_ptr.hpp>

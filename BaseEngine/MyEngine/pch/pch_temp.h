@@ -56,3 +56,13 @@
 #include <list>
 #include <filesystem>
 #include <cstdlib> 
+
+// Graphics Library Headers
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#pragma warning(push, 0)
+#include <glm/glm.hpp>
+#pragma warning(pop)
+
+// Rapid JSON Library Headers
+#include <rapidjson/document.h>

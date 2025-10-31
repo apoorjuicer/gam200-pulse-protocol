@@ -12,10 +12,7 @@
                         "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
-                        "autoHide": false,
-                        "mdl_to_ndc_xform": {
-                            "m": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
-                        }
+                        "autoHide": false
                     }
                 },
                 {
@@ -52,10 +49,7 @@
                         "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
-                        "autoHide": false,
-                        "mdl_to_ndc_xform": {
-                            "m": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
-                        }
+                        "autoHide": false
                     }
                 },
                 {

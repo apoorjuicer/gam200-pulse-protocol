@@ -14,7 +14,9 @@
  */
  /******************************************************************************/
 
-#include "pch/pch.h"
+#include "pch/pch_temp.h"
+#include "../MyEngine/Input/RhythmGameplayInput.h"
+#include "../MyEngine/CoreEngine/ECS/Coordinator.h"
 
 static std::string keyToString(int key) {
     switch (key) {

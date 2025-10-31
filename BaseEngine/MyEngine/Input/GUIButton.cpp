@@ -10,7 +10,7 @@
  */
  /******************************************************************************/
 
-#include "pch/pch.h"
+#include "../MyEngine/Input/GUIButton.h"
 
 void GUIButton::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
     using namespace rapidjson;

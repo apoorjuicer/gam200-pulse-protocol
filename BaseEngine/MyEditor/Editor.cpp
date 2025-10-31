@@ -269,11 +269,31 @@ namespace MyEditor {
                 {
                     std::string display;
 
-                    if (g_coordinator->HasComponent<Framework::Renderable>(entity))
+                    // Priority 1: If has GUIButton, use its label
+                    if (g_coordinator->HasComponent<GUIButton>(entity))
+                    {
+                        auto& btn = g_coordinator->GetComponent<GUIButton>(entity);
+                        display = btn.buttonID;
+                    }
+                    // Priority 2: If has Renderable with sprite, use sprite name
+                    else if (g_coordinator->HasComponent<Framework::Renderable>(entity))
                     {
                         auto& rend = g_coordinator->GetComponent<Framework::Renderable>(entity);
-                        display = rend.spriteName.empty() ? "Unnamed Renderable" : rend.spriteName;
+                        if (!rend.spriteName.empty()) {
+                            // Extract just the filename from the path
+                            size_t lastSlash = rend.spriteName.find_last_of("/\\");
+                            if (lastSlash != std::string::npos) {
+                                display = rend.spriteName.substr(lastSlash + 1);
+                            }
+                            else {
+                                display = rend.spriteName;
+                            }
+                        }
+                        else {
+                            display = "Unnamed Renderable";
+                        }
                     }
+                    // Fallback: Show entity ID
                     else
                     {
                         display = "Entity " + std::to_string((int)entity);

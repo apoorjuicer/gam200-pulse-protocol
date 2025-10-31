@@ -301,6 +301,10 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				Framework::Transform t;
 				t.Deserialize(component["transform"]);
 				g_coordinator->AddComponent<Framework::Transform>(entity, t);
+
+				// DEBUG: Print what we just loaded
+				//std::cout << "[SceneManager] Loaded transform at ("
+				//	<< t.Pos.x << ", " << t.Pos.y << ")" << std::endl;
 			}
 
 			if (component.HasMember("script") && component["script"].IsObject())

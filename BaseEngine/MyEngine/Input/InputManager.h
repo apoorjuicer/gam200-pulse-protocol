@@ -14,7 +14,8 @@
  /******************************************************************************/
 
 #pragma once
-#include "pch/pch.h"
+#include "pch/pch_temp.h"
+#include "../MyEngine/CoreEngine/ECS/System.h"
 
 struct GUIButton;
 

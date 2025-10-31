@@ -14,8 +14,10 @@
  */
  /******************************************************************************/
 
-#include "pch/pch.h"
+#include "pch/pch_temp.h"
 #include "graphics/stb_image.h"
+#include "../MyEngine/Input/InputManager.h"
+#include "../MyEngine/CoreEngine/Message/MessageManager.h"
 
 InputManager::InputManager() : window(nullptr) {
 	std::memset(currentKeys, 0, sizeof(currentKeys));
@@ -249,13 +251,12 @@ glm::vec2 InputManager::getMousePosition() const {
 
 void InputManager::updateGUIButtons() {
 	auto* g_coordinator = Coordinator::GetInstance();
-	glm::vec2 mouseVirtual = mousePositionVirtual;
 
-	// Convert virtual mouse to world space for button collision
-	// Virtual: (0..1600, 0..900), World: (-800..800, -450..450)
-	float worldX = mouseVirtual.x - 800.0f;
-	float worldY = mouseVirtual.y - 450.0f;
-	glm::vec2 mouseWorld(worldX, worldY);
+	// mousePositionVirtual is BOTTOM-origin (0 = bottom, 900 = top)
+	// But screen rendering is TOP-origin (0 = top, 900 = bottom)
+	// So we need to flip Y!
+	float screenX = mousePositionVirtual.x;
+	float screenY = 900.0f - mousePositionVirtual.y;  // CRITICAL: Flip to top-origin!
 
 	for (auto const& entity : GUIButtonEntities) {
 		if (!g_coordinator->HasComponent<GUIButton>(entity)) continue;
@@ -269,11 +270,23 @@ void InputManager::updateGUIButtons() {
 			continue;
 		}
 
-		glm::vec2 buttonPos(transform.Pos.x, transform.Pos.y);
-		glm::vec2 buttonSize(transform.Scale.x, transform.Scale.y);
-		bool isMouseOver = isMouseOverButton(buttonPos, buttonSize, mouseWorld);
+		// Convert button to screen coords (SAME as rendering!)
+		float btnScreenX = transform.Pos.x + 800.0f;
+		float btnScreenY = 450.0f - transform.Pos.y;
 
-		// Update button state based on mouse interaction
+		// Collision bounds
+		float halfW = transform.Scale.x * 0.5f;  // 100
+		float halfH = transform.Scale.y * 0.5f;  // 40
+
+		float left = btnScreenX - halfW;
+		float right = btnScreenX + halfW;
+		float top = btnScreenY - halfH;
+		float bottom = btnScreenY + halfH;
+
+		bool isMouseOver = (screenX >= left && screenX <= right &&
+			screenY >= top && screenY <= bottom &&
+			mouseInGameViewport);
+
 		button.wasClickedThisFrame = false;
 
 		if (isMouseOver) {

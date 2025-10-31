@@ -443,7 +443,7 @@ void GraphicsManager::RenderGUIButtons()
 
     if (!inputMgr) return;
 
-    auto& shader = GLApp::shdrpgms[2]; // Adjust if needed
+    auto& shader = GLApp::shdrpgms[2];
     shader.Use();
 
     for (auto entity : inputMgr->GUIButtonEntities) {
@@ -459,17 +459,31 @@ void GraphicsManager::RenderGUIButtons()
             : button.normalColor;
 
         // Convert world coords to screen coords
-        // World: (-800..800, -450..450), Screen: (0..1600, 0..900)
         float screenX = transform.Pos.x + 800.0f;
-        float screenY = 450.0f - transform.Pos.y; // Flip Y
+        float screenY = 450.0f - transform.Pos.y;
 
-        // Draw colored rectangle
+        // ADD THIS DEBUG OUTPUT
+        static int frameCount = 0;
+        if (frameCount++ < 60) {  // Print for first 60 frames
+            std::cout << "[RenderButton] '" << button.buttonID
+                << "' World: (" << transform.Pos.x << ", " << transform.Pos.y
+                << ") Screen: (" << screenX << ", " << screenY
+                << ") Size: (" << transform.Scale.x << ", " << transform.Scale.y << ")"
+                << std::endl;
+        }
+
         RenderColoredQuad(screenX, screenY, transform.Scale.x, transform.Scale.y, color);
     }
 }
 
 void GraphicsManager::RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color)
 {
+    // DEBUG - only print first few frames
+    static int count = 0;
+    if (count++ < 10) {
+        std::cout << "[RenderQuad] Rendering at screen: (" << x << ", " << y << ")" << std::endl;
+    }
+
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
