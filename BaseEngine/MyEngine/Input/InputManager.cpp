@@ -18,6 +18,8 @@
 #include "graphics/stb_image.h"
 #include "../MyEngine/Input/InputManager.h"
 #include "../MyEngine/CoreEngine/Message/MessageManager.h"
+#include "../MyEngine/CoreEngine/ECS/Name.h"
+
 
 InputManager::InputManager() : window(nullptr) {
 	std::memset(currentKeys, 0, sizeof(currentKeys));
@@ -335,22 +337,27 @@ void InputManager::executeButtonAction(const GUIButton& button) {
 		Framework::Transform transform{};
 		Framework::Renderable renderable{};
 		Framework::Animation animation{};
+		Name nameComponent{};
 
-		transform.Pos = { -400.0f, 200.0f };
-		transform.Scale = { 150.0f, 150.0f };
+
+		transform.Pos = { -300.0f, 300.0f };
+		transform.Scale = { 250.0f, 250.0f };
 		transform.isVisible = true;
 
 		renderable.mdl_ref = 1.0f;
 		renderable.shd_ref = 2.0f;
-		renderable.spriteName = "../../MyEngine/Assets/Textures/Characters/hero.png";
+		renderable.spriteName = "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png";
 
-		animation.totalFrames = 1;
-		animation.columns = 1;
+		animation.totalFrames = 3;
+		animation.columns = 3;
 		animation.rows = 1;
+
+		nameComponent.name = "Created_Hero_" + std::to_string(newEntity);
 
 		g_coordinator->AddComponent(newEntity, transform);
 		g_coordinator->AddComponent(newEntity, renderable);
 		g_coordinator->AddComponent(newEntity, animation);
+		g_coordinator->AddComponent(newEntity, nameComponent);
 
 		createdEntitiesByGUI.push_back(newEntity);
 		//std::cout << "[InputManager] Created entity (ID: " << newEntity << ") at center\n";

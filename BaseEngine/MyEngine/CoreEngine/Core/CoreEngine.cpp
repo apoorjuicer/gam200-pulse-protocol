@@ -23,6 +23,7 @@
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "../TestCases/TestCase.h"
+#include "../MyEngine/CoreEngine/ECS/Name.h"
 #pragma comment(lib, "winmm.lib")
 
 // Game window dimensions and title
@@ -259,6 +260,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<AABB>();
 	g_coordinator->RegisterComponent<LogicComponent>();
 	g_coordinator->RegisterComponent<GUIButton>();
+	g_coordinator->RegisterComponent<Name>();
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();

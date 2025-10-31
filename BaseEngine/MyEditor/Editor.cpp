@@ -27,6 +27,7 @@
 #include "ProfilingTab.h"
 #include "pch/pch.h"
 #include "CoreEngine/ECS/System.h" // For Entity type: debugConsole.AddLogLevel(ConsoleLevel::Info, "Loaded %d textures", &Systems::EntityMember);
+#include "CoreEngine/ECS/Name.h" // For display name in hierarchy list
 #include "Graphics/Transform.h"
 
 namespace MyEditor {
@@ -269,13 +270,19 @@ namespace MyEditor {
                 {
                     std::string display;
 
-                    // Priority 1: If has GUIButton, use its label
-                    if (g_coordinator->HasComponent<GUIButton>(entity))
+                    // Priority 1: If has Name component, use it
+                    if (g_coordinator->HasComponent<Name>(entity))
+                    {
+                        auto& name = g_coordinator->GetComponent<Name>(entity);
+                        display = name.name;
+                    }
+                    // Priority 2: If has GUIButton, use its label
+                    else if (g_coordinator->HasComponent<GUIButton>(entity))
                     {
                         auto& btn = g_coordinator->GetComponent<GUIButton>(entity);
                         display = btn.buttonID;
                     }
-                    // Priority 2: If has Renderable with sprite, use sprite name
+                    // Priority 3: If has Renderable with sprite, use sprite name
                     else if (g_coordinator->HasComponent<Framework::Renderable>(entity))
                     {
                         auto& rend = g_coordinator->GetComponent<Framework::Renderable>(entity);
