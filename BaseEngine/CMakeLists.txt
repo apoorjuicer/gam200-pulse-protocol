@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required(VERSION 3.20)
 project(MyEngine VERSION 0.1 LANGUAGES C CXX)
-
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 # Suppress warnings from external libraries (MSVC only)
 if(MSVC)
     add_compile_options(
@@ -52,7 +52,7 @@ target_include_directories(imgui_backend PUBLIC
   ${CMAKE_CURRENT_LIST_DIR}/imgui/backends
 )
 target_compile_definitions(imgui_backend PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLEW)
-target_link_libraries(imgui_backend PUBLIC imgui glfw)
+target_link_libraries(imgui_backend PRIVATE imgui glfw)
 set_property(TARGET imgui_backend PROPERTY FOLDER "3rdparty/ImGui")
 
 # --- Projects ---
