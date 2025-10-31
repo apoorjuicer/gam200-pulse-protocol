@@ -26,11 +26,6 @@ namespace Framework
     }
     Transform::~Transform() {}
 
-    void AssignTextureFromPath(Framework::Renderable &t)
-    {
-        if (t.textureID == 0 && !t.spriteName.empty())
-            t.textureID = Framework::AssetsManager::GetOrLoad(t.spriteName);
-    }
     void Transform::Initialize() {}
 
     void Transform::update(GLdouble delta_time, const std::set<Entity> entity)
@@ -45,7 +40,6 @@ namespace Framework
         {
             // IMPORTANT: reference, not copy
             auto &x = g_coordinator->GetComponent<Framework::Transform>(it);
-            auto &y = g_coordinator->GetComponent<Framework::Renderable>(it);
 
             // normalize from pixels to your game space
             const float PnormX = x.Pos.x / gw;
@@ -55,13 +49,13 @@ namespace Framework
 
             Matrix3x3 Scaling, Rotating, Translating;
 
-            // S
+            // Scale
             Scaling = Matrix3x3(
                 SnormX, 0.0f, 0.0f,
                 0.0f, SnormY, 0.0f,
                 0.0f, 0.0f, 1.0f);
 
-            // R (use the entity�s angle)
+            // Rotate
             constexpr float DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
             const float cosA = std::cos(x.angle_disp * DEG_TO_RAD);
             const float sinA = std::sin(x.angle_disp * DEG_TO_RAD);
@@ -70,7 +64,7 @@ namespace Framework
                 -sinA, cosA, 0.0f,
                 0.0f, 0.0f, 1.0f);
 
-            // T (column-major layout for your Matrix3x3)
+            // Translate (column-major layout for your Matrix3x3)
             Translating = Matrix3x3(
                 1.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f,
@@ -79,23 +73,12 @@ namespace Framework
             // M = T * R * S
             x.mdl_to_ndc_xform = Translating * Rotating * Scaling;
 
-            // advance entity�s angle
             x.angle_disp += x.angle_speed * static_cast<GLfloat>(delta_time);
             // std::cout << x.mdl_to_ndc_xform;
         }
     }
 
     void Transform::draw() const {}
-
-    void Renderable::SetSprite(std::string ref)
-    {
-        spriteName = ref;
-    }
-
-    std::string Renderable::GetSprite() const
-    {
-        return spriteName;
-    }
 
     /*Serialization && Deserialization */
     void Transform::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
@@ -117,15 +100,15 @@ namespace Framework
         out.AddMember("angle_disp", angle_disp, alloc);
         out.AddMember("angle_speed", angle_speed, alloc);
 
-        //out.AddMember("isVisible", isVisible, alloc);
-        //out.AddMember("visibilityTimer", visibilityTimer, alloc);
-        //out.AddMember("autoHide", autoHide, alloc);
+        // out.AddMember("isVisible", isVisible, alloc);
+        // out.AddMember("visibilityTimer", visibilityTimer, alloc);
+        // out.AddMember("autoHide", autoHide, alloc);
 
         // mat3
         //  Matrix3x3
-        //Value matVal;
-        //mdl_to_ndc_xform.Serialize(matVal, alloc);
-        //out.AddMember("mdl_to_ndc_xform", matVal, alloc);
+        // Value matVal;
+        // mdl_to_ndc_xform.Serialize(matVal, alloc);
+        // out.AddMember("mdl_to_ndc_xform", matVal, alloc);
     }
 
     void Transform::Deserialize(const rapidjson::Value &in)
@@ -148,85 +131,15 @@ namespace Framework
         if (in.HasMember("angle_speed"))
             angle_speed = in["angle_speed"].GetFloat();
 
-        //if (in.HasMember("isVisible"))
-        //    isVisible = in["isVisible"].GetBool();
-        //if (in.HasMember("visibilityTimer"))
-        //    visibilityTimer = in["visibilityTimer"].GetFloat();
-        //if (in.HasMember("autoHide"))
-        //    autoHide = in["autoHide"].GetBool();
+        // if (in.HasMember("isVisible"))
+        //     isVisible = in["isVisible"].GetBool();
+        // if (in.HasMember("visibilityTimer"))
+        //     visibilityTimer = in["visibilityTimer"].GetFloat();
+        // if (in.HasMember("autoHide"))
+        //     autoHide = in["autoHide"].GetBool();
 
-        //if (in.HasMember("mdl_to_ndc_xform"))
-        //    mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
-    }
-
-    /*Serialization && Deserialization */
-    void Renderable::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
-    {
-        using namespace rapidjson;
-        out.SetObject();
-
-        out.AddMember("mdl_ref", mdl_ref, alloc);
-        out.AddMember("shd_ref", shd_ref, alloc);
-        out.AddMember("textureID", static_cast<uint64_t>(textureID), alloc);
-
-        Value spriteNameVal;
-        spriteNameVal.SetString(spriteName.c_str(), static_cast<SizeType>(spriteName.length()), alloc);
-        out.AddMember("spriteName", spriteNameVal, alloc);
-    }
-
-    void Renderable::Deserialize(const rapidjson::Value &in)
-    {
-        if (!in.IsObject())
-        {
-            std::cerr << "[Renderable] Invalid JSON format\n";
-            return;
-        }
-
-        if (in.HasMember("mdl_ref"))
-            mdl_ref = in["mdl_ref"].GetFloat();
-        if (in.HasMember("shd_ref"))
-            shd_ref = in["shd_ref"].GetFloat();
-        if (in.HasMember("textureID"))
-            textureID = static_cast<GLuint>(in["textureID"].GetUint64());
-
-        if (in.HasMember("spriteName"))
-            spriteName = in["spriteName"].GetString();
-    }
-
-    /*Serialization && Deserialization */
-    void Animation::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
-    {
-        using namespace rapidjson;
-        out.SetObject();
-
-        out.AddMember("currentFrame", currentFrame, alloc);
-        out.AddMember("elapsedTime", elapsedTime, alloc);
-        out.AddMember("totalFrames", totalFrames, alloc);
-        out.AddMember("columns", columns, alloc);
-        out.AddMember("rows", rows, alloc);
-        out.AddMember("animationSpeed", animationSpeed, alloc);
-    }
-
-    void Animation::Deserialize(const rapidjson::Value &in)
-    {
-        if (!in.IsObject())
-        {
-            std::cerr << "[Animation] Invalid JSON format\n";
-            return;
-        }
-
-        if (in.HasMember("currentFrame"))
-            currentFrame = in["currentFrame"].GetInt();
-        if (in.HasMember("elapsedTime"))
-            elapsedTime = in["elapsedTime"].GetFloat();
-        if (in.HasMember("totalFrames"))
-            totalFrames = in["totalFrames"].GetInt();
-        if (in.HasMember("columns"))
-            columns = in["columns"].GetInt();
-        if (in.HasMember("rows"))
-            rows = in["rows"].GetInt();
-        if (in.HasMember("animationSpeed"))
-            animationSpeed = in["animationSpeed"].GetFloat();
+        // if (in.HasMember("mdl_to_ndc_xform"))
+        //     mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
     }
 
     bool SaveTransform(Transform const &t, std::string const &path)
@@ -290,7 +203,5 @@ namespace Framework
         t.Deserialize(d["transform"]);
         return true;
     }
-
-      
 
 } // end of namespace

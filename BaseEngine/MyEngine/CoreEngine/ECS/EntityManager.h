@@ -76,6 +76,19 @@ public:
 		return SignatureID[entity];
 	}
 
+	std::deque<Entity> GetActiveEntities() const
+	{
+		std::deque<Entity> active;
+		for (Entity e = 0; e < MaxEntity; ++e)
+		{
+			Signature sig = SignatureID[e];
+			if (sig.any())
+				active.push_back(e);
+		}
+		return active;
+	}
+
+
 
 	// make a function for ben that returns EntityList, link with coordinator cos its not in the ecs. aka not inherite ECS
 

@@ -33,32 +33,6 @@ namespace Framework
 		Vector2 Pos;
 		Vector2 Scale;
 	};
-	class Renderable 
-	{
-	public:
-		float mdl_ref = 0.f;		// Model no
-		float shd_ref = 0.f;		// Shader no
-		GLuint textureID = 0;		// Texture ID
-		std::string spriteName;
-		void SetSprite(std::string ref);
-		std::string GetSprite() const;
-		void AssignTextureFromPath(Framework::Renderable& t);
-		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
-		void Deserialize(const rapidjson::Value& in);
-	};
-
-	class Animation 
-	{
-	public:
-		int currentFrame = 0;
-		float elapsedTime = 0.0f; // Time accumulator for animation
-		int totalFrames = 1;	  // Total frames in the sprite sheet
-		int columns = 1;		  // Columns in the sprite sheet
-		int rows = 1;			  // Rows in the sprite sheet
-		float animationSpeed = 2.f;
-		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
-		void Deserialize(const rapidjson::Value& in);
-	};
 
 	class Transform
 	{

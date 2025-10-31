@@ -21,6 +21,7 @@
 #include "graphics/stb_image.h"
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
+#include "../TestCases/TestCase.h"
 #pragma comment(lib, "winmm.lib")
 
 // Game window dimensions and title
@@ -29,6 +30,8 @@ Config config;
 AssetRegistry ar;
 int WindowWidth;
 int WindowHeight;
+
+TestCase Test;
 
 void APIENTRY glDebugOutput(GLenum source,
 							GLenum type,
@@ -154,19 +157,19 @@ void CoreEngine::Init()
 	std::cout << "WindowHeight is: " << WindowHeight << "\n";
 
 	///*saving config data*/ //tested saving works
-	//std::string newConfigPath = "../../MyEngine/JSON/config2.json";
-	//config.SetWindowWidth(800);
-	//config.SetWindowHeight(600);
-	//std::cout << "set WindowWidth is: " << config.GetWindowWidth() << "\n";
-	//std::cout << "set WindowHeight is: " << config.GetWindowHeight() << "\n";
-	//if (!SaveConfig(config, newConfigPath))
+	// std::string newConfigPath = "../../MyEngine/JSON/config2.json";
+	// config.SetWindowWidth(800);
+	// config.SetWindowHeight(600);
+	// std::cout << "set WindowWidth is: " << config.GetWindowWidth() << "\n";
+	// std::cout << "set WindowHeight is: " << config.GetWindowHeight() << "\n";
+	// if (!SaveConfig(config, newConfigPath))
 	//{
 	//	std::cerr << "Failed to load config!\n";
-	//}
-	//else
+	// }
+	// else
 	//{
 	//	std::cout << "save config to FilePath: " << std::filesystem::absolute(newConfigPath) << "\n";
-	//}
+	// }
 
 	if (!glfwInit())
 	{
@@ -291,21 +294,24 @@ void CoreEngine::Init()
 	// }
 
 	GameRunning = true;
-	std::string filePath = "../../MyEngine/JSON/test.json"; // AssetManager.mPrefabMap[path];
-	Factory factory;
-	SceneManager SM;
-	factory.CreateEntityFromJson(filePath);
 
-	std::string filePath2 = "../../MyEngine/JSON/test2.json";
-	Entity entity = factory.DefaultObj();
-	LogicComponent l;
-	l.ScriptName = "IT WORKS!!!!";
-	g_coordinator->AddComponent(entity, l);
-	factory.SaveEntityToJson(entity, filePath2);
+	// std::string filePath = "../../MyEngine/JSON/test.json";//AssetManager.mPrefabMap[path];
+	// Factory factory;
+	// SceneManager SM;
+	// factory.CreateEntityFromJson(filePath);
 
-	std::string filePath3 = "../../MyEngine/JSON/MainMenu.json";
-	SM.LoadSceneFromJson(filePath3);
-	SM.SaveCurrentScene();
+	// std::string filePath2 = "../../MyEngine/JSON/test2.json";
+	// Entity entity = factory.DefaultObj();
+	// LogicComponent l;
+	// l.ScriptName = "IT WORKS!!!!";
+	// g_coordinator->AddComponent(entity, l);
+	// factory.SaveEntityToJson(entity, filePath2);
+
+	// std::string filePath3 = "../../MyEngine/JSON/MainMenu.json";
+	// SM.LoadSceneFromJson(filePath3);
+	// SM.SaveCurrentScene();
+
+	// Test.Init();
 }
 
 void CoreEngine::Setup()
@@ -322,6 +328,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<NPC>();
 	g_coordinator->RegisterComponent<AABB>();
 	g_coordinator->RegisterComponent<LogicComponent>();
+	g_coordinator->RegisterComponent<GUIButton>();
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
@@ -378,22 +385,63 @@ void CoreEngine::Update(float dt)
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
 
-	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
+	auto profiler = ProfilingManager::GetInstance();
 
+	profiler->StartSystem("Input System");
+	if (g_inputSystem)
+		g_inputSystem->Update(dt);
+	profiler->EndSystem("Input System");
+
+	profiler->StartSystem("Scene System");
+	if (g_sceneSystem)
+		g_sceneSystem->Update(dt);
+	profiler->EndSystem("Scene System");
+
+	profiler->StartSystem("LogicSystem");
+	g_coordinator->UpdateAllSystems(dt);
+	profiler->EndSystem("LogicSystem");
+
+	profiler->StartSystem("RhythmGameplayInput");
+	if (g_rhythmSystem)
+		g_rhythmSystem->Update(dt);
+	profiler->EndSystem("RhythmGameplayInput");
+
+	profiler->StartSystem("Graphics System");
 	if (g_graphicsSystem)
 		g_graphicsSystem->Update();
+	profiler->EndSystem("Graphics System");
+
+	profiler->StartSystem("Audio System");
+	if (g_audioSystem)
+		g_audioSystem->Update();
+	profiler->EndSystem("Audio System");
+
+	profiler->StartSystem("Collision System");
+	// If collision is in UpdateAllSystems, remove this
+	profiler->EndSystem("Collision System");
+	// Test.Update(dt);
+
+	// Always process engine / message stuff
+	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
+
+	// Always draw/update graphics once per frame
+	if (g_graphicsSystem)
+		g_graphicsSystem->Update();
+
+	// 2) If paused, stop here � no gameplay / input / scene logic
+	if (m_paused)
+		return;
+
+	// 3) Normal running path
 	if (g_inputSystem)
 		g_inputSystem->Update(dt);
 	if (g_rhythmSystem)
 		g_rhythmSystem->Update(dt);
-
-	g_coordinator->UpdateAllSystems(dt);
 }
 
 void CoreEngine::GameLoop()
 {
 	LastTime = timeGetTime();
-
 	auto profiler = ProfilingManager::GetInstance();
 
 	// application loop
@@ -410,15 +458,14 @@ void CoreEngine::GameLoop()
 		// Update the when the last update started
 		LastTime = currenttime;
 
-		profiler->StartFrame();
-
-		//  1. Poll event(input key)
+		// Don't start frame here
 		glfwPollEvents();
 
-		//  2. update engine cpp
-		Update(dt);
+		// Start profiling ONLY for ECS systems
+		profiler->StartFrame();
+		Update(dt); // This contains all your ECS system profiling
+		profiler->EndFrame();
 
-		//  3. ImGui update
 #ifdef ENABLE_EDITOR
 		MyEditor::NewFrame();
 #endif
@@ -560,4 +607,22 @@ void CoreEngine::RenderDebugDraw()
 	}
 
 	DebugDraw::End();
+}
+
+void CoreEngine::SetPaused(bool paused)
+{
+	if (m_paused == paused)
+		return;
+	m_paused = paused;
+
+	// Pause/resume audio, too
+	if (auto audio = Coordinator::GetInstance()->GetSystem<AudioManager>())
+	{
+		audio->SetPaused(paused);
+	}
+}
+
+void CoreEngine::TogglePaused()
+{
+	SetPaused(!m_paused);
 }

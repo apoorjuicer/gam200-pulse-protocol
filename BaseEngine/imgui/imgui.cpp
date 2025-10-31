@@ -15916,9 +15916,9 @@ void ImGui::ShowMetricsWindow(bool* p_open)
 
 #ifdef IMGUI_HAS_DOCK
     // Overlay: Display Docking info
-    if (show_docking_nodes && g.IO.KeyCtrl)
-    {
-    }
+    //if (show_docking_nodes && g.IO.KeyCtrl)
+    //{
+    //}
 #endif // #ifdef IMGUI_HAS_DOCK
 
     End();

@@ -62,46 +62,41 @@ double random() {
 	return static_cast<double>((rand() % 10) / 10.0f);
 }
 
-
-// Match ImGui panel ratios
-static constexpr float kLeftRatio   = 0.20f; // 20% width
-static constexpr float kRightRatio  = 0.25f; // 25% width
-static constexpr float kBottomRatio = 0.25f; // 25% height
-
-static void ApplyEditorViewportPixels(int fbW, int fbH)
-{
-    // derive middle-blank area where the game renders
-    const int assets_h = static_cast<int>(fbH * kBottomRatio);
-    const int top_h    = fbH - assets_h;
-
-    const int left_w   = static_cast<int>(fbW * kLeftRatio);
-    const int right_w  = static_cast<int>(fbW * kRightRatio);
-    const int center_w = fbW - left_w - right_w;
-
-    // OpenGL Y=0 is bottom ? shift up by bottom bar height
-    glViewport(left_w, assets_h, center_w, top_h);
-
-    // Update your globals for any code that needs them
-    GLHelper::GameWidth  = center_w;
-    GLHelper::GameHeight = top_h;
-    GLHelper::GameOffsetX = left_w;
-    GLHelper::GameOffsetY = assets_h;
-
-}
+//static void ApplyEditorViewportPixels(int fbW, int fbH)
+//{
+//    // derive middle-blank area where the game renders
+//    const int assets_h = static_cast<int>(fbH * kBottomRatio);
+//    const int top_h    = fbH - assets_h;
+//
+//    const int left_w   = static_cast<int>(fbW * kLeftRatio);
+//    const int right_w  = static_cast<int>(fbW * kRightRatio);
+//    const int center_w = fbW - left_w - right_w;
+//
+//    // OpenGL Y=0 is bottom ? shift up by bottom bar height
+//    glViewport(left_w, assets_h, center_w, top_h);
+//
+//    // Update your globals for any code that needs them
+//    GLHelper::GameWidth  = center_w;
+//    GLHelper::GameHeight = top_h;
+//    GLHelper::GameOffsetX = left_w;
+//    GLHelper::GameOffsetY = assets_h;
+//
+//}
 
 
 
 GLApp::GLModel GLApp::mdl;
 GLApp::TranslationBuf GLApp::tb;
+GLApp::Camera2D GLApp::gCamera{};
 
-void GLApp::init(float inputEditorWidth, float inputEditorHeight) {
+void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/) {
 	// --- Compute middle rectangle from window size using fixed ratios ---
 	const float kLeftRatio = 0.20f; // 20% width
 	const float kRightRatio = 0.25f; // 25% width
 	const float kBottomRatio = 0.25f; // 25% height
 
-	GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth));
-	GLint h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
+	//GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth));
+	//GLint h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
 
 	// Use your existing globals for window size
 	const int fbW = static_cast<int>(WindowWidth);
@@ -205,7 +200,8 @@ void GLApp::updateAnimation(Framework::Animation& x, float deltaTime) {
 }
 
 
-void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y, Framework::Transform& z) {
+void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y, 
+Framework::Transform& z, const glm::mat3& ZoomNDC) {
 
 	auto& shader = shdrpgms[static_cast<uint64_t>(x.shd_ref)];
 	shader.Use();
@@ -222,8 +218,13 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y, Framewo
 
 	if (uOffsetLoc >= 0) glUniform2f(uOffsetLoc, uOffsetX, uOffsetY);
 	if (uScaleLoc >= 0) glUniform2f(uScaleLoc, frameWidth, frameHeight);
-	if (uModelLoc >= 0) glUniformMatrix3fv(uModelLoc, 1, GL_FALSE, z.mdl_to_ndc_xform.Begin());
+	//if (uModelLoc >= 0) glUniformMatrix3fv(uModelLoc, 1, GL_FALSE, z.mdl_to_ndc_xform.Begin());
 
+	glm::mat3 M = glm::make_mat3(z.mdl_to_ndc_xform.Begin());
+	glm::mat3 mdlNdc = ZoomNDC * M;
+	if (uModelLoc >= 0) {
+		glUniformMatrix3fv(uModelLoc, 1, GL_FALSE, glm::value_ptr(mdlNdc));
+	}
 	glBindVertexArray(models[static_cast<uint64_t>(x.mdl_ref)].vaoid);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, x.textureID);
@@ -235,18 +236,26 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y, Framewo
 	shader.UnUse();
 }
 
+static glm::mat3 BuildZoomNDC(float zoom) {
+	const float s = glm::max(zoom, 0.0001f);   // use zoom, not 1/zoom
+	return glm::mat3(s, 0, 0,
+					 0, s, 0,
+					 0, 0, 1);
+}
+
 void GLApp::draw(std::set<Entity> entities) {
 	GLFWwindow* window = glfwGetCurrentContext();
 
 	if (MyEditor::IsEnabled()) {
 		// Editor ON - render in ImGui panel
-		auto vp = MyEditor::ComputeGameViewportPixels(window, true);
+		auto vp = MyEditor::ComputeMiddleGameViewportPixels(window, true);
 		glViewport(vp.x, vp.y, vp.w, vp.h);
 
 		GLHelper::GameOffsetX = vp.x;
 		GLHelper::GameOffsetY = vp.y;
 		GLHelper::GameWidth = vp.w;
 		GLHelper::GameHeight = vp.h;
+		gCamera.zoom = 0.5f;     // zoom OUT in editor
 	}
 	else {
 		// Editor OFF - use full screen with letterboxing
@@ -255,7 +264,18 @@ void GLApp::draw(std::set<Entity> entities) {
 
 		// Re-apply the correct fullscreen scaling immediately
 		ComputeLetterbox(fbW, fbH);
+		gCamera.zoom = 1.0f;     // normal gameplay zoom
 	}
+	auto* input = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
+
+	// Option A: wheel zoom only in editor (gameplay fixed to 1.0)
+	if (MyEditor::IsEnabled()) {
+		if (input) gCamera.zoom = input->getZoomLevel();   // wheel controls zoom
+	}
+	else {
+		gCamera.zoom = 1.0f;
+	}
+	glm::mat3 ZoomNDC = BuildZoomNDC(gCamera.zoom);
 
 	// Clear
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -287,7 +307,7 @@ void GLApp::draw(std::set<Entity> entities) {
 		if (tr.isVisible && re.textureID != 0) {
 			updateAnimation(an, deltaTime);
 			glBindTexture(GL_TEXTURE_2D, re.textureID);
-			drawTrans(re, an, tr);
+			drawTrans(re, an, tr, ZoomNDC);
 		}
 	}
 }

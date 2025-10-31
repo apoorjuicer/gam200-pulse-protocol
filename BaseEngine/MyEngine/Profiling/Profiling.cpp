@@ -14,7 +14,8 @@
  */
  /******************************************************************************/
 
-#include "pch/pch.h"
+#include "pch/pch_temp.h"
+#include "Profiling.h"
 
 ProfilingManager* ProfilingManager::instance = nullptr;
 
@@ -45,17 +46,20 @@ void ProfilingManager::EndFrame() {
         timeSinceDisplay += totalFrameTime;
 
         if (timeSinceDisplay >= displayUpdateInterval) {
+            //std::cout << "UPDATING DISPLAY NOW!" << std::endl; // DEBUG
             displayProfiles = profiles;
             cachedFrameTime = totalFrameTime;
+            timeSinceDisplay = 0.0;
+        }
 
             // Reset profiles after displaying, to make sure that it does not exceed 100
             for (auto& [name, profile] : profiles) {
                 profile.totalTime = 0.0;
                 profile.percentage = 0.0;
                 profile.callCount = 0;
-            }
+            
 
-            timeSinceDisplay = 0.0;
+            
         }
     }
 }
