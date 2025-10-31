@@ -93,6 +93,18 @@ void SceneManager::SaveCurrentScene()
 		Value componentsArray(kArrayType);
 
 		// check all the components if they have it
+		if (g_coordinator->HasComponent<NamingComponent>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value NameVal;
+
+			auto& nam = g_coordinator->GetComponent<NamingComponent>(entity);
+			nam.Serialize(NameVal, alloc);
+
+			ComponentObj.AddMember("Typing", NameVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
 		if (g_coordinator->HasComponent<Framework::Transform>(entity))
 		{
 			Value ComponentObj(rapidjson::kObjectType);
@@ -266,6 +278,13 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 		for (SizeType j = 0; j < components.Size(); ++j)
 		{
 			const auto& component = components[j];
+
+			if (component.HasMember("Typing") && component["Typing"].IsObject())
+			{
+				NamingComponent n;
+				n.Deserialize(component["Typing"]);
+				g_coordinator->AddComponent<NamingComponent>(entity, n);
+			}
 
 			if (component.HasMember("transform") && component["transform"].IsObject())
 			{

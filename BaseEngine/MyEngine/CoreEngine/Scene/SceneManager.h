@@ -14,6 +14,7 @@
 /******************************************************************************/
 #pragma once
 #include "pch/pch_temp.h"
+#include "../Components/Naming.h"
 #include "../GameLogic/GameLogic.h"
 #include "../Graphics/Transform.h"
 #include "../Graphics/Animation.h"

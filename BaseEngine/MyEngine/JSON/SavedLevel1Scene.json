@@ -4,10 +4,15 @@
         {
             "components": [
                 {
+                    "Typing": {
+                        "Type": "Background"
+                    }
+                },
+                {
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": -821.0
+                            "y": -795.5
                         },
                         "scale": {
                             "x": 1600.0,
@@ -25,11 +30,6 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": "PlayerScript"
-                    }
-                },
-                {
                     "render": {
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
@@ -40,7 +40,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.17849530279636384,
+                        "elapsedTime": 0.255234032869339,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
@@ -52,10 +52,15 @@
         {
             "components": [
                 {
+                    "Typing": {
+                        "Type": "Player"
+                    }
+                },
+                {
                     "transform": {
                         "position": {
-                            "x": -800.0,
-                            "y": -191.5
+                            "x": 417.5,
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 500.0,
@@ -88,7 +93,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.17849530279636384,
+                        "elapsedTime": 0.255234032869339,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -100,9 +105,14 @@
         {
             "components": [
                 {
+                    "Typing": {
+                        "Type": "Enemy"
+                    }
+                },
+                {
                     "transform": {
                         "position": {
-                            "x": 28.5,
+                            "x": -574.5,
                             "y": 0.0
                         },
                         "scale": {
@@ -136,7 +146,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.17849530279636384,
+                        "elapsedTime": 0.255234032869339,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,

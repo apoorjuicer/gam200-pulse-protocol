@@ -2,9 +2,16 @@
     "scene": "Level1",
     "entities": 
     [       
-        {"Type": "Background",
+        {
         "components":
         [
+            {
+                "Typing": 
+                {
+                    "Type":"Background"
+                }
+            },
+            
             {
                 "transform": {
                         "position": {
@@ -35,20 +42,20 @@
                     "columns": 1,
                     "rows": 1
                 }
-            },
-            
-            {
-                "script":  
-                    {
-                        "ScriptName": "PlayerScript"
-                    }
             }
         ]
         },
 
-        {"Type": "Player",
+        {
         "components":
         [
+            {
+                "Typing": 
+                {
+                    "Type":"Player"
+                }
+            },
+
             {
                 "transform": {
                         "position": {
@@ -109,9 +116,16 @@
         ]
         },
 
-        {"Type": "Enemy",
+        {
         "components":
             [
+                {
+                    "Typing": 
+                    {
+                        "Type":"Enemy"
+                    }
+                },
+
                 {
                     "transform": {
                         "position": {

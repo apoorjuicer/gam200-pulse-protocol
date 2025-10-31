@@ -258,7 +258,9 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<NPC>();
 	g_coordinator->RegisterComponent<AABB>();
 	g_coordinator->RegisterComponent<LogicComponent>();
+	g_coordinator->RegisterComponent<NamingComponent>();
 	g_coordinator->RegisterComponent<GUIButton>();
+
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
@@ -268,7 +270,6 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterSystem<CollisionManager>();
 	g_coordinator->RegisterSystem<SceneManager>();
 	g_coordinator->RegisterSystem<LogicSystem>();
-
 
 	// Set signature for component and system
 	Signature collisionSig;
@@ -297,10 +298,11 @@ void CoreEngine::Setup()
 	Signature sceneSig;
 	sceneSig.set(g_coordinator->GetComponentType<NPC>());
 	sceneSig.set(g_coordinator->GetComponentType<AABB>());
+	sceneSig.set(g_coordinator->GetComponentType<NamingComponent>());
 	sceneSig.set(g_coordinator->GetComponentType<Framework::Transform>());
 	sceneSig.set(g_coordinator->GetComponentType<Framework::Renderable>());
 	sceneSig.set(g_coordinator->GetComponentType<Framework::Animation>());
-	g_coordinator->SetSystemSignature<GraphicsManager>(sceneSig);
+	g_coordinator->SetSystemSignature<SceneManager>(sceneSig);
 
 	Signature LogicSig;
 	LogicSig.set(g_coordinator->GetComponentType<LogicComponent>());
