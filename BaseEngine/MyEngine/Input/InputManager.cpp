@@ -18,6 +18,7 @@
 #include "graphics/stb_image.h"
 #include "../MyEngine/Input/InputManager.h"
 #include "../MyEngine/CoreEngine/Message/MessageManager.h"
+#include "../MyEngine/CoreEngine/Scene/SceneManager.h"
 #include "../MyEngine/CoreEngine/ECS/Name.h"
 
 
@@ -327,60 +328,35 @@ bool InputManager::isMouseOverButton(const glm::vec2& buttonPos, const glm::vec2
 void InputManager::executeButtonAction(const GUIButton& button) {
 	auto* g_coordinator = Coordinator::GetInstance();
 
-	std::cout << "[InputManager] Executing action: " << button.actionType
-		<< " for button: " << button.buttonID << std::endl;
+	//std::cout << "[InputManager] Executing action: " << button.actionType
+	//	<< " for button: " << button.buttonID << std::endl;
 
 	if (button.actionType == "CreateEntity") {
-		// Create entity at center
-		Entity newEntity = g_coordinator->CreateEntity();
+		if (!button.entityJsonPath.empty()) {
+			Entity newEntity = g_coordinator->GetSystem<SceneManager>()->LoadEntityFromJson(button.entityJsonPath);
 
-		Framework::Transform transform{};
-		Framework::Renderable renderable{};
-		Framework::Animation animation{};
-		Name nameComponent{};
+			if (newEntity != 0) {
+				Name nameComponent{};
+				nameComponent.name = "Created_Hero_" + std::to_string(newEntity);
+				g_coordinator->AddComponent(newEntity, nameComponent);
 
-
-		transform.Pos = { -300.0f, 300.0f };
-		transform.Scale = { 250.0f, 250.0f };
-		transform.isVisible = true;
-
-		renderable.mdl_ref = 1.0f;
-		renderable.shd_ref = 2.0f;
-		renderable.spriteName = "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png";
-
-		animation.totalFrames = 3;
-		animation.columns = 3;
-		animation.rows = 1;
-
-		nameComponent.name = "Created_Hero_" + std::to_string(newEntity);
-
-		g_coordinator->AddComponent(newEntity, transform);
-		g_coordinator->AddComponent(newEntity, renderable);
-		g_coordinator->AddComponent(newEntity, animation);
-		g_coordinator->AddComponent(newEntity, nameComponent);
-
-		createdEntitiesByGUI.push_back(newEntity);
-		//std::cout << "[InputManager] Created entity (ID: " << newEntity << ") at center\n";
+				createdEntitiesByGUI.push_back(newEntity);
+				//std::cout << "[InputManager] Created from: " << button.entityJsonPath << std::endl;
+			}
+		}
+		//else {
+		//	std::cout << "[InputManager] No entityJsonPath!" << std::endl;
+		//}
 	}
 	else if (button.actionType == "DestroyEntity") {
 		if (!createdEntitiesByGUI.empty()) {
-			Entity toDestroy = createdEntitiesByGUI.back();  // Get last one
-			createdEntitiesByGUI.pop_back();  // Remove from list
-
-			//std::cout << "[DEBUG] About to destroy entity: " << toDestroy << std::endl;
-			//std::cout << "[DEBUG] Entities left in list: " << createdEntitiesByGUI.size() << std::endl;
-
-			// Check if entity still has components before destroying
-			//if (g_coordinator->HasComponent<Framework::Transform>(toDestroy)) {
-			//	std::cout << "[DEBUG] Entity has Transform - destroying now..." << std::endl;
-			//}
-
+			Entity toDestroy = createdEntitiesByGUI.back();
+			createdEntitiesByGUI.pop_back();
 			g_coordinator->DestroyEntity(toDestroy);
 			//std::cout << "[InputManager] Destroyed entity: " << toDestroy << std::endl;
 		}
-		else {
-			std::cout << "[InputManager] No entities to destroy! List size: "
-				<< createdEntitiesByGUI.size() << std::endl;
-		}
+		//else {
+		//	std::cout << "[InputManager] No entities to destroy!" << std::endl;
+		//}
 	}
 }

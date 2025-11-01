@@ -225,7 +225,7 @@
            			"a": 1.0
         		},
                         "actionType": "CreateEntity",
-                        "entityJsonPath": "",
+                        "entityJsonPath": "../../MyEngine/JSON/herotransform.json",
                         "isEnabled": true
                     }
                 }

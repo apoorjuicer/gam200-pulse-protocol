@@ -47,6 +47,9 @@ public:
 	std::string GrabCurrentScene() const { return CurrentScene; }
 	void ChangeCurrentScene(std::string const& str) { CurrentScene = str; }
 
+	// for gui system usage (M2 rubric)
+	Entity LoadEntityFromJson(std::string const& path);
+
 private:
 	std::string CurrentScene;
 	std::string PreviousScene;

@@ -356,7 +356,7 @@ void CoreEngine::Update(float dt)
 	if (g_graphicsSystem)
 		g_graphicsSystem->Update();
 
-	// 2) If paused, stop here � no gameplay / input / scene logic
+	// 2) If paused, stop here. no gameplay / input / scene logic
 	if (m_paused)
 		return;
 

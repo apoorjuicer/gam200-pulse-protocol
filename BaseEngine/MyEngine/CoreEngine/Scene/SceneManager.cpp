@@ -379,3 +379,41 @@ void SceneManager::Deserialize(const rapidjson::Value& in)
 	if (!in.IsObject()) throw std::runtime_error("Invalid JSON for LogicComponent");
 	if (in.HasMember("SceneName")) CurrentScene = in["SceneName"].GetString(); // already assigns it
 }
+
+Entity SceneManager::LoadEntityFromJson(std::string const& path)
+{
+	auto* g_coordinator = Coordinator::GetInstance();
+	using namespace rapidjson;
+
+	std::ifstream ifs(path);
+	if (!ifs.is_open()) {
+		std::cerr << "[SceneManager] Cannot open: " << path << std::endl;
+		return 0;
+	}
+
+	IStreamWrapper isw(ifs);
+	Document d;
+	d.ParseStream(isw);
+
+	Entity entity = g_coordinator->CreateEntity();
+
+	if (d.HasMember("transform") && d["transform"].IsObject()) {
+		Framework::Transform t;
+		t.Deserialize(d["transform"]);
+		g_coordinator->AddComponent<Framework::Transform>(entity, t);
+	}
+
+	if (d.HasMember("render") && d["render"].IsObject()) {
+		Framework::Renderable r;
+		r.Deserialize(d["render"]);
+		g_coordinator->AddComponent<Framework::Renderable>(entity, r);
+	}
+
+	if (d.HasMember("animation") && d["animation"].IsObject()) {
+		Framework::Animation a;
+		a.Deserialize(d["animation"]);
+		g_coordinator->AddComponent<Framework::Animation>(entity, a);
+	}
+
+	return entity;
+}
