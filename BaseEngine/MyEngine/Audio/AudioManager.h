@@ -1,8 +1,10 @@
 /******************************************************************************/
 /**
- * @file        audio.h
+ * @file        AudioManager.h
  * @project     Pulse Protocol
  * @author      Leu Jun Yong
+ * @author      Ban Kai Wei Benjamin
+ * 
  * @brief       Provides initialization, playback, control, and shutdown of
                 FMOD-based audio for BGM and sound effects.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
@@ -12,19 +14,23 @@
  /******************************************************************************/
 
 #pragma once
-#include "pch/pch.h"
-#include <GLFW/glfw3.h>
+//#include "pch/pch.h"
+#include "pch/pch_temp.h"
+//#include <GLFW/glfw3.h>
 #include "CoreEngine/ECS/System.h"
 #include "CoreEngine/ECS/SystemManager.h"
-#include <string>
+#include "../Resources/AssetRegistry.h" 
 
-extern FMOD::System* mSystem;
+
+
+//extern FMOD::System* mSystem;
 
 // Forward-declare FMOD types to avoid heavy includes here
 namespace FMOD {
     class System;
     class Sound;
     class Channel;
+    class ChannelGroup;
 }
 
 // Simple audio system for BGM playback using FMOD Core
@@ -32,39 +38,66 @@ class AudioManager : public Systems
 {
 public:
     AudioManager();
+    explicit AudioManager(AssetRegistry* registry);
     ~AudioManager();
 
     // Systems interface
+   // void SetRegistry(AssetRegistry* registry);       // load from audioResource
     void Initialize();     // creates FMOD system and (optionally) starts BGM
+                                            
     void Update();         // calls FMOD::System::update()
-    void Shutdown();       // releases all FMOD resources
+    void Shutdown();       // Exit calls releaseAll releases all FMOD resources
 
     // BGM controls (optional for other places in engine)
+    bool LoadBGM(const std::string& id); //new
     void StopBGM();
     void SetBGMVolume(float volume);                 // 0..1
     bool IsBGMPlaying(bool* outPlaying = nullptr) const;
 
     // Pause and Play 
     void SetPaused(bool paused);
-    bool IsPaused() const { return mPaused; }
+    bool IsPaused() const;
 
     // gets path from source file and plays it at wanted volume, default volume is 1.0f
-    bool LoadInputSFX(const std::string& path);
-    void PlaySound(const std::string& key, float volume);
-    //void PlayInputSFX(float volume = 1.0f);
+    bool LoadSFX(const std::string& id);
+    void PlaySound(const std::string& id);
+
 
     // checks how far into the song the music has played
-    double GetMusicPosition() const;
-    void StopMusic();
+
+    double GetBGMPositionSeconds() const;
+    bool UnloadAudio( std::string const& id);
+
+    //in FMod bgm and sfx behave differently
 
 private:
     FMOD::System* mSystem = nullptr;
-    FMOD::Sound* mBGM = nullptr;
-    FMOD::Channel* mBGMCh = nullptr;
-    FMOD::Sound* mInputSFX = nullptr;
+
+    FMOD::Sound* mBGM = nullptr; //single background music
+    FMOD::Channel* mBGMCh = nullptr; //playback channel for BGM
+    //FMOD::Sound* mInputSFX = nullptr;
     bool mPaused = true;
 
+
     void releaseAll(); // stop channel, release sound/system
+
+    //registry
+    std::unordered_map<std::string, FMOD::Sound*> mSfx; // id -> sound
+    std::unordered_map<std::string, FMOD::Channel*> mChannels; // id -> active Channel
+    AssetRegistry* mRegistry = nullptr;  // link to asset registry
+
+    //for sliders
+    FMOD::ChannelGroup* mMasterGroup = nullptr;
+    FMOD::ChannelGroup* mMusicGroup = nullptr;
+    FMOD::ChannelGroup* mSfxGroup = nullptr;
+    float mMasterVol = 1.f, mMusicVol = 1.f, mSfxVol = 1.f;
+
+
+    void applyAllVolumes();
+    void applyMasterVolume();
+    void applyMusicVolume();
+    void applySfxVolume();
+    static float clampto0and1(float v);
 
     // non-copyable
     AudioManager(const AudioManager&) = delete;

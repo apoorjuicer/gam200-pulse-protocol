@@ -22,89 +22,89 @@
     namespace Framework {
 
 
-        void AssetsManager::LoadAllSound(const std::string& folder)
-        {
-            const fs::path root = folder;
+        //void AssetsManager::LoadAllSound(const std::string& folder)
+        //{
+        //    const fs::path root = folder;
 
-            if (!fs::exists(root)) {
-                std::cerr << "[Audio] Sound folder not found: " << root << std::endl;
-                return;
-            }
+        //    if (!fs::exists(root)) {
+        //        std::cerr << "[Audio] Sound folder not found: " << root << std::endl;
+        //        return;
+        //    }
 
-            for (auto const& entry : fs::recursive_directory_iterator(root)) {
-                if (!entry.is_regular_file()) continue;
+        //    for (auto const& entry : fs::recursive_directory_iterator(root)) {
+        //        if (!entry.is_regular_file()) continue;
 
-                fs::path filePath = entry.path();
-                std::string ext = filePath.extension().string();
-                for (auto& c : ext) c = (char)tolower(c);
+        //        fs::path filePath = entry.path();
+        //        std::string ext = filePath.extension().string();
+        //        for (auto& c : ext) c = (char)tolower(c);
 
-                if (ext != ".mp3" && ext != ".wav")
-                    continue;
+        //        if (ext != ".mp3" && ext != ".wav")
+        //            continue;
 
-                // Key: relative path without extension, lowercased
-                std::string soundKey = filePath.stem().string();
-                for (auto& c : soundKey) c = (char)tolower(c);
+        //        // Key: relative path without extension, lowercased
+        //        std::string soundKey = filePath.stem().string();
+        //        for (auto& c : soundKey) c = (char)tolower(c);
 
-                bool loop = (ext == ".mp3"); // example rule: mp3 loops, wav doesn�t
+        //        bool loop = (ext == ".mp3"); // example rule: mp3 loops, wav doesn�t
 
-                if (LoadSound(soundKey, filePath.string(), loop)) {
-                    std::cout << "[Audio] Loaded: " << soundKey
-                        << " (" << filePath.string() << ")"
-                        << " loop=" << (loop ? "true" : "false") << std::endl;
-                }
-                else {
-                    std::cout << "[Audio] FAILED: " << filePath.string() << std::endl;
-                }
-            }
-        }
+        //  /*      if (LoadSound(soundKey, filePath.string(), loop)) {
+        //            std::cout << "[Audio] Loaded: " << soundKey
+        //                << " (" << filePath.string() << ")"
+        //                << " loop=" << (loop ? "true" : "false") << std::endl;
+        //        }
+        //        else {
+        //            std::cout << "[Audio] FAILED: " << filePath.string() << std::endl;
+        //        }*/
+        //    }
+        //}
 
-        bool AssetsManager::LoadSound(const std::string& soundName, const std::string& filePath, bool loop) {
-            // Check if the sound is already loaded
-            if (soundMap.find(soundName) != soundMap.end()) return true;
+        //bool AssetsManager::LoadSound(const std::string& soundName, const std::string& filePath, bool loop) {
+        //    // Check if the sound is already loaded
+        //    if (soundMap.find(soundName) != soundMap.end()) return true;
 
-            // Load the sound using FMOD
-            FMOD::Sound* newSound = nullptr;
-            FMOD_MODE mode = loop ? FMOD_LOOP_NORMAL : FMOD_DEFAULT;
-            FMOD_RESULT result = mSystem->createSound(filePath.c_str(), mode, nullptr, &newSound);
-            if (result != FMOD_OK) return false;
+        //    // Load the sound using FMOD
+        //    FMOD::Sound* newSound = nullptr;
+        //    FMOD_MODE mode = loop ? FMOD_LOOP_NORMAL : FMOD_DEFAULT;
+        //    FMOD_RESULT result = mSystem->createSound(filePath.c_str(), mode, nullptr, &newSound);
+        //    if (result != FMOD_OK) return false;
 
-            // Store the sound in the map
-            soundMap[soundName] = newSound;
-            std::cout << "Sound '" << soundName << "' loaded successfully from: " << filePath << std::endl;
-            return true;
-        }
+        //    // Store the sound in the map
+        //    soundMap[soundName] = newSound;
+        //    std::cout << "Sound '" << soundName << "' loaded successfully from: " << filePath << std::endl;
+        //    return true;
+        //}
 
-        FMOD::Sound* AssetsManager::GetSound(const std::string& soundName) {
-            auto it = soundMap.find(soundName);
-            return (it != soundMap.end()) ? it->second : nullptr;
-        }
+        //FMOD::Sound* AssetsManager::GetSound(const std::string& soundName) {
+        //    auto it = soundMap.find(soundName);
+        //    return (it != soundMap.end()) ? it->second : nullptr;
+        //}
 
-        void AssetsManager::UnloadAllSound() {
-            // Stop anything that may still be playing (prevents stale handles).
-            if (mSystem) {
-                FMOD::ChannelGroup* master = nullptr;
-                if (mSystem->getMasterChannelGroup(&master) == FMOD_OK && master) {
-                    master->stop();
-                }
-            }
+        //void AssetsManager::UnloadAllSound() {
+        //    // Stop anything that may still be playing (prevents stale handles).
+        //    if (mSystem) {
+        //        FMOD::ChannelGroup* master = nullptr;
+        //        if (mSystem->getMasterChannelGroup(&master) == FMOD_OK && master) {
+        //            master->stop();
+        //        }
+        //    }
 
-            size_t released = 0;
-            for (auto& kv : soundMap) {
-                FMOD::Sound* s = kv.second;
-                if (!s) continue;
+        //    size_t released = 0;
+        //    for (auto& kv : soundMap) {
+        //        FMOD::Sound* s = kv.second;
+        //        if (!s) continue;
 
-                FMOD_RESULT r = s->release();
-                if (r != FMOD_OK) {
-                    std::cerr << "[Audio] release failed for '" << kv.first
-                        << "': " << FMOD_ErrorString(r) << "\n";
-                }
-                else {
-                    ++released;
-                }
-            }
-            soundMap.clear();
-            std::cout << "[Audio] Unloaded " << released << " sound(s).\n";
-        }
+        //        FMOD_RESULT r = s->release();
+        //        if (r != FMOD_OK) {
+        //            std::cerr << "[Audio] release failed for '" << kv.first
+        //                << "': " << FMOD_ErrorString(r) << "\n";
+        //        }
+        //        else {
+        //            ++released;
+        //        }
+        //    }
+        //    soundMap.clear();
+        //    std::cout << "[Audio] Unloaded " << released << " sound(s).\n";
+        //}
 
 
         static GLuint upload_rgba8(int w, int h, unsigned char* data) {

@@ -14,7 +14,11 @@
 
 #pragma once
 
-#include "pch/pch.h"
+#include "pch/pch_temp.h"
+#include "../Graphics/GraphicsManager.h"
+#include "../Audio/AudioManager.h"
+#include "../Resources/AssetRegistry.h"
+
 #include <unordered_map>
 #include <string>
 #include <map>
@@ -76,22 +80,22 @@ namespace Framework {
         // --------------------------------------------------------------------
         // Load all .mp3/.wav in the given folder (recursive). Uses the filename
         // (lowercased, no extension) as the key.
-        void LoadAllSound(const std::string& folder = "../../MyEngine/Assets/Sound");
+       // void LoadAllSound(const std::string& folder = "../../MyEngine/Assets/Sound");
 
         // Load a single sound by path and store in map under soundName.
         // 'loop' controls FMOD loop mode.
-        bool LoadSound(const std::string& soundName,
-            const std::string& filePath,
-            bool loop);
+       // bool LoadSound(const std::string& soundName,
+        //    const std::string& filePath,
+        //    bool loop);
 
         // Get a loaded FMOD::Sound* by key (returns nullptr if missing).
-        FMOD::Sound* GetSound(const std::string& soundName);
+       // FMOD::Sound* GetSound(const std::string& soundName);
 
         // Stop & release all sounds, clear map.
-        void UnloadAllSound();
+       // void UnloadAllSound();
 
         // Inject FMOD system from engine init.
-        void SetFMODSystem(FMOD::System* system) { mSystem = system; }
+        //void SetFMODSystem(FMOD::System* system) { mSystem = system; }
 
 
         // --------------------------------------------------------------------
@@ -147,6 +151,13 @@ namespace Framework {
         ~AssetsManager() = default;
         AssetsManager(const AssetsManager&) = delete;
         AssetsManager& operator=(const AssetsManager&) = delete;
+
+
+        AssetRegistry* mRegistry = nullptr;  // link to asset registry
+        AudioManager am{ mRegistry };
+        //GraphicsManager gm;
+        AssetRegistry ar;
+
 
         // --------------------------------------------------------------------
         // INTERNAL DATA

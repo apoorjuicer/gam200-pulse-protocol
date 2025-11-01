@@ -237,7 +237,7 @@ std::string RhythmGameplayInput::getTimingFeedback() {
         return "GOOD";
     }
 
-    double musicPosition = audioSystem->GetMusicPosition();
+    double musicPosition = audioSystem->GetBGMPositionSeconds();
     double beatPosition = fmod(musicPosition, beatInterval);
     double distance = std::min(beatPosition, fabs(beatInterval - beatPosition));
 
@@ -261,7 +261,7 @@ void RhythmGameplayInput::processRhythmTiming(int key) {
     std::string feedback = getTimingFeedback();
 
     if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
-        audio->PlaySound("beat_placeholder", 0.8f);
+        audio->PlaySound("beat_placeholder");
     }
 
     bool comboCompleted = false;
@@ -296,7 +296,7 @@ void RhythmGameplayInput::checkForMissedBeat() {
         return;
     }
 
-    double currentTime = audioSystem->GetMusicPosition();
+    double currentTime = audioSystem->GetBGMPositionSeconds();
 
     if (currentTime - lastBeatTime < beatInterval) {
         return;
@@ -335,7 +335,7 @@ void RhythmGameplayInput::checkForMissedBeat() {
     if (playerChances <= 0) {
         canInput = false;
         std::cout << "[YOU DIED!] No more chances." << std::endl;
-        if (audioSystem) audioSystem->StopMusic();
+        if (audioSystem) audioSystem->StopBGM();
     }
 
     if (currentCyclePosition <= 4) {

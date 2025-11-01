@@ -182,6 +182,21 @@ void CoreEngine::Init()
 	ar.LoadAudioManifest();
 	ar.LoadTextureManifest();
 	ar.LoadFontManifest();
+	ar.LoadSceneManifest();
+
+	unsigned int version = 0;
+	FMOD::System* system = nullptr;
+
+	FMOD::System_Create(&system);
+	system->getVersion(&version);
+
+	std::cout << "FMOD version: "
+		<< (version >> 16) << "."
+		<< ((version >> 8) & 0xFF) << "."
+		<< (version & 0xFF) << std::endl;
+
+	system->release();
+
 
 	//// --- Logging Setup ---
 	// try {

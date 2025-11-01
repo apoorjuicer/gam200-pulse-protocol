@@ -4,8 +4,11 @@
  * @project     Pulse Protocol
  * @author		Ban Kai Wei Benjamin
  * @author      Chloe Lau Rey En
- * @brief       Implementation of a basic asset manager
- *              management including unloading and logging utilities.
+ * @brief       Implementation of a basic asset registry
+ *              An asset registry in a game is a centralized system that tracks and 
+ *				provides access to all the digital resources (assets) in a project, 
+ *				such as font, textures, and audio files
+ * 
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without
  *              the prior written consent of DigiPen Institute of Technology
@@ -71,6 +74,19 @@ void FontResource::Deserialize(const rapidjson::Value& in_obj) {
 	if (in_obj.HasMember("path") && in_obj["path"].IsString()) { path = in_obj["path"].GetString(); }
 }
 
+/*Scene Resource*/
+void SceneResource::Deserialize(const rapidjson::Value& in_obj) {
+	if (!in_obj.IsObject()) {
+		std::cerr << "[SceneResource] Invalid JSON format\n";
+		return;
+	}
+
+	//***Essential metadata, must exist and validated 
+	if (in_obj.HasMember("id") && in_obj["id"].IsString()) { scene_id = in_obj["id"].GetString(); }
+	if (in_obj.HasMember("path") && in_obj["path"].IsString()) { path = in_obj["path"].GetString(); }
+}
+
+
 /*Asset Registry*/
 
 /*accessor*/
@@ -82,6 +98,10 @@ std::unordered_map<std::string, AudioResource> const& AssetRegistry::getAudioCon
 }
 std::unordered_map<std::string, TextureResource> const& AssetRegistry::getTexContainer() const {
 	return textureResources;
+}
+
+std::unordered_map<std::string, SceneResource> const& AssetRegistry::getSceneContainer() const {
+	return sceneResources;
 }
 
 std::string const& AssetRegistry::GetAudioJSONfilepath() const {
@@ -96,6 +116,10 @@ std::string const& AssetRegistry::GetFontJSONfilepath() const {
 	return fontjsonfilepath;
 }
 
+std::string const& AssetRegistry::GetSceneJSONfilepath() const {
+	return scenejsonfilepath;
+}
+
 AudioResource  const* AssetRegistry::FindAudio(std::string const& id)  const {
 	if (auto it = audioResources.find(id); it != audioResources.end()) return &it->second;
 	return nullptr;
@@ -106,6 +130,11 @@ TextureResource const* AssetRegistry::FindTexture(std::string const& id) const {
 }
 FontResource   const* AssetRegistry::FindFont(std::string const& id)   const {
 	if (auto it = fontResources.find(id); it != fontResources.end()) return &it->second;
+	return nullptr;
+}
+
+SceneResource   const* AssetRegistry::FindScene(std::string const& id)   const {
+	if (auto it = sceneResources.find(id); it != sceneResources.end()) return &it->second;
 	return nullptr;
 }
 
@@ -166,7 +195,7 @@ bool AssetRegistry::LoadAudioManifest( std::string const& jsonPath) {
 	}// end of for-range to load data into container
 
 
-	std::cout << "No. of [Audio] Loaded :" << added << "\n"
+	std::cout << "No. of [Audio] item(s) Loaded :" << added << "\n"
 			  << "No. item(s), skipped " << skipped << "\n"
 		      << "Loaded from :" << jsonPath << "\n";
 
@@ -217,7 +246,7 @@ bool AssetRegistry::LoadTextureManifest( std::string const& jsonPath) {
 		}
 	}// end of for-range to load data into container
 
-	std::cout << "No. of [Texture] Loaded :" << added << "\n"
+	std::cout << "No. of [Texture] item(s) Loaded :" << added << "\n"
 	<< "No. item(s), skipped " << skipped << "\n"
 	<< "Loaded from :" << jsonPath << "\n";
 
@@ -270,7 +299,59 @@ bool AssetRegistry::LoadFontManifest(std::string const& jsonPath) {
 		}
 	}// end of for-range to load data into container
 
-	std::cout << "No. of [Font] Loaded :" << added << "\n"
+	std::cout << "No. of [Font] item(s) Loaded :" << added << "\n"
+		<< "No. item(s), skipped " << skipped << "\n"
+		<< "Loaded from :" << jsonPath << "\n";
+
+	return true;
+}
+
+
+bool AssetRegistry::LoadSceneManifest(std::string const& jsonPath) {
+	std::ifstream ifs(jsonPath);
+	if (!ifs.is_open()) {
+		std::cerr << "Error: Cannot open file for reading: " << jsonPath << "\n";
+		return false;
+	}
+	rapidjson::IStreamWrapper isw(ifs);
+	rapidjson::Document d;
+	d.ParseStream(isw);
+	if (d.HasParseError()) {
+		std::cerr << "Error: Failed to parse JSON in file: " << jsonPath << "\n";
+		return false;
+	}
+
+	if (!d.HasMember("sceneFilePaths")) {
+		std::cerr << "Error: No 'sceneFilePaths' field in file: " << jsonPath << "\n";
+		return false;
+	}
+
+	//get the array of json file
+	auto const& arr = d["sceneFilePaths"].GetArray();
+	//variables to count successful parsing and failed parsing
+	size_t added = 0, skipped = 0;
+
+	for (const auto& entry : arr) {
+
+		SceneResource scene_res;
+		scene_res.Deserialize(entry);
+
+		if (scene_res.scene_id.empty() || scene_res.path.empty()) {
+			++skipped;
+			std::cerr << "[Scene] Skipping entry with missing id/path\n";
+			continue;
+		}
+		auto [it, ok] = sceneResources.emplace(scene_res.scene_id, std::move(scene_res));
+		if (!ok) {
+			++skipped;
+			std::cerr << "[Scene] Duplicate id =" << it->first << "= error skipping\n";
+		}
+		else {
+			++added;
+		}
+	}// end of for-range to load data into container
+
+	std::cout << "No. of [Scene] item(s) Loaded :" << added << "\n"
 		<< "No. item(s), skipped " << skipped << "\n"
 		<< "Loaded from :" << jsonPath << "\n";
 
@@ -287,6 +368,9 @@ bool AssetRegistry::LoadFontManifest() {
 	return LoadFontManifest(fontjsonfilepath);
 }
 
+bool AssetRegistry::LoadSceneManifest() {
+	return LoadSceneManifest(scenejsonfilepath);
+}
 
 /*For Debug and Console Init print all container element*/
 std::ostream& operator<<(std::ostream& os, AssetRegistry const& ar) {
@@ -310,6 +394,13 @@ std::ostream& operator<<(std::ostream& os, AssetRegistry const& ar) {
 	printSeparator(os);
 	for (auto const& [id, font] : ar.getFontContainer()) {
 		os << id << "->" << font.path << "\n";
+	}
+	printSeparator(os);
+
+	os << "Scene: \n";
+	printSeparator(os);
+	for (auto const& [id, scene] : ar.getSceneContainer()) {
+		os << id << "->" << scene.path << "\n";
 	}
 	printSeparator(os);
 	return os;

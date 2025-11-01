@@ -7,7 +7,7 @@
             "volume": 1.0
         },
         {
-            "id": "rhythm_feedback",
+            "id": "beat_placeholder",
             "path": "../../MyEngine/Assets/SFX/Rhythm_Feedback/Gamebeat_placeholderMusic.wav",
             "loop": false,
             "volume": 1.0

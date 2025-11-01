@@ -15,10 +15,11 @@
 
 #pragma once
 
-#include <string>
-#include <unordered_map> 
-#include <fstream>
-#include <iostream>
+//#include <string>
+//#include <unordered_map> 
+//#include <fstream>
+//#include <iostream>
+#include "pch/pch_temp.h"
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
 
@@ -47,32 +48,44 @@ struct FontResource {
 	void Deserialize( rapidjson::Value const& in);
 };
 
+struct SceneResource {
+	std::string scene_id = "";
+	std::string path = "";
+
+	void Deserialize(rapidjson::Value const& in);
+};
+
 class AssetRegistry {
 private:
 	//[key,value]
 	std::unordered_map<std::string, AudioResource> audioResources;
 	std::unordered_map<std::string, TextureResource> textureResources;
 	std::unordered_map<std::string, FontResource> fontResources;
+	std::unordered_map<std::string, SceneResource> sceneResources;
 
 	//file paths
 	std::string audiojsonfilepath = "../../MyEngine/JSON/audio.json";
 	std::string texturejsonfilepath = "../../MyEngine/JSON/texture.json";
 	std::string fontjsonfilepath = "../../MyEngine/JSON/font.json";
+	std::string scenejsonfilepath = "../../MyEngine/JSON/scene.json";
 
 public:
 	//AssetRegistry(); for debugging shouldn't use. due to Rule of Zero
 	std::unordered_map<std::string, AudioResource> const& getAudioContainer() const;
 	std::unordered_map<std::string, TextureResource> const& getTexContainer() const;
 	std::unordered_map<std::string, FontResource> const& getFontContainer() const;
+	std::unordered_map<std::string, SceneResource> const& getSceneContainer() const;
 
 	std::string const& GetAudioJSONfilepath() const;
 	std::string const& GetTextureJSONfilepath() const;
 	std::string const& GetFontJSONfilepath() const;
+	std::string const& GetSceneJSONfilepath() const;
 
 	//findXXX use like this rm.FindXXX(id), e.g. rm.FindAudio("bgm");
 	AudioResource  const* FindAudio(std::string const& id)  const;
 	TextureResource const* FindTexture(std::string const& id) const;
 	FontResource   const* FindFont(std::string const& id)   const;
+	SceneResource   const* FindScene(std::string const& id)   const;
 
 	//A manifest describes
 	//existing assets(id,path)
@@ -81,12 +94,15 @@ public:
 	bool LoadAudioManifest( std::string const& jsonPath);
 	bool LoadTextureManifest( std::string const& jsonPath);
 	bool LoadFontManifest( std::string const& jsonPath);
+	bool LoadSceneManifest(std::string const& jsonPath);
 
 	//taking overloaded function!! DO NOT REMOVE
 	bool LoadAudioManifest();
 	bool LoadTextureManifest();
 	bool LoadFontManifest();
+	bool LoadSceneManifest();
 };
 
-std::ostream& operator<<(std::ostream& os, AssetRegistry const& rm);
+//ODR
+inline std::ostream& operator<<(std::ostream& os, AssetRegistry const& rm);
 
