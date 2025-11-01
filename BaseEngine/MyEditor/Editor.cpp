@@ -26,32 +26,87 @@
 #include "DebugConsole.h"
 #include "ProfilingTab.h"
 #include "pch/pch.h"
-#include "CoreEngine/ECS/System.h" // For Entity type: debugConsole.AddLogLevel(ConsoleLevel::Info, "Loaded %d textures", &Systems::EntityMember);
-#include "CoreEngine/ECS/Name.h" // For display name in hierarchy list
+#include "CoreEngine/ECS/System.h"   // For Entity type
+#include "CoreEngine/ECS/Name.h"     // For display name in hierarchy list
 #include "Graphics/Transform.h"
 
-namespace MyEditor {
+
+namespace MyEditor
+{
+    // --------------------------------------------------------------------
+    // CONSTANTS & BASIC STATE
+    // --------------------------------------------------------------------
+    constexpr Entity INVALID_ENTITY = static_cast<Entity>(-1);
+    static Entity selectedEntity = INVALID_ENTITY;
 
     static GLFWwindow* s_Window = nullptr;
     static bool s_enabled = true;
+    static bool s_restoreNextFrame = false;
 
-    // --- PANEL RATIOS -------------------------------------------------
-    static float s_top_ratio = 0.05f;  // ~5% of screen height for Play/Pause bar
+    // --------------------------------------------------------------------
+    // PANEL RATIOS
+    // --------------------------------------------------------------------
+    static float s_top_ratio = 0.05f;     // ~5% of screen height for Play/Pause bar
     static float s_bottom_ratio = 0.30f;  // bottom assets/debug/profiler
-    static float s_left_ratio = 0.20f;  // scene/entity panel
-    static float s_right_ratio = 0.15f;  // inspector panel
+    static float s_left_ratio = 0.20f;    // scene/entity panel
+    static float s_right_ratio = 0.15f;   // inspector panel
 
     static constexpr float SPLIT_THICK = 6.0f;
-    static constexpr float MIN_RATIO_W = 0.12f; // min 12% for left/right widths
-    static constexpr float MIN_RATIO_H = 0.05f; // min 5% for top/bottom heights
+    static constexpr float MIN_RATIO_W = 0.12f;   // min 12% for left/right widths
+    static constexpr float MIN_RATIO_H = 0.05f;   // min 5% for top/bottom heights
     static constexpr float MAX_TOTAL_SIDE = 0.85f;
     static constexpr float MAX_TOTAL_VERT = 0.85f;
 
-    template<typename T>
-    static T clamp_val(T v, T lo, T hi) { return (v < lo) ? lo : (v > hi) ? hi : v; }
+    // --------------------------------------------------------------------
+    // ASSET BROWSER STATE
+    // --------------------------------------------------------------------
+    static std::string s_assetRoot = "../../MyEngine/Assets";
+    static std::string s_currentDir = s_assetRoot;
+    static std::vector<AssetItem> s_dirEntries;
 
-    constexpr Entity INVALID_ENTITY = static_cast<Entity>(-1);
-    static Entity selectedEntity = INVALID_ENTITY;
+    static float s_thumbSize = 72.0f;
+    static float s_thumbPadding = 10.0f;
+
+    // --------------------------------------------------------------------
+    // PLAY MODE SNAPSHOT STATE
+    // --------------------------------------------------------------------
+    struct SavedEntityState
+    {
+        Entity id;
+
+        bool hasTransform;
+        Framework::Transform transform;
+
+        bool hasRenderable;
+        Framework::Renderable renderable;
+
+        bool hasName;
+        Name name;
+
+        bool hasGuiButton;
+        GUIButton guiButton;
+
+        SavedEntityState()
+            : id(INVALID_ENTITY),
+              hasTransform(false),
+              hasRenderable(false),
+              hasName(false),
+              hasGuiButton(false)
+        {}
+    };
+
+    static bool s_isPlaying = false;                // current play mode or not
+    static bool s_hasEditorBaseline = false;        // whether we have captured a snapshot
+    static std::vector<SavedEntityState> s_editorBaseline;
+
+    // --------------------------------------------------------------------
+    // UTILITY
+    // --------------------------------------------------------------------
+    template<typename T>
+    static T clamp_val(T v, T lo, T hi)
+    {
+        return (v < lo) ? lo : (v > hi) ? hi : v;
+    }
 
 
     // helper to draw a 1px line
@@ -62,6 +117,286 @@ namespace MyEditor {
             1.0f
         );
     }
+
+    static bool IsImageExt(const std::string& path)
+    {
+        auto dot = path.find_last_of('.');
+        if (dot == std::string::npos) return false;
+        std::string ext = path.substr(dot + 1);
+        for (auto& c : ext) c = (char)tolower(c);
+
+        // add more if your AssetsManager supports them
+        return (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp" || ext == "tga" || ext == "dds");
+    }
+
+    static void RefreshCurrentDir()
+    {
+        s_dirEntries.clear();
+
+        namespace fs = std::filesystem;
+        std::error_code ec;
+
+        if (!fs::exists(s_currentDir, ec))
+            return;
+
+        // 1) first, add ".." if not root
+        if (fs::weakly_canonical(s_currentDir, ec) != fs::weakly_canonical(s_assetRoot, ec))
+        {
+            AssetItem up;
+            up.name = "..";
+            up.fullPath = fs::weakly_canonical(fs::path(s_currentDir).parent_path(), ec).string();
+            up.isDir = true;
+            s_dirEntries.push_back(up);
+        }
+
+        // 2) list current dir (non-recursive)
+        for (auto const& entry : fs::directory_iterator(s_currentDir, ec))
+        {
+            AssetItem it;
+            it.fullPath = entry.path().lexically_normal().string();
+            it.name = entry.path().filename().string();
+            it.isDir = entry.is_directory();
+            s_dirEntries.push_back(std::move(it));
+        }
+
+        // 3) sort: folders first, then files alpha
+        std::sort(s_dirEntries.begin(), s_dirEntries.end(),
+            [](AssetItem const& a, AssetItem const& b)
+            {
+                if (a.isDir != b.isDir)
+                    return a.isDir > b.isDir;
+                return a.name < b.name;
+            });
+    }
+
+    // Load thumbnail texture lazily using your AssetsManager
+    static void EnsureThumbnailLoaded(AssetItem& item)
+    {
+        if (item.triedLoad) return;     // already tried
+        item.triedLoad = true;
+
+        if (item.isDir) return;         // no thumb for folder
+
+        if (!IsImageExt(item.fullPath)) return;
+
+        // this assumes your AssetsManager returns a GLuint / unsigned int
+        item.texID = Framework::AssetsManager::GetOrLoad(item.fullPath);
+    }
+
+    static void DrawAssetsBrowserPanelUnity(Entity selectedEntity)
+    {
+        // top bar: path + refresh + view size
+        {
+            if (ImGui::Button("Refresh"))
+                RefreshCurrentDir();
+            ImGui::SameLine();
+
+            // breadcrumb-like display (simple version)
+            ImGui::TextUnformatted(s_currentDir.c_str());
+            ImGui::SameLine();
+
+            ImGui::SetNextItemWidth(120.0f);
+            ImGui::SliderFloat("Size", &s_thumbSize, 40.0f, 160.0f, "%.0f");
+        }
+
+        ImGui::Separator();
+
+        // scrolling region
+        ImGui::BeginChild("AssetsGrid", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+
+        float availX = ImGui::GetContentRegionAvail().x;
+        float cellSize = s_thumbSize + s_thumbPadding;
+        int   cols = (int)(availX / cellSize);
+        if (cols < 1) cols = 1;
+
+        int itemIndex = 0;
+
+        for (auto& item : s_dirEntries)
+        {
+            // start new row
+            if (itemIndex % cols != 0)
+                ImGui::SameLine();
+
+            ImGui::BeginGroup();
+            ImGui::PushID(itemIndex);
+
+            // 1) Draw the thumbnail
+            ImVec2 thumbSize(s_thumbSize, s_thumbSize);
+
+            if (item.isDir)
+            {
+                // Folder: just draw a big button
+                if (ImGui::Button(item.name.c_str(), thumbSize))
+                {
+                    // go into folder
+                    s_currentDir = item.fullPath;
+                    RefreshCurrentDir();
+                    ImGui::PopID();
+                    ImGui::EndGroup();
+                    // since we changed directory, we shouldn't keep drawing old list
+                    ImGui::EndChild();
+                    return;
+                }
+            }
+            else
+            {
+                // File
+                EnsureThumbnailLoaded(item);
+
+                bool clicked = false;
+
+                if (item.texID != 0)
+                {
+                    ImTextureID tid = (ImTextureID)(intptr_t)item.texID;
+
+                    // make a unique ID for ImGui so it doesn't clash with other items
+                    std::string btnId = "##assetTex_" + item.fullPath;
+
+                    clicked = ImGui::ImageButton(
+                        btnId.c_str(),      // <- string id (required by your ImGui)
+                        tid,                // texture
+                        ImVec2(s_thumbSize, s_thumbSize),
+                        ImVec2(0, 1),       // uv0  (flip Y if your textures are upside-down)
+                        ImVec2(1, 0)        // uv1
+                        // you can add frame_padding, bg_col, tint_col if needed
+                    );
+
+                }
+                else
+                {
+                    // no texture -> generic button with extension
+                    if (ImGui::Button(item.name.c_str(), thumbSize))
+                        clicked = true;
+                }
+
+                if (clicked)
+                {
+                    // if an entity is selected, assign this asset to its Renderable
+                    if (selectedEntity != INVALID_ENTITY)
+                    {
+                        auto* g_coordinator = Coordinator::GetInstance();
+                        if (g_coordinator && g_coordinator->HasComponent<Framework::Renderable>(selectedEntity))
+                        {
+                            auto& rend = g_coordinator->GetComponent<Framework::Renderable>(selectedEntity);
+                            rend.spriteName = item.fullPath;                       // or make it relative
+                            rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
+                        }
+                    }
+                }
+
+                // optional: right click popup to "Ping", "Copy path", etc.
+                if (ImGui::BeginPopupContextItem("AssetContext"))
+                {
+                    if (ImGui::MenuItem("Copy path"))
+                    {
+                        ImGui::SetClipboardText(item.fullPath.c_str());
+                    }
+                    if (selectedEntity != INVALID_ENTITY)
+                    {
+                        if (ImGui::MenuItem("Assign to selected"))
+                        {
+                            auto* g_coordinator = Coordinator::GetInstance();
+                            if (g_coordinator && g_coordinator->HasComponent<Framework::Renderable>(selectedEntity))
+                            {
+                                auto& rend = g_coordinator->GetComponent<Framework::Renderable>(selectedEntity);
+                                rend.spriteName = item.fullPath;
+                                rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
+                            }
+                        }
+                    }
+                    ImGui::EndPopup();
+                }
+            }
+
+            // 2) Draw label under thumb (clipped)
+            ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + s_thumbSize);
+            ImGui::TextUnformatted(item.name.c_str());
+            ImGui::PopTextWrapPos();
+
+            ImGui::PopID();
+            ImGui::EndGroup();
+
+            itemIndex++;
+        }
+
+        ImGui::EndChild();
+    }
+
+    // take current ECS and remember it as "start state"
+    static void CaptureEditorBaseline()
+    {
+        s_editorBaseline.clear();
+
+        auto* coord = Coordinator::GetInstance();
+        if (!coord)
+            return;
+
+        for (auto e : coord->GetAllEntities())
+        {
+            SavedEntityState st;
+            st.id = e;
+
+            if (coord->HasComponent<Framework::Transform>(e))
+            {
+                st.hasTransform = true;
+                st.transform = coord->GetComponent<Framework::Transform>(e);
+            }
+
+            if (coord->HasComponent<Framework::Renderable>(e))
+            {
+                st.hasRenderable = true;
+                st.renderable = coord->GetComponent<Framework::Renderable>(e);
+            }
+
+            if (coord->HasComponent<Name>(e))
+            {
+                st.hasName = true;
+                st.name = coord->GetComponent<Name>(e);
+            }
+
+            if (coord->HasComponent<GUIButton>(e))
+            {
+                st.hasGuiButton = true;
+                st.guiButton = coord->GetComponent<GUIButton>(e);
+            }
+
+            s_editorBaseline.push_back(std::move(st));
+        }
+
+        s_hasEditorBaseline = true;
+        std::cout << "[Editor] Captured baseline with "
+            << s_editorBaseline.size() << " entities.\n";
+    }
+
+    // push the remembered state back into ECS
+    static void RestoreEditorBaseline()
+    {
+        if (!s_hasEditorBaseline)
+            return;
+
+        auto* coord = Coordinator::GetInstance();
+        if (!coord)
+            return;
+
+        for (auto const& st : s_editorBaseline)
+        {
+            if (coord->HasComponent<Framework::Transform>(st.id) && st.hasTransform)
+                coord->GetComponent<Framework::Transform>(st.id) = st.transform;
+
+            if (coord->HasComponent<Framework::Renderable>(st.id) && st.hasRenderable)
+                coord->GetComponent<Framework::Renderable>(st.id) = st.renderable;
+
+            if (coord->HasComponent<Name>(st.id) && st.hasName)
+                coord->GetComponent<Name>(st.id) = st.name;
+
+            if (coord->HasComponent<GUIButton>(st.id) && st.hasGuiButton)
+                coord->GetComponent<GUIButton>(st.id) = st.guiButton;
+        }
+
+        std::cout << "[Editor] Restored baseline.\n";
+    }
+
+   
 
     // Left splitter: drags the RIGHT edge of the Left panel => modifies left_ratio
     //static void SplitterV_Left(const char* id, float x_px, float top_h_px, float full_w_px, float& left_ratio,
@@ -121,6 +456,8 @@ namespace MyEditor {
         ImGui_ImplGlfw_InitForOpenGL(s_Window, true);
         ImGui_ImplOpenGL3_Init("#version 130");
         s_enabled = true;
+
+        RefreshCurrentDir();
     }
 
 
@@ -136,6 +473,14 @@ namespace MyEditor {
 
     void Draw() {
         if (!s_enabled) return;
+
+        if (s_restoreNextFrame)
+        {
+            // Only run after the engine is safely paused
+            RestoreEditorBaseline();
+            s_restoreNextFrame = false;
+        }
+
 
         ImGuiIO& io = ImGui::GetIO();
         const float W = io.DisplaySize.x;
@@ -203,14 +548,38 @@ namespace MyEditor {
             if (ImGui::Begin("TopBar", nullptr, top_flags)) {
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
 
-                // --- Play / Pause ---
-                if (ImGui::Button("Play", ImVec2(70, 0))) {  // fixed width looks neat
+
+                // --- Play ---
+                if (ImGui::Button("Play", ImVec2(70, 0)))
+                {
+                    // restore ECS snapshot
+                    if (!s_hasEditorBaseline)
+                        CaptureEditorBaseline();
+                    else
+                        RestoreEditorBaseline();
+
+                    // tell engine to restart audio/rhythm
+                    Engine->RestartRuntimeForPlay();
+
+                    // then run
                     Engine->SetPaused(false);
+                    s_isPlaying = true;
                 }
+
                 ImGui::SameLine();
-                if (ImGui::Button("Pause", ImVec2(70, 0))) {
+
+                // --- Stop ---
+                if (ImGui::Button("Stop", ImVec2(70, 0)))
+                {
+                    // pause game first
                     Engine->SetPaused(true);
+                    s_isPlaying = false;
+
+                    // put ECS back to editor state
+                    RestoreEditorBaseline();
+
                 }
+
 
                 // --- Visual spacing gap before scene controls ---
                 ImGui::SameLine();
@@ -224,7 +593,7 @@ namespace MyEditor {
                         sceneMgr->SaveCurrentScene();
                     }
                 }
-
+                    
                 ImGui::SameLine();
                 if (ImGui::Button("Load Scene", ImVec2(120, 0))) {
                     std::string path = OpenJsonFileDialog();
@@ -232,12 +601,20 @@ namespace MyEditor {
                         auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>();
                         if (sceneMgr) {
                             sceneMgr->LoadSceneFromJson(path);
+                            std::cout << "[Editor] Loaded scene: " << path << "\n";
+
+                            // new scene = new baseline required
+                            s_hasEditorBaseline = false;
+                            selectedEntity = INVALID_ENTITY;
                         }
                     }
                     else {
                         std::cout << "[Editor] Load scene cancelled.\n";
                     }
                 }
+
+
+
 
                 // --- Right-aligned label ---
                 ImGui::SameLine();
@@ -421,9 +798,10 @@ namespace MyEditor {
             if (ImGui::BeginTabBar("BottomTabs")) {
 
                 if (ImGui::BeginTabItem("Assets")) {
-                    ImGui::TextUnformatted("Asset browser / thumbnails / filters.");
+                    DrawAssetsBrowserPanelUnity(selectedEntity);
                     ImGui::EndTabItem();
                 }
+
 
                 // ===== DEBUG TAB =====
                 static DebugConsole debugConsole;

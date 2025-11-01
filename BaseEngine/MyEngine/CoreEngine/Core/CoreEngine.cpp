@@ -311,58 +311,48 @@ void CoreEngine::Setup()
 
 void CoreEngine::Update(float dt)
 {
-	auto g_coordinator = Coordinator::GetInstance();
-	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
-	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
-	auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
-	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
-	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
-
+	auto coord = Coordinator::GetInstance();
+	auto audio = coord->GetSystem<AudioManager>();
+	auto input = coord->GetSystem<InputManager>();
+	auto rhythm = coord->GetSystem<RhythmGameplayInput>();
+	auto graphics = coord->GetSystem<GraphicsManager>();
+	auto scene = coord->GetSystem<SceneManager>();
 	auto profiler = ProfilingManager::GetInstance();
 
-	profiler->StartSystem("Input System");
-	if (g_inputSystem) g_inputSystem->Update(dt);
-	profiler->EndSystem("Input System");
-	
-	profiler->StartSystem("Scene System");
-	if (g_sceneSystem) g_sceneSystem->Update(dt);
-	profiler->EndSystem("Scene System");
+	// 1) always keep FMOD and graphics alive
+	if (audio)    audio->Update();
+	if (graphics) graphics->Update();
 
-	profiler->StartSystem("LogicSystem");
-	g_coordinator->UpdateAllSystems(dt);
-	profiler->EndSystem("LogicSystem");
-
-	profiler->StartSystem("RhythmGameplayInput");
-	if (g_rhythmSystem) g_rhythmSystem->Update(dt);
-	profiler->EndSystem("RhythmGameplayInput");
-
-	profiler->StartSystem("Graphics System");
-	if (g_graphicsSystem) g_graphicsSystem->Update();
-	profiler->EndSystem("Graphics System");
-
-	profiler->StartSystem("Audio System");
-	if (g_audioSystem) g_audioSystem->Update();
-	profiler->EndSystem("Audio System");
-
-	profiler->StartSystem("Collision System");
-	// If collision is in UpdateAllSystems, remove this
-	profiler->EndSystem("Collision System");
-	//Test.Update(dt);
-
-	// Always process engine / message stuff
+	// always process messages
 	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
 
-	// Always draw/update graphics once per frame
-	if (g_graphicsSystem)
-		g_graphicsSystem->Update();
-
-	// 2) If paused, stop here � no gameplay / input / scene logic
+	// 2) if paused, stop here -> NO rhythm, NO input, NO scene
 	if (m_paused)
 		return;
 
-	// 3) Normal running path
-	if (g_inputSystem)    g_inputSystem->Update(dt);
-	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);	
+	// 3) gameplay path
+	if (input) {
+		profiler->StartSystem("Input System");
+		input->Update(dt);
+		profiler->EndSystem("Input System");
+	}
+
+	if (scene) {
+		profiler->StartSystem("Scene System");
+		scene->Update(dt);
+		profiler->EndSystem("Scene System");
+	}
+
+	// ECS systems that depend on dt
+	profiler->StartSystem("LogicSystem");
+	coord->UpdateAllSystems(dt);
+	profiler->EndSystem("LogicSystem");
+
+	if (rhythm) {
+		profiler->StartSystem("RhythmGameplayInput");
+		rhythm->Update(dt);
+		profiler->EndSystem("RhythmGameplayInput");
+	}
 }
 
 
@@ -516,4 +506,23 @@ void CoreEngine::TogglePaused()
 {
 	SetPaused(!m_paused);
 }
+
+void CoreEngine::RestartRuntimeForPlay()
+{
+	auto coord = Coordinator::GetInstance();
+	if (!coord) return;
+
+	// 1) AUDIO: force BGM to start at 0
+	if (auto audio = coord->GetSystem<AudioManager>()) {
+		// if engine is paused (Stop button), keep audio paused too
+		audio->RestartBGM(m_paused);
+	}
+
+	// 2) RHYTHM: easiest reset is shutdown + initialize (your code already has both)
+	if (auto rhythm = coord->GetSystem<RhythmGameplayInput>()) {
+		rhythm->Shutdown();
+		rhythm->Initialize();
+	}
+}
+
 

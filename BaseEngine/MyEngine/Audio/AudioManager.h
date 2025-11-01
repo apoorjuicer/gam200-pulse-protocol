@@ -57,6 +57,8 @@ public:
     double GetMusicPosition() const;
     void StopMusic();
 
+    void RestartBGM(bool startPaused);
+
 private:
     FMOD::System* mSystem = nullptr;
     FMOD::Sound* mBGM = nullptr;

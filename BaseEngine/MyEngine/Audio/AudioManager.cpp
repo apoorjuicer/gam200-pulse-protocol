@@ -31,6 +31,29 @@ static inline void FMOD_CHECK(FMOD_RESULT r, const char* where)
 AudioManager::AudioManager() {}
 AudioManager::~AudioManager() {}
 
+void AudioManager::RestartBGM(bool startPaused)
+{
+    if (!mSystem) return;
+
+    // 1) stop current BGM channel if any
+    if (mBGMCh) {
+        mBGMCh->stop();
+        mBGMCh = nullptr;
+    }
+
+    // 2) if we have a BGM sound loaded, play it again from the start
+    if (mBGM) {
+        FMOD_RESULT r = mSystem->playSound(mBGM, nullptr, false, &mBGMCh);
+        if (r == FMOD_OK && mBGMCh) {
+            mBGMCh->setVolume(1.0f);
+            mBGMCh->setPaused(startPaused);
+        }
+    }
+
+    // remember current pause state
+    mPaused = startPaused;
+}
+
 
 void AudioManager::releaseAll()
 {

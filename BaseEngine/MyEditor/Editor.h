@@ -31,5 +31,16 @@ namespace MyEditor {
     // Returns the middle "game" rectangle in FRAMEBUFFER PIXELS, computed from current panel sizes
     GameViewport ComputeMiddleGameViewportPixels(GLFWwindow* window, bool keep_16x9 = true);
 
+    struct AssetItem
+{
+    std::string name;        // just the file/folder name
+    std::string fullPath;    // absolute-ish path (../../MyEngine/Assets/...)
+    bool        isDir = false;
+
+    // thumbnail stuff (for files)
+    unsigned int texID = 0;
+    bool         triedLoad = false; // so we don't spam-load every frame
+};
+
 
 }

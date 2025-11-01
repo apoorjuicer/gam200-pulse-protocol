@@ -37,6 +37,9 @@ public:
 	bool IsGameRunning() const { return GameRunning; }
 
 	GLFWwindow* GetWindow() const { return window; }
+
+	void RestartRuntimeForPlay();
+
 	
 private:
 	bool GameRunning;
