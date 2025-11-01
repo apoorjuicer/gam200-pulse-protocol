@@ -7,6 +7,7 @@
  *             unloading, and transitioning between game scenes (MainMenu, Pause,
  *             Level1, Dead). Manages scene-specific entity creation/destruction
  *             and maintains a list of entities belonging to the current scene
+ * 
  * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
  *             Reproduction or disclosure of this file or its contents without the
  *             prior written consent of DigiPen Institute of Technology is prohibited.
@@ -150,7 +151,7 @@ void SceneManager::SaveCurrentScene()
 			auto& btn = g_coordinator->GetComponent<GUIButton>(entity);
 			btn.Serialize(ButtonVal, alloc);
 
-			ComponentObj.AddMember("button", ButtonVal, alloc);
+			ComponentObj.AddMember("ui", ButtonVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
@@ -280,11 +281,11 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 		{
 			const auto& component = components[j];
 
-			// this is purely for the in-game basic GUI system
-			if (component.HasMember("button") && component["button"].IsObject())
+			// this is purely for the in-game basic GUI system & on screen UI elements
+			if (component.HasMember("ui") && component["ui"].IsObject())
 			{
 				GUIButton btn;
-				btn.Deserialize(component["button"]);
+				btn.Deserialize(component["ui"]);
 				g_coordinator->AddComponent<GUIButton>(entity, btn);
 			}
 
@@ -328,7 +329,12 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				g_coordinator->AddComponent<Framework::Animation>(entity, a);
 			}
 			
-
+			if (component.HasMember("name") && component["name"].IsObject())
+			{
+				Name n;
+				n.Deserialize(component["name"]);
+				g_coordinator->AddComponent<Name>(entity, n);
+			}
 		}
 
 		// save obj to a vector for deleting later

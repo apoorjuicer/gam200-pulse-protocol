@@ -15,7 +15,15 @@
                             "x": 1600.0,
                             "y": 900.0
                         },
-                        "isVisible": true
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "angle_disp": 0.0,
+                        "angle_speed": 0.0,
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
                     }
             },
 
@@ -170,6 +178,76 @@
             ]
         },
 
+        {"Type": "FeedbackBar",
+        "components":
+            [
+                {
+                    "name": {
+                        "name": "FeedbackBar"
+                    }
+                },
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": -300.0
+                        },
+                        "scale": {
+                            "x": 600.0,
+                            "y": 90.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "angle_disp": 0.0,
+                        "angle_speed": 0.0,
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "textureID": 0,
+                        "useTexture": false,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+
+                {
+                    "ui": {
+                        "buttonID": "feedback_bar",
+                        "label": "",
+                        "normalColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "hoverColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "actionType": "",
+                        "entityJsonPath": "",
+                        "isEnabled": false
+                    }
+                }
+            ]
+        },
+
         {"Type": "GUIButton",
         "components": [
                 {
@@ -209,21 +287,21 @@
                     }
                 },
                 {
-                    "button": {
+                    "ui": {
                         "buttonID": "btn_create",
                         "label": "Create Hero",
-                                "normalColor": {
-            			"r": 0.0,
-            			"g": 0.7,
-            			"b": 0.0,
-            			"a": 1.0
-        		},
-        			"hoverColor": {
-            			"r": 0.0,
-            			"g": 0.5,
-           			"b": 0.0,
-           			"a": 1.0
-        		},
+                        "normalColor": {
+                            "r": 0.0,
+                            "g": 0.7,
+                            "b": 0.0,
+                            "a": 1.0
+                        },
+                        "hoverColor": {
+                            "r": 0.0,
+                            "g": 0.5,
+                            "b": 0.0,
+                            "a": 1.0
+                        },
                         "actionType": "CreateEntity",
                         "entityJsonPath": "../../MyEngine/JSON/herotransform.json",
                         "isEnabled": true
@@ -270,7 +348,7 @@
                     }
                 },
                 {
-                    "button": {
+                    "ui": {
                         "buttonID": "btn_destroy",
                         "label": "Destroy Hero",
                         "normalColor": {

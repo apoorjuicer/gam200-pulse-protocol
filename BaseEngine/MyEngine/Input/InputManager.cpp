@@ -57,6 +57,7 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
 }
 
 void InputManager::Update(float) {
+	/*std::cout << "[INPUT MANAGER UPDATE]" << std::endl;*/
 	updateInputStates();
 	updateGUIButtons();
 	processDebugToggles();
@@ -262,6 +263,14 @@ void InputManager::updateGUIButtons() {
 		if (!g_coordinator->HasComponent<GUIButton>(entity)) continue;
 
 		auto& button = g_coordinator->GetComponent<GUIButton>(entity);
+
+		if (g_coordinator->HasComponent<Framework::Transform>(entity)) {
+			auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
+			if (!transform.isVisible) {
+				button.currentState = ButtonState::Normal;
+				continue;  // Skip hidden entities
+			}
+		}
 
 		if (!button.isEnabled) {
 			button.currentState = ButtonState::Normal;

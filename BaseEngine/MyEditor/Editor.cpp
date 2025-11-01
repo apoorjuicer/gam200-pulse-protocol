@@ -308,7 +308,9 @@ namespace MyEditor {
 
                     // Highlight if currently selected
                     bool isSelected = (selectedEntity == entity);
-                    if (ImGui::Selectable(display.c_str(), isSelected))
+
+                    std::string uniqueLabel = display + "##" + std::to_string((int)entity);
+                    if (ImGui::Selectable(uniqueLabel.c_str(), isSelected))
                     {
                         selectedEntity = entity;
                     }

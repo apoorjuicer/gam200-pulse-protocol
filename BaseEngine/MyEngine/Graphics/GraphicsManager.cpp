@@ -174,8 +174,8 @@ void GraphicsManager::Update()
     // 2) then draw text on top
     //RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
 
-    // 3) Draw in-game gui system
-    RenderGUIButtons();
+    // 3) Draw in-game gui system & UI overlay
+    RenderUIOverlayElements();
 
     // 4) Draw overlay text last
     auto& textShader = GLApp::shdrpgms[3];
@@ -436,7 +436,7 @@ void GraphicsManager::OnResize(int width, int height)
     // you can rebuild 'projection' here too.
 }
 
-void GraphicsManager::RenderGUIButtons()
+void GraphicsManager::RenderUIOverlayElements()
 {
     auto* coordinator = Coordinator::GetInstance();
     auto inputMgr = coordinator->GetSystem<InputManager>();
@@ -452,6 +452,16 @@ void GraphicsManager::RenderGUIButtons()
 
         auto& button = coordinator->GetComponent<GUIButton>(entity);
         auto& transform = coordinator->GetComponent<Framework::Transform>(entity);
+
+        // Skip rendering if entity is hidden
+        if (!transform.isVisible) {
+            continue;
+        }
+
+        // Skip rendering if alpha is 0 (transparent)
+        if (button.normalColor.a <= 0.0f && button.hoverColor.a <= 0.0f) {
+            continue;
+        }
 
         // Choose color based on button state
         glm::vec4 color = (button.currentState == ButtonState::Hover)
