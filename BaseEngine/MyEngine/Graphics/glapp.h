@@ -20,6 +20,8 @@
 #include "Transform.h"
 #include "Renderable.h"
 #include "Animation.h"
+#include "CoreEngine/Assets.h"
+#include "Physics/collision.h"          
 // External transforms list (used elsewhere)   
 namespace Framework { class Transform; class Animation; class Renderable;}
 
@@ -47,7 +49,7 @@ public:
 	static inline float PixelScale = 1.0f;     // uniform scale = min(fbw/VW, fbh/VH)
 	static void ComputeLetterbox(int fbw, int fbh);
 	static void OnResize(int width, int height);
-
+	void DrawAABB_NDC(const glm::mat3& modelToNDC, const AABB& box, const glm::vec3& color);
 	struct Camera2D {
 		glm::vec2 center{ 0.0f, 0.0f };
 		float zoom = 1.0f; // 1.0f = normal, >1 = zoom in, <1 = zoom out

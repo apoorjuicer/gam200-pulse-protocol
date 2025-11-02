@@ -310,9 +310,45 @@ void GLApp::draw(std::set<Entity> entities) {
 			drawTrans(re, an, tr, ZoomNDC);
 		}
 	}
+	GLboolean depthWasOn = glIsEnabled(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
+
+	if (MyEditor::IsEnabled())
+	{
+		DebugDraw::Begin(glm::mat4(1.0f));
+
+		for (auto e : entities) {
+			if (!g_coordinator->HasComponent<Framework::Transform>(e))   continue;
+			if (!g_coordinator->HasComponent<Framework::Renderable>(e))  continue;
+
+			auto& tr = g_coordinator->GetComponent<Framework::Transform>(e);
+			auto& re = g_coordinator->GetComponent<Framework::Renderable>(e);
+
+			AABB aabb;
+			if (re.mdl_ref == 0) {          // Background quad
+				aabb.min = { -1.f, -1.f };
+				aabb.max = { 1.f,  1.f };
+			}
+			else {                           // Sprite quad
+				aabb.min = { -0.5f, -0.5f };
+				aabb.max = { 0.5f,  0.5f };
+			}
+
+			glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
+			glm::mat3 modelToNDC = BuildZoomNDC(gCamera.zoom) * M;
+
+			const bool isHero = re.spriteName.find("hero") != std::string::npos;
+			glm::vec3 color = isHero ? glm::vec3(1, 0, 0) : glm::vec3(0, 1, 0);
+
+			DrawAABB_NDC(modelToNDC, aabb, color);
+		}
+
+		glLineWidth(2.0f);
+		DebugDraw::End();
+	}
+
+	if (depthWasOn) glEnable(GL_DEPTH_TEST);
 }
-
-
 
 
 void GLApp::cleanup() {
@@ -497,4 +533,28 @@ void GLApp::ComputeLetterbox(int fbw, int fbh)
 void GLApp::OnResize(int width, int height)
 {
 	ComputeLetterbox(width, height);
+}
+
+// Convert vec2 in model space to NDC using your existing 2D pipeline
+static inline glm::vec2 ToNDC(const glm::mat3& M, const glm::vec2& v) {
+	glm::vec3 h = M * glm::vec3(v, 1.0f);
+	return { h.x, h.y };               // already NDC
+}
+
+// Draw an AABB as 4 lines in NDC
+void GLApp::DrawAABB_NDC(const glm::mat3& modelToNDC, const AABB& box, const glm::vec3& color) {
+	const glm::vec2 a{ box.min.x, box.min.y };
+	const glm::vec2 b{ box.max.x, box.min.y };
+	const glm::vec2 c{ box.max.x, box.max.y };
+	const glm::vec2 d{ box.min.x, box.max.y };
+
+	glm::vec2 qa = ToNDC(modelToNDC, a);
+	glm::vec2 qb = ToNDC(modelToNDC, b);
+	glm::vec2 qc = ToNDC(modelToNDC, c);
+	glm::vec2 qd = ToNDC(modelToNDC, d);
+
+	DebugDraw::DrawLine(qa, qb, color);
+	DebugDraw::DrawLine(qb, qc, color);
+	DebugDraw::DrawLine(qc, qd, color);
+	DebugDraw::DrawLine(qd, qa, color);
 }

@@ -14,11 +14,13 @@
 #define COLLISION_H
 
 #include "../CoreEngine/Assets.h"
+#include "Graphics/Transform.h"
 #include "pch/pch.h"
 
 // -----------------------------------------------------------------------------
 // CollisionManager
 // -----------------------------------------------------------------------------
+namespace Framework { class Transform; }
 class CollisionManager : public Systems
 {
 public:
