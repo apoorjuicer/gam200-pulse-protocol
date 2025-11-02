@@ -510,10 +510,10 @@ void GraphicsManager::RenderUIOverlayElements()
 void GraphicsManager::RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color)
 {
     // DEBUG - only print first few frames
-    static int count = 0;
-    if (count++ < 10) {
-        std::cout << "[RenderQuad] Rendering at screen: (" << x << ", " << y << ")" << std::endl;
-    }
+    //static int count = 0;
+    //if (count++ < 10) {
+    //    std::cout << "[RenderQuad] Rendering at screen: (" << x << ", " << y << ")" << std::endl;
+    //}
 
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);

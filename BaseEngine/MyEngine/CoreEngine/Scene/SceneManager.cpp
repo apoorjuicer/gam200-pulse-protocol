@@ -85,7 +85,7 @@ void SceneManager::SaveCurrentScene()
 	Value JsonEntityArray(kArrayType);
 
 	// save one entity one at a time into 1 Json file
-	for (auto const& entity: SceneEntityList)
+	for (auto const& entity: g_coordinator->GetAllEntities())
 	{
 		// We make an object first for JsonEntityArray[i]
 		Value entityObj(kObjectType);
