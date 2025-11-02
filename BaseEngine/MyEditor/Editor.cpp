@@ -26,6 +26,7 @@
 #include "DebugConsole.h"
 #include "ProfilingTab.h"
 #include "pch/pch.h"
+#include "CoreEngine/Factory/Factory.h" // for creating/deleting entities
 #include "CoreEngine/ECS/System.h"   // For Entity type
 #include "CoreEngine/ECS/Name.h"     // For display name in hierarchy list
 #include "Graphics/Transform.h"
@@ -548,54 +549,24 @@ namespace MyEditor
             if (ImGui::Begin("TopBar", nullptr, top_flags)) {
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
 
+                ImVec2 framePadding = ImGui::GetStyle().FramePadding;
+                float itemSpacing = ImGui::GetStyle().ItemSpacing.x;
 
-                // --- Play ---
-                if (ImGui::Button("Play", ImVec2(70, 0)))
-                {
-                    // restore ECS snapshot
-                    if (!s_hasEditorBaseline)
-                        CaptureEditorBaseline();
-                    else
-                        RestoreEditorBaseline();
+                // Scene control buttons on the left
+                ImVec2 saveTextSize = ImGui::CalcTextSize("Save Scene");
+                ImVec2 loadTextSize = ImGui::CalcTextSize("Load Scene");
+                ImVec2 saveButtonSize = ImVec2(saveTextSize.x + framePadding.x * 2, 0);
+                ImVec2 loadButtonSize = ImVec2(loadTextSize.x + framePadding.x * 2, 0);
 
-                    // tell engine to restart audio/rhythm
-                    Engine->RestartRuntimeForPlay();
-
-                    // then run
-                    Engine->SetPaused(false);
-                    s_isPlaying = true;
-                }
-
-                ImGui::SameLine();
-
-                // --- Stop ---
-                if (ImGui::Button("Stop", ImVec2(70, 0)))
-                {
-                    // pause game first
-                    Engine->SetPaused(true);
-                    s_isPlaying = false;
-
-                    // put ECS back to editor state
-                    RestoreEditorBaseline();
-
-                }
-
-
-                // --- Visual spacing gap before scene controls ---
-                ImGui::SameLine();
-                ImGui::Dummy(ImVec2(30, 0));  // neat separation
-                ImGui::SameLine();
-
-                // --- Scene controls ---
-                if (ImGui::Button("Save Scene", ImVec2(120, 0))) {
+                if (ImGui::Button("Save Scene", saveButtonSize)) {
                     auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>();
                     if (sceneMgr) {
                         sceneMgr->SaveCurrentScene();
                     }
                 }
-                    
+
                 ImGui::SameLine();
-                if (ImGui::Button("Load Scene", ImVec2(120, 0))) {
+                if (ImGui::Button("Load Scene", loadButtonSize)) {
                     std::string path = OpenJsonFileDialog();
                     if (!path.empty()) {
                         auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>();
@@ -613,14 +584,46 @@ namespace MyEditor
                     }
                 }
 
+                ImVec2 playTextSize = ImGui::CalcTextSize("Play");
+                ImVec2 stopTextSize = ImGui::CalcTextSize("Stop");
+                ImVec2 playButtonSize = ImVec2(playTextSize.x + framePadding.x * 2, 0);
+                ImVec2 stopButtonSize = ImVec2(stopTextSize.x + framePadding.x * 2, 0);
 
+                float windowWidth = ImGui::GetWindowWidth();
+                float totalButtonWidth = playButtonSize.x + stopButtonSize.x + itemSpacing;
+                float offset = (windowWidth - totalButtonWidth) * 0.5f;
 
+                // Stay on same line, position at centered offset
+                if (offset > 0.0f) {
+                    ImGui::SameLine(offset);
+                }
+                else {
+                    ImGui::SameLine();
+                }
 
-                // --- Right-aligned label ---
+                // --- Play ---
+                if (ImGui::Button("Play", playButtonSize))
+                {
+                    // restore ECS snapshot
+                    if (!s_hasEditorBaseline)
+                        CaptureEditorBaseline();
+                    else
+                        RestoreEditorBaseline();
+
+                    Engine->RestartRuntimeForPlay();
+                    Engine->SetPaused(false);
+                    s_isPlaying = true;
+                }
+
                 ImGui::SameLine();
-                ImGui::Dummy(ImVec2(30, 0));
-                ImGui::SameLine();
-                ImGui::TextUnformatted("| Game View");
+
+                // --- Stop ---
+                if (ImGui::Button("Stop", stopButtonSize))
+                {
+                    Engine->SetPaused(true);
+                    s_isPlaying = false;
+                    RestoreEditorBaseline();
+                }
 
                 ImGui::PopStyleVar();
             }
@@ -640,6 +643,93 @@ namespace MyEditor
 
             if (g_coordinator)
             {
+                // --- Entity Creation with Type Selection ---
+                struct EntityPrefab {
+                    const char* displayName;
+                    const char* jsonPath;
+                    bool isDefault;
+                    float defaultScaleX;
+                    float defaultScaleY;
+                };
+
+                static std::vector<EntityPrefab> entityPrefabs = {
+                    {"Empty Entity", nullptr, true, 200.0f, 200.0f},
+                    {"Hero", "../../MyEngine/JSON/herotransform.json", false, 0, 0},
+                    {"Monster", "../../MyEngine/JSON/monstertransform.json", false, 0, 0},
+                    {"Background", nullptr, true, 800.0f, 600.0f}
+                };
+
+                static int selectedType = 0;
+
+                // Build display names for combo box
+                std::vector<const char*> displayNames;
+                for (const auto& prefab : entityPrefabs) {
+                    displayNames.push_back(prefab.displayName);
+                }
+
+                ImGui::PushItemWidth(-FLT_MIN);
+                ImGui::Combo("##EntityType", &selectedType, displayNames.data(), static_cast<int>(displayNames.size()));
+                ImGui::PopItemWidth();
+
+                if (ImGui::Button("+ Create Selected Type", ImVec2(-FLT_MIN, 0)))
+                {
+                    Factory defaultEntity;
+                    Entity newEntity;
+
+                    const EntityPrefab& selectedPrefab = entityPrefabs[selectedType];
+
+                    if (selectedPrefab.isDefault)
+                    {
+                        // Create default entity
+                        newEntity = defaultEntity.DefaultObj();
+
+                        // Apply custom scale if specified
+                        if (g_coordinator->HasComponent<Framework::Transform>(newEntity)) {
+                            auto& t = g_coordinator->GetComponent<Framework::Transform>(newEntity);
+                            t.Scale = { selectedPrefab.defaultScaleX, selectedPrefab.defaultScaleY };
+                        }
+                    }
+                    else if (selectedPrefab.jsonPath != nullptr)
+                    {
+                        // Use SceneManager's LoadEntityFromJson which handles the JSON format
+                        auto sceneMgr = g_coordinator->GetSystem<SceneManager>();
+                        if (sceneMgr) {
+                            newEntity = sceneMgr->LoadEntityFromJson(selectedPrefab.jsonPath);
+                            if (newEntity == 0 || newEntity == INVALID_ENTITY) {
+                                std::cerr << "[Editor] Failed to load prefab: " << selectedPrefab.jsonPath << std::endl;
+                                newEntity = defaultEntity.DefaultObj();
+                            }
+                        }
+                        else
+                        {
+                            std::cerr << "[Editor] SceneManager not found!" << std::endl;
+                            newEntity = defaultEntity.DefaultObj();
+                        }
+                    }
+                    else
+                    {
+                        // Fallback
+                        newEntity = defaultEntity.DefaultObj();
+                    }
+
+                    selectedEntity = newEntity; // Auto-select the new entity
+                }
+
+                // Only show delete button if an entity is selected
+                if (selectedEntity != INVALID_ENTITY)
+                {
+                    if (ImGui::Button("Delete Selected", ImVec2(-FLT_MIN, 0)))
+                    {
+                        Factory defaultEntity;
+                        defaultEntity.DeleteEntity(selectedEntity);
+                        selectedEntity = INVALID_ENTITY; // Clear selection after deletion
+                    }
+                }
+
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
                 // Use full available size for the scrollable list
                 ImGui::BeginChild("HierarchyList", ImVec2(-FLT_MIN, -FLT_MIN), true);
 
@@ -674,7 +764,7 @@ namespace MyEditor
                             }
                         }
                         else {
-                            display = "Unnamed Renderable";
+                            display = "Default Entity (Empty)";
                         }
                     }
                     // Fallback: Show entity ID
