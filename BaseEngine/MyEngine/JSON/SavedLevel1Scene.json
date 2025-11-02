@@ -33,7 +33,7 @@
                     "render": {
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
-                        "textureID": 258,
+                        "textureID": 259,
                         "useTexture": true,
                         "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg",
                         "tintColor": {
@@ -47,7 +47,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.4838685989379883,
+                        "elapsedTime": 0.4736180007457733,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
@@ -88,7 +88,7 @@
                     "render": {
                         "mdl_ref": 1.0,
                         "shd_ref": 2.0,
-                        "textureID": 259,
+                        "textureID": 260,
                         "useTexture": true,
                         "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
                         "tintColor": {
@@ -101,8 +101,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.4838685989379883,
+                        "currentFrame": 0,
+                        "elapsedTime": 0.4736180007457733,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -143,7 +143,7 @@
                     "render": {
                         "mdl_ref": 1.0,
                         "shd_ref": 2.0,
-                        "textureID": 260,
+                        "textureID": 261,
                         "useTexture": true,
                         "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
                         "tintColor": {
@@ -157,7 +157,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.4838685989379883,
+                        "elapsedTime": 0.4736180007457733,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
@@ -207,21 +207,21 @@
                 {
                     "button": {
                         "buttonID": "btn_create",
-                        "label": "Create Entity",
+                        "label": "Create Hero",
                         "normalColor": {
-                            "r": 1.0,
-                            "g": 0.5,
+                            "r": 0.0,
+                            "g": 0.699999988079071,
                             "b": 0.0,
                             "a": 1.0
                         },
                         "hoverColor": {
-                            "r": 1.0,
-                            "g": 0.699999988079071,
-                            "b": 0.30000001192092898,
+                            "r": 0.0,
+                            "g": 0.5,
+                            "b": 0.0,
                             "a": 1.0
                         },
                         "actionType": "CreateEntity",
-                        "entityJsonPath": "",
+                        "entityJsonPath": "../../MyEngine/JSON/herotransform.json",
                         "isEnabled": true
                     }
                 }
@@ -268,17 +268,17 @@
                 {
                     "button": {
                         "buttonID": "btn_destroy",
-                        "label": "Destroy Entity",
+                        "label": "Destroy Hero",
                         "normalColor": {
                             "r": 1.0,
-                            "g": 0.5,
+                            "g": 0.0,
                             "b": 0.0,
                             "a": 1.0
                         },
                         "hoverColor": {
-                            "r": 1.0,
-                            "g": 0.699999988079071,
-                            "b": 0.30000001192092898,
+                            "r": 0.800000011920929,
+                            "g": 0.0,
+                            "b": 0.0,
                             "a": 1.0
                         },
                         "actionType": "DestroyEntity",

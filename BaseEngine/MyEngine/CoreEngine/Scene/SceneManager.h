@@ -7,6 +7,7 @@
  *             Defines Scene enum for game states and provides interface for
  *             scene loading, unloading, and transitioning. Maintains current
  *             scene state and tracks scene-specific entities for cleanup
+ * 
  * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
  *             Reproduction or disclosure of this file or its contents without the
  *             prior written consent of DigiPen Institute of Technology is prohibited.
@@ -19,6 +20,7 @@
 #include "../Graphics/Animation.h"
 #include "../Graphics/Renderable.h"
 
+#include "CoreEngine/ECS/Name.h"
 #include "../CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
 #include "CoreEngine/Factory/Factory.h"
@@ -46,6 +48,9 @@ public:
 	
 	std::string GrabCurrentScene() const { return CurrentScene; }
 	void ChangeCurrentScene(std::string const& str) { CurrentScene = str; }
+
+	// for gui system usage (M2 rubric)
+	Entity LoadEntityFromJson(std::string const& path);
 
 private:
 	std::string CurrentScene;

@@ -16,7 +16,7 @@
 
 #include "pch/pch_temp.h"
 #include "../MyEngine/Input/RhythmGameplayInput.h"
-#include "../MyEngine/CoreEngine/ECS/Coordinator.h"
+#include "../MyEngine/CoreEngine/Core/CoreEngine.h"
 
 static std::string keyToString(int key) {
     switch (key) {
@@ -41,76 +41,93 @@ RhythmGameplayInput::~RhythmGameplayInput() {
 }
 
 void RhythmGameplayInput::Initialize() {
-    std::cout << "[RhythmGameplayInput] Successfully initialized." << std::endl;
-    std::cout << "[COMBOS READY] Available combos: Basic Strike (W->A), Swift Slash (S->D), Power Combo (A->S->D)" << std::endl;
+    //std::cout << "[RhythmGameplayInput] Successfully initialized." << std::endl;
+    //std::cout << "[COMBOS READY] Available combos: Basic Strike (W->A), Swift Slash (S->D), Power Combo (A->S->D)" << std::endl;
 
     currentBeatIndex = 0;
     comboStartBeat = -1;
     lastBeatTime = 0.0;
     currentCyclePosition = 1;
 
-    auto* g_coordinator = Coordinator::GetInstance();
+    fontEntity = 0;
 
-    Entity fontEntityObj = g_coordinator->CreateEntity();
-    Framework::Transform fontTr{};
-    Framework::Renderable fontRe{};
-    Framework::Animation fontAn{};
-    fontTr.Pos = { 0.0f, 0.0f };
-    fontTr.Scale = { 500.0f, 500.0f };
-    fontRe.mdl_ref = 1.0f;
-    fontRe.shd_ref = 3.0f;
-    fontTr.isVisible = true;
-    fontAn.currentFrame = 1;
-
-    g_coordinator->AddComponent(fontEntityObj, fontTr);
-    fontEntity = fontEntityObj;
-
-    // Loaded Transform data from transform.json
-    std::string path = "../../MyEngine/JSON/transform.json";
-    Framework::Transform new_feedbackTransform;
-
-    if (!Framework::LoadTransform(new_feedbackTransform, path)) {
-        std::cerr << "Failed to load new_feedbackTransform!\n";
-    }
-    else {
-        std::cout << "Loaded new_feedbackTransform From: " << std::filesystem::absolute(path) << "\n";
-    }
-    std::cout << "Testing data loaded from transform" << "\n";
-    std::cout << "new_feedbackTransform: Pos" << new_feedbackTransform.Pos << "\n";
-    std::cout << "new_feedbackTransform: Scale" << new_feedbackTransform.Scale << "\n";
-
-    // Save Transform data to save_transform.json
-    std::cout << "Testing saving data loaded to save_transform" << "\n";
-    std::string saved_path = "../../MyEngine/JSON/save_transform.json";
-    new_feedbackTransform.Pos = { 50.0f, 50.0f };
-    if (!Framework::SaveTransform(new_feedbackTransform, saved_path)) {
-        std::cerr << "Failed to save save_transform!\n";
-    }
-    else {
-        std::cout << "Saved to: " << std::filesystem::absolute(saved_path) << "\n";
-    }
-
-    // Testing prefab assigning new Transform object with original transform
-    Framework::Transform new_feedbackTransform4{ new_feedbackTransform };
-    std::cout << "Testing prefab" << "\n";
-    std::cout << "new_feedbackTransform4 Pos:" << new_feedbackTransform4.Pos << "\n";
-    std::cout << "new_feedbackTransform4 Scale:" << new_feedbackTransform4.Scale << "\n";
+    // Initialize combos
+    initializeSwordCombos();
 }
 
 void RhythmGameplayInput::Update(float deltaTime) {
     auto* g_coordinator = Coordinator::GetInstance();
 
+    // FIND FeedbackBar on first update
+    if (fontEntity == 0) {
+        auto activeEntities = g_coordinator->GetAllEntities();
+
+        for (auto entity : activeEntities) {
+            if (g_coordinator->HasComponent<Name>(entity)) {
+                auto& nameComp = g_coordinator->GetComponent<Name>(entity);
+                if (nameComp.name == "FeedbackBar") {
+                    fontEntity = entity;
+                    std::cout << "========================================" << std::endl;
+                    std::cout << "[RhythmGameplayInput] Found FeedbackBar: " << entity << std::endl;
+
+                    // Check components
+                    bool hasTransform = g_coordinator->HasComponent<Framework::Transform>(entity);
+                    bool hasGUIButton = g_coordinator->HasComponent<GUIButton>(entity);
+                    bool hasRenderable = g_coordinator->HasComponent<Framework::Renderable>(entity);
+
+                    std::cout << "[DEBUG] Has Transform: " << (hasTransform ? "YES" : "NO") << std::endl;
+                    std::cout << "[DEBUG] Has GUIButton: " << (hasGUIButton ? "YES" : "NO") << std::endl;
+                    std::cout << "[DEBUG] Has Renderable: " << (hasRenderable ? "YES" : "NO") << std::endl;
+
+                    if (hasGUIButton) {
+                        auto& button = g_coordinator->GetComponent<GUIButton>(entity);
+                        std::cout << "[DEBUG] Initial normalColor alpha: " << button.normalColor.a << std::endl;
+                        button.normalColor.a = 0.0f;
+                        button.hoverColor.a = 0.0f;
+                        std::cout << "[DEBUG] Set alpha to 0.0" << std::endl;
+                    }
+
+                    if (hasTransform) {
+                        auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
+                        std::cout << "[DEBUG] isVisible: " << transform.isVisible << std::endl;
+                        transform.isVisible = false;
+                        std::cout << "[DEBUG] Set isVisible to false" << std::endl;
+                    }
+
+                    std::cout << "========================================" << std::endl;
+                    break;
+                }
+            }
+        }
+
+        if (fontEntity == 0) {
+            return;
+        }
+    }
+
     processRhythmInputs();
     processComboInputs();
-    checkForMissedBeat();
 
-    // Update fontEntity visibility timer
-    auto& transform1 = g_coordinator->GetComponent<Framework::Transform>(fontEntity);
-    if (transform1.autoHide && transform1.isVisible) {
-        transform1.visibilityTimer -= deltaTime;
-        if (transform1.visibilityTimer <= 0.0f) {
-            transform1.isVisible = false;
-            transform1.autoHide = false;
+    // Timer logic
+    if (fontEntity != 0) {
+        if (g_coordinator->HasComponent<Framework::Transform>(fontEntity)) {
+            auto& transform = g_coordinator->GetComponent<Framework::Transform>(fontEntity);
+            if (transform.autoHide) {
+                transform.visibilityTimer -= deltaTime;
+                //std::cout << "[TIMER] Visibility timer: " << transform.visibilityTimer << std::endl;
+
+                if (transform.visibilityTimer <= 0.0f) {
+                    //std::cout << "[HIDING] Hiding FeedbackBar now!" << std::endl;
+                    transform.isVisible = false;
+                    transform.autoHide = false;
+
+                    if (g_coordinator->HasComponent<GUIButton>(fontEntity)) {
+                        auto& button = g_coordinator->GetComponent<GUIButton>(fontEntity);
+                        button.normalColor.a = 0.0f;
+                        button.hoverColor.a = 0.0f;
+                    }
+                }
+            }
         }
     }
 }
@@ -146,23 +163,37 @@ void RhythmGameplayInput::processRhythmInputs() {
     auto* g_coordinator = Coordinator::GetInstance();
     auto inputMgr = g_coordinator->GetSystem<InputManager>();
 
+    if (Engine->IsPaused()) {
+        return;
+    }
+
     const int rhythmKeys[] = { GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D };
-    bool inInputWindow = (currentCyclePosition >= 5 && currentCyclePosition <= 8);
+    const char* keyNames[] = { "W", "A", "S", "D" };
 
     for (int i = 0; i < 4; ++i) {
         if (inputMgr->isKeyTriggered(rhythmKeys[i])) {
-            if (inInputWindow) {
-                processRhythmTiming(rhythmKeys[i]);
-                std::string feedback = getTimingFeedback();
-                InputEvent rhythmEvent(InputEvent::Type::RHYTHM_INPUT, rhythmKeys[i], glfwGetTime(), feedback);
-                broadcastInputEvent(rhythmEvent);
-            }
-        }
-    }
 
-    if (inputMgr->isKeyTriggered(GLFW_KEY_Z)) {
-        extern void ToggleObjectVisibility();
-        ToggleObjectVisibility();
+            std::cout << "[KEY DETECTED] " << keyNames[i] << " key pressed!" << std::endl;
+
+            // Play sound
+            if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
+                audio->PlaySound("beat_placeholder", 0.8f);
+            }
+
+            // Show feedback bar by setting alpha to 1.0
+            if (g_coordinator->HasComponent<GUIButton>(fontEntity)) {
+                auto& button = g_coordinator->GetComponent<GUIButton>(fontEntity);
+                button.normalColor.a = 1.0f;  // Make visible
+                button.hoverColor.a = 1.0f;
+
+                auto& transform = g_coordinator->GetComponent<Framework::Transform>(fontEntity);
+                transform.visibilityTimer = 2.0f;
+                transform.autoHide = true;
+            }
+
+            processRhythmTiming(rhythmKeys[i]);
+            broadcastInputEvent(InputEvent(InputEvent::Type::RHYTHM_INPUT, rhythmKeys[i], glfwGetTime()));
+        }
     }
 }
 
