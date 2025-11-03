@@ -49,6 +49,7 @@ public:
 	
 	std::string GrabCurrentScene() const { return CurrentScene; }
 	void ChangeCurrentScene(std::string const& str) { CurrentScene = str; }
+	void IncrementEntityArray(Entity entity) { SceneEntityList.push_back(entity); }
 
 	// for gui system usage (M2 rubric)
 	Entity LoadEntityFromJson(std::string const& path);

@@ -118,18 +118,6 @@ void SceneManager::SaveCurrentScene()
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
-		if (g_coordinator->HasComponent<LogicComponent>(entity))
-		{
-			Value ComponentObj(rapidjson::kObjectType);
-			Value ScriptVal;
-
-			auto& script = g_coordinator->GetComponent<LogicComponent>(entity);
-			script.Serialize(ScriptVal, alloc);
-
-			ComponentObj.AddMember("script", ScriptVal, alloc);
-			componentsArray.PushBack(ComponentObj, alloc);
-		}
-
 		if (g_coordinator->HasComponent<Framework::Renderable>(entity))
 		{
 			Value ComponentObj(rapidjson::kObjectType);
@@ -154,6 +142,18 @@ void SceneManager::SaveCurrentScene()
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
+		if (g_coordinator->HasComponent<LogicComponent>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value ScriptVal;
+
+			auto& script = g_coordinator->GetComponent<LogicComponent>(entity);
+			script.Serialize(ScriptVal, alloc);
+
+			ComponentObj.AddMember("script", ScriptVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
 		// purely for testing in-game GUI system
 		if (g_coordinator->HasComponent<GUIButton>(entity))
 		{
@@ -164,6 +164,18 @@ void SceneManager::SaveCurrentScene()
 			btn.Serialize(ButtonVal, alloc);
 
 			ComponentObj.AddMember("ui", ButtonVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		if (g_coordinator->HasComponent<Name>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value NameVal;
+
+			auto& name = g_coordinator->GetComponent<Name>(entity);
+			name.Serialize(NameVal, alloc);
+
+			ComponentObj.AddMember("name", NameVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
@@ -298,12 +310,6 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				NamingComponent n;
 				n.Deserialize(component["Typing"]);
 				g_coordinator->AddComponent<NamingComponent>(entity, n);
-			// this is purely for the in-game basic GUI system & on screen UI elements
-			if (component.HasMember("ui") && component["ui"].IsObject())
-			{
-				GUIButton btn;
-				btn.Deserialize(component["ui"]);
-				g_coordinator->AddComponent<GUIButton>(entity, btn);
 			}
 
 			if (component.HasMember("transform") && component["transform"].IsObject())
@@ -325,6 +331,20 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				//	<< t.Pos.x << ", " << t.Pos.y << ")" << std::endl;
 			}
 
+			if (component.HasMember("render") && component["render"].IsObject())
+			{
+				Framework::Renderable r;
+				r.Deserialize(component["render"]);
+				g_coordinator->AddComponent<Framework::Renderable>(entity, r);
+			}
+
+			if (component.HasMember("animation") && component["animation"].IsObject())
+			{
+				Framework::Animation a;
+				a.Deserialize(component["animation"]);
+				g_coordinator->AddComponent<Framework::Animation>(entity, a);
+			}
+
 			if (component.HasMember("script") && component["script"].IsObject())
 			{
 				LogicComponent l;
@@ -332,33 +352,25 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				g_coordinator->AddComponent<LogicComponent>(entity, l);
 			}
 
-			if (component.HasMember("render") && component["render"].IsObject())
-			{
-				Framework::Renderable r;
-				r.Deserialize(component["render"]);
-				g_coordinator->AddComponent<Framework::Renderable>(entity, r);
-			}
-			
-			if (component.HasMember("animation") && component["animation"].IsObject())
-			{
-				Framework::Animation a;
-				a.Deserialize(component["animation"]);
-				g_coordinator->AddComponent<Framework::Animation>(entity, a);
-			}
-			
 			if (component.HasMember("name") && component["name"].IsObject())
 			{
 				Name n;
 				n.Deserialize(component["name"]);
 				g_coordinator->AddComponent<Name>(entity, n);
 			}
-		}
 
+			// this is purely for the in-game basic GUI system & on screen UI elements
+			if (component.HasMember("ui") && component["ui"].IsObject())
+			{
+				GUIButton btn;
+				btn.Deserialize(component["ui"]);
+				g_coordinator->AddComponent<GUIButton>(entity, btn);
+			}
+		}
+			
 		// save obj to a vector for deleting later
 		SceneEntityList.push_back(entity);
 	}
-
-		ChangeCurrentScene(d["scene"].GetString());
 
 		auto* coordinator = Coordinator::GetInstance();
 		auto inputMgr = coordinator->GetSystem<InputManager>();
@@ -379,14 +391,12 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			std::cout << "[SceneManager] Total GUI buttons: " << inputMgr->GUIButtonEntities.size() << std::endl;
 #endif
 		}
-		
+
+		ChangeCurrentScene(d["scene"].GetString());
 #ifdef _DEBUG
 		std::cout << "\n===================================================" << std::endl;
 		std::cout << "   [Scene Manager]: " << CurrentScene << " loaded successfully!" << std::endl;
 		std::cout << "===================================================" << std::endl;
-#endif
-#ifdef DEBUG
-		//std::cout << GrabCurrentScene << " Loaded Successfully" << std::endl;
 #endif
 }
 

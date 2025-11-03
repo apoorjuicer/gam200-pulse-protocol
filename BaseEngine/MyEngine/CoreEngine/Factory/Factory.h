@@ -1,5 +1,6 @@
 #pragma once
 #include "pch/pch_temp.h"	
+#include "../Components/Naming.h"
 #include "../Graphics/Transform.h"
 #include "../GameLogic/GameLogic.h"
 #include "../CoreEngine/ECS/Types.h"

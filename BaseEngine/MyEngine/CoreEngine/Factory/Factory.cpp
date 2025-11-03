@@ -33,19 +33,22 @@ bool Factory::CreateEntityFromJson(std::string const& path)
 	
 	Entity entity = DefaultObj();			   // create entity with transform and render component.
 	const auto& components = d["components"];  // Get the components array
-	LogicComponent l;
-	l.ScriptName = "no scripts inside";
-	g_coordinator->AddComponent(entity, l);
 	
 	// run thru all the components in the component array
 	for (rapidjson::SizeType i = 0; i < components.Size(); ++i)
 	{
 		const auto& component = components[i];
 
+		if (component.HasMember("Typing") && component["Typing"].IsObject()) 
+		{ 
+
+			g_coordinator->GetComponent<NamingComponent>(entity).Deserialize(component["Typing"]); 
+		}
 		if (component.HasMember("transform") && component["transform"].IsObject()) { g_coordinator->GetComponent<Framework::Transform>(entity).Deserialize(component["transform"]); }
-		if (component.HasMember("script") && component["script"].IsObject()) { g_coordinator->GetComponent<LogicComponent>(entity).Deserialize(component["script"]); }
 		if (component.HasMember("render") && component["render"].IsObject()) { g_coordinator->GetComponent<Framework::Renderable>(entity).Deserialize(component["render"]); }
 		if (component.HasMember("animation") && component["animation"].IsObject()) { g_coordinator->GetComponent<Framework::Animation>(entity).Deserialize(component["animation"]); }
+		if (component.HasMember("script") && component["script"].IsObject()) { g_coordinator->GetComponent<LogicComponent>(entity).Deserialize(component["script"]); }
+		if (component.HasMember("name") && component["name"].IsObject()) { g_coordinator->GetComponent<Name>(entity).Deserialize(component["name"]); }
 	}
 
 	return true;
@@ -61,16 +64,17 @@ Entity Factory::DefaultObj()
 	t.Rotation = {0,0};
 	t.Pos = {0,0};
 
-	
 	Framework::Renderable r;
-	r.mdl_ref = 0.f;
-	r.shd_ref = 0.f;
-	r.textureID = 0;
-	r.spriteName;
-	
+
+	Framework::Animation a;
 
 	g_coordinator->AddComponent(entity, t);
 	g_coordinator->AddComponent(entity, r);
+	g_coordinator->AddComponent(entity, a);
+	
+	// add entity to list of entity in the current scene
+	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
+	sceneManager->IncrementEntityArray(entity);
 	return entity;
 }
 
@@ -93,6 +97,18 @@ bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const& path)
 	// we want our components to be an array
 	Value componentsArray(kArrayType);
 
+	if (g_coordinator->HasComponent<NamingComponent>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value TypeVal;
+
+		auto& objtype = g_coordinator->GetComponent<NamingComponent>(entity);
+		objtype.Serialize(TypeVal, alloc);
+
+		ComponentObj.AddMember("Typing", TypeVal, alloc);	// so now it will be "transform":{}
+		componentsArray.PushBack(ComponentObj, alloc);				// push the entire transform data into component array
+	}
+
 	// check if entity have these compoennts, if have then serialize to json file
 	if (g_coordinator->HasComponent<Framework::Transform>(entity))
 	{ 
@@ -105,7 +121,6 @@ bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const& path)
 		ComponentObj.AddMember("transform", TransformVal, alloc);	// so now it will be "transform":{}
 		componentsArray.PushBack(ComponentObj, alloc);				// push the entire transform data into component array
 	}
-
 
 	// check if entity have these compoennts, if have then serialize to json file
 	if (g_coordinator->HasComponent<Framework::Renderable>(entity))
@@ -129,6 +144,30 @@ bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const& path)
 		animation.Serialize(AnimationVal, alloc);
 
 		ComponentObj.AddMember("animation", AnimationVal, alloc);
+		componentsArray.PushBack(ComponentObj, alloc);
+	}
+
+	if (g_coordinator->HasComponent<LogicComponent>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value ScriptVal;
+
+		auto& script = g_coordinator->GetComponent<LogicComponent>(entity);
+		script.Serialize(ScriptVal, alloc);
+
+		ComponentObj.AddMember("script", ScriptVal, alloc);
+		componentsArray.PushBack(ComponentObj, alloc);
+	}
+
+	if (g_coordinator->HasComponent<Name>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value NameVal;
+
+		auto& name = g_coordinator->GetComponent<Name>(entity);
+		name.Serialize(NameVal, alloc);
+
+		ComponentObj.AddMember("name", NameVal, alloc);
 		componentsArray.PushBack(ComponentObj, alloc);
 	}
 
