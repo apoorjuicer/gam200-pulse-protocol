@@ -58,6 +58,13 @@
         "components":
         [
             {
+                "name":
+                {
+                    "name": "Jeff"
+                } 
+            },
+
+            {
                 "Typing": 
                 {
                     "Type":"Player"
