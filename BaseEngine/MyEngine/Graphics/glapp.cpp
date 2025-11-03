@@ -12,7 +12,6 @@
  /******************************************************************************/
 #include "glapp.h"
 #include "DebugDraw.h"
-//#include "../Managers/AssetsManager.h"
 
 /*                                                   objects with file scope
 ----------------------------------------------------------------------------- */
@@ -61,29 +60,6 @@ const std::string font_fs = {
 double random() {
 	return static_cast<double>((rand() % 10) / 10.0f);
 }
-
-//static void ApplyEditorViewportPixels(int fbW, int fbH)
-//{
-//    // derive middle-blank area where the game renders
-//    const int assets_h = static_cast<int>(fbH * kBottomRatio);
-//    const int top_h    = fbH - assets_h;
-//
-//    const int left_w   = static_cast<int>(fbW * kLeftRatio);
-//    const int right_w  = static_cast<int>(fbW * kRightRatio);
-//    const int center_w = fbW - left_w - right_w;
-//
-//    // OpenGL Y=0 is bottom ? shift up by bottom bar height
-//    glViewport(left_w, assets_h, center_w, top_h);
-//
-//    // Update your globals for any code that needs them
-//    GLHelper::GameWidth  = center_w;
-//    GLHelper::GameHeight = top_h;
-//    GLHelper::GameOffsetX = left_w;
-//    GLHelper::GameOffsetY = assets_h;
-//
-//}
-
-
 
 GLApp::GLModel GLApp::mdl;
 GLApp::TranslationBuf GLApp::tb;

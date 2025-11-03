@@ -50,32 +50,6 @@ public:
 	bool isMouseInGameViewport() const { return mouseInGameViewport; }
 
 	// -------------------------------------------------
-	// Scroll (For zoom)
-	// -------------------------------------------------
-	float scrollOffset = 0.0f;
-	float zoomLevel = 1.0f;
-	float zoomSpeed = 0.1f;
-	float minZoom = 0.1f;
-	float maxZoom = 5.0f;
-
-	// Getters
-	float getZoomLevel() const { return zoomLevel; }
-	float getScrollOffset() const { return scrollOffset; }
-
-	// Setters (for configuration)
-	void setZoomSpeed(float speed) { zoomSpeed = speed; }
-	void setZoomRange(float min, float max) {
-		minZoom = min;
-		maxZoom = max;
-	}
-	void setZoomLevel(float level) {
-		zoomLevel = std::clamp(level, minZoom, maxZoom);
-	}
-
-	// Utilities
-	void resetZoom() { zoomLevel = 1.0f; scrollOffset = 0.0f; }
-
-	// -------------------------------------------------
 	// Debug toggles
 	// -------------------------------------------------
 	bool isDebugRectsEnabled() const { return debugRectsEnabled; }

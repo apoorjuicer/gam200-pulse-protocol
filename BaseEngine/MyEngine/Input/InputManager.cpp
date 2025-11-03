@@ -41,15 +41,6 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
 		return;
 	}
 
-	// Set scroll callback for zoom
-	glfwSetScrollCallback(window, [](GLFWwindow* win, double xoffset, double yoffset) {
-		(void)xoffset;
-		auto* inputMgr = static_cast<InputManager*>(glfwGetWindowUserPointer(win));
-		if (inputMgr) {
-			inputMgr->scrollOffset += static_cast<float>(yoffset);
-		}
-		});
-
 	// Store InputManager pointer in window for callback access
 	glfwSetWindowUserPointer(window, this);
 
@@ -61,29 +52,6 @@ void InputManager::Update(float) {
 	updateInputStates();
 	updateGUIButtons();
 	processDebugToggles();
-
-	if (scrollOffset != 0.0f) {
-		float oldZoom = zoomLevel;
-		zoomLevel += scrollOffset * zoomSpeed;
-		zoomLevel = std::clamp(zoomLevel, minZoom, maxZoom);
-
-		std::cout << "========================================\n";
-		std::cout << "[ZOOM TEST] Scroll detected!\n";
-		std::cout << "  Scroll Offset: " << scrollOffset << "\n";
-		std::cout << "  Old Zoom: " << oldZoom << "\n";
-		std::cout << "  New Zoom: " << zoomLevel << "\n";
-		std::cout << "  Zoom Speed: " << zoomSpeed << "\n";
-		std::cout << "  Zoom Range: [" << minZoom << " - " << maxZoom << "]\n";
-		std::cout << "========================================\n";
-
-		scrollOffset = 0.0f;
-	}
-
-	// Test reset
-	if (isKeyTriggered(GLFW_KEY_R)) {
-		resetZoom();
-		std::cout << "[ZOOM TEST] Reset! Zoom = " << zoomLevel << "\n";
-	}
 
 	// Test delayed message (Advanced Feature: Message Queuing)
 	if (isKeyTriggered(GLFW_KEY_SPACE)) {
@@ -106,27 +74,6 @@ void InputManager::Update(float) {
 	if (isMouseButtonReleased(0)) {
 		std::cout << "[MOUSE] Left Released" << std::endl;
 	}
-
-	// Update zoom based on scroll
-	if (scrollOffset != 0.0f) {
-		float oldZoom = zoomLevel;
-		zoomLevel += scrollOffset * zoomSpeed;
-		zoomLevel = std::clamp(zoomLevel, minZoom, maxZoom);
-
-		// Only log if zoom actually changed
-		if (oldZoom != zoomLevel) {
-			std::cout << "[Zoom] Level: " << zoomLevel << " (Speed: " << zoomSpeed
-				<< ", Range: " << minZoom << "-" << maxZoom << ")\n";
-		}
-
-		scrollOffset = 0.0f;
-	}
-
-	// Optional: Reset zoom with configurable key
-	//if (isKeyTriggered(GLFW_KEY_R)) {
-	//	resetZoom();
-	//	std::cout << "[Zoom] Reset to default\n";
-	//}
 
 	// Editor toggle
 	if (isKeyTriggered(GLFW_KEY_O)) {

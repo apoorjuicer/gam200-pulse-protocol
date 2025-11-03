@@ -2,7 +2,8 @@
 /**
  * @file        collision.h
  * @project     Pulse Protocol
- * @author      Reginald Lew Yee Ren
+ * @author      Reginald Lew Yee Ren (99%)
+ * @author      Goh Pin Kai (1%)
  * @brief       Collision management utilities (AABB, sword, distance, and line hit tests).
  *              Contains all collision-related calculations, separated from gameplay logic.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.

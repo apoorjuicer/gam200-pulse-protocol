@@ -2,8 +2,8 @@
 /**
  * @file        Editor.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong
- * @author      Goh Pin Kai
+ * @author      Leu Jun Yong(93%)
+ * @author      Goh Pin Kai(7%)
  * @brief       Initializes, updates, renders, and manages the ImGui
                 editor interface with toggle support.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
