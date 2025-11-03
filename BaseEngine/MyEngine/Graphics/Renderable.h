@@ -57,6 +57,9 @@ namespace Framework
 		void AssignTextureFromPath(Framework::Renderable& t);
 		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
 		void Deserialize(const rapidjson::Value& in);
+
+		bool        needsTextureReload = false;   // true after user edits the name
+		std::string loadedSpriteName;             // the name we actually loaded
 	};
 }
 #endif // FRAMEWORK_RENDERABLE_H

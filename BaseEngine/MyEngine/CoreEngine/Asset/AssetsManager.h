@@ -18,6 +18,7 @@
 #include <unordered_map>
 #include <string>
 #include <map>
+#include <filesystem>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -115,6 +116,12 @@ namespace Framework {
         const std::unordered_map<std::string, FMOD::Sound*>& GetSoundMap() const {
             return soundMap;
         }
+
+        static std::string FindTextureByFilename(std::string_view filename,
+            const std::string& root = "../../MyEngine/Assets/Textures");
+        
+        static GLuint GetOrLoadByFilename(std::string_view filename,
+            const std::string& root = "../../MyEngine/Assets/Textures");
 
 
         // --------------------------------------------------------------------

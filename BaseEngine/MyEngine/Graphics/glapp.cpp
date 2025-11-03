@@ -12,6 +12,7 @@
  /******************************************************************************/
 #include "glapp.h"
 #include "DebugDraw.h"
+#include <filesystem>
 //#include "../Managers/AssetsManager.h"
 
 /*                                                   objects with file scope
@@ -266,6 +267,7 @@ void GLApp::draw(std::set<Entity> entities) {
 		ComputeLetterbox(fbW, fbH);
 		gCamera.zoom = 1.0f;     // normal gameplay zoom
 	}
+
 	auto* input = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
 
 	// Option A: wheel zoom only in editor (gameplay fixed to 1.0)
@@ -296,23 +298,56 @@ void GLApp::draw(std::set<Entity> entities) {
 		auto& re = g_coordinator->GetComponent<Framework::Renderable>(it);
 		auto& an = g_coordinator->GetComponent<Framework::Animation>(it);
 
-		if (!re.spriteName.empty() && re.textureID == 0) {
-			re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+		// BEFORE drawing each entity
+		if (!re.spriteName.empty()) {
 			if (re.textureID == 0) {
-				std::cerr << "[GLApp] Failed to load texture: " << re.spriteName << std::endl;
-				continue;
+				// Only autoload if this is the first time and not dirty
+				if (!re.needsTextureReload) {
+					re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+					re.loadedSpriteName = re.spriteName;
+				}
+			
+			}
+			else {
+
 			}
 		}
 
+
 		if (tr.isVisible && re.textureID != 0) {
-			updateAnimation(an, deltaTime);
+			// ---- Single-image vs spritesheet guard -----------------------------------
+			// Treat as "single image" if rows*columns <= 1 OR totalFrames <= 1.
+			// This prevents animation from advancing when switching from a spritesheet
+			// to a static sprite.
+			const int rows = std::max(1, an.rows);
+			const int columns = std::max(1, an.columns);
+			const bool isSingle = (rows * columns <= 1) || (an.totalFrames <= 1);
+
+			if (isSingle) {
+				// Freeze animation on the first frame and normalize grid to 1x1
+				an.rows = 1;
+				an.columns = 1;
+				an.totalFrames = 1;     // optional but keeps everyone honest
+				an.currentFrame = 0;
+				an.elapsedTime = 0.0f;
+				// (No updateAnimation call)
+			}
+			else {
+				// Normal animated spritesheet
+				updateAnimation(an, deltaTime);
+				// Ensure sane values after update (defensive)
+				an.rows = std::max(1, an.rows);
+				an.columns = std::max(1, an.columns);
+				an.totalFrames = std::max(1, an.totalFrames);
+				if (an.currentFrame >= an.totalFrames) an.currentFrame %= an.totalFrames;
+			}
+			// ---------------------------------------------------------------------------
+
 			glBindTexture(GL_TEXTURE_2D, re.textureID);
 			drawTrans(re, an, tr, ZoomNDC);
 		}
 	}
 }
-
-
 
 
 void GLApp::cleanup() {

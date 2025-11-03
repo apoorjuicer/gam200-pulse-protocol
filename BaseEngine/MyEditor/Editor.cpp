@@ -489,6 +489,54 @@ namespace MyEditor
     }
 #endif
 
+    // Heuristic: look for "<rows>x<cols>" just before the file extension.
+// Supports "..._4x6.png" or "...[4x6].png"
+    static bool ParseGridFromFilename(const std::string& full, int& outRows, int& outCols)
+    {
+        outRows = 1; outCols = 1;
+
+        if (full.empty()) return false;
+
+        // grab the filename portion
+        size_t slash = full.find_last_of("/\\");
+        std::string filename = (slash != std::string::npos) ? full.substr(slash + 1) : full;
+
+        // strip extension
+        size_t dot = filename.find_last_of('.');
+        std::string stem = (dot != std::string::npos) ? filename.substr(0, dot) : filename;
+
+        // find an 'x' with digits on both sides, scanning from the end
+        for (size_t i = stem.size(); i-- > 0; )
+        {
+            if (stem[i] != 'x' && stem[i] != 'X') continue;
+
+            // parse left number
+            size_t l = i;
+            while (l > 0 && isdigit((unsigned char)stem[l - 1])) --l;
+            if (l == i) continue; // no digits on the left
+
+            // parse right number
+            size_t r = i + 1;
+            while (r < stem.size() && isdigit((unsigned char)stem[r])) ++r;
+            if (r == i + 1) continue; // no digits on the right
+
+            try {
+                int rows = std::stoi(stem.substr(l, i - l));
+                int cols = std::stoi(stem.substr(i + 1, r - (i + 1)));
+                if (rows > 0 && cols > 0) {
+                    outRows = rows;
+                    outCols = cols;
+                    return true;
+                }
+            }
+            catch (...) {
+                // ignore and continue searching
+            }
+        }
+        return false;
+    }
+
+
 
     // Left splitter: drags the RIGHT edge of the Left panel => modifies left_ratio
     //static void SplitterV_Left(const char* id, float x_px, float top_h_px, float full_w_px, float& left_ratio,
@@ -791,19 +839,117 @@ namespace MyEditor
                     ImGui::Separator();
                 }
 
-                if (g->HasComponent<Framework::Renderable>(selectedEntity)) {
+                if (g->HasComponent<Framework::Renderable>(selectedEntity))
+                {
                     auto& r = g->GetComponent<Framework::Renderable>(selectedEntity);
+
                     ImGui::TextUnformatted("Renderable");
                     ImGui::Separator();
-                    ImGui::Text("Model Ref: %.1f", r.mdl_ref);
-                    ImGui::Text("Shader Ref: %.1f", r.shd_ref);
+
+                    // --- Model Reference ---
+                    {
+                        int modelRef = static_cast<int>(r.mdl_ref);
+                        if (ImGui::InputInt("Model Ref", &modelRef))
+                        {
+                            int maxModels = static_cast<int>(GLApp::models.size()); // total available models
+                            modelRef = std::clamp(modelRef, 0, std::max(0, maxModels - 1));
+                            r.mdl_ref = static_cast<float>(modelRef);
+                        }
+                    }
+
+                    // --- Shader Reference ---
+                    {
+                        int shaderRef = static_cast<int>(r.shd_ref);
+                        if (ImGui::InputInt("Shader Ref", &shaderRef))
+                        {
+                            int maxShaders = static_cast<int>(GLApp::shdrpgms.size()); // total available shaders
+                            shaderRef = std::clamp(shaderRef, 0, std::max(0, maxShaders - 1));
+                            r.shd_ref = static_cast<float>(shaderRef);
+                        }
+                    }
+
+
+
+                    // --- Texture info ---
                     ImGui::Text("Texture ID: %u", r.textureID);
-                    static char spriteBuf[256];
-                    strncpy(spriteBuf, r.spriteName.c_str(), sizeof(spriteBuf)); spriteBuf[255] = '\0';
-                    if (ImGui::InputText("Sprite Name", spriteBuf, IM_ARRAYSIZE(spriteBuf))) r.spriteName = spriteBuf;
-                    if (ImGui::Button("Reload Texture")) r.textureID = Framework::AssetsManager::GetOrLoad(r.spriteName);
+
+                    // --- Sprite name: filename editing (no extension typing needed) ---
+                    {
+                        const std::string& full = r.spriteName;
+                        std::string dir, fileNoExt, ext;
+
+                        if (!full.empty()) {
+                            size_t slash = full.find_last_of("/\\");
+                            std::string filename = (slash != std::string::npos) ? full.substr(slash + 1) : full;
+                            size_t dot = filename.find_last_of('.');
+                            if (dot != std::string::npos) {
+                                fileNoExt = filename.substr(0, dot);
+                                ext = filename.substr(dot);
+                            }
+                            else fileNoExt = filename;
+                            if (slash != std::string::npos)
+                                dir = full.substr(0, slash + 1);
+                        }
+
+                        if (!dir.empty())
+                            ImGui::TextWrapped("Folder: %s", dir.c_str());
+
+                        static char fileBuf[256];
+                        std::strncpy(fileBuf, fileNoExt.c_str(), sizeof(fileBuf));
+                        fileBuf[sizeof(fileBuf) - 1] = '\0';
+
+                        if (ImGui::InputText("Sprite Name", fileBuf, IM_ARRAYSIZE(fileBuf)))
+                        {
+                            std::string newName = fileBuf;
+
+                            size_t dot = newName.find_last_of('.');
+                            if (dot != std::string::npos)
+                                newName = newName.substr(0, dot);
+
+                            if (ext.empty())
+                                ext = ".png";
+
+                            r.spriteName = dir + newName + ext;
+                            r.needsTextureReload = true;  // mark dirty, not reload yet
+                        }
+                    }
+
+                    // --- Reload texture button ---
+                    if (ImGui::Button("Reload Texture"))
+                    {
+                        r.textureID = Framework::AssetsManager::GetOrLoad(r.spriteName);
+                        r.loadedSpriteName = r.spriteName;
+                        r.needsTextureReload = false;
+
+                        // --- Sprite sheet detection ---
+                        if (g->HasComponent<Framework::Animation>(selectedEntity))
+                        {
+                            auto& anim = g->GetComponent<Framework::Animation>(selectedEntity);
+
+                            int hintRows = 1, hintCols = 1;
+                            const bool hasGridHint = ParseGridFromFilename(r.spriteName, hintRows, hintCols);
+
+                            if (hasGridHint && hintRows * hintCols > 1)
+                            {
+                                anim.rows = hintRows;
+                                anim.columns = hintCols;
+                                anim.totalFrames = std::max(1, anim.rows * anim.columns);
+                                anim.currentFrame = std::min(anim.currentFrame, anim.totalFrames - 1);
+                                anim.elapsedTime = 0.0f;
+                            }
+                            else
+                            {
+                                anim.rows = anim.columns = 1;
+                                anim.totalFrames = 1;
+                                anim.currentFrame = 0;
+                                anim.elapsedTime = 0.0f;
+                            }
+                        }
+                    }
+
                     ImGui::Separator();
                 }
+
             }
         }
         ImGui::End();
@@ -920,18 +1066,11 @@ namespace MyEditor
         ImGui::End(); // LayoutOverlay
     }
 
-
-
-
-
     void Render() {
         if (!s_enabled) return;
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
-
-
-
 
 
     void Shutdown() {

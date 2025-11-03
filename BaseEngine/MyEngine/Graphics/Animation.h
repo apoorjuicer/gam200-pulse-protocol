@@ -40,6 +40,8 @@ namespace Framework
 		float animationSpeed = 2.f;
 		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
 		void Deserialize(const rapidjson::Value& in);
+		static inline bool IsSingleImage(const Framework::Animation& a);
+		void TickAnimation(Framework::Animation& anim, float dt);
 	};
 }
 #endif // FRAMEWORK_ANIMATION_H

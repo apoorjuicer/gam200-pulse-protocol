@@ -17,7 +17,30 @@
 #include <../MyEngine/Math/math.h>
 
 namespace Framework
-{
+{   
+    static inline bool IsSingleImage(const Framework::Animation& a) {
+        // treat anything that's logically 1 frame as "not a spritesheet"
+        return (a.rows <= 1 && a.columns <= 1) || a.totalFrames <= 1;
+    }
+
+    // Pseudocode in your per-frame update for an entity:
+    void TickAnimation(Framework::Animation& anim, float dt)
+    {
+        if (IsSingleImage(anim)) {
+            anim.currentFrame = 0;
+            anim.elapsedTime = 0.0f; // keep it frozen
+            return;
+        }
+
+        anim.elapsedTime += dt;
+        const float secondsPerFrame = (anim.animationSpeed > 0.0f) ? (1.0f / anim.animationSpeed) : 1.0f;
+        while (anim.elapsedTime >= secondsPerFrame) {
+            anim.elapsedTime -= secondsPerFrame;
+            anim.currentFrame = (anim.currentFrame + 1) % std::max(1, anim.totalFrames);
+        }
+    }
+
+
     /*Serialization && Deserialization */
     void Animation::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
     {
