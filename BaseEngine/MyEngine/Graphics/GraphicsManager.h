@@ -20,67 +20,143 @@
  */
  /******************************************************************************/
 
+
+
+//#include "pch/pch.h"
+//#include "glapp.h"
+//#include "CoreEngine/ECS/System.h"
+//#include "CoreEngine/ECS/SystemManager.h"
+//#include "Transform.h"          
+//#include "../Physics/collision.h"
+//#include "../CoreEngine/Asset/AssetsManager.h" 
+//#include "../Resources/AssetRegistry.h"
+
 #pragma once
-
-#include "pch/pch.h"
-#include "glapp.h"
+#include "pch/pch_temp.h"
 #include "CoreEngine/ECS/System.h"
-#include "CoreEngine/ECS/SystemManager.h"
-#include "Transform.h"          
-#include "../Physics/collision.h"
-#include "../CoreEngine/Asset/AssetsManager.h" 
+//#include "CoreEngine/ECS/SystemManager.h"
+//#include "glapp.h"
+#include <ft2build.h>
+#include <memory>
+#include FT_FREETYPE_H
+
+//namespace Framework {
+//    class GLApp;
+//}
+
+class AssetRegistry; //fwd
+class GLApp; //fwd
+
+    //struct FontData; // already defined in AssetsManager.h, but forward-declare is fine in header
+    /**************************************************************************
+     * Font rendering data types
+     * These are at namespace scope so systems like GraphicsManager can use
+     * them without including the whole AssetsManager implementation details.
+     **************************************************************************/
+
+    //cache of all glyphs(characters) loaded in a font
+    //for rendering FreeType + OpenGL, represents 1 letter(a single glyph)
+    struct Character {
+        GLuint      TextureID;   // OpenGL texture for this glyph
+        glm::ivec2  Size;        // pixel width/height of glyph bitmap
+        glm::ivec2  Bearing;     // offset from baseline to left/top
+        unsigned int Advance;    // horizontal advance (1/64 px from FreeType)
+    };
+
+    //Represents an entire font face
+    //contain glyph(s) container and pixelHeight
+    struct FontData {
+        std::map<char, Character> glyphs;   // ASCII glyph table
+        unsigned int pixelHeight = 0;       // baked pixel height (e.g. 48)
+    };
+
+    struct TextureData {
+        GLuint textureID = 0;
+        int width = 0, height = 0, nrChannels = 0;
+        // (Optional) debug info only:
+        std::string textureName;
+        std::string filePath;
+    };
+
+    class GraphicsManager : public Systems
+    {
+    public:
+        GraphicsManager() = default;
+        explicit GraphicsManager(AssetRegistry* registry);
+        ~GraphicsManager();
+
+        void Initialize();
+        void Update();
+        void Shutdown();
+        void OnResize(int width, int height);
+
+        GraphicsManager(GraphicsManager const&) = delete; // no copy
+        GraphicsManager& operator=(GraphicsManager const&) = delete;
+        GraphicsManager(GraphicsManager&&) noexcept = default; // move ok
+        GraphicsManager& operator=(GraphicsManager&&) noexcept = default;
+    private:
+        // Draw text (world overlay / debug text etc.)
+        void RenderText(
+            GLSLShader& shader,
+            const std::string& text,
+            float x, float y,
+            float scale,
+            const glm::vec3& color,
+            const FontData* fontData
+        );
+
+        // For In-Game GUI System
+        void RenderGUIButtons();
+        void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
+
+        //Fonts
+        bool InitFonts();
+        void ShutdownFonts();
+        bool LoadFontFile(const std::string& fontFilePath,
+            const std::string& fontKey,
+            unsigned int pixelHeight);
+
+        //bool LoadFontsFromRegistry(AssetRegistry const& reg);
+        bool LoadFontsFromRegistry();
+
+        FontData const* GM_FindFont( std::string const& id) const;
+
+        //Texture
+        GLuint LoadTextureFile( std::string const& path);
+        GLuint GetOrLoad( std::string const& path);
+        std::string const& PathFromID(GLuint texID);
+        void Clear();
+    private:
+       // std::unique_ptr<GLApp> glapp;
+        GLApp* glapp = nullptr;  // owning raw pointer           
+        
+       // Shared quad VAO/VBO for glyph rendering
+        GLuint VAO = 0;
+        GLuint VBO = 0;
+
+        // Shader and rendering details
+        GLuint whiteTexture;
+
+        // Screen-space ortho for text drawing
+        glm::mat4 projection{ 1.0f };
+
+        // Cached font refs //no longer from AssetsManager
+        FontData const* m_uiFont = nullptr;
+        FontData const* m_debugFont = nullptr;
+        //Textures
+        std::unordered_map<std::string, TextureData> textureMap;
+
+        //static GLuint LoadTextureFile(const std::string& path);
+
+        // path <-> GL texture ID mapping
+        std::unordered_map<std::string, GLuint> s_pathToID{};
+        std::unordered_map<GLuint, std::string> s_idToPath{};
 
 
-#include <map>
-#include <string>
-#include <sstream>
+        AssetRegistry* mRegistry = nullptr;  // link to asset registry
 
-class GLApp;
+        FT_Library m_ft = nullptr; // FreeType main library handle
+        std::unordered_map<std::string, FontData> m_fontMap;
+    };
 
-namespace Framework {
-    struct FontData; // already defined in AssetsManager.h, but forward-declare is fine in header
-}
 
-class GraphicsManager : public Systems
-{
-public:
-    GraphicsManager();
-    ~GraphicsManager();
-
-    void Initialize();
-    void Update();
-    void Shutdown();
-    void OnResize(int width, int height);
-
-private:
-    // Draw text (world overlay / debug text etc.)
-    void RenderText(
-        GLSLShader& shader,
-        const std::string& text,
-        float x, float y,
-        float scale,
-        const glm::vec3& color,
-        const Framework::FontData* fontData
-    );
-
-	// For In-Game GUI System
-	void RenderGUIButtons();
-	void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
-
-private:
-    GLApp* glapp = nullptr;
-
-    // Shared quad VAO/VBO for glyph rendering
-    GLuint VAO = 0;
-    GLuint VBO = 0;
-
-	// Shader and rendering details
-	GLuint whiteTexture;
-
-    // Screen-space ortho for text drawing
-    glm::mat4 projection{ 1.0f };
-
-    // Cached font refs from AssetsManager
-    const Framework::FontData* m_uiFont = nullptr;
-    const Framework::FontData* m_debugFont = nullptr;
-};

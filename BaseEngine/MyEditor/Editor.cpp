@@ -375,7 +375,7 @@ namespace MyEditor {
                         rend.spriteName = spriteBuf;
 
                     if (ImGui::Button("Reload Texture"))
-                        rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
+                        //rend.textureID = GraphicsManager::GetOrLoad(rend.spriteName);
 
                     ImGui::Separator();
                 }

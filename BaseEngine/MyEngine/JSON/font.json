@@ -2,11 +2,13 @@
     "fontFilePaths": [
         {
             "id": "liberation_font",
-            "path": "../../MyEngine/Assets/Font/liberation-mono.ttf"
+            "path": "../../MyEngine/Assets/Font/liberation-mono.ttf",
+            "pixelHeight": 48
         },
         {
             "id": "PatrickHand_font",
-            "path": "../../MyEngine/Assets/Font/PatrickHand-Regular.ttf"
+            "path": "../../MyEngine/Assets/Font/PatrickHand-Regular.ttf",
+            "pixelHeight": 48
         }
     ]
 }

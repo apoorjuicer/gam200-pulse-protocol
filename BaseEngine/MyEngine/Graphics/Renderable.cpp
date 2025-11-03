@@ -21,8 +21,10 @@ namespace Framework
 {
     void AssignTextureFromPath(Framework::Renderable &t)
     {
-        if (t.textureID == 0 && !t.spriteName.empty())
-            t.textureID = Framework::AssetsManager::GetOrLoad(t.spriteName);
+        if (t.textureID == 0 && !t.spriteName.empty()) {
+            // t.textureID = Framework::AssetsManager::GetOrLoad(t.spriteName);
+        }
+          
     }
 
     /*Serialization && Deserialization */

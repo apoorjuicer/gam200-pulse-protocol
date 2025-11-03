@@ -22,12 +22,16 @@
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "../TestCases/TestCase.h"
+#include "glap.h"
+#include "../MyEngine/Resources/AssetRegistry.h"
+#include "../CoreEngine/Asset/AssetsManager.h"
+
 #pragma comment(lib, "winmm.lib")
 
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
 Config config;
-AssetRegistry ar;
+
 int WindowWidth;
 int WindowHeight;
 
@@ -127,6 +131,7 @@ CoreEngine::CoreEngine() : window(nullptr), DebugMode(false)
 {
 	LastTime = 0;
 	GameRunning = false;
+	mAssets.Initialize();
 }
 
 CoreEngine::~CoreEngine()
@@ -179,10 +184,10 @@ void CoreEngine::Init()
 
 	// loading metadata for audio,texture,font into
 	// ASset reg's container each respectively
-	ar.LoadAudioManifest();
-	ar.LoadTextureManifest();
-	ar.LoadFontManifest();
-	ar.LoadSceneManifest();
+	//ar.LoadAudioManifest();
+	//ar.LoadTextureManifest();
+	//ar.LoadFontManifest();
+	//ar.LoadSceneManifest();
 
 	unsigned int version = 0;
 	FMOD::System* system = nullptr;

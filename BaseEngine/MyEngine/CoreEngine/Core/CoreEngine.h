@@ -14,7 +14,19 @@
 #pragma once
 #include "pch/pch.h"
 #include "../MyEngine/Serialization/Serialization.h"
-#include "../MyEngine/Resources/AssetRegistry.h"
+//#include "../MyEngine/Resources/AssetRegistry.h"
+#include "../Asset/AssetsManager.h"
+
+//namespace Framework { 
+//	class AssetRegistry;
+//	class AudioManager;
+//	class GraphicsManager;
+//	class AssetsManager;
+//}
+
+//namespace {
+//	class Config;
+//}
 
 class CoreEngine
 {
@@ -39,6 +51,9 @@ public:
 
 	GLFWwindow* GetWindow() const { return window; }
 	
+
+	AssetsManager& Assets() { return mAssets; }
+
 private:
 	bool GameRunning;
 	bool DebugMode = false;
@@ -49,12 +64,19 @@ private:
 	void RenderDebugDraw();
 
 	GLFWwindow* window;
+
+	//
+	//Framework::AssetRegistry mAssetRegistry;
+	//Framework::AudioManager mAudioManager;
+	//Framework::GraphicsManager mGraphicsManager;
+	AssetsManager mAssets;
+
 };
 
 //A global pointer to the instance of the core
 extern CoreEngine* Engine;
 extern Config config; //global scope
-extern AssetRegistry ar; //global scope
+//extern Framework::AssetRegistry ar; //global scope
 extern int WindowWidth;
 extern int WindowHeight;
 //constexpr int WindowWidth = 1600;

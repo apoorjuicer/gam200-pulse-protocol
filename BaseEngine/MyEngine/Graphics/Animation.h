@@ -20,7 +20,7 @@
 // #include "../Math/Vector_2D.h"
 #include "pch/pch.h" // FIRST
 #include "CoreEngine/ECS/Coordinator.h"
-#include "CoreEngine/Asset/AssetsManager.h"
+//#include "CoreEngine/Asset/AssetsManager.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "glhelper.h"
 

@@ -297,7 +297,7 @@ void GLApp::draw(std::set<Entity> entities) {
 		auto& an = g_coordinator->GetComponent<Framework::Animation>(it);
 
 		if (!re.spriteName.empty() && re.textureID == 0) {
-			re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+			//re.textureID = Framework::GraphicsManager::GetOrLoad(re.spriteName);
 			if (re.textureID == 0) {
 				std::cerr << "[GLApp] Failed to load texture: " << re.spriteName << std::endl;
 				continue;
@@ -332,8 +332,8 @@ void GLApp::cleanup() {
 		tb.translationBuffer = 0;
 	}
 
-	// Use AssetsManager to clean up all textures
-	Framework::AssetsManager::Clear();
+	// Use GraphicsManager to clean up all textures
+	//Framework::GraphicsManager::Clear();
 
 	// Delete any standalone textures not managed by TextureManager
 	if (textureID) {

@@ -18,8 +18,8 @@
 #include "pch/pch_temp.h"
 //#include <GLFW/glfw3.h>
 #include "CoreEngine/ECS/System.h"
-#include "CoreEngine/ECS/SystemManager.h"
-#include "../Resources/AssetRegistry.h" 
+//#include "CoreEngine/ECS/SystemManager.h"
+
 
 
 
@@ -33,73 +33,82 @@ namespace FMOD {
     class ChannelGroup;
 }
 
-// Simple audio system for BGM playback using FMOD Core
-class AudioManager : public Systems
-{
-public:
-    AudioManager();
-    explicit AudioManager(AssetRegistry* registry);
-    ~AudioManager();
-
-    // Systems interface
-   // void SetRegistry(AssetRegistry* registry);       // load from audioResource
-    void Initialize();     // creates FMOD system and (optionally) starts BGM
-                                            
-    void Update();         // calls FMOD::System::update()
-    void Shutdown();       // Exit calls releaseAll releases all FMOD resources
-
-    // BGM controls (optional for other places in engine)
-    bool LoadBGM(const std::string& id); //new
-    void StopBGM();
-    void SetBGMVolume(float volume);                 // 0..1
-    bool IsBGMPlaying(bool* outPlaying = nullptr) const;
-
-    // Pause and Play 
-    void SetPaused(bool paused);
-    bool IsPaused() const;
-
-    // gets path from source file and plays it at wanted volume, default volume is 1.0f
-    bool LoadSFX(const std::string& id);
-    void PlaySound(const std::string& id);
+class AssetRegistry; //fwd
 
 
-    // checks how far into the song the music has played
+    // Simple audio system for BGM playback using FMOD Core
+    class AudioManager : public Systems
+    {
+    public:
+        AudioManager() = default;
+        explicit AudioManager(AssetRegistry* registry);
+        ~AudioManager();
 
-    double GetBGMPositionSeconds() const;
-    bool UnloadAudio( std::string const& id);
+        // non-copyable but movable
+        AudioManager(AudioManager const&) = delete;
+        AudioManager& operator=(AudioManager const&) = delete;
+        AudioManager(AudioManager&&) noexcept = default;
+        AudioManager& operator=(AudioManager&&) noexcept = default;
 
-    //in FMod bgm and sfx behave differently
+        // Systems interface
+       // void SetRegistry(AssetRegistry* registry);       // load from audioResource
+        void Initialize();     // creates FMOD system and (optionally) starts BGM
 
-private:
-    FMOD::System* mSystem = nullptr;
+        void Update();         // calls FMOD::System::update()
+        void Shutdown();       // Exit calls releaseAll releases all FMOD resources
 
-    FMOD::Sound* mBGM = nullptr; //single background music
-    FMOD::Channel* mBGMCh = nullptr; //playback channel for BGM
-    //FMOD::Sound* mInputSFX = nullptr;
-    bool mPaused = true;
+        // BGM controls (optional for other places in engine)
+        bool LoadBGM(const std::string& id); //new
+        void StopBGM();
+        void SetBGMVolume(float volume);                 // 0..1
+        bool IsBGMPlaying(bool* outPlaying = nullptr) const;
 
+        // Pause and Play 
+        void SetPaused(bool paused);
+        bool IsPaused() const;
 
-    void releaseAll(); // stop channel, release sound/system
-
-    //registry
-    std::unordered_map<std::string, FMOD::Sound*> mSfx; // id -> sound
-    std::unordered_map<std::string, FMOD::Channel*> mChannels; // id -> active Channel
-    AssetRegistry* mRegistry = nullptr;  // link to asset registry
-
-    //for sliders
-    FMOD::ChannelGroup* mMasterGroup = nullptr;
-    FMOD::ChannelGroup* mMusicGroup = nullptr;
-    FMOD::ChannelGroup* mSfxGroup = nullptr;
-    float mMasterVol = 1.f, mMusicVol = 1.f, mSfxVol = 1.f;
+        // gets path from source file and plays it at wanted volume, default volume is 1.0f
+        bool LoadSFX(const std::string& id);
+        void PlaySound(const std::string& id);
 
 
-    void applyAllVolumes();
-    void applyMasterVolume();
-    void applyMusicVolume();
-    void applySfxVolume();
-    static float clampto0and1(float v);
+        // checks how far into the song the music has played
 
-    // non-copyable
-    AudioManager(const AudioManager&) = delete;
-    AudioManager& operator=(const AudioManager&) = delete;
-};
+        double GetBGMPositionSeconds() const;
+        bool UnloadAudio(std::string const& id);
+
+        //in FMod bgm and sfx behave differently
+
+    private:
+        FMOD::System* mSystem = nullptr;
+
+        FMOD::Sound* mBGM = nullptr; //single background music
+        FMOD::Channel* mBGMCh = nullptr; //playback channel for BGM
+        //FMOD::Sound* mInputSFX = nullptr;
+        bool mPaused = true;
+
+
+        void releaseAll(); // stop channel, release sound/system
+
+        //registry
+        std::unordered_map<std::string, FMOD::Sound*> mSfx; // id -> sound
+        std::unordered_map<std::string, FMOD::Channel*> mChannels; // id -> active Channel
+        AssetRegistry* mRegistry = nullptr;  // link to asset registry
+
+        //for sliders
+        FMOD::ChannelGroup* mMasterGroup = nullptr;
+        FMOD::ChannelGroup* mMusicGroup = nullptr;
+        FMOD::ChannelGroup* mSfxGroup = nullptr;
+        float mMasterVol = 1.f, mMusicVol = 1.f, mSfxVol = 1.f;
+
+
+        void applyAllVolumes();
+        void applyMasterVolume();
+        void applyMusicVolume();
+        void applySfxVolume();
+        static float clampto0and1(float v);
+
+        
+    };
+
+
