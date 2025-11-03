@@ -28,7 +28,7 @@
 #include "pch/pch.h"
 #include "CoreEngine/Factory/Factory.h" // for creating/deleting entities
 #include "CoreEngine/ECS/System.h"   // For Entity type
-#include "CoreEngine/ECS/Name.h"     // For display name in hierarchy list
+#include "Components/Name.h"     // For display name in hierarchy list
 #include "Graphics/Transform.h"
 
 

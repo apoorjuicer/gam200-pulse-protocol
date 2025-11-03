@@ -17,14 +17,11 @@
 ----------------------------------------------------------------------------- */
 // define singleton containers
 std::vector<GLSLShader> GLApp::shdrpgms;
-std::vector<GLApp::GLModel> GLApp::models;
 std::vector<GLApp::GLViewport> GLApp::vps;
 
-//other containers
-const float PI = 3.14159265358979323846f;
-//int polygonmode = 0;
-GLuint future_shd_ref = 0; // Initial shader index
+
 GLuint textureID;
+static GLApp::BatchRender gBatch;
 const std::string test_vs = {
 	#include "shader/test_vs.vert" 
 };
@@ -61,11 +58,10 @@ double random() {
 	return static_cast<double>((rand() % 10) / 10.0f);
 }
 
-GLApp::GLModel GLApp::mdl;
-GLApp::TranslationBuf GLApp::tb;
 GLApp::Camera2D GLApp::gCamera{};
 
 void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/) {
+	gBatch.Init(/*maxSprites*/ 10000);
 	// --- Compute middle rectangle from window size using fixed ratios ---
 	const float kLeftRatio = 0.20f; // 20% width
 	const float kRightRatio = 0.25f; // 25% width
@@ -130,27 +126,6 @@ void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/) {
 		std::make_pair(font_vs, font_fs)
 	};
 	GLApp::init_shdrpgms_cont(shdr_strs);
-	GLApp::init_models_cont();
-
-
-
-	bool fixed_seed = true;
-	std::random_device rd;
-	std::mt19937 gen((fixed_seed ? 123 : rd())); // Fixed seed for reproducibility
-	std::uniform_real_distribution<float> dis_translate(-tb.boundaryRange, tb.boundaryRange);
-	std::uniform_real_distribution<float> dis_delta(-0.01f, 0.01f);
-
-	// Generate instance data
-	for (int i = 0; i < tb.instance_count; ++i) {
-		tb.position_scale.push_back(glm::vec4(dis_translate(gen), dis_translate(gen), tb.quad_scale, tb.quad_scale));
-		tb.velocity.push_back(glm::vec2(dis_delta(gen), dis_delta(gen)));
-	}
-
-	glCreateBuffers(1, &tb.translationBuffer);
-	glNamedBufferStorage(tb.translationBuffer, tb.translationBufferSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
-	GLuint bindingIndex = 0; // Set binding index in shader program
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingIndex, tb.translationBuffer);
-	glNamedBufferSubData(tb.translationBuffer, 0, tb.translationBufferSize, tb.position_scale.data());
 }
 
 
@@ -175,41 +150,13 @@ void GLApp::updateAnimation(Framework::Animation& x, float deltaTime) {
 	}
 }
 
-
-void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
-	Framework::Transform& z, const glm::mat3& ZoomNDC) {
-
-	auto& shader = shdrpgms[static_cast<uint64_t>(x.shd_ref)];
-	shader.Use();
-	GLuint prog = shader.GetHandle();
-
-	GLint uModelLoc = glGetUniformLocation(prog, "uModel_to_NDC");
-	GLint uOffsetLoc = glGetUniformLocation(prog, "uOffset");
-	GLint uScaleLoc = glGetUniformLocation(prog, "uScale");
-
-	float frameWidth = 1.0f / y.columns;
-	float frameHeight = 1.0f / y.rows;
-	float uOffsetX = (y.currentFrame % y.columns) * frameWidth;
-	float uOffsetY = 1.0f - ((y.currentFrame / y.columns + 1) * frameHeight);
-
-	if (uOffsetLoc >= 0) glUniform2f(uOffsetLoc, uOffsetX, uOffsetY);
-	if (uScaleLoc >= 0) glUniform2f(uScaleLoc, frameWidth, frameHeight);
-	//if (uModelLoc >= 0) glUniformMatrix3fv(uModelLoc, 1, GL_FALSE, z.mdl_to_ndc_xform.Begin());
-
-	glm::mat3 M = glm::make_mat3(z.mdl_to_ndc_xform.Begin());
-	glm::mat3 mdlNdc = ZoomNDC * M;
-	if (uModelLoc >= 0) {
-		glUniformMatrix3fv(uModelLoc, 1, GL_FALSE, glm::value_ptr(mdlNdc));
-	}
-	glBindVertexArray(models[static_cast<uint64_t>(x.mdl_ref)].vaoid);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, x.textureID);
-	glDrawElements(models[static_cast<uint64_t>(x.mdl_ref)].primitive_type,
-		models[static_cast<uint64_t>(x.mdl_ref)].draw_cnt,
-		GL_UNSIGNED_SHORT, nullptr);
-
-	glBindVertexArray(0);
-	shader.UnUse();
+// Convert a framebuffer pixel to NDC inside the current game viewport
+static inline glm::vec2 ScreenToNDC(double x, double y) {
+	// x,y are OS pixels from glfwGetCursorPos
+	const double rx = (x - GLHelper::GameOffsetX) / (double)GLHelper::GameWidth;
+	const double ry = (y - GLHelper::GameOffsetY) / (double)GLHelper::GameHeight;
+	// NDC X: 0..1 -> -1..1 ;  NDC Y: flip and map
+	return glm::vec2(float(rx * 2.0 - 1.0), float(1.0 - ry * 2.0));
 }
 
 static inline glm::mat3 BuildPanZoomNDC(const GLApp::Camera2D& cam) {
@@ -223,13 +170,27 @@ static inline glm::mat3 BuildPanZoomNDC(const GLApp::Camera2D& cam) {
 	return T * S;   // translate after scaling
 }
 
-// Convert a framebuffer pixel to NDC inside the current game viewport
-static inline glm::vec2 ScreenToNDC(double x, double y) {
-	// x,y are OS pixels from glfwGetCursorPos
-	const double rx = (x - GLHelper::GameOffsetX) / (double)GLHelper::GameWidth;
-	const double ry = (y - GLHelper::GameOffsetY) / (double)GLHelper::GameHeight;
-	// NDC X: 0..1 -> -1..1 ;  NDC Y: flip and map
-	return glm::vec2(float(rx * 2.0 - 1.0), float(1.0 - ry * 2.0));
+void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
+	Framework::Transform& z, const glm::mat3& ZoomNDC)
+{
+	float frameWidth = 1.0f / y.columns;
+	float frameHeight = 1.0f / y.rows;
+	float uOffsetX = (y.currentFrame % y.columns) * frameWidth;
+	float vTop = 1.0f - ((y.currentFrame / y.columns + 1) * frameHeight);
+
+	const float u0 = uOffsetX;
+	const float v0 = vTop;
+	const float u1 = uOffsetX + frameWidth;
+	const float v1 = vTop + frameHeight;
+
+	glm::mat3 M = glm::make_mat3(z.mdl_to_ndc_xform.Begin());
+	glm::mat3 modelNDC = ZoomNDC * M;
+
+	// NOTE: re.shd_ref / re.mdl_ref are floats in your component; cast to uint16
+	gBatch.Push(static_cast<uint16_t>(x.shd_ref),
+		static_cast<uint16_t>(x.mdl_ref),
+		x.textureID,
+		modelNDC, u0, v0, u1, v1);
 }
 
 void GLApp::draw(std::set<Entity> entities) {
@@ -303,7 +264,7 @@ void GLApp::draw(std::set<Entity> entities) {
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
 	lastTime = currentTime;
-
+	gBatch.Begin();
 	// Draw entities
 	for (auto it : entities) {
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
@@ -320,10 +281,10 @@ void GLApp::draw(std::set<Entity> entities) {
 
 		if (tr.isVisible && re.textureID != 0) {
 			updateAnimation(an, deltaTime);
-			glBindTexture(GL_TEXTURE_2D, re.textureID);
 			drawTrans(re, an, tr, PanZoom);
 		}
 	}
+	gBatch.Flush(shdrpgms);
 	GLboolean depthWasOn = glIsEnabled(GL_DEPTH_TEST);
 	glDisable(GL_DEPTH_TEST);
 
@@ -366,21 +327,7 @@ void GLApp::draw(std::set<Entity> entities) {
 
 
 void GLApp::cleanup() {
-	// Delete VAOs, VBOs
-	for (auto& model : GLApp::models) {
-		if (model.vaoid) {
-			glDeleteVertexArrays(1, &model.vaoid);
-			model.vaoid = 0;
-		}
-	}
-	GLApp::models.clear();
 	GLApp::shdrpgms.clear();
-
-	// Delete translation buffer
-	if (tb.translationBuffer) {
-		glDeleteBuffers(1, &tb.translationBuffer);
-		tb.translationBuffer = 0;
-	}
 
 	// Use AssetsManager to clean up all textures
 	Framework::AssetsManager::Clear();
@@ -394,11 +341,6 @@ void GLApp::cleanup() {
 	GLApp::vps.clear();
 
 	std::cout << "Graphics Resources successfully cleaned up." << std::endl;
-}
-
-void GLApp::init_models_cont() {
-	GLApp::models.emplace_back(GLApp::bg_model());
-	GLApp::models.emplace_back(GLApp::box_model());
 }
 
 //Shader Program Container
@@ -430,103 +372,6 @@ void GLApp::init_shdrpgms_cont(GLApp::VPSS const& vpss) {
 	}
 }
 
-//Background VAO
-GLApp::GLModel GLApp::bg_model() {
-	std::vector<GLushort> idx_vtx = { 0, 1, 2, 2, 3, 0 };
-
-	struct Vertex {
-		glm::vec2 position;
-		glm::vec3 color;
-		glm::vec2 texCoord;
-	};
-
-	std::array<Vertex, 4> vertices = {
-		Vertex{ glm::vec2(1.f, -1.f), glm::vec3(0.f, 1.f, 0.f), glm::vec2(1.0f, 0.0f) },
-		Vertex{ glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 1.f), glm::vec2(1.0f, 1.0f) },
-		Vertex{ glm::vec2(-1.f, 1.f), glm::vec3(1.f, 0.f, 1.f), glm::vec2(0.0f, 1.0f) },
-		Vertex{ glm::vec2(-1.f, -1.f), glm::vec3(1.f, 0.f, 0.f), glm::vec2(0.0f, 0.0f) }
-	};
-
-	GLuint vbo_hdl;
-	glCreateBuffers(1, &vbo_hdl);
-	glNamedBufferStorage(vbo_hdl, sizeof(vertices), vertices.data(), GL_DYNAMIC_STORAGE_BIT);
-
-	GLuint ebo_hdl;
-	glCreateBuffers(1, &ebo_hdl);
-	glNamedBufferStorage(ebo_hdl, sizeof(idx_vtx), idx_vtx.data(), GL_DYNAMIC_STORAGE_BIT);
-
-	glCreateVertexArrays(1, &vaoid);
-	glVertexArrayVertexBuffer(vaoid, 0, vbo_hdl, 0, sizeof(Vertex));
-	glVertexArrayElementBuffer(vaoid, ebo_hdl);
-
-	glEnableVertexArrayAttrib(vaoid, 0);
-	glVertexArrayAttribFormat(vaoid, 0, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, position));
-	glVertexArrayAttribBinding(vaoid, 0, 0);
-
-	glEnableVertexArrayAttrib(vaoid, 1);
-	glVertexArrayAttribFormat(vaoid, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, color));
-	glVertexArrayAttribBinding(vaoid, 1, 0);
-
-	glEnableVertexArrayAttrib(vaoid, 2);
-	glVertexArrayAttribFormat(vaoid, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, texCoord));
-	glVertexArrayAttribBinding(vaoid, 2, 0);
-
-	GLApp::GLModel quad{};
-	quad.vaoid = vaoid;
-	quad.primitive_type = GL_TRIANGLES;
-	quad.draw_cnt = static_cast<GLuint>(idx_vtx.size());
-	quad.primitive_cnt = 4;
-	return quad;
-}
-GLApp::GLModel GLApp::box_model() {
-	std::vector<GLushort> idx_vtx = { 0, 1, 2, 2, 3, 0 };
-
-	struct Vertex {
-		glm::vec2 position;
-		glm::vec3 color;
-		glm::vec2 texCoord;
-	};
-
-	std::array<Vertex, 4> vertices = {
-		Vertex{ glm::vec2(0.5f, -0.5f), glm::vec3(0.f, 1.f, 0.f), glm::vec2(1.0f, 0.0f) },
-		Vertex{ glm::vec2(0.5f, 0.5f), glm::vec3(0.f, 0.f, 1.f), glm::vec2(1.0f, 1.0f) },
-		Vertex{ glm::vec2(-0.5f, 0.5f), glm::vec3(1.f, 0.f, 1.f), glm::vec2(0.0f, 1.0f) },
-		Vertex{ glm::vec2(-0.5f, -0.5f), glm::vec3(1.f, 0.f, 0.f), glm::vec2(0.0f, 0.0f) }
-	};
-
-	GLuint vbo_hdl;
-	glCreateBuffers(1, &vbo_hdl);
-	glNamedBufferStorage(vbo_hdl, sizeof(vertices), vertices.data(), GL_DYNAMIC_STORAGE_BIT);
-
-	GLuint ebo_hdl;
-	glCreateBuffers(1, &ebo_hdl);
-	glNamedBufferStorage(ebo_hdl, sizeof(idx_vtx), idx_vtx.data(), GL_DYNAMIC_STORAGE_BIT);
-
-	glCreateVertexArrays(1, &vaoid);
-	glVertexArrayVertexBuffer(vaoid, 0, vbo_hdl, 0, sizeof(Vertex));
-	glVertexArrayElementBuffer(vaoid, ebo_hdl);
-
-	glEnableVertexArrayAttrib(vaoid, 0);
-	glVertexArrayAttribFormat(vaoid, 0, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, position));
-	glVertexArrayAttribBinding(vaoid, 0, 0);
-
-	glEnableVertexArrayAttrib(vaoid, 1);
-	glVertexArrayAttribFormat(vaoid, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, color));
-	glVertexArrayAttribBinding(vaoid, 1, 0);
-
-	glEnableVertexArrayAttrib(vaoid, 2);
-	glVertexArrayAttribFormat(vaoid, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, texCoord));
-	glVertexArrayAttribBinding(vaoid, 2, 0);
-
-	GLApp::GLModel quad{};
-	quad.vaoid = vaoid;
-	//quad.primitive_type = GL_TRIANGLE_STRIP;
-	quad.primitive_type = GL_TRIANGLES;
-	quad.draw_cnt = static_cast<GLuint>(idx_vtx.size());
-
-	quad.primitive_cnt = 2;
-	return quad;
-}
 void GLApp::ComputeLetterbox(int fbw, int fbh)
 {
 	const float sx = static_cast<float>(fbw) / static_cast<float>(GLApp::VIRTUAL_W);

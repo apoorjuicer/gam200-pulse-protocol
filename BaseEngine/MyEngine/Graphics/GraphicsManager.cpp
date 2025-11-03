@@ -43,13 +43,13 @@ GraphicsManager::~GraphicsManager()
 
 void GraphicsManager::Initialize()
 {
+    GLHelper::print_specs();
     auto& AM = Framework::AssetsManager::Instance();
 
     AM.InitFonts();
     AM.LoadAllFonts("../../MyEngine/Assets/Font", 48);
 
     // Print GL info and init the app renderer
-    GLHelper::print_specs();
     glapp->init();
 
     // Subscribe to combo messages - DONT REMOVE, TEST FOR MESSAGE SYSTEM
