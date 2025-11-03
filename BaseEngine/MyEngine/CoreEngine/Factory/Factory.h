@@ -1,6 +1,6 @@
 #pragma once
 #include "pch/pch_temp.h"	
-#include "../Components/Naming.h"
+#include "../Components/EntityType.h"
 #include "../Graphics/Transform.h"
 #include "../GameLogic/GameLogic.h"
 #include "../CoreEngine/ECS/Types.h"
@@ -37,7 +37,7 @@ private:
 
 	// calls onto prefab json file only, it will just load what the param PrefabName is.
 	//bool LoadPrefab(Entity entity, std::string const& PrefabName);
-	std::string PrefabPathway = "../../MyEngine/JSON/Prefab.json";
+	std::string PrefabPathway = "../../MyEngine/JSON/PrefabList.json";
 
 
 	// name of prefab, reward is the container inside of this prefab. DO WE NEED THIS? 

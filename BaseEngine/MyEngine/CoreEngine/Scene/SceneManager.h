@@ -15,13 +15,13 @@
 /******************************************************************************/
 #pragma once
 #include "pch/pch_temp.h"
-#include "../Components/Naming.h"
+#include "../Components/EntityType.h"
 #include "../GameLogic/GameLogic.h"
 #include "../Graphics/Transform.h"
 #include "../Graphics/Animation.h"
 #include "../Graphics/Renderable.h"
 
-#include "../MyEngine/Components/Name.h"
+#include "../MyEngine/Components/DisplayName.h"
 #include "../CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
 #include "CoreEngine/Factory/Factory.h"
@@ -50,9 +50,6 @@ public:
 	std::string GrabCurrentScene() const { return CurrentScene; }
 	void ChangeCurrentScene(std::string const& str) { CurrentScene = str; }
 	void IncrementEntityArray(Entity entity) { SceneEntityList.push_back(entity); }
-
-	// for gui system usage (M2 rubric)
-	Entity LoadEntityFromJson(std::string const& path);
 
 private:
 	std::string CurrentScene;

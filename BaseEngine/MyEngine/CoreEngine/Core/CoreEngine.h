@@ -14,7 +14,7 @@
 #pragma once
 #include "pch/pch.h"
 #include "../MyEngine/Serialization/Serialization.h"
-#include "../Components/Naming.h"
+#include "../Components/EntityType.h"
 
 class CoreEngine
 {

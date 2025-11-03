@@ -28,7 +28,7 @@
 #include "pch/pch.h"
 #include "CoreEngine/Factory/Factory.h" // for creating/deleting entities
 #include "CoreEngine/ECS/System.h"   // For Entity type
-#include "Components/Name.h"     // For display name in hierarchy list
+#include "Components/DisplayName.h"     // For display name in hierarchy list
 #include "Graphics/Transform.h"
 
 
@@ -39,6 +39,9 @@ namespace MyEditor
     // --------------------------------------------------------------------
     constexpr Entity INVALID_ENTITY = static_cast<Entity>(-1);
     static Entity selectedEntity = INVALID_ENTITY;
+
+    // Entity display order tracking for hierarchy
+    static std::vector<Entity> entityDisplayOrder;
 
     static GLFWwindow* s_Window = nullptr;
     static bool s_enabled = true;
@@ -397,55 +400,6 @@ namespace MyEditor
         std::cout << "[Editor] Restored baseline.\n";
     }
 
-   
-
-    // Left splitter: drags the RIGHT edge of the Left panel => modifies left_ratio
-    //static void SplitterV_Left(const char* id, float x_px, float top_h_px, float full_w_px, float& left_ratio,
-    //    float right_ratio_limit)
-    //{
-    //    ImGui::SetCursorScreenPos(ImVec2(x_px - SPLIT_THICK * 0.5f, 0.0f));
-    //    ImGui::InvisibleButton(id, ImVec2(SPLIT_THICK, top_h_px));
-    //    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-    //    if (ImGui::IsItemActive()) {
-    //        left_ratio += ImGui::GetIO().MouseDelta.x / full_w_px;
-    //        left_ratio = clamp_val(left_ratio, MIN_RATIO_W, 1.0f - right_ratio_limit - MIN_RATIO_W);
-    //    }
-    //    ImGui::GetForegroundDrawList()->AddLine(ImVec2(x_px, 0.0f), ImVec2(x_px, top_h_px),
-    //        IM_COL32(180, 180, 180, 160), 1.0f);
-    //}
-
-    // Right splitter: drags the LEFT edge of the Right panel => modifies right_ratio
-    //static void SplitterV_Right(const char* id, float x_px, float top_h_px, float full_w_px, float& right_ratio,
-    //    float left_ratio_limit)
-    //{
-    //    ImGui::SetCursorScreenPos(ImVec2(x_px - SPLIT_THICK * 0.5f, 0.0f));
-    //    ImGui::InvisibleButton(id, ImVec2(SPLIT_THICK, top_h_px));
-    //    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-    //    if (ImGui::IsItemActive()) {
-    //        float edge = x_px + ImGui::GetIO().MouseDelta.x;        // new x of right panel’s left edge
-    //        right_ratio = (full_w_px - edge) / full_w_px;           // convert to ratio
-    //        right_ratio = clamp_val(right_ratio, MIN_RATIO_W, 1.0f - left_ratio_limit - MIN_RATIO_W);
-    //    }
-    //    ImGui::GetForegroundDrawList()->AddLine(ImVec2(x_px, 0.0f), ImVec2(x_px, top_h_px),
-    //        IM_COL32(180, 180, 180, 160), 1.0f);
-    //}
-
-    // Bottom splitter: drags the TOP edge of the bottom area => modifies bottom_ratio
-    //static void SplitterH_Bottom(const char* id, float y_px, float full_w_px, float full_h_px, float& bottom_ratio)
-    //{
-    //    ImGui::SetCursorScreenPos(ImVec2(0.0f, y_px - SPLIT_THICK * 0.5f));
-    //    ImGui::InvisibleButton(id, ImVec2(full_w_px, SPLIT_THICK));
-    //    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
-    //    if (ImGui::IsItemActive()) {
-    //        float edge = y_px + ImGui::GetIO().MouseDelta.y; // new y of top of bottom area
-    //        bottom_ratio = (full_h_px - edge) / full_h_px;
-    //        bottom_ratio = clamp_val(bottom_ratio, MIN_RATIO_H, 0.7f);
-    //    }
-    //    ImGui::GetForegroundDrawList()->AddLine(ImVec2(0.0f, y_px), ImVec2(full_w_px, y_px),
-    //        IM_COL32(180, 180, 180, 160), 1.0f);
-    //}
-
-
     void Init(GLFWwindow* w) {
         s_Window = w;
         IMGUI_CHECKVERSION();
@@ -534,8 +488,8 @@ namespace MyEditor
             ImGuiWindowFlags_NoSavedSettings;
 
         // ----------------------------
- // TOP BAR (Play / Pause / Scene Controls)
- // ----------------------------
+        // TOP BAR (Play / Pause / Scene Controls)
+        // ----------------------------
         {
             ImGuiWindowFlags top_flags =
                 ImGuiWindowFlags_NoTitleBar |
@@ -654,8 +608,8 @@ namespace MyEditor
 
                 static std::vector<EntityPrefab> entityPrefabs = {
                     {"Empty Entity", nullptr, true, 200.0f, 200.0f},
-                    {"Hero", "../../MyEngine/JSON/herotransform.json", false, 0, 0},
-                    {"Monster", "../../MyEngine/JSON/monstertransform.json", false, 0, 0},
+                    {"Hero", "../../MyEngine/JSON/HeroPrefab.json", false, 0, 0},
+                    {"Monster", "../../MyEngine/JSON/MonsterPrefab.json", false, 0, 0},
                     {"Background", nullptr, true, 800.0f, 600.0f}
                 };
 
@@ -667,14 +621,47 @@ namespace MyEditor
                     displayNames.push_back(prefab.displayName);
                 }
 
-                ImGui::PushItemWidth(-FLT_MIN);
-                ImGui::Combo("##EntityType", &selectedType, displayNames.data(), static_cast<int>(displayNames.size()));
+                // ============================================
+                // UNITY-STYLE TOOLBAR
+                // ============================================
+
+                float windowWidth = ImGui::GetContentRegionAvail().x;
+                float dropdownWidth = 120.0f;
+
+                // Toolbar buttons (left side)
+                bool createClicked = ImGui::SmallButton("+");
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Create at End");
+
+                ImGui::SameLine();
+                ImGui::BeginDisabled(selectedEntity == INVALID_ENTITY);
+                bool createAboveClicked = ImGui::SmallButton("^");
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Create Above Selected");
+
+                ImGui::SameLine();
+                bool createBelowClicked = ImGui::SmallButton("v");
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Create Below Selected");
+
+                ImGui::SameLine();
+                bool deleteClicked = ImGui::SmallButton("X");
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Delete Selected");
+                ImGui::EndDisabled();
+
+                // Entity type dropdown (right side)
+                ImGui::SameLine(windowWidth - dropdownWidth + 5);
+                ImGui::PushItemWidth(dropdownWidth);
+                ImGui::Combo("##Type", &selectedType, displayNames.data(), static_cast<int>(displayNames.size()));
                 ImGui::PopItemWidth();
 
-                if (ImGui::Button("+ Create Selected Type", ImVec2(-FLT_MIN, 0)))
+                ImGui::Separator();
+
+                // ============================================
+                // HANDLE BUTTON CLICKS - Create Entity
+                // ============================================
+
+                if (createClicked || createAboveClicked || createBelowClicked)
                 {
                     Factory defaultEntity;
-                    Entity newEntity;
+                    Entity newEntity = INVALID_ENTITY;
 
                     const EntityPrefab& selectedPrefab = entityPrefabs[selectedType];
 
@@ -691,18 +678,14 @@ namespace MyEditor
                     }
                     else if (selectedPrefab.jsonPath != nullptr)
                     {
-                        // Use SceneManager's LoadEntityFromJson which handles the JSON format
-                        auto sceneMgr = g_coordinator->GetSystem<SceneManager>();
-                        if (sceneMgr) {
-                            newEntity = sceneMgr->LoadEntityFromJson(selectedPrefab.jsonPath);
-                            if (newEntity == 0 || newEntity == INVALID_ENTITY) {
-                                std::cerr << "[Editor] Failed to load prefab: " << selectedPrefab.jsonPath << std::endl;
-                                newEntity = defaultEntity.DefaultObj();
-                            }
+                        // Use Factory's CreateEntityFromJson
+                        auto result = defaultEntity.CreateEntityFromJson(selectedPrefab.jsonPath);
+                        if (result.has_value()) {
+                            newEntity = result.value();
                         }
                         else
                         {
-                            std::cerr << "[Editor] SceneManager not found!" << std::endl;
+                            std::cerr << "[Editor] Failed to load prefab: " << selectedPrefab.jsonPath << std::endl;
                             newEntity = defaultEntity.DefaultObj();
                         }
                     }
@@ -712,18 +695,56 @@ namespace MyEditor
                         newEntity = defaultEntity.DefaultObj();
                     }
 
-                    selectedEntity = newEntity; // Auto-select the new entity
+                    if (newEntity != INVALID_ENTITY) {
+                        // Add to display order at correct position
+                        if (createClicked) {
+                            // Create at end
+                            entityDisplayOrder.push_back(newEntity);
+                            std::cout << "[Editor] Created entity " << newEntity << " at end" << std::endl;
+                        }
+                        else if (createAboveClicked && selectedEntity != INVALID_ENTITY) {
+                            // Insert above selected entity
+                            auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+                            if (it != entityDisplayOrder.end()) {
+                                entityDisplayOrder.insert(it, newEntity);
+                                std::cout << "[Editor] Created entity " << newEntity << " above selected" << std::endl;
+                            }
+                            else {
+                                // If selected not found, add at end
+                                entityDisplayOrder.push_back(newEntity);
+                            }
+                        }
+                        else if (createBelowClicked && selectedEntity != INVALID_ENTITY) {
+                            // Insert below selected entity
+                            auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+                            if (it != entityDisplayOrder.end()) {
+                                entityDisplayOrder.insert(it + 1, newEntity);
+                                std::cout << "[Editor] Created entity " << newEntity << " below selected" << std::endl;
+                            }
+                            else {
+                                // If selected not found, add at end
+                                entityDisplayOrder.push_back(newEntity);
+                            }
+                        }
+
+                        selectedEntity = newEntity; // Select newly created entity
+                    }
                 }
 
-                // Only show delete button if an entity is selected
-                if (selectedEntity != INVALID_ENTITY)
+                // Handle Delete
+                if (deleteClicked && selectedEntity != INVALID_ENTITY)
                 {
-                    if (ImGui::Button("Delete Selected", ImVec2(-FLT_MIN, 0)))
-                    {
-                        Factory defaultEntity;
-                        defaultEntity.DeleteEntity(selectedEntity);
-                        selectedEntity = INVALID_ENTITY; // Clear selection after deletion
+                    // Remove from display order
+                    auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+                    if (it != entityDisplayOrder.end()) {
+                        entityDisplayOrder.erase(it);
                     }
+
+                    // Delete the entity
+                    Factory defaultEntity;
+                    defaultEntity.DeleteEntity(selectedEntity);
+                    selectedEntity = INVALID_ENTITY;
+                    std::cout << "[Editor] Deleted entity" << std::endl;
                 }
 
                 ImGui::Spacing();
@@ -733,7 +754,28 @@ namespace MyEditor
                 // Use full available size for the scrollable list
                 ImGui::BeginChild("HierarchyList", ImVec2(-FLT_MIN, -FLT_MIN), true);
 
-                for (auto entity : g_coordinator->GetAllEntities())
+
+                bool anySelectableClicked = false;
+
+                // Sync display order with actual entities
+                auto allEntities = g_coordinator->GetAllEntities();
+                std::set<Entity> entitySet(allEntities.begin(), allEntities.end());
+
+                entityDisplayOrder.erase(
+                    std::remove_if(entityDisplayOrder.begin(), entityDisplayOrder.end(),
+                        [&entitySet](Entity e) { return entitySet.find(e) == entitySet.end(); }),
+                    entityDisplayOrder.end()
+                );
+
+                // Add new entities not yet tracked
+                for (auto entity : allEntities) {
+                    if (std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), entity) == entityDisplayOrder.end()) {
+                        entityDisplayOrder.push_back(entity);
+                    }
+                }
+
+                // Display in tracked order
+                for (auto entity : entityDisplayOrder)
                 {
                     std::string display;
 
@@ -764,9 +806,10 @@ namespace MyEditor
                             }
                         }
                         else {
-                            display = "Default Entity (Empty)";
+                            display = "New Entity";
                         }
                     }
+
                     // Fallback: Show entity ID
                     else
                     {
@@ -780,7 +823,13 @@ namespace MyEditor
                     if (ImGui::Selectable(uniqueLabel.c_str(), isSelected))
                     {
                         selectedEntity = entity;
+                        anySelectableClicked = true;  // Track that we clicked an entity
                     }
+                }
+
+                // Deselect if clicked on empty space in hierarchy
+                if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0) && !anySelectableClicked) {
+                    selectedEntity = INVALID_ENTITY;
                 }
 
                 ImGui::EndChild();

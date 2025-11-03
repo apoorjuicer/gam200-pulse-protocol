@@ -16,6 +16,10 @@
 #pragma once
 #include "pch/pch_temp.h"
 #include "../MyEngine/CoreEngine/ECS/System.h"
+#include "../MyEngine/CoreEngine/Message/MessageManager.h"
+#include "../MyEngine/CoreEngine/Scene/SceneManager.h"
+#include "../MyEngine/CoreEngine/Factory/Factory.h"
+#include "../MyEngine/Components/DisplayName.h"
 
 struct GUIButton;
 

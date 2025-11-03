@@ -17,10 +17,6 @@
 #include "pch/pch_temp.h"
 #include "graphics/stb_image.h"
 #include "../MyEngine/Input/InputManager.h"
-#include "../MyEngine/CoreEngine/Message/MessageManager.h"
-#include "../MyEngine/CoreEngine/Scene/SceneManager.h"
-#include "../MyEngine/Components/Name.h"
-
 
 InputManager::InputManager() : window(nullptr) {
 	std::memset(currentKeys, 0, sizeof(currentKeys));
@@ -288,9 +284,13 @@ void InputManager::executeButtonAction(const GUIButton& button) {
 
 	if (button.actionType == "CreateEntity") {
 		if (!button.entityJsonPath.empty()) {
-			Entity newEntity = g_coordinator->GetSystem<SceneManager>()->LoadEntityFromJson(button.entityJsonPath);
+			// Use Factory's CreateEntityFromJson which returns std::optional<Entity>
+			Factory factory;
+			auto result = factory.CreateEntityFromJson(button.entityJsonPath);
 
-			if (newEntity != 0) {
+			if (result.has_value()) {
+				Entity newEntity = result.value();
+
 				Name nameComponent{};
 				nameComponent.name = "Created_Hero_" + std::to_string(newEntity);
 				g_coordinator->AddComponent(newEntity, nameComponent);

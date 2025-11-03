@@ -318,7 +318,7 @@ void GLApp::draw(std::set<Entity> entities) {
 			DrawAABB_NDC(modelToNDC, aabb, color);
 		}
 
-		glLineWidth(2.0f);
+		glLineWidth(1.0f);
 		DebugDraw::End();
 	}
 

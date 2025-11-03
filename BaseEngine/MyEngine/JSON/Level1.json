@@ -317,7 +317,7 @@
                             "a": 1.0
                         },
                         "actionType": "CreateEntity",
-                        "entityJsonPath": "../../MyEngine/JSON/herotransform.json",
+                        "entityJsonPath": "../../MyEngine/JSON/HeroPrefab.json",
                         "isEnabled": true
                     }
                 }
