@@ -23,6 +23,7 @@
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "../TestCases/TestCase.h"
+#include "../MyEngine/CoreEngine/ECS/Name.h"
 #pragma comment(lib, "winmm.lib")
 
 // Game window dimensions and title
@@ -260,6 +261,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<LogicComponent>();
 	g_coordinator->RegisterComponent<NamingComponent>();
 	g_coordinator->RegisterComponent<GUIButton>();
+	g_coordinator->RegisterComponent<Name>();
 
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
@@ -288,6 +290,8 @@ void CoreEngine::Setup()
 	rhythmSig.set(g_coordinator->GetComponentType<Framework::Renderable>());
 	rhythmSig.set(g_coordinator->GetComponentType<Framework::Animation>());
 	g_coordinator->SetSystemSignature<RhythmGameplayInput>(rhythmSig);
+
+
 
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
@@ -320,10 +324,6 @@ void CoreEngine::Update(float dt)
 
 	auto profiler = ProfilingManager::GetInstance();
 
-	profiler->StartSystem("Input System");
-	if (g_inputSystem) g_inputSystem->Update(dt);
-	profiler->EndSystem("Input System");
-	
 	profiler->StartSystem("Scene System");
 	if (g_sceneSystem) g_sceneSystem->Update(dt);
 	profiler->EndSystem("Scene System");
@@ -332,6 +332,10 @@ void CoreEngine::Update(float dt)
 	g_coordinator->UpdateAllSystems(dt);
 	profiler->EndSystem("LogicSystem");
 
+	profiler->StartSystem("Input System");
+	if (g_inputSystem) g_inputSystem->Update(dt);
+	profiler->EndSystem("Input System");
+	
 	profiler->StartSystem("RhythmGameplayInput");
 	if (g_rhythmSystem) g_rhythmSystem->Update(dt);
 	profiler->EndSystem("RhythmGameplayInput");
@@ -356,13 +360,14 @@ void CoreEngine::Update(float dt)
 	if (g_graphicsSystem)
 		g_graphicsSystem->Update();
 
-	// 2) If paused, stop here � no gameplay / input / scene logic
-	if (m_paused)
+	// 2) If paused, stop here. no gameplay / input / scene logic
+	if (m_paused) {
 		return;
+	}
 
 	// 3) Normal running path
-	if (g_inputSystem)    g_inputSystem->Update(dt);
-	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);	
+	//if (g_inputSystem)    g_inputSystem->Update(dt);
+	//if (g_rhythmSystem)   g_rhythmSystem->Update(dt);	
 }
 
 
@@ -517,3 +522,20 @@ void CoreEngine::TogglePaused()
 	SetPaused(!m_paused);
 }
 
+void CoreEngine::RestartRuntimeForPlay()
+{
+	auto coord = Coordinator::GetInstance();
+	if (!coord) return;
+
+	// 1) AUDIO: force BGM to start at 0
+	if (auto audio = coord->GetSystem<AudioManager>()) {
+		// if engine is paused (Stop button), keep audio paused too
+		audio->RestartBGM(m_paused);
+	}
+
+	// 2) RHYTHM: shutdown + initialize
+	if (auto rhythm = coord->GetSystem<RhythmGameplayInput>()) {
+		rhythm->Shutdown();
+		rhythm->Initialize();
+	}
+}

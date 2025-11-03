@@ -11,9 +11,7 @@
  /******************************************************************************/
 
 #pragma once
-#include <string>
-#include <glm/glm.hpp>
-#include <rapidjson/document.h>
+#include "pch/pch_temp.h"
 
 enum class ButtonState {
     Normal,

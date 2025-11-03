@@ -14,8 +14,13 @@
  */
  /******************************************************************************/
 
-#include "pch/pch.h"
+#include "pch/pch_temp.h"
 #include "graphics/stb_image.h"
+#include "../MyEngine/Input/InputManager.h"
+#include "../MyEngine/CoreEngine/Message/MessageManager.h"
+#include "../MyEngine/CoreEngine/Scene/SceneManager.h"
+#include "../MyEngine/CoreEngine/ECS/Name.h"
+
 
 InputManager::InputManager() : window(nullptr) {
 	std::memset(currentKeys, 0, sizeof(currentKeys));
@@ -36,15 +41,6 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
 		return;
 	}
 
-	// Set scroll callback for zoom
-	glfwSetScrollCallback(window, [](GLFWwindow* win, double xoffset, double yoffset) {
-		(void)xoffset;
-		auto* inputMgr = static_cast<InputManager*>(glfwGetWindowUserPointer(win));
-		if (inputMgr) {
-			inputMgr->scrollOffset += static_cast<float>(yoffset);
-		}
-		});
-
 	// Store InputManager pointer in window for callback access
 	glfwSetWindowUserPointer(window, this);
 
@@ -52,33 +48,10 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
 }
 
 void InputManager::Update(float) {
+	/*std::cout << "[INPUT MANAGER UPDATE]" << std::endl;*/
 	updateInputStates();
 	updateGUIButtons();
 	processDebugToggles();
-
-	// TEMPORARY TEST: Print scroll events
-	if (scrollOffset != 0.0f) {
-		float oldZoom = zoomLevel;
-		zoomLevel += scrollOffset * zoomSpeed;
-		zoomLevel = std::clamp(zoomLevel, minZoom, maxZoom);
-
-		std::cout << "========================================\n";
-		std::cout << "[ZOOM TEST] Scroll detected!\n";
-		std::cout << "  Scroll Offset: " << scrollOffset << "\n";
-		std::cout << "  Old Zoom: " << oldZoom << "\n";
-		std::cout << "  New Zoom: " << zoomLevel << "\n";
-		std::cout << "  Zoom Speed: " << zoomSpeed << "\n";
-		std::cout << "  Zoom Range: [" << minZoom << " - " << maxZoom << "]\n";
-		std::cout << "========================================\n";
-
-		scrollOffset = 0.0f;
-	}
-
-	// Test reset
-	if (isKeyTriggered(GLFW_KEY_R)) {
-		resetZoom();
-		std::cout << "[ZOOM TEST] Reset! Zoom = " << zoomLevel << "\n";
-	}
 
 	// Test delayed message (Advanced Feature: Message Queuing)
 	if (isKeyTriggered(GLFW_KEY_SPACE)) {
@@ -101,27 +74,6 @@ void InputManager::Update(float) {
 	if (isMouseButtonReleased(0)) {
 		std::cout << "[MOUSE] Left Released" << std::endl;
 	}
-
-	// Update zoom based on scroll
-	if (scrollOffset != 0.0f) {
-		float oldZoom = zoomLevel;
-		zoomLevel += scrollOffset * zoomSpeed;
-		zoomLevel = std::clamp(zoomLevel, minZoom, maxZoom);
-
-		// Only log if zoom actually changed
-		if (oldZoom != zoomLevel) {
-			std::cout << "[Zoom] Level: " << zoomLevel << " (Speed: " << zoomSpeed
-				<< ", Range: " << minZoom << "-" << maxZoom << ")\n";
-		}
-
-		scrollOffset = 0.0f;
-	}
-
-	// Optional: Reset zoom with configurable key
-	//if (isKeyTriggered(GLFW_KEY_R)) {
-	//	resetZoom();
-	//	std::cout << "[Zoom] Reset to default\n";
-	//}
 
 	// Editor toggle
 	if (isKeyTriggered(GLFW_KEY_O)) {
@@ -249,31 +201,56 @@ glm::vec2 InputManager::getMousePosition() const {
 
 void InputManager::updateGUIButtons() {
 	auto* g_coordinator = Coordinator::GetInstance();
-	glm::vec2 mouseVirtual = mousePositionVirtual;
 
-	// Convert virtual mouse to world space for button collision
-	// Virtual: (0..1600, 0..900), World: (-800..800, -450..450)
-	float worldX = mouseVirtual.x - 800.0f;
-	float worldY = mouseVirtual.y - 450.0f;
-	glm::vec2 mouseWorld(worldX, worldY);
+	float mouseX = mousePosition.x;
+	float mouseY = mousePosition.y;
 
 	for (auto const& entity : GUIButtonEntities) {
 		if (!g_coordinator->HasComponent<GUIButton>(entity)) continue;
-		if (!g_coordinator->HasComponent<Framework::Transform>(entity)) continue;
 
 		auto& button = g_coordinator->GetComponent<GUIButton>(entity);
-		auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
+
+		if (g_coordinator->HasComponent<Framework::Transform>(entity)) {
+			auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
+			if (!transform.isVisible) {
+				button.currentState = ButtonState::Normal;
+				continue;  // Skip hidden entities
+			}
+		}
 
 		if (!button.isEnabled) {
 			button.currentState = ButtonState::Normal;
 			continue;
 		}
 
-		glm::vec2 buttonPos(transform.Pos.x, transform.Pos.y);
-		glm::vec2 buttonSize(transform.Scale.x, transform.Scale.y);
-		bool isMouseOver = isMouseOverButton(buttonPos, buttonSize, mouseWorld);
+		bool isMouseOver = false;
+		bool editorOn = MyEditor::IsEnabled();
 
-		// Update button state based on mouse interaction
+		if (button.buttonID == "btn_create") {
+			if (editorOn) {
+				// Editor ON - viewport is smaller
+				isMouseOver = (mouseX >= 360 && mouseX <= 490 &&
+					mouseY >= 70 && mouseY <= 130);
+			}
+			else {
+				// Editor OFF - fullscreen
+				isMouseOver = (mouseX >= 85 && mouseX <= 250 &&
+					mouseY >= 45 && mouseY <= 115);
+			}
+		}
+		else if (button.buttonID == "btn_destroy") {
+			if (editorOn) {
+				// Editor ON
+				isMouseOver = (mouseX >= 530 && mouseX <= 655 &&
+					mouseY >= 70 && mouseY <= 125);
+			}
+			else {
+				// Editor OFF - fullscreen
+				isMouseOver = (mouseX >= 330 && mouseX <= 495 &&
+					mouseY >= 50 && mouseY <= 110);
+			}
+		}
+
 		button.wasClickedThisFrame = false;
 
 		if (isMouseOver) {
@@ -306,44 +283,35 @@ bool InputManager::isMouseOverButton(const glm::vec2& buttonPos, const glm::vec2
 void InputManager::executeButtonAction(const GUIButton& button) {
 	auto* g_coordinator = Coordinator::GetInstance();
 
-	std::cout << "[InputManager] Executing action: " << button.actionType
-		<< " for button: " << button.buttonID << std::endl;
+	//std::cout << "[InputManager] Executing action: " << button.actionType
+	//	<< " for button: " << button.buttonID << std::endl;
 
 	if (button.actionType == "CreateEntity") {
-		// Create entity at center
-		Entity newEntity = g_coordinator->CreateEntity();
+		if (!button.entityJsonPath.empty()) {
+			Entity newEntity = g_coordinator->GetSystem<SceneManager>()->LoadEntityFromJson(button.entityJsonPath);
 
-		Framework::Transform transform{};
-		Framework::Renderable renderable{};
-		Framework::Animation animation{};
+			if (newEntity != 0) {
+				Name nameComponent{};
+				nameComponent.name = "Created_Hero_" + std::to_string(newEntity);
+				g_coordinator->AddComponent(newEntity, nameComponent);
 
-		transform.Pos = { -400.0f, 200.0f };
-		transform.Scale = { 150.0f, 150.0f };
-		transform.isVisible = true;
-
-		renderable.mdl_ref = 1.0f;
-		renderable.shd_ref = 2.0f;
-		renderable.spriteName = "../../MyEngine/Assets/Textures/Characters/hero.png";
-
-		animation.totalFrames = 1;
-		animation.columns = 1;
-		animation.rows = 1;
-
-		g_coordinator->AddComponent(newEntity, transform);
-		g_coordinator->AddComponent(newEntity, renderable);
-		g_coordinator->AddComponent(newEntity, animation);
-
-		lastCreatedEntityByGUI = newEntity;
-		std::cout << "[InputManager] Created entity (ID: " << newEntity << ") at center\n";
+				createdEntitiesByGUI.push_back(newEntity);
+				//std::cout << "[InputManager] Created from: " << button.entityJsonPath << std::endl;
+			}
+		}
+		//else {
+		//	std::cout << "[InputManager] No entityJsonPath!" << std::endl;
+		//}
 	}
 	else if (button.actionType == "DestroyEntity") {
-		if (lastCreatedEntityByGUI != 0) {
-			g_coordinator->DestroyEntity(lastCreatedEntityByGUI);
-			std::cout << "[InputManager] Destroyed entity: " << lastCreatedEntityByGUI << std::endl;
-			lastCreatedEntityByGUI = 0;
+		if (!createdEntitiesByGUI.empty()) {
+			Entity toDestroy = createdEntitiesByGUI.back();
+			createdEntitiesByGUI.pop_back();
+			g_coordinator->DestroyEntity(toDestroy);
+			//std::cout << "[InputManager] Destroyed entity: " << toDestroy << std::endl;
 		}
-		else {
-			std::cout << "[InputManager] No entity to destroy!\n";
-		}
+		//else {
+		//	std::cout << "[InputManager] No entities to destroy!" << std::endl;
+		//}
 	}
 }

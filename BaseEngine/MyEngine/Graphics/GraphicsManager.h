@@ -63,8 +63,8 @@ private:
         const Framework::FontData* fontData
     );
 
-	// For In-Game GUI System
-	void RenderGUIButtons();
+	// For In-Game GUI System & ui overlay
+	void RenderUIOverlayElements();
 	void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
 
 private:

@@ -7,6 +7,7 @@
  *             unloading, and transitioning between game scenes (MainMenu, Pause,
  *             Level1, Dead). Manages scene-specific entity creation/destruction
  *             and maintains a list of entities belonging to the current scene
+ * 
  * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
  *             Reproduction or disclosure of this file or its contents without the
  *             prior written consent of DigiPen Institute of Technology is prohibited.
@@ -84,7 +85,7 @@ void SceneManager::SaveCurrentScene()
 	Value JsonEntityArray(kArrayType);
 
 	// save one entity one at a time into 1 Json file
-	for (auto const& entity: SceneEntityList)
+	for (auto const& entity: g_coordinator->GetAllEntities())
 	{
 		// We make an object first for JsonEntityArray[i]
 		Value entityObj(kObjectType);
@@ -150,6 +151,19 @@ void SceneManager::SaveCurrentScene()
 			animation.Serialize(AnimationVal, alloc);
 
 			ComponentObj.AddMember("animation", AnimationVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// purely for testing in-game GUI system
+		if (g_coordinator->HasComponent<GUIButton>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value ButtonVal;
+
+			auto& btn = g_coordinator->GetComponent<GUIButton>(entity);
+			btn.Serialize(ButtonVal, alloc);
+
+			ComponentObj.AddMember("ui", ButtonVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
@@ -284,6 +298,12 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				NamingComponent n;
 				n.Deserialize(component["Typing"]);
 				g_coordinator->AddComponent<NamingComponent>(entity, n);
+			// this is purely for the in-game basic GUI system & on screen UI elements
+			if (component.HasMember("ui") && component["ui"].IsObject())
+			{
+				GUIButton btn;
+				btn.Deserialize(component["ui"]);
+				g_coordinator->AddComponent<GUIButton>(entity, btn);
 			}
 
 			if (component.HasMember("transform") && component["transform"].IsObject())
@@ -299,6 +319,10 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				Framework::Transform t;
 				t.Deserialize(component["transform"]);
 				g_coordinator->AddComponent<Framework::Transform>(entity, t);
+
+				// DEBUG: Print what we just loaded
+				//std::cout << "[SceneManager] Loaded transform at ("
+				//	<< t.Pos.x << ", " << t.Pos.y << ")" << std::endl;
 			}
 
 			if (component.HasMember("script") && component["script"].IsObject())
@@ -322,7 +346,12 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				g_coordinator->AddComponent<Framework::Animation>(entity, a);
 			}
 			
-
+			if (component.HasMember("name") && component["name"].IsObject())
+			{
+				Name n;
+				n.Deserialize(component["name"]);
+				g_coordinator->AddComponent<Name>(entity, n);
+			}
 		}
 
 		// save obj to a vector for deleting later
@@ -330,6 +359,26 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	}
 
 		ChangeCurrentScene(d["scene"].GetString());
+
+		auto* coordinator = Coordinator::GetInstance();
+		auto inputMgr = coordinator->GetSystem<InputManager>();
+
+		if (inputMgr) {
+			inputMgr->GUIButtonEntities.clear();
+
+			for (auto entity : SceneEntityList) {
+				if (coordinator->HasComponent<GUIButton>(entity)) {
+					inputMgr->GUIButtonEntities.insert(entity);
+#ifdef _DEBUG
+					std::cout << "[SceneManager] Registered GUI button entity: " << entity << std::endl;
+#endif
+				}
+			}
+
+#ifdef _DEBUG
+			std::cout << "[SceneManager] Total GUI buttons: " << inputMgr->GUIButtonEntities.size() << std::endl;
+#endif
+		}
 		
 #ifdef _DEBUG
 		std::cout << "\n===================================================" << std::endl;
@@ -352,4 +401,42 @@ void SceneManager::Deserialize(const rapidjson::Value& in)
 {
 	if (!in.IsObject()) throw std::runtime_error("Invalid JSON for LogicComponent");
 	if (in.HasMember("SceneName")) CurrentScene = in["SceneName"].GetString(); // already assigns it
+}
+
+Entity SceneManager::LoadEntityFromJson(std::string const& path)
+{
+	auto* g_coordinator = Coordinator::GetInstance();
+	using namespace rapidjson;
+
+	std::ifstream ifs(path);
+	if (!ifs.is_open()) {
+		std::cerr << "[SceneManager] Cannot open: " << path << std::endl;
+		return 0;
+	}
+
+	IStreamWrapper isw(ifs);
+	Document d;
+	d.ParseStream(isw);
+
+	Entity entity = g_coordinator->CreateEntity();
+
+	if (d.HasMember("transform") && d["transform"].IsObject()) {
+		Framework::Transform t;
+		t.Deserialize(d["transform"]);
+		g_coordinator->AddComponent<Framework::Transform>(entity, t);
+	}
+
+	if (d.HasMember("render") && d["render"].IsObject()) {
+		Framework::Renderable r;
+		r.Deserialize(d["render"]);
+		g_coordinator->AddComponent<Framework::Renderable>(entity, r);
+	}
+
+	if (d.HasMember("animation") && d["animation"].IsObject()) {
+		Framework::Animation a;
+		a.Deserialize(d["animation"]);
+		g_coordinator->AddComponent<Framework::Animation>(entity, a);
+	}
+
+	return entity;
 }

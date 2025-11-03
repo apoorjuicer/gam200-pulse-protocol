@@ -12,7 +12,6 @@
  /******************************************************************************/
 #include "glapp.h"
 #include "DebugDraw.h"
-//#include "../Managers/AssetsManager.h"
 
 /*                                                   objects with file scope
 ----------------------------------------------------------------------------- */
@@ -61,29 +60,6 @@ const std::string font_fs = {
 double random() {
 	return static_cast<double>((rand() % 10) / 10.0f);
 }
-
-//static void ApplyEditorViewportPixels(int fbW, int fbH)
-//{
-//    // derive middle-blank area where the game renders
-//    const int assets_h = static_cast<int>(fbH * kBottomRatio);
-//    const int top_h    = fbH - assets_h;
-//
-//    const int left_w   = static_cast<int>(fbW * kLeftRatio);
-//    const int right_w  = static_cast<int>(fbW * kRightRatio);
-//    const int center_w = fbW - left_w - right_w;
-//
-//    // OpenGL Y=0 is bottom ? shift up by bottom bar height
-//    glViewport(left_w, assets_h, center_w, top_h);
-//
-//    // Update your globals for any code that needs them
-//    GLHelper::GameWidth  = center_w;
-//    GLHelper::GameHeight = top_h;
-//    GLHelper::GameOffsetX = left_w;
-//    GLHelper::GameOffsetY = assets_h;
-//
-//}
-
-
 
 GLApp::GLModel GLApp::mdl;
 GLApp::TranslationBuf GLApp::tb;
@@ -200,8 +176,8 @@ void GLApp::updateAnimation(Framework::Animation& x, float deltaTime) {
 }
 
 
-void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y, 
-Framework::Transform& z, const glm::mat3& ZoomNDC) {
+void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
+	Framework::Transform& z, const glm::mat3& ZoomNDC) {
 
 	auto& shader = shdrpgms[static_cast<uint64_t>(x.shd_ref)];
 	shader.Use();
@@ -236,11 +212,24 @@ Framework::Transform& z, const glm::mat3& ZoomNDC) {
 	shader.UnUse();
 }
 
-static glm::mat3 BuildZoomNDC(float zoom) {
-	const float s = glm::max(zoom, 0.0001f);   // use zoom, not 1/zoom
-	return glm::mat3(s, 0, 0,
-					 0, s, 0,
-					 0, 0, 1);
+static inline glm::mat3 BuildPanZoomNDC(const GLApp::Camera2D& cam) {
+	// column-major: glm::mat3(col0, col1, col2)
+	glm::mat3 S(cam.zoom, 0, 0,
+		0, cam.zoom, 0,
+		0, 0, 1);
+	glm::mat3 T(1, 0, 0,
+		0, 1, 0,
+		cam.center.x, cam.center.y, 1);
+	return T * S;   // translate after scaling
+}
+
+// Convert a framebuffer pixel to NDC inside the current game viewport
+static inline glm::vec2 ScreenToNDC(double x, double y) {
+	// x,y are OS pixels from glfwGetCursorPos
+	const double rx = (x - GLHelper::GameOffsetX) / (double)GLHelper::GameWidth;
+	const double ry = (y - GLHelper::GameOffsetY) / (double)GLHelper::GameHeight;
+	// NDC X: 0..1 -> -1..1 ;  NDC Y: flip and map
+	return glm::vec2(float(rx * 2.0 - 1.0), float(1.0 - ry * 2.0));
 }
 
 void GLApp::draw(std::set<Entity> entities) {
@@ -255,7 +244,40 @@ void GLApp::draw(std::set<Entity> entities) {
 		GLHelper::GameOffsetY = vp.y;
 		GLHelper::GameWidth = vp.w;
 		GLHelper::GameHeight = vp.h;
-		gCamera.zoom = 0.5f;     // zoom OUT in editor
+		static double s_scrollY = 0.0;
+		static bool   s_scrollInit = false;
+		if (!s_scrollInit) {
+			glfwSetScrollCallback(window, [](GLFWwindow*, double, double yoff) { s_scrollY += yoff; });
+			s_scrollInit = true;
+		}
+
+		static double lastX = 0.0, lastY = 0.0;
+		double curX, curY; glfwGetCursorPos(window, &curX, &curY);
+		static bool first = true;
+		if (first) { lastX = curX; lastY = curY; first = false; }
+
+		const bool mmb = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+		if (mmb) {
+			const double dx = curX - lastX;
+			const double dy = curY - lastY;
+			gCamera.center += glm::vec2(
+				float(2.0 * dx / double(GLHelper::GameWidth)),
+				float(-2.0 * dy / double(GLHelper::GameHeight))
+			);
+		}
+		lastX = curX; lastY = curY;
+
+		float wheel = float(s_scrollY);
+		s_scrollY = 0.0f;
+		if (wheel != 0.0f) {
+			const float oldZ = gCamera.zoom;
+			const float step = 1.12f;
+			float newZ = glm::clamp(oldZ * std::pow(step, wheel), gCamera.minZoom, gCamera.maxZoom);
+
+			glm::vec2 cNDC = ScreenToNDC(curX, curY);
+			gCamera.center = cNDC - (newZ / oldZ) * (cNDC - gCamera.center);
+			gCamera.zoom = newZ;
+		}
 	}
 	else {
 		// Editor OFF - use full screen with letterboxing
@@ -264,18 +286,10 @@ void GLApp::draw(std::set<Entity> entities) {
 
 		// Re-apply the correct fullscreen scaling immediately
 		ComputeLetterbox(fbW, fbH);
-		gCamera.zoom = 1.0f;     // normal gameplay zoom
-	}
-	auto* input = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
-
-	// Option A: wheel zoom only in editor (gameplay fixed to 1.0)
-	if (MyEditor::IsEnabled()) {
-		if (input) gCamera.zoom = input->getZoomLevel();   // wheel controls zoom
-	}
-	else {
 		gCamera.zoom = 1.0f;
+		gCamera.center = glm::vec2(0.0f);
 	}
-	glm::mat3 ZoomNDC = BuildZoomNDC(gCamera.zoom);
+	glm::mat3 PanZoom = BuildPanZoomNDC(gCamera);
 
 	// Clear
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -307,12 +321,48 @@ void GLApp::draw(std::set<Entity> entities) {
 		if (tr.isVisible && re.textureID != 0) {
 			updateAnimation(an, deltaTime);
 			glBindTexture(GL_TEXTURE_2D, re.textureID);
-			drawTrans(re, an, tr, ZoomNDC);
+			drawTrans(re, an, tr, PanZoom);
 		}
 	}
+	GLboolean depthWasOn = glIsEnabled(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
+
+	if (MyEditor::IsEnabled())
+	{
+		DebugDraw::Begin(glm::mat4(1.0f));
+
+		for (auto e : entities) {
+			if (!g_coordinator->HasComponent<Framework::Transform>(e))   continue;
+			if (!g_coordinator->HasComponent<Framework::Renderable>(e))  continue;
+
+			auto& tr = g_coordinator->GetComponent<Framework::Transform>(e);
+			auto& re = g_coordinator->GetComponent<Framework::Renderable>(e);
+
+			AABB aabb;
+			if (re.mdl_ref == 0) {          // Background quad
+				aabb.min = { -1.f, -1.f };
+				aabb.max = { 1.f,  1.f };
+			}
+			else {                           // Sprite quad
+				aabb.min = { -0.5f, -0.5f };
+				aabb.max = { 0.5f,  0.5f };
+			}
+
+			glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
+			glm::mat3 modelToNDC = PanZoom * M;
+
+			const bool isHero = re.spriteName.find("hero") != std::string::npos;
+			glm::vec3 color = isHero ? glm::vec3(1, 0, 0) : glm::vec3(0, 1, 0);
+
+			DrawAABB_NDC(modelToNDC, aabb, color);
+		}
+
+		glLineWidth(2.0f);
+		DebugDraw::End();
+	}
+
+	if (depthWasOn) glEnable(GL_DEPTH_TEST);
 }
-
-
 
 
 void GLApp::cleanup() {
@@ -497,4 +547,28 @@ void GLApp::ComputeLetterbox(int fbw, int fbh)
 void GLApp::OnResize(int width, int height)
 {
 	ComputeLetterbox(width, height);
+}
+
+// Convert vec2 in model space to NDC using your existing 2D pipeline
+static inline glm::vec2 ToNDC(const glm::mat3& M, const glm::vec2& v) {
+	glm::vec3 h = M * glm::vec3(v, 1.0f);
+	return { h.x, h.y };               // already NDC
+}
+
+// Draw an AABB as 4 lines in NDC
+void GLApp::DrawAABB_NDC(const glm::mat3& modelToNDC, const AABB& box, const glm::vec3& color) {
+	const glm::vec2 a{ box.min.x, box.min.y };
+	const glm::vec2 b{ box.max.x, box.min.y };
+	const glm::vec2 c{ box.max.x, box.max.y };
+	const glm::vec2 d{ box.min.x, box.max.y };
+
+	glm::vec2 qa = ToNDC(modelToNDC, a);
+	glm::vec2 qb = ToNDC(modelToNDC, b);
+	glm::vec2 qc = ToNDC(modelToNDC, c);
+	glm::vec2 qd = ToNDC(modelToNDC, d);
+
+	DebugDraw::DrawLine(qa, qb, color);
+	DebugDraw::DrawLine(qb, qc, color);
+	DebugDraw::DrawLine(qc, qd, color);
+	DebugDraw::DrawLine(qd, qa, color);
 }

@@ -1,0 +1,35 @@
+{
+    "transform": {
+        "position": {
+            "x": -300.0,
+            "y": 300.0
+        },
+        "scale": {
+            "x": 250.0,
+            "y": 250.0
+        },
+        "rotation": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "angle_disp": 0.0,
+        "angle_speed": 0.0,
+        "isVisible": true,
+        "visibilityTimer": 0.0,
+        "autoHide": false
+    },
+    "render": {
+        "mdl_ref": 1.0,
+        "shd_ref": 2.0,
+        "textureID": 0,
+        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png"
+    },
+    "animation": {
+        "currentFrame": 0,
+        "elapsedTime": 0.0,
+        "totalFrames": 3,
+        "columns": 3,
+        "rows": 1,
+        "animationSpeed": 2.0
+    }
+}

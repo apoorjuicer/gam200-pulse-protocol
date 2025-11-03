@@ -14,7 +14,8 @@
  /******************************************************************************/
 
 #pragma once
-#include "pch/pch.h"
+#include "pch/pch_temp.h"
+#include "../MyEngine/CoreEngine/ECS/System.h"
 
 struct GUIButton;
 
@@ -47,32 +48,6 @@ public:
 	glm::vec2 getMousePositionVirtual() const { return mousePositionVirtual; }
 
 	bool isMouseInGameViewport() const { return mouseInGameViewport; }
-
-	// -------------------------------------------------
-	// Scroll (For zoom)
-	// -------------------------------------------------
-	float scrollOffset = 0.0f;
-	float zoomLevel = 1.0f;
-	float zoomSpeed = 0.1f;
-	float minZoom = 0.1f;
-	float maxZoom = 5.0f;
-
-	// Getters
-	float getZoomLevel() const { return zoomLevel; }
-	float getScrollOffset() const { return scrollOffset; }
-
-	// Setters (for configuration)
-	void setZoomSpeed(float speed) { zoomSpeed = speed; }
-	void setZoomRange(float min, float max) {
-		minZoom = min;
-		maxZoom = max;
-	}
-	void setZoomLevel(float level) {
-		zoomLevel = std::clamp(level, minZoom, maxZoom);
-	}
-
-	// Utilities
-	void resetZoom() { zoomLevel = 1.0f; scrollOffset = 0.0f; }
 
 	// -------------------------------------------------
 	// Debug toggles
@@ -114,7 +89,7 @@ private:
 	// -------------------------------------------------
 	// In-Game GUI System
 	// -------------------------------------------------
-	Entity lastCreatedEntityByGUI = 0;
+	std::vector<Entity> createdEntitiesByGUI;
 
 	void updateGUIButtons();
 	bool isMouseOverButton(const glm::vec2& buttonPos, const glm::vec2& buttonSize, const glm::vec2& mouseWorld) const;

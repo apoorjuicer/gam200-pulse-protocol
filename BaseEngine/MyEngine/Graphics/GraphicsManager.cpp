@@ -143,6 +143,23 @@ void GraphicsManager::Initialize()
             glUniform1i(loc, 0); // sampler "text" uses texture unit 0
         }
     }
+
+    // create white texture for colored quads
+    glGenTextures(1, &whiteTexture);
+    glBindTexture(GL_TEXTURE_2D, whiteTexture);
+
+    // 1x1 white pixel
+    unsigned char whitePixel[4] = { 255, 255, 255, 255 };
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    std::cout << "[GraphicsManager] White texture created for GUI buttons\n";
 }
 
 void GraphicsManager::Update()
@@ -157,8 +174,12 @@ void GraphicsManager::Update()
     // 2) then draw text on top
     //RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
 
-    // 2) Draw overlay text last
+    // 3) Draw in-game gui system & UI overlay
+    RenderUIOverlayElements();
+
+    // 4) Draw overlay text last
     auto& textShader = GLApp::shdrpgms[3];
+
     // Build FPS string and heaviest system string and render it
     if (!MyEditor::IsEnabled()) {
         auto& AM = Framework::AssetsManager::Instance();
@@ -320,6 +341,11 @@ void GraphicsManager::Shutdown()
     VAO = 0;
     VBO = 0;
 
+    if (whiteTexture) {
+        glDeleteTextures(1, &whiteTexture);
+        whiteTexture = 0;
+    }
+
     std::cout << "[GraphicsManager] Shutdown completed\n";
 }
 
@@ -410,14 +436,14 @@ void GraphicsManager::OnResize(int width, int height)
     // you can rebuild 'projection' here too.
 }
 
-void GraphicsManager::RenderGUIButtons()
+void GraphicsManager::RenderUIOverlayElements()
 {
     auto* coordinator = Coordinator::GetInstance();
     auto inputMgr = coordinator->GetSystem<InputManager>();
 
     if (!inputMgr) return;
 
-    auto& shader = GLApp::shdrpgms[2]; // Adjust if needed
+    auto& shader = GLApp::shdrpgms[2];
     shader.Use();
 
     for (auto entity : inputMgr->GUIButtonEntities) {
@@ -427,44 +453,98 @@ void GraphicsManager::RenderGUIButtons()
         auto& button = coordinator->GetComponent<GUIButton>(entity);
         auto& transform = coordinator->GetComponent<Framework::Transform>(entity);
 
+        // Skip rendering if entity is hidden
+        if (!transform.isVisible) {
+            continue;
+        }
+
+        // Skip rendering if alpha is 0 (transparent)
+        if (button.normalColor.a <= 0.0f && button.hoverColor.a <= 0.0f) {
+            continue;
+        }
+
         // Choose color based on button state
         glm::vec4 color = (button.currentState == ButtonState::Hover)
             ? button.hoverColor
             : button.normalColor;
 
         // Convert world coords to screen coords
-        // World: (-800..800, -450..450), Screen: (0..1600, 0..900)
         float screenX = transform.Pos.x + 800.0f;
-        float screenY = 450.0f - transform.Pos.y; // Flip Y
+        float screenY = 450.0f - transform.Pos.y;
 
         // Draw colored rectangle
         RenderColoredQuad(screenX, screenY, transform.Scale.x, transform.Scale.y, color);
+
+        // ADD TEXT LABEL ON THE BUTTON
+        if (m_uiFont) {
+            // Calculate text size to center it properly
+            float textScale = 0.8f;
+
+            float estimatedTextWidth = button.label.length() * 10.0f * textScale;
+            float textX = screenX - (estimatedTextWidth * 0.5f) - 30.0f;
+            float textY = screenY + 5.0f;
+
+            // Different adjustments for each button, prevents both text from moving together
+            if (button.buttonID == "btn_create") {
+                textX -= 10.0f;  // Move "Create Hero" left
+                textY += 6.0f;   // Move down
+            }
+            else if (button.buttonID == "btn_destroy") {
+                textX -= 10.0f;  // Move "Destroy Hero" left
+                textY += 6.0f;   // Move down
+            }
+
+            RenderText(
+                GLApp::shdrpgms[3],
+                button.label,
+                textX,
+                textY,
+                textScale,
+                glm::vec3(1.0f, 1.0f, 1.0f),  // White text
+                m_uiFont
+            );
+        }
     }
 }
 
 void GraphicsManager::RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color)
 {
+    // DEBUG - only print first few frames
+    //static int count = 0;
+    //if (count++ < 10) {
+    //    std::cout << "[RenderQuad] Rendering at screen: (" << x << ", " << y << ")" << std::endl;
+    //}
+
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    auto& shader = GLApp::shdrpgms[3];
+    auto& shader = GLApp::shdrpgms[3]; // Text shader
     shader.Use();
 
     glUniformMatrix4fv(glGetUniformLocation(shader.GetHandle(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+    // Pass vec4 color including alpha
     glUniform3f(glGetUniformLocation(shader.GetHandle(), "textColor"), color.r, color.g, color.b);
 
-    // Bind white texture instead of unbinding
+    // if shader supports vec4:
+    // glUniform4f(glGetUniformLocation(shader.GetHandle(), "color"), color.r, color.g, color.b, color.a);
+
     glBindTexture(GL_TEXTURE_2D, whiteTexture);
     glBindVertexArray(VAO);
 
+    // Center the quad around the position
+    float halfWidth = width * 0.5f;
+    float halfHeight = height * 0.5f;
+
     float vertices[6][4] = {
-        { x,         y,          0.0f, 0.0f },
-        { x,         y + height, 0.0f, 1.0f },
-        { x + width, y + height, 1.0f, 1.0f },
-        { x,         y,          0.0f, 0.0f },
-        { x + width, y + height, 1.0f, 1.0f },
-        { x + width, y,          1.0f, 0.0f }
+        { x - halfWidth, y - halfHeight, 0.0f, 0.0f },
+        { x - halfWidth, y + halfHeight, 0.0f, 1.0f },
+        { x + halfWidth, y + halfHeight, 1.0f, 1.0f },
+
+        { x - halfWidth, y - halfHeight, 0.0f, 0.0f },
+        { x + halfWidth, y + halfHeight, 1.0f, 1.0f },
+        { x + halfWidth, y - halfHeight, 1.0f, 0.0f }
     };
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
