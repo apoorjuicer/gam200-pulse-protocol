@@ -5,7 +5,7 @@ using namespace rapidjson;
 
 // change to bool, and add file path that will be given from either scene manager/ImGui
 // Read from file, loop thru a check if have type and component. Add component base on type.  
-bool Factory::CreateEntityFromJson(std::string const& path)
+Entity Factory::CreateEntityFromJson(std::string const& path)
 {
 	auto* g_coordinator = Coordinator::GetInstance();
 
@@ -51,7 +51,7 @@ bool Factory::CreateEntityFromJson(std::string const& path)
 		if (component.HasMember("name") && component["name"].IsObject()) { g_coordinator->GetComponent<Name>(entity).Deserialize(component["name"]); }
 	}
 
-	return true;
+	return entity;
 }
 
 // ONLY FOR ImGui

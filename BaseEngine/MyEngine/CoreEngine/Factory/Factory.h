@@ -19,7 +19,7 @@ class Factory
 {
 public: 
 
-	bool CreateEntityFromJson(std::string const& path);
+	Entity CreateEntityFromJson(std::string const& path);
 	// call onto default object function to get the basic SRT and render
 	// then we check the file path from param and check for any components it wanna add 
 	// call component deserialize functions with json filepath and entity as param
