@@ -53,6 +53,8 @@ public:
 	struct Camera2D {
 		glm::vec2 center{ 0.0f, 0.0f };
 		float zoom = 1.0f; // 1.0f = normal, >1 = zoom in, <1 = zoom out
+		float     minZoom{ 0.25f };
+		float     maxZoom{ 6.0f };
 	};
 	static Camera2D gCamera;
 	// encapsulates state required to render a geometrical model

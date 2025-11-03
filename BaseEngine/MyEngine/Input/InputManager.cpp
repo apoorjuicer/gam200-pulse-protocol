@@ -62,7 +62,6 @@ void InputManager::Update(float) {
 	updateGUIButtons();
 	processDebugToggles();
 
-	// TEMPORARY TEST: Print scroll events
 	if (scrollOffset != 0.0f) {
 		float oldZoom = zoomLevel;
 		zoomLevel += scrollOffset * zoomSpeed;

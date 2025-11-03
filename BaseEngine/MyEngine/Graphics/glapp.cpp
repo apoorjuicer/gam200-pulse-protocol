@@ -200,8 +200,8 @@ void GLApp::updateAnimation(Framework::Animation& x, float deltaTime) {
 }
 
 
-void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y, 
-Framework::Transform& z, const glm::mat3& ZoomNDC) {
+void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
+	Framework::Transform& z, const glm::mat3& ZoomNDC) {
 
 	auto& shader = shdrpgms[static_cast<uint64_t>(x.shd_ref)];
 	shader.Use();
@@ -236,11 +236,24 @@ Framework::Transform& z, const glm::mat3& ZoomNDC) {
 	shader.UnUse();
 }
 
-static glm::mat3 BuildZoomNDC(float zoom) {
-	const float s = glm::max(zoom, 0.0001f);   // use zoom, not 1/zoom
-	return glm::mat3(s, 0, 0,
-					 0, s, 0,
-					 0, 0, 1);
+static inline glm::mat3 BuildPanZoomNDC(const GLApp::Camera2D& cam) {
+	// column-major: glm::mat3(col0, col1, col2)
+	glm::mat3 S(cam.zoom, 0, 0,
+		0, cam.zoom, 0,
+		0, 0, 1);
+	glm::mat3 T(1, 0, 0,
+		0, 1, 0,
+		cam.center.x, cam.center.y, 1);
+	return T * S;   // translate after scaling
+}
+
+// Convert a framebuffer pixel to NDC inside the current game viewport
+static inline glm::vec2 ScreenToNDC(double x, double y) {
+	// x,y are OS pixels from glfwGetCursorPos
+	const double rx = (x - GLHelper::GameOffsetX) / (double)GLHelper::GameWidth;
+	const double ry = (y - GLHelper::GameOffsetY) / (double)GLHelper::GameHeight;
+	// NDC X: 0..1 -> -1..1 ;  NDC Y: flip and map
+	return glm::vec2(float(rx * 2.0 - 1.0), float(1.0 - ry * 2.0));
 }
 
 void GLApp::draw(std::set<Entity> entities) {
@@ -255,7 +268,40 @@ void GLApp::draw(std::set<Entity> entities) {
 		GLHelper::GameOffsetY = vp.y;
 		GLHelper::GameWidth = vp.w;
 		GLHelper::GameHeight = vp.h;
-		gCamera.zoom = 0.5f;     // zoom OUT in editor
+		static double s_scrollY = 0.0;
+		static bool   s_scrollInit = false;
+		if (!s_scrollInit) {
+			glfwSetScrollCallback(window, [](GLFWwindow*, double, double yoff) { s_scrollY += yoff; });
+			s_scrollInit = true;
+		}
+
+		static double lastX = 0.0, lastY = 0.0;
+		double curX, curY; glfwGetCursorPos(window, &curX, &curY);
+		static bool first = true;
+		if (first) { lastX = curX; lastY = curY; first = false; }
+
+		const bool mmb = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+		if (mmb) {
+			const double dx = curX - lastX;
+			const double dy = curY - lastY;
+			gCamera.center += glm::vec2(
+				float(2.0 * dx / double(GLHelper::GameWidth)),
+				float(-2.0 * dy / double(GLHelper::GameHeight))
+			);
+		}
+		lastX = curX; lastY = curY;
+
+		float wheel = float(s_scrollY);
+		s_scrollY = 0.0f;
+		if (wheel != 0.0f) {
+			const float oldZ = gCamera.zoom;
+			const float step = 1.12f;
+			float newZ = glm::clamp(oldZ * std::pow(step, wheel), gCamera.minZoom, gCamera.maxZoom);
+
+			glm::vec2 cNDC = ScreenToNDC(curX, curY);
+			gCamera.center = cNDC - (newZ / oldZ) * (cNDC - gCamera.center);
+			gCamera.zoom = newZ;
+		}
 	}
 	else {
 		// Editor OFF - use full screen with letterboxing
@@ -264,18 +310,10 @@ void GLApp::draw(std::set<Entity> entities) {
 
 		// Re-apply the correct fullscreen scaling immediately
 		ComputeLetterbox(fbW, fbH);
-		gCamera.zoom = 1.0f;     // normal gameplay zoom
-	}
-	auto* input = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
-
-	// Option A: wheel zoom only in editor (gameplay fixed to 1.0)
-	if (MyEditor::IsEnabled()) {
-		if (input) gCamera.zoom = input->getZoomLevel();   // wheel controls zoom
-	}
-	else {
 		gCamera.zoom = 1.0f;
+		gCamera.center = glm::vec2(0.0f);
 	}
-	glm::mat3 ZoomNDC = BuildZoomNDC(gCamera.zoom);
+	glm::mat3 PanZoom = BuildPanZoomNDC(gCamera);
 
 	// Clear
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -307,7 +345,7 @@ void GLApp::draw(std::set<Entity> entities) {
 		if (tr.isVisible && re.textureID != 0) {
 			updateAnimation(an, deltaTime);
 			glBindTexture(GL_TEXTURE_2D, re.textureID);
-			drawTrans(re, an, tr, ZoomNDC);
+			drawTrans(re, an, tr, PanZoom);
 		}
 	}
 	GLboolean depthWasOn = glIsEnabled(GL_DEPTH_TEST);
@@ -335,7 +373,7 @@ void GLApp::draw(std::set<Entity> entities) {
 			}
 
 			glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
-			glm::mat3 modelToNDC = BuildZoomNDC(gCamera.zoom) * M;
+			glm::mat3 modelToNDC = PanZoom * M;
 
 			const bool isHero = re.spriteName.find("hero") != std::string::npos;
 			glm::vec3 color = isHero ? glm::vec3(1, 0, 0) : glm::vec3(0, 1, 0);
