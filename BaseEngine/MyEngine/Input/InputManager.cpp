@@ -124,13 +124,14 @@ void InputManager::updateInputStates() {
 	glfwGetWindowSize(window, &winW, &winH);
 	glfwGetFramebufferSize(window, &fbW, &fbH);
 
-	// Guard against divide-by-zero (minimized window etc.)
+	// Guard against divide-by-zero
 	double fbX = 0.0, fbY = 0.0;
 	if (winW > 0 && winH > 0) {
 		fbX = xw * static_cast<double>(fbW) / static_cast<double>(winW);
 		fbY = yw * static_cast<double>(fbH) / static_cast<double>(winH);
 	}
 
+	// Get position relative to game viewport
 	double localX = fbX - GLApp::GameOffsetX;
 	double localY = fbY - GLApp::GameOffsetY;
 
@@ -139,17 +140,18 @@ void InputManager::updateInputStates() {
 			localX <= GLApp::GameWidth &&
 			localY <= GLApp::GameHeight);
 
-	// Map to virtual coordinates (0..VIRTUAL_W/H). Clamp if you prefer to keep it in-range.
-	float vx = static_cast<float>(localX / std::max(1e-6f, GLApp::PixelScale));
-	float vy = static_cast<float>(localY / std::max(1e-6f, GLApp::PixelScale));
+	// SIMPLE conversion matching Transform system exactly
+	// Transform does: PnormX = Pos.x / GameWidth
+	// So: Pos.x = PnormX * GameWidth
+	// Our buttons are stored directly as Pos.x (e.g., -600)
 
-	// If your virtual projection is bottom-left origin (recommended):
-	// GLFW window coords have origin at top-left; flip Y to bottom-left virtual space.
-	vy = static_cast<float>(GLApp::VIRTUAL_H) - vy;
+	// Map mouse from [0, GameWidth] to [-GameWidth/2, GameWidth/2]
+	float vx = static_cast<float>(localX) - (GLApp::GameWidth * 0.5f);
 
-	// Optionally clamp to virtual bounds
-	vx = std::clamp(vx, 0.0f, static_cast<float>(GLApp::VIRTUAL_W));
-	vy = std::clamp(vy, 0.0f, static_cast<float>(GLApp::VIRTUAL_H));
+	// Map mouse from [0, GameHeight] (top) to [-GameHeight/2, GameHeight/2] (bottom-left)
+	float vy = (GLApp::GameHeight * 0.5f) - static_cast<float>(localY);
+
+	vx += -150.0f;  // Start with 300 and adjust up or down as needed
 
 	mousePositionVirtual = glm::vec2(vx, vy);
 }
@@ -216,20 +218,30 @@ glm::vec2 InputManager::getMousePosition() const {
 void InputManager::updateGUIButtons() {
 	auto* g_coordinator = Coordinator::GetInstance();
 
-	float mouseX = mousePosition.x;
-	float mouseY = mousePosition.y;
+	// USE VIRTUAL COORDINATES (already computed in updateInputStates)
+	float mouseX = mousePositionVirtual.x;
+	float mouseY = mousePositionVirtual.y;
+
+	// DEBUG: Print mouse coordinates once per frame
+	static int debugCounter = 0;
+	if (debugCounter++ % 60 == 0) {  // Print every 60 frames to avoid spam
+		std::cout << "[DEBUG] Mouse Window: (" << mousePosition.x << ", " << mousePosition.y << ")" << std::endl;
+		std::cout << "[DEBUG] Mouse Virtual: (" << mouseX << ", " << mouseY << ")" << std::endl;
+		std::cout << "[DEBUG] mouseInGameViewport: " << mouseInGameViewport << std::endl;
+	}
+
 
 	for (auto const& entity : GUIButtonEntities) {
 		if (!g_coordinator->HasComponent<GUIButton>(entity)) continue;
+		if (!g_coordinator->HasComponent<Framework::Transform>(entity)) continue;
 
 		auto& button = g_coordinator->GetComponent<GUIButton>(entity);
+		auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
 
-		if (g_coordinator->HasComponent<Framework::Transform>(entity)) {
-			auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
-			if (!transform.isVisible) {
-				button.currentState = ButtonState::Normal;
-				continue;  // Skip hidden entities
-			}
+		// Check visibility and enabled state
+		if (!transform.isVisible) {
+			button.currentState = ButtonState::Normal;
+			continue;
 		}
 
 		if (!button.isEnabled) {
@@ -237,41 +249,38 @@ void InputManager::updateGUIButtons() {
 			continue;
 		}
 
-		bool isMouseOver = false;
-		bool editorOn = MyEditor::IsEnabled();
+		// Assumes position is at the CENTER of the button
+		float halfWidth = transform.Scale.x * 0.5f;
+		float halfHeight = transform.Scale.y * 0.5f;
 
-		if (button.buttonID == "btn_create") {
-			if (editorOn) {
-				// Editor ON - viewport is smaller
-				isMouseOver = (mouseX >= 360 && mouseX <= 490 &&
-					mouseY >= 70 && mouseY <= 130);
-			}
-			else {
-				// Editor OFF - fullscreen
-				isMouseOver = (mouseX >= 85 && mouseX <= 250 &&
-					mouseY >= 45 && mouseY <= 115);
-			}
-		}
-		else if (button.buttonID == "btn_destroy") {
-			if (editorOn) {
-				// Editor ON
-				isMouseOver = (mouseX >= 530 && mouseX <= 655 &&
-					mouseY >= 70 && mouseY <= 125);
-			}
-			else {
-				// Editor OFF - fullscreen
-				isMouseOver = (mouseX >= 330 && mouseX <= 495 &&
-					mouseY >= 50 && mouseY <= 110);
-			}
-		}
+		float left = transform.Pos.x - halfWidth;
+		float right = transform.Pos.x + halfWidth;
+		float bottom = transform.Pos.y - halfHeight;
+		float top = transform.Pos.y + halfHeight;
+
+		// DEBUG: Print button bounds
+		//if (debugCounter % 60 == 1) {
+		//	std::cout << "[DEBUG] Button '" << button.buttonID << "' bounds:" << std::endl;
+		//	std::cout << "  Pos: (" << transform.Pos.x << ", " << transform.Pos.y << ")" << std::endl;
+		//	std::cout << "  Scale: (" << transform.Scale.x << ", " << transform.Scale.y << ")" << std::endl;
+		//	std::cout << "  Left: " << left << ", Right: " << right << std::endl;
+		//	std::cout << "  Bottom: " << bottom << ", Top: " << top << std::endl;
+		//}
+
+
+		// Check if mouse is over button (both in virtual coordinates now!)
+		bool isMouseOver = (mouseX >= left && mouseX <= right &&
+			mouseY >= bottom && mouseY <= top &&
+			mouseInGameViewport);
 
 		button.wasClickedThisFrame = false;
 
 		if (isMouseOver) {
 			button.currentState = ButtonState::Hover;
+			//std::cout << "[DEBUG] Mouse OVER button: " << button.buttonID << std::endl;
 
 			if (isMouseButtonTriggered(0)) {
-				/*std::cout << "[GUI Button] Button clicked: " << button.buttonID << std::endl;*/
+				std::cout << "[GUI Button] Button clicked: " << button.buttonID << std::endl;
 				button.wasClickedThisFrame = true;
 				executeButtonAction(button);
 			}
