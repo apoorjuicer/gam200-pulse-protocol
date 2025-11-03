@@ -23,7 +23,7 @@
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "../TestCases/TestCase.h"
-#include "../MyEngine/CoreEngine/ECS/Name.h"
+#include "../MyEngine/Components/Name.h
 #pragma comment(lib, "winmm.lib")
 
 // Game window dimensions and title
