@@ -37,10 +37,12 @@ namespace MyEditor
     // --------------------------------------------------------------------
     // CONSTANTS & BASIC STATE
     // --------------------------------------------------------------------
+
+    // the entity selected in the hierarchy; INVALID_ENTITY (-1) simply means nothing is selected
     constexpr Entity INVALID_ENTITY = static_cast<Entity>(-1);
     static Entity selectedEntity = INVALID_ENTITY;
 
-    // Entity display order tracking for hierarchy
+    // this vector maintains the order entities appear in the hierarchy
     static std::vector<Entity> entityDisplayOrder;
 
     static GLFWwindow* s_Window = nullptr;
@@ -613,6 +615,7 @@ namespace MyEditor
                     {"Background", nullptr, true, 800.0f, 600.0f}
                 };
 
+                // which entity type to create (index into prefabs array)
                 static int selectedType = 0;
 
                 // Build display names for combo box
@@ -628,12 +631,15 @@ namespace MyEditor
                 float windowWidth = ImGui::GetContentRegionAvail().x;
                 float dropdownWidth = 120.0f;
 
-                // Toolbar buttons (left side)
+                // toolbar buttons (left side)
                 bool createClicked = ImGui::SmallButton("+");
                 if (ImGui::IsItemHovered()) ImGui::SetTooltip("Create at End");
 
                 ImGui::SameLine();
+
+                // disable the below, aboe and delete buttons if nothing is selected because no reference entity to insert the new entity between
                 ImGui::BeginDisabled(selectedEntity == INVALID_ENTITY);
+
                 bool createAboveClicked = ImGui::SmallButton("^");
                 if (ImGui::IsItemHovered()) ImGui::SetTooltip("Create Above Selected");
 
@@ -644,11 +650,14 @@ namespace MyEditor
                 ImGui::SameLine();
                 bool deleteClicked = ImGui::SmallButton("X");
                 if (ImGui::IsItemHovered()) ImGui::SetTooltip("Delete Selected");
-                ImGui::EndDisabled();
 
-                // Entity type dropdown (right side)
+                ImGui::EndDisabled(); // this re-enables the UI for the buttons
+
+                // this is to create the dropdown
                 ImGui::SameLine(windowWidth - dropdownWidth + 5);
                 ImGui::PushItemWidth(dropdownWidth);
+
+                // selectedType is index into entityPrefabs array
                 ImGui::Combo("##Type", &selectedType, displayNames.data(), static_cast<int>(displayNames.size()));
                 ImGui::PopItemWidth();
 
@@ -660,17 +669,20 @@ namespace MyEditor
 
                 if (createClicked || createAboveClicked || createBelowClicked)
                 {
+                    // initialize a new default game obj from class Factory and set the new Entity to non-selected first in drop-down
                     Factory defaultEntity;
                     Entity newEntity = INVALID_ENTITY;
 
+                    // get the selected entity type from dropdown
                     const EntityPrefab& selectedPrefab = entityPrefabs[selectedType];
 
+                    // then create the entity BASED on the type chosen
                     if (selectedPrefab.isDefault)
                     {
-                        // Create default entity
+                        // this is for a simple default entity that only has these 3 components -> Transform, Renderable, Animation
                         newEntity = defaultEntity.DefaultObj();
 
-                        // Apply custom scale if specified
+                        // apply custom scale from prefab definition
                         if (g_coordinator->HasComponent<Framework::Transform>(newEntity)) {
                             auto& t = g_coordinator->GetComponent<Framework::Transform>(newEntity);
                             t.Scale = { selectedPrefab.defaultScaleX, selectedPrefab.defaultScaleY };
@@ -678,73 +690,95 @@ namespace MyEditor
                     }
                     else if (selectedPrefab.jsonPath != nullptr)
                     {
-                        // Use Factory's CreateEntityFromJson
+                        // complex entity loaded from JSON -> Hero & Monster
                         auto result = defaultEntity.CreateEntityFromJson(selectedPrefab.jsonPath);
                         if (result.has_value()) {
                             newEntity = result.value();
                         }
                         else
                         {
-                            std::cerr << "[Editor] Failed to load prefab: " << selectedPrefab.jsonPath << std::endl;
+                            // fallback if JSON load fails
+                            /*std::cerr << "[Editor] Failed to load prefab: " << selectedPrefab.jsonPath << std::endl;*/
                             newEntity = defaultEntity.DefaultObj();
                         }
                     }
                     else
                     {
-                        // Fallback
+                        // fallback for edge cases
                         newEntity = defaultEntity.DefaultObj();
                     }
 
+                    // this part is for ordering of the entities at the correct position
                     if (newEntity != INVALID_ENTITY) {
-                        // Add to display order at correct position
+
+                        // [+] button: add to end of list (aka. at the very last position in the list)
                         if (createClicked) {
-                            // Create at end
                             entityDisplayOrder.push_back(newEntity);
-                            std::cout << "[Editor] Created entity " << newEntity << " at end" << std::endl;
+                            /*std::cout << "[Editor] Created entity " << newEntity << " at end" << std::endl;*/
                         }
+                        
+                        // [^] button: insert above selected entity
                         else if (createAboveClicked && selectedEntity != INVALID_ENTITY) {
-                            // Insert above selected entity
+
+                            // finds position of selected entity in the vector entityDisplayOrder
                             auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
                             if (it != entityDisplayOrder.end()) {
+
+                                // insert at selected position (and pushes selected down)
+                                // etc. [A, B, C] + insert at B → [A, NEW, B, C]
                                 entityDisplayOrder.insert(it, newEntity);
-                                std::cout << "[Editor] Created entity " << newEntity << " above selected" << std::endl;
+                                /*std::cout << "[Editor] Created entity " << newEntity << " above selected" << std::endl;*/
                             }
                             else {
-                                // If selected not found, add at end
-                                entityDisplayOrder.push_back(newEntity);
-                            }
-                        }
-                        else if (createBelowClicked && selectedEntity != INVALID_ENTITY) {
-                            // Insert below selected entity
-                            auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
-                            if (it != entityDisplayOrder.end()) {
-                                entityDisplayOrder.insert(it + 1, newEntity);
-                                std::cout << "[Editor] Created entity " << newEntity << " below selected" << std::endl;
-                            }
-                            else {
-                                // If selected not found, add at end
+                                // if selected not found, then just add at end of the list
                                 entityDisplayOrder.push_back(newEntity);
                             }
                         }
 
-                        selectedEntity = newEntity; // Select newly created entity
+                        // [v] button: insert below selected entity
+                        else if (createBelowClicked && selectedEntity != INVALID_ENTITY) {
+
+                            // finds position of selected entity
+                            auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+                                
+                            // insert after selected position
+                            // etc. [A, B, C] + insert below B → [A, NEW, B, C]
+                            if (it != entityDisplayOrder.end()) {
+                                entityDisplayOrder.insert(it + 1, newEntity);
+                                /*std::cout << "[Editor] Created entity " << newEntity << " below selected" << std::endl;*/
+                            }
+                            else {
+                                entityDisplayOrder.push_back(newEntity);
+                            }
+                        }
+
+                        // automatically select newly created entity; user can immediately edit or delete what they just created
+                        selectedEntity = newEntity;
                     }
                 }
 
-                // Handle Delete
+                // ============================================
+                // HANDLE BUTTON CLICKS - Delete Entity
+                // ============================================
                 if (deleteClicked && selectedEntity != INVALID_ENTITY)
                 {
-                    // Remove from display order
+
+                    // remove from display order vector (entityDisplayOrder); vector must stay in sync with actual entities
                     auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
                     if (it != entityDisplayOrder.end()) {
+
+                        // opertion used: vector.erase(position)
+                        // etc. [A, B, C] + erase B → [A, C]
                         entityDisplayOrder.erase(it);
                     }
 
-                    // Delete the entity
+                    // delete entity from ECS system; so this means the vector only TRACKS ORDER, but Factory handles ACTUAL DELETIION of the entity
                     Factory defaultEntity;
                     defaultEntity.DeleteEntity(selectedEntity);
+
+                    // need to clear selection because cannot keep selecting an entity that does not exist as it has been deleted already
                     selectedEntity = INVALID_ENTITY;
-                    std::cout << "[Editor] Deleted entity" << std::endl;
+                    /*std::cout << "[Editor] Deleted entity" << std::endl;*/
                 }
 
                 ImGui::Spacing();

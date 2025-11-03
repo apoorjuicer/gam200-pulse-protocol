@@ -17,6 +17,7 @@
 #include "pch/pch_temp.h"
 #include "graphics/stb_image.h"
 #include "../MyEngine/Input/InputManager.h"
+#include "../MyEngine/CoreEngine/ECS/Coordinator.h"
 
 InputManager::InputManager() : window(nullptr) {
 	std::memset(currentKeys, 0, sizeof(currentKeys));
@@ -46,6 +47,23 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
 void InputManager::Update(float) {
 	/*std::cout << "[INPUT MANAGER UPDATE]" << std::endl;*/
 	updateInputStates();
+
+	// Clean up any invalid entity references from GUI tracking
+	if (!createdEntitiesByGUI.empty()) {
+		auto* g_coordinator = Coordinator::GetInstance();
+		auto activeEntities = g_coordinator->GetAllEntities();
+
+		// Remove entities that no longer exist in the active entity list
+		createdEntitiesByGUI.erase(
+			std::remove_if(createdEntitiesByGUI.begin(), createdEntitiesByGUI.end(),
+				[&activeEntities](Entity e) {
+					// Return true if entity is NOT in active list (remove it)
+					return std::find(activeEntities.begin(), activeEntities.end(), e) == activeEntities.end();
+				}),
+			createdEntitiesByGUI.end()
+		);
+	}
+
 	updateGUIButtons();
 	processDebugToggles();
 
@@ -72,11 +90,11 @@ void InputManager::Update(float) {
 	}
 
 	// Editor toggle
-	if (isKeyTriggered(GLFW_KEY_O)) {
-		bool now = !MyEditor::IsEnabled();
-		MyEditor::SetEnabled(now);
-		std::cout << "[Editor] ImGui " << (now ? "ON" : "OFF") << std::endl;
-	}
+	//if (isKeyTriggered(GLFW_KEY_O)) {
+	//	bool now = !MyEditor::IsEnabled();
+	//	MyEditor::SetEnabled(now);
+	//	std::cout << "[Editor] ImGui " << (now ? "ON" : "OFF") << std::endl;
+	//}
 }
 
 void InputManager::Shutdown() {
@@ -253,7 +271,7 @@ void InputManager::updateGUIButtons() {
 			button.currentState = ButtonState::Hover;
 
 			if (isMouseButtonTriggered(0)) {
-				std::cout << "[GUI Button] Button clicked: " << button.buttonID << std::endl;
+				/*std::cout << "[GUI Button] Button clicked: " << button.buttonID << std::endl;*/
 				button.wasClickedThisFrame = true;
 				executeButtonAction(button);
 			}
@@ -277,41 +295,26 @@ bool InputManager::isMouseOverButton(const glm::vec2& buttonPos, const glm::vec2
 }
 
 void InputManager::executeButtonAction(const GUIButton& button) {
-	auto* g_coordinator = Coordinator::GetInstance();
-
-	//std::cout << "[InputManager] Executing action: " << button.actionType
-	//	<< " for button: " << button.buttonID << std::endl;
+	Factory factory;
 
 	if (button.actionType == "CreateEntity") {
 		if (!button.entityJsonPath.empty()) {
-			// Use Factory's CreateEntityFromJson which returns std::optional<Entity>
-			Factory factory;
 			auto result = factory.CreateEntityFromJson(button.entityJsonPath);
 
 			if (result.has_value()) {
 				Entity newEntity = result.value();
-
-				Name nameComponent{};
-				nameComponent.name = "Created_Hero_" + std::to_string(newEntity);
-				g_coordinator->AddComponent(newEntity, nameComponent);
-
 				createdEntitiesByGUI.push_back(newEntity);
-				//std::cout << "[InputManager] Created from: " << button.entityJsonPath << std::endl;
+				//std::cout << "[InputManager] Created entity from: " << button.entityJsonPath << std::endl;
 			}
 		}
-		//else {
-		//	std::cout << "[InputManager] No entityJsonPath!" << std::endl;
-		//}
 	}
 	else if (button.actionType == "DestroyEntity") {
 		if (!createdEntitiesByGUI.empty()) {
 			Entity toDestroy = createdEntitiesByGUI.back();
 			createdEntitiesByGUI.pop_back();
-			g_coordinator->DestroyEntity(toDestroy);
+
+			factory.DeleteEntity(toDestroy);
 			//std::cout << "[InputManager] Destroyed entity: " << toDestroy << std::endl;
 		}
-		//else {
-		//	std::cout << "[InputManager] No entities to destroy!" << std::endl;
-		//}
 	}
 }
