@@ -56,6 +56,7 @@
 #include <list>
 #include <filesystem>
 #include <cstdlib> 
+#include <optional>
 
 // Graphics Library Headers
 #include <GL/glew.h>
