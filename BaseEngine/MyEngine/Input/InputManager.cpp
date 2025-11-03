@@ -19,7 +19,7 @@
 #include "../MyEngine/Input/InputManager.h"
 #include "../MyEngine/CoreEngine/Message/MessageManager.h"
 #include "../MyEngine/CoreEngine/Scene/SceneManager.h"
-#include "../MyEngine/CoreEngine/ECS/Name.h"
+#include "../MyEngine/Components/Name.h"
 
 
 InputManager::InputManager() : window(nullptr) {
