@@ -99,6 +99,15 @@ namespace MyEditor
     static bool s_hasEditorBaseline = false;        // whether we have captured a snapshot
     static std::vector<SavedEntityState> s_editorBaseline;
 
+    #ifdef IMGUI_HAS_DOCKING
+        static ImGuiID   g_DockspaceID = 0;
+        static ImGuiID   g_NodeLeft = 0, g_NodeRight = 0, g_NodeBottom = 0, g_NodeCenter = 0;
+        static bool      g_DockLayoutBuilt = false;
+
+        enum class DockTarget { Left, Right, Bottom, Center };
+    #endif
+
+
     // --------------------------------------------------------------------
     // UTILITY
     // --------------------------------------------------------------------
@@ -396,7 +405,90 @@ namespace MyEditor
         std::cout << "[Editor] Restored baseline.\n";
     }
 
-   
+#ifdef IMGUI_HAS_DOCKING
+    static void BuildMainDockspace()
+    {
+        ImGuiViewport* vp = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(vp->WorkPos);
+        ImGui::SetNextWindowSize(vp->WorkSize);
+        ImGui::SetNextWindowViewport(vp->ID);
+
+        ImGuiWindowFlags flags =
+            ImGuiWindowFlags_NoDocking |
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoBringToFrontOnFocus |
+            ImGuiWindowFlags_NoNavFocus |
+            ImGuiWindowFlags_NoBackground;
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::Begin("DockSpaceHost", nullptr, flags);
+        ImGui::PopStyleVar(2);
+
+        g_DockspaceID = ImGui::GetID("MyEditorDockSpace");
+        ImGui::DockSpace(g_DockspaceID, ImVec2(0, 0), ImGuiDockNodeFlags_None);
+
+        ImGui::End();
+    }
+
+    static void EnsureDefaultDockLayout()
+    {
+        if (g_DockLayoutBuilt || g_DockspaceID == 0) return;
+
+        ImGui::DockBuilderRemoveNode(g_DockspaceID);
+        ImGui::DockBuilderAddNode(g_DockspaceID, ImGuiDockNodeFlags_DockSpace);
+        ImGui::DockBuilderSetNodeSize(g_DockspaceID, ImGui::GetMainViewport()->WorkSize);
+
+        g_NodeCenter = g_DockspaceID;
+        g_NodeLeft = ImGui::DockBuilderSplitNode(g_NodeCenter, ImGuiDir_Left, 0.20f, nullptr, &g_NodeCenter);
+        g_NodeRight = ImGui::DockBuilderSplitNode(g_NodeCenter, ImGuiDir_Right, 0.20f, nullptr, &g_NodeCenter);
+        g_NodeBottom = ImGui::DockBuilderSplitNode(g_NodeCenter, ImGuiDir_Down, 0.25f, nullptr, &g_NodeCenter);
+
+        // Place your known windows by name (must match ImGui::Begin titles)
+        ImGui::DockBuilderDockWindow("Scene Hierarchy", g_NodeLeft);
+        ImGui::DockBuilderDockWindow("Inspector", g_NodeRight);
+        ImGui::DockBuilderDockWindow("Bottom", g_NodeBottom);
+        ImGui::DockBuilderDockWindow("TopBar", g_NodeCenter);
+
+        ImGui::DockBuilderFinish(g_DockspaceID);
+        g_DockLayoutBuilt = true;
+    }
+
+    static ImGuiID GetTargetNodeID(DockTarget t)
+    {
+        switch (t)
+        {
+        case DockTarget::Left:   return g_NodeLeft;
+        case DockTarget::Right:  return g_NodeRight;
+        case DockTarget::Bottom: return g_NodeBottom;
+        default:                 return g_NodeCenter;
+        }
+    }
+
+    static void Dock_MoveWindowTo(const char* window_name, DockTarget target)
+    {
+        if (g_DockspaceID == 0) return;
+        EnsureDefaultDockLayout();
+        ImGuiID node = GetTargetNodeID(target);
+        if (node == 0) node = g_DockspaceID;
+        ImGui::DockBuilderDockWindow(window_name, node);
+        ImGui::DockBuilderFinish(g_DockspaceID);
+    }
+
+    static void Dock_FloatWindow(const char* window_name, ImVec2 size = ImVec2(640, 360))
+    {
+        ImGuiID float_node = ImGui::DockBuilderAddNode(0, ImGuiDockNodeFlags_None);
+        ImGui::DockBuilderSetNodeSize(float_node, size);
+        ImVec2 mouse = ImGui::GetMousePos();
+        ImGui::DockBuilderSetNodePos(float_node, mouse);
+        ImGui::DockBuilderDockWindow(window_name, float_node);
+        ImGui::DockBuilderFinish(float_node);
+    }
+#endif
+
 
     // Left splitter: drags the RIGHT edge of the Left panel => modifies left_ratio
     //static void SplitterV_Left(const char* id, float x_px, float top_h_px, float full_w_px, float& left_ratio,
@@ -450,15 +542,33 @@ namespace MyEditor
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
 
-        //ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;  // Enable docking, currently no docking feature so this does not work
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // optional
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // ✅ docking ON
+        // IMPORTANT: keep viewports OFF so nothing pops outside the GLFW window
+        // (turn this on later only if you want multi-window OS-level popouts)
+        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   // ❌ leave disabled
 
         ImGui::StyleColorsDark();
-        ImGui_ImplGlfw_InitForOpenGL(s_Window, true);
-        ImGui_ImplOpenGL3_Init("#version 130");
-        s_enabled = true;
 
+        ImGui_ImplGlfw_InitForOpenGL(w, true);
+        ImGui_ImplOpenGL3_Init("#version 130");
+
+        s_enabled = true;
         RefreshCurrentDir();
+
+        // Tiny runtime check (prints once)
+        std::cout << "[ImGui] Docking: "
+            << ((io.ConfigFlags & ImGuiConfigFlags_DockingEnable) ? "ON" : "OFF")
+            << ", Viewports: "
+            << ((io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) ? "ON" : "OFF")
+            << "\n";
     }
+
+
+
+
+
 
 
     void SetEnabled(bool enabled) { s_enabled = enabled; }
@@ -474,42 +584,27 @@ namespace MyEditor
     void Draw() {
         if (!s_enabled) return;
 
-        if (s_restoreNextFrame)
-        {
-            // Only run after the engine is safely paused
+        if (s_restoreNextFrame) {
             RestoreEditorBaseline();
             s_restoreNextFrame = false;
         }
-
 
         ImGuiIO& io = ImGui::GetIO();
         const float W = io.DisplaySize.x;
         const float H = io.DisplaySize.y;
 
-        // ----------------------------
-        // Resolve actual pixel sizes
-        // ----------------------------
-        // clamp ratios to prevent nonsense
+        // --- Clamp layout ratios
         s_top_ratio = clamp_val(s_top_ratio, MIN_RATIO_H, MAX_TOTAL_VERT);
         s_bottom_ratio = clamp_val(s_bottom_ratio, MIN_RATIO_H, MAX_TOTAL_VERT);
-        if (s_top_ratio + s_bottom_ratio > MAX_TOTAL_VERT)
-        {
-            // squish bottom if combined too large
-            s_bottom_ratio = MAX_TOTAL_VERT - s_top_ratio;
-        }
+        if (s_top_ratio + s_bottom_ratio > MAX_TOTAL_VERT) s_bottom_ratio = MAX_TOTAL_VERT - s_top_ratio;
 
         s_left_ratio = clamp_val(s_left_ratio, MIN_RATIO_W, MAX_TOTAL_SIDE);
         s_right_ratio = clamp_val(s_right_ratio, MIN_RATIO_W, MAX_TOTAL_SIDE);
-        if (s_left_ratio + s_right_ratio > MAX_TOTAL_SIDE)
-        {
-            // squish right if combined too large
-            s_right_ratio = MAX_TOTAL_SIDE - s_left_ratio;
-        }
+        if (s_left_ratio + s_right_ratio > MAX_TOTAL_SIDE) s_right_ratio = MAX_TOTAL_SIDE - s_left_ratio;
 
         const float top_h = H * s_top_ratio;
         const float bottom_h = H * s_bottom_ratio;
         const float middle_h = H - top_h - bottom_h;
-        // keep middle at least 1px high
         const float safe_middle_h = (middle_h < 1.0f ? 1.0f : middle_h);
 
         const float left_w = W * s_left_ratio;
@@ -517,28 +612,25 @@ namespace MyEditor
         const float mid_w = W - left_w - right_w;
         const float safe_mid_w = (mid_w < 1.0f ? 1.0f : mid_w);
 
-        // positions of the 4 bars
         const float top_y = 0.0f;
         const float middle_y = top_h;
         const float bottom_y = top_h + safe_middle_h;
-
         const float left_x = 0.0f;
         const float right_x = left_w + safe_mid_w;
 
-        // common flags
         ImGuiWindowFlags panel_flags =
             ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoSavedSettings;
 
-        // ----------------------------
- // TOP BAR (Play / Pause / Scene Controls)
- // ----------------------------
+        // =========================
+        // TOP BAR
+        // =========================
         {
             ImGuiWindowFlags top_flags =
                 ImGuiWindowFlags_NoTitleBar |
-                ImGuiWindowFlags_NoScrollbar |  
+                ImGuiWindowFlags_NoScrollbar |
                 ImGuiWindowFlags_NoScrollWithMouse |
                 panel_flags;
 
@@ -548,62 +640,32 @@ namespace MyEditor
             if (ImGui::Begin("TopBar", nullptr, top_flags)) {
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
 
-
-                // --- Play ---
-                if (ImGui::Button("Play", ImVec2(70, 0)))
-                {
-                    // restore ECS snapshot
-                    if (!s_hasEditorBaseline)
-                        CaptureEditorBaseline();
-                    else
-                        RestoreEditorBaseline();
-
-                    // tell engine to restart audio/rhythm
+                if (ImGui::Button("Play", ImVec2(70, 0))) {
+                    if (!s_hasEditorBaseline) CaptureEditorBaseline(); else RestoreEditorBaseline();
                     Engine->RestartRuntimeForPlay();
-
-                    // then run
                     Engine->SetPaused(false);
                     s_isPlaying = true;
                 }
-
                 ImGui::SameLine();
-
-                // --- Stop ---
-                if (ImGui::Button("Stop", ImVec2(70, 0)))
-                {
-                    // pause game first
+                if (ImGui::Button("Stop", ImVec2(70, 0))) {
                     Engine->SetPaused(true);
                     s_isPlaying = false;
-
-                    // put ECS back to editor state
                     RestoreEditorBaseline();
-
                 }
 
+                ImGui::SameLine(); ImGui::Dummy(ImVec2(30, 0)); ImGui::SameLine();
 
-                // --- Visual spacing gap before scene controls ---
-                ImGui::SameLine();
-                ImGui::Dummy(ImVec2(30, 0));  // neat separation
-                ImGui::SameLine();
-
-                // --- Scene controls ---
                 if (ImGui::Button("Save Scene", ImVec2(120, 0))) {
-                    auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>();
-                    if (sceneMgr) {
+                    if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>())
                         sceneMgr->SaveCurrentScene();
-                    }
                 }
-                    
                 ImGui::SameLine();
                 if (ImGui::Button("Load Scene", ImVec2(120, 0))) {
                     std::string path = OpenJsonFileDialog();
                     if (!path.empty()) {
-                        auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>();
-                        if (sceneMgr) {
+                        if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>()) {
                             sceneMgr->LoadSceneFromJson(path);
                             std::cout << "[Editor] Loaded scene: " << path << "\n";
-
-                            // new scene = new baseline required
                             s_hasEditorBaseline = false;
                             selectedEntity = INVALID_ENTITY;
                         }
@@ -613,13 +675,7 @@ namespace MyEditor
                     }
                 }
 
-
-
-
-                // --- Right-aligned label ---
-                ImGui::SameLine();
-                ImGui::Dummy(ImVec2(30, 0));
-                ImGui::SameLine();
+                ImGui::SameLine(); ImGui::Dummy(ImVec2(30, 0)); ImGui::SameLine();
                 ImGui::TextUnformatted("| Game View");
 
                 ImGui::PopStyleVar();
@@ -627,220 +683,170 @@ namespace MyEditor
             ImGui::End();
         }
 
+        // ======================================================
+        // FIXED HOST PANELS WITH DOCKSPACES: Left / Right / Bottom
+        // (no DockBuilder: we only create DockSpace IDs)
+        // ======================================================
 
-    // ----------------------------
-    // SCENE HIERARCHY PANEL (LeftPanel)
-    // ----------------------------
+        // --- LEFT HOST ---
         ImGui::SetNextWindowPos(ImVec2(left_x, middle_y));
         ImGui::SetNextWindowSize(ImVec2(left_w, safe_middle_h));
-        if (ImGui::Begin("Scene Hierarchy", nullptr, panel_flags))
-        {
-            // Access ECS Coordinator
-            auto* g_coordinator = Coordinator::GetInstance();
+        ImGuiID leftDockID = 0;
+        if (ImGui::Begin("Left Panel", nullptr, panel_flags)) {
+            leftDockID = ImGui::GetID("LeftDockSpace");
+            ImGui::DockSpace(leftDockID, ImVec2(0, 0));
+        }
+        ImGui::End();
 
-            if (g_coordinator)
-            {
-                // Use full available size for the scrollable list
+        // --- RIGHT HOST ---
+        ImGui::SetNextWindowPos(ImVec2(right_x, middle_y));
+        ImGui::SetNextWindowSize(ImVec2(right_w, safe_middle_h));
+        ImGuiID rightDockID = 0;
+        if (ImGui::Begin("Right Panel", nullptr, panel_flags)) {
+            rightDockID = ImGui::GetID("RightDockSpace");
+            ImGui::DockSpace(rightDockID, ImVec2(0, 0));
+        }
+        ImGui::End();
+
+        // --- BOTTOM HOST ---
+        ImGui::SetNextWindowPos(ImVec2(0.0f, bottom_y));
+        ImGui::SetNextWindowSize(ImVec2(W, bottom_h));
+        ImGuiID bottomDockID = 0;
+        if (ImGui::Begin("Bottom", nullptr, panel_flags)) {
+            bottomDockID = ImGui::GetID("BottomDockSpace");
+            ImGui::DockSpace(bottomDockID, ImVec2(0, 0));
+        }
+        ImGui::End();
+
+        // =========================================
+        // DOCKABLE TOOL WINDOWS (become tabs)
+        // We "suggest" a default dock only on first run using ImGuiCond_FirstUseEver
+        // =========================================
+
+        // Scene Hierarchy
+        if (leftDockID) ImGui::SetNextWindowDockID(leftDockID, ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("Scene Hierarchy")) {
+            auto* g = Coordinator::GetInstance();
+            if (g) {
                 ImGui::BeginChild("HierarchyList", ImVec2(-FLT_MIN, -FLT_MIN), true);
-
-                for (auto entity : g_coordinator->GetAllEntities())
-                {
+                for (auto entity : g->GetAllEntities()) {
                     std::string display;
-
-                    // Priority 1: If has Name component, use it
-                    if (g_coordinator->HasComponent<Name>(entity))
-                    {
-                        auto& name = g_coordinator->GetComponent<Name>(entity);
-                        display = name.name;
+                    if (g->HasComponent<Name>(entity)) {
+                        display = g->GetComponent<Name>(entity).name;
                     }
-                    // Priority 2: If has GUIButton, use its label
-                    else if (g_coordinator->HasComponent<GUIButton>(entity))
-                    {
-                        auto& btn = g_coordinator->GetComponent<GUIButton>(entity);
-                        display = btn.buttonID;
+                    else if (g->HasComponent<GUIButton>(entity)) {
+                        display = g->GetComponent<GUIButton>(entity).buttonID;
                     }
-                    // Priority 3: If has Renderable with sprite, use sprite name
-                    else if (g_coordinator->HasComponent<Framework::Renderable>(entity))
-                    {
-                        auto& rend = g_coordinator->GetComponent<Framework::Renderable>(entity);
+                    else if (g->HasComponent<Framework::Renderable>(entity)) {
+                        auto& rend = g->GetComponent<Framework::Renderable>(entity);
                         if (!rend.spriteName.empty()) {
-                            // Extract just the filename from the path
-                            size_t lastSlash = rend.spriteName.find_last_of("/\\");
-                            if (lastSlash != std::string::npos) {
-                                display = rend.spriteName.substr(lastSlash + 1);
-                            }
-                            else {
-                                display = rend.spriteName;
-                            }
+                            size_t p = rend.spriteName.find_last_of("/\\");
+                            display = (p != std::string::npos) ? rend.spriteName.substr(p + 1) : rend.spriteName;
                         }
-                        else {
-                            display = "Unnamed Renderable";
-                        }
+                        else display = "Unnamed Renderable";
                     }
-                    // Fallback: Show entity ID
-                    else
-                    {
+                    else {
                         display = "Entity " + std::to_string((int)entity);
                     }
-
-                    // Highlight if currently selected
                     bool isSelected = (selectedEntity == entity);
-
-                    std::string uniqueLabel = display + "##" + std::to_string((int)entity);
-                    if (ImGui::Selectable(uniqueLabel.c_str(), isSelected))
-                    {
-                        selectedEntity = entity;
-                    }
+                    std::string label = display + "##" + std::to_string((int)entity);
+                    if (ImGui::Selectable(label.c_str(), isSelected)) selectedEntity = entity;
                 }
-
                 ImGui::EndChild();
             }
-            else
-            {
+            else {
                 ImGui::TextColored(ImVec4(1, 0, 0, 1), "Coordinator not found!");
             }
         }
         ImGui::End();
 
-         // ----------------------------
-         // RIGHT PANEL (Inspector)
-         // spans the MIDDLE region vertically
-         // ----------------------------
-
-        ImGui::SetNextWindowPos(ImVec2(right_x, middle_y));
-        ImGui::SetNextWindowSize(ImVec2(right_w, safe_middle_h));
-        if (ImGui::Begin("Inspector", nullptr, panel_flags))
-        {
+        // Inspector
+        if (rightDockID) ImGui::SetNextWindowDockID(rightDockID, ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("Inspector")) {
             ImGui::TextUnformatted("Entity Inspector");
             ImGui::Separator();
 
-            auto* g_coordinator = Coordinator::GetInstance();
-            if (!g_coordinator)
-            {
+            auto* g = Coordinator::GetInstance();
+            if (!g) {
                 ImGui::TextColored(ImVec4(1, 0, 0, 1), "Coordinator not found!");
             }
-            else if (selectedEntity == INVALID_ENTITY)
-            {
+            else if (selectedEntity == INVALID_ENTITY) {
                 ImGui::TextUnformatted("No entity selected.");
             }
-            else
-            {
+            else {
                 ImGui::Text("Entity ID: %d", (int)selectedEntity);
                 ImGui::Separator();
 
-                // ============================
-                // TRANSFORM COMPONENT
-                // ============================
-                if (g_coordinator->HasComponent<Framework::Transform>(selectedEntity))
-                {
-                    auto& tr = g_coordinator->GetComponent<Framework::Transform>(selectedEntity);
+                if (g->HasComponent<Framework::Transform>(selectedEntity)) {
+                    auto& tr = g->GetComponent<Framework::Transform>(selectedEntity);
                     ImGui::TextUnformatted("Transform");
                     ImGui::Separator();
-
                     float pos[2] = { tr.Pos.x, tr.Pos.y };
-                    if (ImGui::DragFloat2("Position", pos, 0.5f))
-                    {
-                        tr.Pos.x = pos[0];
-                        tr.Pos.y = pos[1];
-                    }
-
-                    float scale[2] = { tr.Scale.x, tr.Scale.y };
-                    if (ImGui::DragFloat2("Scale", scale, 0.5f))
-                    {
-                        tr.Scale.x = scale[0];
-                        tr.Scale.y = scale[1];
-                    }
-
-                    if (ImGui::DragFloat("Rotation (deg)", &tr.angle_disp, 1.0f, -360.f, 360.f)) {}
+                    if (ImGui::DragFloat2("Position", pos, 0.5f)) { tr.Pos.x = pos[0]; tr.Pos.y = pos[1]; }
+                    float sc[2] = { tr.Scale.x, tr.Scale.y };
+                    if (ImGui::DragFloat2("Scale", sc, 0.5f)) { tr.Scale.x = sc[0]; tr.Scale.y = sc[1]; }
+                    ImGui::DragFloat("Rotation (deg)", &tr.angle_disp, 1.0f, -360.f, 360.f);
                     ImGui::DragFloat("Rotation Speed", &tr.angle_speed, 0.1f, -10.0f, 10.0f);
-
-                    ImGui::Checkbox("Visible", &tr.isVisible);
-                    ImGui::SameLine();
-                    ImGui::Checkbox("Auto Hide", &tr.autoHide);
+                    ImGui::Checkbox("Visible", &tr.isVisible); ImGui::SameLine(); ImGui::Checkbox("Auto Hide", &tr.autoHide);
                     ImGui::Separator();
                 }
 
-                // ============================
-                // RENDERABLE COMPONENT
-                // ============================
-                if (g_coordinator->HasComponent<Framework::Renderable>(selectedEntity))
-                {
-                    auto& rend = g_coordinator->GetComponent<Framework::Renderable>(selectedEntity);
+                if (g->HasComponent<Framework::Renderable>(selectedEntity)) {
+                    auto& r = g->GetComponent<Framework::Renderable>(selectedEntity);
                     ImGui::TextUnformatted("Renderable");
                     ImGui::Separator();
-
-                    ImGui::Text("Model Ref: %.1f", rend.mdl_ref);
-                    ImGui::Text("Shader Ref: %.1f", rend.shd_ref);
-                    ImGui::Text("Texture ID: %u", rend.textureID);
-
+                    ImGui::Text("Model Ref: %.1f", r.mdl_ref);
+                    ImGui::Text("Shader Ref: %.1f", r.shd_ref);
+                    ImGui::Text("Texture ID: %u", r.textureID);
                     static char spriteBuf[256];
-                    strncpy(spriteBuf, rend.spriteName.c_str(), sizeof(spriteBuf));
-                    spriteBuf[sizeof(spriteBuf) - 1] = '\0';
-
-                    if (ImGui::InputText("Sprite Name", spriteBuf, IM_ARRAYSIZE(spriteBuf)))
-                        rend.spriteName = spriteBuf;
-
-                    if (ImGui::Button("Reload Texture"))
-                        rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
-
+                    strncpy(spriteBuf, r.spriteName.c_str(), sizeof(spriteBuf)); spriteBuf[255] = '\0';
+                    if (ImGui::InputText("Sprite Name", spriteBuf, IM_ARRAYSIZE(spriteBuf))) r.spriteName = spriteBuf;
+                    if (ImGui::Button("Reload Texture")) r.textureID = Framework::AssetsManager::GetOrLoad(r.spriteName);
                     ImGui::Separator();
                 }
             }
         }
         ImGui::End();
 
-
-        // ----------------------------
-        // BOTTOM PANEL (Assets/Debug/Profiler)
-        // full width, bottom strip
-        // ----------------------------
-        ImGui::SetNextWindowPos(ImVec2(0.0f, bottom_y));
-        ImGui::SetNextWindowSize(ImVec2(W, bottom_h));
-        if (ImGui::Begin("Bottom", nullptr, panel_flags)) {
-            if (ImGui::BeginTabBar("BottomTabs")) {
-
-                if (ImGui::BeginTabItem("Assets")) {
-                    DrawAssetsBrowserPanelUnity(selectedEntity);
-                    ImGui::EndTabItem();
-                }
-
-
-                // ===== DEBUG TAB =====
-                static DebugConsole debugConsole;
-                if (ImGui::BeginTabItem("Debug")) {
-                    debugConsole.Draw();
-                    // put your debug UI here
-
-                    // Example on logging usage
-                    // Plain text
-                    debugConsole.AddLog("Hello plain text");
-
-                    // With level (colored automatically)
-                    debugConsole.AddLogLevel(ConsoleLevel::Info, "Loaded %d textures", &Systems::EntityMember);
-                    debugConsole.AddLogLevel(ConsoleLevel::Warn, "FPS is low: %.1f", GLHelper::fps);
-                    debugConsole.AddLogLevel(ConsoleLevel::Error, "Failed to open '%s'", "[filename]");
-
-                    //// With explicit color (custom)
-                    debugConsole.AddLogColored(ImVec4(0.6f, 1.0f, 0.6f, 1.0f), "Green success message");
-
-                    ImGui::EndTabItem();    
-                }
-
-                // ===== PROFILER TAB =====
-                static ProfilingPanel profilingPanel;
-                if (ImGui::BeginTabItem("Profiler")) {
-                    profilingPanel.Draw();
-                    ImGui::EndTabItem();
-                }
-
-                ImGui::EndTabBar();
-            }
+        // Assets
+        if (bottomDockID) ImGui::SetNextWindowDockID(bottomDockID, ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("Assets")) {
+            DrawAssetsBrowserPanelUnity(selectedEntity);
         }
         ImGui::End();
 
-        // ----------------------------
-        // SPLITTER OVERLAY
-        // ----------------------------
+        // Debug Console
+        if (bottomDockID) ImGui::SetNextWindowDockID(bottomDockID, ImGuiCond_FirstUseEver);
+        static DebugConsole debugConsole;
+        if (ImGui::Begin("Debug Console")) {
+            debugConsole.Draw();
+            // put your debug UI here
+
+            // Example on logging usage
+            // Plain text
+            debugConsole.AddLog("Hello plain text");
+
+            // With level (colored automatically)
+            debugConsole.AddLogLevel(ConsoleLevel::Info, "Loaded %d textures", &Systems::EntityMember);
+            debugConsole.AddLogLevel(ConsoleLevel::Warn, "FPS is low: %.1f", GLHelper::fps);
+            debugConsole.AddLogLevel(ConsoleLevel::Error, "Failed to open '%s'", "[filename]");
+
+            //// With explicit color (custom)
+            debugConsole.AddLogColored(ImVec4(0.6f, 1.0f, 0.6f, 1.0f), "Green success message");
+        }
+        ImGui::End();
+
+        // Profiler
+        if (bottomDockID) ImGui::SetNextWindowDockID(bottomDockID, ImGuiCond_FirstUseEver);
+        static ProfilingPanel profilingPanel;
+        if (ImGui::Begin("Profiler")) {
+            profilingPanel.Draw();
+        }
+        ImGui::End();
+
+        // =============================
+        // SPLITTER OVERLAY (unchanged)
+        // =============================
         ImGuiWindowFlags overlay_flags =
             ImGuiWindowFlags_NoDecoration |
             ImGuiWindowFlags_NoBackground |
@@ -853,96 +859,61 @@ namespace MyEditor
         ImGui::SetNextWindowSize(ImVec2(W, H));
         ImGui::Begin("LayoutOverlay", nullptr, overlay_flags);
 
-        //
-        // 1. Horizontal splitter between TOP and MIDDLE
-        //
+        // Top/Middle splitter
         {
-            float bar_y = top_h; // line between top and middle
+            float bar_y = top_h;
             ImGui::SetCursorScreenPos(ImVec2(0.0f, bar_y - SPLIT_THICK * 0.5f));
             ImGui::InvisibleButton("##split_top_mid", ImVec2(W, SPLIT_THICK));
-            if (ImGui::IsItemHovered())
-                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+            if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
             if (ImGui::IsItemActive()) {
                 float new_edge = bar_y + ImGui::GetIO().MouseDelta.y;
-                // convert new_edge back to ratio of full height
-                s_top_ratio = new_edge / H;
-                // re-clamp, don't let top eat bottom/middle completely
-                s_top_ratio = clamp_val(s_top_ratio, MIN_RATIO_H, MAX_TOTAL_VERT);
-                // keep total with bottom in check
-                if (s_top_ratio + s_bottom_ratio > MAX_TOTAL_VERT) {
-                    s_top_ratio = MAX_TOTAL_VERT - s_bottom_ratio;
-                }
+                s_top_ratio = clamp_val(new_edge / H, MIN_RATIO_H, MAX_TOTAL_VERT);
+                if (s_top_ratio + s_bottom_ratio > MAX_TOTAL_VERT) s_top_ratio = MAX_TOTAL_VERT - s_bottom_ratio;
             }
-
             DrawGuideLine(ImVec2(0.0f, bar_y), ImVec2(W, bar_y));
         }
 
-        //
-        // 2. Horizontal splitter between MIDDLE and BOTTOM
-        //
+        // Middle/Bottom splitter
         {
-            float bar_y = bottom_y; // line between middle and bottom
+            float bar_y = bottom_y;
             ImGui::SetCursorScreenPos(ImVec2(0.0f, bar_y - SPLIT_THICK * 0.5f));
             ImGui::InvisibleButton("##split_mid_bottom", ImVec2(W, SPLIT_THICK));
-            if (ImGui::IsItemHovered())
-                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+            if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
             if (ImGui::IsItemActive()) {
                 float new_edge = bar_y + ImGui::GetIO().MouseDelta.y;
-                // bottom_y = top_h + middle_h
-                // => middle_h = new_edge - top_h
                 float new_bottom_h = H - new_edge;
-                // convert new_bottom_h back to a ratio
-                s_bottom_ratio = new_bottom_h / H;
-                s_bottom_ratio = clamp_val(s_bottom_ratio, MIN_RATIO_H, MAX_TOTAL_VERT);
-                if (s_top_ratio + s_bottom_ratio > MAX_TOTAL_VERT) {
-                    s_bottom_ratio = MAX_TOTAL_VERT - s_top_ratio;
-                }
+                s_bottom_ratio = clamp_val(new_bottom_h / H, MIN_RATIO_H, MAX_TOTAL_VERT);
+                if (s_top_ratio + s_bottom_ratio > MAX_TOTAL_VERT) s_bottom_ratio = MAX_TOTAL_VERT - s_top_ratio;
             }
-
             DrawGuideLine(ImVec2(0.0f, bar_y), ImVec2(W, bar_y));
         }
 
-        //
-        // 3. Vertical splitter between LEFT and CENTER
-        //
+        // Left/Middle splitter
         {
-            float bar_x = left_w; // line between left and middle region
+            float bar_x = left_w;
             ImGui::SetCursorScreenPos(ImVec2(bar_x - SPLIT_THICK * 0.5f, middle_y));
             ImGui::InvisibleButton("##split_left_mid", ImVec2(SPLIT_THICK, safe_middle_h));
-            if (ImGui::IsItemHovered())
-                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+            if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
             if (ImGui::IsItemActive()) {
                 float new_edge = bar_x + ImGui::GetIO().MouseDelta.x;
-                s_left_ratio = new_edge / W;
-                s_left_ratio = clamp_val(s_left_ratio, MIN_RATIO_W, MAX_TOTAL_SIDE);
-                if (s_left_ratio + s_right_ratio > MAX_TOTAL_SIDE) {
-                    s_left_ratio = MAX_TOTAL_SIDE - s_right_ratio;
-                }
+                s_left_ratio = clamp_val(new_edge / W, MIN_RATIO_W, MAX_TOTAL_SIDE);
+                if (s_left_ratio + s_right_ratio > MAX_TOTAL_SIDE) s_left_ratio = MAX_TOTAL_SIDE - s_right_ratio;
             }
-
             DrawGuideLine(ImVec2(bar_x, middle_y), ImVec2(bar_x, middle_y + safe_middle_h));
         }
 
-        //
-        // 4. Vertical splitter between CENTER and RIGHT
-        //
+        // Middle/Right splitter
         {
-            float bar_x = right_x; // line between center and right
+            float bar_x = right_x;
             ImGui::SetCursorScreenPos(ImVec2(bar_x - SPLIT_THICK * 0.5f, middle_y));
             ImGui::InvisibleButton("##split_mid_right", ImVec2(SPLIT_THICK, safe_middle_h));
-            if (ImGui::IsItemHovered())
-                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+            if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
             if (ImGui::IsItemActive()) {
                 float new_edge = bar_x + ImGui::GetIO().MouseDelta.x;
-                // right_ratio = width_of_right / W
                 float new_right_w = (W - new_edge);
-                s_right_ratio = new_right_w / W;
-                s_right_ratio = clamp_val(s_right_ratio, MIN_RATIO_W, MAX_TOTAL_SIDE);
-                if (s_left_ratio + s_right_ratio > MAX_TOTAL_SIDE) {
-                    s_right_ratio = MAX_TOTAL_SIDE - s_left_ratio;
-                }
+                s_right_ratio = clamp_val(new_right_w / W, MIN_RATIO_W, MAX_TOTAL_SIDE);
+                if (s_left_ratio + s_right_ratio > MAX_TOTAL_SIDE) s_right_ratio = MAX_TOTAL_SIDE - s_left_ratio;
             }
-
             DrawGuideLine(ImVec2(bar_x, middle_y), ImVec2(bar_x, middle_y + safe_middle_h));
         }
 
@@ -951,12 +922,17 @@ namespace MyEditor
 
 
 
+
+
     void Render() {
         if (!s_enabled) return;
         ImGui::Render();
-        if (ImDrawData* dd = ImGui::GetDrawData())
-            ImGui_ImplOpenGL3_RenderDrawData(dd);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
+
+
+
+
 
     void Shutdown() {
         ImGui_ImplOpenGL3_Shutdown();
