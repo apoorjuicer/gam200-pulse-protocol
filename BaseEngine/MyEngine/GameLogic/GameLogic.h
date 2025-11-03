@@ -1,13 +1,15 @@
 #pragma once
 #include "pch/pch_temp.h"
+#include <GLFW/glfw3.h>
 #include "../CoreEngine/ECS/Types.h"
 #include "../CoreEngine/ECS/System.h"
 #include "../CoreEngine/ECS/Coordinator.h"
 //#include "../MyEngine/Components/ScriptName.h"
+#include "../MyEngine/Serialization/Serialization.h"
 
 //components:
 #include "../Graphics/Transform.h"
-#include "../GameLogic/GameLogic.h"
+
 
 //Serialize
 #pragma warning(push, 0)
@@ -28,51 +30,99 @@ public:
 	virtual void Exit(Entity ID) = 0;
 };
 
-// ALL THIS IS JUST TEMP, LATER ON WE WILL SHIFT TO LUA SCRIPTING INSTEAD. ALL GAMELOGIC SYSTEM DOES IS 
-// TO UPDATE ALL THE ENTITIES INIT, UPDATE, EXIT SCRIPTS
 class PlayerScript : public Iscript
 {
-	virtual void Init(Entity ID) override
-	{
-		(void)ID;
-	}
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
 
-	virtual void Update(Entity ID) override
-	{
-		//std::cout << ID << std::endl;
-
-		//if (keypress)
-		//{
-		//	get transform
-		//		move entity
-
-		//}
-		(void)ID;
-	}
-
-	virtual void Exit(Entity ID) override
-	{
-		(void)ID;
-	}
+private:
 };
 
 class EnemyScript : public Iscript
 {
-	virtual void Init(Entity ID) override
-	{
-		(void)ID;
-	}
-
-	virtual void Update(Entity ID) override
-	{
-		(void)ID;
-	}
-
-	virtual void Exit(Entity ID) override
-	{
-		(void)ID;
-	}
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
 };
+
+// ALL THIS IS JUST TEMP, LATER ON WE WILL SHIFT TO LUA SCRIPTING INSTEAD. ALL GAMELOGIC SYSTEM DOES IS 
+// TO UPDATE ALL THE ENTITIES INIT, UPDATE, EXIT SCRIPTS
+//class PlayerScript : public Iscript
+//{
+//public:
+//	virtual void Init(Entity ID) override
+//	{
+//		(void)ID;
+//	}
+//
+//	virtual void Update(Entity ID) override
+//	{
+//	    auto g_coordinator = Coordinator::GetInstance();
+//		auto& hero_transform = g_coordinator->GetComponent<Framework::Transform>(ID);
+//		if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_W) == GLFW_PRESS && !wPressed)
+//		{
+//			hero_transform.Pos.y += 5.0f;
+//			wPressed = true;
+//		}
+//		else if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_W) == GLFW_RELEASE){wPressed = false;}
+//
+//		if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_A) == GLFW_PRESS && !aPressed)
+//		{
+//			hero_transform.Pos.x -= 5.0f;
+//			aPressed = true;
+//		}
+//		else if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_A) == GLFW_RELEASE) { aPressed = false; }
+//
+//		if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_S) == GLFW_PRESS && !sPressed)
+//		{
+//			hero_transform.Pos.y -= 5.0f;
+//			sPressed = true;
+//		}
+//		else if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_S) == GLFW_RELEASE) { sPressed = false; }
+//
+//		else if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_D) == GLFW_PRESS && !dPressed)
+//		{
+//			hero_transform.Pos.x += 5.0f;
+//			dPressed = true;
+//		}
+//		else if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_D) == GLFW_RELEASE) { dPressed = false; }
+//
+//
+//		//(void)ID;
+//	}
+//
+//	virtual void Exit(Entity ID) override
+//	{
+//		(void)ID;
+//	}
+//
+//private:
+//	 bool wPressed = false, aPressed = false, sPressed = false, dPressed = false;
+//};
+//
+//class EnemyScript : public Iscript
+//{
+//public:
+//	virtual void Init(Entity ID) override
+//	{
+//		(void)ID;
+//	}
+//
+//	virtual void Update(Entity ID) override
+//	{
+//		(void)ID;
+//	}
+//
+//	virtual void Exit(Entity ID) override
+//	{
+//		(void)ID;
+//	}
+//
+//private:
+//};
 
 
 class LogicSystem: public Systems
