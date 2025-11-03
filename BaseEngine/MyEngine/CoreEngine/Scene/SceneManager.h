@@ -20,7 +20,7 @@
 #include "../Graphics/Animation.h"
 #include "../Graphics/Renderable.h"
 
-#include "Components/Name.h
+#include "../MyEngine/Components/Name.h"
 #include "../CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
 #include "CoreEngine/Factory/Factory.h"
