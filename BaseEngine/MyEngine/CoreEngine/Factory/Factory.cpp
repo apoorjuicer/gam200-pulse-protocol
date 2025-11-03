@@ -3,9 +3,10 @@
 
 using namespace rapidjson;
 
-// change to bool, and add file path that will be given from either scene manager/ImGui
+// change to optional for bool(if loaded succeessfully) and entity ID(for chloe)
+// added file path that will be given from either scene manager/ImGui
 // Read from file, loop thru a check if have type and component. Add component base on type.  
-Entity Factory::CreateEntityFromJson(std::string const& path)
+std::optional<Entity> Factory::CreateEntityFromJson(std::string const& path)
 {
 	auto* g_coordinator = Coordinator::GetInstance();
 
