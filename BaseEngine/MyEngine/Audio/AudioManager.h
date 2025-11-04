@@ -69,6 +69,7 @@ class AssetRegistry; //fwd
 
         // gets path from source file and plays it at wanted volume, default volume is 1.0f
         bool LoadSFX(const std::string& id);
+        bool LoadAllSFX();
         void PlaySound(const std::string& id);
 
 

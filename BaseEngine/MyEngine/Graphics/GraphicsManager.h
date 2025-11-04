@@ -4,6 +4,8 @@
  * @project     Pulse Protocol
  * @author      Goh Pin Kai (primary) - 70%
  * @author      Leu Jun Yong (secondary) - 30%
+ * @author      Ban Kai Wei Benjamin (secondary)
+ * 
  * @brief       Handles high-level rendering:
  *              - World draw via GLApp
  *              - Text rendering overlay (FPS, UI, debug info)
@@ -35,7 +37,7 @@
 #include "pch/pch_temp.h"
 #include "CoreEngine/ECS/System.h"
 //#include "CoreEngine/ECS/SystemManager.h"
-//#include "glapp.h"
+#include "glapp.h"
 #include <ft2build.h>
 #include <memory>
 #include FT_FREETYPE_H
@@ -70,13 +72,13 @@ class GLApp; //fwd
         unsigned int pixelHeight = 0;       // baked pixel height (e.g. 48)
     };
 
-    struct TextureData {
-        GLuint textureID = 0;
-        int width = 0, height = 0, nrChannels = 0;
-        // (Optional) debug info only:
-        std::string textureName;
-        std::string filePath;
-    };
+    //struct TextureData {
+    //    GLuint textureID = 0;
+    //    int width = 0, height = 0, nrChannels = 0;
+    //    // (Optional) debug info only:
+    //    std::string textureName;
+    //    std::string filePath;
+    //};
 
     class GraphicsManager : public Systems
     {
@@ -94,6 +96,16 @@ class GLApp; //fwd
         GraphicsManager& operator=(GraphicsManager const&) = delete;
         GraphicsManager(GraphicsManager&&) noexcept = default; // move ok
         GraphicsManager& operator=(GraphicsManager&&) noexcept = default;
+
+        //Texture
+        GLuint LoadTextureFile(std::string const& path);
+        GLuint GetOrLoad(std::string const& id);
+        std::string const& GetTexName(GLuint texID);
+        void Clear();
+
+
+        FontData const* GM_FindFont(std::string const& id) const;
+        GLuint const* GM_FindTextureHandle(std::string const& id) const;
     private:
         // Draw text (world overlay / debug text etc.)
         void RenderText(
@@ -109,6 +121,10 @@ class GLApp; //fwd
         void RenderGUIButtons();
         void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
 
+        //
+        // 
+        bool LoadTexturesFromRegistry();
+         
         //Fonts
         bool InitFonts();
         void ShutdownFonts();
@@ -117,15 +133,11 @@ class GLApp; //fwd
             unsigned int pixelHeight);
 
         //bool LoadFontsFromRegistry(AssetRegistry const& reg);
+    
         bool LoadFontsFromRegistry();
 
-        FontData const* GM_FindFont( std::string const& id) const;
 
-        //Texture
-        GLuint LoadTextureFile( std::string const& path);
-        GLuint GetOrLoad( std::string const& path);
-        std::string const& PathFromID(GLuint texID);
-        void Clear();
+   
     private:
        // std::unique_ptr<GLApp> glapp;
         GLApp* glapp = nullptr;  // owning raw pointer           
@@ -144,13 +156,19 @@ class GLApp; //fwd
         FontData const* m_uiFont = nullptr;
         FontData const* m_debugFont = nullptr;
         //Textures
-        std::unordered_map<std::string, TextureData> textureMap;
+       // std::unordered_map<std::string, TextureData> textureMap;
+        // texture ID mapping, <name,GLuint>
+        // Logical ID (engine/editor name) -> GPU handle
+        std::unordered_map<std::string, GLuint> texHandle_key;
+        std::unordered_map<GLuint, std::string> texHandle_id;
+        // GPU handle -> Logical ID (for reverse lookup, debugging, reloading)
+        //std::unordered_map<GLuint, std::string> handleToID;
 
         //static GLuint LoadTextureFile(const std::string& path);
 
-        // path <-> GL texture ID mapping
-        std::unordered_map<std::string, GLuint> s_pathToID{};
-        std::unordered_map<GLuint, std::string> s_idToPath{};
+        // path <-> GL texture ID mapping, <path,GLuint>
+        //std::unordered_map<std::string, GLuint> s_pathToID{};
+        //std::unordered_map<GLuint, std::string> s_idToPath{};
 
 
         AssetRegistry* mRegistry = nullptr;  // link to asset registry

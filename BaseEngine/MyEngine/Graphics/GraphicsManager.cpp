@@ -4,6 +4,8 @@
  * @project     Pulse Protocol
  * @author      Goh Pin Kai (primary) - 70%
  * @author      Leu Jun Yong (secondary) - 30%
+ * @author      Ban Kai Wei Benjamin (secondary)
+ * 
  * @brief       Implements GraphicsManager:
  *              - Initializes GL rendering systems
  *              - Draws world (via GLApp) then overlay text (FPS, controls)
@@ -186,6 +188,13 @@ namespace {
             if (loc != -1) {
                 glUniform1i(loc, 0); // sampler "text" uses texture unit 0
             }
+        }
+
+        if (!LoadTexturesFromRegistry()) {
+            std::cerr << "[GraphicsManager] Failed to load some textures from asset registry.\n";
+        }
+        else {
+            std::cout << "[GraphicsManager] Successfully loaded textures from  asset registry.\n";
         }
     }
 
@@ -556,31 +565,77 @@ namespace {
                 << " reason: " << (stbi_failure_reason() ? stbi_failure_reason() : "unknown") << "\n";
             return 0;
         }
-        GLuint id = upload_rgba8(w, h, data);
+        GLuint tex_id = upload_rgba8(w, h, data);
         stbi_image_free(data);
-        return id;
+        return tex_id;
     }
 
-    GLuint GraphicsManager::GetOrLoad(const std::string& path) {
-        if (auto it = s_pathToID.find(path); it != s_pathToID.end()) return it->second;
-        GLuint id = LoadTextureFile(path);
-        if (id) {
-            s_pathToID[path] = id;
-            s_idToPath[id] = path;
+    bool GraphicsManager::LoadTexturesFromRegistry() {
+        if (!mRegistry) {
+            std::cerr << "[Graphics] LoadTexturesFromRegistry called without registry.\n";
+            return false;
         }
-        return id;
+
+        auto const& texTable = mRegistry->getTexContainer();
+        if (texTable.empty()) {
+            std::cout << "[Graphics] No textures listed in registry.\n";
+            return true; // nothing to do, not an error
+        }
+
+        bool ok = true;
+
+        for (auto const& [name, tr] : texTable) {
+            if (tr.path.empty()) {
+                std::cerr << "[Texture] Missing path for id='" << name << "'\n";
+                ok = false;
+                continue;
+            }
+
+            // Load from disk to GL
+            GLuint tex_id = LoadTextureFile(tr.path);
+            if (tex_id == 0) {
+                std::cerr << "[Texture] Failed: id='" << name << "' path='" << tr.path << "'\n";
+                ok = false;
+                continue;
+            }
+      
+           // textureMap[name] = TextureData{ id, /*w*/0, /*h*/0, /*nr*/0, name, tr.path };
+            texHandle_key[tr.tex_name] = tex_id;
+            //s_idToPath[id] = tr.path;
+
+            std::cout << "[Texture] Loaded: id='" << name << "' path='" << tr.path
+                << "' -> GL#" << tex_id << "\n";
+        }
+
+        return ok;
     }
 
-     std::string const& GraphicsManager::PathFromID(GLuint texID) {
-        return s_idToPath.at(texID); // throws if not found (use .find if you prefer no-throw)
+    GLuint GraphicsManager::GetOrLoad(const std::string& tex_name) {
+        if (auto it = texHandle_key.find(tex_name); it != texHandle_key.end()) return it->second;
+        GLuint tex_id = LoadTextureFile(tex_name);
+        if (tex_id) {
+            texHandle_key[tex_name] = tex_id;
+            texHandle_id[tex_id] = tex_name;
+        }
+        return tex_id;
+    }
+
+     std::string const& GraphicsManager::GetTexName(GLuint texID) {
+        return texHandle_id.at(texID); // throws if not found (use .find if you prefer no-throw)
     }
 
     void GraphicsManager::Clear() {
-        for (auto& kv : s_pathToID) glDeleteTextures(1, &kv.second);
-        s_pathToID.clear();
-        s_idToPath.clear();
+        for (auto& kv : texHandle_key) glDeleteTextures(1, &kv.second);
+        texHandle_key.clear();
+        texHandle_id.clear();
     }
 
+    GLuint const* GraphicsManager::GM_FindTextureHandle(std::string const& id) const {
+        if (auto it = texHandle_key.find(id); it != texHandle_key.end()) {
+            return &it->second;
+        }
+        return nullptr;
+    }
 
     //Fonts
     bool GraphicsManager::InitFonts()
@@ -656,10 +711,10 @@ namespace {
         }
 
         FT_Done_Face(face);
-        m_fontMap.emplace(fontKey, std::move(data));
+        /*m_fontMap.emplace(fontKey, std::move(data));
         std::cout << "[Font] Loaded font '" << fontKey
             << "' from " << fontFilePath
-            << " @ " << pixelHeight << "px\n";
+            << " @ " << pixelHeight << "px\n";*/
         return true;
     }
 

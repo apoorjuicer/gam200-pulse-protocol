@@ -1,12 +1,13 @@
 {
-    "hero_spritesheet": [
+    "animationFilePaths": [
         {
             "id": "hero_spritesheet",
             "path": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.jpg",
-            "totalFrames ": 1,
-            "columns ": 1,
-            "rows ": 1,
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
             "animationSpeed": 2.0
         }
     ]
 }
+

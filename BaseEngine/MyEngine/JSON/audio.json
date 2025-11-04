@@ -4,13 +4,15 @@
             "id": "bgm",
             "path": "../../MyEngine/Assets/Music/Background/GameMusic.mp3",
             "loop": true,
-            "volume": 1.0
+            "volume": 1.0,
+            "type" : "BGM"
         },
         {
             "id": "beat_placeholder",
-            "path": "../../MyEngine/Assets/SFX/Rhythm_Feedback/Gamebeat_placeholderMusic.wav",
+            "path": "../../MyEngine/Assets/SFX/Rhythm_Feedback/beat_placeholder.wav",
             "loop": false,
-            "volume": 1.0
+            "volume": 1.0,
+            "type" : "SFX"
         }
     ]
 }

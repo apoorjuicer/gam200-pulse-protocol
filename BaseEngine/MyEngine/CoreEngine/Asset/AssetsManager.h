@@ -34,8 +34,13 @@
 
         // Accessors (refs avoid copies)
         AssetRegistry& getRegistry();
+
+
         AudioManager& getAudio();
+        AudioManager const& getAudio() const;
+
         GraphicsManager& getGraphics();
+        GraphicsManager const& getGraphics() const;
 
     private:
         AssetRegistry mRegistry;                       // owned

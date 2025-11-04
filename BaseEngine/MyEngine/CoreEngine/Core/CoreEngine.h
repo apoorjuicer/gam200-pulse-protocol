@@ -52,7 +52,7 @@ public:
 	GLFWwindow* GetWindow() const { return window; }
 	
 
-	AssetsManager& Assets() { return mAssets; }
+	//AssetsManager& getAssetsManager() { return mAssets; }
 
 private:
 	bool GameRunning;
@@ -69,13 +69,14 @@ private:
 	//Framework::AssetRegistry mAssetRegistry;
 	//Framework::AudioManager mAudioManager;
 	//Framework::GraphicsManager mGraphicsManager;
-	AssetsManager mAssets;
+	//AssetsManager mAssets;
 
 };
 
 //A global pointer to the instance of the core
 extern CoreEngine* Engine;
 extern Config config; //global scope
+extern AssetsManager mAssets;
 //extern Framework::AssetRegistry ar; //global scope
 extern int WindowWidth;
 extern int WindowHeight;

@@ -109,7 +109,19 @@
         if (!LoadBGM("bgm")) {
             std::cerr << "[AudioManager] No 'bgm' entry found in registry.\n";
         }
+        else {
+            std::cout << "[AudioManager] 'bgm' loaded from registry.\n";
+        }
 
+        if (!LoadSFX("beat_placeholder")) {
+            std::cerr << "[AudioManager] No 'beat_placeholder' entry found in registry.\n";
+        }
+        else {
+            std::cout << "[AudioManager] 'beat_placeholder' loaded from registry.\n";
+        }
+
+
+        PlaySound("beat_placeholder");
         std::cout << "[AudioManager] AudioManager initialization completed with mixers.\n";
 
     }// end init
@@ -254,6 +266,7 @@
     bool AudioManager::IsPaused() const { return mPaused; }
 
     /*Sound Effects*/
+   
     bool AudioManager::LoadSFX(std::string const& id) {
         if (!mSystem || !mRegistry) return false;
 
@@ -262,24 +275,40 @@
 
 
         // Get sound resource metadata from asset registry (audioResource)
-        AudioResource const* sfx = mRegistry->FindAudio(id);
-        if (!sfx) {
+        AudioResource const* soundefx = mRegistry->FindAudio(id);
+        if (!soundefx) {
             std::cerr << "[AudioManager] LoadSFX(): No entry found for id : '" << id << "'.\n";
             return false;
         }
+        else {
+            // Create sound (reusable sound, not looping)
+            FMOD_MODE mode = FMOD_DEFAULT | (soundefx->loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF);
+            FMOD::Sound* sound = nullptr; //destroyed after function call
+            FMOD_RESULT result = mSystem->createSound(soundefx->path.c_str(), mode, nullptr, &sound);
+            if (!FMOD_CHECK(result, ("createSound(" + id + ")").c_str()) || !sound) { return false; }
+            // Store in map
+            mSfx[soundefx->audio_id] = sound; //assigned temp ptr to sfx map 
+        }
 
-        // Create sound (reusable sound, not looping)
-        FMOD_MODE mode = FMOD_DEFAULT | (sfx->loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF);
-        FMOD::Sound* sound = nullptr; //destroyed after function call
-        FMOD_RESULT result = mSystem->createSound(sfx->path.c_str(), mode, nullptr, &sound);
-        if (!FMOD_CHECK(result, ("createSound(" + id + ")").c_str()) || !sound) { return false; }
-
-        // Store in map
-        mSfx[id] = sound; //assigned temp ptr to sfx map 
-        std::cout << "[AudioManager] Loaded SFX '" << id << "' (" << sfx->path << ")\n";
+        std::cout << "[AudioManager] Loaded SFX '" << id << "' (" << soundefx->path << ")\n";
         return true;
-
     }
+
+    bool AudioManager::LoadAllSFX() {
+        if (!mSystem || !mRegistry) return false;
+
+        bool all_ok = true;
+        // however you expose the table:
+        auto const& table = mRegistry->getAudioContainer(); // unordered_map<string, AudioResource>
+        for (auto const& [id, ar] : table) {
+            if (ar.audiotype == "SFX") {
+                if (!LoadSFX(id)) all_ok = false;
+            }
+        }
+        return all_ok;
+    }
+
+
     void AudioManager::PlaySound(std::string const& id) {
         if (!mSystem) return;
 

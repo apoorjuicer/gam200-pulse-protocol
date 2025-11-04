@@ -23,7 +23,7 @@
 //#include "CoreEngine/Asset/AssetsManager.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "glhelper.h"
-
+#include <string>
 #ifndef FRAMEWORK_ANIMATION_H
 #define FRAMEWORK_ANIMATION_H
 
@@ -32,6 +32,8 @@ namespace Framework
 	class Animation 
 	{
 	public:
+		std::string id = "";
+		std::string path = "";
 		int currentFrame = 0;
 		float elapsedTime = 0.0f; // Time accumulator for animation
 		int totalFrames = 1;	  // Total frames in the sprite sheet

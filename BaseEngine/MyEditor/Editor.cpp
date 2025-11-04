@@ -28,6 +28,7 @@
 #include "pch/pch.h"
 #include "CoreEngine/ECS/System.h" // For Entity type: debugConsole.AddLogLevel(ConsoleLevel::Info, "Loaded %d textures", &Systems::EntityMember);
 #include "Graphics/Transform.h"
+#include "../Graphics/GraphicsManager.h"
 
 namespace MyEditor {
 
@@ -374,9 +375,13 @@ namespace MyEditor {
                     if (ImGui::InputText("Sprite Name", spriteBuf, IM_ARRAYSIZE(spriteBuf)))
                         rend.spriteName = spriteBuf;
 
-                    if (ImGui::Button("Reload Texture"))
-                        //rend.textureID = GraphicsManager::GetOrLoad(rend.spriteName);
-
+                    if (ImGui::Button("Reload Texture")) {
+                        //rend.textureID = CoreEngine::AssetsManager::GraphicsManager::GetOrLoad(rend.spriteName);
+                       // rend.textureID = mAssets.getGraphics().GetOrLoad(rend.spriteName);
+                       // rend.textureID = mAssets.getGraphics().GM_FindTextureHandle(rend.spriteName);
+                    }
+                        
+                    
                     ImGui::Separator();
                 }
             }

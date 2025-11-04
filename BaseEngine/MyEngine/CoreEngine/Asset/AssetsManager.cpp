@@ -325,5 +325,8 @@
 
     AssetRegistry& AssetsManager::getRegistry() { return mRegistry; }
     AudioManager& AssetsManager::getAudio() { return *mAudio; }
+    AudioManager const& AssetsManager::getAudio() const { return *mAudio; }
+
     GraphicsManager& AssetsManager::getGraphics() { return *mGraphics; }
+    GraphicsManager const& AssetsManager::getGraphics() const { return *mGraphics; }
 

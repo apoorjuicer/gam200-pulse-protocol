@@ -22,7 +22,7 @@
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "../TestCases/TestCase.h"
-#include "glap.h"
+//#include "glapp.h"
 #include "../MyEngine/Resources/AssetRegistry.h"
 #include "../CoreEngine/Asset/AssetsManager.h"
 
@@ -31,6 +31,7 @@
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
 Config config;
+AssetsManager mAssets;
 
 int WindowWidth;
 int WindowHeight;
@@ -131,7 +132,7 @@ CoreEngine::CoreEngine() : window(nullptr), DebugMode(false)
 {
 	LastTime = 0;
 	GameRunning = false;
-	mAssets.Initialize();
+	//mAssets.Initialize();
 }
 
 CoreEngine::~CoreEngine()
@@ -160,6 +161,8 @@ void CoreEngine::Init()
 
 	std::cout << "WindowWidth is: " << WindowWidth << "\n";
 	std::cout << "WindowHeight is: " << WindowHeight << "\n";
+
+	mAssets.Initialize();
 
 	///*saving config data*/ //tested saving works
 	// std::string newConfigPath = "../../MyEngine/JSON/config2.json";
