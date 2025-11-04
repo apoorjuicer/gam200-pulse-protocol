@@ -12,25 +12,12 @@
  */
  /******************************************************************************/
 
-#include "../../imgui/imgui.h"
-#include "../../imgui/backends/imgui_impl_glfw.h"
-#include "../../imgui/backends/imgui_impl_opengl3.h"
 #include "Editor.h"
 #include <Graphics/glhelper.h>
 
 #define NOMINMAX        
 #include <windows.h>
 #include <commdlg.h>
-
-#include <GLFW/glfw3.h> 
-#include "DebugConsole.h"
-#include "ProfilingTab.h"
-#include "pch/pch.h"
-#include "CoreEngine/Factory/Factory.h" // for creating/deleting entities
-#include "CoreEngine/ECS/System.h"   // For Entity type
-#include "Components/DisplayName.h"     // For display name in hierarchy list
-#include "Graphics/Transform.h"
-
 
 namespace MyEditor
 {
@@ -189,7 +176,7 @@ namespace MyEditor
         item.texID = Framework::AssetsManager::GetOrLoad(item.fullPath);
     }
 
-    static void DrawAssetsBrowserPanelUnity(Entity selectedEntity)
+    static void ProjectPanel(Entity selectedEntity)
     {
         // top bar: path + refresh + view size
         {
@@ -277,8 +264,28 @@ namespace MyEditor
 
                 if (clicked)
                 {
-                    // if an entity is selected, assign this asset to its Renderable
-                    if (selectedEntity != INVALID_ENTITY)
+                    // Check if this is a prefab JSON file
+                    bool isPrefabFile = (item.fullPath.find("/Prefabs/") != std::string::npos ||
+                        item.fullPath.find("\\Prefabs\\") != std::string::npos) &&
+                        (item.fullPath.find(".json") != std::string::npos);
+
+                    if (isPrefabFile)
+                    {
+                        // Instantiate prefab
+                        PrefabManager prefabMgr;
+
+                        // Extract prefab name from path
+                        size_t lastSlash = item.fullPath.find_last_of("/\\");
+                        size_t lastDot = item.fullPath.find_last_of(".");
+                        std::string prefabName = item.fullPath.substr(lastSlash + 1, lastDot - lastSlash - 1);
+
+                        auto entity = prefabMgr.InstantiatePrefab(prefabName);
+                        if (entity.has_value()) {
+                            std::cout << "[Project] Instantiated prefab: " << prefabName << " (Entity " << entity.value() << ")" << std::endl;
+                        }
+                    }
+                    // if an entity is selected, assign this asset to its Renderable (for textures)
+                    else if (selectedEntity != INVALID_ENTITY)
                     {
                         auto* g_coordinator = Coordinator::GetInstance();
                         if (g_coordinator && g_coordinator->HasComponent<Framework::Renderable>(selectedEntity))
@@ -316,7 +323,14 @@ namespace MyEditor
 
             // 2) Draw label under thumb (clipped)
             ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + s_thumbSize);
-            ImGui::TextUnformatted(item.name.c_str());
+
+            // aesthetic purpose
+            std::string displayName = item.name;
+            if (displayName.ends_with(".json")) {
+                displayName = displayName.substr(0, displayName.length() - 5);
+            }
+
+            ImGui::TextUnformatted(displayName.c_str());
             ImGui::PopTextWrapPos();
 
             ImGui::PopID();
@@ -592,7 +606,7 @@ namespace MyEditor
     // ----------------------------
         ImGui::SetNextWindowPos(ImVec2(left_x, middle_y));
         ImGui::SetNextWindowSize(ImVec2(left_w, safe_middle_h));
-        if (ImGui::Begin("Scene Hierarchy", nullptr, panel_flags))
+        if (ImGui::Begin("Hierarchy", nullptr, panel_flags))
         {
             // Access ECS Coordinator
             auto* g_coordinator = Coordinator::GetInstance();
@@ -786,8 +800,11 @@ namespace MyEditor
                 ImGui::Spacing();
 
                 // Use full available size for the scrollable list
-                ImGui::BeginChild("HierarchyList", ImVec2(-FLT_MIN, -FLT_MIN), true);
+                ImGui::BeginChild("HierarchyList", ImVec2(-FLT_MIN, -FLT_MIN), true, ImGuiWindowFlags_AlwaysUseWindowPadding);
 
+                if (ImGui::IsWindowHovered()) {
+                    ImGui::SetWindowFocus();
+                }
 
                 bool anySelectableClicked = false;
 
@@ -837,6 +854,12 @@ namespace MyEditor
                             }
                             else {
                                 display = rend.spriteName;
+                            }
+
+                            // this js removes the .json when we load the prefab into the hierarchy list
+                            size_t jsonPos = display.find(".json");
+                            if (jsonPos != std::string::npos) {
+                                display = display.substr(0, jsonPos);
                             }
                         }
                         else {
@@ -958,13 +981,76 @@ namespace MyEditor
 
                     ImGui::Separator();
                 }
+                // ============================================
+                // PREFAB SAVE SECTION (at bottom of inspector)
+                // ============================================
+                if (selectedEntity != INVALID_ENTITY)
+                {
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::TextColored(ImVec4(0.4f, 0.7f, 1.0f, 1.0f), "Prefab");
+                    ImGui::Separator();
+
+                    static char prefabNameBuffer[128] = "";
+                    ImGui::SetNextItemWidth(-1);  // Full width
+                    ImGui::InputTextWithHint("##prefabname", "Enter prefab name...", prefabNameBuffer, IM_ARRAYSIZE(prefabNameBuffer));
+
+                    bool canSave = (prefabNameBuffer[0] != '\0');  // Check if not empty
+                    if (!canSave) {
+                        ImGui::BeginDisabled();
+                    }
+
+                    if (ImGui::Button("Save as Prefab")) {
+                        if (strlen(prefabNameBuffer) > 0) {
+                            auto* coord = Coordinator::GetInstance();
+
+                            // Create temporary entity with ONLY safe components
+                            Entity tempEntity = coord->CreateEntity();
+
+                            // Copy ONLY Transform, Renderable, Animation
+                            if (coord->HasComponent<Framework::Transform>(selectedEntity)) {
+                                coord->AddComponent(tempEntity, coord->GetComponent<Framework::Transform>(selectedEntity));
+                            }
+
+                            if (coord->HasComponent<Framework::Renderable>(selectedEntity)) {
+                                coord->AddComponent(tempEntity, coord->GetComponent<Framework::Renderable>(selectedEntity));
+                            }
+
+                            if (coord->HasComponent<Framework::Animation>(selectedEntity)) {
+                                coord->AddComponent(tempEntity, coord->GetComponent<Framework::Animation>(selectedEntity));
+                            }
+
+                            // Save the temp entity (only has safe components)
+                            PrefabManager prefabMgr;
+                            bool success = prefabMgr.SaveEntityAsPrefab(tempEntity, prefabNameBuffer);
+
+                            // Clean up temp entity
+                            coord->DestroyEntity(tempEntity);
+
+                            if (success) {
+                                std::cout << "[Editor] Saved prefab: " << prefabNameBuffer << std::endl;
+                                memset(prefabNameBuffer, 0, sizeof(prefabNameBuffer));
+                            }
+                            else {
+                                std::cerr << "[Editor] Failed to save prefab!" << std::endl;
+                            }
+                        }
+                    }
+
+                    if (!canSave) {
+                        ImGui::EndDisabled();
+                    }
+
+                    if (ImGui::IsItemHovered() && !canSave) {
+                        ImGui::SetTooltip("Enter a prefab name first");
+                    }
+                }
             }
         }
         ImGui::End();
 
-
         // ----------------------------
-        // BOTTOM PANEL (Assets/Debug/Profiler)
+        // BOTTOM PANEL (Project/Debug/Profiler)
         // full width, bottom strip
         // ----------------------------
         ImGui::SetNextWindowPos(ImVec2(0.0f, bottom_y));
@@ -972,11 +1058,11 @@ namespace MyEditor
         if (ImGui::Begin("Bottom", nullptr, panel_flags)) {
             if (ImGui::BeginTabBar("BottomTabs")) {
 
-                if (ImGui::BeginTabItem("Assets")) {
-                    DrawAssetsBrowserPanelUnity(selectedEntity);
+                if (ImGui::BeginTabItem("Project")) {
+                    // folder browser
+                    ProjectPanel(selectedEntity);
                     ImGui::EndTabItem();
                 }
-
 
                 // ===== DEBUG TAB =====
                 static DebugConsole debugConsole;

@@ -47,7 +47,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.20739160478115083,
+                        "elapsedTime": 0.36565062403678896,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
@@ -101,8 +101,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 2,
-                        "elapsedTime": 0.20739160478115083,
+                        "currentFrame": 1,
+                        "elapsedTime": 0.36565062403678896,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -167,7 +167,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.20739160478115083,
+                        "elapsedTime": 0.36565062403678896,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
@@ -375,11 +375,11 @@
                     "transform": {
                         "position": {
                             "x": -300.0,
-                            "y": 300.0
+                            "y": 350.5
                         },
                         "scale": {
-                            "x": 250.0,
-                            "y": 250.0
+                            "x": 200.0,
+                            "y": 80.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -394,65 +394,15 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "textureID": 259,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "textureID": 0,
+                        "useTexture": false,
+                        "spriteName": "",
                         "tintColor": {
                             "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.05105374753475189,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -300.0,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "textureID": 259,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
+                            "g": 0.5,
+                            "b": 0.0,
                             "a": 1.0
                         }
                     }
@@ -460,309 +410,9 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.4510672092437744,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -300.0,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "textureID": 259,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.28456956148147585,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -300.0,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "textureID": 259,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.28388047218322756,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -300.0,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "textureID": 259,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.16778452694416047,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -300.0,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "textureID": 259,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.06769098341464997,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -300.0,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "textureID": 259,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.48404568433761599,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -300.0,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "textureID": 259,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.36762726306915285,
-                        "totalFrames": 3,
-                        "columns": 3,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
                         "rows": 1,
                         "animationSpeed": 2.0
                     }
@@ -810,7 +460,7 @@
                 {
                     "animation": {
                         "currentFrame": 2,
-                        "elapsedTime": 0.16631895303726197,
+                        "elapsedTime": 0.18347826600074769,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -824,12 +474,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 0.0,
-                            "y": 0.0
+                            "x": -300.0,
+                            "y": 300.0
                         },
                         "scale": {
-                            "x": 200.0,
-                            "y": 200.0
+                            "x": 250.0,
+                            "y": 250.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -844,11 +494,11 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
-                        "textureID": 0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "textureID": 259,
                         "useTexture": true,
-                        "spriteName": "",
+                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -860,9 +510,59 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
+                        "elapsedTime": 0.2505985498428345,
+                        "totalFrames": 3,
+                        "columns": 3,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -927.0,
+                            "y": -281.5
+                        },
+                        "scale": {
+                            "x": 250.0,
+                            "y": -527.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "angle_disp": -360.0,
+                        "angle_speed": 0.0,
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "textureID": 259,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 1,
+                        "elapsedTime": 0.0003196597099304199,
+                        "totalFrames": 3,
+                        "columns": 3,
                         "rows": 1,
                         "animationSpeed": 2.0
                     }
