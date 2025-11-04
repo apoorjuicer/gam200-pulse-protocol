@@ -38,49 +38,49 @@
 class GLApp;
 
 namespace Framework {
-    struct FontData; // already defined in AssetsManager.h, but forward-declare is fine in header
+	struct FontData; // already defined in AssetsManager.h, but forward-declare is fine in header
 }
 
 class GraphicsManager : public Systems
 {
 public:
-    GraphicsManager();
-    ~GraphicsManager();
+	GraphicsManager();
+	~GraphicsManager();
 
-    void Initialize();
-    void Update();
-    void Shutdown();
-    void OnResize(int width, int height);
+	void Initialize();
+	void Update();
+	void Shutdown();
+	void OnResize(int width, int height);
 
 private:
-    // Draw text (world overlay / debug text etc.)
-    void RenderText(
-        GLSLShader& shader,
-        const std::string& text,
-        float x, float y,
-        float scale,
-        const glm::vec3& color,
-        const Framework::FontData* fontData
-    );
+	// Draw text (world overlay / debug text etc.)
+	void RenderText(
+		GLSLShader& shader,
+		const std::string& text,
+		float x, float y,
+		float scale,
+		const glm::vec3& color,
+		const Framework::FontData* fontData
+	);
 
 	// For In-Game GUI System & ui overlay
 	void RenderUIOverlayElements();
 	void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
 
 private:
-    GLApp* glapp = nullptr;
+	GLApp* glapp = nullptr;
 
-    // Shared quad VAO/VBO for glyph rendering
-    GLuint VAO = 0;
-    GLuint VBO = 0;
+	// Shared quad VAO/VBO for glyph rendering
+	GLuint VAO = 0;
+	GLuint VBO = 0;
 
 	// Shader and rendering details
 	GLuint whiteTexture;
 
-    // Screen-space ortho for text drawing
-    glm::mat4 projection{ 1.0f };
+	// Screen-space ortho for text drawing
+	glm::mat4 projection{ 1.0f };
 
-    // Cached font refs from AssetsManager
-    const Framework::FontData* m_uiFont = nullptr;
-    const Framework::FontData* m_debugFont = nullptr;
+	// Cached font refs from AssetsManager
+	const Framework::FontData* m_uiFont = nullptr;
+	const Framework::FontData* m_debugFont = nullptr;
 };

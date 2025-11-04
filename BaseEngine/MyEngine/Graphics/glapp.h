@@ -23,7 +23,7 @@
 #include "CoreEngine/Assets.h"
 #include "Physics/collision.h" 
 // External transforms list (used elsewhere)   
-namespace Framework { class Transform; class Animation; class Renderable;}
+namespace Framework { class Transform; class Animation; class Renderable; }
 
 class GLApp {
 public:
@@ -50,136 +50,133 @@ public:
 	static void OnResize(int width, int height);
 	void DrawAABB_NDC(const glm::mat3& modelToNDC, const AABB& box, const glm::vec3& color);
 
-    struct BatchRender {
-        struct Vtx { glm::vec2 pos; glm::vec2 uv; };
-        struct Key {
-            uint16_t shd;     // shader index (from Renderable.shd_ref)
-            uint16_t mdl;     // model index  (from Renderable.mdl_ref)
-            GLuint   tex;     // GL texture id
+	struct BatchRender {
+		struct Vtx { glm::vec2 pos; glm::vec2 uv; };
+		struct Key {
+			uint16_t shd;     // shader index (from Renderable.shd_ref)
+			uint16_t mdl;     // model index  (from Renderable.mdl_ref)
+			GLuint   tex;     // GL texture id
 
-            bool operator==(const Key& o) const {
-                return shd == o.shd && mdl == o.mdl && tex == o.tex;
-            }
-        };
-        struct KeyHash {
-            size_t operator()(const Key& k) const noexcept {
-                size_t h = std::hash<uint32_t>{}((uint32_t(k.shd) << 16) ^ uint32_t(k.mdl));
-                // mix texture id
-                h ^= std::hash<GLuint>{}(k.tex) + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
-                return h;
-            }
-        };
-        // one bucket per texture -> one draw call per texture
-        std::unordered_map<Key, std::vector<Vtx>, KeyHash> buckets;
+			bool operator==(const Key& o) const {
+				return shd == o.shd && mdl == o.mdl && tex == o.tex;
+			}
+		};
+		struct KeyHash {
+			size_t operator()(const Key& k) const noexcept {
+				size_t h = std::hash<uint32_t>{}((uint32_t(k.shd) << 16) ^ uint32_t(k.mdl));
+				// mix texture id
+				h ^= std::hash<GLuint>{}(k.tex) + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
+				return h;
+			}
+		};
+		// one bucket per texture -> one draw call per texture
+		std::unordered_map<Key, std::vector<Vtx>, KeyHash> buckets;
 
-        // GPU objects reused every frame
-        GLuint vao = 0, vbo = 0, ebo = 0;
-        size_t capacitySprites = 0;
+		// GPU objects reused every frame
+		GLuint vao = 0, vbo = 0, ebo = 0;
+		size_t capacitySprites = 0;
 
-        void Init(size_t maxSprites) {
-            capacitySprites = maxSprites;
-            glCreateVertexArrays(1, &vao);
-            glCreateBuffers(1, &vbo);
-            glCreateBuffers(1, &ebo);
+		void Init(size_t maxSprites) {
+			capacitySprites = maxSprites;
+			glCreateVertexArrays(1, &vao);
+			glCreateBuffers(1, &vbo);
+			glCreateBuffers(1, &ebo);
 
-            // 4 verts + 6 indices per sprite
-            const size_t maxVerts = maxSprites * 4;
-            const size_t maxIndices = maxSprites * 6;
+			// 4 verts + 6 indices per sprite
+			const size_t maxVerts = maxSprites * 4;
+			const size_t maxIndices = maxSprites * 6;
 
-            glNamedBufferStorage(vbo, maxVerts * sizeof(Vtx), nullptr, GL_DYNAMIC_STORAGE_BIT);
-            std::vector<GLushort> ib(maxIndices);
-            for (size_t i = 0; i < maxSprites; ++i) {
-                GLushort base = static_cast<GLushort>(i * 4);
-                size_t off = i * 6;
-                ib[off + 0] = base + 0; ib[off + 1] = base + 1; ib[off + 2] = base + 2;
-                ib[off + 3] = base + 2; ib[off + 4] = base + 3; ib[off + 5] = base + 0;
-            }
-            glNamedBufferStorage(ebo, ib.size() * sizeof(GLushort), ib.data(), 0);
+			glNamedBufferStorage(vbo, maxVerts * sizeof(Vtx), nullptr, GL_DYNAMIC_STORAGE_BIT);
+			std::vector<GLushort> ib(maxIndices);
+			for (size_t i = 0; i < maxSprites; ++i) {
+				GLushort base = static_cast<GLushort>(i * 4);
+				size_t off = i * 6;
+				ib[off + 0] = base + 0; ib[off + 1] = base + 1; ib[off + 2] = base + 2;
+				ib[off + 3] = base + 2; ib[off + 4] = base + 3; ib[off + 5] = base + 0;
+			}
+			glNamedBufferStorage(ebo, ib.size() * sizeof(GLushort), ib.data(), 0);
 
-            glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(Vtx));
-            glVertexArrayElementBuffer(vao, ebo);
+			glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(Vtx));
+			glVertexArrayElementBuffer(vao, ebo);
 
-            // layout: location 0 = vec2 pos, location 2 = vec2 uv (matches your VAOs)
-            glEnableVertexArrayAttrib(vao, 0);
-            glVertexArrayAttribFormat(vao, 0, 2, GL_FLOAT, GL_FALSE, offsetof(Vtx, pos));
-            glVertexArrayAttribBinding(vao, 0, 0);
+			// layout: location 0 = vec2 pos, location 2 = vec2 uv (matches your VAOs)
+			glEnableVertexArrayAttrib(vao, 0);
+			glVertexArrayAttribFormat(vao, 0, 2, GL_FLOAT, GL_FALSE, offsetof(Vtx, pos));
+			glVertexArrayAttribBinding(vao, 0, 0);
 
-            glEnableVertexArrayAttrib(vao, 2);
-            glVertexArrayAttribFormat(vao, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vtx, uv));
-            glVertexArrayAttribBinding(vao, 2, 0);
-        }
+			glEnableVertexArrayAttrib(vao, 2);
+			glVertexArrayAttribFormat(vao, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vtx, uv));
+			glVertexArrayAttribBinding(vao, 2, 0);
+		}
 
-        void Begin() { buckets.clear(); }
+		void Begin() { buckets.clear(); }
 
-        // shd_ref & mdl_ref come from Framework::Renderable
-        void Push(uint16_t shd_ref, uint16_t mdl_ref, GLuint tex,
-            const glm::mat3& modelToNDC, float u0, float v0, float u1, float v1)
-        {
-            // Choose model-space corners based on model type.
-            // mdl_ref==0 is your background (full-screen), others are sprite quads.
-            glm::vec2 a, b, c, d;
-            if (mdl_ref == 0) {                       // Background quad
-                a = { -1.0f, -1.0f };
-                b = { 1.0f, -1.0f };
-                c = { 1.0f,  1.0f };
-                d = { -1.0f,  1.0f };
-            }
-            else {                                   // Sprite quad
-                a = { -0.5f, -0.5f };
-                b = { 0.5f, -0.5f };
-                c = { 0.5f,  0.5f };
-                d = { -0.5f,  0.5f };
-            }
+		// shd_ref & mdl_ref come from Framework::Renderable
+		void Push(uint16_t shd_ref, uint16_t mdl_ref, GLuint tex,
+			const glm::mat3& modelToNDC, float u0, float v0, float u1, float v1)
+		{
+			// Choose model-space corners based on model type.
+			// mdl_ref==0 is your background (full-screen), others are sprite quads.
+			glm::vec2 a, b, c, d;
+			if (mdl_ref == 0) {                       // Background quad
+				a = { -1.0f, -1.0f };
+				b = { 1.0f, -1.0f };
+				c = { 1.0f,  1.0f };
+				d = { -1.0f,  1.0f };
+			}
+			else {                                   // Sprite quad
+				a = { -0.5f, -0.5f };
+				b = { 0.5f, -0.5f };
+				c = { 0.5f,  0.5f };
+				d = { -0.5f,  0.5f };
+			}
 
-            auto toNDC = [&](glm::vec2 p) {
-                glm::vec3 h = modelToNDC * glm::vec3(p, 1.0f);
-                return glm::vec2(h.x, h.y);
-                };
+			auto toNDC = [&](glm::vec2 p) {
+				glm::vec3 h = modelToNDC * glm::vec3(p, 1.0f);
+				return glm::vec2(h.x, h.y);
+				};
 
-            Key k{ shd_ref, mdl_ref, tex };
-            auto& buf = buckets[k];
-            buf.reserve(buf.size() + 4);
+			Key k{ shd_ref, mdl_ref, tex };
+			auto& buf = buckets[k];
+			buf.reserve(buf.size() + 4);
 
-            // UVs after v-fix (above)
-            buf.push_back({ toNDC(a), glm::vec2(u0, v0) }); // BL
-            buf.push_back({ toNDC(b), glm::vec2(u1, v0) }); // BR
-            buf.push_back({ toNDC(c), glm::vec2(u1, v1) }); // TR
-            buf.push_back({ toNDC(d), glm::vec2(u0, v1) }); // TL
-        }
+			// UVs after v-fix (above)
+			buf.push_back({ toNDC(a), glm::vec2(u0, v0) }); // BL
+			buf.push_back({ toNDC(b), glm::vec2(u1, v0) }); // BR
+			buf.push_back({ toNDC(c), glm::vec2(u1, v1) }); // TR
+			buf.push_back({ toNDC(d), glm::vec2(u0, v1) }); // TL
+		}
 
-        void Flush(std::vector<GLSLShader>& shaderPrograms) {
-            glBindVertexArray(vao); // <-- bind BATCH VAO
+		void Flush(std::vector<GLSLShader>& shaderPrograms) {
+			glBindVertexArray(vao); // <-- bind BATCH VAO
 
-            for (const auto& bucket : buckets) {
-                const Key& k = bucket.first;
-                const auto& verts = bucket.second;
-                const size_t spriteCount = verts.size() / 4;
-                if (!spriteCount) continue;
+			for (const auto& bucket : buckets) {
+				const Key& k = bucket.first;
+				const auto& verts = bucket.second;
+				const size_t spriteCount = verts.size() / 4;
+				if (!spriteCount) continue;
 
-                auto& shader = shaderPrograms[k.shd];
-                shader.Use();
+				auto& shader = shaderPrograms[k.shd];
+				shader.Use();
 
-                if (GLint uModel = glGetUniformLocation(shader.GetHandle(), "uModel_to_NDC"); uModel >= 0) {
-                    glm::mat3 I(1.0f); glUniformMatrix3fv(uModel, 1, GL_FALSE, glm::value_ptr(I));
-                }
-                if (GLint uOff = glGetUniformLocation(shader.GetHandle(), "uOffset"); uOff >= 0) glUniform2f(uOff, 0, 0);
-                if (GLint uScl = glGetUniformLocation(shader.GetHandle(), "uScale");  uScl >= 0) glUniform2f(uScl, 1, 1);
+				if (GLint uModel = glGetUniformLocation(shader.GetHandle(), "uModel_to_NDC"); uModel >= 0) {
+					glm::mat3 I(1.0f); glUniformMatrix3fv(uModel, 1, GL_FALSE, glm::value_ptr(I));
+				}
+				if (GLint uOff = glGetUniformLocation(shader.GetHandle(), "uOffset"); uOff >= 0) glUniform2f(uOff, 0, 0);
+				if (GLint uScl = glGetUniformLocation(shader.GetHandle(), "uScale");  uScl >= 0) glUniform2f(uScl, 1, 1);
 
-                glNamedBufferSubData(vbo, 0, verts.size() * sizeof(Vtx), verts.data());
+				glNamedBufferSubData(vbo, 0, verts.size() * sizeof(Vtx), verts.data());
 
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, k.tex);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, k.tex);
 
-                glDrawElements(GL_TRIANGLES,
-                    static_cast<GLsizei>(spriteCount * 6),
-                    GL_UNSIGNED_SHORT,
-                    (void*)0);
-                shader.UnUse();
-            }
+				glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(spriteCount * 6), GL_UNSIGNED_SHORT, 0);   //  using only 1 draw call based on number of sprites in this bucket
+				shader.UnUse();
+			}
 
-            glBindVertexArray(0);
-        }
-    };
+			glBindVertexArray(0);
+		}
+	};
 
 	struct Camera2D {
 		glm::vec2 center{ 0.0f, 0.0f };

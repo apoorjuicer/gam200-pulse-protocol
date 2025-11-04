@@ -7,13 +7,13 @@
  *              This component stores references to the model, shader, and
  *              texture used during rendering, along with sprite name for
  *              texture atlas / asset lookup. Provides helper functions for
- *              assigning textures from asset paths, and supports 
+ *              assigning textures from asset paths, and supports
  *              serialization and deserialization for scene saving/loading.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 #pragma once
 #include "pch/pch_temp.h" // FIRST
 #include "CoreEngine/ECS/Coordinator.h"
@@ -40,7 +40,7 @@ namespace Framework
 	};
 
 
-	class Renderable 
+	class Renderable
 	{
 	public:
 		float mdl_ref = 0.f;		// Model no

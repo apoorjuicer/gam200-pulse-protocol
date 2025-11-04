@@ -12,7 +12,7 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 #pragma once
 // #include "../ComponentJson/Component_System.h"
 // #include "../Math/Matrix_3x3.h"
@@ -62,11 +62,11 @@ namespace Framework
 		// Register these components in your initialization code:
 		// void Serialize(Value& data, Document::AllocatorType& alloc) override;
 		// void Deserialize(Value& data);
-		void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
-		void Deserialize(const rapidjson::Value &in);
+		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
+		void Deserialize(const rapidjson::Value& in);
 	};
 
-	bool SaveTransform(Transform const &t, std::string const &path);
-	bool LoadTransform(Transform &t, std::string const &path);
+	bool SaveTransform(Transform const& t, std::string const& path);
+	bool LoadTransform(Transform& t, std::string const& path);
 }
 #endif // FRAMEWORK_TRANSFORM_H

@@ -281,7 +281,7 @@ void GLApp::draw(std::set<Entity> entities) {
 					re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
 					re.loadedSpriteName = re.spriteName;
 				}
-			
+
 			}
 			else {
 
