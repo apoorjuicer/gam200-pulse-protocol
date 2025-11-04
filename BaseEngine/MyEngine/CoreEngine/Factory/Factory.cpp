@@ -89,8 +89,9 @@ void Factory::DeleteEntity(Entity entity)
 // check if entity has what components, then just serialize to Json file
 bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const& path)
 {
-	using namespace rapidjson;
 	auto* g_coordinator = Coordinator::GetInstance();
+	using namespace rapidjson;
+
 	Document d;
 	d.SetObject();
 	auto& alloc = d.GetAllocator();
@@ -106,8 +107,8 @@ bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const& path)
 		auto& objtype = g_coordinator->GetComponent<NamingComponent>(entity);
 		objtype.Serialize(TypeVal, alloc);
 
-		ComponentObj.AddMember("Typing", TypeVal, alloc);	// so now it will be "transform":{}
-		componentsArray.PushBack(ComponentObj, alloc);				// push the entire transform data into component array
+		ComponentObj.AddMember("Typing", TypeVal, alloc);	
+		componentsArray.PushBack(ComponentObj, alloc);	
 	}
 
 	// check if entity have these compoennts, if have then serialize to json file
