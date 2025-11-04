@@ -47,7 +47,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.18503804504871369,
+                        "elapsedTime": 0.0,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
@@ -66,8 +66,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 50.0,
-                            "y": -130.0
+                            "x": -585.0,
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 500.0,
@@ -102,7 +102,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.18503804504871369,
+                        "elapsedTime": 0.23507392406463624,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -116,7 +116,7 @@
                 },
                 {
                     "name": {
-                        "name": "Jeff"
+                        "name": "Hi"
                     }
                 },
                 {
@@ -188,7 +188,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.18503804504871369,
+                        "elapsedTime": 0.0,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
@@ -386,186 +386,6 @@
                         "actionType": "DestroyEntity",
                         "entityJsonPath": "",
                         "isEnabled": true
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "Typing": {
-                        "Type": "Player"
-                    }
-                },
-                {
-                    "transform": {
-                        "position": {
-                            "x": 20.0,
-                            "y": 255.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "textureID": 259,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.22473560273647309,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "PlayerScript"
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "Typing": {
-                        "Type": "Player"
-                    }
-                },
-                {
-                    "transform": {
-                        "position": {
-                            "x": -110.0,
-                            "y": 380.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "textureID": 259,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 2,
-                        "elapsedTime": 0.27451738715171816,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "PlayerScript"
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "Typing": {
-                        "Type": "Player"
-                    }
-                },
-                {
-                    "transform": {
-                        "position": {
-                            "x": -60.0,
-                            "y": 270.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "textureID": 259,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.45043790340423586,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "PlayerScript"
                     }
                 }
             ]
