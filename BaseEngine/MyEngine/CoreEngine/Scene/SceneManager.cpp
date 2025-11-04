@@ -115,7 +115,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("Typing", NameVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			continue;
+			
 		}
 
 		if (g_coordinator->HasComponent<Framework::Transform>(entity))
@@ -128,7 +128,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("transform", TransfromVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			continue;
+			
 		}
 
 		if (g_coordinator->HasComponent<Framework::Renderable>(entity))
@@ -141,7 +141,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("render", RenderVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			continue;
+			
 		}
 
 		if (g_coordinator->HasComponent<Framework::Animation>(entity))
@@ -154,7 +154,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("animation", AnimationVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			continue;
+			
 		}
 
 		if (g_coordinator->HasComponent<LogicComponent>(entity))
@@ -167,7 +167,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("script", ScriptVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			continue;
+			
 		}
 
 		// purely for testing in-game GUI system
@@ -181,7 +181,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("ui", ButtonVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			continue;
+			
 		}
 
 		if (g_coordinator->HasComponent<Name>(entity))
@@ -194,7 +194,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("name", NameVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			continue;
+			
 		}
 
 		if (g_coordinator->HasComponent<Health>(entity))
@@ -207,7 +207,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("Health", HealthVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			continue;
+			
 		}
 
 		if (g_coordinator->HasComponent<AABB>(entity))
@@ -220,7 +220,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("AABB", AABBVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			continue;
+			
 		}
 
 		// So for this entity, we add compoennt array

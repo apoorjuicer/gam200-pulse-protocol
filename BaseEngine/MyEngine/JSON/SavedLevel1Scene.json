@@ -47,7 +47,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.06825148314237595,
+                        "elapsedTime": 0.18503804504871369,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
@@ -66,8 +66,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -190.0,
-                            "y": -100.0
+                            "x": 50.0,
+                            "y": -130.0
                         },
                         "scale": {
                             "x": 500.0,
@@ -101,8 +101,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.06825148314237595,
+                        "currentFrame": 1,
+                        "elapsedTime": 0.18503804504871369,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -117,6 +117,27 @@
                 {
                     "name": {
                         "name": "Jeff"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 5,
+                        "damage": 1,
+                        "isAlive": true
+                    }
+                },
+                {
+                    "AABB": {
+                        "min": {
+                            "x": 50.0,
+                            "y": 50.0
+                        },
+                        "max": {
+                            "x": 150.0,
+                            "y": 150.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
                     }
                 }
             ]
@@ -167,7 +188,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.06825148314237595,
+                        "elapsedTime": 0.18503804504871369,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
@@ -380,7 +401,7 @@
                     "transform": {
                         "position": {
                             "x": 20.0,
-                            "y": 270.0
+                            "y": 255.0
                         },
                         "scale": {
                             "x": 250.0,
@@ -415,7 +436,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.09889356046915055,
+                        "elapsedTime": 0.22473560273647309,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -439,8 +460,68 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -245.0,
-                            "y": 295.0
+                            "x": -110.0,
+                            "y": 380.0
+                        },
+                        "scale": {
+                            "x": 250.0,
+                            "y": 250.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "angle_disp": 0.0,
+                        "angle_speed": 0.0,
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "textureID": 259,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 2,
+                        "elapsedTime": 0.27451738715171816,
+                        "totalFrames": 3,
+                        "columns": 3,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "PlayerScript"
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "Typing": {
+                        "Type": "Player"
+                    }
+                },
+                {
+                    "transform": {
+                        "position": {
+                            "x": -60.0,
+                            "y": 270.0
                         },
                         "scale": {
                             "x": 250.0,
@@ -475,7 +556,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.490196168422699,
+                        "elapsedTime": 0.45043790340423586,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
