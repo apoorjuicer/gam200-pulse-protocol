@@ -117,14 +117,14 @@ bool SaveEntity(Entity e, Coordinator *g, std::string const &path)
     d.SetObject();
     auto &alloc = d.GetAllocator();
 
-    // NPC
-    if (g->HasComponent<NPC>(e))
-    {
-        // Value npcVal;
-        Value npcVal(kObjectType);
-        g->GetComponent<NPC>(e).Serialize(npcVal, alloc);
-        d.AddMember("NPC", npcVal, alloc);
-    }
+    //// NPC
+    //if (g->HasComponent<NPC>(e))
+    //{
+    //    // Value npcVal;
+    //    Value npcVal(kObjectType);
+    //    g->GetComponent<NPC>(e).Serialize(npcVal, alloc);
+    //    d.AddMember("NPC", npcVal, alloc);
+    //}
     // transform
     //other components
 
@@ -166,11 +166,11 @@ bool LoadEntity(Entity e, Coordinator *g, std::string const &path)
     if (!d.IsObject())
         return false;
 
-    if (d.HasMember("NPC"))
+    /*if (d.HasMember("NPC"))
     {
         auto &npc = g->GetComponent<NPC>(e);
         npc.Deserialize(d["NPC"]);
-    }
+    }*/
     /*    if (d.HasMember("AABB")) {
             auto& aabb = g->GetComponent<AABB>(e);
             aabb.Deserialize(d["AABB"]);
