@@ -77,17 +77,17 @@ void InputManager::Update(float) {
 	}
 
 	// FOR MOUSE TESTING; CAN USE FOR MAIN MENU
-	if (isMouseButtonTriggered(0)) {
-		std::cout << "[MOUSE] Left Click at " << getMousePosition().x << ", " << getMousePosition().y << std::endl;
-	}
+	//if (isMouseButtonTriggered(0)) {
+	//	std::cout << "[MOUSE] Left Click at " << getMousePosition().x << ", " << getMousePosition().y << std::endl;
+	//}
 
-	if (isMouseButtonTriggered(1)) {
-		std::cout << "[MOUSE] Right Click at " << getMousePosition().x << ", " << getMousePosition().y << std::endl;
-	}
+	//if (isMouseButtonTriggered(1)) {
+	//	std::cout << "[MOUSE] Right Click at " << getMousePosition().x << ", " << getMousePosition().y << std::endl;
+	//}
 
-	if (isMouseButtonReleased(0)) {
-		std::cout << "[MOUSE] Left Released" << std::endl;
-	}
+	//if (isMouseButtonReleased(0)) {
+	//	std::cout << "[MOUSE] Left Released" << std::endl;
+	//}
 
 	// Editor toggle
 	//if (isKeyTriggered(GLFW_KEY_O)) {

@@ -12,7 +12,7 @@
  */
  /******************************************************************************/
 #pragma once
-#include "pch/pch.h"
+#include "pch/pch_temp.h"
 #include "CoreEngine/ECS/system.h"
 
 class Vector2 : public Systems
