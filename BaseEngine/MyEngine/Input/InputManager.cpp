@@ -223,12 +223,12 @@ void InputManager::updateGUIButtons() {
 	float mouseY = mousePositionVirtual.y;
 
 	// DEBUG: Print mouse coordinates once per frame
-	static int debugCounter = 0;
-	if (debugCounter++ % 60 == 0) {  // Print every 60 frames to avoid spam
-		std::cout << "[DEBUG] Mouse Window: (" << mousePosition.x << ", " << mousePosition.y << ")" << std::endl;
-		std::cout << "[DEBUG] Mouse Virtual: (" << mouseX << ", " << mouseY << ")" << std::endl;
-		std::cout << "[DEBUG] mouseInGameViewport: " << mouseInGameViewport << std::endl;
-	}
+	//static int debugCounter = 0;
+	//if (debugCounter++ % 60 == 0) {  // Print every 60 frames to avoid spam
+	//	std::cout << "[DEBUG] Mouse Window: (" << mousePosition.x << ", " << mousePosition.y << ")" << std::endl;
+	//	std::cout << "[DEBUG] Mouse Virtual: (" << mouseX << ", " << mouseY << ")" << std::endl;
+	//	std::cout << "[DEBUG] mouseInGameViewport: " << mouseInGameViewport << std::endl;
+	//}
 
 
 	for (auto const& entity : GUIButtonEntities) {
