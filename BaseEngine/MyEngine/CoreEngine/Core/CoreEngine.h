@@ -13,8 +13,10 @@
 
 #pragma once
 #include "pch/pch.h"
-#include "../MyEngine/Serialization/Serialization.h"
+//#include "../Components/AABB.h"
+#include "../Components/Health.h"
 #include "../Components/EntityType.h"
+#include "../MyEngine/Serialization/Serialization.h"
 
 class CoreEngine
 {

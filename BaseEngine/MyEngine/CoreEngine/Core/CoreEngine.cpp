@@ -24,6 +24,7 @@
 #include "CoreEngine/Factory/Factory.h"
 #include "../TestCases/TestCase.h"
 #include "../MyEngine/Components/DisplayName.h"
+#include "../MyEngine/Components/EntityType.h"
 #pragma comment(lib, "winmm.lib")
 
 // Game window dimensions and title
@@ -258,6 +259,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<Framework::Animation>();
 	g_coordinator->RegisterComponent<NPC>();
 	g_coordinator->RegisterComponent<AABB>();
+	g_coordinator->RegisterComponent<Health>();
 	g_coordinator->RegisterComponent<LogicComponent>();
 	g_coordinator->RegisterComponent<NamingComponent>();
 	g_coordinator->RegisterComponent<GUIButton>();
@@ -277,6 +279,7 @@ void CoreEngine::Setup()
 	Signature collisionSig;
 	collisionSig.set(g_coordinator->GetComponentType<NPC>());
 	collisionSig.set(g_coordinator->GetComponentType<AABB>());
+	collisionSig.set(g_coordinator->GetComponentType<Health>());
 	g_coordinator->SetSystemSignature<CollisionManager>(collisionSig);
 
 	Signature inputSig;
@@ -302,6 +305,7 @@ void CoreEngine::Setup()
 	Signature sceneSig;
 	sceneSig.set(g_coordinator->GetComponentType<NPC>());
 	sceneSig.set(g_coordinator->GetComponentType<AABB>());
+	sceneSig.set(g_coordinator->GetComponentType<Health>());
 	sceneSig.set(g_coordinator->GetComponentType<NamingComponent>());
 	sceneSig.set(g_coordinator->GetComponentType<Framework::Transform>());
 	sceneSig.set(g_coordinator->GetComponentType<Framework::Renderable>());
@@ -309,6 +313,7 @@ void CoreEngine::Setup()
 	g_coordinator->SetSystemSignature<SceneManager>(sceneSig);
 
 	Signature LogicSig;
+	LogicSig.set(g_coordinator->GetComponentType<Health>());
 	LogicSig.set(g_coordinator->GetComponentType<LogicComponent>());
 	g_coordinator->SetSystemSignature<LogicSystem>(LogicSig);
 }

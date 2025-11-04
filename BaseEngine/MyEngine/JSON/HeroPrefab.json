@@ -1,5 +1,13 @@
 {
     "components": [
+
+        {
+            "Typing": 
+            {
+                "Type":"Player"
+            }
+        },
+
         {
             "transform": {
                 "position": {
@@ -38,6 +46,13 @@
                 "rows": 1,
                 "animationSpeed": 2.0
             }
+        },
+
+        {
+            "script":  
+                {
+                    "ScriptName": "PlayerScript"
+                }
         }
     ]
 }
