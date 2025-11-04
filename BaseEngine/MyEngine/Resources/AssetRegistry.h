@@ -128,8 +128,15 @@
 	};
 
 
+	std::ostream& operator<<(std::ostream& os, AudioResource const& aud_r);
+	std::ostream& operator<<(std::ostream& os, TextureResource const& tr);
+	std::ostream& operator<<(std::ostream& os, FontResource const& fr);
+	std::ostream& operator<<(std::ostream& os, SceneResource const& sr);
+	std::ostream& operator<<(std::ostream& os, AnimationResource const& anim_r);
+
 	std::ostream& operator<<(std::ostream& os, AssetRegistry const& rm);
 
 
+	
 
 

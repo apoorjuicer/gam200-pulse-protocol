@@ -90,6 +90,7 @@ GLApp::TranslationBuf GLApp::tb;
 GLApp::Camera2D GLApp::gCamera{};
 
 void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/) {
+	
 	// --- Compute middle rectangle from window size using fixed ratios ---
 	const float kLeftRatio = 0.20f; // 20% width
 	const float kRightRatio = 0.25f; // 25% width
@@ -298,6 +299,7 @@ void GLApp::draw(std::set<Entity> entities) {
 
 		if (!re.spriteName.empty() && re.textureID == 0) {
 			//re.textureID = Framework::GraphicsManager::GetOrLoad(re.spriteName);
+			re.textureID = mAssets.getGraphics().GetOrLoad(re.spriteName);
 			if (re.textureID == 0) {
 				std::cerr << "[GLApp] Failed to load texture: " << re.spriteName << std::endl;
 				continue;
@@ -334,6 +336,7 @@ void GLApp::cleanup() {
 
 	// Use GraphicsManager to clean up all textures
 	//Framework::GraphicsManager::Clear();
+	mAssets.getGraphics().Clear();
 
 	// Delete any standalone textures not managed by TextureManager
 	if (textureID) {

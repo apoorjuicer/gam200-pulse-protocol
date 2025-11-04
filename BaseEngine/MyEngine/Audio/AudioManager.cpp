@@ -46,8 +46,12 @@
         return true;
     }
     //AudioManager::AudioManager() {}
-    AudioManager::AudioManager(AssetRegistry* registry) :mRegistry{ registry } { Initialize(); }
-    AudioManager::~AudioManager() { Shutdown(); }
+    AudioManager::AudioManager(AssetRegistry* registry) :mRegistry{ registry } { 
+        //Initialize(); 
+    }
+    AudioManager::~AudioManager() { 
+       Shutdown(); 
+    }
 
     void AudioManager::Initialize() {
         //registry should be set before this function call
@@ -120,7 +124,8 @@
             std::cout << "[AudioManager] 'beat_placeholder' loaded from registry.\n";
         }
 
-
+        std::string tf = IsBGMPlaying() ? "true" : "false";
+        std::cout << "[AudioManager] Playing bgm? "<< tf << "\n";
         PlaySound("beat_placeholder");
         std::cout << "[AudioManager] AudioManager initialization completed with mixers.\n";
 
@@ -276,6 +281,9 @@
 
         // Get sound resource metadata from asset registry (audioResource)
         AudioResource const* soundefx = mRegistry->FindAudio(id);
+
+        if (id != soundefx->audio_id) { return false; }
+
         if (!soundefx) {
             std::cerr << "[AudioManager] LoadSFX(): No entry found for id : '" << id << "'.\n";
             return false;
@@ -358,7 +366,7 @@
 
         return static_cast<double>(ms) / 1000.0; // convert to seconds
     }
-    bool  AudioManager::UnloadAudio(std::string const& id) {
+    bool AudioManager::UnloadAudio(std::string const& id) {
         auto it = mSfx.find(id);
         if (it != mSfx.end()) {
 
@@ -409,15 +417,6 @@
         return (v < 0) ? 0 :
             ((v > 1) ? 1 : v);
     }
-
-
-
-
-
-   
-
-
-
 
  /*
     Every FMOD function returns an FMOD_RESULT

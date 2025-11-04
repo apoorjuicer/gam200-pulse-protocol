@@ -377,8 +377,7 @@ namespace MyEditor {
 
                     if (ImGui::Button("Reload Texture")) {
                         //rend.textureID = CoreEngine::AssetsManager::GraphicsManager::GetOrLoad(rend.spriteName);
-                       // rend.textureID = mAssets.getGraphics().GetOrLoad(rend.spriteName);
-                       // rend.textureID = mAssets.getGraphics().GM_FindTextureHandle(rend.spriteName);
+                        rend.textureID = mAssets.getGraphics().GetOrLoad(rend.spriteName);
                     }
                         
                     

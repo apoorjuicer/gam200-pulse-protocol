@@ -298,6 +298,8 @@
 			}
 			else {
 				++added;
+				std::cout << "[Texture] Added: id='" << it->second.tex_name
+					<< "' path='" << it->second.path << "'\n";
 			}
 		}// end of for-range to load data into container
 
@@ -351,12 +353,18 @@
 			}
 			else {
 				++added;
+				std::cout << "[Font] Added: id='" << it->second.font_id
+					<< "' path='" << it->second.path << "'\n";
 			}
+
 		}// end of for-range to load data into container
 
 		std::cout << "No. of [Font] item(s) Loaded :" << added << "\n"
 			<< "No. item(s), skipped " << skipped << "\n"
 			<< "Loaded from :" << jsonPath << "\n";
+
+		
+
 
 		return true;
 	}
@@ -488,6 +496,47 @@
 	}
 
 	/*For Debug and Console Init print all container element*/
+
+	std::ostream& operator<<(std::ostream& os, AudioResource const& aud_r) {
+		os << "[AudioResource]"
+			<< " id='" << aud_r.audio_id << "'"
+			<< " path='" << aud_r.path << "'"
+			<< " loop=" << std::boolalpha << aud_r.loop
+			<< " volume=" << aud_r.volume
+			<< " type='" << aud_r.audiotype << "'";
+		return os;
+	}
+	std::ostream& operator<<(std::ostream& os, TextureResource const& tr) {
+		os << "[TextureResource]"
+			<< " id='" << tr.tex_name << "'"
+			<< " path='" << tr.path << "'";
+		return os;
+	}
+	std::ostream& operator<<(std::ostream& os, FontResource const& fr) {
+		os << "[FontResource]"
+			<< " id='" << fr.font_id << "'"
+			<< " path='" << fr.path << "'"
+			<< " pixelHeight=" << fr.pixelHeight;
+		return os;
+	}
+	std::ostream& operator<<(std::ostream& os, SceneResource const& sr) {
+		os << "[SceneResource]"
+			<< " id='" << sr.scene_id << "'"
+			<< " path='" << sr.path << "'";
+		return os;
+	}
+	std::ostream& operator<<(std::ostream& os, AnimationResource const& anim_r) {
+		os << "[AnimationResource]"
+			<< " id='" << anim_r.anim_id
+			<< "' path='" << anim_r.path
+			<< "' frames=" << anim_r.totalFrames
+			<< " cols=" << anim_r.columns
+			<< " rows=" << anim_r.rows
+			<< " speed=" << anim_r.animationSpeed;
+		return os;
+	}
+
+
 	std::ostream& operator<<(std::ostream& os, AssetRegistry const& ar) {
 
 		os << "===Asset Registry Loaded: ===\n";

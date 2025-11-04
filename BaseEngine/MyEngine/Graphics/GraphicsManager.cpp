@@ -54,7 +54,10 @@ namespace {
     //}
 
     GraphicsManager::GraphicsManager(AssetRegistry* registry) :mRegistry{ registry } {
-        Initialize();
+       // Initialize();
+                // Construct GLApp only once
+        
+        std::cout << "[GraphicsManager] single arg cons called\n";
     }
 
     GraphicsManager::~GraphicsManager()
@@ -77,11 +80,13 @@ namespace {
            // glapp = std::make_unique<GLApp>();
             glapp = new GLApp;
         }
-       
+
+
 
         //auto& AM = AssetsManager::Instance();
        // AM.InitFonts();
        // AM.LoadAllFonts("../../MyEngine/Assets/Font", 48);
+
         InitFonts();
         if (!LoadFontsFromRegistry()) {
             std::cerr << "[GraphicsManager] Failed to load some fonts from asset registry.\n";
@@ -91,7 +96,6 @@ namespace {
         }
 
 
-        // Print GL info and init the app renderer
         GLHelper::print_specs();
         glapp->init();
 
@@ -111,12 +115,14 @@ namespace {
         }
 
         std::cout << "[GraphicsManager] Successfully initialized for graphics.\n";
-
+        // Print GL info and init the app renderer
+    
         // We want text to alpha-blend on top of world
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_CULL_FACE);
+
 
         // Build a top-left-origin orthographic projection matching our virtual res
         {
@@ -196,6 +202,9 @@ namespace {
         else {
             std::cout << "[GraphicsManager] Successfully loaded textures from  asset registry.\n";
         }
+
+
+        std::cout << "[GraphicsManager] Shaders Successfully initialized for graphics.\n";
     }
 
     void GraphicsManager::Update()
@@ -711,8 +720,8 @@ namespace {
         }
 
         FT_Done_Face(face);
-        /*m_fontMap.emplace(fontKey, std::move(data));
-        std::cout << "[Font] Loaded font '" << fontKey
+        m_fontMap.emplace(fontKey, std::move(data));
+        /*std::cout << "[Font] Loaded font '" << fontKey
             << "' from " << fontFilePath
             << " @ " << pixelHeight << "px\n";*/
         return true;

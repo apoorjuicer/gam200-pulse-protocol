@@ -22,7 +22,8 @@ namespace Framework
     void AssignTextureFromPath(Framework::Renderable &t)
     {
         if (t.textureID == 0 && !t.spriteName.empty()) {
-            // t.textureID = Framework::AssetsManager::GetOrLoad(t.spriteName);
+           //t.textureID = Framework::GraphicsManager::GetOrLoad(t.spriteName);
+            t.textureID = mAssets.getGraphics().GetOrLoad(t.spriteName);
         }
           
     }
@@ -59,5 +60,4 @@ namespace Framework
         if (in.HasMember("spriteName"))
             spriteName = in["spriteName"].GetString();
     }
-
 } // end of namespace

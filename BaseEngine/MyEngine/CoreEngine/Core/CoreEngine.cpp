@@ -25,6 +25,7 @@
 //#include "glapp.h"
 #include "../MyEngine/Resources/AssetRegistry.h"
 #include "../CoreEngine/Asset/AssetsManager.h"
+#include "../MyEngine/Serialization/Serialization.h"
 
 #pragma comment(lib, "winmm.lib")
 
@@ -162,7 +163,7 @@ void CoreEngine::Init()
 	std::cout << "WindowWidth is: " << WindowWidth << "\n";
 	std::cout << "WindowHeight is: " << WindowHeight << "\n";
 
-	mAssets.Initialize();
+
 
 	///*saving config data*/ //tested saving works
 	// std::string newConfigPath = "../../MyEngine/JSON/config2.json";
@@ -283,7 +284,8 @@ void CoreEngine::Init()
 	}
 
 	// Create systems AFTER GL is ready
-
+	mAssets.Initialize();
+	std::cout << mAssets.getRegistry().FindTexture("hero") << "\n";
 	// Singleton for Engine, but once game use EventBus/messaging system
 
 	// PLEASE CALL THIS EVERY SINGLE U WANT 2 USE SINGLETON
@@ -301,8 +303,8 @@ void CoreEngine::Init()
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
 	g_rhythmSystem->Initialize();
-	g_graphicsSystem->Initialize();
-	g_audioSystem->Initialize();
+	//g_graphicsSystem->Initialize();
+	//g_audioSystem->Initialize();
 	g_coordinator->InitializeAllSystems();
 
 	ProfilingManager::GetInstance()->SetResetInterval(60.0);

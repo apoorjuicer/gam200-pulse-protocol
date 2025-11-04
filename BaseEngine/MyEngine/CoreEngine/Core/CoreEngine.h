@@ -13,20 +13,12 @@
 
 #pragma once
 #include "pch/pch.h"
-#include "../MyEngine/Serialization/Serialization.h"
+//#include "../MyEngine/Serialization/Serialization.h"
 //#include "../MyEngine/Resources/AssetRegistry.h"
-#include "../Asset/AssetsManager.h"
+//#include "../Asset/AssetsManager.h"
 
-//namespace Framework { 
-//	class AssetRegistry;
-//	class AudioManager;
-//	class GraphicsManager;
-//	class AssetsManager;
-//}
-
-//namespace {
-//	class Config;
-//}
+class Config;
+class AssetManager;
 
 class CoreEngine
 {
@@ -65,11 +57,6 @@ private:
 
 	GLFWwindow* window;
 
-	//
-	//Framework::AssetRegistry mAssetRegistry;
-	//Framework::AudioManager mAudioManager;
-	//Framework::GraphicsManager mGraphicsManager;
-	//AssetsManager mAssets;
 
 };
 
@@ -77,7 +64,6 @@ private:
 extern CoreEngine* Engine;
 extern Config config; //global scope
 extern AssetsManager mAssets;
-//extern Framework::AssetRegistry ar; //global scope
 extern int WindowWidth;
 extern int WindowHeight;
 //constexpr int WindowWidth = 1600;

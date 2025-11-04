@@ -302,13 +302,17 @@
         mRegistry.LoadTextureManifest();
         mRegistry.LoadFontManifest();
         mRegistry.LoadSceneManifest();
+        mRegistry.LoadAnimationManifest();
 
         // 2) Bring up subsystems (pass registry where needed)
         mAudio = std::make_unique<AudioManager>(&mRegistry);
-        ////mAudio->Initialize(); //already called in constructor
+        mAudio->Initialize(); //already called in constructor
 
         mGraphics = std::make_unique<GraphicsManager>(&mRegistry);
-       // mGraphics->Initialize(); //already called in constructor
+        mGraphics->Initialize(); //already called in constructor
+
+
+        std::cout << "[AssetsManager] Initialized complete.\n";
     }
 
     void AssetsManager::Shutdown() {

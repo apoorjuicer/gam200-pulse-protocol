@@ -42,10 +42,6 @@
 #include <memory>
 #include FT_FREETYPE_H
 
-//namespace Framework {
-//    class GLApp;
-//}
-
 class AssetRegistry; //fwd
 class GLApp; //fwd
 

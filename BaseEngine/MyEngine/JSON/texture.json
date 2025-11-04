@@ -2,7 +2,7 @@
     "textureFilePaths": [
         {
             "id": "background",
-            "path": "../../MyEngine/Assets/Textures/Characters/Background1.jpg",
+            "path": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg",
             "mdl_ref": 0,
             "shd_ref": 0
         },
@@ -33,6 +33,18 @@
         {
             "id": "perfect_ui",
             "path": "../../MyEngine/Assets/Textures/UI/perfect.png",
+            "mdl_ref": 0,
+            "shd_ref": 0
+        },
+        {
+            "id": "hover_btn_placeholder_ui",
+            "path": "../../MyEngine/Assets/Textures/UI/hover_btn_placeholder.png",
+            "mdl_ref": 0,
+            "shd_ref": 0
+        },
+        {
+            "id": "normal_btn_placeholder_ui",
+            "path": "../../MyEngine/Assets/Textures/UI/normal_btn_placeholder.png",
             "mdl_ref": 0,
             "shd_ref": 0
         }
