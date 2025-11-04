@@ -15,6 +15,17 @@
 /******************************************************************************/
 #pragma once
 #include "SceneManager.h"
+#include "../GameLogic/GameLogic.h"
+#include "../Graphics/Transform.h"
+#include "../Graphics/Animation.h"
+#include "../Graphics/Renderable.h"
+//#include "../Components/AABB.h"
+#include "../CoreEngine/Assets.h"
+#include "../Components/Health.h"
+#include "../Components/EntityType.h"
+#include "../MyEngine/Components/DisplayName.h"
+#include "CoreEngine/Factory/Factory.h"
+
 
 //Starting scene will be Main Menu
 SceneManager::SceneManager()

@@ -313,7 +313,6 @@ void CoreEngine::Setup()
 	g_coordinator->SetSystemSignature<SceneManager>(sceneSig);
 
 	Signature LogicSig;
-	LogicSig.set(g_coordinator->GetComponentType<Health>());
 	LogicSig.set(g_coordinator->GetComponentType<LogicComponent>());
 	g_coordinator->SetSystemSignature<LogicSystem>(LogicSig);
 }
