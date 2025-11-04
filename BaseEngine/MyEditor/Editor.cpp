@@ -1568,7 +1568,7 @@ namespace MyEditor
 
         // Project (Assets & Prefabs)
         if (bottomDockID) ImGui::SetNextWindowDockID(bottomDockID, ImGuiCond_FirstUseEver);
-        if (ImGui::BeginTabItem("Project")) {
+        if (ImGui::Begin("Project")) {
             // folder browser
             ProjectPanel(selectedEntity);
         }
