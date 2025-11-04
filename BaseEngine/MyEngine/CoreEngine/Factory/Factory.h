@@ -2,7 +2,7 @@
 #include "pch/pch_temp.h"	
 #include "../Components/EntityType.h"
 //#include "../Components/AABB.h"
-#include "../CoreEngine/Assets.h"
+//#include "../CoreEngine/Assets.h"
 #include "../Components/Health.h"
 #include "../Graphics/Transform.h"
 #include "../GameLogic/GameLogic.h"
