@@ -32,7 +32,7 @@ Config config;
 int WindowWidth;
 int WindowHeight;
 
-TestCase Test;
+//TestCase Test;
 
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,

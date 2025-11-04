@@ -28,8 +28,8 @@ public:
     void Update(float dt) override;
 
     // --- Collision Helper Functions ---
-    //AABB BuildHeroHitbox(Framework::Transform& pos, const NPC& npc);
-    //AABB BuildMonsterHitbox(Framework::Transform& pos, const NPC& npc);
+    AABB BuildHeroHitbox(Framework::Transform& pos, const NPC& npc);
+    AABB BuildMonsterHitbox(Framework::Transform& pos, const NPC& npc);
 
     // --- Collision Detection ---
     bool CheckAABBCollision(const AABB& a, const AABB& b);

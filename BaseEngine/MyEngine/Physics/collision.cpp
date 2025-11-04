@@ -23,30 +23,30 @@ void CollisionManager::Update(float) {}
 //    return { min, max };
 //}
 
-//AABB CollisionManager::BuildHeroHitbox(Framework::Transform& pos, const NPC& npc)
-//{
-//    // Adjust offsets to match where the hero appears visually
-//    constexpr float heroOffsetX = 220.0f;   // move right
-//    constexpr float heroOffsetY = -280.0f;  // move down
-//    constexpr float hitboxScale = 2.0f;     // make hitbox larger if sprite is scaled up
-//
-//    float halfWidth = (npc.width * hitboxScale) / 2.0f;
-//    float halfHeight = (npc.height * hitboxScale) / 2.0f;
-//
-//    Vector2 min((pos.Pos.x + heroOffsetX) - halfWidth,
-//        (pos.Pos.y + heroOffsetY) - halfHeight);
-//    Vector2 max((pos.Pos.x + heroOffsetX) + halfWidth,
-//        (pos.Pos.y + heroOffsetY) + halfHeight);
-//
-//    return { min, max };
-//}
-//
-//AABB CollisionManager::BuildMonsterHitbox(Framework::Transform& pos, const NPC& npc)
-//{
-//    Vector2 min(pos.Pos.x - npc.width / 2.0f, pos.Pos.y - npc.height / 2.0f);
-//    Vector2 max = min + Vector2(npc.width, npc.height);
-//    return { min, max };
-//}
+AABB CollisionManager::BuildHeroHitbox(Framework::Transform& pos, const NPC& npc)
+{
+    // Adjust offsets to match where the hero appears visually
+    constexpr float heroOffsetX = 220.0f;   // move right
+    constexpr float heroOffsetY = -280.0f;  // move down
+    constexpr float hitboxScale = 2.0f;     // make hitbox larger if sprite is scaled up
+
+    float halfWidth = (npc.width * hitboxScale) / 2.0f;
+    float halfHeight = (npc.height * hitboxScale) / 2.0f;
+
+    Vector2 min((pos.Pos.x + heroOffsetX) - halfWidth,
+        (pos.Pos.y + heroOffsetY) - halfHeight);
+    Vector2 max((pos.Pos.x + heroOffsetX) + halfWidth,
+        (pos.Pos.y + heroOffsetY) + halfHeight);
+
+    return { min, max };
+}
+
+AABB CollisionManager::BuildMonsterHitbox(Framework::Transform& pos, const NPC& npc)
+{
+    Vector2 min(pos.Pos.x - npc.width / 2.0f, pos.Pos.y - npc.height / 2.0f);
+    Vector2 max = min + Vector2(npc.width, npc.height);
+    return { min, max };
+}
 
 bool CollisionManager::CheckAABBCollision(const AABB& a, const AABB& b)
 {
