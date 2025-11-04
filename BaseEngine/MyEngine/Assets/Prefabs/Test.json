@@ -3,12 +3,12 @@
         {
             "transform": {
                 "position": {
-                    "x": -383.5,
-                    "y": 0.0
+                    "x": -300.0,
+                    "y": 260.0
                 },
                 "scale": {
-                    "x": 500.0,
-                    "y": 500.0
+                    "x": 250.0,
+                    "y": 250.0
                 },
                 "rotation": {
                     "x": 0.0,
@@ -38,8 +38,8 @@
         },
         {
             "animation": {
-                "currentFrame": 1,
-                "elapsedTime": 0.07525338232517243,
+                "currentFrame": 2,
+                "elapsedTime": 0.10273461043834686,
                 "totalFrames": 3,
                 "columns": 3,
                 "rows": 1,

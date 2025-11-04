@@ -3,7 +3,7 @@
         {
             "transform": {
                 "position": {
-                    "x": 800.0,
+                    "x": -585.0,
                     "y": 0.0
                 },
                 "scale": {
@@ -25,9 +25,9 @@
             "render": {
                 "mdl_ref": 1.0,
                 "shd_ref": 2.0,
-                "textureID": 260,
+                "textureID": 259,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
+                "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -38,10 +38,10 @@
         },
         {
             "animation": {
-                "currentFrame": 0,
-                "elapsedTime": 0.468093603849411,
-                "totalFrames": 1,
-                "columns": 1,
+                "currentFrame": 2,
+                "elapsedTime": 0.33346331119537356,
+                "totalFrames": 3,
+                "columns": 3,
                 "rows": 1,
                 "animationSpeed": 2.0
             }

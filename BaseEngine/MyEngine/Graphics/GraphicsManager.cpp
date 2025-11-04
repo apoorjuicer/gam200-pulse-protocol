@@ -180,43 +180,65 @@ void GraphicsManager::Update()
     // 4) Draw overlay text last
     auto& textShader = GLApp::shdrpgms[3];
 
-    // Build FPS string and heaviest system string and render it
-    if (!MyEditor::IsEnabled()) {
-        auto& AM = Framework::AssetsManager::Instance();
-        const Framework::FontData* debugFont = AM.GetFont("liberation-mono_48");
+    // get the game viewport dimensions from the editor itself
+    MyEditor::GameViewport viewport = MyEditor::ComputeMiddleGameViewportPixels(Engine->GetWindow(), false);
 
-        if (debugFont) {
+    // only renders if viewport is valid
+    if (viewport.w > 0 && viewport.h > 0) {
+
+        // if the 2 fonts are loaded
+        if (m_debugFont && m_uiFont) {
+            // get framebuffer dimensions
+            int fbW = 0, fbH = 0;
+            glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
+
+            // calculate scaling factors between framebuffer and virtual coordinates
+            float scaleX = static_cast<float>(GLApp::VIRTUAL_W) / static_cast<float>(fbW);
+            float scaleY = static_cast<float>(GLApp::VIRTUAL_H) / static_cast<float>(fbH);
+
+            // convert viewport position to virtual coordinates
+            float virtualX = static_cast<float>(viewport.x) * scaleX;
+            float virtualY = static_cast<float>(viewport.y) * scaleY;
+            float virtualW = static_cast<float>(viewport.w) * scaleX;
+            float virtualH = static_cast<float>(viewport.h) * scaleY;
+
+            // text positioning const
+            const float TEXT_PADDING = -325.0f;
+            const float LINE_SPACING = 60.0f;
+            const float BOTTOM_OFFSET = 60.0f;
+            const float FPS_SCALE = 1.3f;
+            const float SYSTEM_SCALE = 1.0f;
+
+            const float TEAM_PADDING_X = -150.0f;
+            const float TEAM_PADDING_Y = -225.0f;
+            const float TEAM_LABEL_SCALE = 1.3f;
+
+            // text color const
+            const glm::vec3 FPS_COLOR = glm::vec3(0.0f, 1.0f, 1.0f); // yellow
+            const glm::vec3 SYSTEM_COLOR = glm::vec3(1.0f, 0.0f, 1.0f); // green
+            const glm::vec3 TEAM_COLOR = glm::vec3(1.0f, 1.0f, 1.0f); // white
+
+            const std::string TEAM_LABEL = "Team BLOOP";
+
+            // bottom-left of game viewport
+            float textX = virtualX + TEXT_PADDING;
+            float textY = virtualY + virtualH - BOTTOM_OFFSET;
+
+            // top right of game viewport
+            float estimatedWidth = TEAM_LABEL.length() * 15.0f * TEAM_LABEL_SCALE;
+            float teamLabelX = virtualX + virtualW - estimatedWidth - TEAM_PADDING_X;
+            float teamLabelY = virtualY + TEAM_PADDING_Y;
+
+            // render FPS text; uses font liberation-mono_48
             std::ostringstream fpsText;
             fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
+            
+            // uses font: 
+            RenderText(GLApp::shdrpgms[3], fpsText.str(), textX, textY, FPS_SCALE, FPS_COLOR, m_debugFont);
 
-            RenderText(GLApp::shdrpgms[3], fpsText.str(), 100.0f, 850.0f,
-                1.0f, glm::vec3(0.5f, 0, 0), debugFont);
-
-            // Add top system below FPS
+            // get top system from profiler
             auto* profiler = ProfilingManager::GetInstance();
             const auto& profiles = profiler->GetDisplayProfiles();
-            //if (!MyEditor::IsEnabled()) {
-            //	std::ostringstream fpsText;
-            //	fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
-            //	RenderText(GLApp::shdrpgms[3], fpsText.str(), 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
-
-            //	// Add top system below FPS
-            //	auto* profiler = ProfilingManager::GetInstance();
-            //	const auto& profiles = profiler->GetDisplayProfiles();
-
-            //	std::string topSystem = "None";
-            //	double topPercentage = 0.0;
-            //	for (const auto& [systemName, profile] : profiles) {
-            //		if (profile.percentage > topPercentage) {
-            //			topPercentage = profile.percentage;
-            //			topSystem = systemName;
-            //		}
-            //	}
-
-            //	std::ostringstream topText;
-            //	topText << topSystem << ": " << std::fixed << std::setprecision(2) << topPercentage << "%";
-            //	RenderText(GLApp::shdrpgms[3], topText.str(), 100.0f, 880.0f, 0.8f, glm::vec3(0.5f, 0.5f, 0), Characters2);
-            //}
 
             std::string topSystem = "None";
             double topPercentage = 0.0;
@@ -227,46 +249,21 @@ void GraphicsManager::Update()
                 }
             }
 
+            // render top system below FPS text
             std::ostringstream topText;
             topText << topSystem << ": " << std::fixed
                 << std::setprecision(2) << topPercentage << "%";
 
-            RenderText(GLApp::shdrpgms[3], topText.str(), 100.0f, 880.0f,
-                0.8f, glm::vec3(0.5f, 0.5f, 0), debugFont);
+            // uses font liberation-mono_48
+            RenderText(textShader, topText.str(), textX, textY + LINE_SPACING, SYSTEM_SCALE, SYSTEM_COLOR, m_debugFont);
+
+            // team label using font patrickhand-regular_48
+            RenderText(textShader, TEAM_LABEL, teamLabelX, teamLabelY, TEAM_LABEL_SCALE, TEAM_COLOR, m_uiFont);
         }
         else {
-            std::cerr << "[GraphicsManager] WARNING: debugFont not found!\n";
+            std::cerr << "[GraphicsManager] WARNING: fonts not found!\n";
         }
     }
-
-
-    // Team label
-    RenderText(
-        textShader,
-        "Team BLOOP",
-        600.0f, 850.0f,
-        1.0f,
-        glm::vec3(1, 1, 1),
-        m_uiFont
-    );
-
-    // FPS counter (while editor hidden)
-    if (!MyEditor::IsEnabled()) {
-        std::ostringstream fpsText;
-        fpsText << "FPS: " << std::fixed
-            << std::setprecision(1)
-            << GLHelper::fps;
-
-        RenderText(
-            textShader,
-            fpsText.str(),
-            100.0f, 850.0f,
-            1.0f,
-            glm::vec3(0.5f, 0.0f, 0.0f),
-            m_debugFont
-        );
-    }
-
     // // Controls help, anchored at right side
     // {
     //     int fbW = 0, fbH = 0;
@@ -319,6 +316,7 @@ void GraphicsManager::Update()
     //         m_debugFont);
     // }
 }
+
 
 void GraphicsManager::Shutdown()
 {
