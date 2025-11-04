@@ -11,18 +11,18 @@
 
 struct NamingComponent
 {
-    std::string ObjType;    // so like player, enenmy, button
+    std::string Type;    // so like player, enenmy, button
 
     void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
     {
         //using namespace rapidjson;
         out.SetObject();
-        out.AddMember("Type", rapidjson::Value(ObjType.c_str(), alloc), alloc);
+        out.AddMember("Type", rapidjson::Value(Type.c_str(), alloc), alloc);
     }
 
     void Deserialize(const rapidjson::Value& in)
     {
         if (!in.IsObject()) throw std::runtime_error("Invalid JSON for LogicComponent");
-        if (in.HasMember("Type")) ObjType = in["Type"].GetString();
+        if (in.HasMember("Type")) Type = in["Type"].GetString();
     }
 };
