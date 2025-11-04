@@ -134,15 +134,54 @@
             return id;
         }
 
-        GLuint AssetsManager::GetOrLoad(const std::string& path) {
-            if (auto it = s_pathToID.find(path); it != s_pathToID.end()) return it->second;
-            GLuint id = LoadTextureFile(path);
-            if (id) {
-                s_pathToID[path] = id;
-                s_idToPath[id] = path;
+        GLuint AssetsManager::GetOrLoad(const std::string& path)
+        {
+            namespace fs = std::filesystem;
+            std::error_code ec;
+
+            // 1) Normalize what we got
+            fs::path p_in = fs::path(path);
+            std::string key = p_in.lexically_normal().string();
+
+            // 2) If already cached, return it
+            if (auto it = s_pathToID.find(key); it != s_pathToID.end())
+                return it->second;
+
+            // 3) If the file doesn't exist OR the user passed only a filename (no parent),
+            //    resolve it by scanning the default Textures root.
+            const std::string kTexturesRoot = "../../MyEngine/Assets/Textures";
+            bool needsResolve = !fs::exists(p_in, ec) || !p_in.has_parent_path();
+
+            if (needsResolve)
+            {
+                // Reduce to base filename and search the whole Textures tree.
+                std::string base = p_in.filename().string();
+                if (base.empty()) base = key;
+
+                std::string resolved = FindTextureByFilename(base, kTexturesRoot);
+                if (!resolved.empty())
+                    key = fs::path(resolved).lexically_normal().string();
+            }
+
+            // 4) Re-check cache under the (possibly) resolved key
+            if (auto it2 = s_pathToID.find(key); it2 != s_pathToID.end())
+                return it2->second;
+
+            // 5) Load and cache
+            GLuint id = LoadTextureFile(key);
+            if (id)
+            {
+                s_pathToID[key] = id;
+                s_idToPath[id] = key;
+            }
+            else
+            {
+                std::cerr << "Failed to load texture: " << key
+                    << " reason: " << (stbi_failure_reason() ? stbi_failure_reason() : "unknown") << "\n";
             }
             return id;
         }
+
 
         const std::string& AssetsManager::PathFromID(GLuint texID) {
             return s_idToPath.at(texID); // throws if not found (use .find if you prefer no-throw)
@@ -201,7 +240,7 @@
         {
             const std::string full = FindTextureByFilename(filename, root);
             if (full.empty()) return 0;
-            return GetOrLoad(full);     // your existing loader & cache
+            return GetOrLoad(full);    
         }
 
         bool AssetsManager::InitFonts()

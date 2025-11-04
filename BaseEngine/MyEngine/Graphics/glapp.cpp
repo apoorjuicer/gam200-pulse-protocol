@@ -191,14 +191,15 @@ void GLApp::update(GLFWwindow* window, std::set<Entity> entity) {
 
 }
 void GLApp::updateAnimation(Framework::Animation& x, float deltaTime) {
+	if (x.totalFrames <= 1 || x.animationSpeed <= 0.0f) return;
 	float frameDuration = 1.0f / x.animationSpeed;
 	x.elapsedTime += deltaTime;
-
-	if (x.elapsedTime >= frameDuration) {
+	while (x.elapsedTime >= frameDuration) {
 		x.currentFrame = (x.currentFrame + 1) % x.totalFrames;
 		x.elapsedTime -= frameDuration;
 	}
 }
+
 
 
 void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y, 
