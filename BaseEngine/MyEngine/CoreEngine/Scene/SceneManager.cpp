@@ -104,6 +104,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("Typing", NameVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
+			continue;
 		}
 
 		if (g_coordinator->HasComponent<Framework::Transform>(entity))
@@ -116,6 +117,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("transform", TransfromVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
+			continue;
 		}
 
 		if (g_coordinator->HasComponent<Framework::Renderable>(entity))
@@ -128,6 +130,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("render", RenderVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
+			continue;
 		}
 
 		if (g_coordinator->HasComponent<Framework::Animation>(entity))
@@ -140,6 +143,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("animation", AnimationVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
+			continue;
 		}
 
 		if (g_coordinator->HasComponent<LogicComponent>(entity))
@@ -152,6 +156,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("script", ScriptVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
+			continue;
 		}
 
 		// purely for testing in-game GUI system
@@ -165,6 +170,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("ui", ButtonVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
+			continue;
 		}
 
 		if (g_coordinator->HasComponent<Name>(entity))
@@ -177,6 +183,33 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("name", NameVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
+			continue;
+		}
+
+		if (g_coordinator->HasComponent<Health>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value HealthVal;
+
+			auto& health = g_coordinator->GetComponent<Health>(entity);
+			health.Serialize(HealthVal, alloc);
+
+			ComponentObj.AddMember("Health", HealthVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+			continue;
+		}
+
+		if (g_coordinator->HasComponent<AABB>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value AABBVal;
+
+			auto& aabb = g_coordinator->GetComponent<AABB>(entity);
+			//aabb.Serialize(AABBVal, alloc);
+
+			ComponentObj.AddMember("AABB", AABBVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+			continue;
 		}
 
 		// So for this entity, we add compoennt array
@@ -357,6 +390,20 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				Name n;
 				n.Deserialize(component["name"]);
 				g_coordinator->AddComponent<Name>(entity, n);
+			}
+
+			if (component.HasMember("Health") && component["Health"].IsObject())
+			{
+				Health h;
+				h.Deserialize(component["Health"]);
+				g_coordinator->AddComponent<Health>(entity, h);
+			}
+
+			if (component.HasMember("AABB") && component["AABB"].IsObject())
+			{
+				AABB aabb;
+				//aabb.Deserialize(component["AABB"]);
+				g_coordinator->AddComponent<AABB>(entity, aabb);
 			}
 
 			// this is purely for the in-game basic GUI system & on screen UI elements

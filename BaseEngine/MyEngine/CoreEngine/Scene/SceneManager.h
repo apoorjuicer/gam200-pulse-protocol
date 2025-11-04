@@ -15,11 +15,14 @@
 /******************************************************************************/
 #pragma once
 #include "pch/pch_temp.h"
-#include "../Components/EntityType.h"
 #include "../GameLogic/GameLogic.h"
 #include "../Graphics/Transform.h"
 #include "../Graphics/Animation.h"
 #include "../Graphics/Renderable.h"
+//#include "../Components/AABB.h"
+#include "../CoreEngine/Assets.h"
+#include "../Components/Health.h"
+#include "../Components/EntityType.h"
 
 #include "../MyEngine/Components/DisplayName.h"
 #include "../CoreEngine/ECS/Types.h"
