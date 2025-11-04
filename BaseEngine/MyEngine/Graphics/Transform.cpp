@@ -21,7 +21,6 @@ namespace Framework
 {
     Transform::Transform()
     {
-        Rotation = Vector2(angle_disp, angle_speed);
         mdl_to_ndc_xform.SetToIdentity();
     }
     Transform::~Transform() {}
@@ -57,8 +56,8 @@ namespace Framework
 
             // Rotate
             constexpr float DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
-            const float cosA = std::cos(x.angle_disp * DEG_TO_RAD);
-            const float sinA = std::sin(x.angle_disp * DEG_TO_RAD);
+            const float cosA = std::cos(x.Rotation.x * DEG_TO_RAD);
+            const float sinA = std::sin(x.Rotation.x * DEG_TO_RAD);
             Rotating = Matrix3x3(
                 cosA, sinA, 0.0f,
                 -sinA, cosA, 0.0f,
@@ -73,7 +72,7 @@ namespace Framework
             // M = T * R * S
             x.mdl_to_ndc_xform = Translating * Rotating * Scaling;
 
-            x.angle_disp += x.angle_speed * static_cast<GLfloat>(delta_time);
+            x.Rotation.x += x.Rotation.y * static_cast<GLfloat>(delta_time);
             // std::cout << x.mdl_to_ndc_xform;
         }
     }

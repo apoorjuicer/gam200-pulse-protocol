@@ -2,8 +2,7 @@
 /**
  * @file        Animation.cpp
  * @project     Pulse Protocol
- * @author      Goh Pin Kai (primary) - 50%
- * @author 		Ban Kai Wei Benjamin (secondary) - 50%
+ * @author      Goh Pin Kai - 100%
  * @brief       Implements the Animation component defined in Animation.h.
  *              Handles serialization and deserialization of animation state,
  *              including frame index, animation timing, and sprite sheet

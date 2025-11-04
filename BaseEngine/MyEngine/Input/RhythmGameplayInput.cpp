@@ -67,34 +67,34 @@ void RhythmGameplayInput::Update(float deltaTime) {
                 auto& nameComp = g_coordinator->GetComponent<Name>(entity);
                 if (nameComp.name == "FeedbackBar") {
                     fontEntity = entity;
-                    std::cout << "========================================" << std::endl;
-                    std::cout << "[RhythmGameplayInput] Found FeedbackBar: " << entity << std::endl;
+                    //std::cout << "========================================" << std::endl;
+                    //std::cout << "[RhythmGameplayInput] Found FeedbackBar: " << entity << std::endl;
 
                     // Check components
                     bool hasTransform = g_coordinator->HasComponent<Framework::Transform>(entity);
                     bool hasGUIButton = g_coordinator->HasComponent<GUIButton>(entity);
                     bool hasRenderable = g_coordinator->HasComponent<Framework::Renderable>(entity);
 
-                    std::cout << "[DEBUG] Has Transform: " << (hasTransform ? "YES" : "NO") << std::endl;
-                    std::cout << "[DEBUG] Has GUIButton: " << (hasGUIButton ? "YES" : "NO") << std::endl;
-                    std::cout << "[DEBUG] Has Renderable: " << (hasRenderable ? "YES" : "NO") << std::endl;
+                    //std::cout << "[DEBUG] Has Transform: " << (hasTransform ? "YES" : "NO") << std::endl;
+                    //std::cout << "[DEBUG] Has GUIButton: " << (hasGUIButton ? "YES" : "NO") << std::endl;
+                    //std::cout << "[DEBUG] Has Renderable: " << (hasRenderable ? "YES" : "NO") << std::endl;
 
                     if (hasGUIButton) {
                         auto& button = g_coordinator->GetComponent<GUIButton>(entity);
-                        std::cout << "[DEBUG] Initial normalColor alpha: " << button.normalColor.a << std::endl;
+                        //std::cout << "[DEBUG] Initial normalColor alpha: " << button.normalColor.a << std::endl;
                         button.normalColor.a = 0.0f;
                         button.hoverColor.a = 0.0f;
-                        std::cout << "[DEBUG] Set alpha to 0.0" << std::endl;
+                        /*std::cout << "[DEBUG] Set alpha to 0.0" << std::endl;*/
                     }
 
                     if (hasTransform) {
                         auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
-                        std::cout << "[DEBUG] isVisible: " << transform.isVisible << std::endl;
+                        /*std::cout << "[DEBUG] isVisible: " << transform.isVisible << std::endl;*/
                         transform.isVisible = false;
-                        std::cout << "[DEBUG] Set isVisible to false" << std::endl;
+                        /*std::cout << "[DEBUG] Set isVisible to false" << std::endl;*/
                     }
 
-                    std::cout << "========================================" << std::endl;
+                    /*std::cout << "========================================" << std::endl;*/
                     break;
                 }
             }

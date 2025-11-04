@@ -1,3 +1,17 @@
+/******************************************************************************/
+/**
+ * @file        DebugConsole.h
+ * @project     Pulse Protocol
+ * @author		Goh Pin Kai
+ * @brief		Implements an ImGui-based in-game debug console that supports
+ *              scrolling log output, text filtering, command execution, message
+ *              history navigation, and color-coded log levels. Provides helper
+ *              functions for formatted logging as well as leveled and colored output.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 #include <imgui.h>
 #include <vector>

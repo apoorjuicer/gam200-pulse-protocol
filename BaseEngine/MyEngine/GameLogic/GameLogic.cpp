@@ -164,3 +164,57 @@ bool LoadScriptName(LogicComponent& t, std::string const& path)
     t.Deserialize(d["ScriptName"]);
     return true;
 }
+
+
+// FOR SCRIPTS ONLY ONWARDS
+void PlayerScript::Init(Entity ID) 
+{
+	(void)ID;
+}
+
+void PlayerScript::Update(Entity ID) 
+{
+	auto g_coordinator = Coordinator::GetInstance();
+	auto& hero_transform = g_coordinator->GetComponent<Framework::Transform>(ID);
+	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_W) == GLFW_PRESS)
+	{
+		hero_transform.Pos.y += 5.0f;
+	}
+
+	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_A) == GLFW_PRESS)
+	{
+		hero_transform.Pos.x -= 5.0f;
+	}
+
+	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_S) == GLFW_PRESS )
+	{
+		hero_transform.Pos.y -= 5.0f;
+	}
+
+	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_D) == GLFW_PRESS)
+	{
+		hero_transform.Pos.x += 5.0f;
+	}
+
+}
+
+void PlayerScript::Exit(Entity ID) 
+{
+	(void)ID;
+}
+
+void EnemyScript::Init(Entity ID)
+{
+	(void)ID;
+}
+
+void EnemyScript::Update(Entity ID)
+{
+	(void)ID;
+}
+
+void EnemyScript::Exit(Entity ID)
+{
+	(void)ID;
+}
+

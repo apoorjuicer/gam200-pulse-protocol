@@ -2,9 +2,16 @@
     "scene": "Level1",
     "entities": 
     [       
-        {"Type": "Background",
+        {
         "components":
         [
+            {
+                "Typing": 
+                {
+                    "Type":"Background"
+                }
+            },
+            
             {
                 "transform": {
                         "position": {
@@ -43,20 +50,27 @@
                     "columns": 1,
                     "rows": 1
                 }
-            },
-            
-            {
-                "script":  
-                    {
-                        "ScriptName": "PlayerScript"
-                    }
             }
         ]
         },
 
-        {"Type": "Player",
+        {
         "components":
         [
+            {
+                "name":
+                {
+                    "name": "Jeff"
+                } 
+            },
+
+            {
+                "Typing": 
+                {
+                    "Type":"Player"
+                }
+            },
+
             {
                 "transform": {
                         "position": {
@@ -113,13 +127,45 @@
                     {
                         "ScriptName": "PlayerScript"
                     }
+            },
+
+            {
+                "Health":
+                {
+                    "hp": 5.0,
+                    "damage": 1.0,
+                    "isAlive": true
+                }
+            },
+
+            {
+                "AABB":
+                {
+                        "min": {
+                            "x": 50.0,
+                            "y": 50.0
+                        },
+                        "max": {
+                            "x": 150.0,
+                            "y": 150.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
+                }
             }
         ]
         },
 
-        {"Type": "Enemy",
+        {
         "components":
             [
+                {
+                    "Typing": 
+                    {
+                        "Type":"Enemy"
+                    }
+                },
+
                 {
                     "transform": {
                         "position": {
@@ -303,7 +349,7 @@
                             "a": 1.0
                         },
                         "actionType": "CreateEntity",
-                        "entityJsonPath": "../../MyEngine/JSON/herotransform.json",
+                        "entityJsonPath": "../../MyEngine/JSON/HeroPrefab.json",
                         "isEnabled": true
                     }
                 }

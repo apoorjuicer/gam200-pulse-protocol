@@ -554,6 +554,7 @@ void GLHelper::update_time(double fps_calc_interval) {
 
 void GLHelper::print_specs()
 {
+    std::cout << "--------------------------------------------" << std::endl;
     std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
     std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
     std::cout << "GL Version: " << glGetString(GL_VERSION) << std::endl;
@@ -576,6 +577,7 @@ void GLHelper::print_specs()
             std::cout << "GL Shading Language: " << glGetStringi(GL_EXTENSIONS, i) << std::endl;
         }
     }
+    std::cout << "--------------------------------------------" << std::endl;
 }
 
 void GLHelper::toggleFullScreen() {

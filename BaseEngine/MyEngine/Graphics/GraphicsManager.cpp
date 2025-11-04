@@ -43,13 +43,13 @@ GraphicsManager::~GraphicsManager()
 
 void GraphicsManager::Initialize()
 {
+    GLHelper::print_specs();
     auto& AM = Framework::AssetsManager::Instance();
 
     AM.InitFonts();
     AM.LoadAllFonts("../../MyEngine/Assets/Font", 48);
 
     // Print GL info and init the app renderer
-    GLHelper::print_specs();
     glapp->init();
 
     // Subscribe to combo messages - DONT REMOVE, TEST FOR MESSAGE SYSTEM
@@ -510,10 +510,10 @@ void GraphicsManager::RenderUIOverlayElements()
 void GraphicsManager::RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color)
 {
     // DEBUG - only print first few frames
-    static int count = 0;
-    if (count++ < 10) {
-        std::cout << "[RenderQuad] Rendering at screen: (" << x << ", " << y << ")" << std::endl;
-    }
+    //static int count = 0;
+    //if (count++ < 10) {
+    //    std::cout << "[RenderQuad] Rendering at screen: (" << x << ", " << y << ")" << std::endl;
+    //}
 
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);

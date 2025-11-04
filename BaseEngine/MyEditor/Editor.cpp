@@ -2,8 +2,8 @@
 /**
  * @file        Editor.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong
- * @author      Goh Pin Kai
+ * @author      Leu Jun Yong(93%)
+ * @author      Goh Pin Kai(7%)
  * @brief       Initializes, updates, renders, and manages the ImGui
                 editor interface with toggle support.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
@@ -26,8 +26,9 @@
 #include "DebugConsole.h"
 #include "ProfilingTab.h"
 #include "pch/pch.h"
+#include "CoreEngine/Factory/Factory.h" // for creating/deleting entities
 #include "CoreEngine/ECS/System.h"   // For Entity type
-#include "CoreEngine/ECS/Name.h"     // For display name in hierarchy list
+#include "Components/DisplayName.h"     // For display name in hierarchy list
 #include "Graphics/Transform.h"
 
 
@@ -36,8 +37,13 @@ namespace MyEditor
     // --------------------------------------------------------------------
     // CONSTANTS & BASIC STATE
     // --------------------------------------------------------------------
+
+    // the entity selected in the hierarchy; INVALID_ENTITY (-1) simply means nothing is selected
     constexpr Entity INVALID_ENTITY = static_cast<Entity>(-1);
     static Entity selectedEntity = INVALID_ENTITY;
+
+    // this vector maintains the order entities appear in the hierarchy
+    static std::vector<Entity> entityDisplayOrder;
 
     static GLFWwindow* s_Window = nullptr;
     static bool s_enabled = true;
@@ -543,10 +549,10 @@ namespace MyEditor
 
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // optional
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // ✅ docking ON
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       //  docking ON
         // IMPORTANT: keep viewports OFF so nothing pops outside the GLFW window
         // (turn this on later only if you want multi-window OS-level popouts)
-        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   // ❌ leave disabled
+        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   //  leave disabled
 
         ImGui::StyleColorsDark();
 
@@ -618,9 +624,9 @@ namespace MyEditor
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoSavedSettings;
 
-        // =========================
-        // TOP BAR
-        // =========================
+        // ----------------------------
+        // TOP BAR (Play / Pause / Scene Controls)
+        // ----------------------------
         {
             ImGuiWindowFlags top_flags =
                 ImGuiWindowFlags_NoTitleBar |
@@ -634,27 +640,23 @@ namespace MyEditor
             if (ImGui::Begin("TopBar", nullptr, top_flags)) {
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
 
-                if (ImGui::Button("Play", ImVec2(70, 0))) {
-                    if (!s_hasEditorBaseline) CaptureEditorBaseline(); else RestoreEditorBaseline();
-                    Engine->RestartRuntimeForPlay();
-                    Engine->SetPaused(false);
-                    s_isPlaying = true;
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Stop", ImVec2(70, 0))) {
-                    Engine->SetPaused(true);
-                    s_isPlaying = false;
-                    RestoreEditorBaseline();
-                }
+                ImVec2 framePadding = ImGui::GetStyle().FramePadding;
+                float itemSpacing = ImGui::GetStyle().ItemSpacing.x;
 
-                ImGui::SameLine(); ImGui::Dummy(ImVec2(30, 0)); ImGui::SameLine();
+                // Scene control buttons on the left
+                ImVec2 saveTextSize = ImGui::CalcTextSize("Save Scene");
+                ImVec2 loadTextSize = ImGui::CalcTextSize("Load Scene");
+                ImVec2 saveButtonSize = ImVec2(saveTextSize.x + framePadding.x * 2, 0);
+                ImVec2 loadButtonSize = ImVec2(loadTextSize.x + framePadding.x * 2, 0);
 
-                if (ImGui::Button("Save Scene", ImVec2(120, 0))) {
-                    if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>())
+                if (ImGui::Button("Save Scene", saveButtonSize)) {
+                    auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>();
+                    if (sceneMgr) {
                         sceneMgr->SaveCurrentScene();
+                    }
                 }
                 ImGui::SameLine();
-                if (ImGui::Button("Load Scene", ImVec2(120, 0))) {
+                if (ImGui::Button("Load Scene", loadButtonSize)) {
                     std::string path = OpenJsonFileDialog();
                     if (!path.empty()) {
                         if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>()) {
@@ -669,8 +671,46 @@ namespace MyEditor
                     }
                 }
 
-                ImGui::SameLine(); ImGui::Dummy(ImVec2(30, 0)); ImGui::SameLine();
-                ImGui::TextUnformatted("| Game View");
+                ImVec2 playTextSize = ImGui::CalcTextSize("Play");
+                ImVec2 stopTextSize = ImGui::CalcTextSize("Stop");
+                ImVec2 playButtonSize = ImVec2(playTextSize.x + framePadding.x * 2, 0);
+                ImVec2 stopButtonSize = ImVec2(stopTextSize.x + framePadding.x * 2, 0);
+
+                float windowWidth = ImGui::GetWindowWidth();
+                float totalButtonWidth = playButtonSize.x + stopButtonSize.x + itemSpacing;
+                float offset = (windowWidth - totalButtonWidth) * 0.5f;
+
+                // Stay on same line, position at centered offset
+                if (offset > 0.0f) {
+                    ImGui::SameLine(offset);
+                }
+                else {
+                    ImGui::SameLine();
+                }
+
+                // --- Play ---
+                if (ImGui::Button("Play", playButtonSize))
+                {
+                    // restore ECS snapshot
+                    if (!s_hasEditorBaseline)
+                        CaptureEditorBaseline();
+                    else
+                        RestoreEditorBaseline();
+
+                    Engine->RestartRuntimeForPlay();
+                    Engine->SetPaused(false);
+                    s_isPlaying = true;
+                }
+
+                ImGui::SameLine();
+
+                // --- Stop ---
+                if (ImGui::Button("Stop", stopButtonSize))
+                {
+                    Engine->SetPaused(true);
+                    s_isPlaying = false;
+                    RestoreEditorBaseline();
+                }
 
                 ImGui::PopStyleVar();
             }
@@ -720,32 +760,266 @@ namespace MyEditor
         // Scene Hierarchy
         if (leftDockID) ImGui::SetNextWindowDockID(leftDockID, ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Scene Hierarchy")) {
-            auto* g = Coordinator::GetInstance();
-            if (g) {
-                ImGui::BeginChild("HierarchyList", ImVec2(-FLT_MIN, -FLT_MIN), true);
-                for (auto entity : g->GetAllEntities()) {
-                    std::string display;
-                    if (g->HasComponent<Name>(entity)) {
-                        display = g->GetComponent<Name>(entity).name;
-                    }
-                    else if (g->HasComponent<GUIButton>(entity)) {
-                        display = g->GetComponent<GUIButton>(entity).buttonID;
-                    }
-                    else if (g->HasComponent<Framework::Renderable>(entity)) {
-                        auto& rend = g->GetComponent<Framework::Renderable>(entity);
-                        if (!rend.spriteName.empty()) {
-                            size_t p = rend.spriteName.find_last_of("/\\");
-                            display = (p != std::string::npos) ? rend.spriteName.substr(p + 1) : rend.spriteName;
+            auto* g_coordinator = Coordinator::GetInstance();
+            if (g_coordinator)
+            {
+                // --- Entity Creation with Type Selection ---
+                struct EntityPrefab {
+                    const char* displayName;
+                    const char* jsonPath;
+                    bool isDefault;
+                    float defaultScaleX;
+                    float defaultScaleY;
+                };
+
+                static std::vector<EntityPrefab> entityPrefabs = {
+                    {"Empty Entity", nullptr, true, 200.0f, 200.0f},
+                    {"Hero", "../../MyEngine/JSON/HeroPrefab.json", false, 0, 0},
+                    {"Monster", "../../MyEngine/JSON/MonsterPrefab.json", false, 0, 0},
+                    {"Background", nullptr, true, 800.0f, 600.0f}
+                };
+
+                // which entity type to create (index into prefabs array)
+                static int selectedType = 0;
+
+                // Build display names for combo box
+                std::vector<const char*> displayNames;
+                for (const auto& prefab : entityPrefabs) {
+                    displayNames.push_back(prefab.displayName);
+                }
+
+                // ============================================
+                // UNITY-STYLE TOOLBAR
+                // ============================================
+
+                float windowWidth = ImGui::GetContentRegionAvail().x;
+                float dropdownWidth = 120.0f;
+
+                // toolbar buttons (left side)
+                bool createClicked = ImGui::SmallButton("+");
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Create at End");
+
+                ImGui::SameLine();
+
+                // disable the below, aboe and delete buttons if nothing is selected because no reference entity to insert the new entity between
+                ImGui::BeginDisabled(selectedEntity == INVALID_ENTITY);
+
+                bool createAboveClicked = ImGui::SmallButton("^");
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Create Above Selected");
+
+                ImGui::SameLine();
+                bool createBelowClicked = ImGui::SmallButton("v");
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Create Below Selected");
+
+                ImGui::SameLine();
+                bool deleteClicked = ImGui::SmallButton("X");
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Delete Selected");
+
+                ImGui::EndDisabled(); // this re-enables the UI for the buttons
+
+                // this is to create the dropdown
+                ImGui::SameLine(windowWidth - dropdownWidth + 5);
+                ImGui::PushItemWidth(dropdownWidth);
+
+                // selectedType is index into entityPrefabs array
+                ImGui::Combo("##Type", &selectedType, displayNames.data(), static_cast<int>(displayNames.size()));
+                ImGui::PopItemWidth();
+
+                ImGui::Separator();
+
+                // ============================================
+                // HANDLE BUTTON CLICKS - Create Entity
+                // ============================================
+
+                if (createClicked || createAboveClicked || createBelowClicked)
+                {
+                    // initialize a new default game obj from class Factory and set the new Entity to non-selected first in drop-down
+                    Factory defaultEntity;
+                    Entity newEntity = INVALID_ENTITY;
+
+                    // get the selected entity type from dropdown
+                    const EntityPrefab& selectedPrefab = entityPrefabs[selectedType];
+
+                    // then create the entity BASED on the type chosen
+                    if (selectedPrefab.isDefault)
+                    {
+                        // this is for a simple default entity that only has these 3 components -> Transform, Renderable, Animation
+                        newEntity = defaultEntity.DefaultObj();
+
+                        // apply custom scale from prefab definition
+                        if (g_coordinator->HasComponent<Framework::Transform>(newEntity)) {
+                            auto& t = g_coordinator->GetComponent<Framework::Transform>(newEntity);
+                            t.Scale = { selectedPrefab.defaultScaleX, selectedPrefab.defaultScaleY };
                         }
-                        else display = "Unnamed Renderable";
                     }
-                    else {
+                    else if (selectedPrefab.jsonPath != nullptr)
+                    {
+                        // complex entity loaded from JSON -> Hero & Monster
+                        auto result = defaultEntity.CreateEntityFromJson(selectedPrefab.jsonPath);
+                        if (result.has_value()) {
+                            newEntity = result.value();
+                        }
+                        else
+                        {
+                            // fallback if JSON load fails
+                            /*std::cerr << "[Editor] Failed to load prefab: " << selectedPrefab.jsonPath << std::endl;*/
+                            newEntity = defaultEntity.DefaultObj();
+                        }
+                    }
+                    else
+                    {
+                        // fallback for edge cases
+                        newEntity = defaultEntity.DefaultObj();
+                    }
+
+                    // this part is for ordering of the entities at the correct position
+                    if (newEntity != INVALID_ENTITY) {
+
+                        // [+] button: add to end of list (aka. at the very last position in the list)
+                        if (createClicked) {
+                            entityDisplayOrder.push_back(newEntity);
+                            /*std::cout << "[Editor] Created entity " << newEntity << " at end" << std::endl;*/
+                        }
+                        
+                        // [^] button: insert above selected entity
+                        else if (createAboveClicked && selectedEntity != INVALID_ENTITY) {
+
+                            // finds position of selected entity in the vector entityDisplayOrder
+                            auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+                            if (it != entityDisplayOrder.end()) {
+
+                                // insert at selected position (and pushes selected down)
+                                // etc. [A, B, C] + insert at B → [A, NEW, B, C]
+                                entityDisplayOrder.insert(it, newEntity);
+                                /*std::cout << "[Editor] Created entity " << newEntity << " above selected" << std::endl;*/
+                            }
+                            else {
+                                // if selected not found, then just add at end of the list
+                                entityDisplayOrder.push_back(newEntity);
+                            }
+                        }
+
+                        // [v] button: insert below selected entity
+                        else if (createBelowClicked && selectedEntity != INVALID_ENTITY) {
+
+                            // finds position of selected entity
+                            auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+                                
+                            // insert after selected position
+                            // etc. [A, B, C] + insert below B → [A, NEW, B, C]
+                            if (it != entityDisplayOrder.end()) {
+                                entityDisplayOrder.insert(it + 1, newEntity);
+                                /*std::cout << "[Editor] Created entity " << newEntity << " below selected" << std::endl;*/
+                            }
+                            else {
+                                entityDisplayOrder.push_back(newEntity);
+                            }
+                        }
+
+                        // automatically select newly created entity; user can immediately edit or delete what they just created
+                        selectedEntity = newEntity;
+                    }
+                }
+
+                // ============================================
+                // HANDLE BUTTON CLICKS - Delete Entity
+                // ============================================
+                if (deleteClicked && selectedEntity != INVALID_ENTITY)
+                {
+
+                    // remove from display order vector (entityDisplayOrder); vector must stay in sync with actual entities
+                    auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+                    if (it != entityDisplayOrder.end()) {
+
+                        // opertion used: vector.erase(position)
+                        // etc. [A, B, C] + erase B → [A, C]
+                        entityDisplayOrder.erase(it);
+                    }
+
+                    // delete entity from ECS system; so this means the vector only TRACKS ORDER, but Factory handles ACTUAL DELETIION of the entity
+                    Factory defaultEntity;
+                    defaultEntity.DeleteEntity(selectedEntity);
+
+                    // need to clear selection because cannot keep selecting an entity that does not exist as it has been deleted already
+                    selectedEntity = INVALID_ENTITY;
+                    /*std::cout << "[Editor] Deleted entity" << std::endl;*/
+                }
+
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                // Use full available size for the scrollable list
+                ImGui::BeginChild("HierarchyList", ImVec2(-FLT_MIN, -FLT_MIN), true);
+
+
+                bool anySelectableClicked = false;
+
+                // Sync display order with actual entities
+                auto allEntities = g_coordinator->GetAllEntities();
+                std::set<Entity> entitySet(allEntities.begin(), allEntities.end());
+
+                entityDisplayOrder.erase(
+                    std::remove_if(entityDisplayOrder.begin(), entityDisplayOrder.end(),
+                        [&entitySet](Entity e) { return entitySet.find(e) == entitySet.end(); }),
+                    entityDisplayOrder.end()
+                );
+
+                // Add new entities not yet tracked
+                for (auto entity : allEntities) {
+                    if (std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), entity) == entityDisplayOrder.end()) {
+                        entityDisplayOrder.push_back(entity);
+                    }
+                }
+
+                // Display in tracked order
+                for (auto entity : entityDisplayOrder)
+                {
+                    std::string display;
+                    if (g_coordinator->HasComponent<Name>(entity)) {
+                        display = g_coordinator->GetComponent<Name>(entity).name;
+                    }
+                    else if (g_coordinator->HasComponent<GUIButton>(entity)) {
+                        display = g_coordinator->GetComponent<GUIButton>(entity).buttonID;
+                    }
+                    else if (g_coordinator->HasComponent<Framework::Renderable>(entity)) {
+                        auto& rend = g_coordinator->GetComponent<Framework::Renderable>(entity);
+                        if (!rend.spriteName.empty()) {
+                            // Extract just the filename from the path
+                            size_t lastSlash = rend.spriteName.find_last_of("/\\");
+                            if (lastSlash != std::string::npos) {
+                                display = rend.spriteName.substr(lastSlash + 1);
+                            }
+                            else {
+                                display = rend.spriteName;
+                            }
+                        }
+                        else {
+                            display = "New Entity";
+                        }
+
+                    }
+
+                    // Fallback: Show entity ID
+                    else
+                    {
                         display = "Entity " + std::to_string((int)entity);
                     }
                     bool isSelected = (selectedEntity == entity);
-                    std::string label = display + "##" + std::to_string((int)entity);
-                    if (ImGui::Selectable(label.c_str(), isSelected)) selectedEntity = entity;
+
+                    std::string uniqueLabel = display + "##" + std::to_string((int)entity);
+                    if (ImGui::Selectable(uniqueLabel.c_str(), isSelected))
+                    {
+                        selectedEntity = entity;
+                        anySelectableClicked = true;  // Track that we clicked an entity
+                    }
                 }
+
+                // Deselect if clicked on empty space in hierarchy
+                if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0) && !anySelectableClicked) {
+                    selectedEntity = INVALID_ENTITY;
+                }
+
                 ImGui::EndChild();
             }
             else {
@@ -911,50 +1185,53 @@ namespace MyEditor
                     }
                     ImGui::Separator();
 
-                    // --- Model Reference  ---
+                    // --- Model Reference (read-only label + +/-) ---
                     {
-                        const int maxModels = static_cast<int>(GLApp::models.size());
-                        int modelIdx = std::clamp(static_cast<int>(r.mdl_ref), 0, std::max(0, maxModels - 1));
+                        // In your renderer, mdl_ref==0 is Background, otherwise Sprite. (Two choices)
+                        // See DrawAABB_NDC and the Push() comment in BatchRender. 
+                        int modelIdx = static_cast<int>(r.mdl_ref);
+                        modelIdx = std::clamp(modelIdx, 0, 1);
 
-                        // Show a read-only label
-                        char modelLabel[64];
-                        std::snprintf(modelLabel, sizeof(modelLabel), "Model #%d", modelIdx);
-                        ImGui::InputText("Model", modelLabel, IM_ARRAYSIZE(modelLabel), ImGuiInputTextFlags_ReadOnly);
+                        const char* kModelNames[2] = { "Background Quad", "Sprite Quad" };
 
-                        // Controls
+                        // Show name (read-only), with +/- controls
+                        ImGui::Text("Model: %s", kModelNames[modelIdx]);
                         ImGui::SameLine();
-                        if (ImGui::SmallButton(" - ")) {
-                            if (modelIdx > 0) { modelIdx--; r.mdl_ref = static_cast<float>(modelIdx); }
-                        }
+                        if (ImGui::SmallButton(" - ")) { modelIdx = std::max(0, modelIdx - 1); }
                         ImGui::SameLine();
-                        if (ImGui::SmallButton(" + ")) {
-                            if (maxModels > 0 && modelIdx < maxModels - 1) { modelIdx++; r.mdl_ref = static_cast<float>(modelIdx); }
-                        }
+                        if (ImGui::SmallButton(" + ")) { modelIdx = std::min(1, modelIdx + 1); }
 
+                        // Write back
+                        r.mdl_ref = static_cast<float>(modelIdx);
                     }
 
-                    // --- Shader Reference  ---
+                    // --- Shader Reference (read-only label + +/-) ---
                     {
+                        // We can clamp by the number of loaded shader programs
                         const int maxShaders = static_cast<int>(GLApp::shdrpgms.size());
                         int shaderIdx = std::clamp(static_cast<int>(r.shd_ref), 0, std::max(0, maxShaders - 1));
 
-                        // Show a read-only label
-                        char shaderLabel[64];
-                        std::snprintf(shaderLabel, sizeof(shaderLabel), "Shader #%d", shaderIdx);
-                        ImGui::InputText("Shader", shaderLabel, IM_ARRAYSIZE(shaderLabel), ImGuiInputTextFlags_ReadOnly);
+                        // Friendly names for the first few shaders in your init order:
+                        // 0: test, 1: background, 2: sprite, 3: font  (see init_shdrpgms_cont order)
+                        auto ShaderName = [&](int i) -> const char* {
+                            switch (i) {
+                            case 0: return "Test Shader";
+                            case 1: return "Background Shader";
+                            case 2: return "Sprite Shader";
+                            case 3: return "Font Shader";
+                            default: return "Shader (unnamed)";
+                            }
+                            };
 
-                        // Controls
+                        ImGui::Text("Shader: %s", ShaderName(shaderIdx));
                         ImGui::SameLine();
-                        if (ImGui::SmallButton("  -  ")) {
-                            if (shaderIdx > 0) { shaderIdx--; r.shd_ref = static_cast<float>(shaderIdx); }
-                        }
+                        if (ImGui::SmallButton(" - ")) { shaderIdx = std::max(0, shaderIdx - 1); }
                         ImGui::SameLine();
-                        if (ImGui::SmallButton("  +  ")) {
-                            if (maxShaders > 0 && shaderIdx < maxShaders - 1) { shaderIdx++; r.shd_ref = static_cast<float>(shaderIdx); }
-                        }
+                        if (ImGui::SmallButton(" + ")) { shaderIdx = std::min(std::max(0, maxShaders - 1), shaderIdx + 1); }
 
-                   
-                    }   
+                        r.shd_ref = static_cast<float>(shaderIdx);
+                    }
+
 
                     // --- Texture info ---
                     ImGui::Text("Texture ID: %u", r.textureID);

@@ -15,15 +15,19 @@
 /******************************************************************************/
 #pragma once
 #include "pch/pch_temp.h"
-#include "../GameLogic/GameLogic.h"
-#include "../Graphics/Transform.h"
-#include "../Graphics/Animation.h"
-#include "../Graphics/Renderable.h"
-
-#include "CoreEngine/ECS/Name.h"
+//#include "../GameLogic/GameLogic.h"
+//#include "../Graphics/Transform.h"
+//#include "../Graphics/Animation.h"
+//#include "../Graphics/Renderable.h"
+////#include "../Components/AABB.h"
+//#include "../CoreEngine/Assets.h"
+//#include "../Components/Health.h"
+//#include "../Components/EntityType.h"
+//
+//#include "../MyEngine/Components/DisplayName.h"
 #include "../CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
-#include "CoreEngine/Factory/Factory.h"
+
 
 #pragma warning(push, 0)
 #include <rapidjson/document.h>     
@@ -48,9 +52,7 @@ public:
 	
 	std::string GrabCurrentScene() const { return CurrentScene; }
 	void ChangeCurrentScene(std::string const& str) { CurrentScene = str; }
-
-	// for gui system usage (M2 rubric)
-	Entity LoadEntityFromJson(std::string const& path);
+	void IncrementEntityArray(Entity entity) { SceneEntityList.push_back(entity); }
 
 private:
 	std::string CurrentScene;

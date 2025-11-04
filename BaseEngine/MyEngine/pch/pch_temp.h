@@ -1,6 +1,6 @@
 /******************************************************************************/
 /**
- * @file        pch.h
+ * @file        pch_temp.h
  * @project     Pulse Protocol
  * @author      Chia Wei Xuan Rachael 
  * @brief       This is a precompiled header file that centralizes all standard library,
@@ -12,10 +12,6 @@
  */
  /******************************************************************************/
 #pragma once
-
-// pch.h: This is a precompiled header file.
-// I'm doing this as we only need to compile it once and make  the files neater, we will put all our lib that we are using here. 
-// Just put #include "pch/pch.h" and you will have access to it
 
 // Suppress third-party library warnings
 #pragma warning(disable: 4146)  // unary minus on unsigned
@@ -56,6 +52,7 @@
 #include <list>
 #include <filesystem>
 #include <cstdlib> 
+#include <optional>
 
 // Graphics Library Headers
 #include <GL/glew.h>

@@ -4,6 +4,11 @@
         {
             "components": [
                 {
+                    "Typing": {
+                        "Type": "Background"
+                    }
+                },
+                {
                     "transform": {
                         "position": {
                             "x": 0.0,
@@ -25,15 +30,10 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": "PlayerScript"
-                    }
-                },
-                {
                     "render": {
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
-                        "textureID": 259,
+                        "textureID": 258,
                         "useTexture": true,
                         "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg",
                         "tintColor": {
@@ -47,7 +47,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.4736180007457733,
+                        "elapsedTime": 0.18503804504871369,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
@@ -59,10 +59,15 @@
         {
             "components": [
                 {
+                    "Typing": {
+                        "Type": "Player"
+                    }
+                },
+                {
                     "transform": {
                         "position": {
-                            "x": -800.0,
-                            "y": 0.0
+                            "x": 50.0,
+                            "y": -130.0
                         },
                         "scale": {
                             "x": 500.0,
@@ -80,15 +85,10 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": "PlayerScript"
-                    }
-                },
-                {
                     "render": {
                         "mdl_ref": 1.0,
                         "shd_ref": 2.0,
-                        "textureID": 260,
+                        "textureID": 259,
                         "useTexture": true,
                         "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
                         "tintColor": {
@@ -101,18 +101,54 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.4736180007457733,
+                        "currentFrame": 1,
+                        "elapsedTime": 0.18503804504871369,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
                         "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "PlayerScript"
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Jeff"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 5,
+                        "damage": 1,
+                        "isAlive": true
+                    }
+                },
+                {
+                    "AABB": {
+                        "min": {
+                            "x": 50.0,
+                            "y": 50.0
+                        },
+                        "max": {
+                            "x": 150.0,
+                            "y": 150.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
                     }
                 }
             ]
         },
         {
             "components": [
+                {
+                    "Typing": {
+                        "Type": "Enemy"
+                    }
+                },
                 {
                     "transform": {
                         "position": {
@@ -135,15 +171,10 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": "EnemyScript"
-                    }
-                },
-                {
                     "render": {
                         "mdl_ref": 1.0,
                         "shd_ref": 2.0,
-                        "textureID": 261,
+                        "textureID": 260,
                         "useTexture": true,
                         "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
                         "tintColor": {
@@ -157,11 +188,82 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.4736180007457733,
+                        "elapsedTime": 0.18503804504871369,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
                         "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "EnemyScript"
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": -300.0
+                        },
+                        "scale": {
+                            "x": 600.0,
+                            "y": 90.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "angle_disp": 0.0,
+                        "angle_speed": 0.0,
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "textureID": 0,
+                        "useTexture": false,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "ui": {
+                        "buttonID": "feedback_bar",
+                        "label": "",
+                        "normalColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 0.0
+                        },
+                        "hoverColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 0.0
+                        },
+                        "actionType": "",
+                        "entityJsonPath": "",
+                        "isEnabled": false
+                    }
+                },
+                {
+                    "name": {
+                        "name": "FeedbackBar"
                     }
                 }
             ]
@@ -205,7 +307,7 @@
                     }
                 },
                 {
-                    "button": {
+                    "ui": {
                         "buttonID": "btn_create",
                         "label": "Create Hero",
                         "normalColor": {
@@ -221,7 +323,7 @@
                             "a": 1.0
                         },
                         "actionType": "CreateEntity",
-                        "entityJsonPath": "../../MyEngine/JSON/herotransform.json",
+                        "entityJsonPath": "../../MyEngine/JSON/HeroPrefab.json",
                         "isEnabled": true
                     }
                 }
@@ -266,7 +368,7 @@
                     }
                 },
                 {
-                    "button": {
+                    "ui": {
                         "buttonID": "btn_destroy",
                         "label": "Destroy Hero",
                         "normalColor": {
@@ -284,6 +386,186 @@
                         "actionType": "DestroyEntity",
                         "entityJsonPath": "",
                         "isEnabled": true
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "Typing": {
+                        "Type": "Player"
+                    }
+                },
+                {
+                    "transform": {
+                        "position": {
+                            "x": 20.0,
+                            "y": 255.0
+                        },
+                        "scale": {
+                            "x": 250.0,
+                            "y": 250.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "angle_disp": 0.0,
+                        "angle_speed": 0.0,
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "textureID": 259,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.22473560273647309,
+                        "totalFrames": 3,
+                        "columns": 3,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "PlayerScript"
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "Typing": {
+                        "Type": "Player"
+                    }
+                },
+                {
+                    "transform": {
+                        "position": {
+                            "x": -110.0,
+                            "y": 380.0
+                        },
+                        "scale": {
+                            "x": 250.0,
+                            "y": 250.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "angle_disp": 0.0,
+                        "angle_speed": 0.0,
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "textureID": 259,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 2,
+                        "elapsedTime": 0.27451738715171816,
+                        "totalFrames": 3,
+                        "columns": 3,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "PlayerScript"
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "Typing": {
+                        "Type": "Player"
+                    }
+                },
+                {
+                    "transform": {
+                        "position": {
+                            "x": -60.0,
+                            "y": 270.0
+                        },
+                        "scale": {
+                            "x": 250.0,
+                            "y": 250.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "angle_disp": 0.0,
+                        "angle_speed": 0.0,
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "textureID": 259,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 1,
+                        "elapsedTime": 0.45043790340423586,
+                        "totalFrames": 3,
+                        "columns": 3,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "PlayerScript"
                     }
                 }
             ]
