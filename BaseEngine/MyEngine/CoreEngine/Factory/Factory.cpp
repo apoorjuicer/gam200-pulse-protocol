@@ -1,5 +1,6 @@
 #pragma once
 #include "Factory.h"
+#include "../CoreEngine/Assets.h"
 
 
 using namespace rapidjson;
@@ -92,7 +93,7 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const& path)
 		if (component.HasMember("AABB") && component["AABB"].IsObject())
 		{
 			AABB aabb;
-			//aabb.Deserialize(component["AABB"]);
+			aabb.Deserialize(component["AABB"]);
 			g_coordinator->AddComponent<AABB>(entity, aabb);
 		}
 
@@ -240,7 +241,7 @@ bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const& path)
 		Value AABBVal;
 
 		auto& aabb = g_coordinator->GetComponent<AABB>(entity);
-		//aabb.Serialize(AABBVal, alloc);
+		aabb.Serialize(AABBVal, alloc);
 
 		ComponentObj.AddMember("AABB", AABBVal, alloc);
 		componentsArray.PushBack(ComponentObj, alloc);

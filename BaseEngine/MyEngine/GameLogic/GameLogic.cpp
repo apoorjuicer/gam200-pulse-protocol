@@ -179,25 +179,21 @@ void PlayerScript::Update(Entity ID)
 	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_W) == GLFW_PRESS)
 	{
 		hero_transform.Pos.y += 5.0f;
-        std::cout << hero_transform.Pos.y << std::endl;
 	}
 
 	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_A) == GLFW_PRESS)
 	{
 		hero_transform.Pos.x -= 5.0f;
-        std::cout << hero_transform.Pos.x << std::endl;
 	}
 
 	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_S) == GLFW_PRESS )
 	{
 		hero_transform.Pos.y -= 5.0f;
-        std::cout << hero_transform.Pos.y << std::endl;
 	}
 
 	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_D) == GLFW_PRESS)
 	{
 		hero_transform.Pos.x += 5.0f;
-        std::cout << hero_transform.Pos.x << std::endl;
 	}
 
 }

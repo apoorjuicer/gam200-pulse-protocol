@@ -216,7 +216,7 @@ void SceneManager::SaveCurrentScene()
 			Value AABBVal;
 
 			auto& aabb = g_coordinator->GetComponent<AABB>(entity);
-			//aabb.Serialize(AABBVal, alloc);
+			aabb.Serialize(AABBVal, alloc);
 
 			ComponentObj.AddMember("AABB", AABBVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
@@ -413,7 +413,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			if (component.HasMember("AABB") && component["AABB"].IsObject())
 			{
 				AABB aabb;
-				//aabb.Deserialize(component["AABB"]);
+				aabb.Deserialize(component["AABB"]);
 				g_coordinator->AddComponent<AABB>(entity, aabb);
 			}
 
