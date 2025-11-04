@@ -210,7 +210,114 @@ void EnemyScript::Init(Entity ID)
 
 void EnemyScript::Update(Entity ID)
 {
-	(void)ID;
+    auto g_coordinator = Coordinator::GetInstance();
+
+    // --- Step 1: Check essential components ---
+    if (!g_coordinator->HasComponent<Framework::Transform>(ID) ||
+        !g_coordinator->HasComponent<AABB>(ID) ||
+        !g_coordinator->HasComponent<Health>(ID))
+        return;
+
+    auto& enemy_transform = g_coordinator->GetComponent<Framework::Transform>(ID);
+    auto& enemy_box = g_coordinator->GetComponent<AABB>(ID);
+    auto& enemy_health = g_coordinator->GetComponent<Health>(ID);
+
+    // --- Step 2: Skip update if enemy is already dead ---
+    if (!enemy_health.isAlive)
+        return;
+
+    // --- Step 3: Wait for key 'M' before moving enemy ---
+    static bool enemyShouldMove = false;
+
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_M) == GLFW_PRESS)
+    {
+        enemyShouldMove = true; // Start moving once M is pressed
+    }
+
+    if (enemyShouldMove)
+    {
+        enemy_transform.Pos.x -= 0.5f; // constant leftward speed
+    }
+
+    // --- Step 4: Find the player entity ---
+    Entity playerEntity = static_cast<Entity>(-1);
+    auto logicSys = g_coordinator->GetSystem<LogicSystem>();
+
+    for (auto const& e : logicSys->EntityMember)
+    {
+        if (!g_coordinator->HasComponent<LogicComponent>(e))
+            continue;
+
+        auto& logic = g_coordinator->GetComponent<LogicComponent>(e);
+        if (logic.ScriptName == "PlayerScript")
+        {
+            playerEntity = e;
+            break;
+        }
+    }
+
+    if (playerEntity == static_cast<Entity>(-1))
+        return;
+
+    // --- Step 5: Retrieve player components ---
+    if (!g_coordinator->HasComponent<Framework::Transform>(playerEntity) ||
+        !g_coordinator->HasComponent<AABB>(playerEntity) ||
+        !g_coordinator->HasComponent<Health>(playerEntity))
+        return;
+
+    auto& player_transform = g_coordinator->GetComponent<Framework::Transform>(playerEntity);
+    auto& player_box = g_coordinator->GetComponent<AABB>(playerEntity);
+    auto& player_health = g_coordinator->GetComponent<Health>(playerEntity);
+
+    // --- Step 6: Build both AABBs using CollisionManager ---
+    CollisionManager collision;
+    AABB enemy_hitbox = collision.BuildAABBFromTransform(enemy_transform, enemy_box);
+    AABB player_hitbox = collision.BuildAABBFromTransform(player_transform, player_box);
+
+    // --- Step 7: Size-based edge collision threshold ---
+    float playerWidth = player_hitbox.width;
+    float enemyWidth = enemy_hitbox.width;
+
+    float worldScale = 4.5f; // adjust for your world scale
+    float edgeThreshold = (playerWidth + enemyWidth) * worldScale;
+
+    bool edgeContact =
+        (player_hitbox.max.x >= enemy_hitbox.min.x - edgeThreshold) &&
+        (player_hitbox.min.x < enemy_hitbox.min.x) &&
+        (player_hitbox.max.y >= enemy_hitbox.min.y) &&
+        (player_hitbox.min.y <= enemy_hitbox.max.y);
+
+    // --- Debug output ---
+    std::cout << std::fixed << std::setprecision(2)
+        << "Enemy Box: [(" << enemy_hitbox.min.x << ", " << enemy_hitbox.min.y << ") -> ("
+        << enemy_hitbox.max.x << ", " << enemy_hitbox.max.y << ")]\n"
+        << "Player Box: [(" << player_hitbox.min.x << ", " << player_hitbox.min.y << ") -> ("
+        << player_hitbox.max.x << ", " << player_hitbox.max.y << ")]\n"
+        << "worldScale=" << worldScale
+        << " edgeThreshold=" << edgeThreshold
+        << " | EdgeContact=" << (edgeContact ? "TRUE" : "FALSE")
+        << std::endl;
+
+    // --- Step 8: Handle collision ---
+    if (edgeContact && enemy_health.isAlive && player_health.isAlive)
+    {
+        enemy_health.isAlive = false;
+
+        player_health.hp -= enemy_health.damage;
+        if (player_health.hp <= 0)
+        {
+            player_health.hp = 0;
+            player_health.isAlive = false;
+            std::cout << ">>> PLAYER DEFEATED\n";
+        }
+
+        std::cout << ">>> COLLISION (edge contact)! Player HP: "
+            << player_health.hp << " | Enemy defeated!\n";
+
+        // Move enemy off-screen
+        enemy_transform.Pos.x = -9999.0f;
+        enemy_transform.Pos.y = -9999.0f;
+    }
 }
 
 void EnemyScript::Exit(Entity ID)

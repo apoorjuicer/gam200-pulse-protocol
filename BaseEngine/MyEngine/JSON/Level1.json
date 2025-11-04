@@ -219,7 +219,32 @@
                     {
                         "ScriptName": "EnemyScript"
                     }
+                },
+
+            {
+                "Health":
+                {
+                    "hp": 1.0,
+                    "damage": 1.0,
+                    "isAlive": true
                 }
+            },
+
+            {
+                "AABB":
+                {
+                        "min": {
+                            "x": 50.0,
+                            "y": 50.0
+                        },
+                        "max": {
+                            "x": 150.0,
+                            "y": 150.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
+                }
+            }
 
             ]
         },
