@@ -714,8 +714,7 @@ namespace MyEditor
                     else
                         RestoreEditorBaseline();
 
-                    Engine->RestartRuntimeForPlay();
-                    Engine->SetPaused(false);
+                    Engine->PlayGame();
                     s_isPlaying = true;
                 }
 
@@ -724,9 +723,9 @@ namespace MyEditor
                 // --- Stop ---
                 if (ImGui::Button("Stop", stopButtonSize))
                 {
-                    Engine->SetPaused(true);
+                    Engine->StopGame();
                     s_isPlaying = false;
-                    RestoreEditorBaseline();
+                    /*RestoreEditorBaseline();*/
                 }
 
                 ImGui::PopStyleVar();

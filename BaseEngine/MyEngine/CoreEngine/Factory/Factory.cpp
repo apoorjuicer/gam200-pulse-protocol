@@ -133,6 +133,9 @@ Entity Factory::DefaultObj()
 void Factory::DeleteEntity(Entity entity)
 {
 	auto* g_coordinator = Coordinator::GetInstance();
+	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
+	sceneManager->DecrementEntityArray(entity); // KILL THE ENTITY FROM SCENE ENTITY CONTAINER >:D
+
 	g_coordinator->DestroyEntity(entity);
 }
 

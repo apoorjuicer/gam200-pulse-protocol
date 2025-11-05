@@ -639,22 +639,93 @@ void CoreEngine::RenderDebugDraw()
 	DebugDraw::End();
 }
 
-void CoreEngine::SetPaused(bool paused)
-{
-	if (m_paused == paused)
-		return;
-	m_paused = paused;
+// void CoreEngine::SetPaused(bool paused)
+//{
+//	if (m_paused == paused) return;
+//	m_paused = paused;
+//
+//	// Pause/resume audio, too
+//	if (auto audio = Coordinator::GetInstance()->GetSystem<AudioManager>()) {
+//		audio->SetPaused(paused);
+//	}
+// }
+//
+// void CoreEngine::TogglePaused()
+//{
+//	SetPaused(!m_paused);
+// }
 
-	// Pause/resume audio, too
-	if (auto audio = Coordinator::GetInstance()->GetSystem<AudioManager>())
+void CoreEngine::PlayGame()
+{
+	m_isPlaying = true;
+
+	auto coord = Coordinator::GetInstance();
+
+	// ALWAYS update the original scene path when Play is pressed
+	if (auto sceneMgr = coord->GetSystem<SceneManager>())
 	{
-		audio->SetPaused(paused);
+		std::string sceneName = sceneMgr->GrabCurrentScene();
+
+		// Remove "Saved" prefix if it exists
+		if (sceneName.find("Saved") == 0)
+		{
+			sceneName = sceneName.substr(5);
+		}
+		// Remove "Scene" suffix if it exists
+		size_t scenePos = sceneName.find("Scene");
+		if (scenePos != std::string::npos)
+		{
+			sceneName = sceneName.substr(0, scenePos);
+		}
+
+		// ALWAYS update this path, even if already set
+		m_originalScenePath = "../../MyEngine/JSON/" + sceneName + ".json";
+
+		std::cout << "[CoreEngine] Original scene path: " << m_originalScenePath << std::endl; // DEBUG
+	}
+
+	RestartRuntimeForPlay();
+
+	// Call Init() on all scripts
+	if (auto logicSys = coord->GetSystem<LogicSystem>())
+	{
+		for (auto const &entity : logicSys->EntityMember)
+		{
+			auto &scriptname = coord->GetComponent<LogicComponent>(entity);
+			auto script = logicSys->GrabScript(scriptname.ScriptName);
+			if (script)
+			{
+				script->Init(entity);
+			}
+		}
+	}
+
+	if (auto audio = coord->GetSystem<AudioManager>())
+	{
+		audio->RestartBGM();
 	}
 }
 
-void CoreEngine::TogglePaused()
+void CoreEngine::StopGame()
 {
-	SetPaused(!m_paused);
+	m_isPlaying = false;
+
+	auto coord = Coordinator::GetInstance();
+
+	// pause the bg music
+	if (auto audio = coord->GetSystem<AudioManager>())
+	{
+		audio->PauseBGM();
+	}
+
+	// reloads original scene to reset all entities to initial starting position
+	if (auto sceneMgr = coord->GetSystem<SceneManager>())
+	{
+		if (!m_originalScenePath.empty())
+		{
+			sceneMgr->LoadSceneFromJson(m_originalScenePath);
+		}
+	}
 }
 
 void CoreEngine::RestartRuntimeForPlay()
@@ -667,7 +738,7 @@ void CoreEngine::RestartRuntimeForPlay()
 	if (auto audio = coord->GetSystem<AudioManager>())
 	{
 		// if engine is paused (Stop button), keep audio paused too
-		audio->RestartBGM(m_paused);
+		audio->RestartBGM();
 	}
 
 	// 2) RHYTHM: shutdown + initialize

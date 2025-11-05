@@ -54,7 +54,7 @@ AudioManager::~AudioManager()
     Shutdown();
 }
 
-void AudioManager::RestartBGM(bool startPaused)
+void AudioManager::RestartBGM()
 {
     if (!mSystem)
         return;
@@ -77,8 +77,8 @@ void AudioManager::RestartBGM(bool startPaused)
         }
     }
 
-    // remember current pause state
-    mPaused = startPaused;
+    // remember current pause state (not using pause as of now)
+    /*mPaused = startPaused;*/
 }
 
 void AudioManager::Initialize()
@@ -178,7 +178,7 @@ void AudioManager::Initialize()
     PlayBGM("bgm");
     std::string tf = IsBGMPlaying() ? "true" : "false";
     std::cout << "[AudioManager] Playing bgm? " << tf << "\n";
-    //PlaySound("beat_placeholder");
+    // PlaySound("beat_placeholder");
     std::cout << "[AudioManager] AudioManager initialization completed with mixers.\n";
 
 } // end init
@@ -470,10 +470,10 @@ bool AudioManager::LoadAllSFX()
     {
         if (ar.audiotype == "SFX")
         {
-            if (!LoadSFX(id)) {
+            if (!LoadSFX(id))
+            {
                 all_ok = false;
             }
-          
         }
     }
     return all_ok;
