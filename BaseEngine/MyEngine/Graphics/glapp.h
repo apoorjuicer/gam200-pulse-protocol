@@ -22,6 +22,7 @@
 #include "Animation.h"
 #include "CoreEngine/Assets.h"
 #include "Physics/collision.h" 
+#include "DebugDraw.h"
 // External transforms list (used elsewhere)   
 namespace Framework { class Transform; class Animation; class Renderable; }
 

@@ -11,7 +11,7 @@
  */
  /******************************************************************************/
 #include "glapp.h"
-#include "DebugDraw.h"
+
 #include <filesystem>
 
 /*                                                   objects with file scope
@@ -310,7 +310,6 @@ void GLApp::draw(std::set<Entity> entities) {
 			// ---------------------------------------------------------------------------
 
 			glBindTexture(GL_TEXTURE_2D, re.textureID);
-			updateAnimation(an, deltaTime);
 			drawTrans(re, an, tr, PanZoom);
 		}
 	}
