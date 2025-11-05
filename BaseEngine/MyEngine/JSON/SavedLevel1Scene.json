@@ -66,8 +66,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -400.0,
-                            "y": 0.0
+                            "x": -410.0,
+                            "y": -460.0
                         },
                         "scale": {
                             "x": 500.0,
@@ -102,7 +102,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.11278198659420014,
+                        "elapsedTime": 0.12402225285768509,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -152,8 +152,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 465.0,
-                            "y": 0.0
+                            "x": 205.0,
+                            "y": -95.0
                         },
                         "scale": {
                             "x": 500.0,
@@ -242,7 +242,7 @@
                         "angle_disp": 0.0,
                         "angle_speed": 0.0,
                         "isVisible": false,
-                        "visibilityTimer": -0.001999272033572197,
+                        "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
