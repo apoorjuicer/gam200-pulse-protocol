@@ -66,8 +66,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -410.0,
-                            "y": -460.0
+                            "x": 35.0,
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 500.0,
@@ -101,8 +101,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.12402225285768509,
+                        "currentFrame": 2,
+                        "elapsedTime": 0.4750276803970337,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -121,88 +121,7 @@
                 },
                 {
                     "Health": {
-                        "hp": 5,
-                        "damage": 1,
-                        "isAlive": true
-                    }
-                },
-                {
-                    "AABB": {
-                        "min": {
-                            "x": 50.0,
-                            "y": 50.0
-                        },
-                        "max": {
-                            "x": 150.0,
-                            "y": 150.0
-                        },
-                        "width": 50.0,
-                        "height": 50.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "Typing": {
-                        "Type": "Enemy"
-                    }
-                },
-                {
-                    "transform": {
-                        "position": {
-                            "x": 205.0,
-                            "y": -95.0
-                        },
-                        "scale": {
-                            "x": 500.0,
-                            "y": 500.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "textureID": 260,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "EnemyScript"
-                    }
-                },
-                {
-                    "Health": {
-                        "hp": 1,
+                        "hp": 4,
                         "damage": 1,
                         "isAlive": true
                     }
@@ -241,9 +160,9 @@
                         },
                         "angle_disp": 0.0,
                         "angle_speed": 0.0,
-                        "isVisible": true,
-                        "visibilityTimer": 1.4680006504058838,
-                        "autoHide": true
+                        "isVisible": false,
+                        "visibilityTimer": -0.002000470645725727,
+                        "autoHide": false
                     }
                 },
                 {
@@ -269,13 +188,13 @@
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
-                            "a": 1.0
+                            "a": 0.0
                         },
                         "hoverColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
-                            "a": 1.0
+                            "a": 0.0
                         },
                         "actionType": "",
                         "entityJsonPath": "",

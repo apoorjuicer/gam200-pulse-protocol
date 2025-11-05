@@ -65,8 +65,8 @@ void RhythmGameplayInput::Update(float deltaTime) {
         for (auto entity : activeEntities) {
             if (g_coordinator->HasComponent<Name>(entity)) {
                 auto& nameComp = g_coordinator->GetComponent<Name>(entity);
-                if (nameComp.name == "FeedbackBar") {
                     fontEntity = entity;
+                if (nameComp.name == "FeedbackBar") {
                     //std::cout << "========================================" << std::endl;
                     //std::cout << "[RhythmGameplayInput] Found FeedbackBar: " << entity << std::endl;
 
