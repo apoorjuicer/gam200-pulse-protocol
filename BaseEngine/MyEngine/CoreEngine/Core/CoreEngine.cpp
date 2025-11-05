@@ -529,17 +529,15 @@ void CoreEngine::RenderDebugDraw() {
 void CoreEngine::PlayGame() {
 	m_isPlaying = true;
 
-	RestartRuntimeForPlay();
-
 	auto coord = Coordinator::GetInstance();
 
-	// SAVE the original scene path before playing
+	// ALWAYS update the original scene path when Play is pressed
 	if (auto sceneMgr = coord->GetSystem<SceneManager>()) {
 		std::string sceneName = sceneMgr->GrabCurrentScene();
 
-		// Remove "Saved" prefix if it exists to get original name
+		// Remove "Saved" prefix if it exists
 		if (sceneName.find("Saved") == 0) {
-			sceneName = sceneName.substr(5);  // Remove "Saved"
+			sceneName = sceneName.substr(5);
 		}
 		// Remove "Scene" suffix if it exists
 		size_t scenePos = sceneName.find("Scene");
@@ -547,7 +545,10 @@ void CoreEngine::PlayGame() {
 			sceneName = sceneName.substr(0, scenePos);
 		}
 
+		// ALWAYS update this path, even if already set
 		m_originalScenePath = "../../MyEngine/JSON/" + sceneName + ".json";
+
+		std::cout << "[CoreEngine] Original scene path: " << m_originalScenePath << std::endl;  // DEBUG
 	}
 
 	RestartRuntimeForPlay();

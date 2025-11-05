@@ -181,7 +181,7 @@ bool LoadScriptName(LogicComponent& t, std::string const& path)
 void PlayerScript::Init(Entity ID) 
 {
 	(void)ID;
-    autoMoveTimer = 2.0f; // reset timer
+    //autoMoveTimer = 2.0f; // reset timer
 }
 
 void PlayerScript::Update(Entity ID) 
@@ -189,11 +189,11 @@ void PlayerScript::Update(Entity ID)
 	auto g_coordinator = Coordinator::GetInstance();
 	auto& hero_transform = g_coordinator->GetComponent<Framework::Transform>(ID);
 
-    // auto-moves right after game starts (for 2 secs)
-    if (autoMoveTimer > 0.0f) {
-        hero_transform.Pos.x += 3.0f;
-        autoMoveTimer -= 0.016f;
-    }
+    //// auto-moves right after game starts (for 2 secs)
+    //if (autoMoveTimer > 0.0f) {
+    //    hero_transform.Pos.x += 3.0f;
+    //    autoMoveTimer -= 0.016f;
+    //}
 
     // this is just regular WASD
 	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_W) == GLFW_PRESS)

@@ -288,6 +288,11 @@ void SceneManager::UnloadCurrentScene()
 
 void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE JSON FILE 
 {
+	// is scene is switched, automatically STOP the game
+	if (Engine && Engine->IsPlaying()) {
+		Engine->StopGame();
+	}
+
 	UnloadCurrentScene();
 
 #ifdef _DEBUG

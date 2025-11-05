@@ -66,8 +66,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -285.0,
-                            "y": 120.0
+                            "x": -300.0,
+                            "y": -270.0
                         },
                         "scale": {
                             "x": 500.0,
@@ -101,8 +101,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.15361946821212769,
+                        "currentFrame": 1,
+                        "elapsedTime": 0.27770787477493288,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -242,7 +242,7 @@
                         "angle_disp": 0.0,
                         "angle_speed": 0.0,
                         "isVisible": true,
-                        "visibilityTimer": 1.0360002517700196,
+                        "visibilityTimer": 1.4680006504058838,
                         "autoHide": true
                     }
                 },
