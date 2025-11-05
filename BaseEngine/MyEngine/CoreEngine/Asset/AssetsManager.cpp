@@ -80,6 +80,12 @@
         }
 
         void AssetsManager::UnloadAllSound() {
+            if (!mSystem) {
+                soundMap.clear();  // Clear the map even if system is gone
+                std::cout << "[Audio] System already shut down.\n";
+                return;
+            }
+
             // Stop anything that may still be playing (prevents stale handles).
             if (mSystem) {
                 FMOD::ChannelGroup* master = nullptr;

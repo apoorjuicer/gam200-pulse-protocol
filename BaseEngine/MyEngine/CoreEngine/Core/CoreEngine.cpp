@@ -551,7 +551,9 @@ void CoreEngine::PlayGame() {
 		std::cout << "[CoreEngine] Original scene path: " << m_originalScenePath << std::endl;  // DEBUG
 	}
 
-	RestartRuntimeForPlay();
+	if (auto audio = coord->GetSystem<AudioManager>()) {
+		audio->RestartBGM();
+	}
 
 	// Call Init() on all scripts
 	if (auto logicSys = coord->GetSystem<LogicSystem>()) {
@@ -562,10 +564,6 @@ void CoreEngine::PlayGame() {
 				script->Init(entity);
 			}
 		}
-	}
-
-	if (auto audio = coord->GetSystem<AudioManager>()) {
-		audio->RestartBGM();
 	}
 }
 
@@ -588,20 +586,21 @@ void CoreEngine::StopGame()
 	}
 }
 
+// this might have been causing the random crash cus its calling restartBGM() too
 void CoreEngine::RestartRuntimeForPlay()
 {
-	auto coord = Coordinator::GetInstance();
-	if (!coord) return;
+	//auto coord = Coordinator::GetInstance();
+	//if (!coord) return;
 
-	// 1) AUDIO: force BGM to start at 0
-	if (auto audio = coord->GetSystem<AudioManager>()) {
-		// if engine is paused (Stop button), keep audio paused too
-		audio->RestartBGM();
-	}
+	//// 1) AUDIO: force BGM to start at 0
+	//if (auto audio = coord->GetSystem<AudioManager>()) {
+	//	// if engine is paused (Stop button), keep audio paused too
+	//	audio->RestartBGM();
+	//}
 
-	// 2) RHYTHM: shutdown + initialize
-	if (auto rhythm = coord->GetSystem<RhythmGameplayInput>()) {
-		rhythm->Shutdown();
-		rhythm->Initialize();
-	}
+	//// 2) RHYTHM: shutdown + initialize
+	//if (auto rhythm = coord->GetSystem<RhythmGameplayInput>()) {
+	//	rhythm->Shutdown();
+	//	rhythm->Initialize();
+	//}
 }

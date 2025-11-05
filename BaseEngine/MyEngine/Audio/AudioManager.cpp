@@ -65,19 +65,33 @@ void AudioManager::releaseAll()
 {
     if (!mSystem) return;
 
-    // 1) Stop anything that might still be playing
-    if (FMOD::ChannelGroup* master = nullptr;
-        mSystem->getMasterChannelGroup(&master) == FMOD_OK && master) {
+    // 1) Stop BGM channel FIRST and nullify
+    if (mBGMCh) {
+        mBGMCh->stop();
+        mBGMCh = nullptr;  // ADD THIS
+    }
+
+    // 2) Stop master channel group
+    FMOD::ChannelGroup* master = nullptr;
+    if (mSystem->getMasterChannelGroup(&master) == FMOD_OK && master) {
         master->stop();
     }
 
-    // 2) Unload all sounds (does not require the system to be closed yet)
+    // 3) DON'T release mBGM here - AssetsManager owns it
+    mBGM = nullptr;  // Just clear the pointer
+
+    // 4) DON'T release mInputSFX here either
+    mInputSFX = nullptr;  // Just clear the pointer
+
+    // 5) Unload all sounds (this calls FMOD release internally)
     Framework::AssetsManager::Instance().UnloadAllSound();
 
-    // 3) Tear down FMOD
-    mSystem->close();
-    mSystem->release();
-    mSystem = nullptr;
+    // 6) Close and release FMOD system
+    if (mSystem) {
+        mSystem->close();
+        mSystem->release();
+        mSystem = nullptr;
+    }
 }
 
 
@@ -129,9 +143,8 @@ void AudioManager::Initialize()
 
 void AudioManager::Update()
 {
-    if (mSystem) {
-        mSystem->update();
-    }
+    if (!mSystem) return;
+    mSystem->update();
 
 }
 

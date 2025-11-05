@@ -389,6 +389,10 @@ void EnemyScript::Update(Entity ID)
 
         if (edgeContact && enemy_health.isAlive && player_health.isAlive)
         {
+            if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
+                audio->PlaySound("collision", 0.8f);
+            }
+
             enemy_health.isAlive = false;
             player_health.hp -= enemy_health.damage;
 
@@ -443,6 +447,10 @@ void EnemyScript::Update(Entity ID)
 
         if (obbHit && enemy_health.isAlive && player_health.isAlive)
         {
+            if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
+                audio->PlaySound("collision", 0.8f);
+            }
+
             enemy_health.isAlive = false;
             player_health.hp -= enemy_health.damage;
 
