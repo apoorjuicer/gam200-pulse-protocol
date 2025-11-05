@@ -1072,15 +1072,14 @@ namespace MyEditor
                 ImGui::Separator();
 
 
-                // -----------------------------
-                // Add Component button + popup
-                // -----------------------------
-                ImGui::AlignTextToFramePadding();
-                ImGui::TextUnformatted("Components"); ImGui::SameLine();
-                if (ImGui::Button("Add Component")) ImGui::OpenPopup("AddCompPopup");
-
-                if (ImGui::BeginPopup("AddCompPopup"))
+                
+                // Right click to add component
+                if (selectedEntity != INVALID_ENTITY &&
+                    ImGui::BeginPopupContextWindow("AddCompPopup",
+                        ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
                 {
+                    auto* g = Coordinator::GetInstance();
+
                     // Transform
                     if (!g->HasComponent<Framework::Transform>(selectedEntity))
                     {
@@ -1096,6 +1095,7 @@ namespace MyEditor
                             g->AddComponent<Framework::Transform>(selectedEntity, t);
                         }
                     }
+
                     // Renderable
                     if (!g->HasComponent<Framework::Renderable>(selectedEntity))
                     {
@@ -1109,6 +1109,7 @@ namespace MyEditor
                             g->AddComponent<Framework::Renderable>(selectedEntity, r);
                         }
                     }
+
                     // Animation
                     if (!g->HasComponent<Framework::Animation>(selectedEntity))
                     {
@@ -1122,6 +1123,7 @@ namespace MyEditor
                             g->AddComponent<Framework::Animation>(selectedEntity, a);
                         }
                     }
+
                     // Name
                     if (!g->HasComponent<Name>(selectedEntity))
                     {
@@ -1132,7 +1134,8 @@ namespace MyEditor
                             g->AddComponent<Name>(selectedEntity, nm);
                         }
                     }
-                    // GUIButton (if your project uses it)
+
+                    // GUIButton (optional, if used in your project)
                     if (!g->HasComponent<GUIButton>(selectedEntity))
                     {
                         if (ImGui::MenuItem("GUIButton"))
@@ -1145,8 +1148,6 @@ namespace MyEditor
 
                     ImGui::EndPopup();
                 }
-
-                ImGui::Separator();
 
 
                 // --- Name --------------------------------------------------------------------
