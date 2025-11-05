@@ -13,7 +13,6 @@
 #include "glapp.h"
 #include "DebugDraw.h"
 #include <filesystem>
-//#include "../Managers/AssetsManager.h"
 
 /*                                                   objects with file scope
 ----------------------------------------------------------------------------- */
@@ -24,37 +23,29 @@ std::vector<GLApp::GLViewport> GLApp::vps;
 
 GLuint textureID;
 static GLApp::BatchRender gBatch;
-const std::string test_vs = {
-	#include "shader/test_vs.vert" 
-};
 
-const std::string test_fs = {
-	#include "shader/test_fs.frag" 
-};
-const std::string bg_vs = {
-	#include "shader/bg_vs.vert" 
-};
+namespace fs = std::filesystem;
 
-const std::string bg_fs = {
-	#include "shader/bg_fs.frag" 
-};
+static std::string LoadFile(const char* relativeToGraphicsShader) {
+	fs::path here = fs::path(__FILE__).parent_path();      // ...\MyEngine\Graphics
+	fs::path full = here / "shader" / relativeToGraphicsShader;
+	std::ifstream f(full, std::ios::binary);
+	if (!f) {
+		std::cerr << "[Shader] Open failed: " << full << "\n";
+		return {};
+	}
+	std::ostringstream ss; ss << f.rdbuf();
+	return ss.str();
+}
 
-const std::string sprite_vs = {
-	#include "shader/sprite_vs.vert" 
-};
-
-const std::string sprite_fs = {
-	#include "shader/sprite_fs.frag" 
-};
-
-const std::string font_vs = {
-	#include "shader/font_vs.vert" 
-};
-
-const std::string font_fs = {
-	#include "shader/font_fs.frag" 
-};
-
+const std::string test_vs = LoadFile("test_vs.vert");
+const std::string test_fs = LoadFile("test_fs.frag");
+const std::string bg_vs = LoadFile("bg_vs.vert");
+const std::string bg_fs = LoadFile("bg_fs.frag");
+const std::string sprite_vs = LoadFile("sprite_vs.vert");
+const std::string sprite_fs = LoadFile("sprite_fs.frag");
+const std::string font_vs = LoadFile("font_vs.vert");
+const std::string font_fs = LoadFile("font_fs.frag");
 
 double random() {
 	return static_cast<double>((rand() % 10) / 10.0f);
@@ -386,8 +377,12 @@ void GLApp::cleanup() {
 void GLApp::init_shdrpgms_cont(GLApp::VPSS const& vpss) {
 	shdrpgms.clear();
 	shdrpgms.reserve(vpss.size());
+	int i = 0;
 	for (auto const& x : vpss) {
+		if (x.first.empty()) { std::cerr << "[Shader] Empty VERT source for tag\n"; std::exit(EXIT_FAILURE); }
+		if (x.second.empty()) { std::cerr << "[Shader] Empty FRAG source for tag\n"; std::exit(EXIT_FAILURE); }
 		GLSLShader shdr_pgm;
+		const char* tag = (i == 0) ? "test" : (i == 1) ? "bg" : (i == 2) ? "sprite" : "font";
 		if (!shdr_pgm.CompileShaderFromString(GL_VERTEX_SHADER, x.first)) {
 			std::cout << "Vertex shader failed to compile: ";
 			std::cout << shdr_pgm.GetLog() << std::endl;
@@ -399,15 +394,16 @@ void GLApp::init_shdrpgms_cont(GLApp::VPSS const& vpss) {
 			std::exit(EXIT_FAILURE);
 		}
 		if (!shdr_pgm.Link()) {
-			std::cout << "Shader program failed to link!" << std::endl;
+			std::cout << "Shader program failed to link!" << shdr_pgm.GetLog() << std::endl;
 			std::exit(EXIT_FAILURE);
 		}
 		if (!shdr_pgm.Validate()) {
-			std::cout << "Shader program failed to validate!" << std::endl;
+			std::cout << "Shader program failed to validate!" << shdr_pgm.GetLog() << std::endl;
 			std::exit(EXIT_FAILURE);
 		}
 		// insert shader program into container
 		GLApp::shdrpgms.emplace_back(std::move(shdr_pgm));
+		++i;
 	}
 }
 

@@ -1,4 +1,4 @@
-R"(#version 450 core
+#version 450 core
 
 layout(location = 0) in vec2 aVertexPosition; // Vertex position
 layout(location = 1) in vec3 aVertexColor;    // Vertex color
@@ -16,4 +16,3 @@ void main() {
     vColor = aVertexColor;
     vTex = aTexture * uScale + uOffset; // Scale and offset UVs for animation
 }
-)"
