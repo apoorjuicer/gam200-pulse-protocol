@@ -271,6 +271,19 @@ namespace MyEditor
                         clicked = true;
                 }
 
+                // Make image files draggable
+                if (IsImageExt(item.fullPath)) {
+                    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+                        // Send full path as payload. Keep the type string in sync with the Inspector target.
+                        const char* path = item.fullPath.c_str();
+                        ImGui::SetDragDropPayload("ASSET_TEXTURE", path, (int)std::strlen(path) + 1);
+                        ImGui::TextUnformatted(("Texture: " + item.name).c_str()); // nice tooltip while dragging
+                        ImGui::EndDragDropSource();
+                    }
+                }
+
+
+
                 if (clicked)
                 {
                     // Check if this is a prefab JSON file
@@ -1311,62 +1324,80 @@ namespace MyEditor
                     }
 
                     // --- Reload texture button ---
-                    if (ImGui::Button("Reload Texture"))
+                    // --- Reload texture button + Drag&Drop target ---
                     {
-                        namespace fs = std::filesystem;
-                        const std::string kTexturesRoot = "../../MyEngine/Assets/Textures";
+                        // Draw the button first
+                        bool reloadClicked = ImGui::Button("Reload Texture");
 
-                        // Adjust these to your actual shader indices
-                        constexpr int SPRITE_SHADER_INDEX = 1; // plain sprite shader
-                        constexpr int SPRITESHEET_SHADER_INDEX = 2; // spritesheet shader
-
-                        // 1) Resolve path if user typed only a filename or an invalid path
+                        // Allow dropping a texture file onto this button
+                        if (ImGui::BeginDragDropTarget())
                         {
-                            std::string candidate = r.spriteName;
-                            std::error_code ec;
-                            if (!fs::path(candidate).has_parent_path() || !fs::exists(candidate, ec)) {
-                                std::string base = fs::path(candidate).filename().string();
-                                if (base.empty()) base = candidate;
-
-                                std::string resolved = Framework::AssetsManager::FindTextureByFilename(base, kTexturesRoot);
-                                if (!resolved.empty())
-                                    r.spriteName = resolved; // keep resolved full path for next time
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
+                            {
+                                // -------------- Apply dropped path --------------
+                                const char* droppedPath = static_cast<const char*>(payload->Data);
+                                r.spriteName = droppedPath ? std::string(droppedPath) : std::string();
+                                reloadClicked = true; // reuse the same reload routine below
                             }
+                            ImGui::EndDragDropTarget();
                         }
 
-                        // 2) Load (cached by AssetsManager)
-                        r.textureID = Framework::AssetsManager::GetOrLoad(r.spriteName);
-                        r.loadedSpriteName = r.spriteName;
-                        r.needsTextureReload = false;
-
-                        // 3) OPTIONAL: choose shader based on filename hint, but DO NOT touch Animation
-                        int  hintRows = 1, hintCols = 1;
-                        bool isSheet = false;
-
-                        // Try strict grid parser on the *base filename*
+                        if (reloadClicked)
                         {
-                            int rr = 1, cc = 1;
-                            std::string base = fs::path(r.spriteName).filename().string();
-                            if (ParseGridFromFilename(base, rr, cc) && rr * cc > 1) {
-                                hintRows = rr; hintCols = cc;
-                                isSheet = true;
+                            namespace fs = std::filesystem;
+                            const std::string kTexturesRoot = "../../MyEngine/Assets/Textures";
+
+                            // Adjust these to your actual shader indices
+                            constexpr int SPRITE_SHADER_INDEX = 1; // plain sprite shader
+                            constexpr int SPRITESHEET_SHADER_INDEX = 2; // spritesheet shader
+
+                            // 1) Resolve path if user typed only a filename or an invalid path
+                            {
+                                std::string candidate = r.spriteName;
+                                std::error_code ec;
+                                if (!fs::path(candidate).has_parent_path() || !fs::exists(candidate, ec)) {
+                                    std::string base = fs::path(candidate).filename().string();
+                                    if (base.empty()) base = candidate;
+
+                                    std::string resolved = Framework::AssetsManager::FindTextureByFilename(base, kTexturesRoot);
+                                    if (!resolved.empty())
+                                        r.spriteName = resolved; // keep resolved full path for next time
+                                }
                             }
+
+                            // 2) Load (cached by AssetsManager)
+                            r.textureID = Framework::AssetsManager::GetOrLoad(r.spriteName);
+                            r.loadedSpriteName = r.spriteName;
+                            r.needsTextureReload = false;
+
+                            // 3) OPTIONAL: choose shader based on filename hint, but DO NOT touch Animation
+                            int  hintRows = 1, hintCols = 1;
+                            bool isSheet = false;
+
+                            // Try strict grid parser on the *base filename*
+                            {
+                                int rr = 1, cc = 1;
+                                std::string base = fs::path(r.spriteName).filename().string();
+                                if (ParseGridFromFilename(base, rr, cc) && rr * cc > 1) {
+                                    hintRows = rr; hintCols = cc;
+                                    isSheet = true;
+                                }
+                            }
+
+                            // Tiny heuristic backup ("sheet"/"atlas")
+                            if (!isSheet) {
+                                std::string base = fs::path(r.spriteName).filename().string();
+                                for (auto& c : base) c = (char)tolower(c);
+                                if (base.find("sheet") != std::string::npos || base.find("atlas") != std::string::npos)
+                                    isSheet = true;
+                            }
+
+                            // Switch only the shader; leave Animation component untouched
+                            r.shd_ref = static_cast<float>(isSheet ? SPRITESHEET_SHADER_INDEX
+                                : SPRITE_SHADER_INDEX);
                         }
-
-                        // Tiny heuristic backup ("sheet"/"atlas")
-                        if (!isSheet) {
-                            std::string base = fs::path(r.spriteName).filename().string();
-                            for (auto& c : base) c = (char)tolower(c);
-                            if (base.find("sheet") != std::string::npos || base.find("atlas") != std::string::npos)
-                                isSheet = true;
-                        }
-
-                        // Switch only the shader; leave Animation component untouched
-                        r.shd_ref = static_cast<float>(isSheet ? SPRITESHEET_SHADER_INDEX
-                            : SPRITE_SHADER_INDEX);
-
-
                     }
+
 
                     ImGui::Separator();
 
