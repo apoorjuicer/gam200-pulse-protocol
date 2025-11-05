@@ -41,7 +41,6 @@ AABB CollisionManager::BuildHeroHitbox(Framework::Transform& pos, const NPC& npc
     return { min, max };
 }
 
-
 AABB CollisionManager::BuildMonsterHitbox(Framework::Transform& pos, const NPC& npc)
 {
     Vector2 min(pos.Pos.x - npc.width / 2.0f, pos.Pos.y - npc.height / 2.0f);

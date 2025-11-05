@@ -2,8 +2,7 @@
 /**
  * @file        Animation.h
  * @project     Pulse Protocol
- * @author      Goh Pin Kai (primary) - 90%
- * @author 		Ban Kai Wei Benjamin (secondary) - 10%
+ * @author      Goh Pin Kai - 100%
  * @brief       Declares the Animation component for the ECS framework.
  *              This component stores sprite sheet animation playback state,
  *              including frame indices, timing, and atlas layout information.
@@ -13,7 +12,7 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 #pragma once
 // #include "../ComponentJson/Component_System.h"
 // #include "../Math/Matrix_3x3.h"
@@ -29,7 +28,7 @@
 
 namespace Framework
 {
-	class Animation 
+	class Animation
 	{
 	public:
 		std::string id = "";
@@ -42,6 +41,8 @@ namespace Framework
 		float animationSpeed = 2.f;
 		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
 		void Deserialize(const rapidjson::Value& in);
+		static inline bool IsSingleImage(const Framework::Animation& a);
+		void TickAnimation(Framework::Animation& anim, float dt);
 	};
 }
 #endif // FRAMEWORK_ANIMATION_H

@@ -9,13 +9,15 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/
+/******************************************************************************/
 
 #pragma once
 #include "pch/pch.h"
-//#include "../MyEngine/Serialization/Serialization.h"
-//#include "../MyEngine/Resources/AssetRegistry.h"
-//#include "../Asset/AssetsManager.h"
+// #include "../MyEngine/Serialization/Serialization.h"
+// #include "../MyEngine/Resources/AssetRegistry.h"
+// #include "../Asset/AssetsManager.h"
+#include "../Components/Health.h"
+#include "../Components/EntityType.h"
 
 class Config;
 class AssetManager;
@@ -36,36 +38,33 @@ public:
 	void SetPaused(bool p);
 	void TogglePaused();
 	bool IsPaused() const { return m_paused; }
-	// One of the ways to glue systems tgt. 
-	//void BroadcastMessage(Message* message);
+	// One of the ways to glue systems tgt.
+	// void BroadcastMessage(Message* message);
 
 	bool IsGameRunning() const { return GameRunning; }
 
-	GLFWwindow* GetWindow() const { return window; }
-	
+	GLFWwindow *GetWindow() const { return window; }
 
-	//AssetsManager& getAssetsManager() { return mAssets; }
+	void RestartRuntimeForPlay();
+
+	// AssetsManager& getAssetsManager() { return mAssets; }
 
 private:
 	bool GameRunning;
 	bool DebugMode = false;
-	unsigned LastTime; //The last time the game was updated
+	unsigned LastTime; // The last time the game was updated
 	bool m_paused = true;
-
 
 	void RenderDebugDraw();
 
-	GLFWwindow* window;
-
-
+	GLFWwindow *window;
 };
 
-//A global pointer to the instance of the core
-extern CoreEngine* Engine;
-extern Config config; //global scope
+// A global pointer to the instance of the core
+extern CoreEngine *Engine;
+extern Config config; // global scope
 extern AssetsManager mAssets;
 extern int WindowWidth;
 extern int WindowHeight;
-//constexpr int WindowWidth = 1600;
-//constexpr int WindowHeight = 900;
-
+// constexpr int WindowWidth = 1600;
+// constexpr int WindowHeight = 900;

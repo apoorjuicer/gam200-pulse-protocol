@@ -18,7 +18,7 @@ namespace Framework
 	class Font {
 		std::string FontID;
 		std::string FontPath;
-	
+
 		virtual void Initialize() {
 		}
 

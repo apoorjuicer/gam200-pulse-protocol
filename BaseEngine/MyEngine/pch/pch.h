@@ -125,5 +125,5 @@
 #include "../MyEngine/CoreEngine/Window.h"
 #include "../MyEngine/CoreEngine/Assets.h"
 #include "../MyEngine/CoreEngine/Scene/SceneManager.h"
-#include <../MyEngine/CoreEngine/Asset/AssetsManager.h>
+#include "../MyEngine/CoreEngine/Asset/AssetsManager.h"
 #include "../MyEngine/CoreEngine/Message/MessageManager.h"

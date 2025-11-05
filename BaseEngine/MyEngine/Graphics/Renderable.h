@@ -2,21 +2,20 @@
 /**
  * @file        Renderable.h
  * @project     Pulse Protocol
- * @author      Goh Pin Kai (primary) - 90%
- * @author 		Ban Kai Wei Benjamin (secondary) - 10%
+ * @author      Goh Pin Kai - 100%
  * @brief       Declares the Renderable component used by the ECS framework.
  *              This component stores references to the model, shader, and
  *              texture used during rendering, along with sprite name for
  *              texture atlas / asset lookup. Provides helper functions for
- *              assigning textures from asset paths, and supports 
+ *              assigning textures from asset paths, and supports
  *              serialization and deserialization for scene saving/loading.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 #pragma once
-#include "pch/pch.h" // FIRST
+#include "pch/pch_temp.h" // FIRST
 #include "CoreEngine/ECS/Coordinator.h"
 #include "CoreEngine/Asset/AssetsManager.h"
 #include <glm/gtc/type_ptr.hpp>
@@ -27,18 +26,39 @@
 
 namespace Framework
 {
-	class Renderable 
+	// for solid color support
+	struct Color {
+		float r = 1.0f;
+		float g = 1.0f;
+		float b = 1.0f;
+		float a = 1.0f;
+
+		Color() = default;
+		Color(float red, float green, float blue, float alpha = 1.0f)
+			: r(red), g(green), b(blue), a(alpha) {
+		}
+	};
+
+
+	class Renderable
 	{
 	public:
 		float mdl_ref = 0.f;		// Model no
 		float shd_ref = 0.f;		// Shader no
 		GLuint textureID = 0;		// Texture ID
 		std::string spriteName;
-		void SetSprite(std::string ref);
-		std::string GetSprite() const;
+
+		Color tintColor = Color(1.0f, 1.0f, 1.0f, 1.0f); // Default white
+		bool useTexture = true;     // Flag: true = use texture, false = use solid color
+
+		//void SetSprite(std::string ref);
+		//std::string GetSprite() const;
 		void AssignTextureFromPath(Framework::Renderable& t);
 		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
 		void Deserialize(const rapidjson::Value& in);
+
+		bool        needsTextureReload = false;   // true after user edits the name
+		std::string loadedSpriteName;             // the name we actually loaded
 	};
 }
 #endif // FRAMEWORK_RENDERABLE_H

@@ -22,11 +22,13 @@
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "../TestCases/TestCase.h"
-//#include "glapp.h"
+// #include "glapp.h"
 #include "../MyEngine/Resources/AssetRegistry.h"
 #include "../CoreEngine/Asset/AssetsManager.h"
 #include "../MyEngine/Serialization/Serialization.h"
 
+#include "../MyEngine/Components/DisplayName.h"
+#include "../MyEngine/Components/EntityType.h"
 #pragma comment(lib, "winmm.lib")
 
 // Game window dimensions and title
@@ -37,7 +39,7 @@ AssetsManager mAssets;
 int WindowWidth;
 int WindowHeight;
 
-TestCase Test;
+// TestCase Test;
 
 void APIENTRY glDebugOutput(GLenum source,
 							GLenum type,
@@ -133,7 +135,7 @@ CoreEngine::CoreEngine() : window(nullptr), DebugMode(false)
 {
 	LastTime = 0;
 	GameRunning = false;
-	//mAssets.Initialize();
+	// mAssets.Initialize();
 }
 
 CoreEngine::~CoreEngine()
@@ -163,8 +165,6 @@ void CoreEngine::Init()
 	std::cout << "WindowWidth is: " << WindowWidth << "\n";
 	std::cout << "WindowHeight is: " << WindowHeight << "\n";
 
-
-
 	///*saving config data*/ //tested saving works
 	// std::string newConfigPath = "../../MyEngine/JSON/config2.json";
 	// config.SetWindowWidth(800);
@@ -188,24 +188,23 @@ void CoreEngine::Init()
 
 	// loading metadata for audio,texture,font into
 	// ASset reg's container each respectively
-	//ar.LoadAudioManifest();
-	//ar.LoadTextureManifest();
-	//ar.LoadFontManifest();
-	//ar.LoadSceneManifest();
+	// ar.LoadAudioManifest();
+	// ar.LoadTextureManifest();
+	// ar.LoadFontManifest();
+	// ar.LoadSceneManifest();
 
 	unsigned int version = 0;
-	FMOD::System* system = nullptr;
+	FMOD::System *system = nullptr;
 
 	FMOD::System_Create(&system);
 	system->getVersion(&version);
 
 	std::cout << "FMOD version: "
-		<< (version >> 16) << "."
-		<< ((version >> 8) & 0xFF) << "."
-		<< (version & 0xFF) << std::endl;
+			  << (version >> 16) << "."
+			  << ((version >> 8) & 0xFF) << "."
+			  << (version & 0xFF) << std::endl;
 
 	system->release();
-
 
 	//// --- Logging Setup ---
 	// try {
@@ -303,8 +302,8 @@ void CoreEngine::Init()
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
 	g_rhythmSystem->Initialize();
-	//g_graphicsSystem->Initialize();
-	//g_audioSystem->Initialize();
+	// g_graphicsSystem->Initialize();
+	// g_audioSystem->Initialize();
 	g_coordinator->InitializeAllSystems();
 
 	ProfilingManager::GetInstance()->SetResetInterval(60.0);
@@ -352,8 +351,11 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<Framework::Animation>();
 	g_coordinator->RegisterComponent<NPC>();
 	g_coordinator->RegisterComponent<AABB>();
+	g_coordinator->RegisterComponent<Health>();
 	g_coordinator->RegisterComponent<LogicComponent>();
+	g_coordinator->RegisterComponent<NamingComponent>();
 	g_coordinator->RegisterComponent<GUIButton>();
+	g_coordinator->RegisterComponent<Name>();
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
@@ -368,6 +370,7 @@ void CoreEngine::Setup()
 	Signature collisionSig;
 	collisionSig.set(g_coordinator->GetComponentType<NPC>());
 	collisionSig.set(g_coordinator->GetComponentType<AABB>());
+	collisionSig.set(g_coordinator->GetComponentType<Health>());
 	g_coordinator->SetSystemSignature<CollisionManager>(collisionSig);
 
 	Signature inputSig;
@@ -391,10 +394,12 @@ void CoreEngine::Setup()
 	Signature sceneSig;
 	sceneSig.set(g_coordinator->GetComponentType<NPC>());
 	sceneSig.set(g_coordinator->GetComponentType<AABB>());
+	sceneSig.set(g_coordinator->GetComponentType<Health>());
+	sceneSig.set(g_coordinator->GetComponentType<NamingComponent>());
 	sceneSig.set(g_coordinator->GetComponentType<Framework::Transform>());
 	sceneSig.set(g_coordinator->GetComponentType<Framework::Renderable>());
 	sceneSig.set(g_coordinator->GetComponentType<Framework::Animation>());
-	g_coordinator->SetSystemSignature<GraphicsManager>(sceneSig);
+	g_coordinator->SetSystemSignature<SceneManager>(sceneSig);
 
 	Signature LogicSig;
 	LogicSig.set(g_coordinator->GetComponentType<LogicComponent>());
@@ -412,11 +417,6 @@ void CoreEngine::Update(float dt)
 
 	auto profiler = ProfilingManager::GetInstance();
 
-	profiler->StartSystem("Input System");
-	if (g_inputSystem)
-		g_inputSystem->Update(dt);
-	profiler->EndSystem("Input System");
-
 	profiler->StartSystem("Scene System");
 	if (g_sceneSystem)
 		g_sceneSystem->Update(dt);
@@ -425,6 +425,11 @@ void CoreEngine::Update(float dt)
 	profiler->StartSystem("LogicSystem");
 	g_coordinator->UpdateAllSystems(dt);
 	profiler->EndSystem("LogicSystem");
+
+	profiler->StartSystem("Input System");
+	if (g_inputSystem)
+		g_inputSystem->Update(dt);
+	profiler->EndSystem("Input System");
 
 	profiler->StartSystem("RhythmGameplayInput");
 	if (g_rhythmSystem)
@@ -453,15 +458,15 @@ void CoreEngine::Update(float dt)
 	if (g_graphicsSystem)
 		g_graphicsSystem->Update();
 
-	// 2) If paused, stop here � no gameplay / input / scene logic
+	// 2) If paused, stop here. no gameplay / input / scene logic
 	if (m_paused)
+	{
 		return;
+	}
 
 	// 3) Normal running path
-	if (g_inputSystem)
-		g_inputSystem->Update(dt);
-	if (g_rhythmSystem)
-		g_rhythmSystem->Update(dt);
+	// if (g_inputSystem)    g_inputSystem->Update(dt);
+	// if (g_rhythmSystem)   g_rhythmSystem->Update(dt);
 }
 
 void CoreEngine::GameLoop()
@@ -650,4 +655,25 @@ void CoreEngine::SetPaused(bool paused)
 void CoreEngine::TogglePaused()
 {
 	SetPaused(!m_paused);
+}
+
+void CoreEngine::RestartRuntimeForPlay()
+{
+	auto coord = Coordinator::GetInstance();
+	if (!coord)
+		return;
+
+	// 1) AUDIO: force BGM to start at 0
+	if (auto audio = coord->GetSystem<AudioManager>())
+	{
+		// if engine is paused (Stop button), keep audio paused too
+		audio->RestartBGM(m_paused);
+	}
+
+	// 2) RHYTHM: shutdown + initialize
+	if (auto rhythm = coord->GetSystem<RhythmGameplayInput>())
+	{
+		rhythm->Shutdown();
+		rhythm->Initialize();
+	}
 }

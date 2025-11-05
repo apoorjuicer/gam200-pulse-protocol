@@ -10,51 +10,45 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/
+/******************************************************************************/
 
 #pragma once
 #include "pch/pch_temp.h"
 #include "../Resources/AssetRegistry.h"
-//#include "../Graphics/GraphicsManager.h"
-//#include "../Audio/AudioManager.h"
+// #include "../Graphics/GraphicsManager.h"
+// #include "../Audio/AudioManager.h"
 
-    class GraphicsManager; // fwd
-    class AudioManager; // fwd
-    //class AssetRegistry; //cant fwd because take by value
-    class AssetsManager {
-    public:
+class GraphicsManager; // fwd
+class AudioManager;    // fwd
+// class AssetRegistry; //cant fwd because take by value
+class AssetsManager
+{
+public:
+    AssetsManager() = default;
+    ~AssetsManager();
 
-        AssetsManager() = default;
-        ~AssetsManager();
+    void Initialize();
+    void Shutdown();
 
-        void Initialize();
-        void Shutdown();
+    // Accessors (refs avoid copies)
+    AssetRegistry &getRegistry();
 
-        // Accessors (refs avoid copies)
-        AssetRegistry& getRegistry();
+    AudioManager &getAudio();
+    AudioManager const &getAudio() const;
 
+    GraphicsManager &getGraphics();
+    GraphicsManager const &getGraphics() const;
 
-        AudioManager& getAudio();
-        AudioManager const& getAudio() const;
+    unsigned int GetOrLoadTexture(const std::string &name);
 
-        GraphicsManager& getGraphics();
-        GraphicsManager const& getGraphics() const;
-
-        unsigned int GetOrLoadTexture(const std::string& name);
-
-
-    private:
-        AssetRegistry mRegistry;                       // owned
-        //AudioManager mAudio;
-       // GraphicsManager mGraphics;
-        //Asset Manager owns AudioManager and GraphicsManager
-        //use unique_ptr for automatic clean up
-        //single-ownership cannot be copied only moved
-        //more safety
-        std::unique_ptr<AudioManager>   mAudio;        // owned
-        std::unique_ptr<GraphicsManager> mGraphics;    // owned
-    };
-
-
-
-
+private:
+    AssetRegistry mRegistry; // owned
+    // AudioManager mAudio;
+    // GraphicsManager mGraphics;
+    // Asset Manager owns AudioManager and GraphicsManager
+    // use unique_ptr for automatic clean up
+    // single-ownership cannot be copied only moved
+    // more safety
+    std::unique_ptr<AudioManager> mAudio;       // owned
+    std::unique_ptr<GraphicsManager> mGraphics; // owned
+};

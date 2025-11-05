@@ -19,189 +19,188 @@
 
 namespace Framework
 {
-    Transform::Transform()
-    {
-        Rotation = Vector2(angle_disp, angle_speed);
-        mdl_to_ndc_xform.SetToIdentity();
-    }
-    Transform::~Transform() {}
+	Transform::Transform()
+	{
+		mdl_to_ndc_xform.SetToIdentity();
+	}
+	Transform::~Transform() {}
 
-    void Transform::Initialize() {}
+	void Transform::Initialize() {}
 
-    void Transform::update(GLdouble delta_time, const std::set<Entity> entity)
-    {
-        auto *g_coordinator = Coordinator::GetInstance();
+	void Transform::update(GLdouble delta_time, const std::set<Entity> entity)
+	{
+		auto *g_coordinator = Coordinator::GetInstance();
 
-        // pull the current game area; fall back if not set
-        const float gw = (GLHelper::GameWidth > 0) ? (float)GLHelper::GameWidth : 1600.0f;
-        const float gh = (GLHelper::GameHeight > 0) ? (float)GLHelper::GameHeight : 900.0f;
+		// pull the current game area; fall back if not set
+		const float gw = (GLHelper::GameWidth > 0) ? (float)GLHelper::GameWidth : 1600.0f;
+		const float gh = (GLHelper::GameHeight > 0) ? (float)GLHelper::GameHeight : 900.0f;
 
-        for (auto it : entity)
-        {
-            // IMPORTANT: reference, not copy
-            auto &x = g_coordinator->GetComponent<Framework::Transform>(it);
+		for (auto it : entity)
+		{
+			// IMPORTANT: reference, not copy
+			auto &x = g_coordinator->GetComponent<Framework::Transform>(it);
 
-            // normalize from pixels to your game space
-            const float PnormX = x.Pos.x / gw;
-            const float PnormY = x.Pos.y / gh;
-            const float SnormX = x.Scale.x / gw;
-            const float SnormY = x.Scale.y / gh;
+			// normalize from pixels to your game space
+			const float PnormX = x.Pos.x / gw;
+			const float PnormY = x.Pos.y / gh;
+			const float SnormX = x.Scale.x / gw;
+			const float SnormY = x.Scale.y / gh;
 
-            Matrix3x3 Scaling, Rotating, Translating;
+			Matrix3x3 Scaling, Rotating, Translating;
 
-            // Scale
-            Scaling = Matrix3x3(
-                SnormX, 0.0f, 0.0f,
-                0.0f, SnormY, 0.0f,
-                0.0f, 0.0f, 1.0f);
+			// Scale
+			Scaling = Matrix3x3(
+				SnormX, 0.0f, 0.0f,
+				0.0f, SnormY, 0.0f,
+				0.0f, 0.0f, 1.0f);
 
-            // Rotate
-            constexpr float DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
-            const float cosA = std::cos(x.angle_disp * DEG_TO_RAD);
-            const float sinA = std::sin(x.angle_disp * DEG_TO_RAD);
-            Rotating = Matrix3x3(
-                cosA, sinA, 0.0f,
-                -sinA, cosA, 0.0f,
-                0.0f, 0.0f, 1.0f);
+			// Rotate
+			constexpr float DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
+			const float cosA = std::cos(x.Rotation.x * DEG_TO_RAD);
+			const float sinA = std::sin(x.Rotation.x * DEG_TO_RAD);
+			Rotating = Matrix3x3(
+				cosA, sinA, 0.0f,
+				-sinA, cosA, 0.0f,
+				0.0f, 0.0f, 1.0f);
 
-            // Translate (column-major layout for your Matrix3x3)
-            Translating = Matrix3x3(
-                1.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                PnormX, PnormY, 1.0f);
+			// Translate (column-major layout for your Matrix3x3)
+			Translating = Matrix3x3(
+				1.0f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f,
+				PnormX, PnormY, 1.0f);
 
-            // M = T * R * S
-            x.mdl_to_ndc_xform = Translating * Rotating * Scaling;
+			// M = T * R * S
+			x.mdl_to_ndc_xform = Translating * Rotating * Scaling;
 
-            x.angle_disp += x.angle_speed * static_cast<GLfloat>(delta_time);
-            // std::cout << x.mdl_to_ndc_xform;
-        }
-    }
+			x.Rotation.x += x.Rotation.y * static_cast<GLfloat>(delta_time);
+			// std::cout << x.mdl_to_ndc_xform;
+		}
+	}
 
-    void Transform::draw() const {}
+	void Transform::draw() const {}
 
-    /*Serialization && Deserialization */
-    void Transform::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
-    {
-        using namespace rapidjson;
-        out.SetObject();
+	/*Serialization && Deserialization */
+	void Transform::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
+	{
+		using namespace rapidjson;
+		out.SetObject();
 
-        // Vector2s
-        Value posVal, scaleVal, rotVal, renderVal;
-        Pos.Serialize(posVal, alloc);
-        Scale.Serialize(scaleVal, alloc);
-        Rotation.Serialize(rotVal, alloc);
+		// Vector2s
+		Value posVal, scaleVal, rotVal, renderVal;
+		Pos.Serialize(posVal, alloc);
+		Scale.Serialize(scaleVal, alloc);
+		Rotation.Serialize(rotVal, alloc);
 
-        out.AddMember("position", posVal, alloc);
-        out.AddMember("scale", scaleVal, alloc);
-        out.AddMember("rotation", rotVal, alloc);
+		out.AddMember("position", posVal, alloc);
+		out.AddMember("scale", scaleVal, alloc);
+		out.AddMember("rotation", rotVal, alloc);
 
-        // simple types
-        out.AddMember("angle_disp", angle_disp, alloc);
-        out.AddMember("angle_speed", angle_speed, alloc);
+		// simple types
+		out.AddMember("angle_disp", angle_disp, alloc);
+		out.AddMember("angle_speed", angle_speed, alloc);
 
-        // out.AddMember("isVisible", isVisible, alloc);
-        // out.AddMember("visibilityTimer", visibilityTimer, alloc);
-        // out.AddMember("autoHide", autoHide, alloc);
+		out.AddMember("isVisible", isVisible, alloc);
+		out.AddMember("visibilityTimer", visibilityTimer, alloc);
+		out.AddMember("autoHide", autoHide, alloc);
 
-        // mat3
-        //  Matrix3x3
-        // Value matVal;
-        // mdl_to_ndc_xform.Serialize(matVal, alloc);
-        // out.AddMember("mdl_to_ndc_xform", matVal, alloc);
-    }
+		// mat3
+		//  Matrix3x3
+		// Value matVal;
+		// mdl_to_ndc_xform.Serialize(matVal, alloc);
+		// out.AddMember("mdl_to_ndc_xform", matVal, alloc);
+	}
 
-    void Transform::Deserialize(const rapidjson::Value &in)
-    {
-        if (!in.IsObject())
-        {
-            std::cerr << "[Transform] Invalid JSON format\n";
-            return;
-        }
+	void Transform::Deserialize(const rapidjson::Value &in)
+	{
+		if (!in.IsObject())
+		{
+			std::cerr << "[Transform] Invalid JSON format\n";
+			return;
+		}
 
-        if (in.HasMember("position"))
-            Pos.Deserialize(in["position"]);
-        if (in.HasMember("scale"))
-            Scale.Deserialize(in["scale"]);
-        if (in.HasMember("rotation"))
-            Rotation.Deserialize(in["rotation"]);
+		if (in.HasMember("position"))
+			Pos.Deserialize(in["position"]);
+		if (in.HasMember("scale"))
+			Scale.Deserialize(in["scale"]);
+		if (in.HasMember("rotation"))
+			Rotation.Deserialize(in["rotation"]);
 
-        if (in.HasMember("angle_disp"))
-            angle_disp = in["angle_disp"].GetFloat();
-        if (in.HasMember("angle_speed"))
-            angle_speed = in["angle_speed"].GetFloat();
+		if (in.HasMember("angle_disp"))
+			angle_disp = in["angle_disp"].GetFloat();
+		if (in.HasMember("angle_speed"))
+			angle_speed = in["angle_speed"].GetFloat();
 
-        // if (in.HasMember("isVisible"))
-        //     isVisible = in["isVisible"].GetBool();
-        // if (in.HasMember("visibilityTimer"))
-        //     visibilityTimer = in["visibilityTimer"].GetFloat();
-        // if (in.HasMember("autoHide"))
-        //     autoHide = in["autoHide"].GetBool();
+		if (in.HasMember("isVisible"))
+			isVisible = in["isVisible"].GetBool();
+		if (in.HasMember("visibilityTimer"))
+			visibilityTimer = in["visibilityTimer"].GetFloat();
+		if (in.HasMember("autoHide"))
+			autoHide = in["autoHide"].GetBool();
 
-        // if (in.HasMember("mdl_to_ndc_xform"))
-        //     mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
-    }
+		// if (in.HasMember("mdl_to_ndc_xform"))
+		//   mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
+	}
 
-    bool SaveTransform(Transform const &t, std::string const &path)
-    {
-        rapidjson::Document d;
-        d.SetObject();
-        auto &alloc = d.GetAllocator();
+	bool SaveTransform(Transform const &t, std::string const &path)
+	{
+		rapidjson::Document d;
+		d.SetObject();
+		auto &alloc = d.GetAllocator();
 
-        rapidjson::Value tVal;
-        t.Serialize(tVal, alloc);
-        d.AddMember("transform", tVal, alloc);
+		rapidjson::Value tVal;
+		t.Serialize(tVal, alloc);
+		d.AddMember("transform", tVal, alloc);
 
-        rapidjson::StringBuffer buffer;
-        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-        d.Accept(writer);
+		rapidjson::StringBuffer buffer;
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+		d.Accept(writer);
 
-        // Ensure directory exists
-        namespace fs = std::filesystem;
-        fs::create_directories("../../MyEngine/JSON");
-        // fs::create_directories("../JSON");
+		// Ensure directory exists
+		namespace fs = std::filesystem;
+		fs::create_directories("../../MyEngine/JSON");
+		// fs::create_directories("../JSON");
 
-        std::ofstream ofs(path);
-        if (!ofs.is_open())
-        {
-            std::cerr << "Error: Cannot open file for writing: " << path << "\n";
-            return false;
-        }
-        ofs << buffer.GetString();
-        if (!ofs.good())
-        {
-            std::cerr << "Error: Failed to write JSON to file: " << path << "\n";
-            return false;
-        }
-        return true;
-    }
+		std::ofstream ofs(path);
+		if (!ofs.is_open())
+		{
+			std::cerr << "Error: Cannot open file for writing: " << path << "\n";
+			return false;
+		}
+		ofs << buffer.GetString();
+		if (!ofs.good())
+		{
+			std::cerr << "Error: Failed to write JSON to file: " << path << "\n";
+			return false;
+		}
+		return true;
+	}
 
-    bool LoadTransform(Transform &t, std::string const &path)
-    {
-        std::ifstream ifs(path);
-        if (!ifs.is_open())
-        {
-            std::cerr << "Error: Cannot open file for reading: " << path << "\n";
-            return false;
-        }
-        rapidjson::IStreamWrapper isw(ifs); // must have
-        rapidjson::Document d;              // must have
-        d.ParseStream(isw);                 // must have
+	bool LoadTransform(Transform &t, std::string const &path)
+	{
+		std::ifstream ifs(path);
+		if (!ifs.is_open())
+		{
+			std::cerr << "Error: Cannot open file for reading: " << path << "\n";
+			return false;
+		}
+		rapidjson::IStreamWrapper isw(ifs); // must have
+		rapidjson::Document d;				// must have
+		d.ParseStream(isw);					// must have
 
-        if (d.HasParseError())
-        {
-            std::cerr << "Error: Failed to parse JSON in file: " << path << "\n";
-            return false;
-        }
+		if (d.HasParseError())
+		{
+			std::cerr << "Error: Failed to parse JSON in file: " << path << "\n";
+			return false;
+		}
 
-        if (!d.HasMember("transform"))
-        {
-            std::cerr << "Error: No 'transform' field in file: " << path << "\n";
-            return false;
-        }
+		if (!d.HasMember("transform"))
+		{
+			std::cerr << "Error: No 'transform' field in file: " << path << "\n";
+			return false;
+		}
 
-        t.Deserialize(d["transform"]);
-        return true;
-    }
+		t.Deserialize(d["transform"]);
+		return true;
+	}
 
 } // end of namespace

@@ -1,5 +1,8 @@
 #pragma once
 #include "pch/pch_temp.h"	
+#include "../Components/EntityType.h"
+//#include "../Components/AABB.h"
+#include "../Components/Health.h"
 #include "../Graphics/Transform.h"
 #include "../Graphics/Animation.h"
 #include "../Graphics/Renderable.h"
@@ -20,7 +23,7 @@ class Factory
 {
 public: 
 
-	bool CreateEntityFromJson(std::string const& path);
+	std::optional<Entity> CreateEntityFromJson(std::string const& path);
 	// call onto default object function to get the basic SRT and render
 	// then we check the file path from param and check for any components it wanna add 
 	// call component deserialize functions with json filepath and entity as param
@@ -38,7 +41,7 @@ private:
 
 	// calls onto prefab json file only, it will just load what the param PrefabName is.
 	//bool LoadPrefab(Entity entity, std::string const& PrefabName);
-	std::string PrefabPathway = "../../MyEngine/JSON/Prefab.json";
+	std::string PrefabPathway = "../../MyEngine/JSON/PrefabList.json";
 
 
 	// name of prefab, reward is the container inside of this prefab. DO WE NEED THIS? 

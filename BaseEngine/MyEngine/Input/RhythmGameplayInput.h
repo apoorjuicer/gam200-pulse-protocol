@@ -19,7 +19,9 @@
  /******************************************************************************/
 
 #pragma once
-#include "pch/pch.h"
+#include "pch/pch_temp.h"
+#include "../MyEngine/Input/InputManager.h"
+#include "../MyEngine/CoreEngine/ECS/Coordinator.h"
 
 struct InputEvent {
 	enum class Type {

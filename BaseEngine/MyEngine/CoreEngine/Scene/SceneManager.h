@@ -7,6 +7,7 @@
  *             Defines Scene enum for game states and provides interface for
  *             scene loading, unloading, and transitioning. Maintains current
  *             scene state and tracks scene-specific entities for cleanup
+ * 
  * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
  *             Reproduction or disclosure of this file or its contents without the
  *             prior written consent of DigiPen Institute of Technology is prohibited.
@@ -14,11 +15,19 @@
 /******************************************************************************/
 #pragma once
 #include "pch/pch_temp.h"
-#include "../Graphics/Transform.h"
-#include "../GameLogic/GameLogic.h"
+//#include "../GameLogic/GameLogic.h"
+//#include "../Graphics/Transform.h"
+//#include "../Graphics/Animation.h"
+//#include "../Graphics/Renderable.h"
+////#include "../Components/AABB.h"
+//#include "../CoreEngine/Assets.h"
+//#include "../Components/Health.h"
+//#include "../Components/EntityType.h"
+//
+//#include "../MyEngine/Components/DisplayName.h"
 #include "../CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
-#include "CoreEngine/Factory/Factory.h"
+
 
 #pragma warning(push, 0)
 #include <rapidjson/document.h>     
@@ -43,6 +52,7 @@ public:
 	
 	std::string GrabCurrentScene() const { return CurrentScene; }
 	void ChangeCurrentScene(std::string const& str) { CurrentScene = str; }
+	void IncrementEntityArray(Entity entity) { SceneEntityList.push_back(entity); }
 
 private:
 	std::string CurrentScene;
