@@ -53,6 +53,14 @@ public:
 	std::string GrabCurrentScene() const { return CurrentScene; }
 	void ChangeCurrentScene(std::string const& str) { CurrentScene = str; }
 	void IncrementEntityArray(Entity entity) { SceneEntityList.push_back(entity); }
+	void DecrementEntityArray(Entity entity)
+	{
+		auto victim = std::find(SceneEntityList.begin(), SceneEntityList.end(), entity);
+		if (victim != SceneEntityList.end())
+		{
+			SceneEntityList.erase(victim);  // Erases ONLY the first victim that matches and kill it >:D
+		}
+	}
 
 private:
 	std::string CurrentScene;
