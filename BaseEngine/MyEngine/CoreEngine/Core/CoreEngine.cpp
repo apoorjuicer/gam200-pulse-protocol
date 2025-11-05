@@ -22,6 +22,7 @@
 #include "graphics/stb_image.h"
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
+#include "../MyEditor/Editor.h"
 #include "../TestCases/TestCase.h"
 #include "../MyEngine/Components/DisplayName.h"
 #include "../MyEngine/Components/EntityType.h"
@@ -153,8 +154,19 @@ void CoreEngine::Init()
 	}
 
 	glfwMakeContextCurrent(window);
+
+	glfwSetDropCallback(window, [](GLFWwindow*, int count, const char** paths)
+	{
+		for (int i = 0; i < count; ++i)
+			MyEditor::PushOSDropPath(paths[i]);
+	});
+
+
+
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwSetFramebufferSizeCallback(window,
+
+
 		[](GLFWwindow*, int fbw, int fbh)
 		{
 			if (fbw <= 0 || fbh <= 0) return;

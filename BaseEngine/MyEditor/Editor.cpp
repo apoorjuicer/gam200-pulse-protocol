@@ -25,9 +25,8 @@ namespace MyEditor
     // CONSTANTS & BASIC STATE
     // --------------------------------------------------------------------
 
-    // the entity selected in the hierarchy; INVALID_ENTITY (-1) simply means nothing is selected
-    constexpr Entity INVALID_ENTITY = static_cast<Entity>(-1);
-    static Entity selectedEntity = INVALID_ENTITY;
+    const Entity INVALID_ENTITY = static_cast<Entity>(-1);  
+    Entity selectedEntity = INVALID_ENTITY;
 
     // this vector maintains the order entities appear in the hierarchy
     static std::vector<Entity> entityDisplayOrder;
@@ -131,6 +130,7 @@ namespace MyEditor
         return (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp" || ext == "tga" || ext == "dds");
     }
 
+    
     static void RefreshCurrentDir()
     {
         s_dirEntries.clear();
@@ -138,38 +138,40 @@ namespace MyEditor
         namespace fs = std::filesystem;
         std::error_code ec;
 
-        if (!fs::exists(s_currentDir, ec))
-            return;
+        // Normalize the current dir to an absolute, canonical path
+        fs::path cur = fs::weakly_canonical(fs::absolute(s_currentDir), ec);
+        if (ec || cur.empty() || !fs::exists(cur, ec)) return;
 
-        // 1) first, add ".." if not root
-        if (fs::weakly_canonical(s_currentDir, ec) != fs::weakly_canonical(s_assetRoot, ec))
+        // Add ".." (only if not at the asset root)
+        fs::path root = fs::weakly_canonical(fs::absolute(s_assetRoot), ec);
+        if (!ec && cur != root)
         {
             AssetItem up;
             up.name = "..";
-            up.fullPath = fs::weakly_canonical(fs::path(s_currentDir).parent_path(), ec).string();
+            up.fullPath = fs::weakly_canonical(cur.parent_path(), ec).string();
             up.isDir = true;
             s_dirEntries.push_back(up);
         }
 
-        // 2) list current dir (non-recursive)
-        for (auto const& entry : fs::directory_iterator(s_currentDir, ec))
+        // List the directory (non-recursive)
+        for (auto const& entry : fs::directory_iterator(cur, ec))
         {
             AssetItem it;
-            it.fullPath = entry.path().lexically_normal().string();
+            it.fullPath = fs::weakly_canonical(entry.path(), ec).string(); // absolute
             it.name = entry.path().filename().string();
             it.isDir = entry.is_directory();
             s_dirEntries.push_back(std::move(it));
         }
 
-        // 3) sort: folders first, then files alpha
+        // Sort: folders first, then alpha
         std::sort(s_dirEntries.begin(), s_dirEntries.end(),
             [](AssetItem const& a, AssetItem const& b)
             {
-                if (a.isDir != b.isDir)
-                    return a.isDir > b.isDir;
+                if (a.isDir != b.isDir) return a.isDir > b.isDir;
                 return a.name < b.name;
             });
     }
+
 
     // Load thumbnail texture lazily using your AssetsManager
     static void EnsureThumbnailLoaded(AssetItem& item)
@@ -202,6 +204,70 @@ namespace MyEditor
         }
 
         ImGui::Separator();
+
+        // ----- OS → Editor imports (copy files into the real folder shown in the Project panel)
+        if (!s_pendingOSDrops.empty())
+        {
+            namespace fs = std::filesystem;
+            std::error_code ec;
+
+            // Resolve destination directory from s_currentDir (absolute & canonical)
+            fs::path dstDir = fs::weakly_canonical(fs::absolute(s_currentDir), ec);
+            if (!ec && !dstDir.empty())
+            {
+                if (!fs::exists(dstDir, ec)) fs::create_directories(dstDir, ec);
+
+                auto IsImageExt = [](const fs::path& p)
+                    {
+                        std::string ext = p.extension().string();
+                        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+                        return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
+                            ext == ".bmp" || ext == ".tga" || ext == ".dds";
+                    };
+
+                int imported = 0;
+
+                for (const std::string& srcStr : s_pendingOSDrops)
+                {
+                    fs::path src = fs::weakly_canonical(fs::path(srcStr), ec);
+                    if (ec || src.empty() || !fs::exists(src, ec)) continue;
+
+                    // Build unique destination filename
+                    fs::path dst = dstDir / src.filename();
+                    int suffix = 1;
+                    while (fs::exists(dst, ec))
+                    {
+                        auto stem = dst.stem().string();
+                        auto ext = dst.extension().string();
+                        size_t pos = stem.rfind(" (");
+                        if (pos != std::string::npos && !stem.empty() && stem.back() == ')')
+                            stem = stem.substr(0, pos);
+                        dst = dstDir / fs::path(stem + " (" + std::to_string(suffix++) + ")" + ext);
+                    }
+
+                    // Copy onto disk
+                    if (fs::copy_file(src, dst, fs::copy_options::none, ec))
+                    {
+                        ++imported;
+                        // Preload thumbnails for images
+                        if (IsImageExt(dst))
+                            Framework::AssetsManager::GetOrLoad(dst.lexically_normal().string());
+                        std::cout << "[Project] Imported: " << dst.string() << "\n";
+                    }
+                    else
+                    {
+                        std::cerr << "[Project] Copy failed: " << src.string()
+                            << " -> " << dst.string() << " (" << ec.message() << ")\n";
+                    }
+                }
+
+                if (imported > 0)
+                    RefreshCurrentDir();  // show new files immediately
+            }
+
+            s_pendingOSDrops.clear();
+        }
+
 
         // scrolling region
         ImGui::BeginChild("AssetsGrid", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
@@ -568,6 +634,18 @@ namespace MyEditor
         return false;
     }
 
+    void EnqueueExternalDrop(const std::vector<std::string>& paths)
+    {
+        // Append (don’t clear) so multiple drops are handled
+        s_pendingOSDrops.insert(s_pendingOSDrops.end(), paths.begin(), paths.end());
+    }
+
+    void PushOSDropPath(const char* path)
+    {
+        if (path && *path)
+            s_pendingOSDrops.emplace_back(path);
+    }
+
 
     void Init(GLFWwindow* w) {
         s_Window = w;
@@ -585,6 +663,19 @@ namespace MyEditor
 
         ImGui_ImplGlfw_InitForOpenGL(w, true);
         ImGui_ImplOpenGL3_Init("#version 130");
+
+        // Make s_assetRoot and s_currentDir absolute/canonical so all I/O hits the real disk location.
+        {
+            namespace fs = std::filesystem;
+            std::error_code ec;
+
+            // s_assetRoot currently holds "../../MyEngine/Assets"
+            fs::path abs = fs::weakly_canonical(fs::absolute(s_assetRoot), ec);
+            if (!ec && !abs.empty())
+                s_assetRoot = abs.string();
+
+            s_currentDir = s_assetRoot;  // start in the real absolute root
+        }
 
         s_enabled = true;
         RefreshCurrentDir();

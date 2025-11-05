@@ -37,6 +37,12 @@ namespace MyEditor {
     static std::string OpenJsonFileDialog(); 
 
     struct GameViewport { int x, y, w, h; };
+    extern const Entity INVALID_ENTITY;     
+    extern Entity selectedEntity;         
+    static std::vector<std::string> s_pendingOSDrops;
+
+    void EnqueueExternalDrop(const std::vector<std::string>& paths);
+    void PushOSDropPath(const char* path);
 
     // Returns the middle "game" rectangle in FRAMEBUFFER PIXELS, computed from current panel sizes
     GameViewport ComputeMiddleGameViewportPixels(GLFWwindow* window, bool keep_16x9 = true);
