@@ -47,6 +47,9 @@ public:
     std::string GetScenePath(std::string const& id)   const;
     std::string GetAnimationPath(std::string const& id)   const;
 
+
+    void SetAudioManager(AudioManager* audio);
+    void SetGraphicsManager(GraphicsManager* graphics);
     bool PlaySFX(std::string const& id);
     bool PlayMusic(std::string const& id);
 
@@ -58,6 +61,8 @@ private:
     // use unique_ptr for automatic clean up
     // single-ownership cannot be copied only moved
     // more safety
-    std::unique_ptr<AudioManager> mAudio;       // owned
-    std::unique_ptr<GraphicsManager> mGraphics; // owned
+   //std::unique_ptr<AudioManager> mAudio;       // owned
+   // std::unique_ptr<GraphicsManager> mGraphics; // owned
+    AudioManager* mAudio = nullptr;    // non-owning
+    GraphicsManager* mGraphics = nullptr;   // non-owning
 };

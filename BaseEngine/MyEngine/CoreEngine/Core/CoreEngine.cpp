@@ -283,8 +283,8 @@ void CoreEngine::Init()
 	}
 
 	// Create systems AFTER GL is ready
-	mAssets.Initialize();
-	std::cout << mAssets.getRegistry().FindTexture("hero") << "\n";
+	mAssets.Initialize(); //loaded registry inside
+	//std::cout << mAssets.getRegistry().FindTexture("hero") << "\n";
 	// Singleton for Engine, but once game use EventBus/messaging system
 	std::cout << "path for bgm : " << mAssets.getRegistry().FindAudio("bgm")->path << "\n";
 	// PLEASE CALL THIS EVERY SINGLE U WANT 2 USE SINGLETON
@@ -292,9 +292,18 @@ void CoreEngine::Init()
 
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
 	auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
-	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
-	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
+	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();		//default cons
+	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>(); //default cons
 	auto g_CollisionManager = g_coordinator->GetSystem<CollisionManager>();
+
+	g_audioSystem->SetRegistry(&mAssets.getRegistry());
+	g_graphicsSystem->SetRegistry(&mAssets.getRegistry());
+
+	mAssets.SetAudioManager(g_audioSystem.get());
+	mAssets.SetGraphicsManager(g_graphicsSystem.get());
+
+	//g_graphicsSystem->GM_FindFont("PatrickHand_font");
+	//g_graphicsSystem->GM_FindFont("liberation_font");
 
 	MessageManager::GetInstance();
 	std::cout << "[MessageManager] Initialized" << std::endl;
@@ -302,9 +311,12 @@ void CoreEngine::Init()
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
 	g_rhythmSystem->Initialize();
-	// g_graphicsSystem->Initialize();
-	// g_audioSystem->Initialize();
+	g_graphicsSystem->Initialize();
+	g_audioSystem->Initialize();
 	g_coordinator->InitializeAllSystems();
+
+	g_graphicsSystem->GM_FindFont("PatrickHand_font");
+	g_graphicsSystem->GM_FindFont("liberation_font");
 
 	ProfilingManager::GetInstance()->SetResetInterval(60.0);
 	ProfilingManager::GetInstance()->SetDisplayUpdateInterval(1.0);
@@ -715,7 +727,7 @@ void CoreEngine::StopGame()
 	// pause the bg music
 	if (auto audio = coord->GetSystem<AudioManager>())
 	{
-		audio->PauseBGM();
+		audio->SetPaused(true);
 	}
 
 	// reloads original scene to reset all entities to initial starting position

@@ -299,12 +299,12 @@ void AssetsManager::Initialize()
     mRegistry.LoadSceneManifest();
     mRegistry.LoadAnimationManifest();
 
-    // 2) Bring up subsystems (pass registry where needed)
-    mAudio = std::make_unique<AudioManager>(&mRegistry);
-    mAudio->Initialize(); // already called in constructor
+    //// 2) Bring up subsystems (pass registry where needed)
+    //mAudio = std::make_unique<AudioManager>(&mRegistry);
+    //mAudio->Initialize(); // already called in constructor
 
-    mGraphics = std::make_unique<GraphicsManager>(&mRegistry);
-    mGraphics->Initialize(); // already called in constructor
+    //mGraphics = std::make_unique<GraphicsManager>(&mRegistry);
+    //mGraphics->Initialize(); // already called in constructor
 
     std::cout << "[AssetsManager] Initialized complete.\n";
 }
@@ -315,14 +315,14 @@ void AssetsManager::Shutdown()
     // Registry no external dependences, constructed
     // and destroyed automatically by compiler(RAII)
     // reset unique_ptr calls dtor for graphics and audio
-    if (mGraphics)
-    { /*mGraphics->Shutdown();*/
-        mGraphics.reset();
-    }
-    if (mAudio)
-    { /*mAudio->Shutdown();  */
-        mAudio.reset();
-    }
+    //if (mGraphics)
+    //{ /*mGraphics->Shutdown();*/
+    //    mGraphics.reset();
+    //}
+    //if (mAudio)
+    //{ /*mAudio->Shutdown();  */
+    //    mAudio.reset();
+    //}
 
     std::cout << "[AssetsManager] Shutdown complete.\n";
 }
@@ -370,6 +370,16 @@ bool AssetsManager::PlayMusic(std::string const& id) {
         return true;
     }
     return false;
+}
+
+void AssetsManager::SetAudioManager(AudioManager* audio)
+{
+    mAudio = audio;
+}
+
+void AssetsManager::SetGraphicsManager(GraphicsManager* graphics)
+{
+    mGraphics = graphics;
 }
 
 

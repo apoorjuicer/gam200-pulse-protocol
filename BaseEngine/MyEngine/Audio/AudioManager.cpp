@@ -54,10 +54,17 @@ AudioManager::~AudioManager()
     Shutdown();
 }
 
+void AudioManager::SetRegistry(AssetRegistry* registry)
+{
+    mRegistry = registry;
+}
+
 void AudioManager::RestartBGM()
 {
-    if (!mSystem)
+    if (!mSystem) {
         return;
+    }
+        
 
     // 1) stop current BGM channel if any
     if (mCurrentBGMCh)
@@ -70,11 +77,13 @@ void AudioManager::RestartBGM()
     if (mCurrentBGM)
     {
         FMOD_RESULT r = mSystem->playSound(mCurrentBGM, nullptr, false, &mCurrentBGMCh);
-        if (r == FMOD_OK && mCurrentBGMCh)
+        if (r != FMOD_OK || !mCurrentBGMCh)
         {
-            mCurrentBGMCh->setVolume(1.0f);
-            mCurrentBGMCh->setPaused(startPaused);
+            return;
         }
+
+        mCurrentBGMCh->setVolume(1.0f);
+        //mCurrentBGMCh->setPaused(startPaused);
     }
 
     // remember current pause state (not using pause as of now)
@@ -163,7 +172,7 @@ void AudioManager::Initialize()
     }
     else
     {
-        std::cout << "[AudioManager] load all BGM failed.\n";
+        std::cout << "[AudioManager] load all BGM success.\n";
     }
 
     if (!LoadAllSFX())
@@ -172,7 +181,7 @@ void AudioManager::Initialize()
     }
     else
     {
-        std::cout << "[AudioManager] load all SFX sucesss.\n";
+        std::cout << "[AudioManager] load all SFX success.\n";
     }
 
     PlayBGM("bgm");

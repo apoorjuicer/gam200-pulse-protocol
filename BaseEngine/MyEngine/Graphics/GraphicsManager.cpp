@@ -59,6 +59,12 @@ GraphicsManager::~GraphicsManager()
     Shutdown();
 }
 
+
+void GraphicsManager::SetRegistry(AssetRegistry* registry)
+{
+    mRegistry = registry;
+}
+
 void GraphicsManager::Initialize()
 {
 
@@ -90,7 +96,7 @@ void GraphicsManager::Initialize()
     }
 
 
-    PrintFontMap();
+  
 
     // Subscribe to combo messages - DONT REMOVE, TEST FOR MESSAGE SYSTEM
     {
@@ -131,19 +137,22 @@ void GraphicsManager::Initialize()
     {
         // m_uiFont = AM.GetFont(UI_FONT_KEY);
         // m_debugFont = AM.GetFont(DEBUG_FONT_KEY);
+   
         m_uiFont = GM_FindFont(UI_FONT_KEY);
         m_debugFont = GM_FindFont(DEBUG_FONT_KEY);
-
         if (!m_uiFont)
         {
             std::cerr << "[GraphicsManager] ERROR: missing font "
                       << UI_FONT_KEY << "\n";
         }
+
         if (!m_debugFont)
         {
             std::cerr << "[GraphicsManager] ERROR: missing font "
                       << DEBUG_FONT_KEY << "\n";
         }
+ 
+        //PrintFontMap();
     }
 
     // Create VAO/VBO used for glyph quads
@@ -195,6 +204,8 @@ void GraphicsManager::Initialize()
         std::cout << "[GraphicsManager] Successfully loaded textures from  asset registry.\n";
     }
 
+    
+
     // create white texture for colored quads
     InitWhiteTexture();
 }
@@ -223,14 +234,19 @@ void GraphicsManager::Update()
         // auto& AM = Framework::AssetsManager::Instance();
         // const Framework::FontData* debugFont = AM.GetFont("liberation-mono_48");
 
-        FontData const *debugFont = GM_FindFont(DEBUG_FONT_KEY);
-        if (debugFont)
+       //FontData const* debugFont = GM_FindFont(DEBUG_FONT_KEY);
+
+        if (m_debugFont)
         {
             std::ostringstream fpsText;
             fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
 
-            RenderText(GLApp::shdrpgms[3], fpsText.str(), 100.0f, 850.0f,
-                       1.0f, glm::vec3(0.5f, 0, 0), debugFont);
+            RenderText(GLApp::shdrpgms[3], 
+                fpsText.str(), 
+                100.0f, 850.0f,
+                       1.0f, 
+                glm::vec3(0.5f, 0, 0), 
+                m_debugFont);
 
             // Add top system below FPS
             auto *profiler = ProfilingManager::GetInstance();
@@ -273,23 +289,31 @@ void GraphicsManager::Update()
             topText << topSystem << ": " << std::fixed
                     << std::setprecision(2) << topPercentage << "%";
 
-            RenderText(GLApp::shdrpgms[3], topText.str(), 100.0f, 880.0f,
-                       0.8f, glm::vec3(0.5f, 0.5f, 0), debugFont);
+            //RenderText(GLApp::shdrpgms[3], topText.str(), 100.0f, 880.0f,
+            //           0.8f, glm::vec3(0.5f, 0.5f, 0), m_debugFont);
         }
         else
         {
-            std::cerr << "[GraphicsManager] WARNING: debugFont not found!\n";
+            std::cerr << "[GraphicsManager] WARNING: m_debugFont not found!\n";
         }
     }
 
-    // Team label
-    RenderText(
-        textShader,
-        "Team BLOOP",
-        600.0f, 850.0f,
-        1.0f,
-        glm::vec3(1, 1, 1),
-        m_uiFont);
+    if (m_uiFont)
+    {
+        // Team label, error probably from IMGUI
+        RenderText(
+            GLApp::shdrpgms[3],
+            "Team BLOOP",
+            600.0f, 850.0f,
+            1.0f,
+            glm::vec3(1, 1, 1),
+            m_uiFont);
+    }
+    else {
+        std::cerr << "[GraphicsManager] WARNING: m_uiFont not found!\n";
+    }
+
+
 
     // FPS counter (while editor hidden)
     if (!MyEditor::IsEnabled())
@@ -299,13 +323,13 @@ void GraphicsManager::Update()
                 << std::setprecision(1)
                 << GLHelper::fps;
 
-        RenderText(
-            textShader,
-            fpsText.str(),
-            100.0f, 850.0f,
-            1.0f,
-            glm::vec3(0.5f, 0.0f, 0.0f),
-            m_debugFont);
+        //RenderText(
+        //    textShader,
+        //    fpsText.str(),
+        //    100.0f, 850.0f,
+        //    1.0f,
+        //    glm::vec3(0.5f, 0.0f, 0.0f),
+        //    m_debugFont);
     }
 
     // // Controls help, anchored at right side
@@ -480,7 +504,7 @@ void GraphicsManager::RenderText(
     glBindTexture(GL_TEXTURE_2D, 0);
 
 
-    std::cerr << "[GraphicsManager] RenderText successful for" << text << "\n";
+   // std::cout << "[GraphicsManager] RenderText successful for " << text << "\n";
 }
 
 void GraphicsManager::OnResize(int width, int height)
@@ -906,8 +930,11 @@ FontData const *GraphicsManager::GM_FindFont(std::string const &id) const
 {
     if (auto it = m_fontMap.find(id); it != m_fontMap.end())
     {
+        std::cout << "Found Font '" << id << "' in font map" << "\n";
         return &it->second;
     }
+
+    std::cout << "Not Found Font '" << id << "' in font map" << "\n";
     return nullptr;
 }
 
@@ -940,3 +967,21 @@ void GraphicsManager::PrintFontMap()
 
     std::cout << "===== END OF FONT MAP =====\n";
 }
+
+//std::ostream& operator<<(std::ostream& os, const FontData& fd)
+//{
+//    os << "FontData { pixelHeight=" << fd.pixelHeight
+//        << ", glyphs=" << fd.glyphs.size() << " }";
+//
+//    // Optional: print first few glyphs for debug
+//    int count = 0;
+//    for (auto const& [ch, glyph] : fd.glyphs)
+//    {
+//        if (count++ >= 5) { os << ", ..."; break; }
+//        os << "\n  '" << ch << "': (size=" << glyph.Size.x << "x" << glyph.Size.y
+//            << ", bearing=" << glyph.Bearing.x << "," << glyph.Bearing.y
+//            << ", advance=" << glyph.Advance << ")";
+//    }
+//
+//    return os;
+//}

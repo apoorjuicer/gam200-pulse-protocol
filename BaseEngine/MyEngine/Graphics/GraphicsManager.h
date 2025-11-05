@@ -102,6 +102,7 @@ public:
     FontData const *GM_FindFont(std::string const &id) const;
     GLuint const *GM_FindTextureHandle(std::string const &id) const;
 
+    void SetRegistry(AssetRegistry* registry);
 private:
     // Draw text (world overlay / debug text etc.)
     void RenderText(
@@ -177,3 +178,6 @@ private:
     //debug
     void PrintFontMap();
 };
+
+
+//std::ostream& operator<<(std::ostream& os, const FontData& fd);

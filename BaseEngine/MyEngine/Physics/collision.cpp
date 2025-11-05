@@ -90,7 +90,7 @@ OBB CollisionManager::BuildOBBFromTransform(const Framework::Transform& transfor
     );
 
     // === 3. Assign rotation from Transform ===
-    obb.rotation = transform.angle_disp;
+    obb.rotation = transform.Rotation.x;
 
     // === 4. Compute local axes for SAT projection ===
     // Convert rotation to radians

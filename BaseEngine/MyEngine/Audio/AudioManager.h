@@ -57,9 +57,10 @@ public:
     void StopBGM();
     void SetBGMVolume(float volume); // 0..1
     bool IsBGMPlaying(bool *outPlaying = nullptr) const;
-    void RestartBGM(bool startPaused);
+    void RestartBGM();
 
     // Pause and Play
+    void PauseBGM();
     void SetPaused(bool paused);
     bool IsPaused() const;
 
@@ -74,6 +75,8 @@ public:
     bool UnloadAudio(std::string const &id);
 
     // in FMod bgm and sfx behave differently
+
+    void SetRegistry(AssetRegistry* registry);
 
 private:
     FMOD::System *mSystem = nullptr;
