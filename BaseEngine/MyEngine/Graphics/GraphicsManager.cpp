@@ -18,12 +18,6 @@
  /******************************************************************************/
 
 #include "GraphicsManager.h"
-#include <iomanip>   // for std::setprecision
-#include <iostream>
-#include <chrono>
-
-float editorWidth;
-float editorHeight;
 
 // These are the asset keys we expect to exist after AssetsManager::LoadAllFonts()
 namespace {
@@ -73,7 +67,6 @@ void GraphicsManager::Initialize()
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_CULL_FACE);
 
 	// Build a top-left-origin orthographic projection matching our virtual res
 	{
@@ -170,10 +163,13 @@ void GraphicsManager::Update()
 
 	// 1) Update and draw world (sprites etc.)
 	glapp->update(Engine->GetWindow(), EntityMember);
-	glapp->draw(EntityMember);
-	// 2) then draw text on top
-	//RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
+	// 1) Background pass
+	glapp->draw(EntityMember, LAYER_BACKGROUND);
 
+	// 2) World pass
+	glapp->draw(EntityMember, LAYER_WORLD);
+;
+	
 	// 3) Draw in-game gui system & UI overlay
 	RenderUIOverlayElements();
 
@@ -359,11 +355,6 @@ void GraphicsManager::RenderText(
 	if (!fontData)
 		return;
 
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	shader.Use();
 
 	glUniformMatrix4fv(
@@ -512,10 +503,6 @@ void GraphicsManager::RenderColoredQuad(float x, float y, float width, float hei
 	//if (count++ < 10) {
 	//    std::cout << "[RenderQuad] Rendering at screen: (" << x << ", " << y << ")" << std::endl;
 	//}
-
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	auto& shader = GLApp::shdrpgms[3]; // Text shader
 	shader.Use();
