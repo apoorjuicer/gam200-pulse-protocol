@@ -38,7 +38,7 @@ public:
 	void Exit(Entity ID) override;
 
 private:
-	float autoMoveTimer = 2.0f; // FOR TESTING THE STOP BUTTON FUNCTIONALITY PURPOSE
+	/*float autoMoveTimer = 2.0f;*/ // FOR TESTING THE STOP BUTTON FUNCTIONALITY PURPOSE
 };
 
 class EnemyScript : public Iscript

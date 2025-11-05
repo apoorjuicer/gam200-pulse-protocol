@@ -42,7 +42,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.13556919991970063,
+                        "elapsedTime": 0.0,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
@@ -92,7 +92,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.13556919991970063,
+                        "elapsedTime": 0.0,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
@@ -142,7 +142,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.13556919991970063,
+                        "elapsedTime": 0.0,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,

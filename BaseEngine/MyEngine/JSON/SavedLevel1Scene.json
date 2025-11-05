@@ -241,9 +241,9 @@
                         },
                         "angle_disp": 0.0,
                         "angle_speed": 0.0,
-                        "isVisible": false,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
+                        "isVisible": true,
+                        "visibilityTimer": 1.4680006504058838,
+                        "autoHide": true
                     }
                 },
                 {
@@ -269,13 +269,13 @@
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
-                            "a": 0.0
+                            "a": 1.0
                         },
                         "hoverColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
-                            "a": 0.0
+                            "a": 1.0
                         },
                         "actionType": "",
                         "entityJsonPath": "",

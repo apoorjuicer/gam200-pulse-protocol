@@ -289,6 +289,7 @@ void SceneManager::UnloadCurrentScene()
 void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE JSON FILE 
 {
 	// auto-stops if game is playin when switching scsenes, to prevent position from being modified while changing scenes
+	// is scene is switched, automatically STOP the game
 	if (Engine && Engine->IsPlaying()) {
 		Engine->StopGame();
 	}

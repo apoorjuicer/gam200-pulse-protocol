@@ -529,11 +529,31 @@ void CoreEngine::RenderDebugDraw() {
 void CoreEngine::PlayGame() {
 	m_isPlaying = true;
 
-	RestartRuntimeForPlay();
-
 	auto coord = Coordinator::GetInstance();
 
-	// call all the entities scripts
+	// ALWAYS update the original scene path when Play is pressed
+	if (auto sceneMgr = coord->GetSystem<SceneManager>()) {
+		std::string sceneName = sceneMgr->GrabCurrentScene();
+
+		// Remove "Saved" prefix if it exists
+		if (sceneName.find("Saved") == 0) {
+			sceneName = sceneName.substr(5);
+		}
+		// Remove "Scene" suffix if it exists
+		size_t scenePos = sceneName.find("Scene");
+		if (scenePos != std::string::npos) {
+			sceneName = sceneName.substr(0, scenePos);
+		}
+
+		// ALWAYS update this path, even if already set
+		m_originalScenePath = "../../MyEngine/JSON/" + sceneName + ".json";
+
+		std::cout << "[CoreEngine] Original scene path: " << m_originalScenePath << std::endl;  // DEBUG
+	}
+
+	RestartRuntimeForPlay();
+
+	// Call Init() on all scripts
 	if (auto logicSys = coord->GetSystem<LogicSystem>()) {
 		for (auto const& entity : logicSys->EntityMember) {
 			auto& scriptname = coord->GetComponent<LogicComponent>(entity);
@@ -562,9 +582,9 @@ void CoreEngine::StopGame()
 
 	// reloads original scene to reset all entities to initial starting position
 	if (auto sceneMgr = coord->GetSystem<SceneManager>()) {
-		std::string sceneName = sceneMgr->GrabCurrentScene();
-		std::string scenePath = "../../MyEngine/JSON/" + sceneName + ".json";
-		sceneMgr->LoadSceneFromJson(scenePath);
+		if (!m_originalScenePath.empty()) {
+			sceneMgr->LoadSceneFromJson(m_originalScenePath);
+		}
 	}
 }
 
