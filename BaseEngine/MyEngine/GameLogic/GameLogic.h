@@ -38,6 +38,7 @@ public:
 	void Exit(Entity ID) override;
 
 private:
+	float autoMoveTimer = 2.0f; // FOR TESTING THE STOP BUTTON FUNCTIONALITY PURPOSE
 };
 
 class EnemyScript : public Iscript
@@ -46,6 +47,10 @@ public:
 	void Init(Entity ID) override;
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
+
+	// --- Toggles for testing modes ---
+	static bool testAABBCollision;
+	static bool testOBBCollision;
 };
 
 

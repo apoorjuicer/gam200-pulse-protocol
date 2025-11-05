@@ -163,9 +163,9 @@ void RhythmGameplayInput::processRhythmInputs() {
     auto* g_coordinator = Coordinator::GetInstance();
     auto inputMgr = g_coordinator->GetSystem<InputManager>();
 
-    if (Engine->IsPaused()) {
-        return;
-    }
+    //if (Engine->IsPaused()) {
+    //    return;
+    //}
 
     const int rhythmKeys[] = { GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D };
     const char* keyNames[] = { "W", "A", "S", "D" };

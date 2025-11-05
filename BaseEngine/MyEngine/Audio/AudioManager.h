@@ -41,12 +41,13 @@ public:
 
     // BGM controls (optional for other places in engine)
     void StopBGM();
+    void PauseBGM();
     void SetBGMVolume(float volume);                 // 0..1
     bool IsBGMPlaying(bool* outPlaying = nullptr) const;
 
-    // Pause and Play 
-    void SetPaused(bool paused);
-    bool IsPaused() const { return mPaused; }
+    // Pause and Play  // not using pause for now
+    //void SetPaused(bool paused);
+    //bool IsPaused() const { return mPaused; }
 
     // gets path from source file and plays it at wanted volume, default volume is 1.0f
     bool LoadInputSFX(const std::string& path);
@@ -57,14 +58,14 @@ public:
     double GetMusicPosition() const;
     void StopMusic();
 
-    void RestartBGM(bool startPaused);
+    void RestartBGM();
 
 private:
     FMOD::System* mSystem = nullptr;
     FMOD::Sound* mBGM = nullptr;
     FMOD::Channel* mBGMCh = nullptr;
     FMOD::Sound* mInputSFX = nullptr;
-    bool mPaused = true;
+    /*bool mPaused = true;*/ // not using pause for now
 
     void releaseAll(); // stop channel, release sound/system
 
