@@ -47,6 +47,10 @@ public:
 	void Init(Entity ID) override;
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
+
+	// --- Toggles for testing modes ---
+	static bool testAABBCollision;
+	static bool testOBBCollision;
 };
 
 // ALL THIS IS JUST TEMP, LATER ON WE WILL SHIFT TO LUA SCRIPTING INSTEAD. ALL GAMELOGIC SYSTEM DOES IS 
