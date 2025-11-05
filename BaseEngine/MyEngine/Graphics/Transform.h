@@ -43,8 +43,8 @@ namespace Framework
 		Vector2 Pos;
 		Vector2 Scale;
 		Vector2 Rotation;
-		float angle_disp = 0.f;
-		float angle_speed = 0.f;
+		//float angle_disp = 0.f;
+		//float angle_speed = 0.f;
 		Matrix3x3 mdl_to_ndc_xform; // Initialize as identity matrix
 		Transform();
 		~Transform();

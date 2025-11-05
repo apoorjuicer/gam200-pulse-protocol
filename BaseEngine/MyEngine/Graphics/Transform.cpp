@@ -96,8 +96,8 @@ namespace Framework
 		out.AddMember("rotation", rotVal, alloc);
 
 		// simple types
-		out.AddMember("angle_disp", angle_disp, alloc);
-		out.AddMember("angle_speed", angle_speed, alloc);
+		//out.AddMember("angle_disp", angle_disp, alloc);
+		//out.AddMember("angle_speed", angle_speed, alloc);
 
 		out.AddMember("isVisible", isVisible, alloc);
 		out.AddMember("visibilityTimer", visibilityTimer, alloc);
@@ -125,10 +125,10 @@ namespace Framework
 		if (in.HasMember("rotation"))
 			Rotation.Deserialize(in["rotation"]);
 
-		if (in.HasMember("angle_disp"))
-			angle_disp = in["angle_disp"].GetFloat();
-		if (in.HasMember("angle_speed"))
-			angle_speed = in["angle_speed"].GetFloat();
+		//if (in.HasMember("angle_disp"))
+		//	angle_disp = in["angle_disp"].GetFloat();
+		//if (in.HasMember("angle_speed"))
+		//	angle_speed = in["angle_speed"].GetFloat();
 
 		if (in.HasMember("isVisible"))
 			isVisible = in["isVisible"].GetBool();

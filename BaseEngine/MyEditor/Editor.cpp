@@ -1339,7 +1339,7 @@ namespace MyEditor
 
                         // 2) Load (cached by AssetsManager)
                        // r.textureID = Framework::AssetsManager::GetOrLoad(r.spriteName);
-                        r.textureID = mAssets.getGraphics().GetOrLoad(r.spriteName);
+                        r.textureID = mAssets.GetOrLoadTexture(r.spriteName);
                         r.loadedSpriteName = r.spriteName;
                         r.needsTextureReload = false;
 
