@@ -243,11 +243,6 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	}
 	glm::mat3 PanZoom = BuildPanZoomNDC(gCamera);
 
-	// Clear
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
-	glClearDepth(1.0f);
-
 	// Timing
 	auto* g_coordinator = Coordinator::GetInstance();
 

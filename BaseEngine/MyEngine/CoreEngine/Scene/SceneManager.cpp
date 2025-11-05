@@ -436,24 +436,25 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			LayerTag tag{};
 
 			// Sensible defaults:
-			if (g_coordinator->HasComponent<GUIButton>(entity)) {
-				// UI stuff goes to UI layer and on top
-				tag.mask = LAYER_UI;
-				tag.orderInLayer = 100;
-				tag.z = 0.0f;
-			}
-			else if (g_coordinator->HasComponent<Framework::Renderable>(entity)) {
+			//if (g_coordinator->HasComponent<GUIButton>(entity)) {
+			//	// UI stuff goes to UI layer and on top
+			//	tag.mask = LAYER_UI;
+			//	tag.orderInLayer = 2;
+			//	tag.z = 0.0f;
+			//}
+			//else 
+			if (g_coordinator->HasComponent<Framework::Renderable>(entity)) {
 				// Background quad heuristic: mdl_ref==0
 				auto& r = g_coordinator->GetComponent<Framework::Renderable>(entity);
 				const bool isBackground = (static_cast<int>(r.mdl_ref) == 0);
 				tag.mask = isBackground ? LAYER_BACKGROUND : LAYER_WORLD;
-				tag.orderInLayer = isBackground ? -100 : 0;
+				tag.orderInLayer = isBackground ? 0 : 1;
 				tag.z = 0.0f;
 			}
 			else {
 				// Everything else defaults to world
 				tag.mask = LAYER_WORLD;
-				tag.orderInLayer = 0;
+				tag.orderInLayer = 1;
 				tag.z = 0.0f;
 			}
 
