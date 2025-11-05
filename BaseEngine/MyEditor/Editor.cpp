@@ -777,7 +777,7 @@ namespace MyEditor
 
         // Scene Hierarchy
         if (leftDockID) ImGui::SetNextWindowDockID(leftDockID, ImGuiCond_FirstUseEver);
-        if (ImGui::Begin("Hierarchy", nullptr, panel_flags))
+        if (ImGui::Begin("Scene Hierarchy", nullptr, panel_flags))
         {
             // Access ECS Coordinator
             auto* g_coordinator = Coordinator::GetInstance();
@@ -1092,8 +1092,8 @@ namespace MyEditor
                             Framework::Transform t{};
                             t.Pos = { 0.0f, 0.0f };
                             t.Scale = { 1.0f, 1.0f };
-                            t.angle_disp = 0.0f;
-                            t.angle_speed = 0.0f;
+                            t.Rotation.x = 0.0f;
+                            t.Rotation.y = 0.0f;
                             t.isVisible = true;
                             t.autoHide = false;
                             g->AddComponent<Framework::Transform>(selectedEntity, t);
@@ -1193,8 +1193,8 @@ namespace MyEditor
                     if (ImGui::DragFloat2("Position", pos, 0.5f)) { tr.Pos.x = pos[0]; tr.Pos.y = pos[1]; }
                     float sc[2] = { tr.Scale.x, tr.Scale.y };
                     if (ImGui::DragFloat2("Scale", sc, 0.5f)) { tr.Scale.x = sc[0]; tr.Scale.y = sc[1]; }
-                    ImGui::DragFloat("Rotation (deg)", &tr.angle_disp, 1.0f, -360.f, 360.f);
-                    ImGui::DragFloat("Rotation Speed", &tr.angle_speed, 0.1f, -10.0f, 10.0f);
+                    ImGui::DragFloat("Rotation (deg)", &tr.Rotation.x, 1.0f, -360.f, 360.f);
+                    ImGui::DragFloat("Rotation Speed", &tr.Rotation.y, 0.1f, -10.0f, 10.0f);
                     ImGui::Checkbox("Visible", &tr.isVisible);
                     ImGui::Separator();
 
@@ -1686,6 +1686,15 @@ namespace MyEditor
 
     void Render() {
         if (!s_enabled) return;
+
+        //glBindVertexArray(0);
+        //glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        //glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        //glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        //glBindBuffer(GL_COPY_READ_BUFFER, 0);
+        //glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }

@@ -135,6 +135,8 @@ private:
 
     bool LoadFontsFromRegistry();
 
+    void InitWhiteTexture();
+
 private:
     // std::unique_ptr<GLApp> glapp;
     GLApp *glapp = nullptr; // owning raw pointer
@@ -171,4 +173,7 @@ private:
 
     FT_Library m_ft = nullptr; // FreeType main library handle
     std::unordered_map<std::string, FontData> m_fontMap;
+
+    //debug
+    void PrintFontMap();
 };

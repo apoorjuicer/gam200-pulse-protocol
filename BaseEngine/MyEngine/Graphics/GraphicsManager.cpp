@@ -22,15 +22,10 @@
 #include "GraphicsManager.h"
 #include "../Resources/AssetRegistry.h"
 #include "glapp.h"
-// #include <iomanip>   // for std::setprecision
-// #include <iostream>
-// #include <chrono>
-// #include <memory>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../Graphics/stb_image.h"
 
-// namespace fs = std::filesystem;
 
 float editorWidth;
 float editorHeight;
@@ -93,6 +88,9 @@ void GraphicsManager::Initialize()
     {
         std::cout << "[GraphicsManager] Successfully loaded fonts from  asset registry.\n";
     }
+
+
+    PrintFontMap();
 
     // Subscribe to combo messages - DONT REMOVE, TEST FOR MESSAGE SYSTEM
     {
@@ -169,7 +167,7 @@ void GraphicsManager::Initialize()
         // layout(location = 1) vec2 aUV;
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(
-            0, 2, GL_FLOAT, GL_FALSE,
+            1, 2, GL_FLOAT, GL_FALSE,
             4 * sizeof(float),
             (void *)(2 * sizeof(float)));
 
@@ -198,21 +196,7 @@ void GraphicsManager::Initialize()
     }
 
     // create white texture for colored quads
-    glGenTextures(1, &whiteTexture);
-    glBindTexture(GL_TEXTURE_2D, whiteTexture);
-
-    // 1x1 white pixel
-    unsigned char whitePixel[4] = {255, 255, 255, 255};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    std::cout << "[GraphicsManager] White texture created for GUI buttons\n";
+    InitWhiteTexture();
 }
 
 void GraphicsManager::Update()
@@ -240,7 +224,6 @@ void GraphicsManager::Update()
         // const Framework::FontData* debugFont = AM.GetFont("liberation-mono_48");
 
         FontData const *debugFont = GM_FindFont(DEBUG_FONT_KEY);
-
         if (debugFont)
         {
             std::ostringstream fpsText;
@@ -428,8 +411,11 @@ void GraphicsManager::RenderText(
     const glm::vec3 &color,
     const FontData *fontData)
 {
-    if (!fontData)
+    if (!fontData) {
+        std::cerr << "[GraphicsManager] : fontData not found!!! in RenderText\n";
         return;
+    }
+       
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
@@ -492,6 +478,9 @@ void GraphicsManager::RenderText(
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+
+    std::cerr << "[GraphicsManager] RenderText successful for" << text << "\n";
 }
 
 void GraphicsManager::OnResize(int width, int height)
@@ -508,8 +497,11 @@ void GraphicsManager::RenderUIOverlayElements()
     auto *coordinator = Coordinator::GetInstance();
     auto inputMgr = coordinator->GetSystem<InputManager>();
 
-    if (!inputMgr)
+    if (!inputMgr) {
+        std::cerr << "[GraphicsManager] : inputMgr not found!!! in RenderUIOverlayElements\n";
         return;
+    }
+        
 
     auto &shader = GLApp::shdrpgms[2];
     shader.Use();
@@ -582,6 +574,23 @@ void GraphicsManager::RenderUIOverlayElements()
     }
 }
 
+void GraphicsManager::InitWhiteTexture() {
+    glGenTextures(1, &whiteTexture);
+    glBindTexture(GL_TEXTURE_2D, whiteTexture);
+
+    // 1x1 white pixel
+    unsigned char whitePixel[4] = { 255, 255, 255, 255 };
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    std::cout << "[GraphicsManager] White texture created for GUI buttons\n";
+}
+
 void GraphicsManager::RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color)
 {
     // DEBUG - only print first few frames
@@ -627,7 +636,8 @@ void GraphicsManager::RenderColoredQuad(float x, float y, float width, float hei
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+   glBindTexture(GL_TEXTURE_2D, 0);
+
 }
 
 // Textures
@@ -899,4 +909,34 @@ FontData const *GraphicsManager::GM_FindFont(std::string const &id) const
         return &it->second;
     }
     return nullptr;
+}
+
+//debug
+
+void GraphicsManager::PrintFontMap()
+{
+    std::cout << "===== FONT MAP DUMP =====\n";
+
+    for (const auto& [fontKey, fontData] : m_fontMap)
+    {
+        std::cout << "Font ID: " << fontKey << "\n";
+        std::cout << "  Pixel Height: " << fontData.pixelHeight << "\n";
+        std::cout << "  Glyph Count:  " << fontData.glyphs.size() << "\n";
+
+        // Print each glyph info (optional — can be large)
+        for (const auto& [ch, glyph] : fontData.glyphs)
+        {
+            std::cout << "    '" << ch << "'"
+                << " (ASCII " << static_cast<int>(ch) << "): "
+                << "TexID=" << glyph.TextureID
+                << ", Size=(" << glyph.Size.x << "," << glyph.Size.y << ")"
+                << ", Bearing=(" << glyph.Bearing.x << "," << glyph.Bearing.y << ")"
+                << ", Advance=" << glyph.Advance
+                << "\n";
+        }
+
+        std::cout << "-------------------------------\n";
+    }
+
+    std::cout << "===== END OF FONT MAP =====\n";
 }
