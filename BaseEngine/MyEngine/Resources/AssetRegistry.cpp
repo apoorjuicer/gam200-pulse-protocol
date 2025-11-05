@@ -495,6 +495,24 @@
 		return LoadAnimationManifest(animationjsonfilepath);
 	}
 
+
+	std::string AssetRegistry::GetAudioItemPath(std::string const& id)  const {
+		return FindAudio(id)->path;
+	}
+	std::string AssetRegistry::GetTextureItemPath(std::string const& id) const {
+		return FindTexture(id)->path;
+	}
+	std::string AssetRegistry::GetFontItemPath(std::string const& id)   const {
+		return FindFont(id)->path;
+	}
+	std::string AssetRegistry::GetSceneItemPath(std::string const& id)   const {
+		return FindScene(id)->path;
+	}
+	std::string AssetRegistry::GetAnimationItemPath(std::string const& id)   const {
+		return FindAnimation(id)->path;
+	}
+
+
 	/*For Debug and Console Init print all container element*/
 
 	std::ostream& operator<<(std::ostream& os, AudioResource const& aud_r) {

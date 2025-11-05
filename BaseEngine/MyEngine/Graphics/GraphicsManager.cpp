@@ -56,8 +56,6 @@ GraphicsManager::GraphicsManager(AssetRegistry *registry) : mRegistry{registry}
 {
     // Initialize();
     // Construct GLApp only once
-
-    std::cout << "[GraphicsManager] single arg cons called\n";
 }
 
 GraphicsManager::~GraphicsManager()

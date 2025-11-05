@@ -41,6 +41,15 @@ public:
 
     unsigned int GetOrLoadTexture(const std::string &name);
 
+    std::string GetAudioPath(std::string const& id)  const;
+    std::string GetTexturePath(std::string const& id) const;
+    std::string GetFontPath(std::string const& id)   const;
+    std::string GetScenePath(std::string const& id)   const;
+    std::string GetAnimationPath(std::string const& id)   const;
+
+    bool PlaySFX(std::string const& id);
+    bool PlayMusic(std::string const& id);
+
 private:
     AssetRegistry mRegistry; // owned
     // AudioManager mAudio;

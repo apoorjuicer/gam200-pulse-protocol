@@ -108,6 +108,12 @@
 		FontResource   const* FindFont(std::string const& id)   const;
 		SceneResource   const* FindScene(std::string const& id)   const;
 		AnimationResource   const* FindAnimation(std::string const& id)   const;
+		
+		std::string GetAudioItemPath(std::string const& id)  const;
+		std::string GetTextureItemPath(std::string const& id) const;
+		std::string GetFontItemPath(std::string const& id)   const;
+		std::string GetSceneItemPath(std::string const& id)   const;
+		std::string GetAnimationItemPath(std::string const& id)   const;
 
 		//A manifest describes
 		//existing assets(id,path)

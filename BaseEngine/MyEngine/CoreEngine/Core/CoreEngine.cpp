@@ -286,7 +286,7 @@ void CoreEngine::Init()
 	mAssets.Initialize();
 	std::cout << mAssets.getRegistry().FindTexture("hero") << "\n";
 	// Singleton for Engine, but once game use EventBus/messaging system
-
+	std::cout << "path for bgm : " << mAssets.getRegistry().FindAudio("bgm")->path;
 	// PLEASE CALL THIS EVERY SINGLE U WANT 2 USE SINGLETON
 	auto g_coordinator = Coordinator::GetInstance();
 

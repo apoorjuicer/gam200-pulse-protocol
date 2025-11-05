@@ -339,6 +339,40 @@ unsigned int AssetsManager::GetOrLoadTexture(const std::string &name)
     return mGraphics ? mGraphics->GetOrLoad(name) : 0u;
 }
 
+std::string AssetsManager::GetAudioPath(std::string const& id)  const {
+    return mRegistry.GetAudioItemPath(id);
+}
+std::string AssetsManager::GetTexturePath(std::string const& id) const {
+    return mRegistry.GetTextureItemPath(id);
+}
+std::string AssetsManager::GetFontPath(std::string const& id)   const {
+    return mRegistry.GetFontItemPath(id);
+}
+std::string AssetsManager::GetScenePath(std::string const& id)   const {
+    return mRegistry.GetSceneItemPath(id);
+}
+std::string AssetsManager::GetAnimationPath(std::string const& id)   const {
+    return mRegistry.GetAnimationItemPath(id);
+}
+
+
+bool AssetsManager::PlaySFX(std::string const& id) {
+    if (mAudio) {
+        mAudio->PlaySound(id);  
+        return true;                 
+    }
+    return false;                 
+}
+
+bool AssetsManager::PlayMusic(std::string const& id) {
+    if (mAudio) {
+        mAudio->PlayBGM(id);
+        return true;
+    }
+    return false;
+}
+
+
 //static std::string normalize_full(const std::filesystem::path& p)
 //{
 //    return p.lexically_normal().string();

@@ -159,26 +159,26 @@ void AudioManager::Initialize()
 
     if (!LoadAllBGM())
     {
-        std::cerr << "[AudioManager] No 'bgm' entry found in registry.\n";
+        std::cerr << "[AudioManager] load all BGM failed.\n";
     }
     else
     {
-        std::cout << "[AudioManager] 'bgm' loaded from registry.\n";
+        std::cout << "[AudioManager] load all BGM failed.\n";
     }
 
     if (!LoadAllSFX())
     {
-        std::cerr << "[AudioManager] No 'beat_placeholder' entry found in registry.\n";
+        std::cerr << "[AudioManager] load all SFX failed.\n";
     }
     else
     {
-        std::cout << "[AudioManager] 'beat_placeholder' loaded from registry.\n";
+        std::cout << "[AudioManager] load all SFX sucesss.\n";
     }
 
     PlayBGM("bgm");
     std::string tf = IsBGMPlaying() ? "true" : "false";
     std::cout << "[AudioManager] Playing bgm? " << tf << "\n";
-    PlaySound("beat_placeholder");
+    //PlaySound("beat_placeholder");
     std::cout << "[AudioManager] AudioManager initialization completed with mixers.\n";
 
 } // end init
@@ -470,8 +470,10 @@ bool AudioManager::LoadAllSFX()
     {
         if (ar.audiotype == "SFX")
         {
-            if (!LoadSFX(id))
+            if (!LoadSFX(id)) {
                 all_ok = false;
+            }
+          
         }
     }
     return all_ok;
