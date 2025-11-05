@@ -66,8 +66,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -585.0,
-                            "y": 0.0
+                            "x": -285.0,
+                            "y": 120.0
                         },
                         "scale": {
                             "x": 500.0,
@@ -101,8 +101,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.23507392406463624,
+                        "currentFrame": 0,
+                        "elapsedTime": 0.15361946821212769,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -116,7 +116,7 @@
                 },
                 {
                     "name": {
-                        "name": "Hi"
+                        "name": "Jeff"
                     }
                 },
                 {
@@ -199,6 +199,27 @@
                     "script": {
                         "ScriptName": "EnemyScript"
                     }
+                },
+                {
+                    "Health": {
+                        "hp": 1,
+                        "damage": 1,
+                        "isAlive": true
+                    }
+                },
+                {
+                    "AABB": {
+                        "min": {
+                            "x": 50.0,
+                            "y": 50.0
+                        },
+                        "max": {
+                            "x": 150.0,
+                            "y": 150.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
+                    }
                 }
             ]
         },
@@ -220,9 +241,9 @@
                         },
                         "angle_disp": 0.0,
                         "angle_speed": 0.0,
-                        "isVisible": false,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
+                        "isVisible": true,
+                        "visibilityTimer": 1.0360002517700196,
+                        "autoHide": true
                     }
                 },
                 {
@@ -248,13 +269,13 @@
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
-                            "a": 0.0
+                            "a": 1.0
                         },
                         "hoverColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
-                            "a": 0.0
+                            "a": 1.0
                         },
                         "actionType": "",
                         "entityJsonPath": "",

@@ -60,6 +60,7 @@ private:
 	unsigned LastTime; //The last time the game was updated
 	bool m_paused = true;
 	bool m_isPlaying = false;
+	std::string m_originalScenePath = "";
 
 	void RenderDebugDraw();
 
