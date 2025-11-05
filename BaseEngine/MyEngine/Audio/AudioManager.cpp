@@ -110,20 +110,35 @@
         applyAllVolumes();
 
         //load and play bgm
-        if (!LoadBGM("bgm")) {
+        //if (!LoadBGM("bgm")) {
+        //    std::cerr << "[AudioManager] No 'bgm' entry found in registry.\n";
+        //}
+        //else {
+        //    std::cout << "[AudioManager] 'bgm' loaded from registry.\n";
+        //}
+
+        //if (!LoadSFX("beat_placeholder")) {
+        //    std::cerr << "[AudioManager] No 'beat_placeholder' entry found in registry.\n";
+        //}
+        //else {
+        //    std::cout << "[AudioManager] 'beat_placeholder' loaded from registry.\n";
+        //}
+
+        if (!LoadAllBGM()) {
             std::cerr << "[AudioManager] No 'bgm' entry found in registry.\n";
         }
         else {
             std::cout << "[AudioManager] 'bgm' loaded from registry.\n";
         }
 
-        if (!LoadSFX("beat_placeholder")) {
+        if (!LoadAllSFX()) {
             std::cerr << "[AudioManager] No 'beat_placeholder' entry found in registry.\n";
         }
         else {
             std::cout << "[AudioManager] 'beat_placeholder' loaded from registry.\n";
         }
 
+        PlayBGM("bgm");
         std::string tf = IsBGMPlaying() ? "true" : "false";
         std::cout << "[AudioManager] Playing bgm? "<< tf << "\n";
         PlaySound("beat_placeholder");
@@ -165,10 +180,10 @@
         mSfx.clear();
 
         // 3) release BGM
-        if (mBGM) {
-            FMOD_RESULT res = mBGM->release();
+        if (mCurrentBGM) {
+            FMOD_RESULT res = mCurrentBGM->release();
             FMOD_CHECK(res, "BGM->release");
-            mBGM = nullptr; //set to nullptr
+            mCurrentBGM = nullptr; //set to nullptr
         }
 
         // 4) Close and release FMOD system
@@ -190,8 +205,10 @@
     bool AudioManager::LoadBGM(std::string const& id) {
         if (!mSystem || !mRegistry) { return false; }
         // Stop and release previous BGM
-        if (mBGMCh) { mBGMCh->stop(); mBGMCh = nullptr; }
-        if (mBGM) { mBGM->release(); mBGM = nullptr; }
+      //  if (mBGMCh) { mBGMCh->stop(); mBGMCh = nullptr; }
+       // if (mBGM) { mBGM->release(); mBGM = nullptr; }
+
+        if (mBGMCache.count(id)) return true; // already cached
 
         //get bgm from registry, pointer to a read-only AudioResource
         AudioResource const* bgm = mRegistry->FindAudio(id);
@@ -203,20 +220,24 @@
             //mode is playback mode, bitwise operator combines FMOD flag
             FMOD_MODE mode = FMOD_DEFAULT | (bgm->loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF);
             //createSound(cstring_audipath, playbackmode, extra_info parameter, output parameter sound)
-            FMOD_RESULT result = mSystem->createSound(bgm->path.c_str(), mode, nullptr, &mBGM);
+            //FMOD_RESULT result = mSystem->createSound(bgm->path.c_str(), mode, nullptr, &mBGM);
 
-            if (!FMOD_CHECK(result, ("createSound(" + id + ")").c_str())) { return false; }
+            FMOD::Sound* s = nullptr;
+            FMOD_RESULT result = mSystem->createStream(bgm->path.c_str(), mode, nullptr, &s);
+
+
+            if (!FMOD_CHECK(result, ("createStream(" + id + ")").c_str())) { return false; }
 
             // Route to Music group if available, else master
-            FMOD::ChannelGroup* target = mMusicGroup ? mMusicGroup : nullptr;
-            //playSound (sound, channelgroup, paused, channel)
-            //passing nullptr in channel group puts it in MasterChannelGroup(top level mixer)
-            result = mSystem->playSound(mBGM, target, false, &mBGMCh);
-            if (!FMOD_CHECK(result, ("playSound(" + id + ")").c_str()) || !mBGMCh) { return false; }
+            //FMOD::ChannelGroup* target = mMusicGroup ? mMusicGroup : nullptr;
+            ////playSound (sound, channelgroup, paused, channel)
+            ////passing nullptr in channel group puts it in MasterChannelGroup(top level mixer)
+            //result = mSystem->playSound(mCurrentBGM, target, false, &mCurrentBGMCh);
+            //if (!FMOD_CHECK(result, ("playSound(" + id + ")").c_str()) || !mCurrentBGMCh) { return false; }
 
-            mBGMCh->setVolume(clampto0and1(bgm->volume));
+            //mCurrentBGMCh->setVolume(clampto0and1(bgm->volume));
 
-            // Sync with engine pause (if present)
+            //// Sync with engine pause (if present)
             //if (Engine && Engine->IsPaused()) {
             //    mBGMCh->setPaused(true);
             //    std::cout << "[AudioManager] BGM loaded and paused (engine paused).\n";
@@ -224,31 +245,76 @@
             //else {
             //    std::cout << "[AudioManager] BGM playing: " << bgm->path << "\n";
             //}
+
+            mBGMCache[id] = s;               // map OWNS the sound
+            mCurrentBGMID = id;              // optional: mark as “loaded current”
+            mCurrentBGM = s;               // non-owning alias
         }
 
         return true;
     }
+
+    bool AudioManager::LoadAllBGM()
+    {
+        if (!mSystem || !mRegistry) return false;
+
+        bool all_ok = true;
+        for (auto const& [id, ar] : mRegistry->getAudioContainer()) {
+            if (ar.audiotype == "BGM") {
+                if (!LoadBGM(id)) all_ok = false;
+            }
+        }
+        return all_ok;
+    }
+
+    bool AudioManager::PlayBGM(const std::string& id)
+    {
+        if (!mSystem) return false;
+        if (!mBGMCache.count(id) && !LoadBGM(id)) return false;
+
+        // stop previous current channel (no crossfade here; add one later if desired)
+        if (mCurrentBGMCh) { mCurrentBGMCh->stop(); mCurrentBGMCh = nullptr; }
+
+        FMOD::ChannelGroup* target = mMusicGroup ? mMusicGroup : nullptr;
+        FMOD::Channel* ch = nullptr;
+        FMOD_RESULT r = mSystem->playSound(mBGMCache[id], target, false, &ch);
+        if (!FMOD_CHECK(r, ("playSound(" + id + ")").c_str()) || !ch) return false;
+
+        // per-track volume (multiplied by a global mMusicVol if you keep one)
+        float vol = 1.0f;
+        if (const auto* ar = mRegistry->FindAudio(id)) vol = ar->volume;
+        ch->setVolume(clampto0and1(vol * mMusicVol));
+
+        // book-keeping
+        mBGMChannels[id] = ch;
+        mCurrentBGMID = id;
+        mCurrentBGM = mBGMCache[id];
+        mCurrentBGMCh = ch;
+        return true;
+    }
+
+
     void AudioManager::StopBGM() {
-        if (mBGMCh) {
-            FMOD_RESULT result = mBGMCh->stop();
+        if (mCurrentBGM) {
+            FMOD_RESULT result = mCurrentBGMCh->stop();
             FMOD_CHECK(result, "StopBGM(): ");
-            mBGMCh = nullptr;
+            mCurrentBGMCh = nullptr;
         }
         std::cout << "[AudioManager] BGM stopped.\n";
     }
     void AudioManager::SetBGMVolume(float volume) {
-        if (mBGMCh) {
-            mBGMCh->setVolume(clampto0and1(volume));
+        if (mCurrentBGM) {
+            mCurrentBGMCh->setVolume(clampto0and1(volume));
         }
     }
     bool AudioManager::IsBGMPlaying(bool* outPlaying) const {
-        if (!mBGMCh) {
+        if (!mCurrentBGMCh) {
             if (outPlaying) { *outPlaying = false; }
             return false;
         }
 
         bool playing = false;
-        FMOD_RESULT result = mBGMCh->isPlaying(&playing);
+        FMOD_RESULT result = mCurrentBGMCh->isPlaying(&playing);
         FMOD_CHECK(result, "IsBGMPlaying");
 
         if (outPlaying) { *outPlaying = playing; }
@@ -358,10 +424,10 @@
     /**/
 
     double AudioManager::GetBGMPositionSeconds() const {
-        if (!mBGMCh) return 0.0;
+        if (!mCurrentBGMCh) return 0.0;
 
         unsigned int ms = 0; // position in milliseconds
-        FMOD_RESULT result = mBGMCh->getPosition(&ms, FMOD_TIMEUNIT_MS);
+        FMOD_RESULT result = mCurrentBGMCh->getPosition(&ms, FMOD_TIMEUNIT_MS);
         FMOD_CHECK(result, "getPosition(BGM)");
 
         return static_cast<double>(ms) / 1000.0; // convert to seconds
@@ -393,11 +459,11 @@
         }
 
         // Otherwise, check if it’s the currently loaded BGM
-        if (mBGM && id == "bgm") {
-            if (mBGMCh) { mBGMCh->stop(); mBGMCh = nullptr; }
-            FMOD_RESULT res = mBGM->release();
+        if (mCurrentBGM && id == "bgm") {
+            if (mCurrentBGMCh) { mCurrentBGMCh->stop(); mCurrentBGMCh = nullptr; }
+            FMOD_RESULT res = mCurrentBGM->release();
             FMOD_CHECK(res, "releaseSound(bgm)");
-            mBGM = nullptr;
+            mCurrentBGM = nullptr;
             std::cout << "[AudioManager] Unloaded BGM.\n";
             return true;
         }

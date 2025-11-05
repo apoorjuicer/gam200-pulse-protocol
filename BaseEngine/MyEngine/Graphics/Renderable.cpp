@@ -23,7 +23,8 @@ namespace Framework
     {
         if (t.textureID == 0 && !t.spriteName.empty()) {
            //t.textureID = Framework::GraphicsManager::GetOrLoad(t.spriteName);
-            t.textureID = mAssets.getGraphics().GetOrLoad(t.spriteName);
+           // t.textureID = mAssets.getGraphics().GetOrLoad(t.spriteName);
+            t.textureID = mAssets.GetOrLoadTexture(t.spriteName);
         }
           
     }

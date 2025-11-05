@@ -40,7 +40,7 @@
         GraphicsManager& getGraphics();
         GraphicsManager const& getGraphics() const;
 
-
+        unsigned int GetOrLoadTexture(const std::string& name);
 
 
     private:

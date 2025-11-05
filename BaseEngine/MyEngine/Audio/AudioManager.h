@@ -51,7 +51,9 @@ class AssetRegistry; //fwd
         void Shutdown();       // Exit calls releaseAll releases all FMOD resources
 
         // BGM controls (optional for other places in engine)
-        bool LoadBGM(const std::string& id); //new
+        bool LoadBGM( std::string const& id); //new
+        bool LoadAllBGM();
+        bool PlayBGM( std::string const& id);
         void StopBGM();
         void SetBGMVolume(float volume);                 // 0..1
         bool IsBGMPlaying(bool* outPlaying = nullptr) const;
@@ -60,7 +62,7 @@ class AssetRegistry; //fwd
         void SetPaused(bool paused);
         bool IsPaused() const;
 
-        // gets path from source file and plays it at wanted volume, default volume is 1.0f
+        // gets id from map and plays it at wanted volume, default volume is 1.0f
         bool LoadSFX(const std::string& id);
         bool LoadAllSFX();
         void PlaySound(const std::string& id);
@@ -76,8 +78,12 @@ class AssetRegistry; //fwd
     private:
         FMOD::System* mSystem = nullptr;
 
-        FMOD::Sound* mBGM = nullptr; //single background music
-        FMOD::Channel* mBGMCh = nullptr; //playback channel for BGM
+        FMOD::Sound* mCurrentBGM = nullptr; //single background music
+        FMOD::Channel* mCurrentBGMCh = nullptr; //playback channel for BGM
+        std::string mCurrentBGMID;
+        std::unordered_map<std::string, FMOD::Sound*> mBGMCache; //single background music
+        std::unordered_map<std::string, FMOD::Channel*> mBGMChannels;
+        
         //FMOD::Sound* mInputSFX = nullptr;
         bool mPaused = true;
 

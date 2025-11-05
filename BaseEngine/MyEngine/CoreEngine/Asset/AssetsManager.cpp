@@ -334,3 +334,12 @@
     GraphicsManager& AssetsManager::getGraphics() { return *mGraphics; }
     GraphicsManager const& AssetsManager::getGraphics() const { return *mGraphics; }
 
+
+
+
+    unsigned int AssetsManager::GetOrLoadTexture(const std::string& name)
+    {
+        return mGraphics ? mGraphics->GetOrLoad(name) : 0u;
+    }
+
+

@@ -299,7 +299,8 @@ void GLApp::draw(std::set<Entity> entities) {
 
 		if (!re.spriteName.empty() && re.textureID == 0) {
 			//re.textureID = Framework::GraphicsManager::GetOrLoad(re.spriteName);
-			re.textureID = mAssets.getGraphics().GetOrLoad(re.spriteName);
+			//re.textureID = mAssets.getGraphics().GetOrLoad(re.spriteName);
+			re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
 			if (re.textureID == 0) {
 				std::cerr << "[GLApp] Failed to load texture: " << re.spriteName << std::endl;
 				continue;
