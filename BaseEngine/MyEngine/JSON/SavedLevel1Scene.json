@@ -66,7 +66,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -585.0,
+                            "x": -400.0,
                             "y": 0.0
                         },
                         "scale": {
@@ -102,7 +102,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.23507392406463624,
+                        "elapsedTime": 0.11278198659420014,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -116,7 +116,7 @@
                 },
                 {
                     "name": {
-                        "name": "Hi"
+                        "name": "Jeff"
                     }
                 },
                 {
@@ -152,7 +152,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 800.0,
+                            "x": 465.0,
                             "y": 0.0
                         },
                         "scale": {
@@ -199,6 +199,27 @@
                     "script": {
                         "ScriptName": "EnemyScript"
                     }
+                },
+                {
+                    "Health": {
+                        "hp": 1,
+                        "damage": 1,
+                        "isAlive": true
+                    }
+                },
+                {
+                    "AABB": {
+                        "min": {
+                            "x": 50.0,
+                            "y": 50.0
+                        },
+                        "max": {
+                            "x": 150.0,
+                            "y": 150.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
+                    }
                 }
             ]
         },
@@ -221,7 +242,7 @@
                         "angle_disp": 0.0,
                         "angle_speed": 0.0,
                         "isVisible": false,
-                        "visibilityTimer": 0.0,
+                        "visibilityTimer": -0.001999272033572197,
                         "autoHide": false
                     }
                 },

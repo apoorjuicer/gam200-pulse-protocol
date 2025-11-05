@@ -34,8 +34,11 @@ void LogicSystem::Update(float dt)
 
 	auto* g_coordinator = Coordinator::GetInstance();
 
+    // make copy first
+    auto entities = EntityMember;
+
 	// only update all entity that has scripts
-	for (auto const& entity : EntityMember)
+	for (auto const& entity : entities)
 	{
 		// get script name from each entity and feed them to its respective scripts
 		auto& scriptname = g_coordinator->GetComponent<LogicComponent>(entity);
@@ -181,7 +184,7 @@ bool LoadScriptName(LogicComponent& t, std::string const& path)
 void PlayerScript::Init(Entity ID) 
 {
 	(void)ID;
-    autoMoveTimer = 2.0f; // reset timer
+    //autoMoveTimer = 2.0f; // reset timer
 }
 
 void PlayerScript::Update(Entity ID) 
@@ -190,28 +193,28 @@ void PlayerScript::Update(Entity ID)
 	auto& hero_transform = g_coordinator->GetComponent<Framework::Transform>(ID);
 
     // auto-moves right after game starts (for 2 secs)
-    if (autoMoveTimer > 0.0f) {
+    /*if (autoMoveTimer > 0.0f) {
         hero_transform.Pos.x += 3.0f;
         autoMoveTimer -= 0.016f;
-    }
+    }*/
 
     // this is just regular WASD
-	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_W) == GLFW_PRESS)
+	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_T) == GLFW_PRESS)
 	{
 		hero_transform.Pos.y += 5.0f;
 	}
 
-	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_A) == GLFW_PRESS)
+	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_F) == GLFW_PRESS)
 	{
 		hero_transform.Pos.x -= 5.0f;
 	}
 
-	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_S) == GLFW_PRESS )
+	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_G) == GLFW_PRESS )
 	{
 		hero_transform.Pos.y -= 5.0f;
 	}
 
-	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_D) == GLFW_PRESS)
+	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_H) == GLFW_PRESS)
 	{
 		hero_transform.Pos.x += 5.0f;
 	}
@@ -283,8 +286,31 @@ void EnemyScript::Update(Entity ID)
     if (!enemy_health.isAlive)
         return;
 
+    // --- Movement for enemy ---
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        enemy_transform.Pos.y += 5.0f;
+    }
+
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_LEFT) == GLFW_PRESS)
+    {
+        enemy_transform.Pos.x -= 5.0f;
+    }
+
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        enemy_transform.Pos.y -= 5.0f;
+    }
+
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS)
+    {
+        enemy_transform.Pos.x += 5.0f;
+    }
+
+
+
     // --- Mode toggles ---
-    static bool aabbMode = false;
+    static bool aabbMode = true;  // change to m so enemy movement arrow keys
     static bool obbMode = false;
     static bool wasMPressed = false;
     static bool wasNPressed = false;
@@ -294,7 +320,7 @@ void EnemyScript::Update(Entity ID)
     {
         if (!wasMPressed)
         {
-            aabbMode = !aabbMode;
+            //aabbMode = !aabbMode;   // comments so that collision is always on
             obbMode = false; // disable OBB when AABB is on
             wasMPressed = true;
             std::cout << (aabbMode ? "[ENEMY] AABB Mode ON\n" : "[ENEMY] AABB Mode OFF\n");
@@ -347,7 +373,7 @@ void EnemyScript::Update(Entity ID)
     // ====================================================================
     if (aabbMode)
     {
-        enemy_transform.Pos.x -= 0.5f; // move left at constant rate
+        //enemy_transform.Pos.x -= 0.5f; // move left at constant rate
 
         AABB enemyAABB = collision.BuildAABBFromTransform(enemy_transform, enemy_box);
         AABB playerAABB = collision.BuildAABBFromTransform(player_transform, player_box);
@@ -376,7 +402,10 @@ void EnemyScript::Update(Entity ID)
                 std::cout << ">>> PLAYER DEFEATED\n";
             }
 
-            enemy_transform.Pos = { -9999.0f, -9999.0f };
+            // NOW YOU DIE
+            Factory factory;
+            factory.DeleteEntity(ID);
+            //enemy_transform.Pos = { -9999.0f, -9999.0f };
         }
     }
 
@@ -427,7 +456,10 @@ void EnemyScript::Update(Entity ID)
                 std::cout << ">>> PLAYER DEFEATED\n";
             }
 
-            enemy_transform.Pos = { -9999.0f, -9999.0f };
+            // NOW YOU DIE
+            Factory factory;
+            factory.DeleteEntity(ID);
+            //enemy_transform.Pos = { -9999.0f, -9999.0f };
         }
     }
 }
