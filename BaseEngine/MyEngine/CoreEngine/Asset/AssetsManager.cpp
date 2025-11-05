@@ -338,3 +338,53 @@ unsigned int AssetsManager::GetOrLoadTexture(const std::string &name)
 {
     return mGraphics ? mGraphics->GetOrLoad(name) : 0u;
 }
+
+//static std::string normalize_full(const std::filesystem::path& p)
+//{
+//    return p.lexically_normal().string();
+//}
+//
+//std::string AssetsManager::FindTextureByFilename(std::string_view filename,
+//    const std::string& root)
+//{
+//    namespace fs = std::filesystem;
+//    if (filename.empty())
+//        return {};
+//
+//    // Reduce any path to just the base filename ("../Enemies/Hero.png" -> "Hero.png")
+//    fs::path nameOnly = fs::path(std::string(filename)).filename();
+//
+//    std::error_code ec;
+//
+//    // 1) If the caller actually passed a full path and it exists, accept it.
+//    fs::path maybePath = std::string(filename);
+//    if ((maybePath.has_parent_path() || maybePath.is_absolute()) && fs::exists(maybePath, ec))
+//    {
+//        return normalize_full(maybePath);
+//    }
+//
+//    // 2) Try to find an already-loaded path in our cache that matches the filename.
+//    for (const auto& kv : s_idToPath)
+//    { // uses your existing map
+//        fs::path p = kv.second;
+//        if (p.filename() == nameOnly)
+//        {
+//            return normalize_full(p);
+//        }
+//    }
+//
+//    // 3) Search the Textures folder recursively.
+//    fs::path rootDir = root;
+//    if (!fs::exists(rootDir, ec))
+//        return {};
+//
+//    for (const auto& entry : fs::recursive_directory_iterator(rootDir, ec))
+//    {
+//        if (entry.is_regular_file(ec) && entry.path().filename() == nameOnly)
+//        {
+//            return normalize_full(entry.path());
+//        }
+//    }
+//
+//    return {};
+//}

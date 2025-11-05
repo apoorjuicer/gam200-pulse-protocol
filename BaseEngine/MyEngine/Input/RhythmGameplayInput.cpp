@@ -212,7 +212,8 @@ void RhythmGameplayInput::processRhythmInputs()
             // Play sound
             if (auto audio = g_coordinator->GetSystem<AudioManager>())
             {
-                audio->PlaySound("beat_placeholder", 0.8f);
+                //audio->PlaySound("beat_placeholder", 0.8f);
+                mAssets.getAudio().PlaySound("beat_placeholder");
             }
 
             // Show feedback bar by setting alpha to 1.0

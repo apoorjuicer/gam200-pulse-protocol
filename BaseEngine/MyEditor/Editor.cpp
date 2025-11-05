@@ -182,7 +182,8 @@ namespace MyEditor
         if (!IsImageExt(item.fullPath)) return;
 
         // this assumes your AssetsManager returns a GLuint / unsigned int
-        item.texID = Framework::AssetsManager::GetOrLoad(item.fullPath);
+        //item.texID = Framework::AssetsManager::GetOrLoad(item.fullPath);
+        item.texID = mAssets.GetOrLoadTexture(item.fullPath);
     }
 
     static void ProjectPanel(Entity selectedEntity)
@@ -301,7 +302,8 @@ namespace MyEditor
                         {
                             auto& rend = g_coordinator->GetComponent<Framework::Renderable>(selectedEntity);
                             rend.spriteName = item.fullPath;                       // or make it relative
-                            rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
+                            //rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
+                            rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
                         }
                     }
                 }
@@ -322,7 +324,8 @@ namespace MyEditor
                             {
                                 auto& rend = g_coordinator->GetComponent<Framework::Renderable>(selectedEntity);
                                 rend.spriteName = item.fullPath;
-                                rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
+                               // rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
+                                rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
                             }
                         }
                     }
@@ -1327,14 +1330,16 @@ namespace MyEditor
                                 std::string base = fs::path(candidate).filename().string();
                                 if (base.empty()) base = candidate;
 
-                                std::string resolved = Framework::AssetsManager::FindTextureByFilename(base, kTexturesRoot);
-                                if (!resolved.empty())
-                                    r.spriteName = resolved; // keep resolved full path for next time
+                                //std::string resolved = Framework::AssetsManager::FindTextureByFilename(base, kTexturesRoot);
+
+                                //if (!resolved.empty())
+                                  //  r.spriteName = resolved; // keep resolved full path for next time
                             }
                         }
 
                         // 2) Load (cached by AssetsManager)
-                        r.textureID = Framework::AssetsManager::GetOrLoad(r.spriteName);
+                       // r.textureID = Framework::AssetsManager::GetOrLoad(r.spriteName);
+                        r.textureID = mAssets.getGraphics().GetOrLoad(r.spriteName);
                         r.loadedSpriteName = r.spriteName;
                         r.needsTextureReload = false;
 
