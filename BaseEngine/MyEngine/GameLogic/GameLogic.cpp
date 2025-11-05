@@ -23,6 +23,12 @@ void LogicSystem::Init()
 void LogicSystem::Update(float dt)
 {
 	(void)dt;
+
+    // don't update scripts, if not playing the game
+    if (!Engine->IsPlaying()) {
+        return;
+    }
+
 	auto* g_coordinator = Coordinator::GetInstance();
 
 	// only update all entity that has scripts
@@ -166,16 +172,27 @@ bool LoadScriptName(LogicComponent& t, std::string const& path)
 }
 
 
+// ---------------------------------------------------------------------
 // FOR SCRIPTS ONLY ONWARDS
+// ---------------------------------------------------------------------
 void PlayerScript::Init(Entity ID) 
 {
 	(void)ID;
+    autoMoveTimer = 2.0f; // reset timer
 }
 
 void PlayerScript::Update(Entity ID) 
 {
 	auto g_coordinator = Coordinator::GetInstance();
 	auto& hero_transform = g_coordinator->GetComponent<Framework::Transform>(ID);
+
+    // auto-moves right after game starts (for 2 secs)
+    if (autoMoveTimer > 0.0f) {
+        hero_transform.Pos.x += 3.0f;
+        autoMoveTimer -= 0.016f;
+    }
+
+    // this is just regular WASD
 	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_W) == GLFW_PRESS)
 	{
 		hero_transform.Pos.y += 5.0f;

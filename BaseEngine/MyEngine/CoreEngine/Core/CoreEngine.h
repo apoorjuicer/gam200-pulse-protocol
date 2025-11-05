@@ -31,15 +31,25 @@ public:
 	void GameLoop();
 	void Exit();
 
-	void SetPaused(bool p);
-	void TogglePaused();
-	bool IsPaused() const { return m_paused; }
+	//void SetPaused(bool p);
+	//void TogglePaused();
+	//bool IsPaused() const { return m_paused; }
+
 	// One of the ways to glue systems tgt. 
 	//void BroadcastMessage(Message* message);
 
+
+	// for controlling main game loop
 	bool IsGameRunning() const { return GameRunning; }
 
+	// for controlling scripts
+	bool IsPlaying() const { return m_isPlaying; }
+
 	GLFWwindow* GetWindow() const { return window; }
+
+
+	void PlayGame();	// play button functionality
+	void StopGame();	// stop button functionality
 
 	void RestartRuntimeForPlay();
 
@@ -49,7 +59,7 @@ private:
 	bool DebugMode = false;
 	unsigned LastTime; //The last time the game was updated
 	bool m_paused = true;
-
+	bool m_isPlaying = false;
 
 	void RenderDebugDraw();
 
@@ -61,6 +71,3 @@ extern CoreEngine* Engine;
 extern Config config;
 extern int WindowWidth;
 extern int WindowHeight;
-//constexpr int WindowWidth = 1600;
-//constexpr int WindowHeight = 900;
-
