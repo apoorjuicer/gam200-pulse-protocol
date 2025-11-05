@@ -18,6 +18,31 @@
 namespace Framework { class Transform; }
 
 /**
+ * @struct OBB
+ * @brief Represents an Oriented Bounding Box for rotational collision detection.
+ */
+struct OBB
+{
+    Vector2 center;        // Center of the box
+    Vector2 halfExtents;   // Half width / height
+    float rotation;        // Rotation in degrees (use Transform::angle_disp)
+    Vector2 axis[2];       // Local axes for SAT
+};
+
+
+// Converts rotation to radians whether it's already an angle (float)
+// or a 2D direction vector (Vector2) in your Transform.
+inline float ToAngleRadians(float angleRadians) {
+    return angleRadians; // already radians
+}
+
+inline float ToAngleRadians(const Vector2& dir) {
+    // If Rotation is a direction vector, derive angle with atan2(y, x)
+    // Assumes dir is normalized or at least non-zero.
+    return atan2f(dir.y, dir.x);
+}
+
+/**
  * @class CollisionManager
  * @brief Handles all collision-related computations, separated from gameplay logic.
  */
@@ -28,12 +53,6 @@ public:
     void Update(float dt) override;
 
     // --- Core AABB Utilities ---
-    /**
-     * @brief Builds an axis-aligned bounding box from an entity's transform and AABB component.
-     * @param transform  The entity's transform (position and scale).
-     * @param baseBox    The AABB component (width, height).
-     * @return AABB object with computed min/max corners.
-     */
     AABB BuildAABBFromTransform(const Framework::Transform& transform, const AABB& baseBox);
 
     // --- Collision Detection ---
@@ -46,6 +65,11 @@ public:
     bool CheckGUIButtonCollision(const glm::vec2& mouseVirtual,
         const glm::vec2& buttonPos,
         const glm::vec2& buttonSize);
+
+    // --- Rotational (OBB) Collision Support ---
+    OBB BuildOBBFromTransform(const Framework::Transform& transform, const AABB& baseBox);
+    bool CheckOBBvsOBB(const OBB& obbA, const OBB& obbB);
+    void ResolveOBBCollision(Framework::Transform& a, Framework::Transform& b, float elasticity = 0.25f);
 };
 
 #endif // COLLISION_H
