@@ -80,7 +80,7 @@
                             "y": 500.0
                         },
                         "rotation": {
-                            "x": 50.0,
+                            "x": 0.0,
                             "y": 0.0
                         },
                         "isVisible": true,
@@ -121,7 +121,7 @@
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
-                        "animationSpeed": 12.0
+                        "animationSpeed": 24.0
                     }
                 },
                 {
