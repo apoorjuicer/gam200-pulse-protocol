@@ -19,6 +19,8 @@
 
 namespace Framework
 {
+	constexpr float VIRTUAL_W = 1600.0f;
+	constexpr float VIRTUAL_H = 900.0f;
 	Transform::Transform()
 	{
 		mdl_to_ndc_xform.SetToIdentity();
@@ -31,20 +33,16 @@ namespace Framework
 	{
 		auto *g_coordinator = Coordinator::GetInstance();
 
-		// pull the current game area; fall back if not set
-		const float gw = (GLHelper::GameWidth > 0) ? (float)GLHelper::GameWidth : 1600.0f;
-		const float gh = (GLHelper::GameHeight > 0) ? (float)GLHelper::GameHeight : 900.0f;
-
 		for (auto it : entity)
 		{
 			// IMPORTANT: reference, not copy
 			auto &x = g_coordinator->GetComponent<Framework::Transform>(it);
 
 			// normalize from pixels to your game space
-			const float PnormX = x.Pos.x / gw;
-			const float PnormY = x.Pos.y / gh;
-			const float SnormX = x.Scale.x / gw;
-			const float SnormY = x.Scale.y / gh;
+			const float PnormX = x.Pos.x;
+			const float PnormY = x.Pos.y;
+			const float SnormX = x.Scale.x;
+			const float SnormY = x.Scale.y;
 
 			Matrix3x3 Scaling, Rotating, Translating;
 
@@ -59,8 +57,8 @@ namespace Framework
 			const float cosA = std::cos(x.Rotation.x * DEG_TO_RAD);
 			const float sinA = std::sin(x.Rotation.x * DEG_TO_RAD);
 			Rotating = Matrix3x3(
-				cosA, sinA, 0.0f,
-				-sinA, cosA, 0.0f,
+				cosA, -sinA, 0.0f,
+				sinA, cosA, 0.0f,
 				0.0f, 0.0f, 1.0f);
 
 			// Translate (column-major layout for your Matrix3x3)
@@ -70,7 +68,12 @@ namespace Framework
 				PnormX, PnormY, 1.0f);
 
 			// M = T * R * S
-			x.mdl_to_ndc_xform = Translating  * Scaling * Rotating;
+			Matrix3x3 ScreenToNDC(
+				2.0f / VIRTUAL_W, 0, 0,
+				0, 2.0f / VIRTUAL_H, 0,
+				0.0f, 0.0f, 1);
+
+			x.mdl_to_ndc_xform = ScreenToNDC * (Translating * Rotating * Scaling);
 
 			x.Rotation.x += x.Rotation.y * static_cast<GLfloat>(delta_time);
 			// std::cout << x.mdl_to_ndc_xform;
@@ -96,8 +99,8 @@ namespace Framework
 		out.AddMember("rotation", rotVal, alloc);
 
 		// simple types
-		//out.AddMember("angle_disp", angle_disp, alloc);
-		//out.AddMember("angle_speed", angle_speed, alloc);
+		// out.AddMember("angle_disp", angle_disp, alloc);
+		// out.AddMember("angle_speed", angle_speed, alloc);
 
 		out.AddMember("isVisible", isVisible, alloc);
 		out.AddMember("visibilityTimer", visibilityTimer, alloc);
@@ -125,9 +128,9 @@ namespace Framework
 		if (in.HasMember("rotation"))
 			Rotation.Deserialize(in["rotation"]);
 
-		//if (in.HasMember("angle_disp"))
+		// if (in.HasMember("angle_disp"))
 		//	angle_disp = in["angle_disp"].GetFloat();
-		//if (in.HasMember("angle_speed"))
+		// if (in.HasMember("angle_speed"))
 		//	angle_speed = in["angle_speed"].GetFloat();
 
 		if (in.HasMember("isVisible"))
