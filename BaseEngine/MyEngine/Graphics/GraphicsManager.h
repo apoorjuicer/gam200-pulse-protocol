@@ -13,7 +13,7 @@
  *              - Message subscription for debug combos
  *
  *              NOTE:
- *              Fonts are owned by Framework::AssetsManager. We just grab
+ *              Fonts are owned by . We just grab
  *              const FontData* and render with it. We do NOT own or free
  *              the glyph textures here.
  *

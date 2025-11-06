@@ -288,7 +288,8 @@ for (auto it : entities) {
 
     // ensure texture is ready BEFORE push
     if (re.textureID == 0 && !re.spriteName.empty()) {
-        re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+        //re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+		re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
         re.loadedSpriteName = re.spriteName;
     }
 
@@ -314,7 +315,8 @@ for (auto it : entities) {
 		// BEFORE drawing each entity
 		if (!re.spriteName.empty()) {
 			if (re.textureID == 0) {
-				re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+				//re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+				re.textureID =  mAssets.GetOrLoadTexture(re.spriteName);
 				re.loadedSpriteName = re.spriteName;
 				re.needsTextureReload = false;
 			}

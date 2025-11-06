@@ -227,10 +227,6 @@ void GraphicsManager::Update()
     // Build FPS string and heaviest system string and render it
     if (!MyEditor::IsEnabled())
     {
-        // auto& AM = Framework::AssetsManager::Instance();
-        // const Framework::FontData* debugFont = AM.GetFont("liberation-mono_48");
-
-       //FontData const* debugFont = GM_FindFont(DEBUG_FONT_KEY);
 
         if (m_debugFont)
         {
@@ -297,26 +293,24 @@ void GraphicsManager::Update()
                 << std::setprecision(1)
                 << GLHelper::fps;
 
-        //RenderText(
-        //    textShader,
-        //    fpsText.str(),
-        //    100.0f, 850.0f,
-        //    1.0f,
-        //    glm::vec3(0.5f, 0.0f, 0.0f),
-        //    m_debugFont);
-    }
+        RenderText(
+            textShader,
+            fpsText.str(),
+            100.0f, 850.0f,
+            1.0f,
+            glm::vec3(0.5f, 0.0f, 0.0f),
+            m_debugFont);
 
-    // // Controls help, anchored at right side
-    // {
-    //     int fbW = 0, fbH = 0;
-    //     glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
 
-			// team label using font patrickhand-regular_48
-			//RenderText(textShader, TEAM_LABEL, teamLabelX, teamLabelY, TEAM_LABEL_SCALE, TEAM_COLOR, m_uiFont);
-		
-		else {
-			std::cerr << "[GraphicsManager] WARNING: fonts not found!\n";
-		}
+        // // Controls help, anchored at right side
+        // {
+        //     int fbW = 0, fbH = 0;
+        //     glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
+
+        // team label using font patrickhand-regular_48
+        //RenderText(textShader, TEAM_LABEL, teamLabelX, teamLabelY, TEAM_LABEL_SCALE, TEAM_COLOR, m_uiFont);
+    }	
+
 	
 	 //// Controls help, anchored at right side
 	 //{
