@@ -386,43 +386,42 @@ namespace MyEditor
 
     glm::vec2 WorldToScreen(const Vector2& wpos, const GameViewport& vp)
     {
-        // 1) world -> NDC   with  N = diag(2/W, 2/H, 1)
-        const float sx = 2.0f / kWorldW;
-        const float sy = 2.0f / kWorldH;
-        const glm::mat3 N(sx, 0, 0,
-            0, sy, 0,
-            0, 0, 1);
-
-        // camera pan/zoom (same one used during drawing) 
+        // world -> NDC
+        const float sx = 2.0f / kWorldW, sy = 2.0f / kWorldH;
+        const glm::mat3 N(sx, 0, 0, 0, sy, 0, 0, 0, 1);
         const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gCamera);
+        const glm::vec3 ndc = Cam * (N * glm::vec3(wpos.x, wpos.y, 1.0f)); // -1..1
 
-        glm::vec3 ndc = Cam * (N * glm::vec3(wpos.x, wpos.y, 1.0f)); // -1..1
+        // NDC -> framebuffer px inside the *drawn* game rect (letterbox-aware)
+        float drawX, drawY, drawW, drawH, scale;
+        ComputeGameDrawRect(vp, drawX, drawY, drawW, drawH, scale);
 
-        // 2) NDC -> framebuffer pixels in the drawn game rectangle
-        float x = vp.x + (ndc.x * 0.5f + 0.5f) * vp.w;
-        float y = vp.y + (1.0f - (ndc.y * 0.5f + 0.5f)) * vp.h;
+        const float x = drawX + (ndc.x * 0.5f + 0.5f) * drawW;
+        const float y = drawY + (1.0f - (ndc.y * 0.5f + 0.5f)) * drawH;
         return { x, y };
     }
 
+
     Vector2 ScreenToWorld(glm::vec2 screen, const GameViewport& vp)
     {
-        // 1) framebuffer px inside the game rect -> NDC
-        float ndcX = ((screen.x - vp.x) / vp.w) * 2.0f - 1.0f;
-        float ndcY = 1.0f - ((screen.y - vp.y) / vp.h) * 2.0f;
-        glm::vec3 ndc(ndcX, ndcY, 1.0f);
+        // framebuffer px -> NDC using the *drawn* game rect
+        float drawX, drawY, drawW, drawH, scale;
+        ComputeGameDrawRect(vp, drawX, drawY, drawW, drawH, scale);
 
-        // 2) invert camera and normalization
-        const float sx = 2.0f / kWorldW;
-        const float sy = 2.0f / kWorldH;
-        const glm::mat3 N(sx, 0, 0,
-            0, sy, 0,
-            0, 0, 1);
-        const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gCamera); // 
-        glm::mat3 invAll = glm::inverse(Cam * N);
+        const float ndcX = ((screen.x - drawX) / drawW) * 2.0f - 1.0f;
+        const float ndcY = 1.0f - ((screen.y - drawY) / drawH) * 2.0f;
+        const glm::vec3 ndc(ndcX, ndcY, 1.0f);
 
-        glm::vec3 w = invAll * ndc;   // back to world units (centered at 0,0)
+        // invert camera + normalization (as you already do)
+        const float sx = 2.0f / kWorldW, sy = 2.0f / kWorldH;
+        const glm::mat3 N(sx, 0, 0, 0, sy, 0, 0, 0, 1);
+        const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gCamera);
+        const glm::mat3 invAll = glm::inverse(Cam * N);
+
+        const glm::vec3 w = invAll * ndc;
         return Vector2{ w.x, w.y };
     }
+
 
 
     // Lightweight: click anywhere inside an entity's AABB to select; drag to move.
@@ -435,43 +434,54 @@ namespace MyEditor
         ImGuiIO& io = ImGui::GetIO();
 
         // ImGui UI px  <->  Framebuffer px (handles DPI / HiDPI)
-        const float sx = io.DisplayFramebufferScale.x > 0.f ? io.DisplayFramebufferScale.x : 1.f;
-        const float sy = io.DisplayFramebufferScale.y > 0.f ? io.DisplayFramebufferScale.y : 1.f;
+        const float sx_ui = io.DisplayFramebufferScale.x > 0.f ? io.DisplayFramebufferScale.x : 1.f;
+        const float sy_ui = io.DisplayFramebufferScale.y > 0.f ? io.DisplayFramebufferScale.y : 1.f;
 
-        // Mouse in FB px and in NDC (relative to the game viewport)
-        const glm::vec2 mouseFB(io.MousePos.x * sx, io.MousePos.y * sy);
-        const float ndcX = ((mouseFB.x - vp.x) / vp.w) * 2.0f - 1.0f;
-        const float ndcY = 1.0f - ((mouseFB.y - vp.y) / vp.h) * 2.0f;
+        // --- Letterbox-aware draw rectangle (in framebuffer px) ---
+        float drawX, drawY, drawW, drawH, scale;
+        ComputeGameDrawRect(vp, drawX, drawY, drawW, drawH, scale);
+
+        // Mouse in framebuffer pixels
+        const glm::vec2 mouseFB(io.MousePos.x * sx_ui, io.MousePos.y * sy_ui);
+
+        // FB (draw rect) -> NDC
+        const float ndcX = ((mouseFB.x - drawX) / drawW) * 2.0f - 1.0f;
+        const float ndcY = 1.0f - ((mouseFB.y - drawY) / drawH) * 2.0f;
         const glm::vec3 mouseNDC(ndcX, ndcY, 1.0f);
 
         // Camera pan/zoom used by the renderer
         const glm::mat3 PanZoom = GLApp::BuildPanZoomNDC(GLApp::gCamera);
 
+        // Normalization matrix used by renderer (world −1..1)
+        const float nsx = 2.0f / kWorldW, nsy = 2.0f / kWorldH;
+        const glm::mat3 N(nsx, 0, 0, 0, nsy, 0, 0, 0, 1);
+        const glm::mat3 invAll = glm::inverse(PanZoom * N);
+
+        auto ScreenToWorld_DrawRect = [&](glm::vec2 fb)->Vector2 {
+            const float x = ((fb.x - drawX) / drawW) * 2.0f - 1.0f;
+            const float y = 1.0f - ((fb.y - drawY) / drawH) * 2.0f;
+            glm::vec3 w = invAll * glm::vec3(x, y, 1.0f);
+            return Vector2{ w.x, w.y };
+            };
+
         // Hover/pick using the same pipeline as rendering
         Entity hovered = INVALID_ENTITY;
 
-        // -----------------------------------------------
-        // Clip gizmo rendering to the game viewport rect
-        // -----------------------------------------------
+        // Clip gizmo to the drawn game rect (convert FB px -> ImGui UI px)
         ImDrawList* dl = ImGui::GetForegroundDrawList();
-        const ImVec2 clip_min_ui(vp.x / sx, vp.y / sy);
-        const ImVec2 clip_max_ui((vp.x + vp.w) / sx, (vp.y + vp.h) / sy);
-        dl->PushClipRect(clip_min_ui, clip_max_ui, true);
+        dl->PushClipRect(ImVec2(drawX / sx_ui, drawY / sy_ui),
+            ImVec2((drawX + drawW) / sx_ui, (drawY + drawH) / sy_ui),
+            true);
 
-        // We will only consider hover if the mouse is inside the game rect.
         const bool inGameRect =
-            (mouseFB.x >= vp.x && mouseFB.x <= vp.x + vp.w &&
-                mouseFB.y >= vp.y && mouseFB.y <= vp.y + vp.h);
+            (mouseFB.x >= drawX && mouseFB.x <= drawX + drawW &&
+                mouseFB.y >= drawY && mouseFB.y <= drawY + drawH);
 
         for (Entity e : coord->GetAllEntities())
         {
-            // Skip in-game GUI elements
-            if (coord->HasComponent<GUIButton>(e))
-                continue;
-
+            if (coord->HasComponent<GUIButton>(e)) continue;
             if (!coord->HasComponent<Framework::Transform>(e) ||
-                !coord->HasComponent<Framework::Renderable>(e))
-                continue;
+                !coord->HasComponent<Framework::Renderable>(e)) continue;
 
             auto& tr = coord->GetComponent<Framework::Transform>(e);
             auto& re = coord->GetComponent<Framework::Renderable>(e);
@@ -487,21 +497,21 @@ namespace MyEditor
             if (re.mdl_ref == 0) { qmin = { -1.f, -1.f }; qmax = { 1.f,  1.f }; }
             else { qmin = { -0.5f,-0.5f }; qmax = { 0.5f, 0.5f }; }
 
-            // Hit test (only if mouse is in game rect)
+            // Hit test
             if (inGameRect) {
                 glm::vec3 m = invModelToNDC * mouseNDC;
                 if (m.x >= qmin.x && m.x <= qmax.x && m.y >= qmin.y && m.y <= qmax.y)
                     hovered = e;
             }
 
-            // Draw bounds ONLY for the selected entity
+            // Draw bounds for the selected entity
             if (e == selectedEntity)
             {
                 auto toUI = [&](glm::vec2 modelP)->ImVec2 {
-                    glm::vec3 n = modelToNDC * glm::vec3(modelP, 1.0f);   // model -> NDC
-                    float x = vp.x + (n.x * 0.5f + 0.5f) * vp.w;           // NDC -> FB
-                    float y = vp.y + (1.0f - (n.y * 0.5f + 0.5f)) * vp.h;
-                    return ImVec2(x / sx, y / sy);                         // FB -> UI (ImGui)
+                    glm::vec3 n = modelToNDC * glm::vec3(modelP, 1.0f);       // model -> NDC
+                    const float x = drawX + (n.x * 0.5f + 0.5f) * drawW;       // NDC -> FB (draw rect)
+                    const float y = drawY + (1.0f - (n.y * 0.5f + 0.5f)) * drawH;
+                    return ImVec2(x / sx_ui, y / sy_ui);                       // FB -> UI
                     };
 
                 ImVec2 a = toUI({ qmin.x, qmin.y });
@@ -516,15 +526,13 @@ namespace MyEditor
             }
         }
 
-        // -----------------------------------------------
-        // Drag logic (world-space; unchanged)
-        // -----------------------------------------------
+        // Drag logic (world-space; now using draw-rect aware conversion)
         if (inGameRect && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
         {
             if (hovered != INVALID_ENTITY) {
                 selectedEntity = hovered;
                 auto& tr = coord->GetComponent<Framework::Transform>(selectedEntity);
-                Vector2 mouseWorld = ScreenToWorld(mouseFB, vp);
+                Vector2 mouseWorld = ScreenToWorld_DrawRect(mouseFB);
                 g_gizmo.dragging = true;
                 g_gizmo.active = selectedEntity;
                 g_gizmo.dragStartWorld = mouseWorld;
@@ -540,7 +548,7 @@ namespace MyEditor
             if (coord->HasComponent<Framework::Transform>(g_gizmo.active))
             {
                 auto& tr = coord->GetComponent<Framework::Transform>(g_gizmo.active);
-                Vector2 mouseWorld = ScreenToWorld(mouseFB, vp);
+                Vector2 mouseWorld = ScreenToWorld_DrawRect(mouseFB);
                 Vector2 d{ mouseWorld.x - g_gizmo.dragStartWorld.x,
                            mouseWorld.y - g_gizmo.dragStartWorld.y };
                 tr.Pos.x = g_gizmo.entityStartPos.x + d.x;
@@ -553,9 +561,9 @@ namespace MyEditor
             g_gizmo.active = INVALID_ENTITY;
         }
 
-        // Restore drawing state
         dl->PopClipRect();
     }
+
 
 
     // ===================== ProjectPanel =====================
