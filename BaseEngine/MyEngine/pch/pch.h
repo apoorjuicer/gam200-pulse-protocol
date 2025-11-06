@@ -101,8 +101,10 @@
 #include "../MyEngine/Graphics/GraphicsManager.h"
 #include "../MyEngine/Graphics/DebugDraw.h"
 #include "../MyEngine/Graphics/Transform.h"
+#include "../MyEngine/Graphics/Animation.h"
+#include "../MyEngine/Graphics/Renderable.h"
 #include "../MyEngine/Physics/collision.h"
-#include "../MyEngine/Resources/ResourceManager.h"
+#include "../MyEngine/Resources/AssetRegistry.h"
 #include "../MyEngine/Serialization/Serialization.h"
 
 // Core Engine

@@ -12,20 +12,24 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/
+/******************************************************************************/
 #include "../MyEngine/Graphics/Renderable.h"
 #include "../MyEngine/Math/math.h"
 
 namespace Framework
 {
-	void AssignTextureFromPath(Framework::Renderable& t)
+	void AssignTextureFromPath(Framework::Renderable &t)
 	{
 		if (t.textureID == 0 && !t.spriteName.empty())
-			t.textureID = Framework::AssetsManager::GetOrLoad(t.spriteName);
+		{
+			// t.textureID = Framework::GraphicsManager::GetOrLoad(t.spriteName);
+			//  t.textureID = mAssets.getGraphics().GetOrLoad(t.spriteName);
+			t.textureID = mAssets.GetOrLoadTexture(t.spriteName);
+		}
 	}
 
 	/*Serialization && Deserialization */
-	void Renderable::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
+	void Renderable::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
 	{
 		using namespace rapidjson;
 		out.SetObject();
@@ -48,7 +52,7 @@ namespace Framework
 		out.AddMember("tintColor", colorVal, alloc);
 	}
 
-	void Renderable::Deserialize(const rapidjson::Value& in)
+	void Renderable::Deserialize(const rapidjson::Value &in)
 	{
 		if (!in.IsObject())
 		{
@@ -71,11 +75,15 @@ namespace Framework
 		/* color deserialization part */
 		if (in.HasMember("tintColor") && in["tintColor"].IsObject())
 		{
-			auto& col = in["tintColor"];
-			if (col.HasMember("r")) tintColor.r = col["r"].GetFloat();
-			if (col.HasMember("g")) tintColor.g = col["g"].GetFloat();
-			if (col.HasMember("b")) tintColor.b = col["b"].GetFloat();
-			if (col.HasMember("a")) tintColor.a = col["a"].GetFloat();
+			auto &col = in["tintColor"];
+			if (col.HasMember("r"))
+				tintColor.r = col["r"].GetFloat();
+			if (col.HasMember("g"))
+				tintColor.g = col["g"].GetFloat();
+			if (col.HasMember("b"))
+				tintColor.b = col["b"].GetFloat();
+			if (col.HasMember("a"))
+				tintColor.a = col["a"].GetFloat();
 		}
 	}
 

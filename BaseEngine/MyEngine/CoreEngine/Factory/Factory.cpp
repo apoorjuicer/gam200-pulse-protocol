@@ -13,7 +13,7 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const& path)
 	auto* g_coordinator = Coordinator::GetInstance();
 
 	// path iis the name of the prefab you want to create
-	//std::string filePath = "../../MyEngine/JSON/test.json";//AssetManager.mPrefabMap[path];
+	//std::string filePath = "../../MyEngine/JSON/test.json";//AssetsManager.mPrefabMap[path];
 	//std::string savefilePath = "../../MyEngine/JSON/test2.json";
 
 	std::ifstream ifs(path);

@@ -1,7 +1,7 @@
 {
     "config": {
-        "WindowWidth": 1600.0,
-        "WindowHeight": 900.0,
+        "WindowWidth": 1600,
+        "WindowHeight": 900,
         "ConfigPath": "../../MyEngine/JSON/config.json"
     }
 }

@@ -14,15 +14,19 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/
+/******************************************************************************/
 
-
-#include <windows.h>   // for OutputDebugString, etc.
+#include <windows.h> // for OutputDebugString, etc.
 #include "pch/pch.h"
 #include "graphics/stb_image.h"
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "../TestCases/TestCase.h"
+// #include "glapp.h"
+#include "../MyEngine/Resources/AssetRegistry.h"
+#include "../CoreEngine/Asset/AssetsManager.h"
+#include "../MyEngine/Serialization/Serialization.h"
+
 #include "../MyEngine/Components/DisplayName.h"
 #include "../MyEngine/Components/EntityType.h"
 #pragma comment(lib, "winmm.lib")
@@ -30,56 +34,100 @@
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
 Config config;
+AssetsManager mAssets;
+
 int WindowWidth;
 int WindowHeight;
 
-//TestCase Test;
+// TestCase Test;
 
 void APIENTRY glDebugOutput(GLenum source,
-	GLenum type,
-	unsigned int id,
-	GLenum severity,
-	GLsizei,
-	const char* message,
-	const void* userParam)
+							GLenum type,
+							unsigned int id,
+							GLenum severity,
+							GLsizei,
+							const char *message,
+							const void *userParam)
 {
 	(void)userParam;
 	// ignore non-significant error/warning codes
-	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+	if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
+		return;
 
 	std::cout << "---------------" << std::endl;
 	std::cout << "Debug message (" << id << "): " << message << std::endl;
 
 	switch (source)
 	{
-	case GL_DEBUG_SOURCE_API:             std::cout << "Source: API"; break;
-	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   std::cout << "Source: Window System"; break;
-	case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cout << "Source: Shader Compiler"; break;
-	case GL_DEBUG_SOURCE_THIRD_PARTY:     std::cout << "Source: Third Party"; break;
-	case GL_DEBUG_SOURCE_APPLICATION:     std::cout << "Source: Application"; break;
-	case GL_DEBUG_SOURCE_OTHER:           std::cout << "Source: Other"; break;
-	} std::cout << std::endl;
+	case GL_DEBUG_SOURCE_API:
+		std::cout << "Source: API";
+		break;
+	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+		std::cout << "Source: Window System";
+		break;
+	case GL_DEBUG_SOURCE_SHADER_COMPILER:
+		std::cout << "Source: Shader Compiler";
+		break;
+	case GL_DEBUG_SOURCE_THIRD_PARTY:
+		std::cout << "Source: Third Party";
+		break;
+	case GL_DEBUG_SOURCE_APPLICATION:
+		std::cout << "Source: Application";
+		break;
+	case GL_DEBUG_SOURCE_OTHER:
+		std::cout << "Source: Other";
+		break;
+	}
+	std::cout << std::endl;
 
 	switch (type)
 	{
-	case GL_DEBUG_TYPE_ERROR:               std::cout << "Type: Error"; break;
-	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: std::cout << "Type: Deprecated Behaviour"; break;
-	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  std::cout << "Type: Undefined Behaviour"; break;
-	case GL_DEBUG_TYPE_PORTABILITY:         std::cout << "Type: Portability"; break;
-	case GL_DEBUG_TYPE_PERFORMANCE:         std::cout << "Type: Performance"; break;
-	case GL_DEBUG_TYPE_MARKER:              std::cout << "Type: Marker"; break;
-	case GL_DEBUG_TYPE_PUSH_GROUP:          std::cout << "Type: Push Group"; break;
-	case GL_DEBUG_TYPE_POP_GROUP:           std::cout << "Type: Pop Group"; break;
-	case GL_DEBUG_TYPE_OTHER:               std::cout << "Type: Other"; break;
-	} std::cout << std::endl;
+	case GL_DEBUG_TYPE_ERROR:
+		std::cout << "Type: Error";
+		break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+		std::cout << "Type: Deprecated Behaviour";
+		break;
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+		std::cout << "Type: Undefined Behaviour";
+		break;
+	case GL_DEBUG_TYPE_PORTABILITY:
+		std::cout << "Type: Portability";
+		break;
+	case GL_DEBUG_TYPE_PERFORMANCE:
+		std::cout << "Type: Performance";
+		break;
+	case GL_DEBUG_TYPE_MARKER:
+		std::cout << "Type: Marker";
+		break;
+	case GL_DEBUG_TYPE_PUSH_GROUP:
+		std::cout << "Type: Push Group";
+		break;
+	case GL_DEBUG_TYPE_POP_GROUP:
+		std::cout << "Type: Pop Group";
+		break;
+	case GL_DEBUG_TYPE_OTHER:
+		std::cout << "Type: Other";
+		break;
+	}
+	std::cout << std::endl;
 
 	switch (severity)
 	{
-	case GL_DEBUG_SEVERITY_HIGH:         std::cout << "Severity: high"; break;
-	case GL_DEBUG_SEVERITY_MEDIUM:       std::cout << "Severity: medium"; break;
-	case GL_DEBUG_SEVERITY_LOW:          std::cout << "Severity: low"; break;
-	case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
-	} std::cout << std::endl;
+	case GL_DEBUG_SEVERITY_HIGH:
+		std::cout << "Severity: high";
+		break;
+	case GL_DEBUG_SEVERITY_MEDIUM:
+		std::cout << "Severity: medium";
+		break;
+	case GL_DEBUG_SEVERITY_LOW:
+		std::cout << "Severity: low";
+		break;
+	case GL_DEBUG_SEVERITY_NOTIFICATION:
+		std::cout << "Severity: notification";
+		break;
+	}
+	std::cout << std::endl;
 	std::cout << std::endl;
 }
 
@@ -87,6 +135,7 @@ CoreEngine::CoreEngine() : window(nullptr), DebugMode(false)
 {
 	LastTime = 0;
 	GameRunning = false;
+	// mAssets.Initialize();
 }
 
 CoreEngine::~CoreEngine()
@@ -101,10 +150,12 @@ CoreEngine::~CoreEngine()
 void CoreEngine::Init()
 {
 	/*Config load window width and height*/
-	if (!LoadConfig(config, config.GetConfigPath())) {
+	if (!LoadConfig(config, config.GetConfigPath()))
+	{
 		std::cerr << "Failed to load config!\n";
 	}
-	else {
+	else
+	{
 		std::cout << "Load config From FilePath: " << std::filesystem::absolute(config.GetConfigPath()) << "\n";
 	}
 
@@ -114,13 +165,49 @@ void CoreEngine::Init()
 	std::cout << "WindowWidth is: " << WindowWidth << "\n";
 	std::cout << "WindowHeight is: " << WindowHeight << "\n";
 
-	if (!glfwInit()) {
+	///*saving config data*/ //tested saving works
+	// std::string newConfigPath = "../../MyEngine/JSON/config2.json";
+	// config.SetWindowWidth(800);
+	// config.SetWindowHeight(600);
+	// std::cout << "set WindowWidth is: " << config.GetWindowWidth() << "\n";
+	// std::cout << "set WindowHeight is: " << config.GetWindowHeight() << "\n";
+	// if (!SaveConfig(config, newConfigPath))
+	//{
+	//	std::cerr << "Failed to load config!\n";
+	// }
+	// else
+	//{
+	//	std::cout << "save config to FilePath: " << std::filesystem::absolute(newConfigPath) << "\n";
+	// }
+
+	if (!glfwInit())
+	{
 		spdlog::error("Failed to initialize GLFW");
 		return;
 	}
 
+	// loading metadata for audio,texture,font into
+	// ASset reg's container each respectively
+	// ar.LoadAudioManifest();
+	// ar.LoadTextureManifest();
+	// ar.LoadFontManifest();
+	// ar.LoadSceneManifest();
+
+	unsigned int version = 0;
+	FMOD::System *system = nullptr;
+
+	FMOD::System_Create(&system);
+	system->getVersion(&version);
+
+	std::cout << "FMOD version: "
+			  << (version >> 16) << "."
+			  << ((version >> 8) & 0xFF) << "."
+			  << (version & 0xFF) << std::endl;
+
+	system->release();
+
 	//// --- Logging Setup ---
-	//try {
+	// try {
 	//	auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 	//	auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
 	//		"logs/engine.log", 1024 * 1024 * 5, 3);
@@ -135,7 +222,7 @@ void CoreEngine::Init()
 
 	//	spdlog::info("=== Engine Logging Initialized ===");
 	//}
-	//catch (const spdlog::spdlog_ex& ex) {
+	// catch (const spdlog::spdlog_ex& ex) {
 	//	std::cerr << "Log init failed: " << ex.what() << std::endl;
 	//}
 	//// ----------------------
@@ -146,7 +233,8 @@ void CoreEngine::Init()
 
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 	window = glfwCreateWindow(WindowWidth, WindowHeight, WindowTitle, nullptr, nullptr);
-	if (!window) {
+	if (!window)
+	{
 		std::cerr << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return;
@@ -155,20 +243,22 @@ void CoreEngine::Init()
 	glfwMakeContextCurrent(window);
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwSetFramebufferSizeCallback(window,
-		[](GLFWwindow*, int fbw, int fbh)
-		{
-			if (fbw <= 0 || fbh <= 0) return;
+								   [](GLFWwindow *, int fbw, int fbh)
+								   {
+									   if (fbw <= 0 || fbh <= 0)
+										   return;
 
-			// Letterboxed viewport + scale
-			GLApp::ComputeLetterbox(fbw, fbh);
+									   // Letterboxed viewport + scale
+									   GLApp::ComputeLetterbox(fbw, fbh);
 
-			WindowWidth = fbw;
-			WindowHeight = fbh;
+									   WindowWidth = fbw;
+									   WindowHeight = fbh;
 
-			if (auto g = Coordinator::GetInstance()->GetSystem<GraphicsManager>()) {
-				g->OnResize(fbw, fbh);
-			}
-		});
+									   if (auto g = Coordinator::GetInstance()->GetSystem<GraphicsManager>())
+									   {
+										   g->OnResize(fbw, fbh);
+									   }
+								   });
 
 	int fbw = 0, fbh = 0;
 	glfwGetFramebufferSize(window, &fbw, &fbh);
@@ -181,8 +271,9 @@ void CoreEngine::Init()
 
 	// Initialize DebugDraw AFTER glewInit()
 	DebugDraw::Init();
-	
-	int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+
+	int flags;
+	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
 	{
 		glEnable(GL_DEBUG_OUTPUT);
@@ -192,17 +283,27 @@ void CoreEngine::Init()
 	}
 
 	// Create systems AFTER GL is ready
-
+	mAssets.Initialize(); //loaded registry inside
+	//std::cout << mAssets.getRegistry().FindTexture("hero") << "\n";
 	// Singleton for Engine, but once game use EventBus/messaging system
-
+	std::cout << "path for bgm : " << mAssets.getRegistry().FindAudio("bgm")->path << "\n";
 	// PLEASE CALL THIS EVERY SINGLE U WANT 2 USE SINGLETON
 	auto g_coordinator = Coordinator::GetInstance();
 
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
 	auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
-	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
-	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
+	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();		//default cons
+	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>(); //default cons
 	auto g_CollisionManager = g_coordinator->GetSystem<CollisionManager>();
+
+	g_audioSystem->SetRegistry(&mAssets.getRegistry());
+	g_graphicsSystem->SetRegistry(&mAssets.getRegistry());
+
+	mAssets.SetAudioManager(g_audioSystem.get());
+	mAssets.SetGraphicsManager(g_graphicsSystem.get());
+
+	//g_graphicsSystem->GM_FindFont("PatrickHand_font");
+	//g_graphicsSystem->GM_FindFont("liberation_font");
 
 	MessageManager::GetInstance();
 	std::cout << "[MessageManager] Initialized" << std::endl;
@@ -214,36 +315,39 @@ void CoreEngine::Init()
 	g_audioSystem->Initialize();
 	g_coordinator->InitializeAllSystems();
 
+	g_graphicsSystem->GM_FindFont("PatrickHand_font");
+	g_graphicsSystem->GM_FindFont("liberation_font");
+
 	ProfilingManager::GetInstance()->SetResetInterval(60.0);
 	ProfilingManager::GetInstance()->SetDisplayUpdateInterval(1.0);
 
-	//GLuint barTexture = LoadTexture("../../MyEngine/Assets/Sprites/perfect.png");
-	//if (barTexture > 0) {
+	// GLuint barTexture = LoadTexture("../../MyEngine/Assets/Sprites/perfect.png");
+	// if (barTexture > 0) {
 	//	Entity box2 = g_inputSystem->GetFeedbackEntity2();  // Use getter
 	//	auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(box2);
 	//	transform2.textureID = barTexture;
 	//	std::cout << "Texture loaded and assigned to box 2: " << barTexture << std::endl;
-	//}
+	// }
 
 	GameRunning = true;
 
-	//std::string filePath = "../../MyEngine/JSON/test.json";//AssetManager.mPrefabMap[path];
-	//Factory factory;
-	//SceneManager SM;
-	//factory.CreateEntityFromJson(filePath);
+	// std::string filePath = "../../MyEngine/JSON/test.json";//AssetManager.mPrefabMap[path];
+	// Factory factory;
+	// SceneManager SM;
+	// factory.CreateEntityFromJson(filePath);
 
-	//std::string filePath2 = "../../MyEngine/JSON/test2.json";
-	//Entity entity = factory.DefaultObj();
-	//LogicComponent l;
-	//l.ScriptName = "IT WORKS!!!!";
-	//g_coordinator->AddComponent(entity, l);
-	//factory.SaveEntityToJson(entity, filePath2);
+	// std::string filePath2 = "../../MyEngine/JSON/test2.json";
+	// Entity entity = factory.DefaultObj();
+	// LogicComponent l;
+	// l.ScriptName = "IT WORKS!!!!";
+	// g_coordinator->AddComponent(entity, l);
+	// factory.SaveEntityToJson(entity, filePath2);
 
-	//std::string filePath3 = "../../MyEngine/JSON/MainMenu.json";
-	//SM.LoadSceneFromJson(filePath3);
-	//SM.SaveCurrentScene();
+	// std::string filePath3 = "../../MyEngine/JSON/MainMenu.json";
+	// SM.LoadSceneFromJson(filePath3);
+	// SM.SaveCurrentScene();
 
-	//Test.Init();
+	// Test.Init();
 }
 
 void CoreEngine::Setup()
@@ -294,11 +398,9 @@ void CoreEngine::Setup()
 	rhythmSig.set(g_coordinator->GetComponentType<Framework::Animation>());
 	g_coordinator->SetSystemSignature<RhythmGameplayInput>(rhythmSig);
 
-
-
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
-	graphicsSig.set(g_coordinator->GetComponentType<Framework::Renderable>());  // <-- needs Renderable
+	graphicsSig.set(g_coordinator->GetComponentType<Framework::Renderable>()); // <-- needs Renderable
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Animation>());  // <-- needs Animation
 	graphicsSig.set(g_coordinator->GetComponentType<LayerTag>());
 	g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
@@ -330,7 +432,8 @@ void CoreEngine::Update(float dt)
 	auto profiler = ProfilingManager::GetInstance();
 
 	profiler->StartSystem("Scene System");
-	if (g_sceneSystem) g_sceneSystem->Update(dt);
+	if (g_sceneSystem)
+		g_sceneSystem->Update(dt);
 	profiler->EndSystem("Scene System");
 
 	profiler->StartSystem("LogicSystem");
@@ -338,25 +441,29 @@ void CoreEngine::Update(float dt)
 	profiler->EndSystem("LogicSystem");
 
 	profiler->StartSystem("Input System");
-	if (g_inputSystem) g_inputSystem->Update(dt);
+	if (g_inputSystem)
+		g_inputSystem->Update(dt);
 	profiler->EndSystem("Input System");
-	
+
 	profiler->StartSystem("RhythmGameplayInput");
-	if (g_rhythmSystem) g_rhythmSystem->Update(dt);
+	if (g_rhythmSystem)
+		g_rhythmSystem->Update(dt);
 	profiler->EndSystem("RhythmGameplayInput");
 
 	profiler->StartSystem("Graphics System");
-	if (g_graphicsSystem) g_graphicsSystem->Update();
+	if (g_graphicsSystem)
+		g_graphicsSystem->Update();
 	profiler->EndSystem("Graphics System");
 
 	profiler->StartSystem("Audio System");
-	if (g_audioSystem) g_audioSystem->Update();
+	if (g_audioSystem)
+		g_audioSystem->Update();
 	profiler->EndSystem("Audio System");
 
 	profiler->StartSystem("Collision System");
 	// If collision is in UpdateAllSystems, remove this
 	profiler->EndSystem("Collision System");
-	//Test.Update(dt);
+	// Test.Update(dt);
 
 	// Always process engine / message stuff
 	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
@@ -366,7 +473,8 @@ void CoreEngine::Update(float dt)
 		g_graphicsSystem->Update();
 
 	// 2) If paused, stop here. no gameplay / input / scene logic
-	if (m_paused) {
+	if (m_paused)
+	{
 		return;
 	}
 
@@ -375,16 +483,23 @@ void CoreEngine::Update(float dt)
 	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);	
 }
 
-
 void CoreEngine::GameLoop()
 {
 	LastTime = timeGetTime();
 	auto profiler = ProfilingManager::GetInstance();
 
+	// application loop
+	static bool keystateP = false;
+	static bool PKeyWasPressed = false;
 	while (!glfwWindowShouldClose(window) && GameRunning)
 	{
+		// Get the current time in milliseconds
 		unsigned currenttime = timeGetTime();
+
+		// Convert it to the time passed since the last frame (in seconds)
 		float dt = (currenttime - LastTime) / 1000.0f;
+
+		// Update the when the last update started
 		LastTime = currenttime;
 
 		// Don't start frame here
@@ -392,20 +507,30 @@ void CoreEngine::GameLoop()
 
 		// Start profiling ONLY for ECS systems
 		profiler->StartFrame();
-		Update(dt);  // This contains all your ECS system profiling
+		Update(dt); // This contains all your ECS system profiling
 		profiler->EndFrame();
 
 #ifdef ENABLE_EDITOR
 		MyEditor::NewFrame();
 #endif
 
-		// These are NOT profiled (outside StartFrame/EndFrame)
+		//  4. game update(NOT A WHILE LOOP) gsm
+
+		//  5. game rendering
+		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+
+		profiler->EndFrame();
+
+		//  6. ImGui rendering
 #ifdef ENABLE_EDITOR
 		MyEditor::Draw();
 		MyEditor::Render();
 #endif
 
 		RenderDebugDraw();
+
+		// 7. Swap Buffer(like two window)
 		glfwSwapBuffers(window);
 
 		profiler->Reset();
@@ -421,10 +546,14 @@ void CoreEngine::Exit()
 	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 
-	if (g_inputSystem) g_inputSystem->Shutdown();
-	if (g_rhythmSystem) g_rhythmSystem->Shutdown();
-	if (g_audioSystem) g_audioSystem->Shutdown();
-	if (g_graphicsSystem) g_graphicsSystem->Shutdown();
+	if (g_inputSystem)
+		g_inputSystem->Shutdown();
+	if (g_rhythmSystem)
+		g_rhythmSystem->Shutdown();
+	if (g_audioSystem)
+		g_audioSystem->Shutdown();
+	if (g_graphicsSystem)
+		g_graphicsSystem->Shutdown();
 
 	g_coordinator->ExitAllSystems();
 
@@ -439,79 +568,92 @@ void CoreEngine::Exit()
 	glfwTerminate();
 }
 
-void CoreEngine::RenderDebugDraw() {
+void CoreEngine::RenderDebugDraw()
+{
 	auto g_coordinator = Coordinator::GetInstance();
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
-	if (!g_inputSystem) return;
+	if (!g_inputSystem)
+		return;
 
 	const float aspect = (WindowHeight > 0)
-		? static_cast<float>(WindowWidth) / static_cast<float>(WindowHeight)
-		: (16.0f / 9.0f);
+							 ? static_cast<float>(WindowWidth) / static_cast<float>(WindowHeight)
+							 : (16.0f / 9.0f);
 
 	// reference world height
 	const float worldH = 900.0f;
 	const float worldW = worldH * aspect;
 
 	glm::mat4 projection = glm::ortho(-worldW * 0.5f, worldW * 0.5f,
-		-worldH * 0.5f, worldH * 0.5f);
+									  -worldH * 0.5f, worldH * 0.5f);
 	DebugDraw::Begin(projection);
 
 	// F1 - DrawRect
-	if (g_inputSystem->isDebugRectsEnabled()) {
-		for (auto& entity : g_inputSystem->DebugEntities) {
-			auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
-			glm::vec2 center = { transform.Pos.x, transform.Pos.y };
+	if (g_inputSystem->isDebugRectsEnabled())
+	{
+		for (auto &entity : g_inputSystem->DebugEntities)
+		{
+			auto &transform = g_coordinator->GetComponent<Framework::Transform>(entity);
+			glm::vec2 center = {transform.Pos.x, transform.Pos.y};
 			glm::vec2 half = 0.5f * glm::vec2(transform.Scale.x, transform.Scale.y);
 			glm::vec2 min = center - half;
 			glm::vec2 max = center + half;
 
-			DebugDraw::DrawRect(min, max, { 1.0f, 1.0f, 0.0f });  // Yellow
+			DebugDraw::DrawRect(min, max, {1.0f, 1.0f, 0.0f}); // Yellow
 		}
 	}
 
 	// F2 - DrawLine
-	if (g_inputSystem->isDebugLinesEnabled()) {
-		DebugDraw::DrawLine({ -800.0f, -450.0f }, { 800.0f, 450.0f }, { 1.0f, 0.0f, 0.0f });
-		DebugDraw::DrawLine({ 800.0f, -450.0f }, { -800.0f, 450.0f }, { 0.0f, 1.0f, 0.0f });
-		DebugDraw::DrawLine({ 0.0f, -450.0f }, { 0.0f, 450.0f }, { 0.0f, 0.0f, 1.0f });
-		DebugDraw::DrawLine({ -800.0f, 0.0f }, { 800.0f, 0.0f }, { 1.0f, 1.0f, 0.0f });
+	if (g_inputSystem->isDebugLinesEnabled())
+	{
+		DebugDraw::DrawLine({-800.0f, -450.0f}, {800.0f, 450.0f}, {1.0f, 0.0f, 0.0f});
+		DebugDraw::DrawLine({800.0f, -450.0f}, {-800.0f, 450.0f}, {0.0f, 1.0f, 0.0f});
+		DebugDraw::DrawLine({0.0f, -450.0f}, {0.0f, 450.0f}, {0.0f, 0.0f, 1.0f});
+		DebugDraw::DrawLine({-800.0f, 0.0f}, {800.0f, 0.0f}, {1.0f, 1.0f, 0.0f});
 	}
 
 	// F3 - DrawCircle
-	if (g_inputSystem->isDebugCirclesEnabled()) {
-		DebugDraw::DrawCircle({ 0.0, 0.0f }, 200.0f, { 1.0f, 0.0f, 1.0f }, 32);
-		DebugDraw::DrawCircle({ 400.0f, 300.0f }, 100.0f, { 0.0f, 1.0f, 1.0f }, 24);
+	if (g_inputSystem->isDebugCirclesEnabled())
+	{
+		DebugDraw::DrawCircle({0.0, 0.0f}, 200.0f, {1.0f, 0.0f, 1.0f}, 32);
+		DebugDraw::DrawCircle({400.0f, 300.0f}, 100.0f, {0.0f, 1.0f, 1.0f}, 24);
 	}
 
 	// F4 - DrawCircleFilled
-	if (g_inputSystem->isDebugCirclesFilledEnabled()) {
-		DebugDraw::DrawCircleFilled({ 100.0f, 300.0f }, 80.0f, { 1.0f, 0.5f, 0.0f }, 24);
-		DebugDraw::DrawCircleFilled({ 100.0f, -300.0f }, 60.0f, { 0.5f, 0.0f, 1.0f }, 16);
+	if (g_inputSystem->isDebugCirclesFilledEnabled())
+	{
+		DebugDraw::DrawCircleFilled({100.0f, 300.0f}, 80.0f, {1.0f, 0.5f, 0.0f}, 24);
+		DebugDraw::DrawCircleFilled({100.0f, -300.0f}, 60.0f, {0.5f, 0.0f, 1.0f}, 16);
 	}
 
 	// F5 - DrawPoint
-	if (g_inputSystem->isDebugPointsEnabled()) {
-		for (float x = -800.0f; x < 800.0f; x += 200.0f) {
-			for (float y = -450.0f; y < 450.0f; y += 200.0f) {
-				DebugDraw::DrawPoint({ x, y }, 5.0f, { 1.0f, 1.0f, 0.0f });
+	if (g_inputSystem->isDebugPointsEnabled())
+	{
+		for (float x = -800.0f; x < 800.0f; x += 200.0f)
+		{
+			for (float y = -450.0f; y < 450.0f; y += 200.0f)
+			{
+				DebugDraw::DrawPoint({x, y}, 5.0f, {1.0f, 1.0f, 0.0f});
 			}
 		}
 	}
 
 	// F6 - Grid
-	if (g_inputSystem->isDebugGridEnabled()) {
-		for (float x = -800.0f; x < 800.0f; x += 100.0f) {
-			DebugDraw::DrawLine({ x, -450.0f }, { x, 450.0f }, { 0.3f, 0.3f, 0.3f });
+	if (g_inputSystem->isDebugGridEnabled())
+	{
+		for (float x = -800.0f; x < 800.0f; x += 100.0f)
+		{
+			DebugDraw::DrawLine({x, -450.0f}, {x, 450.0f}, {0.3f, 0.3f, 0.3f});
 		}
-		for (float y = -450.0f; y < 450.0f; y += 100.0f) {
-			DebugDraw::DrawLine({ -800.0f, y }, { 800.0f, y }, { 0.3f, 0.3f, 0.3f });
+		for (float y = -450.0f; y < 450.0f; y += 100.0f)
+		{
+			DebugDraw::DrawLine({-800.0f, y}, {800.0f, y}, {0.3f, 0.3f, 0.3f});
 		}
 	}
 
 	DebugDraw::End();
 }
 
-//void CoreEngine::SetPaused(bool paused)
+// void CoreEngine::SetPaused(bool paused)
 //{
 //	if (m_paused == paused) return;
 //	m_paused = paused;
@@ -520,36 +662,40 @@ void CoreEngine::RenderDebugDraw() {
 //	if (auto audio = Coordinator::GetInstance()->GetSystem<AudioManager>()) {
 //		audio->SetPaused(paused);
 //	}
-//}
+// }
 //
-//void CoreEngine::TogglePaused()
+// void CoreEngine::TogglePaused()
 //{
 //	SetPaused(!m_paused);
-//}
+// }
 
-void CoreEngine::PlayGame() {
+void CoreEngine::PlayGame()
+{
 	m_isPlaying = true;
 
 	auto coord = Coordinator::GetInstance();
 
 	// ALWAYS update the original scene path when Play is pressed
-	if (auto sceneMgr = coord->GetSystem<SceneManager>()) {
+	if (auto sceneMgr = coord->GetSystem<SceneManager>())
+	{
 		std::string sceneName = sceneMgr->GrabCurrentScene();
 
 		// Remove "Saved" prefix if it exists
-		if (sceneName.find("Saved") == 0) {
+		if (sceneName.find("Saved") == 0)
+		{
 			sceneName = sceneName.substr(5);
 		}
 		// Remove "Scene" suffix if it exists
 		size_t scenePos = sceneName.find("Scene");
-		if (scenePos != std::string::npos) {
+		if (scenePos != std::string::npos)
+		{
 			sceneName = sceneName.substr(0, scenePos);
 		}
 
 		// ALWAYS update this path, even if already set
 		m_originalScenePath = "../../MyEngine/JSON/" + sceneName + ".json";
 
-		std::cout << "[CoreEngine] Original scene path: " << m_originalScenePath << std::endl;  // DEBUG
+		std::cout << "[CoreEngine] Original scene path: " << m_originalScenePath << std::endl; // DEBUG
 	}
 
 	if (auto audio = coord->GetSystem<AudioManager>()) {
@@ -557,11 +703,14 @@ void CoreEngine::PlayGame() {
 	}
 
 	// Call Init() on all scripts
-	if (auto logicSys = coord->GetSystem<LogicSystem>()) {
-		for (auto const& entity : logicSys->EntityMember) {
-			auto& scriptname = coord->GetComponent<LogicComponent>(entity);
+	if (auto logicSys = coord->GetSystem<LogicSystem>())
+	{
+		for (auto const &entity : logicSys->EntityMember)
+		{
+			auto &scriptname = coord->GetComponent<LogicComponent>(entity);
 			auto script = logicSys->GrabScript(scriptname.ScriptName);
-			if (script) {
+			if (script)
+			{
 				script->Init(entity);
 			}
 		}
@@ -575,13 +724,16 @@ void CoreEngine::StopGame()
 	auto coord = Coordinator::GetInstance();
 
 	// pause the bg music
-	if (auto audio = coord->GetSystem<AudioManager>()) {
-		audio->PauseBGM();
+	if (auto audio = coord->GetSystem<AudioManager>())
+	{
+		audio->SetPaused(true);
 	}
 
 	// reloads original scene to reset all entities to initial starting position
-	if (auto sceneMgr = coord->GetSystem<SceneManager>()) {
-		if (!m_originalScenePath.empty()) {
+	if (auto sceneMgr = coord->GetSystem<SceneManager>())
+	{
+		if (!m_originalScenePath.empty())
+		{
 			sceneMgr->LoadSceneFromJson(m_originalScenePath);
 		}
 	}
