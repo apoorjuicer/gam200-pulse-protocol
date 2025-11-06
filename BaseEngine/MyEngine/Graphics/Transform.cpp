@@ -19,6 +19,8 @@
 
 namespace Framework
 {
+	constexpr float VIRTUAL_W = 1600.0f;
+	constexpr float VIRTUAL_H = 900.0f;
 	Transform::Transform()
 	{
 		mdl_to_ndc_xform.SetToIdentity();
@@ -41,10 +43,10 @@ namespace Framework
 			auto &x = g_coordinator->GetComponent<Framework::Transform>(it);
 
 			// normalize from pixels to your game space
-			const float PnormX = x.Pos.x / gw;
-			const float PnormY = x.Pos.y / gh;
-			const float SnormX = x.Scale.x / gw;
-			const float SnormY = x.Scale.y / gh;
+			const float PnormX = x.Pos.x;
+			const float PnormY = x.Pos.y;
+			const float SnormX = x.Scale.x;
+			const float SnormY = x.Scale.y;
 
 			Matrix3x3 Scaling, Rotating, Translating;
 
@@ -59,8 +61,8 @@ namespace Framework
 			const float cosA = std::cos(x.Rotation.x * DEG_TO_RAD);
 			const float sinA = std::sin(x.Rotation.x * DEG_TO_RAD);
 			Rotating = Matrix3x3(
-				cosA, sinA, 0.0f,
-				-sinA, cosA, 0.0f,
+				cosA, -sinA, 0.0f,
+				sinA, cosA, 0.0f,
 				0.0f, 0.0f, 1.0f);
 
 			// Translate (column-major layout for your Matrix3x3)
@@ -70,7 +72,12 @@ namespace Framework
 				PnormX, PnormY, 1.0f);
 
 			// M = T * R * S
-			x.mdl_to_ndc_xform = Translating * Rotating * Scaling;
+			Matrix3x3 ScreenToNDC(
+				2.0f / VIRTUAL_W, 0, 0,
+				0, 2.0f / VIRTUAL_H, 0,
+				0.0f, 0.0f, 1);
+
+			x.mdl_to_ndc_xform = ScreenToNDC * (Translating * Rotating * Scaling);
 
 			x.Rotation.x += x.Rotation.y * static_cast<GLfloat>(delta_time);
 			// std::cout << x.mdl_to_ndc_xform;
