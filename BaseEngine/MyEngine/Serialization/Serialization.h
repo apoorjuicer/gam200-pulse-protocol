@@ -52,9 +52,3 @@ public:
 
 bool SaveConfig(Config const &cfg, std::string const &path);
 bool LoadConfig(Config &cfg, std::string const &path);
-
-bool SaveEntity(Entity e, Coordinator *g, std::string const &path);
-bool LoadEntity(Entity e, Coordinator *g, std::string const &path);
-
-// bool SaveScene(const std::vector<Entity>& entities, Coordinator* g, const std::string& path);
-// bool LoadScene(std::vector<Entity>& entities, Coordinator* g, const std::string& path);

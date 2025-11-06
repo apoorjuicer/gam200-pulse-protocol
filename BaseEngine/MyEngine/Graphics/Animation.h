@@ -36,7 +36,7 @@ namespace Framework
 		int totalFrames = 1;	  // Total frames in the sprite sheet
 		int columns = 1;		  // Columns in the sprite sheet
 		int rows = 1;			  // Rows in the sprite sheet
-		float animationSpeed = 2.f;
+		float animationSpeed = 2.0f;
 		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
 		void Deserialize(const rapidjson::Value& in);
 		static inline bool IsSingleImage(const Framework::Animation& a);

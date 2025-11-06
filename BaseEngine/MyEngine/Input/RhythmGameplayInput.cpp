@@ -293,10 +293,6 @@ void RhythmGameplayInput::processRhythmTiming(int key) {
 
     std::string feedback = getTimingFeedback();
 
-    if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
-        audio->PlaySound("beat_placeholder", 0.8f);
-    }
-
     bool comboCompleted = false;
     std::string completedComboName = "";
 
@@ -310,6 +306,11 @@ void RhythmGameplayInput::processRhythmTiming(int key) {
     }
 
     if (comboCompleted) {
+        // plays combo sucess audio file instead of regular beat sound
+        if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
+            audio->PlaySound("combo_success", 0.9f);
+        }
+
         std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << keyToString(key) << " | Combo: " << completedComboName << std::endl;
 
         auto* msgMgr = MessageManager::GetInstance();
@@ -317,6 +318,11 @@ void RhythmGameplayInput::processRhythmTiming(int key) {
         msgMgr->Publish(msg);
     }
     else {
+        // plays regular beat sfx for regular beat
+        if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
+            audio->PlaySound("beat_placeholder", 0.8f);
+        }
+
         std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << keyToString(key) << " | Combo: unsuccessful" << std::endl;
     }
 }

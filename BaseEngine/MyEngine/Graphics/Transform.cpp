@@ -70,7 +70,7 @@ namespace Framework
 				PnormX, PnormY, 1.0f);
 
 			// M = T * R * S
-			x.mdl_to_ndc_xform = Translating * Rotating * Scaling;
+			x.mdl_to_ndc_xform = Translating  * Scaling * Rotating;
 
 			x.Rotation.x += x.Rotation.y * static_cast<GLfloat>(delta_time);
 			// std::cout << x.mdl_to_ndc_xform;
