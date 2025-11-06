@@ -57,6 +57,7 @@ public:
 
     // --- Collision Detection ---
     bool CheckAABBCollision(const AABB& a, const AABB& b);
+    bool CheckEdgeContactCollision(const AABB& playerBox, const AABB& enemyBox, float threshold);
     bool CheckDistanceCollision(const Vector2& a, float aradius,
         const Vector2& b, float bradius);
 

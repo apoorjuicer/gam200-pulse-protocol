@@ -18,26 +18,56 @@ void CollisionManager::Update(float) {}
 AABB CollisionManager::BuildAABBFromTransform(const Framework::Transform& transform, const AABB& baseBox)
 {
     AABB box;
-    box.width = baseBox.width;
-    box.height = baseBox.height;
+    box.width = baseBox.width * transform.Scale.x / 50.0f;
+    box.height = baseBox.height * transform.Scale.y / 50.0f;
 
-    // Center-based AABB calculation
-    box.min.x = transform.Pos.x - box.width * 0.5f;
-    box.max.x = transform.Pos.x + box.width * 0.5f;
-    box.min.y = transform.Pos.y - box.height * 0.5f;
-    box.max.y = transform.Pos.y + box.height * 0.5f;
+    box.min.x = transform.Pos.x - (box.width * 0.5f);
+    box.max.x = transform.Pos.x + (box.width * 0.5f);
+    box.min.y = transform.Pos.y - (box.height * 0.5f);
+    box.max.y = transform.Pos.y + (box.height * 0.5f);
+
+    std::cout << std::fixed << std::setprecision(2)
+        << "[DEBUG] BuildAABBFromTransform -> Pos(" << transform.Pos.x << "," << transform.Pos.y << ") "
+        << "Width=" << box.width << " Height=" << box.height << "\n"
+        << "AABB Min(" << box.min.x << "," << box.min.y << ") Max(" << box.max.x << "," << box.max.y << ")\n";
 
     return box;
 }
+
 
 // =============================================================================
 // Collision Checks
 // =============================================================================
 bool CollisionManager::CheckAABBCollision(const AABB& a, const AABB& b)
 {
-    return (a.min.x <= b.max.x && a.max.x >= b.min.x &&
-        a.min.y <= b.max.y && a.max.y >= b.min.y);
+    return (
+        a.min.x <= b.max.x &&
+        a.max.x >= b.min.x &&
+        a.min.y <= b.max.y &&
+        a.max.y >= b.min.y
+        );
 }
+
+bool CollisionManager::CheckEdgeContactCollision(const AABB& a, const AABB& b, float threshold)
+{
+    // Horizontal edge contact (X direction)
+    bool xEdgeContact =
+        (std::abs(a.max.x - b.min.x) <= threshold) || // A right vs B left
+        (std::abs(b.max.x - a.min.x) <= threshold);   // B right vs A left
+
+    // Vertical edge contact (Y direction)
+    bool yEdgeContact =
+        (std::abs(a.max.y - b.min.y) <= threshold) || // A top vs B bottom
+        (std::abs(b.max.y - a.min.y) <= threshold);   // B top vs A bottom
+
+    // Allow slight Y and X proximity so height difference doesn’t block edge collision
+    bool yCloseEnough = std::abs(((a.min.y + a.max.y) / 2) - ((b.min.y + b.max.y) / 2)) <= ((a.height + b.height) * 0.5f);
+    bool xCloseEnough = std::abs(((a.min.x + a.max.x) / 2) - ((b.min.x + b.max.x) / 2)) <= ((a.width + b.width) * 0.5f);
+
+    // Trigger collision when edges meet in either direction, with small tolerance
+    return (xEdgeContact && yCloseEnough) || (yEdgeContact && xCloseEnough);
+}
+
 
 bool CollisionManager::CheckDistanceCollision(const Vector2& a, float aradius,
     const Vector2& b, float bradius)
@@ -85,8 +115,8 @@ OBB CollisionManager::BuildOBBFromTransform(const Framework::Transform& transfor
     float scaleY = std::clamp(transform.Scale.y, 0.1f, 10.0f);
 
     obb.halfExtents = Vector2(
-        (baseBox.width * 0.5f) * scaleX,
-        (baseBox.height * 0.5f) * scaleY
+        (baseBox.width * 0.6f) * scaleX,
+        (baseBox.height * 0.6f) * scaleY
     );
 
     // === 3. Assign rotation from Transform ===
