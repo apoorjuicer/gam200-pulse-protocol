@@ -146,7 +146,7 @@ namespace MyEditor
         return (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp" || ext == "tga" || ext == "dds");
     }
 
-    static void DrawReplaceModal()
+    [[maybe_unused]] static void DrawReplaceModal()
     {
         if (!s_showReplaceModal) return;
 
@@ -323,7 +323,7 @@ namespace MyEditor
 
         if (item.isDir) return;         // no thumb for folder
 
-        if (!IsImageExt(item.fullPath)) return;
+        if (!IsImageExt(item.fullPath)) return ;
 
         // this assumes your AssetsManager returns a GLuint / unsigned int
         item.texID = mAssets.GetOrLoadTexture(item.fullPath);
@@ -333,7 +333,7 @@ namespace MyEditor
     // Replace a texture file on disk, then reload it everywhere in editor/runtime.
     // Safe version that doesn't need access to AssetsManager internals.
     // ============================================================================
-    static bool ReplaceTextureFileOnDisk(const std::string& dstPath, const std::string& srcPath)
+    [[maybe_unused]] static bool ReplaceTextureFileOnDisk(const std::string& dstPath, const std::string& srcPath)
     {
         namespace fs = std::filesystem;
         std::error_code ec;
@@ -567,7 +567,7 @@ namespace MyEditor
 
 
     // ===================== ProjectPanel =====================
-    static void ProjectPanel(Entity selectedEntity)
+    static void ProjectPanel(Entity)
     {
         // ── Top bar ────────────────────────────────────────────────
         {
@@ -1580,10 +1580,10 @@ namespace MyEditor
                     ImGui::BeginPopupContextWindow("AddCompPopup",
                         ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
                 {
-                    auto* g = Coordinator::GetInstance();
+                    auto* coord = Coordinator::GetInstance();
 
                     // Transform
-                    if (!g->HasComponent<Framework::Transform>(selectedEntity))
+                    if (!coord->HasComponent<Framework::Transform>(selectedEntity))
                     {
                         if (ImGui::MenuItem("Transform"))
                         {
@@ -1594,12 +1594,12 @@ namespace MyEditor
                             t.Rotation.y = 0.0f;
                             t.isVisible = true;
                             t.autoHide = false;
-                            g->AddComponent<Framework::Transform>(selectedEntity, t);
+                            coord->AddComponent<Framework::Transform>(selectedEntity, t);
                         }
                     }
 
                     // Renderable
-                    if (!g->HasComponent<Framework::Renderable>(selectedEntity))
+                    if (!coord->HasComponent<Framework::Renderable>(selectedEntity))
                     {
                         if (ImGui::MenuItem("Renderable"))
                         {
@@ -1608,12 +1608,12 @@ namespace MyEditor
                             r.shd_ref = 2.0f;
                             r.textureID = 0;
                             r.spriteName.clear();
-                            g->AddComponent<Framework::Renderable>(selectedEntity, r);
+                            coord->AddComponent<Framework::Renderable>(selectedEntity, r);
                         }
                     }
 
                     // Animation
-                    if (!g->HasComponent<Framework::Animation>(selectedEntity))
+                    if (!coord->HasComponent<Framework::Animation>(selectedEntity))
                     {
                         if (ImGui::MenuItem("Animation"))
                         {
@@ -1622,29 +1622,29 @@ namespace MyEditor
                             a.totalFrames = 1;
                             a.currentFrame = 0;
                             a.elapsedTime = 0.0f;
-                            g->AddComponent<Framework::Animation>(selectedEntity, a);
+                            coord->AddComponent<Framework::Animation>(selectedEntity, a);
                         }
                     }
 
                     // Name
-                    if (!g->HasComponent<Name>(selectedEntity))
+                    if (!coord->HasComponent<Name>(selectedEntity))
                     {
                         if (ImGui::MenuItem("Name"))
                         {
                             Name nm{};
                             nm.name = std::string("Entity ") + std::to_string((int)selectedEntity);
-                            g->AddComponent<Name>(selectedEntity, nm);
+                            coord->AddComponent<Name>(selectedEntity, nm);
                         }
                     }
 
                     // GUIButton (optional, if used in your project)
-                    if (!g->HasComponent<GUIButton>(selectedEntity))
+                    if (!coord->HasComponent<GUIButton>(selectedEntity))
                     {
                         if (ImGui::MenuItem("GUIButton"))
                         {
                             GUIButton b{};
                             b.buttonID = "button";
-                            g->AddComponent<GUIButton>(selectedEntity, b);
+                            coord->AddComponent<GUIButton>(selectedEntity, b);
                         }
                     }
 
