@@ -431,7 +431,8 @@ namespace MyEditor
         if (!coord) return;
 
         ImGuiIO& io = ImGui::GetIO();
-        // ImGui UI px  <->  Framebuffer px (handles DPI)
+
+        // ImGui UI px  <->  Framebuffer px (handles DPI / HiDPI)
         const float sx = io.DisplayFramebufferScale.x > 0.f ? io.DisplayFramebufferScale.x : 1.f;
         const float sy = io.DisplayFramebufferScale.y > 0.f ? io.DisplayFramebufferScale.y : 1.f;
 
@@ -441,57 +442,71 @@ namespace MyEditor
         const float ndcY = 1.0f - ((mouseFB.y - vp.y) / vp.h) * 2.0f;
         const glm::vec3 mouseNDC(ndcX, ndcY, 1.0f);
 
-        // Build the camera pan/zoom matrix used by rendering
-        const glm::mat3 PanZoom = GLApp::BuildPanZoomNDC(GLApp::gCamera);  // same as draw() path. :contentReference[oaicite:2]{index=2}
+        // Camera pan/zoom used by the renderer
+        const glm::mat3 PanZoom = GLApp::BuildPanZoomNDC(GLApp::gCamera);
 
-        // Hover/pick using modelToNDC (exactly the same pipeline as the red box)
+        // Hover/pick using the same pipeline as rendering
         Entity hovered = INVALID_ENTITY;
+
+        // -----------------------------------------------
+        // Clip gizmo rendering to the game viewport rect
+        // -----------------------------------------------
+        ImDrawList* dl = ImGui::GetForegroundDrawList();
+        const ImVec2 clip_min_ui(vp.x / sx, vp.y / sy);
+        const ImVec2 clip_max_ui((vp.x + vp.w) / sx, (vp.y + vp.h) / sy);
+        dl->PushClipRect(clip_min_ui, clip_max_ui, true);
+
+        // We will only consider hover if the mouse is inside the game rect.
+        const bool inGameRect =
+            (mouseFB.x >= vp.x && mouseFB.x <= vp.x + vp.w &&
+                mouseFB.y >= vp.y && mouseFB.y <= vp.y + vp.h);
 
         for (Entity e : coord->GetAllEntities())
         {
-            // --- Skip in-game GUI objects completely ---
+            // Skip in-game GUI elements
             if (coord->HasComponent<GUIButton>(e))
                 continue;
-                
 
             if (!coord->HasComponent<Framework::Transform>(e) ||
-                !coord->HasComponent<Framework::Renderable>(e)) continue;
+                !coord->HasComponent<Framework::Renderable>(e))
+                continue;
 
             auto& tr = coord->GetComponent<Framework::Transform>(e);
             auto& re = coord->GetComponent<Framework::Renderable>(e);
             if (!tr.isVisible) continue;
 
-            // M from the same source the renderer uses
+            // Model->NDC (same as draw path)
             glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
-            glm::mat3 modelToNDC = PanZoom * M; // identical to GLApp::draw(). :contentReference[oaicite:3]{index=3}
+            glm::mat3 modelToNDC = PanZoom * M;
             glm::mat3 invModelToNDC = glm::inverse(modelToNDC);
 
-            // Model-space quad matches your renderer (bg vs sprite). :contentReference[oaicite:4]{index=4}
+            // Background uses [-1,1], sprites use [-0.5,0.5]
             glm::vec2 qmin, qmax;
             if (re.mdl_ref == 0) { qmin = { -1.f, -1.f }; qmax = { 1.f,  1.f }; }
             else { qmin = { -0.5f,-0.5f }; qmax = { 0.5f, 0.5f }; }
 
-            // Hit test: bring mouse from NDC -> model space and test inside quad
-            glm::vec3 m = invModelToNDC * mouseNDC;
-            if (m.x >= qmin.x && m.x <= qmax.x && m.y >= qmin.y && m.y <= qmax.y)
-                hovered = e;
+            // Hit test (only if mouse is in game rect)
+            if (inGameRect) {
+                glm::vec3 m = invModelToNDC * mouseNDC;
+                if (m.x >= qmin.x && m.x <= qmax.x && m.y >= qmin.y && m.y <= qmax.y)
+                    hovered = e;
+            }
 
-            // Draw bounds ONLY for selected; transform corners like the red box
+            // Draw bounds ONLY for the selected entity
             if (e == selectedEntity)
             {
-                auto toFB = [&](glm::vec2 modelP)->ImVec2 {
-                    glm::vec3 n = modelToNDC * glm::vec3(modelP, 1.0f);         // model -> NDC
-                    float x = vp.x + (n.x * 0.5f + 0.5f) * vp.w;                 // NDC -> FB
+                auto toUI = [&](glm::vec2 modelP)->ImVec2 {
+                    glm::vec3 n = modelToNDC * glm::vec3(modelP, 1.0f);   // model -> NDC
+                    float x = vp.x + (n.x * 0.5f + 0.5f) * vp.w;           // NDC -> FB
                     float y = vp.y + (1.0f - (n.y * 0.5f + 0.5f)) * vp.h;
-                    return ImVec2(x / sx, y / sy);                               // FB -> UI for ImGui
+                    return ImVec2(x / sx, y / sy);                         // FB -> UI (ImGui)
                     };
 
-                ImVec2 a = toFB({ qmin.x, qmin.y });
-                ImVec2 b = toFB({ qmax.x, qmin.y });
-                ImVec2 c = toFB({ qmax.x, qmax.y });
-                ImVec2 d = toFB({ qmin.x, qmax.y });
+                ImVec2 a = toUI({ qmin.x, qmin.y });
+                ImVec2 b = toUI({ qmax.x, qmin.y });
+                ImVec2 c = toUI({ qmax.x, qmax.y });
+                ImVec2 d = toUI({ qmin.x, qmax.y });
 
-                auto* dl = ImGui::GetForegroundDrawList();
                 dl->AddLine(a, b, IM_COL32(255, 220, 80, 180), 2.0f);
                 dl->AddLine(b, c, IM_COL32(255, 220, 80, 180), 2.0f);
                 dl->AddLine(c, d, IM_COL32(255, 220, 80, 180), 2.0f);
@@ -499,19 +514,15 @@ namespace MyEditor
             }
         }
 
-        // Begin drag only if mouse is inside the game viewport (FB px)
-        const bool inGameRect =
-            (mouseFB.x >= vp.x && mouseFB.x <= vp.x + vp.w &&
-                mouseFB.y >= vp.y && mouseFB.y <= vp.y + vp.h);
-
-        // For dragging, keep your existing world-space move (works with your Transform)
-        // Convert mouseFB -> WORLD using your helper, then apply delta to tr.Pos.
+        // -----------------------------------------------
+        // Drag logic
+        // -----------------------------------------------
         if (inGameRect && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
         {
             if (hovered != INVALID_ENTITY) {
                 selectedEntity = hovered;
                 auto& tr = coord->GetComponent<Framework::Transform>(selectedEntity);
-                Vector2 mouseWorld = ScreenToWorld(mouseFB, vp); // your existing helper
+                Vector2 mouseWorld = ScreenToWorld(mouseFB, vp);
                 g_gizmo.dragging = true;
                 g_gizmo.active = selectedEntity;
                 g_gizmo.dragStartWorld = mouseWorld;
@@ -539,7 +550,11 @@ namespace MyEditor
             g_gizmo.dragging = false;
             g_gizmo.active = INVALID_ENTITY;
         }
+
+        // Restore drawing state
+        dl->PopClipRect();
     }
+
 
 
 
