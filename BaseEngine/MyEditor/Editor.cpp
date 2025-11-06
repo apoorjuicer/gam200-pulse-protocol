@@ -18,6 +18,9 @@
 #define NOMINMAX        
 #include <windows.h>
 #include <commdlg.h>
+#include "CoreEngine/Asset/AssetsManager.h"
+
+// ==========================================================================
 
 namespace MyEditor
 {
@@ -25,9 +28,8 @@ namespace MyEditor
     // CONSTANTS & BASIC STATE
     // --------------------------------------------------------------------
 
-    // the entity selected in the hierarchy; INVALID_ENTITY (-1) simply means nothing is selected
-    constexpr Entity INVALID_ENTITY = static_cast<Entity>(-1);
-    static Entity selectedEntity = INVALID_ENTITY;
+    const Entity INVALID_ENTITY = static_cast<Entity>(-1);
+    Entity selectedEntity = INVALID_ENTITY;
 
     // this vector maintains the order entities appear in the hierarchy
     static std::vector<Entity> entityDisplayOrder;
@@ -35,6 +37,19 @@ namespace MyEditor
     static GLFWwindow* s_Window = nullptr;
     static bool s_enabled = true;
     static bool s_restoreNextFrame = false;
+
+    static bool s_showReplaceModal = false;
+    static std::string s_replaceDstPath;   // file being replaced
+    static std::string s_replaceSrcPath;
+
+    static GizmoState g_gizmo;
+    static CollisionManager g_col;
+    static inline glm::vec2 ToGlm(const ImVec2& v) { return glm::vec2(v.x, v.y); }
+    static inline ImVec2    ToIm(const glm::vec2& v) { return ImVec2(v.x, v.y); }
+    static inline ImVec2    ToIm(const Vector2& v) { return ImVec2(v.x, v.y); } // your Vector2 (x,y)
+    static inline Vector2   ToV2(const glm::vec2& v) { return Vector2{ v.x, v.y }; }
+    static constexpr float kWorldW = 1920.0f;
+    static constexpr float kWorldH = 1080.0f;
 
     // --------------------------------------------------------------------
     // PANEL RATIOS
@@ -81,24 +96,25 @@ namespace MyEditor
 
         SavedEntityState()
             : id(INVALID_ENTITY),
-              hasTransform(false),
-              hasRenderable(false),
-              hasName(false),
-              hasGuiButton(false)
-        {}
+            hasTransform(false),
+            hasRenderable(false),
+            hasName(false),
+            hasGuiButton(false)
+        {
+        }
     };
 
     static bool s_isPlaying = false;                // current play mode or not
     static bool s_hasEditorBaseline = false;        // whether we have captured a snapshot
     static std::vector<SavedEntityState> s_editorBaseline;
 
-    #ifdef IMGUI_HAS_DOCKING
-        static ImGuiID   g_DockspaceID = 0;
-        static ImGuiID   g_NodeLeft = 0, g_NodeRight = 0, g_NodeBottom = 0, g_NodeCenter = 0;
-        static bool      g_DockLayoutBuilt = false;
+#ifdef IMGUI_HAS_DOCKING
+    static ImGuiID   g_DockspaceID = 0;
+    static ImGuiID   g_NodeLeft = 0, g_NodeRight = 0, g_NodeBottom = 0, g_NodeCenter = 0;
+    static bool      g_DockLayoutBuilt = false;
 
-        enum class DockTarget { Left, Right, Bottom, Center };
-    #endif
+    enum class DockTarget { Left, Right, Bottom, Center };
+#endif
 
 
     // --------------------------------------------------------------------
@@ -131,6 +147,133 @@ namespace MyEditor
         return (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp" || ext == "tga" || ext == "dds");
     }
 
+    static void DrawReplaceModal()
+    {
+        if (!s_showReplaceModal) return;
+
+        ImGui::OpenPopup("Replace Texture");
+        if (ImGui::BeginPopupModal("Replace Texture", &s_showReplaceModal, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::TextWrapped("Target:\n%s", s_replaceDstPath.c_str());
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::TextUnformatted("Replacement path (.png/.jpg/.bmp/.tga/.dds):");
+            ImGui::SetNextItemWidth(420.0f);
+            static char buf[512];
+            std::strncpy(buf, s_replaceSrcPath.c_str(), sizeof(buf));
+            buf[sizeof(buf) - 1] = '\0';
+            if (ImGui::InputText("##replPath", buf, IM_ARRAYSIZE(buf)))
+                s_replaceSrcPath = buf;
+
+            // Allow dropping an internal texture payload into the text box to auto-fill
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload* p = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
+                {
+                    const char* src = static_cast<const char*>(p->Data);
+                    if (src && *src) s_replaceSrcPath = src;
+                }
+                ImGui::EndDragDropTarget();
+            }
+
+            ImGui::Spacing();
+            if (ImGui::Button("Replace", ImVec2(120, 0)))
+            {
+                if (!s_replaceDstPath.empty() && !s_replaceSrcPath.empty())
+                {
+                    if (ReplaceTextureFileOnDisk_AndRefreshAll(s_replaceDstPath, s_replaceSrcPath))
+                    {
+                        for (auto& it : s_dirEntries)
+                            if (it.fullPath == s_replaceDstPath) { it.triedLoad = false; it.texID = 0; break; }
+
+                        RefreshCurrentDir();
+                        s_showReplaceModal = false;
+                    }
+                }
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0))) s_showReplaceModal = false;
+
+            ImGui::EndPopup();
+        }
+    }
+
+    // ============================================================================
+// Replace file on disk and hot-swap everywhere using AssetsManager API.
+//  - Copies src -> dst
+//  - mAssets.EvictTexture(dst) + mAssets.GetOrLoadTexture(dst) ⇒ NEW GL id
+//  - Updates thumbnails and any Renderable using the file
+// ============================================================================
+    static bool ReplaceTextureFileOnDisk_AndRefreshAll(const std::string& dstPath,
+        const std::string& srcPath)
+    {
+        namespace fs = std::filesystem;
+        std::error_code ec;
+
+        if (dstPath.empty() || srcPath.empty()) return false;
+        if (!fs::exists(srcPath, ec)) return false;
+
+        auto IsImage = [](const fs::path& p) {
+            std::string ext = p.extension().string();
+            std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+            return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
+                ext == ".bmp" || ext == ".tga" || ext == ".dds";
+            };
+        if (!IsImage(srcPath)) return false;
+
+        // 1) Overwrite target file
+        fs::copy_file(srcPath, dstPath, fs::copy_options::overwrite_existing, ec);
+        if (ec) {
+            std::cerr << "[Project] Replace failed: " << srcPath << " -> "
+                << dstPath << " (" << ec.message() << ")\n";
+            return false;
+        }
+
+        // 2) Force a fresh GL texture id and cache entry
+        mAssets.EvictTexture(dstPath);
+        GLuint newTex = mAssets.GetOrLoadTexture(dstPath);
+        if (!newTex) {
+            std::cerr << "[Project] Reload failed for: " << dstPath << "\n";
+            return false;
+        }
+
+        // 3) Update Project thumbnails
+        for (auto& it : s_dirEntries) {
+            if (!it.isDir && it.fullPath == dstPath) {
+                it.texID = newTex;
+                it.triedLoad = true;
+            }
+        }
+
+        // 4) Update all live scene users (match by exact path OR same filename)
+        if (auto* coord = Coordinator::GetInstance()) {
+            for (Entity e : coord->GetAllEntities()) {
+                if (!coord->HasComponent<Framework::Renderable>(e)) continue;
+                auto& r = coord->GetComponent<Framework::Renderable>(e);
+
+                std::string rBase = std::filesystem::path(r.spriteName).filename().string();
+                std::string dBase = std::filesystem::path(dstPath).filename().string();
+
+                if (!r.spriteName.empty() && (r.spriteName == dstPath || rBase == dBase)) {
+                    r.spriteName = dstPath;     // normalize to definitive path
+                    r.textureID = newTex;      // swap immediately
+                }
+            }
+        }
+
+        // 5) Refresh directory view (labels/order)
+        RefreshCurrentDir();
+
+        std::cout << "[Project] Replaced & hot-swapped: " << dstPath
+            << "  <=  " << srcPath << "\n";
+        return true;
+    }
+
+    
+
     static void RefreshCurrentDir()
     {
         s_dirEntries.clear();
@@ -138,38 +281,40 @@ namespace MyEditor
         namespace fs = std::filesystem;
         std::error_code ec;
 
-        if (!fs::exists(s_currentDir, ec))
-            return;
+        // Normalize the current dir to an absolute, canonical path
+        fs::path cur = fs::weakly_canonical(fs::absolute(s_currentDir), ec);
+        if (ec || cur.empty() || !fs::exists(cur, ec)) return;
 
-        // 1) first, add ".." if not root
-        if (fs::weakly_canonical(s_currentDir, ec) != fs::weakly_canonical(s_assetRoot, ec))
+        // Add ".." (only if not at the asset root)
+        fs::path root = fs::weakly_canonical(fs::absolute(s_assetRoot), ec);
+        if (!ec && cur != root)
         {
             AssetItem up;
             up.name = "..";
-            up.fullPath = fs::weakly_canonical(fs::path(s_currentDir).parent_path(), ec).string();
+            up.fullPath = fs::weakly_canonical(cur.parent_path(), ec).string();
             up.isDir = true;
             s_dirEntries.push_back(up);
         }
 
-        // 2) list current dir (non-recursive)
-        for (auto const& entry : fs::directory_iterator(s_currentDir, ec))
+        // List the directory (non-recursive)
+        for (auto const& entry : fs::directory_iterator(cur, ec))
         {
             AssetItem it;
-            it.fullPath = entry.path().lexically_normal().string();
+            it.fullPath = fs::weakly_canonical(entry.path(), ec).string(); // absolute
             it.name = entry.path().filename().string();
             it.isDir = entry.is_directory();
             s_dirEntries.push_back(std::move(it));
         }
 
-        // 3) sort: folders first, then files alpha
+        // Sort: folders first, then alpha
         std::sort(s_dirEntries.begin(), s_dirEntries.end(),
             [](AssetItem const& a, AssetItem const& b)
             {
-                if (a.isDir != b.isDir)
-                    return a.isDir > b.isDir;
+                if (a.isDir != b.isDir) return a.isDir > b.isDir;
                 return a.name < b.name;
             });
     }
+
 
     // Load thumbnail texture lazily using your AssetsManager
     static void EnsureThumbnailLoaded(AssetItem& item)
@@ -182,29 +327,318 @@ namespace MyEditor
         if (!IsImageExt(item.fullPath)) return;
 
         // this assumes your AssetsManager returns a GLuint / unsigned int
-        //item.texID = Framework::AssetsManager::GetOrLoad(item.fullPath);
         item.texID = mAssets.GetOrLoadTexture(item.fullPath);
     }
 
+    // ============================================================================
+    // Replace a texture file on disk, then reload it everywhere in editor/runtime.
+    // Safe version that doesn't need access to AssetsManager internals.
+    // ============================================================================
+    static bool ReplaceTextureFileOnDisk(const std::string& dstPath, const std::string& srcPath)
+    {
+        namespace fs = std::filesystem;
+        std::error_code ec;
+
+        if (dstPath.empty() || srcPath.empty()) return false;
+        if (!fs::exists(srcPath, ec)) return false;
+
+        // --- Validate image extension ---
+        auto extLower = [](std::string s) {
+            for (auto& c : s) c = (char)tolower(c);
+            return s;
+            };
+        std::string srcExt = extLower(fs::path(srcPath).extension().string());
+        if (!(srcExt == ".png" || srcExt == ".jpg" || srcExt == ".jpeg" ||
+            srcExt == ".bmp" || srcExt == ".tga" || srcExt == ".dds"))
+            return false;
+
+        // --- 1) Copy new file over existing one ---
+        fs::copy_file(srcPath, dstPath, fs::copy_options::overwrite_existing, ec);
+        if (ec) {
+            std::cerr << "[Project] Replace failed: " << srcPath << " -> " << dstPath
+                << " (" << ec.message() << ")\n";
+            return false;
+        }
+
+        // --- 2) Force reload of new texture on next frame ---
+        // We don't need to access the internal cache; just reload the new file.
+        GLuint newTex = mAssets.GetOrLoadTexture(dstPath);
+
+        // Bind it once to ensure GL has the new texture data
+        glBindTexture(GL_TEXTURE_2D, newTex);
+
+        std::cout << "[Project] Replaced texture file: " << dstPath
+            << " with " << srcPath << "\n";
+        return true;
+    }
+
+
+    static inline void ComputeGameDrawRect(const GameViewport& vp, float& drawX, float& drawY,
+        float& drawW, float& drawH, float& scale)
+    {
+        const float sx = vp.w / kWorldW;
+        const float sy = vp.h / kWorldH;
+        scale = (sx < sy) ? sx : sy;           // fit inside
+        drawW = kWorldW * scale;
+        drawH = kWorldH * scale;
+        drawX = vp.x + (vp.w - drawW) * 0.5f;  // pillar/letter box offsets
+        drawY = vp.y + (vp.h - drawH) * 0.5f;
+    }
+
+    glm::vec2 WorldToScreen(const Vector2& wpos, const GameViewport& vp)
+    {
+        // 1) world -> NDC   with  N = diag(2/W, 2/H, 1)
+        const float sx = 2.0f / kWorldW;
+        const float sy = 2.0f / kWorldH;
+        const glm::mat3 N(sx, 0, 0,
+            0, sy, 0,
+            0, 0, 1);
+
+        // camera pan/zoom (same one used during drawing) 
+        const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gCamera);
+
+        glm::vec3 ndc = Cam * (N * glm::vec3(wpos.x, wpos.y, 1.0f)); // -1..1
+
+        // 2) NDC -> framebuffer pixels in the drawn game rectangle
+        float x = vp.x + (ndc.x * 0.5f + 0.5f) * vp.w;
+        float y = vp.y + (1.0f - (ndc.y * 0.5f + 0.5f)) * vp.h;
+        return { x, y };
+    }
+
+    Vector2 ScreenToWorld(glm::vec2 screen, const GameViewport& vp)
+    {
+        // 1) framebuffer px inside the game rect -> NDC
+        float ndcX = ((screen.x - vp.x) / vp.w) * 2.0f - 1.0f;
+        float ndcY = 1.0f - ((screen.y - vp.y) / vp.h) * 2.0f;
+        glm::vec3 ndc(ndcX, ndcY, 1.0f);
+
+        // 2) invert camera and normalization
+        const float sx = 2.0f / kWorldW;
+        const float sy = 2.0f / kWorldH;
+        const glm::mat3 N(sx, 0, 0,
+            0, sy, 0,
+            0, 0, 1);
+        const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gCamera); // 
+        glm::mat3 invAll = glm::inverse(Cam * N);
+
+        glm::vec3 w = invAll * ndc;   // back to world units (centered at 0,0)
+        return Vector2{ w.x, w.y };
+    }
+
+
+    // Lightweight: click anywhere inside an entity's AABB to select; drag to move.
+    // Uses BuildAABBFromTransform + CheckMouseCollision.
+    void MyEditor::Gizmo_DrawAndHandle(const GameViewport& vp)
+    {
+        auto* coord = Coordinator::GetInstance();
+        if (!coord) return;
+
+        ImGuiIO& io = ImGui::GetIO();
+
+        // ImGui UI px  <->  Framebuffer px (handles DPI / HiDPI)
+        const float sx = io.DisplayFramebufferScale.x > 0.f ? io.DisplayFramebufferScale.x : 1.f;
+        const float sy = io.DisplayFramebufferScale.y > 0.f ? io.DisplayFramebufferScale.y : 1.f;
+
+        // Mouse in FB px and in NDC (relative to the game viewport)
+        const glm::vec2 mouseFB(io.MousePos.x * sx, io.MousePos.y * sy);
+        const float ndcX = ((mouseFB.x - vp.x) / vp.w) * 2.0f - 1.0f;
+        const float ndcY = 1.0f - ((mouseFB.y - vp.y) / vp.h) * 2.0f;
+        const glm::vec3 mouseNDC(ndcX, ndcY, 1.0f);
+
+        // Camera pan/zoom used by the renderer
+        const glm::mat3 PanZoom = GLApp::BuildPanZoomNDC(GLApp::gCamera);
+
+        // Hover/pick using the same pipeline as rendering
+        Entity hovered = INVALID_ENTITY;
+
+        // -----------------------------------------------
+        // Clip gizmo rendering to the game viewport rect
+        // -----------------------------------------------
+        ImDrawList* dl = ImGui::GetForegroundDrawList();
+        const ImVec2 clip_min_ui(vp.x / sx, vp.y / sy);
+        const ImVec2 clip_max_ui((vp.x + vp.w) / sx, (vp.y + vp.h) / sy);
+        dl->PushClipRect(clip_min_ui, clip_max_ui, true);
+
+        // We will only consider hover if the mouse is inside the game rect.
+        const bool inGameRect =
+            (mouseFB.x >= vp.x && mouseFB.x <= vp.x + vp.w &&
+                mouseFB.y >= vp.y && mouseFB.y <= vp.y + vp.h);
+
+        for (Entity e : coord->GetAllEntities())
+        {
+            // Skip in-game GUI elements
+            if (coord->HasComponent<GUIButton>(e))
+                continue;
+
+            if (!coord->HasComponent<Framework::Transform>(e) ||
+                !coord->HasComponent<Framework::Renderable>(e))
+                continue;
+
+            auto& tr = coord->GetComponent<Framework::Transform>(e);
+            auto& re = coord->GetComponent<Framework::Renderable>(e);
+            if (!tr.isVisible) continue;
+
+            // Model->NDC (same as draw path)
+            glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
+            glm::mat3 modelToNDC = PanZoom * M;
+            glm::mat3 invModelToNDC = glm::inverse(modelToNDC);
+
+            // Background uses [-1,1], sprites use [-0.5,0.5]
+            glm::vec2 qmin, qmax;
+            if (re.mdl_ref == 0) { qmin = { -1.f, -1.f }; qmax = { 1.f,  1.f }; }
+            else { qmin = { -0.5f,-0.5f }; qmax = { 0.5f, 0.5f }; }
+
+            // Hit test (only if mouse is in game rect)
+            if (inGameRect) {
+                glm::vec3 m = invModelToNDC * mouseNDC;
+                if (m.x >= qmin.x && m.x <= qmax.x && m.y >= qmin.y && m.y <= qmax.y)
+                    hovered = e;
+            }
+
+            // Draw bounds ONLY for the selected entity
+            if (e == selectedEntity)
+            {
+                auto toUI = [&](glm::vec2 modelP)->ImVec2 {
+                    glm::vec3 n = modelToNDC * glm::vec3(modelP, 1.0f);   // model -> NDC
+                    float x = vp.x + (n.x * 0.5f + 0.5f) * vp.w;           // NDC -> FB
+                    float y = vp.y + (1.0f - (n.y * 0.5f + 0.5f)) * vp.h;
+                    return ImVec2(x / sx, y / sy);                         // FB -> UI (ImGui)
+                    };
+
+                ImVec2 a = toUI({ qmin.x, qmin.y });
+                ImVec2 b = toUI({ qmax.x, qmin.y });
+                ImVec2 c = toUI({ qmax.x, qmax.y });
+                ImVec2 d = toUI({ qmin.x, qmax.y });
+
+                dl->AddLine(a, b, IM_COL32(255, 220, 80, 180), 2.0f);
+                dl->AddLine(b, c, IM_COL32(255, 220, 80, 180), 2.0f);
+                dl->AddLine(c, d, IM_COL32(255, 220, 80, 180), 2.0f);
+                dl->AddLine(d, a, IM_COL32(255, 220, 80, 180), 2.0f);
+            }
+        }
+
+        // -----------------------------------------------
+        // Drag logic (world-space; unchanged)
+        // -----------------------------------------------
+        if (inGameRect && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+        {
+            if (hovered != INVALID_ENTITY) {
+                selectedEntity = hovered;
+                auto& tr = coord->GetComponent<Framework::Transform>(selectedEntity);
+                Vector2 mouseWorld = ScreenToWorld(mouseFB, vp);
+                g_gizmo.dragging = true;
+                g_gizmo.active = selectedEntity;
+                g_gizmo.dragStartWorld = mouseWorld;
+                g_gizmo.entityStartPos = tr.Pos;
+            }
+            else {
+                selectedEntity = INVALID_ENTITY;
+            }
+        }
+
+        if (g_gizmo.dragging && g_gizmo.active != INVALID_ENTITY && ImGui::IsMouseDown(ImGuiMouseButton_Left))
+        {
+            if (coord->HasComponent<Framework::Transform>(g_gizmo.active))
+            {
+                auto& tr = coord->GetComponent<Framework::Transform>(g_gizmo.active);
+                Vector2 mouseWorld = ScreenToWorld(mouseFB, vp);
+                Vector2 d{ mouseWorld.x - g_gizmo.dragStartWorld.x,
+                           mouseWorld.y - g_gizmo.dragStartWorld.y };
+                tr.Pos.x = g_gizmo.entityStartPos.x + d.x;
+                tr.Pos.y = g_gizmo.entityStartPos.y + d.y;
+            }
+        }
+
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+            g_gizmo.dragging = false;
+            g_gizmo.active = INVALID_ENTITY;
+        }
+
+        // Restore drawing state
+        dl->PopClipRect();
+    }
+
+
+    // ===================== ProjectPanel =====================
     static void ProjectPanel(Entity selectedEntity)
     {
-        // top bar: path + refresh + view size
+        // ── Top bar ────────────────────────────────────────────────
         {
-            if (ImGui::Button("Refresh"))
+            if (ImGui::Button("Refresh")) {
+                // Rebuild thumbnails from current disk contents
+                for (auto& it : s_dirEntries) {
+                    if (!it.isDir) {
+                        mAssets.EvictTexture(it.fullPath);
+                        it.texID = mAssets.GetOrLoadTexture(it.fullPath);
+                        it.triedLoad = true;
+                    }
+                }
                 RefreshCurrentDir();
+            }
             ImGui::SameLine();
-
-            // breadcrumb-like display (simple version)
             ImGui::TextUnformatted(s_currentDir.c_str());
             ImGui::SameLine();
-
             ImGui::SetNextItemWidth(120.0f);
             ImGui::SliderFloat("Size", &s_thumbSize, 40.0f, 160.0f, "%.0f");
         }
-
         ImGui::Separator();
 
-        // scrolling region
+        // ── OS drag-and-drop into project panel ───────────────────
+        if (!s_pendingOSDrops.empty())
+        {
+            namespace fs = std::filesystem;
+            std::error_code ec;
+
+            fs::path dstDir = fs::weakly_canonical(fs::absolute(s_currentDir), ec);
+            if (!ec && !dstDir.empty())
+            {
+                if (!fs::exists(dstDir, ec)) fs::create_directories(dstDir, ec);
+
+                auto IsImageExt = [](const fs::path& p) {
+                    std::string ext = p.extension().string();
+                    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+                    return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
+                        ext == ".bmp" || ext == ".tga" || ext == ".dds";
+                    };
+
+                int changed = 0;
+                for (const std::string& srcStr : s_pendingOSDrops)
+                {
+                    fs::path src = fs::weakly_canonical(fs::path(srcStr), ec);
+                    if (ec || src.empty() || !fs::exists(src, ec)) continue;
+                    fs::path dst = dstDir / src.filename();
+
+                    if (fs::exists(dst, ec))
+                    {
+                        // same name → replace
+                        if (IsImageExt(dst)) {
+                            if (ReplaceTextureFileOnDisk_AndRefreshAll(dst.string(), src.string()))
+                                ++changed;
+                        }
+                        else {
+                            fs::copy_file(src, dst, fs::copy_options::overwrite_existing, ec);
+                            if (!ec) ++changed;
+                        }
+                    }
+                    else
+                    {
+                        // new file → import
+                        fs::copy_file(src, dst, fs::copy_options::none, ec);
+                        if (!ec) {
+                            ++changed;
+                            if (IsImageExt(dst)) {
+                                mAssets.EvictTexture(dst.string()); // be explicit
+                                mAssets.GetOrLoadTexture(dst.lexically_normal().string());
+                            }
+                        }
+                    }
+                }
+                if (changed > 0) RefreshCurrentDir();
+            }
+            s_pendingOSDrops.clear();
+        }
+
+        // ── Grid ──────────────────────────────────────────────────
         ImGui::BeginChild("AssetsGrid", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 
         float availX = ImGui::GetContentRegionAvail().x;
@@ -213,146 +647,106 @@ namespace MyEditor
         if (cols < 1) cols = 1;
 
         int itemIndex = 0;
-
         for (auto& item : s_dirEntries)
         {
-            // start new row
-            if (itemIndex % cols != 0)
-                ImGui::SameLine();
-
+            if (itemIndex % cols != 0) ImGui::SameLine();
             ImGui::BeginGroup();
             ImGui::PushID(itemIndex);
 
-            // 1) Draw the thumbnail
             ImVec2 thumbSize(s_thumbSize, s_thumbSize);
+            bool clicked = false;
 
             if (item.isDir)
             {
-                // Folder: just draw a big button
-                if (ImGui::Button(item.name.c_str(), thumbSize))
-                {
-                    // go into folder
+                if (ImGui::Button(item.name.c_str(), thumbSize)) {
                     s_currentDir = item.fullPath;
                     RefreshCurrentDir();
-                    ImGui::PopID();
-                    ImGui::EndGroup();
-                    // since we changed directory, we shouldn't keep drawing old list
-                    ImGui::EndChild();
-                    return;
+                    ImGui::PopID(); ImGui::EndGroup(); ImGui::EndChild(); return;
                 }
             }
             else
             {
-                // File
-                EnsureThumbnailLoaded(item);
+                EnsureThumbnailLoaded(item);  // your existing function
 
-                bool clicked = false;
-
-                if (item.texID != 0)
-                {
-                    ImTextureID tid = (ImTextureID)(intptr_t)item.texID;
-
-                    // make a unique ID for ImGui so it doesn't clash with other items
+                if (item.texID != 0) {
                     std::string btnId = "##assetTex_" + item.fullPath;
-
-                    clicked = ImGui::ImageButton(
-                        btnId.c_str(),      // <- string id (required by your ImGui)
-                        tid,                // texture
-                        ImVec2(s_thumbSize, s_thumbSize),
-                        ImVec2(0, 1),       // uv0  (flip Y if your textures are upside-down)
-                        ImVec2(1, 0)        // uv1
-                        // you can add frame_padding, bg_col, tint_col if needed
-                    );
-
+                    clicked = ImGui::ImageButton(btnId.c_str(), (ImTextureID)(intptr_t)item.texID,
+                        ImVec2(s_thumbSize, s_thumbSize), ImVec2(0, 1), ImVec2(1, 0));
                 }
-                else
-                {
-                    // no texture -> generic button with extension
-                    if (ImGui::Button(item.name.c_str(), thumbSize))
-                        clicked = true;
+                else {
+                    if (ImGui::Button(item.name.c_str(), thumbSize)) clicked = true;
                 }
 
-                if (clicked)
-                {
-                    // Check if this is a prefab JSON file
-                    bool isPrefabFile = (item.fullPath.find("/Prefabs/") != std::string::npos ||
-                        item.fullPath.find("\\Prefabs\\") != std::string::npos) &&
-                        (item.fullPath.find(".json") != std::string::npos);
+                // Allow drag source (image files only)
+                auto IsImageExtStr = [](const std::string& s) {
+                    std::string ext;
+                    auto dot = s.find_last_of('.');
+                    if (dot != std::string::npos) ext = s.substr(dot);
+                    for (auto& c : ext) c = (char)tolower(c);
+                    return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
+                        ext == ".bmp" || ext == ".tga" || ext == ".dds";
+                    };
 
-                    if (isPrefabFile)
+                if (IsImageExtStr(item.fullPath))
+                {
+                    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                     {
-                        // Instantiate prefab
-                        PrefabManager prefabMgr;
-
-                        // Extract prefab name from path
-                        size_t lastSlash = item.fullPath.find_last_of("/\\");
-                        size_t lastDot = item.fullPath.find_last_of(".");
-                        std::string prefabName = item.fullPath.substr(lastSlash + 1, lastDot - lastSlash - 1);
-
-                        auto entity = prefabMgr.InstantiatePrefab(prefabName);
-                        if (entity.has_value()) {
-                            std::cout << "[Project] Instantiated prefab: " << prefabName << " (Entity " << entity.value() << ")" << std::endl;
-                        }
+                        const char* path = item.fullPath.c_str();
+                        ImGui::SetDragDropPayload("ASSET_TEXTURE", path, (int)std::strlen(path) + 1);
+                        ImGui::TextUnformatted(("Texture: " + item.name).c_str());
+                        ImGui::EndDragDropSource();
                     }
-                    // if an entity is selected, assign this asset to its Renderable (for textures)
-                    else if (selectedEntity != INVALID_ENTITY)
+
+                    // Drag target: drop one image onto another to replace
+                    if (ImGui::BeginDragDropTarget())
                     {
-                        auto* g_coordinator = Coordinator::GetInstance();
-                        if (g_coordinator && g_coordinator->HasComponent<Framework::Renderable>(selectedEntity))
+                        if (const ImGuiPayload* p = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
                         {
-                            auto& rend = g_coordinator->GetComponent<Framework::Renderable>(selectedEntity);
-                            rend.spriteName = item.fullPath;                       // or make it relative
-                            //rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
-                            rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
-                        }
-                    }
-                }
-
-                // optional: right click popup to "Ping", "Copy path", etc.
-                if (ImGui::BeginPopupContextItem("AssetContext"))
-                {
-                    if (ImGui::MenuItem("Copy path"))
-                    {
-                        ImGui::SetClipboardText(item.fullPath.c_str());
-                    }
-                    if (selectedEntity != INVALID_ENTITY)
-                    {
-                        if (ImGui::MenuItem("Assign to selected"))
-                        {
-                            auto* g_coordinator = Coordinator::GetInstance();
-                            if (g_coordinator && g_coordinator->HasComponent<Framework::Renderable>(selectedEntity))
+                            const char* src = static_cast<const char*>(p->Data);
+                            if (src && *src)
                             {
-                                auto& rend = g_coordinator->GetComponent<Framework::Renderable>(selectedEntity);
-                                rend.spriteName = item.fullPath;
-                               // rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
-                                rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
+                                std::string srcPath = src;
+                                std::string dstPath = item.fullPath;
+                                if (srcPath != dstPath)
+                                    ReplaceTextureFileOnDisk_AndRefreshAll(dstPath, srcPath);
                             }
                         }
+                        ImGui::EndDragDropTarget();
                     }
-                    ImGui::EndPopup();
+                }
+
+                // Left-click assigns to selected entity
+                if (clicked && selectedEntity != INVALID_ENTITY)
+                {
+                    auto* coord = Coordinator::GetInstance();
+                    if (coord && coord->HasComponent<Framework::Renderable>(selectedEntity))
+                    {
+                        auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
+                        rend.spriteName = item.fullPath;
+                        rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
+                    }
                 }
             }
 
-            // 2) Draw label under thumb (clipped)
+            // label
             ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + s_thumbSize);
-
-            // aesthetic purpose
             std::string displayName = item.name;
-            if (displayName.ends_with(".json")) {
-                displayName = displayName.substr(0, displayName.length() - 5);
-            }
-
+            if (displayName.ends_with(".json")) displayName.resize(displayName.size() - 5);
             ImGui::TextUnformatted(displayName.c_str());
             ImGui::PopTextWrapPos();
 
             ImGui::PopID();
             ImGui::EndGroup();
-
-            itemIndex++;
+            ++itemIndex;
         }
 
         ImGui::EndChild();
     }
+
+    
+
+
+
 
     // take current ECS and remember it as "start state"
     static void CaptureEditorBaseline()
@@ -559,6 +953,19 @@ namespace MyEditor
     }
 
 
+    void EnqueueExternalDrop(const std::vector<std::string>& paths)
+    {
+        // Append (don’t clear) so multiple drops are handled
+        s_pendingOSDrops.insert(s_pendingOSDrops.end(), paths.begin(), paths.end());
+    }
+
+    void PushOSDropPath(const char* path)
+    {
+        if (path && *path)
+            s_pendingOSDrops.emplace_back(path);
+    }
+
+
     void Init(GLFWwindow* w) {
         s_Window = w;
         IMGUI_CHECKVERSION();
@@ -575,6 +982,19 @@ namespace MyEditor
 
         ImGui_ImplGlfw_InitForOpenGL(w, true);
         ImGui_ImplOpenGL3_Init("#version 130");
+
+        // Make s_assetRoot and s_currentDir absolute/canonical so all I/O hits the real disk location.
+        {
+            namespace fs = std::filesystem;
+            std::error_code ec;
+
+            // s_assetRoot currently holds "../../MyEngine/Assets"
+            fs::path abs = fs::weakly_canonical(fs::absolute(s_assetRoot), ec);
+            if (!ec && !abs.empty())
+                s_assetRoot = abs.string();
+
+            s_currentDir = s_assetRoot;  // start in the real absolute root
+        }
 
         s_enabled = true;
         RefreshCurrentDir();
@@ -751,7 +1171,7 @@ namespace MyEditor
         // --- RIGHT HOST ---
         ImGui::SetNextWindowPos(ImVec2(right_x, middle_y));
         ImGui::SetNextWindowSize(ImVec2(right_w, safe_middle_h));
-        
+
         ImGuiID rightDockID = 0;
         if (ImGui::Begin("Right Panel", nullptr, panel_flags)) {
             rightDockID = ImGui::GetID("RightDockSpace");
@@ -776,7 +1196,7 @@ namespace MyEditor
 
         // Scene Hierarchy
         if (leftDockID) ImGui::SetNextWindowDockID(leftDockID, ImGuiCond_FirstUseEver);
-        if (ImGui::Begin("Scene Hierarchy", nullptr, panel_flags))
+        if (ImGui::Begin("Hierarchy", nullptr, panel_flags))
         {
             // Access ECS Coordinator
             auto* g_coordinator = Coordinator::GetInstance();
@@ -899,7 +1319,7 @@ namespace MyEditor
                             entityDisplayOrder.push_back(newEntity);
                             /*std::cout << "[Editor] Created entity " << newEntity << " at end" << std::endl;*/
                         }
-                        
+
                         // [^] button: insert above selected entity
                         else if (createAboveClicked && selectedEntity != INVALID_ENTITY) {
 
@@ -923,7 +1343,7 @@ namespace MyEditor
 
                             // finds position of selected entity
                             auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
-                                
+
                             // insert after selected position
                             // etc. [A, B, C] + insert below B → [A, NEW, B, C]
                             if (it != entityDisplayOrder.end()) {
@@ -1074,15 +1494,14 @@ namespace MyEditor
                 ImGui::Separator();
 
 
-                // -----------------------------
-                // Add Component button + popup
-                // -----------------------------
-                ImGui::AlignTextToFramePadding();
-                ImGui::TextUnformatted("Components"); ImGui::SameLine();
-                if (ImGui::Button("Add Component")) ImGui::OpenPopup("AddCompPopup");
 
-                if (ImGui::BeginPopup("AddCompPopup"))
+                // Right click to add component
+                if (selectedEntity != INVALID_ENTITY &&
+                    ImGui::BeginPopupContextWindow("AddCompPopup",
+                        ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
                 {
+                    auto* g = Coordinator::GetInstance();
+
                     // Transform
                     if (!g->HasComponent<Framework::Transform>(selectedEntity))
                     {
@@ -1098,6 +1517,7 @@ namespace MyEditor
                             g->AddComponent<Framework::Transform>(selectedEntity, t);
                         }
                     }
+
                     // Renderable
                     if (!g->HasComponent<Framework::Renderable>(selectedEntity))
                     {
@@ -1111,6 +1531,7 @@ namespace MyEditor
                             g->AddComponent<Framework::Renderable>(selectedEntity, r);
                         }
                     }
+
                     // Animation
                     if (!g->HasComponent<Framework::Animation>(selectedEntity))
                     {
@@ -1124,6 +1545,7 @@ namespace MyEditor
                             g->AddComponent<Framework::Animation>(selectedEntity, a);
                         }
                     }
+
                     // Name
                     if (!g->HasComponent<Name>(selectedEntity))
                     {
@@ -1134,7 +1556,8 @@ namespace MyEditor
                             g->AddComponent<Name>(selectedEntity, nm);
                         }
                     }
-                    // GUIButton (if your project uses it)
+
+                    // GUIButton (optional, if used in your project)
                     if (!g->HasComponent<GUIButton>(selectedEntity))
                     {
                         if (ImGui::MenuItem("GUIButton"))
@@ -1147,8 +1570,6 @@ namespace MyEditor
 
                     ImGui::EndPopup();
                 }
-
-                ImGui::Separator();
 
 
                 // --- Name --------------------------------------------------------------------
@@ -1311,69 +1732,125 @@ namespace MyEditor
                         }
                     }
 
-                    // --- Reload texture button ---
-                    if (ImGui::Button("Reload Texture"))
+                    // --- Reload texture button + Drag&Drop target ---
                     {
-                        namespace fs = std::filesystem;
-                        const std::string kTexturesRoot = "../../MyEngine/Assets/Textures";
+                        // Draw the button first
+                        bool reloadClicked = ImGui::Button("Reload Texture");
 
-                        // Adjust these to your actual shader indices
-                        constexpr int SPRITE_SHADER_INDEX = 1; // plain sprite shader
-                        constexpr int SPRITESHEET_SHADER_INDEX = 2; // spritesheet shader
-
-                        // 1) Resolve path if user typed only a filename or an invalid path
+                        // Allow dropping a texture file onto this button
+                        if (ImGui::BeginDragDropTarget())
                         {
-                            std::string candidate = r.spriteName;
-                            std::error_code ec;
-                            if (!fs::path(candidate).has_parent_path() || !fs::exists(candidate, ec)) {
-                                std::string base = fs::path(candidate).filename().string();
-                                if (base.empty()) base = candidate;
-
-                                //std::string resolved = Framework::AssetsManager::FindTextureByFilename(base, kTexturesRoot);
-
-                                //if (!resolved.empty())
-                                  //  r.spriteName = resolved; // keep resolved full path for next time
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
+                            {
+                                // -------------- Apply dropped path --------------
+                                const char* droppedPath = static_cast<const char*>(payload->Data);
+                                r.spriteName = droppedPath ? std::string(droppedPath) : std::string();
+                                reloadClicked = true; // reuse the same reload routine below
                             }
+                            ImGui::EndDragDropTarget();
                         }
 
-                        // 2) Load (cached by AssetsManager)
-                       // r.textureID = Framework::AssetsManager::GetOrLoad(r.spriteName);
-                        r.textureID = mAssets.GetOrLoadTexture(r.spriteName);
-                        r.loadedSpriteName = r.spriteName;
-                        r.needsTextureReload = false;
-
-                        // 3) OPTIONAL: choose shader based on filename hint, but DO NOT touch Animation
-                        int  hintRows = 1, hintCols = 1;
-                        bool isSheet = false;
-
-                        // Try strict grid parser on the *base filename*
+                        if (reloadClicked)
                         {
-                            int rr = 1, cc = 1;
-                            std::string base = fs::path(r.spriteName).filename().string();
-                            if (ParseGridFromFilename(base, rr, cc) && rr * cc > 1) {
-                                hintRows = rr; hintCols = cc;
-                                isSheet = true;
+                            namespace fs = std::filesystem;
+                            const std::string kTexturesRoot = "../../MyEngine/Assets/Textures";
+
+                            // Adjust these to your actual shader indices
+                            constexpr int SPRITE_SHADER_INDEX = 1; // plain sprite shader
+                            constexpr int SPRITESHEET_SHADER_INDEX = 2; // spritesheet shader
+
+                            // 1) Resolve path if user typed only a filename or an invalid path
+                            {
+                                namespace fs = std::filesystem;
+
+                                std::string candidate = r.spriteName;
+                                std::error_code ec;
+
+                                // If user already provided a valid path on disk, keep it.
+                                if ((fs::path(candidate).has_parent_path() || fs::path(candidate).is_absolute()) &&
+                                    fs::exists(candidate, ec))
+                                {
+                                    // nothing to do; r.spriteName already points to an existing file
+                                }
+                                else
+                                {
+                                    // Reduce to just the filename (e.g., "hero.png")
+                                    std::string base = fs::path(candidate).filename().string();
+                                    if (base.empty()) base = candidate;
+
+                                    // Where to search (add/remove roots as you need)
+                                    const fs::path roots[] = {
+                                        fs::path(kTexturesRoot),                      // "../../MyEngine/Assets/Textures"
+                                        fs::path("../../MyEngine/Assets")             // optional broader scan
+                                    };
+
+                                    std::string resolved;
+
+                                    for (const fs::path& root : roots)
+                                    {
+                                        fs::path rootAbs = fs::weakly_canonical(root, ec);
+                                        if (ec || rootAbs.empty() || !fs::exists(rootAbs, ec)) continue;
+
+                                        // Scan this root recursively and stop at the first filename match
+                                        for (fs::recursive_directory_iterator it(rootAbs, ec), end; it != end && !ec; ++it)
+                                        {
+                                            if (!it->is_regular_file(ec)) continue;
+                                            if (it->path().filename().string() == base)
+                                            {
+                                                resolved = it->path().lexically_normal().string();
+                                                break;
+                                            }
+                                        }
+                                        if (!resolved.empty()) break;
+                                    }
+
+                                    if (!resolved.empty())
+                                    {
+                                        // Keep the fully-resolved, normalized absolute path for next time
+                                        r.spriteName = resolved;
+                                    }
+                                    // else: leave r.spriteName as-is; the subsequent load attempt will surface any error
+                                }
                             }
+
+
+                            // 2) Load (cached by AssetsManager)
+                            r.textureID = mAssets.GetOrLoadTexture(r.spriteName);
+                            r.loadedSpriteName = r.spriteName;
+                            r.needsTextureReload = false;
+
+                            // 3) OPTIONAL: choose shader based on filename hint, but DO NOT touch Animation
+                            int  hintRows = 1, hintCols = 1;
+                            bool isSheet = false;
+
+                            // Try strict grid parser on the *base filename*
+                            {
+                                int rr = 1, cc = 1;
+                                std::string base = fs::path(r.spriteName).filename().string();
+                                if (ParseGridFromFilename(base, rr, cc) && rr * cc > 1) {
+                                    hintRows = rr; hintCols = cc;
+                                    isSheet = true;
+                                }
+                            }
+
+                            // Tiny heuristic backup ("sheet"/"atlas")
+                            if (!isSheet) {
+                                std::string base = fs::path(r.spriteName).filename().string();
+                                for (auto& c : base) c = (char)tolower(c);
+                                if (base.find("sheet") != std::string::npos || base.find("atlas") != std::string::npos)
+                                    isSheet = true;
+                            }
+
+                            // Switch only the shader; leave Animation component untouched
+                            r.shd_ref = static_cast<float>(isSheet ? SPRITESHEET_SHADER_INDEX
+                                : SPRITE_SHADER_INDEX);
                         }
-
-                        // Tiny heuristic backup ("sheet"/"atlas")
-                        if (!isSheet) {
-                            std::string base = fs::path(r.spriteName).filename().string();
-                            for (auto& c : base) c = (char)tolower(c);
-                            if (base.find("sheet") != std::string::npos || base.find("atlas") != std::string::npos)
-                                isSheet = true;
-                        }
-
-                        // Switch only the shader; leave Animation component untouched
-                        r.shd_ref = static_cast<float>(isSheet ? SPRITESHEET_SHADER_INDEX
-                            : SPRITE_SHADER_INDEX);
-
-
                     }
+
 
                     ImGui::Separator();
 
-                        
+
 
                     // --- Animation ---------------------------------------------------------------
                     if (g->HasComponent<Framework::Animation>(selectedEntity))
@@ -1475,7 +1952,7 @@ namespace MyEditor
                     }
 
 
-    
+
 
 
                     // --- GUIButton ---------------------------------------------------------------
@@ -1607,6 +2084,20 @@ namespace MyEditor
         }
         ImGui::End();
 
+        // ===== In-scene picking/dragging (gizmo) on the middle viewport =====
+        MyEditor::GameViewport vp;
+        vp.x = (int)left_w;
+        vp.y = (int)middle_y;
+        vp.w = (int)safe_mid_w;
+        vp.h = (int)safe_middle_h;
+
+
+        MyEditor::Gizmo_DrawAndHandle(vp);
+
+
+
+
+
         // =============================
         // SPLITTER OVERLAY (unchanged)
         // =============================
@@ -1681,19 +2172,11 @@ namespace MyEditor
         }
 
         ImGui::End(); // LayoutOverlay
+
     }
 
     void Render() {
         if (!s_enabled) return;
-
-        //glBindVertexArray(0);
-        //glBindBuffer(GL_ARRAY_BUFFER, 0);
-        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        //glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        //glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-        //glBindBuffer(GL_COPY_READ_BUFFER, 0);
-        //glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
-
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
@@ -1704,7 +2187,7 @@ namespace MyEditor
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
         s_Window = nullptr;
-    
+
     }
 
     extern float s_left_ratio;
@@ -1807,7 +2290,7 @@ namespace MyEditor
 
         return { vx, vy, vw, vh };
     }
-    
+
     std::string MyEditor::OpenJsonFileDialog()
     {
         char fileBuf[MAX_PATH] = { 0 };

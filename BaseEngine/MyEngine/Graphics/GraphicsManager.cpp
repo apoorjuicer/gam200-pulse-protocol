@@ -52,7 +52,6 @@ GraphicsManager::GraphicsManager(AssetRegistry *registry) : mRegistry{registry}
 GraphicsManager::~GraphicsManager()
 {
     // Cleanup happens in Shutdown()
-    Shutdown();
 }
 
 
@@ -933,6 +932,29 @@ void GraphicsManager::PrintFontMap()
 
     std::cout << "===== END OF FONT MAP =====\n";
 }
+
+bool GraphicsManager::EvictTexture(std::string const& idOrPath)
+{
+    // Find by key (the same string used in GetOrLoad). Today you store by tex_name.
+    auto it = texHandle_key.find(idOrPath);
+    if (it == texHandle_key.end())
+        return false;
+
+    GLuint oldId = it->second;
+    // Delete GPU object
+    if (oldId)
+        glDeleteTextures(1, &oldId);
+
+    // Remove both directions
+    texHandle_key.erase(it);
+    if (auto it2 = texHandle_id.find(oldId); it2 != texHandle_id.end())
+        texHandle_id.erase(it2);
+
+    std::cout << "[Graphics] Evicted texture: " << idOrPath << "\n";
+    return true;
+}
+
+
 
 //std::ostream& operator<<(std::ostream& os, const FontData& fd)
 //{

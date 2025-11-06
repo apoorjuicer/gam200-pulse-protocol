@@ -21,6 +21,7 @@
 #include "graphics/stb_image.h"
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
+#include "../MyEditor/Editor.h"
 #include "../TestCases/TestCase.h"
 // #include "glapp.h"
 #include "../MyEngine/Resources/AssetRegistry.h"
@@ -241,24 +242,33 @@ void CoreEngine::Init()
 	}
 
 	glfwMakeContextCurrent(window);
+
+	glfwSetDropCallback(window, [](GLFWwindow*, int count, const char** paths)
+	{
+		for (int i = 0; i < count; ++i)
+			MyEditor::PushOSDropPath(paths[i]);
+	});
+
+
+
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwSetFramebufferSizeCallback(window,
-								   [](GLFWwindow *, int fbw, int fbh)
-								   {
-									   if (fbw <= 0 || fbh <= 0)
-										   return;
+	[](GLFWwindow *, int fbw, int fbh)
+	{
+		if (fbw <= 0 || fbh <= 0)
+			return;
 
-									   // Letterboxed viewport + scale
-									   GLApp::ComputeLetterbox(fbw, fbh);
+		// Letterboxed viewport + scale
+		GLApp::ComputeLetterbox(fbw, fbh);
 
-									   WindowWidth = fbw;
-									   WindowHeight = fbh;
+		WindowWidth = fbw;
+		WindowHeight = fbh;
 
-									   if (auto g = Coordinator::GetInstance()->GetSystem<GraphicsManager>())
-									   {
-										   g->OnResize(fbw, fbh);
-									   }
-								   });
+		if (auto g = Coordinator::GetInstance()->GetSystem<GraphicsManager>())
+		{
+			g->OnResize(fbw, fbh);
+		}
+	});
 
 	int fbw = 0, fbh = 0;
 	glfwGetFramebufferSize(window, &fbw, &fbh);

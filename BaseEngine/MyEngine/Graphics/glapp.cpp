@@ -148,9 +148,30 @@ void GLApp::updateAnimation(Framework::Animation &x, float deltaTime)
 	}
 }
 
+inline AABB PixelsToModelAABB(const AABB& bb, int texW, int texH) {
+	AABB out = bb;
+	if (texW <= 0 || texH <= 0) {            // <- prevent infs
+		out.min = { -0.5f, -0.5f };
+		out.max = { 0.5f,  0.5f };
+		return out;
+	}
+
+	glm::vec2 minPx(bb.min.x, bb.min.y);
+	glm::vec2 maxPx(bb.max.x, bb.max.y);
+
+	glm::vec2 texHalf(texW * 0.5f, texH * 0.5f);
+	glm::vec2 invTex(1.0f / float(texW), 1.0f / float(texH));
+
+	glm::vec2 minLocal = (minPx - texHalf) * invTex;
+	glm::vec2 maxLocal = (maxPx - texHalf) * invTex;
+
+	out.min.x = minLocal.x; out.min.y = minLocal.y;
+	out.max.x = maxLocal.x; out.max.y = maxLocal.y;
+	return out;
+}
+
 // Convert a framebuffer pixel to NDC inside the current game viewport
-static inline glm::vec2 ScreenToNDC(double x, double y)
-{
+glm::vec2 GLApp::ScreenToNDC(double x, double y) {
 	// x,y are OS pixels from glfwGetCursorPos
 	const double rx = (x - GLHelper::GameOffsetX) / (double)GLHelper::GameWidth;
 	const double ry = (y - GLHelper::GameOffsetY) / (double)GLHelper::GameHeight;
@@ -158,8 +179,7 @@ static inline glm::vec2 ScreenToNDC(double x, double y)
 	return glm::vec2(float(rx * 2.0 - 1.0), float(1.0 - ry * 2.0));
 }
 
-static inline glm::mat3 BuildPanZoomNDC(const GLApp::Camera2D &cam)
-{
+glm::mat3 GLApp::BuildPanZoomNDC(const GLApp::Camera2D& cam) {
 	// column-major: glm::mat3(col0, col1, col2)
 	glm::mat3 S(cam.zoom, 0, 0,
 				0, cam.zoom, 0,
@@ -170,8 +190,9 @@ static inline glm::mat3 BuildPanZoomNDC(const GLApp::Camera2D &cam)
 	return T * S; // translate after scaling
 }
 
-void GLApp::drawTrans(Framework::Renderable &x, Framework::Animation &y,
-					  Framework::Transform &z, const glm::mat3 &ZoomNDC)
+
+void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
+	Framework::Transform& z, const glm::mat3& ZoomNDC)
 {
 	float frameWidth = 1.0f / y.columns;
 	float frameHeight = 1.0f / y.rows;
@@ -278,27 +299,30 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 
 	// Draw entities
 // build drawList
-for (auto it : entities) {
-    auto& lt = g_coordinator->GetComponent<LayerTag>(it);
-    if ((lt.mask & includeMask) == 0) continue;
+	for (auto it : entities) {
+		auto& lt = g_coordinator->GetComponent<LayerTag>(it);
+		if ((lt.mask & includeMask) == 0) continue;
 
-    auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
-    auto& re = g_coordinator->GetComponent<Framework::Renderable>(it);
-    if (!tr.isVisible) continue;
+		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
+		auto& re = g_coordinator->GetComponent<Framework::Renderable>(it);
+		if (!tr.isVisible) continue;
 
     // ensure texture is ready BEFORE push
     if (re.textureID == 0 && !re.spriteName.empty()) {
         //re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+		int w = 0, h = 0;
 		re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
+		re.texW = w;
+		re.texH = h;
         re.loadedSpriteName = re.spriteName;
     }
 
-    // if still 0 and you only want textured sprites, you can continue here,
-    // or push anyway if you also render colored quads
-    if (re.textureID == 0) continue;
+		// if still 0 and you only want textured sprites, you can continue here,
+		// or push anyway if you also render colored quads
+		if (re.textureID == 0) continue;
 
-    drawList.push_back(it);
-}
+		drawList.push_back(it);
+	}
 
 	std::stable_sort(drawList.begin(), drawList.end(), [&](Entity a, Entity b) {
 		auto& A = g_coordinator->GetComponent<LayerTag>(a);
@@ -316,7 +340,8 @@ for (auto it : entities) {
 		if (!re.spriteName.empty()) {
 			if (re.textureID == 0) {
 				//re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
-				re.textureID =  mAssets.GetOrLoadTexture(re.spriteName);
+
+				re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
 				re.loadedSpriteName = re.spriteName;
 				re.needsTextureReload = false;
 			}
@@ -361,6 +386,8 @@ for (auto it : entities) {
 
 		}
 		glBindTexture(GL_TEXTURE_2D, re.textureID);
+		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &re.texW);
+		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &re.texH);
 		drawTrans(re, an, tr, PanZoom);
 	}
 	gBatch.Flush(shdrpgms);
@@ -377,29 +404,23 @@ for (auto it : entities) {
 				continue;
 			if (!g_coordinator->HasComponent<Framework::Renderable>(e))
 				continue;
-
+			if (!g_coordinator->HasComponent<AABB>(e)) continue;
 			auto &tr = g_coordinator->GetComponent<Framework::Transform>(e);
 			auto &re = g_coordinator->GetComponent<Framework::Renderable>(e);
-
-			AABB aabb;
-			if (re.mdl_ref == 0)
-			{ // Background quad
-				aabb.min = {-1.f, -1.f};
-				aabb.max = {1.f, 1.f};
-			}
-			else
-			{ // Sprite quad
-				aabb.min = {-0.5f, -0.5f};
-				aabb.max = {0.5f, 0.5f};
-			}
+			auto& an = g_coordinator->GetComponent<Framework::Animation>(e);
+			auto& bb = g_coordinator->GetComponent<AABB>(e);
 
 			glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
 			glm::mat3 modelToNDC = PanZoom * M;
 
 			const bool isHero = re.spriteName.find("hero") != std::string::npos;
 			glm::vec3 color = isHero ? glm::vec3(1, 0, 0) : glm::vec3(0, 1, 0);
-
-			DrawAABB_NDC(modelToNDC, aabb, color);
+			const int columns = std::max(1, an.columns);
+			const int rows = std::max(1, an.rows);
+			const int frameW = (re.texW > 0 ? re.texW / columns : 0);
+			const int frameH = (re.texH > 0 ? re.texH / rows : 0);
+			AABB aabbModel = PixelsToModelAABB(bb, frameW, frameH);
+			DrawAABB_NDC(modelToNDC, aabbModel, color);
 		}
 
 		glLineWidth(1.0f);

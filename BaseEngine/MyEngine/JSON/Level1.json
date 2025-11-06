@@ -26,8 +26,6 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -85,8 +83,6 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false,
@@ -105,26 +101,31 @@
             },
 
             {
-                "render": 
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
                 {
-                    "mdl_ref": 1.0,
-                    "shd_ref": 2.0,
-                    "textureID": 0,
-                    "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png"
-                }
-            },
-
-            {
-                "animation": {
-                    "totalFrames": 3,
-                    "columns": 3,
-                    "rows": 1
-                }
-            },
-            
-            {
-                "script":  
-                    {
+                    "animation": {
+                        "currentFrame": 1,
+                        "elapsedTime": 0.14539051055908204,
+                        "totalFrames": 3,
+                        "columns": 3,
+                        "rows": 1,
+                        "animationSpeed": 12.0
+                    }
+                },
+                {
+                    "script": {
                         "ScriptName": "PlayerScript"
                     }
             },
@@ -142,12 +143,12 @@
                 "AABB":
                 {
                         "min": {
-                            "x": 50.0,
-                            "y": 50.0
+                            "x": 0.0,
+                            "y": -10.0
                         },
                         "max": {
-                            "x": 150.0,
-                            "y": 150.0
+                            "x": 550.0,
+                            "y": 470.0
                         },
                         "width": 50.0,
                         "height": 50.0
@@ -180,8 +181,6 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false,
@@ -234,12 +233,12 @@
                 "AABB":
                 {
                         "min": {
-                            "x": 50.0,
-                            "y": 50.0
+                            "x": 0.0,
+                            "y": 0.0
                         },
                         "max": {
-                            "x": 150.0,
-                            "y": 150.0
+                            "x": 410.0,
+                            "y": 280.0
                         },
                         "width": 50.0,
                         "height": 50.0
@@ -271,8 +270,6 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
                         "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -335,8 +332,6 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "angle_disp": -39.0,
-                        "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -396,8 +391,6 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
