@@ -243,6 +243,60 @@
             return GetOrLoad(full);    
         }
 
+        // Normalize and resolve a key exactly like GetOrLoad, but without loading.
+        static std::string ResolveTextureKeyLikeGetOrLoad(const std::string& pathIn) {
+            namespace fs = std::filesystem;
+            std::error_code ec;
+
+            fs::path p_in = fs::path(pathIn);
+            std::string key = p_in.lexically_normal().string();
+
+            // Same rule as GetOrLoad
+            const std::string kTexturesRoot = "../../MyEngine/Assets/Textures";
+            bool needsResolve = !fs::exists(p_in, ec) || !p_in.has_parent_path();
+            if (needsResolve) {
+                std::string base = p_in.filename().string();
+                if (base.empty()) base = key;
+                std::string resolved = Framework::AssetsManager::FindTextureByFilename(base, kTexturesRoot);
+                if (!resolved.empty())
+                    key = fs::path(resolved).lexically_normal().string();
+            }
+            return key;
+        }
+
+        bool AssetsManager::EvictTexture(const std::string& path)
+        {
+            // Resolve to the cache key we use in GetOrLoad
+            const std::string key = ResolveTextureKeyLikeGetOrLoad(path);
+
+            auto it = s_pathToID.find(key);
+            if (it == s_pathToID.end())
+                return false;
+
+            GLuint oldId = it->second;
+            if (oldId) {
+                glDeleteTextures(1, &oldId);
+            }
+            s_pathToID.erase(it);
+
+            // Remove reverse lookup if present
+            auto it2 = s_idToPath.find(oldId);
+            if (it2 != s_idToPath.end())
+                s_idToPath.erase(it2);
+
+            std::cout << "[Assets] Evicted texture: " << key << "\n";
+            return true;
+        }
+
+        GLuint AssetsManager::ReloadTexture(const std::string& path)
+        {
+            // Evict old if any (safe no-op if none)
+            AssetsManager::EvictTexture(path);
+            // Load again using the normal pipeline (creates a fresh GL id + caches)
+            return AssetsManager::GetOrLoad(path);
+        }
+
+
         bool AssetsManager::InitFonts()
         {
             if (FT_Init_FreeType(&m_ft)) {

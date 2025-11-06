@@ -35,6 +35,10 @@ namespace MyEditor
     static bool s_enabled = true;
     static bool s_restoreNextFrame = false;
 
+    static bool s_showReplaceModal = false;
+    static std::string s_replaceDstPath;   // file being replaced
+    static std::string s_replaceSrcPath;
+
     // --------------------------------------------------------------------
     // PANEL RATIOS
     // --------------------------------------------------------------------
@@ -130,6 +134,132 @@ namespace MyEditor
         return (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp" || ext == "tga" || ext == "dds");
     }
 
+    static void DrawReplaceModal()
+    {
+        if (!s_showReplaceModal) return;
+
+        ImGui::OpenPopup("Replace Texture");
+        if (ImGui::BeginPopupModal("Replace Texture", &s_showReplaceModal, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::TextWrapped("Target:\n%s", s_replaceDstPath.c_str());
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::TextUnformatted("Replacement path (.png/.jpg/.bmp/.tga/.dds):");
+            ImGui::SetNextItemWidth(420.0f);
+            static char buf[512];
+            std::strncpy(buf, s_replaceSrcPath.c_str(), sizeof(buf));
+            buf[sizeof(buf) - 1] = '\0';
+            if (ImGui::InputText("##replPath", buf, IM_ARRAYSIZE(buf)))
+                s_replaceSrcPath = buf;
+
+            // Allow dropping an internal texture payload into the text box to auto-fill
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload* p = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
+                {
+                    const char* src = static_cast<const char*>(p->Data);
+                    if (src && *src) s_replaceSrcPath = src;
+                }
+                ImGui::EndDragDropTarget();
+            }
+
+            ImGui::Spacing();
+            if (ImGui::Button("Replace", ImVec2(120, 0)))
+            {
+                if (!s_replaceDstPath.empty() && !s_replaceSrcPath.empty())
+                {
+                    if (ReplaceTextureFileOnDisk_AndRefreshAll(s_replaceDstPath, s_replaceSrcPath))
+                    {
+                        for (auto& it : s_dirEntries)
+                            if (it.fullPath == s_replaceDstPath) { it.triedLoad = false; it.texID = 0; break; }
+
+                        RefreshCurrentDir();
+                        s_showReplaceModal = false;
+                    }
+                }
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0))) s_showReplaceModal = false;
+
+            ImGui::EndPopup();
+        }
+    }   
+
+    // ============================================================================
+// Replace file on disk and hot-swap everywhere using AssetsManager API.
+//  - Copies src -> dst
+//  - AssetsManager::ReloadTexture(dst) produces a NEW GL id and updates caches
+//  - We assign that id to thumbnails and any Renderable using the file
+//  - No manual glDelete needed here (EvictTexture already deletes the old id)
+// ============================================================================
+    static bool ReplaceTextureFileOnDisk_AndRefreshAll(const std::string& dstPath,
+        const std::string& srcPath)
+    {
+        namespace fs = std::filesystem;
+        std::error_code ec;
+
+        if (dstPath.empty() || srcPath.empty()) return false;
+        if (!fs::exists(srcPath, ec)) return false;
+
+        auto lower = [](std::string s) { for (auto& c : s) c = (char)tolower(c); return s; };
+        std::string ext = lower(fs::path(srcPath).extension().string());
+        if (!(ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".tga" || ext == ".dds"))
+            return false;
+
+        // 1) Overwrite the file on disk
+        fs::copy_file(srcPath, dstPath, fs::copy_options::overwrite_existing, ec);
+        if (ec) {
+            std::cerr << "[Project] Replace failed: " << srcPath << " -> " << dstPath
+                << " (" << ec.message() << ")\n";
+            return false;
+        }
+
+        // 2) Ask AssetsManager to evict+reload; this gives us the NEW GL id and
+        //    ensures subsequent GetOrLoad(dstPath) returns this same new id.
+        GLuint newTex = Framework::AssetsManager::ReloadTexture(dstPath);
+        if (!newTex) {
+            std::cerr << "[Project] Reload failed for: " << dstPath << "\n";
+            return false;
+        }
+
+        // 3) Update Project thumbnails to the new id (ImGui updates this frame)
+        for (auto& it : s_dirEntries) {
+            if (!it.isDir && it.fullPath == dstPath) {
+                it.texID = newTex;
+                it.triedLoad = true;
+            }
+        }
+
+        // 4) Update ALL scene users that reference this path (by exact path or same filename)
+        if (auto* coord = Coordinator::GetInstance()) {
+            for (auto e : coord->GetAllEntities()) {
+                if (coord->HasComponent<Framework::Renderable>(e)) {
+                    auto& r = coord->GetComponent<Framework::Renderable>(e);
+                    const std::string rBase = fs::path(r.spriteName).filename().string();
+                    const std::string dBase = fs::path(dstPath).filename().string();
+                    const bool matches = (!r.spriteName.empty() &&
+                        (r.spriteName == dstPath || rBase == dBase));
+                    if (matches) {
+                        r.spriteName = dstPath;   // normalize to the definitive path
+                        r.textureID = newTex;    // swap immediately; old id was deleted by EvictTexture
+                        r.needsTextureReload = false;
+                    }
+                }
+            }
+        }
+
+        // 5) Refresh list (labels/ordering). IDs already swapped so visuals are instant.
+        RefreshCurrentDir();
+
+        std::cout << "[Project] Replaced & hot-swapped (AssetMgr): " << dstPath
+            << "  <=  " << srcPath << "\n";
+        return true;
+    }
+
+
     
     static void RefreshCurrentDir()
     {
@@ -187,31 +317,70 @@ namespace MyEditor
         item.texID = Framework::AssetsManager::GetOrLoad(item.fullPath);
     }
 
+    // ============================================================================
+    // Replace a texture file on disk, then reload it everywhere in editor/runtime.
+    // Safe version that doesn't need access to AssetsManager internals.
+    // ============================================================================
+    static bool ReplaceTextureFileOnDisk(const std::string& dstPath, const std::string& srcPath)
+    {
+        namespace fs = std::filesystem;
+        std::error_code ec;
+
+        if (dstPath.empty() || srcPath.empty()) return false;
+        if (!fs::exists(srcPath, ec)) return false;
+
+        // --- Validate image extension ---
+        auto extLower = [](std::string s) {
+            for (auto& c : s) c = (char)tolower(c);
+            return s;
+            };
+        std::string srcExt = extLower(fs::path(srcPath).extension().string());
+        if (!(srcExt == ".png" || srcExt == ".jpg" || srcExt == ".jpeg" ||
+            srcExt == ".bmp" || srcExt == ".tga" || srcExt == ".dds"))
+            return false;
+
+        // --- 1) Copy new file over existing one ---
+        fs::copy_file(srcPath, dstPath, fs::copy_options::overwrite_existing, ec);
+        if (ec) {
+            std::cerr << "[Project] Replace failed: " << srcPath << " -> " << dstPath
+                << " (" << ec.message() << ")\n";
+            return false;
+        }
+
+        // --- 2) Force reload of new texture on next frame ---
+        // We don't need to access the internal cache; just reload the new file.
+        GLuint newTex = Framework::AssetsManager::GetOrLoad(dstPath);
+
+        // Bind it once to ensure GL has the new texture data
+        glBindTexture(GL_TEXTURE_2D, newTex);
+
+        std::cout << "[Project] Replaced texture file: " << dstPath
+            << " with " << srcPath << "\n";
+        return true;
+    }
+
+
+
+    // ===================== ProjectPanel =====================
     static void ProjectPanel(Entity selectedEntity)
     {
-        // top bar: path + refresh + view size
+        // ── Top bar ────────────────────────────────────────────────
         {
-            if (ImGui::Button("Refresh"))
-                RefreshCurrentDir();
+            if (ImGui::Button("Refresh")) RefreshCurrentDir();
             ImGui::SameLine();
-
-            // breadcrumb-like display (simple version)
             ImGui::TextUnformatted(s_currentDir.c_str());
             ImGui::SameLine();
-
             ImGui::SetNextItemWidth(120.0f);
             ImGui::SliderFloat("Size", &s_thumbSize, 40.0f, 160.0f, "%.0f");
         }
-
         ImGui::Separator();
 
-        // ----- OS → Editor imports (copy files into the real folder shown in the Project panel)
+        // ── OS drag-and-drop into project panel ───────────────────
         if (!s_pendingOSDrops.empty())
         {
             namespace fs = std::filesystem;
             std::error_code ec;
 
-            // Resolve destination directory from s_currentDir (absolute & canonical)
             fs::path dstDir = fs::weakly_canonical(fs::absolute(s_currentDir), ec);
             if (!ec && !dstDir.empty())
             {
@@ -225,51 +394,48 @@ namespace MyEditor
                             ext == ".bmp" || ext == ".tga" || ext == ".dds";
                     };
 
-                int imported = 0;
-
+                int changed = 0;
                 for (const std::string& srcStr : s_pendingOSDrops)
                 {
                     fs::path src = fs::weakly_canonical(fs::path(srcStr), ec);
                     if (ec || src.empty() || !fs::exists(src, ec)) continue;
-
-                    // Build unique destination filename
                     fs::path dst = dstDir / src.filename();
-                    int suffix = 1;
-                    while (fs::exists(dst, ec))
-                    {
-                        auto stem = dst.stem().string();
-                        auto ext = dst.extension().string();
-                        size_t pos = stem.rfind(" (");
-                        if (pos != std::string::npos && !stem.empty() && stem.back() == ')')
-                            stem = stem.substr(0, pos);
-                        dst = dstDir / fs::path(stem + " (" + std::to_string(suffix++) + ")" + ext);
-                    }
 
-                    // Copy onto disk
-                    if (fs::copy_file(src, dst, fs::copy_options::none, ec))
+                    if (fs::exists(dst, ec))
                     {
-                        ++imported;
-                        // Preload thumbnails for images
+                        // same name → replace
                         if (IsImageExt(dst))
-                            Framework::AssetsManager::GetOrLoad(dst.lexically_normal().string());
-                        std::cout << "[Project] Imported: " << dst.string() << "\n";
+                        {
+                            if (ReplaceTextureFileOnDisk_AndRefreshAll(dst.string(), src.string()))
+                            {
+                                ++changed;
+                                std::cout << "[Project] Replaced (OS drop): " << dst << " <= " << src << "\n";
+                            }
+                        }
+                        else
+                        {
+                            fs::copy_file(src, dst, fs::copy_options::overwrite_existing, ec);
+                            if (!ec) ++changed;
+                        }
                     }
                     else
                     {
-                        std::cerr << "[Project] Copy failed: " << src.string()
-                            << " -> " << dst.string() << " (" << ec.message() << ")\n";
+                        // new file → import
+                        fs::copy_file(src, dst, fs::copy_options::none, ec);
+                        if (!ec)
+                        {
+                            ++changed;
+                            if (IsImageExt(dst))
+                                Framework::AssetsManager::GetOrLoad(dst.lexically_normal().string());
+                        }
                     }
                 }
-
-                if (imported > 0)
-                    RefreshCurrentDir();  // show new files immediately
+                if (changed > 0) RefreshCurrentDir();
             }
-
             s_pendingOSDrops.clear();
         }
 
-
-        // scrolling region
+        // ── Grid ──────────────────────────────────────────────────
         ImGui::BeginChild("AssetsGrid", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 
         float availX = ImGui::GetContentRegionAvail().x;
@@ -278,157 +444,107 @@ namespace MyEditor
         if (cols < 1) cols = 1;
 
         int itemIndex = 0;
-
         for (auto& item : s_dirEntries)
         {
-            // start new row
-            if (itemIndex % cols != 0)
-                ImGui::SameLine();
-
+            if (itemIndex % cols != 0) ImGui::SameLine();
             ImGui::BeginGroup();
             ImGui::PushID(itemIndex);
 
-            // 1) Draw the thumbnail
             ImVec2 thumbSize(s_thumbSize, s_thumbSize);
+            bool clicked = false;
 
             if (item.isDir)
             {
-                // Folder: just draw a big button
                 if (ImGui::Button(item.name.c_str(), thumbSize))
                 {
-                    // go into folder
                     s_currentDir = item.fullPath;
                     RefreshCurrentDir();
-                    ImGui::PopID();
-                    ImGui::EndGroup();
-                    // since we changed directory, we shouldn't keep drawing old list
-                    ImGui::EndChild();
-                    return;
+                    ImGui::PopID(); ImGui::EndGroup(); ImGui::EndChild(); return;
                 }
             }
             else
             {
-                // File
                 EnsureThumbnailLoaded(item);
-
-                bool clicked = false;
 
                 if (item.texID != 0)
                 {
-                    ImTextureID tid = (ImTextureID)(intptr_t)item.texID;
-
-                    // make a unique ID for ImGui so it doesn't clash with other items
                     std::string btnId = "##assetTex_" + item.fullPath;
-
-                    clicked = ImGui::ImageButton(
-                        btnId.c_str(),      // <- string id (required by your ImGui)
-                        tid,                // texture
-                        ImVec2(s_thumbSize, s_thumbSize),
-                        ImVec2(0, 1),       // uv0  (flip Y if your textures are upside-down)
-                        ImVec2(1, 0)        // uv1
-                        // you can add frame_padding, bg_col, tint_col if needed
-                    );
-
+                    clicked = ImGui::ImageButton(btnId.c_str(), (ImTextureID)(intptr_t)item.texID,
+                        ImVec2(s_thumbSize, s_thumbSize), ImVec2(0, 1), ImVec2(1, 0));
                 }
                 else
                 {
-                    // no texture -> generic button with extension
-                    if (ImGui::Button(item.name.c_str(), thumbSize))
-                        clicked = true;
+                    if (ImGui::Button(item.name.c_str(), thumbSize)) clicked = true;
                 }
 
-                // Make image files draggable
-                if (IsImageExt(item.fullPath)) {
-                    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-                        // Send full path as payload. Keep the type string in sync with the Inspector target.
+                // Allow drag source
+                auto IsImageExtStr = [](const std::string& s)
+                    {
+                        std::string ext;
+                        auto dot = s.find_last_of('.');
+                        if (dot != std::string::npos) ext = s.substr(dot);
+                        for (auto& c : ext) c = (char)tolower(c);
+                        return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
+                            ext == ".bmp" || ext == ".tga" || ext == ".dds";
+                    };
+
+                if (IsImageExtStr(item.fullPath))
+                {
+                    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                    {
                         const char* path = item.fullPath.c_str();
                         ImGui::SetDragDropPayload("ASSET_TEXTURE", path, (int)std::strlen(path) + 1);
-                        ImGui::TextUnformatted(("Texture: " + item.name).c_str()); // nice tooltip while dragging
+                        ImGui::TextUnformatted(("Texture: " + item.name).c_str());
                         ImGui::EndDragDropSource();
                     }
-                }
 
-
-
-                if (clicked)
-                {
-                    // Check if this is a prefab JSON file
-                    bool isPrefabFile = (item.fullPath.find("/Prefabs/") != std::string::npos ||
-                        item.fullPath.find("\\Prefabs\\") != std::string::npos) &&
-                        (item.fullPath.find(".json") != std::string::npos);
-
-                    if (isPrefabFile)
+                    // Drag target: drop one image onto another to replace
+                    if (ImGui::BeginDragDropTarget())
                     {
-                        // Instantiate prefab
-                        PrefabManager prefabMgr;
-
-                        // Extract prefab name from path
-                        size_t lastSlash = item.fullPath.find_last_of("/\\");
-                        size_t lastDot = item.fullPath.find_last_of(".");
-                        std::string prefabName = item.fullPath.substr(lastSlash + 1, lastDot - lastSlash - 1);
-
-                        auto entity = prefabMgr.InstantiatePrefab(prefabName);
-                        if (entity.has_value()) {
-                            std::cout << "[Project] Instantiated prefab: " << prefabName << " (Entity " << entity.value() << ")" << std::endl;
-                        }
-                    }
-                    // if an entity is selected, assign this asset to its Renderable (for textures)
-                    else if (selectedEntity != INVALID_ENTITY)
-                    {
-                        auto* g_coordinator = Coordinator::GetInstance();
-                        if (g_coordinator && g_coordinator->HasComponent<Framework::Renderable>(selectedEntity))
+                        if (const ImGuiPayload* p = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
                         {
-                            auto& rend = g_coordinator->GetComponent<Framework::Renderable>(selectedEntity);
-                            rend.spriteName = item.fullPath;                       // or make it relative
-                            rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
-                        }
-                    }
-                }
-
-                // optional: right click popup to "Ping", "Copy path", etc.
-                if (ImGui::BeginPopupContextItem("AssetContext"))
-                {
-                    if (ImGui::MenuItem("Copy path"))
-                    {
-                        ImGui::SetClipboardText(item.fullPath.c_str());
-                    }
-                    if (selectedEntity != INVALID_ENTITY)
-                    {
-                        if (ImGui::MenuItem("Assign to selected"))
-                        {
-                            auto* g_coordinator = Coordinator::GetInstance();
-                            if (g_coordinator && g_coordinator->HasComponent<Framework::Renderable>(selectedEntity))
+                            const char* src = static_cast<const char*>(p->Data);
+                            if (src && *src)
                             {
-                                auto& rend = g_coordinator->GetComponent<Framework::Renderable>(selectedEntity);
-                                rend.spriteName = item.fullPath;
-                                rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
+                                std::string srcPath = src;
+                                std::string dstPath = item.fullPath;
+                                if (srcPath != dstPath)
+                                    ReplaceTextureFileOnDisk_AndRefreshAll(dstPath, srcPath);
                             }
                         }
+                        ImGui::EndDragDropTarget();
                     }
-                    ImGui::EndPopup();
+                }
+
+                // Left-click assigns to selected entity
+                if (clicked && selectedEntity != INVALID_ENTITY)
+                {
+                    auto* coord = Coordinator::GetInstance();
+                    if (coord && coord->HasComponent<Framework::Renderable>(selectedEntity))
+                    {
+                        auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
+                        rend.spriteName = item.fullPath;
+                        rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
+                    }
                 }
             }
 
-            // 2) Draw label under thumb (clipped)
+            // label
             ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + s_thumbSize);
-
-            // aesthetic purpose
             std::string displayName = item.name;
-            if (displayName.ends_with(".json")) {
-                displayName = displayName.substr(0, displayName.length() - 5);
-            }
-
+            if (displayName.ends_with(".json")) displayName.resize(displayName.size() - 5);
             ImGui::TextUnformatted(displayName.c_str());
             ImGui::PopTextWrapPos();
 
             ImGui::PopID();
             ImGui::EndGroup();
-
-            itemIndex++;
+            ++itemIndex;
         }
 
         ImGui::EndChild();
     }
+
+
 
     // take current ECS and remember it as "start state"
     static void CaptureEditorBaseline()

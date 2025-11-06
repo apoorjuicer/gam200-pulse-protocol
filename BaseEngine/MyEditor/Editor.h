@@ -43,6 +43,10 @@ namespace MyEditor {
 
     void EnqueueExternalDrop(const std::vector<std::string>& paths);
     void PushOSDropPath(const char* path);
+    static bool ReplaceTextureFileOnDisk(const std::string& dstPath, const std::string& srcPath);
+    static void RefreshCurrentDir();
+    static bool ReplaceTextureFileOnDisk_AndRefreshAll(const std::string& dstPath,
+        const std::string& srcPath);
 
     // Returns the middle "game" rectangle in FRAMEBUFFER PIXELS, computed from current panel sizes
     GameViewport ComputeMiddleGameViewportPixels(GLFWwindow* window, bool keep_16x9 = true);

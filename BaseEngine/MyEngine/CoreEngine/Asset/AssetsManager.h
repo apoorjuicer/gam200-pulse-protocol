@@ -123,6 +123,9 @@ namespace Framework {
         static GLuint GetOrLoadByFilename(std::string_view filename,
             const std::string& root = "../../MyEngine/Assets/Textures");
 
+        static bool EvictTexture(const std::string& path);
+        static GLuint ReloadTexture(const std::string& path);
+
 
         // --------------------------------------------------------------------
         // FONT (FreeType)
