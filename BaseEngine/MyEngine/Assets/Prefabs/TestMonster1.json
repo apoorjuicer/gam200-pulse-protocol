@@ -3,12 +3,12 @@
         {
             "transform": {
                 "position": {
-                    "x": 68.3076171875,
-                    "y": -36.923065185546878
+                    "x": 0.0,
+                    "y": 0.0
                 },
                 "scale": {
-                    "x": 1600.0,
-                    "y": 900.0
+                    "x": 200.0,
+                    "y": 200.0
                 },
                 "rotation": {
                     "x": 0.0,
@@ -24,7 +24,7 @@
                 "mdl_ref": 0.0,
                 "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg",
+                "spriteName": "C:\\Users\\User\\Desktop\\project_repos\\Bloop_CustomEngine\\BaseEngine\\MyEngine\\Assets\\Textures\\Enemies\\RedGorillaEnemy.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -40,7 +40,7 @@
                 "totalFrames": 1,
                 "columns": 1,
                 "rows": 1,
-                "animationSpeed": 2.0
+                "animationSpeed": 12.0
             }
         }
     ]

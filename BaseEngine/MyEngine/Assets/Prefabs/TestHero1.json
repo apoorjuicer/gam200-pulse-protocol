@@ -3,19 +3,17 @@
         {
             "transform": {
                 "position": {
-                    "x": -300.0,
-                    "y": 260.0
+                    "x": -800.0,
+                    "y": 0.0
                 },
                 "scale": {
-                    "x": 250.0,
-                    "y": 250.0
+                    "x": 50.0,
+                    "y": 50.0
                 },
                 "rotation": {
                     "x": 0.0,
                     "y": 0.0
                 },
-                "angle_disp": 0.0,
-                "angle_speed": 0.0,
                 "isVisible": true,
                 "visibilityTimer": 0.0,
                 "autoHide": false
@@ -25,7 +23,6 @@
             "render": {
                 "mdl_ref": 1.0,
                 "shd_ref": 2.0,
-                "textureID": 259,
                 "useTexture": true,
                 "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
                 "tintColor": {
@@ -38,12 +35,12 @@
         },
         {
             "animation": {
-                "currentFrame": 2,
-                "elapsedTime": 0.10273461043834686,
+                "currentFrame": 0,
+                "elapsedTime": 0.005202325526624918,
                 "totalFrames": 3,
                 "columns": 3,
                 "rows": 1,
-                "animationSpeed": 2.0
+                "animationSpeed": 24.0
             }
         }
     ]

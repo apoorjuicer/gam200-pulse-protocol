@@ -61,7 +61,7 @@ void GUIManager::Update(float dt) {
                             }
                         }
                     }
-                    return true; // Name doesn't exist anymore, remove it
+                    return true;
                 }),
             createdEntityNamesByGUI.end()
         );

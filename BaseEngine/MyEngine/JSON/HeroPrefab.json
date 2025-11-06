@@ -53,6 +53,30 @@
                 {
                     "ScriptName": "PlayerScript"
                 }
+        },
+
+        {
+            "Health": {
+                "hp": 100,
+                "maxHp": 100,
+                "damage": 10,
+                "isAlive": true
+            }
+        },
+
+        {
+            "AABB": {
+                "min": {
+                    "x": 100.0,
+                    "y": 100.0
+                },
+                "max": {
+                    "x": 150.0,
+                    "y": 150.0
+                },
+                "width": 100.0,
+                "height": 100.0
+            }
         }
     ]
 }

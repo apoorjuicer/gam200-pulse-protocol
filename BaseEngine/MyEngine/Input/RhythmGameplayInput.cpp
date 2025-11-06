@@ -68,6 +68,10 @@ void RhythmGameplayInput::Initialize()
 
 void RhythmGameplayInput::Update(float deltaTime)
 {
+    if (!Engine->IsPlaying()) {
+        return;
+    }
+
     auto *g_coordinator = Coordinator::GetInstance();
 
     // FIND FeedbackBar on first update
@@ -189,9 +193,9 @@ void RhythmGameplayInput::processRhythmInputs()
     auto *g_coordinator = Coordinator::GetInstance();
     auto inputMgr = g_coordinator->GetSystem<InputManager>();
 
-    // if (Engine->IsPaused()) {
-    //     return;
-    // }
+     if (!Engine->IsPlaying()) {
+         return;
+     }
 
     const int rhythmKeys[] = {GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D};
     const char *keyNames[] = {"W", "A", "S", "D"};
@@ -378,6 +382,10 @@ void RhythmGameplayInput::processRhythmTiming(int key)
 
 void RhythmGameplayInput::checkForMissedBeat()
 {
+    if (!Engine->IsPlaying()) {
+        return;
+    }
+
     if (!canInput)
         return;
     auto *g_coordinator = Coordinator::GetInstance();

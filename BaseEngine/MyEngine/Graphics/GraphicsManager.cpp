@@ -282,6 +282,16 @@ void GraphicsManager::Update()
             std::string topSystem = "None";
             double topPercentage = 0.0;
 
+            if (!profiles.empty()) {
+                // Find the system with highest percentage
+                for (const auto& profile : profiles) {
+                    if (profile.second.percentage > topPercentage) {
+                        topPercentage = profile.second.percentage;
+                        topSystem = profile.first;  // Use the key (system name)
+                    }
+                }
+            }
+
             // render top system below FPS text
             std::ostringstream topText;
             topText << topSystem << ": " << std::fixed << std::setprecision(2) << topPercentage << "%";

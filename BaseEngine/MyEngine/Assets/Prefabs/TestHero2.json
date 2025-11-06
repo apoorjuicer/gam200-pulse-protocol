@@ -1,21 +1,24 @@
 {
     "components": [
         {
+            "Typing": {
+                "Type": "Player"
+            }
+        },
+        {
             "transform": {
                 "position": {
-                    "x": -585.0,
+                    "x": -800.0,
                     "y": 0.0
                 },
                 "scale": {
-                    "x": 500.0,
-                    "y": 500.0
+                    "x": 50.0,
+                    "y": 50.0
                 },
                 "rotation": {
                     "x": 0.0,
                     "y": 0.0
                 },
-                "angle_disp": 0.0,
-                "angle_speed": 0.0,
                 "isVisible": true,
                 "visibilityTimer": 0.0,
                 "autoHide": false
@@ -25,7 +28,6 @@
             "render": {
                 "mdl_ref": 1.0,
                 "shd_ref": 2.0,
-                "textureID": 259,
                 "useTexture": true,
                 "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
                 "tintColor": {
@@ -38,12 +40,43 @@
         },
         {
             "animation": {
-                "currentFrame": 2,
-                "elapsedTime": 0.33346331119537356,
+                "currentFrame": 0,
+                "elapsedTime": 0.015287214890122414,
                 "totalFrames": 3,
                 "columns": 3,
                 "rows": 1,
-                "animationSpeed": 2.0
+                "animationSpeed": 24.0
+            }
+        },
+        {
+            "script": {
+                "ScriptName": "PlayerScript"
+            }
+        },
+        {
+            "name": {
+                "name": "Jeff"
+            }
+        },
+        {
+            "Health": {
+                "hp": 5,
+                "damage": 1,
+                "isAlive": true
+            }
+        },
+        {
+            "AABB": {
+                "min": {
+                    "x": 50.0,
+                    "y": 50.0
+                },
+                "max": {
+                    "x": 150.0,
+                    "y": 150.0
+                },
+                "width": 50.0,
+                "height": 50.0
             }
         }
     ]

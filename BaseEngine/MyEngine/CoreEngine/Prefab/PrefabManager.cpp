@@ -42,7 +42,13 @@ bool PrefabManager::SaveEntityAsPrefab(Entity entity, std::string const& prefabN
 
 std::optional<Entity> PrefabManager::InstantiatePrefab(std::string const& prefabName)
 {
-	std::string prefabPath = GetPrefabPath(prefabName);
+	// strip .json extension if prsent
+	std::string cleanName = prefabName;
+	if (cleanName.ends_with(".json")) {
+		cleanName = cleanName.substr(0, cleanName.length() - 5);
+	}
+
+	std::string prefabPath = GetPrefabPath(cleanName);
 
 	// if the prefab path is wrong/does not exist
 	if (!std::filesystem::exists(prefabPath)) {
@@ -67,9 +73,17 @@ std::optional<Entity> PrefabManager::InstantiatePrefab(std::string const& prefab
 		if (coord->HasComponent<Name>(entity)) {
 			coord->GetComponent<Name>(entity).name = cleanName;
 		}
+		else {
+			// else add Name component if it doesn't exist
+			Name nm;
+			nm.name = cleanName;
+			coord->AddComponent<Name>(entity, nm);
+		}
 
-		std::cout << "[PrefabManager] Successfully instantiated: " << cleanName
-			<< " (Entity " << entity << ")" << std::endl;
+		//std::cout << "[PrefabManager] Successfully instantiated: " << cleanName << " (Entity " << entity << ")" << std::endl;
+	}
+	else {
+		std::cerr << "[PrefabManager] Failed to create entity from: " << prefabPath << std::endl;
 	}
 
 	return result;

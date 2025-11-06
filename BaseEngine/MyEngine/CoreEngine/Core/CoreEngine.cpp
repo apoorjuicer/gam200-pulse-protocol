@@ -890,3 +890,13 @@ void CoreEngine::RestartRuntimeForPlay()
 	//	rhythm->Initialize();
 	//}
 }
+
+void CoreEngine::PauseGame()
+{
+	m_isPlaying = false;
+}
+
+void CoreEngine::ResumeGame()
+{
+	m_isPlaying = true;
+}

@@ -11,7 +11,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 5.538482666015625,
+                            "x": 0.0,
                             "y": 0.0
                         },
                         "scale": {
@@ -95,12 +95,12 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 2,
-                        "elapsedTime": 0.034742508083581927,
+                        "currentFrame": 1,
+                        "elapsedTime": 0.08074472099542618,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
-                        "animationSpeed": 24.0
+                        "animationSpeed": 2.0
                     }
                 },
                 {
@@ -389,130 +389,6 @@
                         "actionType": "DestroyEntity",
                         "entityJsonPath": "",
                         "isEnabled": true
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "Typing": {
-                        "Type": "Player"
-                    }
-                },
-                {
-                    "transform": {
-                        "position": {
-                            "x": -300.0,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.015886498615145685,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "PlayerScript"
-                    }
-                },
-                {
-                    "name": {
-                        "name": "GUICreated_Player_19"
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "Typing": {
-                        "Type": "Player"
-                    }
-                },
-                {
-                    "transform": {
-                        "position": {
-                            "x": -300.0,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.01394639816135168,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "PlayerScript"
-                    }
-                },
-                {
-                    "name": {
-                        "name": "GUICreated_Player_20"
                     }
                 }
             ]

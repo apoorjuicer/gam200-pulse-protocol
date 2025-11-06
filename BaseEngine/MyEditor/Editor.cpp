@@ -723,14 +723,47 @@ namespace MyEditor
                 }
 
                 // Left-click assigns to selected entity
-                if (clicked && selectedEntity != INVALID_ENTITY)
+                if (clicked)
                 {
-                    auto* coord = Coordinator::GetInstance();
-                    if (coord && coord->HasComponent<Framework::Renderable>(selectedEntity))
+                    // Check if this is a prefab (.json file)
+                    if (item.fullPath.ends_with(".json"))
                     {
-                        auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
-                        rend.spriteName = item.fullPath;
-                        rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
+                        // Instantiate prefab as a new entity
+                        PrefabManager prefabMgr;
+
+                        // Get just the filename without extension for the prefab name
+                        std::string prefabName = item.name;
+                        if (prefabName.ends_with(".json")) {
+                            prefabName = prefabName.substr(0, prefabName.length() - 5);
+                        }
+
+                        auto result = prefabMgr.InstantiatePrefab(prefabName);
+                        if (result.has_value()) {
+                            Entity newEntity = result.value();
+
+                            // Add to hierarchy list so it shows up
+                            entityDisplayOrder.push_back(newEntity);
+
+                            // Select the newly created entity
+                            selectedEntity = newEntity;
+
+                            std::cout << "[Editor] Instantiated prefab: " << prefabName
+                                << " (Entity " << newEntity << ")" << std::endl;
+                        }
+                        else {
+                            std::cerr << "[Editor] Failed to instantiate prefab: " << prefabName << std::endl;
+                        }
+                    }
+                    else if (selectedEntity != INVALID_ENTITY)
+                    {
+                        // For non-prefab files (textures), assign to selected entity
+                        auto* coord = Coordinator::GetInstance();
+                        if (coord && coord->HasComponent<Framework::Renderable>(selectedEntity))
+                        {
+                            auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
+                            rend.spriteName = item.fullPath;
+                            rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
+                        }
                     }
                 }
             }
@@ -1115,13 +1148,20 @@ namespace MyEditor
                     }
                 }
 
-                ImVec2 playTextSize = ImGui::CalcTextSize("Play");
-                ImVec2 stopTextSize = ImGui::CalcTextSize("Stop");
-                ImVec2 playButtonSize = ImVec2(playTextSize.x + framePadding.x * 2, 0);
-                ImVec2 stopButtonSize = ImVec2(stopTextSize.x + framePadding.x * 2, 0);
+                // Calculate button sizes
+                const char* playStopLabel = s_isPlaying ? "Stop" : "Play";
+                ImVec2 playStopTextSize = ImGui::CalcTextSize(playStopLabel);
+
+                // Make Pause button show "Resume" when paused
+                static bool isPaused = false;
+                const char* pauseLabel = isPaused ? "Resume" : "Pause";
+                ImVec2 pauseTextSize = ImGui::CalcTextSize(pauseLabel);
+
+                ImVec2 playStopButtonSize = ImVec2(playStopTextSize.x + framePadding.x * 2 + 20.0f, 0);
+                ImVec2 pauseButtonSize = ImVec2(pauseTextSize.x + framePadding.x * 2 + 20.0f, 0);
 
                 float windowWidth = ImGui::GetWindowWidth();
-                float totalButtonWidth = playButtonSize.x + stopButtonSize.x + itemSpacing;
+                float totalButtonWidth = playStopButtonSize.x + pauseButtonSize.x + itemSpacing;
                 float offset = (windowWidth - totalButtonWidth) * 0.5f;
 
                 // Stay on same line, position at centered offset
@@ -1133,26 +1173,59 @@ namespace MyEditor
                 }
 
                 // --- Play ---
-                if (ImGui::Button("Play", playButtonSize))
+                if (ImGui::Button(playStopLabel, playStopButtonSize))
                 {
-                    // restore ECS snapshot
-                    if (!s_hasEditorBaseline)
-                        CaptureEditorBaseline();
-                    else
+                    if (!s_isPlaying) {
+                        // START PLAYING
+                        if (!s_hasEditorBaseline) {
+                            CaptureEditorBaseline();
+                        }
+                        Engine->PlayGame();
+                        s_isPlaying = true;
+                        isPaused = false; // Reset pause when starting fresh
+                        std::cout << "[Editor] Play Started\n";
+                    }
+                    else {
+                        // STOP PLAYING & RESTORE
+                        Engine->StopGame();
+                        s_isPlaying = false;
+                        isPaused = false;
                         RestoreEditorBaseline();
-
-                    Engine->PlayGame();
-                    s_isPlaying = true;
+                        s_hasEditorBaseline = false;
+                        std::cout << "[Editor] Stopped - Scene Restored\n";
+                    }
                 }
 
                 ImGui::SameLine();
 
-                // --- Stop ---
-                if (ImGui::Button("Stop", stopButtonSize))
+                // --- Pause ---
+                
+                if (!s_isPlaying) {
+                    ImGui::BeginDisabled(); // Grey out when not playing
+                }
+                
+                if (ImGui::Button(pauseLabel, pauseButtonSize))
                 {
-                    Engine->StopGame();
-                    s_isPlaying = false;
-                    /*RestoreEditorBaseline();*/
+                    if (s_isPlaying) {
+                        isPaused = !isPaused;
+                        
+                        if (isPaused) {
+                            Engine->PauseGame();
+                            std::cout << "[Editor] Game Paused\n";
+                        } else {
+                            Engine->ResumeGame();
+                            std::cout << "[Editor] Game Resumed\n";
+                        }
+                    }
+                }
+
+                if (!s_isPlaying) {
+                    ImGui::EndDisabled(); // End grey out
+                }
+
+                // Show tooltip when hovering over disabled Pause button
+                if (!s_isPlaying && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+                    ImGui::SetTooltip("Start playing to enable Pause");
                 }
 
                 ImGui::PopStyleVar();
@@ -2007,33 +2080,11 @@ namespace MyEditor
 
                     if (ImGui::Button("Save as Prefab")) {
                         if (strlen(prefabNameBuffer) > 0) {
-                            auto* coord = Coordinator::GetInstance();
-
-                            // Create temporary entity with ONLY safe components
-                            Entity tempEntity = coord->CreateEntity();
-
-                            // Copy ONLY Transform, Renderable, Animation
-                            if (coord->HasComponent<Framework::Transform>(selectedEntity)) {
-                                coord->AddComponent(tempEntity, coord->GetComponent<Framework::Transform>(selectedEntity));
-                            }
-
-                            if (coord->HasComponent<Framework::Renderable>(selectedEntity)) {
-                                coord->AddComponent(tempEntity, coord->GetComponent<Framework::Renderable>(selectedEntity));
-                            }
-
-                            if (coord->HasComponent<Framework::Animation>(selectedEntity)) {
-                                coord->AddComponent(tempEntity, coord->GetComponent<Framework::Animation>(selectedEntity));
-                            }
-
-                            // Save the temp entity (only has safe components)
                             PrefabManager prefabMgr;
-                            bool success = prefabMgr.SaveEntityAsPrefab(tempEntity, prefabNameBuffer);
-
-                            // Clean up temp entity
-                            coord->DestroyEntity(tempEntity);
+                            bool success = prefabMgr.SaveEntityAsPrefab(selectedEntity, prefabNameBuffer);
 
                             if (success) {
-                                std::cout << "[Editor] Saved prefab: " << prefabNameBuffer << std::endl;
+                                std::cout << "[Editor] Saved prefab: " << prefabNameBuffer << " with ALL components" << std::endl;
                                 memset(prefabNameBuffer, 0, sizeof(prefabNameBuffer));
                             }
                             else {

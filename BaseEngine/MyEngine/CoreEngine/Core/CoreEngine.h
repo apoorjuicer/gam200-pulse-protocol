@@ -51,6 +51,8 @@ public:
 	GLFWwindow *GetWindow() const { return window; }
 
 	void PlayGame(); // play button functionality
+	void PauseGame(); // pause btn functionality
+	void ResumeGame(); // resume btn functionality
 	void StopGame(); // stop button functionality
 
 	void RestartRuntimeForPlay();
