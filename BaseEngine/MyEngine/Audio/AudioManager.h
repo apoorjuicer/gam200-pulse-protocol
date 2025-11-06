@@ -60,7 +60,6 @@ public:
     void RestartBGM();
 
     // Pause and Play
-    void PauseBGM();
     void SetPaused(bool paused);
     bool IsPaused() const;
 

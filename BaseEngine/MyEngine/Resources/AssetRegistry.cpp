@@ -25,8 +25,6 @@
 		}
 	}
 
-
-
 	/*Audio Resource*/
 
 	void AudioResource::Deserialize(const rapidjson::Value& in_obj) {
@@ -63,9 +61,23 @@
 			return;
 		}
 
-		//***Essential metadata, must exist and validated 
+		//***Essential metadata, must exist and validated  
 		if (in_obj.HasMember("id") && in_obj["id"].IsString()) { tex_name = in_obj["id"].GetString(); }
 		if (in_obj.HasMember("path") && in_obj["path"].IsString()) { path = in_obj["path"].GetString(); }
+
+		if (in_obj.HasMember("vert_shader_path") && in_obj["vert_shader_path"].IsString()) {
+			vert_shader_path = in_obj["vert_shader_path"].GetString();
+		}
+		if (in_obj.HasMember("frag_shader_path") && in_obj["frag_shader_path"].IsString()) {
+			frag_shader_path = in_obj["frag_shader_path"].GetString();
+		}
+
+		if (in_obj.HasMember("mdl_ref") && in_obj["mdl_ref"].IsNumber()) {
+			mdl_ref = in_obj["mdl_ref"].GetInt64();
+		}
+		if (in_obj.HasMember("shd_ref") && in_obj["shd_ref"].IsNumber()) {
+			shd_ref = in_obj["shd_ref"].GetInt64();
+		}
 	}
 	/*Font Resource*/
 	void FontResource::Deserialize(const rapidjson::Value& in_obj) {
@@ -527,7 +539,11 @@
 	std::ostream& operator<<(std::ostream& os, TextureResource const& tr) {
 		os << "[TextureResource]"
 			<< " id='" << tr.tex_name << "'"
-			<< " path='" << tr.path << "'";
+			<< " path='" << tr.path << "'"
+			<< " vert_shader_path='" << tr.vert_shader_path << "'"
+			<< " frag_shader_path='" << tr.frag_shader_path << "'"
+			<< " mdl_ref='" << tr.mdl_ref << "'"
+			<< " shd_ref='" << tr.shd_ref << "'";
 		return os;
 	}
 	std::ostream& operator<<(std::ostream& os, FontResource const& fr) {

@@ -12,14 +12,14 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/
+/******************************************************************************/
 #pragma once
 // #include "../ComponentJson/Component_System.h"
 // #include "../Math/Matrix_3x3.h"
 // #include "../Math/Vector_2D.h"
 #include "pch/pch.h" // FIRST
 #include "CoreEngine/ECS/Coordinator.h"
-//#include "CoreEngine/Asset/AssetsManager.h"
+// #include "CoreEngine/Asset/AssetsManager.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "glhelper.h"
 #include <string>
@@ -38,11 +38,11 @@ namespace Framework
 		int totalFrames = 1;	  // Total frames in the sprite sheet
 		int columns = 1;		  // Columns in the sprite sheet
 		int rows = 1;			  // Rows in the sprite sheet
-		float animationSpeed = 12.f;
-		void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
-		void Deserialize(const rapidjson::Value& in);
-		static inline bool IsSingleImage(const Framework::Animation& a);
-		void TickAnimation(Framework::Animation& anim, float dt);
+		float animationSpeed = 24.f;
+		void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
+		void Deserialize(const rapidjson::Value &in);
+		static inline bool IsSingleImage(const Framework::Animation &a);
+		void TickAnimation(Framework::Animation &anim, float dt);
 	};
 }
 #endif // FRAMEWORK_ANIMATION_H

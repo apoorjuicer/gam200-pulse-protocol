@@ -489,8 +489,8 @@ void CoreEngine::Update(float dt)
 	}
 
 	// 3) Normal running path
-	// if (g_inputSystem)    g_inputSystem->Update(dt);
-	// if (g_rhythmSystem)   g_rhythmSystem->Update(dt);
+	if (g_inputSystem)    g_inputSystem->Update(dt);
+	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);	
 }
 
 void CoreEngine::GameLoop()
@@ -816,7 +816,9 @@ void CoreEngine::PlayGame()
 		std::cout << "[CoreEngine] Original scene path: " << m_originalScenePath << std::endl; // DEBUG
 	}
 
-	RestartRuntimeForPlay();
+	if (auto audio = coord->GetSystem<AudioManager>()) {
+		audio->RestartBGM();
+	}
 
 	// Call Init() on all scripts
 	if (auto logicSys = coord->GetSystem<LogicSystem>())
@@ -831,11 +833,6 @@ void CoreEngine::PlayGame()
 			}
 		}
 	}
-
-	if (auto audio = coord->GetSystem<AudioManager>())
-	{
-		audio->RestartBGM();
-	}
 }
 
 void CoreEngine::StopGame()
@@ -847,7 +844,7 @@ void CoreEngine::StopGame()
 	// pause the bg music
 	if (auto audio = coord->GetSystem<AudioManager>())
 	{
-		audio->SetPaused(true);
+		audio->StopBGM();
 	}
 
 	// reloads original scene to reset all entities to initial starting position
@@ -860,23 +857,21 @@ void CoreEngine::StopGame()
 	}
 }
 
+// this might have been causing the random crash cus its calling restartBGM() too
 void CoreEngine::RestartRuntimeForPlay()
 {
-	auto coord = Coordinator::GetInstance();
-	if (!coord)
-		return;
+	//auto coord = Coordinator::GetInstance();
+	//if (!coord) return;
 
-	// 1) AUDIO: force BGM to start at 0
-	if (auto audio = coord->GetSystem<AudioManager>())
-	{
-		// if engine is paused (Stop button), keep audio paused too
-		audio->RestartBGM();
-	}
+	//// 1) AUDIO: force BGM to start at 0
+	//if (auto audio = coord->GetSystem<AudioManager>()) {
+	//	// if engine is paused (Stop button), keep audio paused too
+	//	audio->RestartBGM();
+	//}
 
-	// 2) RHYTHM: shutdown + initialize
-	if (auto rhythm = coord->GetSystem<RhythmGameplayInput>())
-	{
-		rhythm->Shutdown();
-		rhythm->Initialize();
-	}
+	//// 2) RHYTHM: shutdown + initialize
+	//if (auto rhythm = coord->GetSystem<RhythmGameplayInput>()) {
+	//	rhythm->Shutdown();
+	//	rhythm->Initialize();
+	//}
 }

@@ -11,6 +11,20 @@
             "id": "beat_placeholder",
             "path": "../../MyEngine/Assets/SFX/Rhythm_Feedback/beat_placeholder.wav",
             "loop": false,
+            "volume": 0.8,
+            "audiotype": "SFX"
+        },
+        {
+            "id": "collision",
+            "path": "../../MyEngine/Assets/SFX/Combat/Weapons/collision.wav",
+            "loop": false,
+            "volume": 1.0,
+            "audiotype": "SFX"
+        },
+        {
+            "id": "combo_success",
+            "path": "../../MyEngine/Assets/SFX/Rhythm_Feedback/combo_success.wav",
+            "loop": false,
             "volume": 1.0,
             "audiotype": "SFX"
         }

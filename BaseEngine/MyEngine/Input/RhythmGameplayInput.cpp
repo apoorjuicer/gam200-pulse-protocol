@@ -88,7 +88,7 @@ void RhythmGameplayInput::Update(float deltaTime)
                     // Check components
                     bool hasTransform = g_coordinator->HasComponent<Framework::Transform>(entity);
                     bool hasGUIButton = g_coordinator->HasComponent<GUIButton>(entity);
-                    bool hasRenderable = g_coordinator->HasComponent<Framework::Renderable>(entity);
+                    /*bool hasRenderable = g_coordinator->HasComponent<Framework::Renderable>(entity);*/
 
                     // std::cout << "[DEBUG] Has Transform: " << (hasTransform ? "YES" : "NO") << std::endl;
                     // std::cout << "[DEBUG] Has GUIButton: " << (hasGUIButton ? "YES" : "NO") << std::endl;
@@ -202,13 +202,6 @@ void RhythmGameplayInput::processRhythmInputs()
         {
 
             std::cout << "[KEY DETECTED] " << keyNames[i] << " key pressed!" << std::endl;
-
-            // Play sound
-            if (auto audio = g_coordinator->GetSystem<AudioManager>())
-            {
-                // audio->PlaySound("beat_placeholder", 0.8f);
-                mAssets.getAudio().PlaySound("beat_placeholder");
-            }
 
             // Show feedback bar by setting alpha to 1.0
             if (g_coordinator->HasComponent<GUIButton>(fontEntity))
@@ -368,16 +361,22 @@ void RhythmGameplayInput::processRhythmTiming(int key)
         }
     }
 
-    if (comboCompleted)
-    {
+    if (comboCompleted) {
+        // plays combo sucess audio file instead of regular beat sound
+        if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
+            audio->PlaySound("combo_success");
+        }
+
         std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << keyToString(key) << " | Combo: " << completedComboName << std::endl;
 
         auto *msgMgr = MessageManager::GetInstance();
         InputComboMessage msg(completedComboName, glfwGetTime());
         msgMgr->Publish(msg);
-    }
-    else
-    {
+    } else {
+        // plays regular beat sfx for regular beat
+        if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
+            audio->PlaySound("beat_placeholder");
+        }
         std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << keyToString(key) << " | Combo: unsuccessful" << std::endl;
     }
 }

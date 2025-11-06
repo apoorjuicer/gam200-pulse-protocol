@@ -310,7 +310,7 @@ void EnemyScript::Update(Entity ID)
 
 
     // --- Mode toggles ---
-    static bool aabbMode = true;  // change to m so enemy movement arrow keys
+    static bool aabbMode = false;  // change to m so enemy movement arrow keys
     static bool obbMode = false;
     static bool wasMPressed = false;
     static bool wasNPressed = false;
@@ -320,7 +320,7 @@ void EnemyScript::Update(Entity ID)
     {
         if (!wasMPressed)
         {
-            //aabbMode = !aabbMode;   // comments so that collision is always on
+            aabbMode = !aabbMode;   // comments so that collision is always on
             obbMode = false; // disable OBB when AABB is on
             wasMPressed = true;
             std::cout << (aabbMode ? "[ENEMY] AABB Mode ON\n" : "[ENEMY] AABB Mode OFF\n");
@@ -373,7 +373,7 @@ void EnemyScript::Update(Entity ID)
     // ====================================================================
     if (aabbMode)
     {
-        //enemy_transform.Pos.x -= 0.5f; // move left at constant rate
+        enemy_transform.Pos.x -= 0.5f; // move left at constant rate
 
         AABB enemyAABB = collision.BuildAABBFromTransform(enemy_transform, enemy_box);
         AABB playerAABB = collision.BuildAABBFromTransform(player_transform, player_box);
@@ -392,6 +392,10 @@ void EnemyScript::Update(Entity ID)
 
         if (edgeHit && enemy_health.isAlive && player_health.isAlive)
         {
+            if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
+                audio->PlaySound("collision");
+            }
+
             enemy_health.isAlive = false;
             player_health.hp -= enemy_health.damage;
 
@@ -444,6 +448,10 @@ void EnemyScript::Update(Entity ID)
 
         if (obbHit && enemy_health.isAlive && player_health.isAlive)
         {
+            if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
+                audio->PlaySound("collision");
+            }
+
             enemy_health.isAlive = false;
             player_health.hp -= enemy_health.damage;
 
