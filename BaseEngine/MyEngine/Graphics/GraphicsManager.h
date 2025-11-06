@@ -24,16 +24,12 @@
 
 #include "pch/pch.h"
 #include "glapp.h"
+#include "Layer.h"
 #include "CoreEngine/ECS/System.h"
 #include "CoreEngine/ECS/SystemManager.h"
 #include "Transform.h"          
 #include "../Physics/collision.h"
 #include "../CoreEngine/Asset/AssetsManager.h" 
-
-
-#include <map>
-#include <string>
-#include <sstream>
 
 class GLApp;
 

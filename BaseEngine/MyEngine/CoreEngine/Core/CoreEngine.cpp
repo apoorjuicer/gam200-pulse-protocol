@@ -264,7 +264,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<NamingComponent>();
 	g_coordinator->RegisterComponent<GUIButton>();
 	g_coordinator->RegisterComponent<Name>();
-
+	g_coordinator->RegisterComponent<LayerTag>();
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
@@ -300,6 +300,7 @@ void CoreEngine::Setup()
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Renderable>());  // <-- needs Renderable
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Animation>());  // <-- needs Animation
+	graphicsSig.set(g_coordinator->GetComponentType<LayerTag>());
 	g_coordinator->SetSystemSignature<GraphicsManager>(graphicsSig);
 
 	Signature sceneSig;
