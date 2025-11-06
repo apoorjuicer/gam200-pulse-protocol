@@ -169,6 +169,11 @@ void InputManager::processDebugToggles() {
 			std::cout << "[" << debugNames[i] << "] " << (*debugFlags[i] ? "ENABLED" : "DISABLED") << std::endl;
 		}
 	}
+
+	if (isKeyTriggered(GLFW_KEY_F7)) {
+		stressToggleRequested = true;
+	}
+
 }
 
 // -------------------------------------------------

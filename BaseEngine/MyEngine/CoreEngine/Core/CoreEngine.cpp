@@ -586,53 +586,53 @@ void CoreEngine::RenderDebugDraw()
 		return;
 
 	const float aspect = (WindowHeight > 0)
-							 ? static_cast<float>(WindowWidth) / static_cast<float>(WindowHeight)
-							 : (16.0f / 9.0f);
+		? static_cast<float>(WindowWidth) / static_cast<float>(WindowHeight)
+		: (16.0f / 9.0f);
 
 	// reference world height
 	const float worldH = 900.0f;
 	const float worldW = worldH * aspect;
 
 	glm::mat4 projection = glm::ortho(-worldW * 0.5f, worldW * 0.5f,
-									  -worldH * 0.5f, worldH * 0.5f);
+		-worldH * 0.5f, worldH * 0.5f);
 	DebugDraw::Begin(projection);
 
 	// F1 - DrawRect
 	if (g_inputSystem->isDebugRectsEnabled())
 	{
-		for (auto &entity : g_inputSystem->DebugEntities)
+		for (auto& entity : g_inputSystem->DebugEntities)
 		{
-			auto &transform = g_coordinator->GetComponent<Framework::Transform>(entity);
-			glm::vec2 center = {transform.Pos.x, transform.Pos.y};
+			auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
+			glm::vec2 center = { transform.Pos.x, transform.Pos.y };
 			glm::vec2 half = 0.5f * glm::vec2(transform.Scale.x, transform.Scale.y);
 			glm::vec2 min = center - half;
 			glm::vec2 max = center + half;
 
-			DebugDraw::DrawRect(min, max, {1.0f, 1.0f, 0.0f}); // Yellow
+			DebugDraw::DrawRect(min, max, { 1.0f, 1.0f, 0.0f }); // Yellow
 		}
 	}
 
 	// F2 - DrawLine
 	if (g_inputSystem->isDebugLinesEnabled())
 	{
-		DebugDraw::DrawLine({-800.0f, -450.0f}, {800.0f, 450.0f}, {1.0f, 0.0f, 0.0f});
-		DebugDraw::DrawLine({800.0f, -450.0f}, {-800.0f, 450.0f}, {0.0f, 1.0f, 0.0f});
-		DebugDraw::DrawLine({0.0f, -450.0f}, {0.0f, 450.0f}, {0.0f, 0.0f, 1.0f});
-		DebugDraw::DrawLine({-800.0f, 0.0f}, {800.0f, 0.0f}, {1.0f, 1.0f, 0.0f});
+		DebugDraw::DrawLine({ -800.0f, -450.0f }, { 800.0f, 450.0f }, { 1.0f, 0.0f, 0.0f });
+		DebugDraw::DrawLine({ 800.0f, -450.0f }, { -800.0f, 450.0f }, { 0.0f, 1.0f, 0.0f });
+		DebugDraw::DrawLine({ 0.0f, -450.0f }, { 0.0f, 450.0f }, { 0.0f, 0.0f, 1.0f });
+		DebugDraw::DrawLine({ -800.0f, 0.0f }, { 800.0f, 0.0f }, { 1.0f, 1.0f, 0.0f });
 	}
 
 	// F3 - DrawCircle
 	if (g_inputSystem->isDebugCirclesEnabled())
 	{
-		DebugDraw::DrawCircle({0.0, 0.0f}, 200.0f, {1.0f, 0.0f, 1.0f}, 32);
-		DebugDraw::DrawCircle({400.0f, 300.0f}, 100.0f, {0.0f, 1.0f, 1.0f}, 24);
+		DebugDraw::DrawCircle({ 0.0, 0.0f }, 200.0f, { 1.0f, 0.0f, 1.0f }, 32);
+		DebugDraw::DrawCircle({ 400.0f, 300.0f }, 100.0f, { 0.0f, 1.0f, 1.0f }, 24);
 	}
 
 	// F4 - DrawCircleFilled
 	if (g_inputSystem->isDebugCirclesFilledEnabled())
 	{
-		DebugDraw::DrawCircleFilled({100.0f, 300.0f}, 80.0f, {1.0f, 0.5f, 0.0f}, 24);
-		DebugDraw::DrawCircleFilled({100.0f, -300.0f}, 60.0f, {0.5f, 0.0f, 1.0f}, 16);
+		DebugDraw::DrawCircleFilled({ 100.0f, 300.0f }, 80.0f, { 1.0f, 0.5f, 0.0f }, 24);
+		DebugDraw::DrawCircleFilled({ 100.0f, -300.0f }, 60.0f, { 0.5f, 0.0f, 1.0f }, 16);
 	}
 
 	// F5 - DrawPoint
@@ -642,7 +642,7 @@ void CoreEngine::RenderDebugDraw()
 		{
 			for (float y = -450.0f; y < 450.0f; y += 200.0f)
 			{
-				DebugDraw::DrawPoint({x, y}, 5.0f, {1.0f, 1.0f, 0.0f});
+				DebugDraw::DrawPoint({ x, y }, 5.0f, { 1.0f, 1.0f, 0.0f });
 			}
 		}
 	}
@@ -652,16 +652,124 @@ void CoreEngine::RenderDebugDraw()
 	{
 		for (float x = -800.0f; x < 800.0f; x += 100.0f)
 		{
-			DebugDraw::DrawLine({x, -450.0f}, {x, 450.0f}, {0.3f, 0.3f, 0.3f});
+			DebugDraw::DrawLine({ x, -450.0f }, { x, 450.0f }, { 0.3f, 0.3f, 0.3f });
 		}
 		for (float y = -450.0f; y < 450.0f; y += 100.0f)
 		{
-			DebugDraw::DrawLine({-800.0f, y}, {800.0f, y}, {0.3f, 0.3f, 0.3f});
+			DebugDraw::DrawLine({ -800.0f, y }, { 800.0f, y }, { 0.3f, 0.3f, 0.3f });
+		}
+	}
+	
+	// ---------------------------------------------------------------------
+	// F7: spawn/delete 1,000 moving sprites (hero)
+	// ---------------------------------------------------------------------
+	static std::vector<Entity>                   s_stressEntities;
+	static std::unordered_map<Entity, glm::vec2> s_velocity;
+	static double s_lastTick = glfwGetTime();
+
+	if (g_inputSystem->ConsumeStressToggleRequest())
+	{
+		if (!s_stressEntities.empty())
+		{
+			Factory factory;
+			for (Entity e : s_stressEntities) factory.DeleteEntity(e);
+			s_stressEntities.clear();
+			s_velocity.clear();
+			std::cout << "[StressTest] Deleted spawned entities (F7)\n";
+		}
+		else
+		{
+			// Resolve the real path for the 'hero' texture via the registry
+			const std::string heroPath = mAssets.GetTexturePath("hero");  // e.g. ".../Textures/Characters/hero.png"
+			const GLuint sharedTex = mAssets.GetOrLoadTexture(heroPath);  // goes through GraphicsManager cache
+			if (!sharedTex) {
+				std::cerr << "[StressTest] Failed to load texture: " << heroPath << "\n";
+			}
+
+			const float worldH = 900.0f;
+			const float aspect = (WindowHeight > 0)
+				? float(WindowWidth) / float(WindowHeight)
+				: (16.0f / 9.0f);
+			const float worldW = worldH * aspect;
+
+			std::mt19937 rng{ std::random_device{}() };
+			std::uniform_real_distribution<float> posX(-worldW, worldW);
+			std::uniform_real_distribution<float> posY(-worldH, worldH);
+			std::uniform_real_distribution<float> vel(-220.0f, 220.0f);
+			std::uniform_real_distribution<float> size(28.0f, 64.0f);
+
+			s_stressEntities.reserve(1000);
+			for (int i = 0; i < 1000; ++i)
+			{
+				Entity e = Factory{}.DefaultObj();
+				s_stressEntities.push_back(e);
+
+				// Transform
+				auto& t = g_coordinator->GetComponent<Framework::Transform>(e);
+				t.Pos = { posX(rng), posY(rng) };
+				float s = size(rng);
+				t.Scale = { s, s };
+				t.Rotation = { 0.0f, 0.0f };
+
+				// Renderable  USE SPRITE PIPELINE + TEXTURE
+				auto& r = g_coordinator->GetComponent<Framework::Renderable>(e);
+				r.useTexture = (sharedTex != 0);
+				r.textureID = sharedTex;          // GL handle already cached by GM
+				r.spriteName = heroPath;           // use the SAME key string you loaded with
+				r.mdl_ref = 1.0f;               // ? sprite quad model (not background/other model)
+				r.shd_ref = 2.0f;               // ? sprite shader that samples the texture
+				// r.tintColor stays white by default
+
+				// Motion
+				s_velocity[e] = { vel(rng), vel(rng) };
+			}
+
+			std::cout << "[StressTest] Spawned 1000 entities with texture: " << heroPath << " (F7)\n";
 		}
 	}
 
+	if (!s_stressEntities.empty())
+	{
+		const double now = glfwGetTime();
+		const float dt = float(now - s_lastTick);
+		s_lastTick = now;
+
+		const float worldH = 900.0f;
+		const float aspect = (WindowHeight > 0)
+			? float(WindowWidth) / float(WindowHeight)
+			: (16.0f / 9.0f);
+		const float worldW = worldH * aspect;
+
+		const float left = -worldW;
+		const float right = worldW;
+		const float bottom = -worldH;
+		const float top = worldH;
+
+		for (Entity e : s_stressEntities)
+		{
+			if (!g_coordinator->HasComponent<Framework::Transform>(e)) continue;
+
+			auto& t = g_coordinator->GetComponent<Framework::Transform>(e);
+			auto& v = s_velocity[e];
+
+			t.Pos.x += v.x * dt;
+			t.Pos.y += v.y * dt;
+
+			const float halfW = t.Scale.x * 0.5f;
+			const float halfH = t.Scale.y * 0.5f;
+
+			if (t.Pos.x - halfW < left) { t.Pos.x = left + halfW; v.x = -v.x; }
+			if (t.Pos.x + halfW > right) { t.Pos.x = right - halfW; v.x = -v.x; }
+			if (t.Pos.y - halfH < bottom) { t.Pos.y = bottom + halfH; v.y = -v.y; }
+			if (t.Pos.y + halfH > top) { t.Pos.y = top - halfH; v.y = -v.y; }
+		}
+	}
+	// ---------------------------------------------------------------------
+
+
+
 	DebugDraw::End();
-}
+}	
 
 // void CoreEngine::SetPaused(bool paused)
 //{

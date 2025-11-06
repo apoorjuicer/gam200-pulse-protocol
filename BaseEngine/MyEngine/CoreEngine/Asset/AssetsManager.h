@@ -2,8 +2,9 @@
 /**
  * @file        AssetsManager.h
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 60%
- * @author      Goh Pin Kai (secondary) - 40%
+ * @author       Ban Kai Wei Benjamin (primary)
+ * @author      Leu Jun Yong (secondary)
+ * @author      Goh Pin Kai (secondary)
  * @brief       Central manager for loading, accessing, and releasing audio (FMOD)
                 and texture (OpenGL) assets.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.

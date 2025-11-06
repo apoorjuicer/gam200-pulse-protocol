@@ -62,6 +62,11 @@ public:
 	bool isDebugCirclesFilledEnabled() const { return debugCirclesFilledEnabled; }
 	bool isDebugPointsEnabled() const { return debugPointsEnabled; }
 	bool isDebugGridEnabled() const { return debugGridEnabled; }
+	bool ConsumeStressToggleRequest() {
+		bool out = stressToggleRequested;
+		stressToggleRequested = false;
+		return out;
+	}
 
 	std::set<Entity> DebugEntities;
 	std::set<Entity> GUIButtonEntities;
@@ -89,6 +94,7 @@ private:
 	bool debugPointsEnabled = false;
 	bool debugGridEnabled = false;
 	bool debugToggleKeyPressed[6] = { false };
+	bool stressToggleRequested = false;
 
 	// -------------------------------------------------
 	// In-Game GUI System

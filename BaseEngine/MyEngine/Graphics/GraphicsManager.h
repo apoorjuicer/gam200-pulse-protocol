@@ -2,8 +2,8 @@
 /**
  * @file        GraphicsManager.h
  * @project     Pulse Protocol
- * @author      Goh Pin Kai (primary) - 70%
- * @author      Leu Jun Yong (secondary) - 30%
+ * @author      Goh Pin Kai (primary)
+ * @author      Leu Jun Yong (secondary)
  * @author      Ban Kai Wei Benjamin (secondary)
  *
  * @brief       Handles high-level rendering:
