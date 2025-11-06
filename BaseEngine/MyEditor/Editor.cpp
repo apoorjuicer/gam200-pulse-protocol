@@ -18,6 +18,9 @@
 #define NOMINMAX        
 #include <windows.h>
 #include <commdlg.h>
+#include "CoreEngine/Asset/AssetsManager.h"
+
+// ==========================================================================
 
 namespace MyEditor
 {
@@ -201,9 +204,8 @@ namespace MyEditor
     // ============================================================================
 // Replace file on disk and hot-swap everywhere using AssetsManager API.
 //  - Copies src -> dst
-//  - AssetsManager::ReloadTexture(dst) produces a NEW GL id and updates caches
-//  - We assign that id to thumbnails and any Renderable using the file
-//  - No manual glDelete needed here (EvictTexture already deletes the old id)
+//  - mAssets.EvictTexture(dst) + mAssets.GetOrLoadTexture(dst) ⇒ NEW GL id
+//  - Updates thumbnails and any Renderable using the file
 // ============================================================================
     static bool ReplaceTextureFileOnDisk_AndRefreshAll(const std::string& dstPath,
         const std::string& srcPath)
@@ -214,28 +216,31 @@ namespace MyEditor
         if (dstPath.empty() || srcPath.empty()) return false;
         if (!fs::exists(srcPath, ec)) return false;
 
-        auto lower = [](std::string s) { for (auto& c : s) c = (char)tolower(c); return s; };
-        std::string ext = lower(fs::path(srcPath).extension().string());
-        if (!(ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".tga" || ext == ".dds"))
-            return false;
+        auto IsImage = [](const fs::path& p) {
+            std::string ext = p.extension().string();
+            std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+            return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
+                ext == ".bmp" || ext == ".tga" || ext == ".dds";
+            };
+        if (!IsImage(srcPath)) return false;
 
-        // 1) Overwrite the file on disk
+        // 1) Overwrite target file
         fs::copy_file(srcPath, dstPath, fs::copy_options::overwrite_existing, ec);
         if (ec) {
-            std::cerr << "[Project] Replace failed: " << srcPath << " -> " << dstPath
-                << " (" << ec.message() << ")\n";
+            std::cerr << "[Project] Replace failed: " << srcPath << " -> "
+                << dstPath << " (" << ec.message() << ")\n";
             return false;
         }
 
-        // 2) Ask AssetsManager to evict+reload; this gives us the NEW GL id and
-        //    ensures subsequent GetOrLoad(dstPath) returns this same new id.
-        GLuint newTex = Framework::AssetsManager::ReloadTexture(dstPath);
+        // 2) Force a fresh GL texture id and cache entry
+        mAssets.EvictTexture(dstPath);
+        GLuint newTex = mAssets.GetOrLoadTexture(dstPath);
         if (!newTex) {
             std::cerr << "[Project] Reload failed for: " << dstPath << "\n";
             return false;
         }
 
-        // 3) Update Project thumbnails to the new id (ImGui updates this frame)
+        // 3) Update Project thumbnails
         for (auto& it : s_dirEntries) {
             if (!it.isDir && it.fullPath == dstPath) {
                 it.texID = newTex;
@@ -243,33 +248,31 @@ namespace MyEditor
             }
         }
 
-        // 4) Update ALL scene users that reference this path (by exact path or same filename)
+        // 4) Update all live scene users (match by exact path OR same filename)
         if (auto* coord = Coordinator::GetInstance()) {
-            for (auto e : coord->GetAllEntities()) {
-                if (coord->HasComponent<Framework::Renderable>(e)) {
-                    auto& r = coord->GetComponent<Framework::Renderable>(e);
-                    const std::string rBase = fs::path(r.spriteName).filename().string();
-                    const std::string dBase = fs::path(dstPath).filename().string();
-                    const bool matches = (!r.spriteName.empty() &&
-                        (r.spriteName == dstPath || rBase == dBase));
-                    if (matches) {
-                        r.spriteName = dstPath;   // normalize to the definitive path
-                        r.textureID = newTex;    // swap immediately; old id was deleted by EvictTexture
-                        r.needsTextureReload = false;
-                    }
+            for (Entity e : coord->GetAllEntities()) {
+                if (!coord->HasComponent<Framework::Renderable>(e)) continue;
+                auto& r = coord->GetComponent<Framework::Renderable>(e);
+
+                std::string rBase = std::filesystem::path(r.spriteName).filename().string();
+                std::string dBase = std::filesystem::path(dstPath).filename().string();
+
+                if (!r.spriteName.empty() && (r.spriteName == dstPath || rBase == dBase)) {
+                    r.spriteName = dstPath;     // normalize to definitive path
+                    r.textureID = newTex;      // swap immediately
                 }
             }
         }
 
-        // 5) Refresh list (labels/ordering). IDs already swapped so visuals are instant.
+        // 5) Refresh directory view (labels/order)
         RefreshCurrentDir();
 
-        std::cout << "[Project] Replaced & hot-swapped (AssetMgr): " << dstPath
+        std::cout << "[Project] Replaced & hot-swapped: " << dstPath
             << "  <=  " << srcPath << "\n";
         return true;
     }
 
-
+    
 
     static void RefreshCurrentDir()
     {
@@ -324,7 +327,7 @@ namespace MyEditor
         if (!IsImageExt(item.fullPath)) return;
 
         // this assumes your AssetsManager returns a GLuint / unsigned int
-        item.texID = Framework::AssetsManager::GetOrLoad(item.fullPath);
+        item.texID = mAssets.GetOrLoadTexture(item.fullPath);
     }
 
     // ============================================================================
@@ -359,7 +362,7 @@ namespace MyEditor
 
         // --- 2) Force reload of new texture on next frame ---
         // We don't need to access the internal cache; just reload the new file.
-        GLuint newTex = Framework::AssetsManager::GetOrLoad(dstPath);
+        GLuint newTex = mAssets.GetOrLoadTexture(dstPath);
 
         // Bind it once to ensure GL has the new texture data
         glBindTexture(GL_TEXTURE_2D, newTex);
@@ -515,7 +518,7 @@ namespace MyEditor
         }
 
         // -----------------------------------------------
-        // Drag logic
+        // Drag logic (world-space; unchanged)
         // -----------------------------------------------
         if (inGameRect && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
         {
@@ -556,14 +559,22 @@ namespace MyEditor
     }
 
 
-
-
     // ===================== ProjectPanel =====================
     static void ProjectPanel(Entity selectedEntity)
     {
         // ── Top bar ────────────────────────────────────────────────
         {
-            if (ImGui::Button("Refresh")) RefreshCurrentDir();
+            if (ImGui::Button("Refresh")) {
+                // Rebuild thumbnails from current disk contents
+                for (auto& it : s_dirEntries) {
+                    if (!it.isDir) {
+                        mAssets.EvictTexture(it.fullPath);
+                        it.texID = mAssets.GetOrLoadTexture(it.fullPath);
+                        it.triedLoad = true;
+                    }
+                }
+                RefreshCurrentDir();
+            }
             ImGui::SameLine();
             ImGui::TextUnformatted(s_currentDir.c_str());
             ImGui::SameLine();
@@ -583,12 +594,11 @@ namespace MyEditor
             {
                 if (!fs::exists(dstDir, ec)) fs::create_directories(dstDir, ec);
 
-                auto IsImageExt = [](const fs::path& p)
-                    {
-                        std::string ext = p.extension().string();
-                        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-                        return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
-                            ext == ".bmp" || ext == ".tga" || ext == ".dds";
+                auto IsImageExt = [](const fs::path& p) {
+                    std::string ext = p.extension().string();
+                    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+                    return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
+                        ext == ".bmp" || ext == ".tga" || ext == ".dds";
                     };
 
                 int changed = 0;
@@ -601,16 +611,11 @@ namespace MyEditor
                     if (fs::exists(dst, ec))
                     {
                         // same name → replace
-                        if (IsImageExt(dst))
-                        {
+                        if (IsImageExt(dst)) {
                             if (ReplaceTextureFileOnDisk_AndRefreshAll(dst.string(), src.string()))
-                            {
                                 ++changed;
-                                std::cout << "[Project] Replaced (OS drop): " << dst << " <= " << src << "\n";
-                            }
                         }
-                        else
-                        {
+                        else {
                             fs::copy_file(src, dst, fs::copy_options::overwrite_existing, ec);
                             if (!ec) ++changed;
                         }
@@ -619,11 +624,12 @@ namespace MyEditor
                     {
                         // new file → import
                         fs::copy_file(src, dst, fs::copy_options::none, ec);
-                        if (!ec)
-                        {
+                        if (!ec) {
                             ++changed;
-                            if (IsImageExt(dst))
-                                Framework::AssetsManager::GetOrLoad(dst.lexically_normal().string());
+                            if (IsImageExt(dst)) {
+                                mAssets.EvictTexture(dst.string()); // be explicit
+                                mAssets.GetOrLoadTexture(dst.lexically_normal().string());
+                            }
                         }
                     }
                 }
@@ -652,8 +658,7 @@ namespace MyEditor
 
             if (item.isDir)
             {
-                if (ImGui::Button(item.name.c_str(), thumbSize))
-                {
+                if (ImGui::Button(item.name.c_str(), thumbSize)) {
                     s_currentDir = item.fullPath;
                     RefreshCurrentDir();
                     ImGui::PopID(); ImGui::EndGroup(); ImGui::EndChild(); return;
@@ -661,28 +666,25 @@ namespace MyEditor
             }
             else
             {
-                EnsureThumbnailLoaded(item);
+                EnsureThumbnailLoaded(item);  // your existing function
 
-                if (item.texID != 0)
-                {
+                if (item.texID != 0) {
                     std::string btnId = "##assetTex_" + item.fullPath;
                     clicked = ImGui::ImageButton(btnId.c_str(), (ImTextureID)(intptr_t)item.texID,
                         ImVec2(s_thumbSize, s_thumbSize), ImVec2(0, 1), ImVec2(1, 0));
                 }
-                else
-                {
+                else {
                     if (ImGui::Button(item.name.c_str(), thumbSize)) clicked = true;
                 }
 
-                // Allow drag source
-                auto IsImageExtStr = [](const std::string& s)
-                    {
-                        std::string ext;
-                        auto dot = s.find_last_of('.');
-                        if (dot != std::string::npos) ext = s.substr(dot);
-                        for (auto& c : ext) c = (char)tolower(c);
-                        return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
-                            ext == ".bmp" || ext == ".tga" || ext == ".dds";
+                // Allow drag source (image files only)
+                auto IsImageExtStr = [](const std::string& s) {
+                    std::string ext;
+                    auto dot = s.find_last_of('.');
+                    if (dot != std::string::npos) ext = s.substr(dot);
+                    for (auto& c : ext) c = (char)tolower(c);
+                    return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
+                        ext == ".bmp" || ext == ".tga" || ext == ".dds";
                     };
 
                 if (IsImageExtStr(item.fullPath))
@@ -721,7 +723,7 @@ namespace MyEditor
                     {
                         auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
                         rend.spriteName = item.fullPath;
-                        rend.textureID = Framework::AssetsManager::GetOrLoad(rend.spriteName);
+                        rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
                     }
                 }
             }
@@ -740,6 +742,9 @@ namespace MyEditor
 
         ImGui::EndChild();
     }
+
+    
+
 
 
 
@@ -946,6 +951,7 @@ namespace MyEditor
         }
         return false;
     }
+
 
     void EnqueueExternalDrop(const std::vector<std::string>& paths)
     {
@@ -1504,8 +1510,8 @@ namespace MyEditor
                             Framework::Transform t{};
                             t.Pos = { 0.0f, 0.0f };
                             t.Scale = { 1.0f, 1.0f };
-                            t.angle_disp = 0.0f;
-                            t.angle_speed = 0.0f;
+                            t.Rotation.x = 0.0f;
+                            t.Rotation.y = 0.0f;
                             t.isVisible = true;
                             t.autoHide = false;
                             g->AddComponent<Framework::Transform>(selectedEntity, t);
@@ -1607,8 +1613,8 @@ namespace MyEditor
                     if (ImGui::DragFloat2("Position", pos, 0.5f)) { tr.Pos.x = pos[0]; tr.Pos.y = pos[1]; }
                     float sc[2] = { tr.Scale.x, tr.Scale.y };
                     if (ImGui::DragFloat2("Scale", sc, 0.5f)) { tr.Scale.x = sc[0]; tr.Scale.y = sc[1]; }
-                    ImGui::DragFloat("Rotation (deg)", &tr.angle_disp, 1.0f, -360.f, 360.f);
-                    ImGui::DragFloat("Rotation Speed", &tr.angle_speed, 0.1f, -10.0f, 10.0f);
+                    ImGui::DragFloat("Rotation (deg)", &tr.Rotation.x, 1.0f, -360.f, 360.f);
+                    ImGui::DragFloat("Rotation Speed", &tr.Rotation.y, 0.1f, -10.0f, 10.0f);
                     ImGui::Checkbox("Visible", &tr.isVisible);
                     ImGui::Separator();
 
@@ -1726,7 +1732,6 @@ namespace MyEditor
                         }
                     }
 
-                    // --- Reload texture button ---
                     // --- Reload texture button + Drag&Drop target ---
                     {
                         // Draw the button first
@@ -1756,20 +1761,61 @@ namespace MyEditor
 
                             // 1) Resolve path if user typed only a filename or an invalid path
                             {
+                                namespace fs = std::filesystem;
+
                                 std::string candidate = r.spriteName;
                                 std::error_code ec;
-                                if (!fs::path(candidate).has_parent_path() || !fs::exists(candidate, ec)) {
+
+                                // If user already provided a valid path on disk, keep it.
+                                if ((fs::path(candidate).has_parent_path() || fs::path(candidate).is_absolute()) &&
+                                    fs::exists(candidate, ec))
+                                {
+                                    // nothing to do; r.spriteName already points to an existing file
+                                }
+                                else
+                                {
+                                    // Reduce to just the filename (e.g., "hero.png")
                                     std::string base = fs::path(candidate).filename().string();
                                     if (base.empty()) base = candidate;
 
-                                    std::string resolved = Framework::AssetsManager::FindTextureByFilename(base, kTexturesRoot);
+                                    // Where to search (add/remove roots as you need)
+                                    const fs::path roots[] = {
+                                        fs::path(kTexturesRoot),                      // "../../MyEngine/Assets/Textures"
+                                        fs::path("../../MyEngine/Assets")             // optional broader scan
+                                    };
+
+                                    std::string resolved;
+
+                                    for (const fs::path& root : roots)
+                                    {
+                                        fs::path rootAbs = fs::weakly_canonical(root, ec);
+                                        if (ec || rootAbs.empty() || !fs::exists(rootAbs, ec)) continue;
+
+                                        // Scan this root recursively and stop at the first filename match
+                                        for (fs::recursive_directory_iterator it(rootAbs, ec), end; it != end && !ec; ++it)
+                                        {
+                                            if (!it->is_regular_file(ec)) continue;
+                                            if (it->path().filename().string() == base)
+                                            {
+                                                resolved = it->path().lexically_normal().string();
+                                                break;
+                                            }
+                                        }
+                                        if (!resolved.empty()) break;
+                                    }
+
                                     if (!resolved.empty())
-                                        r.spriteName = resolved; // keep resolved full path for next time
+                                    {
+                                        // Keep the fully-resolved, normalized absolute path for next time
+                                        r.spriteName = resolved;
+                                    }
+                                    // else: leave r.spriteName as-is; the subsequent load attempt will surface any error
                                 }
                             }
 
+
                             // 2) Load (cached by AssetsManager)
-                            r.textureID = Framework::AssetsManager::GetOrLoad(r.spriteName);
+                            r.textureID = mAssets.GetOrLoadTexture(r.spriteName);
                             r.loadedSpriteName = r.spriteName;
                             r.needsTextureReload = false;
 

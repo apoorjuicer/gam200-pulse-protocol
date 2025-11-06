@@ -1,0 +1,12 @@
+{
+    "sceneFilePaths": [
+        {
+            "id": "mainmenu_scene",
+            "path": "../../MyEngine/JSON/MainMenu.json"
+        },
+        {
+            "id": "level1_scene",
+            "path": "../../MyEngine/JSON/Level1.json"
+        }
+    ]
+}

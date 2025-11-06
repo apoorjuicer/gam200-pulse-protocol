@@ -4,6 +4,8 @@
 //#include "../Components/AABB.h"
 #include "../Components/Health.h"
 #include "../Graphics/Transform.h"
+#include "../Graphics/Animation.h"
+#include "../Graphics/Renderable.h"
 #include "../GameLogic/GameLogic.h"
 #include "../CoreEngine/ECS/Types.h"
 #include "../CoreEngine/ECS/Coordinator.h"

@@ -84,7 +84,7 @@ void SceneManager::SaveCurrentScene()
 
 	// grab scene name for the json file name
 	//std::filesystem::path path = static_cast<std::filesystem::path>("../../MyEngine/JSON/Saved" + PreviousScene + "Scene.json"); 
-	std::filesystem::path path = "../../MyEngine/JSON/Saved" + PreviousScene + "Scene.json"; // file we want to save data into
+	std::filesystem::path path = "../../MyEngine/JSON/" + PreviousScene + ".json"; // file we want to save data into
 	//std::string path = "../../MyEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
 
 	// Save scene name first

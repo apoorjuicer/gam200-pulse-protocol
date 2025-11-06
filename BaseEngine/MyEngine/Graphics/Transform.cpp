@@ -13,7 +13,7 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/
+/******************************************************************************/
 #include "Transform.h"
 #include <../MyEngine/Math/math.h>
 
@@ -29,7 +29,7 @@ namespace Framework
 
 	void Transform::update(GLdouble delta_time, const std::set<Entity> entity)
 	{
-		auto* g_coordinator = Coordinator::GetInstance();
+		auto *g_coordinator = Coordinator::GetInstance();
 
 		// pull the current game area; fall back if not set
 		const float gw = (GLHelper::GameWidth > 0) ? (float)GLHelper::GameWidth : 1600.0f;
@@ -38,7 +38,7 @@ namespace Framework
 		for (auto it : entity)
 		{
 			// IMPORTANT: reference, not copy
-			auto& x = g_coordinator->GetComponent<Framework::Transform>(it);
+			auto &x = g_coordinator->GetComponent<Framework::Transform>(it);
 
 			// normalize from pixels to your game space
 			const float PnormX = x.Pos.x / gw;
@@ -80,7 +80,7 @@ namespace Framework
 	void Transform::draw() const {}
 
 	/*Serialization && Deserialization */
-	void Transform::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
+	void Transform::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
 	{
 		using namespace rapidjson;
 		out.SetObject();
@@ -96,8 +96,8 @@ namespace Framework
 		out.AddMember("rotation", rotVal, alloc);
 
 		// simple types
-		out.AddMember("angle_disp", angle_disp, alloc);
-		out.AddMember("angle_speed", angle_speed, alloc);
+		//out.AddMember("angle_disp", angle_disp, alloc);
+		//out.AddMember("angle_speed", angle_speed, alloc);
 
 		out.AddMember("isVisible", isVisible, alloc);
 		out.AddMember("visibilityTimer", visibilityTimer, alloc);
@@ -105,16 +105,17 @@ namespace Framework
 
 		// mat3
 		//  Matrix3x3
-		//Value matVal;
-		//mdl_to_ndc_xform.Serialize(matVal, alloc);
-		//out.AddMember("mdl_to_ndc_xform", matVal, alloc);
+		// Value matVal;
+		// mdl_to_ndc_xform.Serialize(matVal, alloc);
+		// out.AddMember("mdl_to_ndc_xform", matVal, alloc);
 	}
 
-	void Transform::Deserialize(const rapidjson::Value& in)
+	void Transform::Deserialize(const rapidjson::Value &in)
 	{
 		if (!in.IsObject())
 		{
-			throw std::runtime_error("Invalid JSON for Transform");
+			std::cerr << "[Transform] Invalid JSON format\n";
+			return;
 		}
 
 		if (in.HasMember("position"))
@@ -124,10 +125,10 @@ namespace Framework
 		if (in.HasMember("rotation"))
 			Rotation.Deserialize(in["rotation"]);
 
-		if (in.HasMember("angle_disp"))
-			angle_disp = in["angle_disp"].GetFloat();
-		if (in.HasMember("angle_speed"))
-			angle_speed = in["angle_speed"].GetFloat();
+		//if (in.HasMember("angle_disp"))
+		//	angle_disp = in["angle_disp"].GetFloat();
+		//if (in.HasMember("angle_speed"))
+		//	angle_speed = in["angle_speed"].GetFloat();
 
 		if (in.HasMember("isVisible"))
 			isVisible = in["isVisible"].GetBool();
@@ -136,15 +137,15 @@ namespace Framework
 		if (in.HasMember("autoHide"))
 			autoHide = in["autoHide"].GetBool();
 
-		//if (in.HasMember("mdl_to_ndc_xform"))
-		  //  mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
+		// if (in.HasMember("mdl_to_ndc_xform"))
+		//   mdl_to_ndc_xform.Deserialize(in["mdl_to_ndc_xform"]);
 	}
 
-	bool SaveTransform(Transform const& t, std::string const& path)
+	bool SaveTransform(Transform const &t, std::string const &path)
 	{
 		rapidjson::Document d;
 		d.SetObject();
-		auto& alloc = d.GetAllocator();
+		auto &alloc = d.GetAllocator();
 
 		rapidjson::Value tVal;
 		t.Serialize(tVal, alloc);
@@ -174,7 +175,7 @@ namespace Framework
 		return true;
 	}
 
-	bool LoadTransform(Transform& t, std::string const& path)
+	bool LoadTransform(Transform &t, std::string const &path)
 	{
 		std::ifstream ifs(path);
 		if (!ifs.is_open())
@@ -182,9 +183,9 @@ namespace Framework
 			std::cerr << "Error: Cannot open file for reading: " << path << "\n";
 			return false;
 		}
-		rapidjson::IStreamWrapper isw(ifs); //must have
-		rapidjson::Document d;                  //must have
-		d.ParseStream(isw);                       //must have
+		rapidjson::IStreamWrapper isw(ifs); // must have
+		rapidjson::Document d;				// must have
+		d.ParseStream(isw);					// must have
 
 		if (d.HasParseError())
 		{

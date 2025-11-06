@@ -4,6 +4,8 @@
  * @project     Pulse Protocol
  * @author      Goh Pin Kai (primary) - 70%
  * @author      Leu Jun Yong (secondary) - 30%
+ * @author      Ban Kai Wei Benjamin (secondary)
+ *
  * @brief       Implements GraphicsManager:
  *              - Initializes GL rendering systems
  *              - Draws world (via GLApp) then overlay text (FPS, controls)
@@ -15,144 +17,190 @@
  *              - We pull them from AssetsManager::GetFont() which returns
  *                const Framework::FontData*.
  */
- /******************************************************************************/
+/******************************************************************************/
 
 #include "GraphicsManager.h"
+#include "../Resources/AssetRegistry.h"
+#include "glapp.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "../Graphics/stb_image.h"
 
 // These are the asset keys we expect to exist after AssetsManager::LoadAllFonts()
-namespace {
-	constexpr const char* UI_FONT_KEY = "patrickhand-regular_48";
-	constexpr const char* DEBUG_FONT_KEY = "liberation-mono_48";
+// namespace {
+//    constexpr const char* UI_FONT_KEY = "patrickhand-regular_48";
+//    constexpr const char* DEBUG_FONT_KEY = "liberation-mono_48";
+//}
+// TODO: Make these data-driven via Config class once config integration is stable.
+namespace
+{
+    constexpr const char *UI_FONT_KEY = "PatrickHand_font";
+    constexpr const char *DEBUG_FONT_KEY = "liberation_font";
 }
 
-GraphicsManager::GraphicsManager()
+// GraphicsManager::GraphicsManager()
+//{
+//     glapp = new GLApp;
+// }
+
+GraphicsManager::GraphicsManager(AssetRegistry *registry) : mRegistry{registry}
 {
-	glapp = new GLApp;
+    // Initialize();
+    // Construct GLApp only once
 }
 
 GraphicsManager::~GraphicsManager()
 {
-	// Cleanup happens in Shutdown()
+    // Cleanup happens in Shutdown()
+    //utdown();
+}
+
+
+void GraphicsManager::SetRegistry(AssetRegistry* registry)
+{
+    mRegistry = registry;
 }
 
 void GraphicsManager::Initialize()
 {
-	GLHelper::print_specs();
-	auto& AM = Framework::AssetsManager::Instance();
 
-	AM.InitFonts();
-	AM.LoadAllFonts("../../MyEngine/Assets/Font", 48);
+    if (!mRegistry)
+    {
+        std::cerr << "[GraphicsManager] Initialize without registry.\n";
+        return;
+    }
 
-	// Print GL info and init the app renderer
-	glapp->init();
+    // Construct GLApp only once
+    if (!glapp)
+    {
+        // same as glapp = new GLApp;
+        // but more safe and better
+        // glapp = std::make_unique<GLApp>();
+        glapp = new GLApp;
+    }
+    // Print GL info and init the app renderer
+    GLHelper::print_specs();
+    glapp->init();
+    InitFonts();
+    if (!LoadFontsFromRegistry())
+    {
+        std::cerr << "[GraphicsManager] Failed to load some fonts from asset registry.\n";
+    }
+    else
+    {
+        std::cout << "[GraphicsManager] Successfully loaded fonts from  asset registry.\n";
+    }
 
-	// Subscribe to combo messages - DONT REMOVE, TEST FOR MESSAGE SYSTEM
-	{
-		auto* msgMgr = MessageManager::GetInstance();
-		msgMgr->Subscribe(
-			Message::Type::INPUT_COMBO,
-			"GraphicsManager",
-			[this](const Message& msg) {
-				const InputComboMessage& comboMsg =
-					static_cast<const InputComboMessage&>(msg);
-				std::cout << "[GRAPHICS] Received combo: "
-					<< comboMsg.comboName << std::endl;
-			}
-		);
-	}
 
-	std::cout << "[GraphicsManager] Successfully initialized for graphics.\n";
+  
 
-	// We want text to alpha-blend on top of world
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // Subscribe to combo messages - DONT REMOVE, TEST FOR MESSAGE SYSTEM
+    {
+        auto *msgMgr = MessageManager::GetInstance();
+        msgMgr->Subscribe(
+            Message::Type::INPUT_COMBO,
+            "GraphicsManager",
+            [this](const Message &msg)
+            {
+                const InputComboMessage &comboMsg =
+                    static_cast<const InputComboMessage &>(msg);
+                std::cout << "[GRAPHICS] Received combo: "
+                          << comboMsg.comboName << std::endl;
+            });
+    }
 
-	// Build a top-left-origin orthographic projection matching our virtual res
-	{
-		int fbW = 0, fbH = 0;
-		glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
+    std::cout << "[GraphicsManager] Successfully initialized for graphics.\n";
 
-		projection = glm::ortho(
-			0.0f,
-			static_cast<float>(GLApp::VIRTUAL_W),
-			static_cast<float>(GLApp::VIRTUAL_H),
-			0.0f
-		);
-	}
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// Grab fonts from AssetsManager (must have been loaded already in engine bootstrap)
-	{
-		m_uiFont = AM.GetFont(UI_FONT_KEY);
-		m_debugFont = AM.GetFont(DEBUG_FONT_KEY);
+    // Build a top-left-origin orthographic projection matching our virtual res
+    {
+        int fbW = 0, fbH = 0;
+        glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
 
-		if (!m_uiFont) {
-			std::cerr << "[GraphicsManager] ERROR: missing font "
-				<< UI_FONT_KEY << "\n";
-		}
-		if (!m_debugFont) {
-			std::cerr << "[GraphicsManager] ERROR: missing font "
-				<< DEBUG_FONT_KEY << "\n";
-		}
-	}
+        projection = glm::ortho(
+            0.0f,
+            static_cast<float>(GLApp::VIRTUAL_W),
+            static_cast<float>(GLApp::VIRTUAL_H),
+            0.0f);
+    }
 
-	// Create VAO/VBO used for glyph quads
-	{
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
+    // Grab fonts from AssetsManager (must have been loaded already in engine bootstrap)
+    {
+        // m_uiFont = AM.GetFont(UI_FONT_KEY);
+        // m_debugFont = AM.GetFont(DEBUG_FONT_KEY);
+   
+        m_uiFont = GM_FindFont(UI_FONT_KEY);
+        m_debugFont = GM_FindFont(DEBUG_FONT_KEY);
+        if (!m_uiFont)
+        {
+            std::cerr << "[GraphicsManager] ERROR: missing font "
+                      << UI_FONT_KEY << "\n";
+        }
 
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        if (!m_debugFont)
+        {
+            std::cerr << "[GraphicsManager] ERROR: missing font "
+                      << DEBUG_FONT_KEY << "\n";
+        }
+ 
+        //PrintFontMap();
+    }
 
-		// pos.xy + uv.xy for 6 verts
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
+    // Create VAO/VBO used for glyph quads
+    {
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
 
-		// layout(location = 0) vec2 aPos;
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(
-			0, 2, GL_FLOAT, GL_FALSE,
-			4 * sizeof(float),
-			(void*)0
-		);
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-		// layout(location = 1) vec2 aUV;
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(
-			1, 2, GL_FLOAT, GL_FALSE,
-			4 * sizeof(float),
-			(void*)(2 * sizeof(float))
-		);
+        // pos.xy + uv.xy for 6 verts
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	}
+        // layout(location = 0) vec2 aPos;
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(
+            0, 2, GL_FLOAT, GL_FALSE,
+            4 * sizeof(float),
+            (void *)0);
 
-	// Set text shader sampler uniform once
-	{
-		auto& textShader = GLApp::shdrpgms[3]; // index 3 assumed to be text shader
-		textShader.Use();
-		GLint loc = glGetUniformLocation(textShader.GetHandle(), "text");
-		if (loc != -1) {
-			glUniform1i(loc, 0); // sampler "text" uses texture unit 0
-		}
-	}
+        // layout(location = 1) vec2 aUV;
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(
+            1, 2, GL_FLOAT, GL_FALSE,
+            4 * sizeof(float),
+            (void *)(2 * sizeof(float)));
 
-	// create white texture for colored quads
-	glGenTextures(1, &whiteTexture);
-	glBindTexture(GL_TEXTURE_2D, whiteTexture);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
 
-	// 1x1 white pixel
-	unsigned char whitePixel[4] = { 255, 255, 255, 255 };
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
+    // Set text shader sampler uniform once
+    {
+        auto &textShader = GLApp::shdrpgms[3]; // index 3 assumed to be text shader
+        textShader.Use();
+        GLint loc = glGetUniformLocation(textShader.GetHandle(), "text");
+        if (loc != -1)
+        {
+            glUniform1i(loc, 0); // sampler "text" uses texture unit 0
+        }
+    }
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    if (!LoadTexturesFromRegistry())
+    {
+        std::cerr << "[GraphicsManager] Failed to load some textures from asset registry.\n";
+    }
+    else
+    {
+        std::cout << "[GraphicsManager] Successfully loaded textures from  asset registry.\n";
+    }
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+    
 
-	std::cout << "[GraphicsManager] White texture created for GUI buttons\n";
+    // create white texture for colored quads
+    InitWhiteTexture();
 }
 
 void GraphicsManager::Update()
@@ -178,90 +226,82 @@ void GraphicsManager::Update()
 	// Draw overlay text last
 	auto& textShader = GLApp::shdrpgms[3];
 
-	// get the game viewport dimensions from the editor itself
-	MyEditor::GameViewport viewport = MyEditor::ComputeMiddleGameViewportPixels(Engine->GetWindow(), false);
+    // Build FPS string and heaviest system string and render it
+    if (!MyEditor::IsEnabled())
+    {
 
-	// only renders if viewport is valid
-	if (viewport.w > 0 && viewport.h > 0) {
+        if (m_debugFont)
+        {
+            std::ostringstream fpsText;
+            fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
 
-		// if the 2 fonts are loaded
-		if (m_debugFont && m_uiFont) {
-			// get framebuffer dimensions
-			int fbW = 0, fbH = 0;
-			glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
+            RenderText(GLApp::shdrpgms[3], 
+                fpsText.str(), 
+                100.0f, 850.0f,
+                       1.0f, 
+                glm::vec3(0.5f, 0, 0), 
+                m_debugFont);
 
-			// calculate scaling factors between framebuffer and virtual coordinates
-			float scaleX = static_cast<float>(GLApp::VIRTUAL_W) / static_cast<float>(fbW);
-			float scaleY = static_cast<float>(GLApp::VIRTUAL_H) / static_cast<float>(fbH);
+            // Add top system below FPS
+            auto *profiler = ProfilingManager::GetInstance();
+            const auto &profiles = profiler->GetDisplayProfiles();
 
-			// convert viewport position to virtual coordinates
-			float virtualX = static_cast<float>(viewport.x) * scaleX;
-			float virtualY = static_cast<float>(viewport.y) * scaleY;
-			float virtualW = static_cast<float>(viewport.w) * scaleX;
-			float virtualH = static_cast<float>(viewport.h) * scaleY;
+            std::string topSystem = "None";
+            double topPercentage = 0.0;
+            for (const auto &[systemName, profile] : profiles)
+            {
+                if (profile.percentage > topPercentage)
+                {
+                    topPercentage = profile.percentage;
+                    topSystem = systemName;
+                }
+            }
 
-			// text positioning const
-			const float TEXT_PADDING = -325.0f;
-			const float LINE_SPACING = 60.0f;
-			const float BOTTOM_OFFSET = 60.0f;
-			const float FPS_SCALE = 1.3f;
-			const float SYSTEM_SCALE = 1.0f;
+            std::ostringstream topText;
+            topText << topSystem << ": " << std::fixed
+                    << std::setprecision(2) << topPercentage << "%";
 
-			const float TEAM_PADDING_X = -150.0f;
-			const float TEAM_PADDING_Y = -225.0f;
-			const float TEAM_LABEL_SCALE = 1.3f;
+            //RenderText(GLApp::shdrpgms[3], topText.str(), 100.0f, 880.0f,
+            //           0.8f, glm::vec3(0.5f, 0.5f, 0), m_debugFont);
+        }
+        else
+        {
+            std::cerr << "[GraphicsManager] WARNING: m_debugFont not found!\n";
+        }
+    }
 
-			// text color const
-			const glm::vec3 FPS_COLOR = glm::vec3(0.0f, 1.0f, 1.0f); // yellow
-			const glm::vec3 SYSTEM_COLOR = glm::vec3(1.0f, 0.0f, 1.0f); // green
-			const glm::vec3 TEAM_COLOR = glm::vec3(1.0f, 1.0f, 1.0f); // white
+    if (m_uiFont)
+    {
+        // Team label, error probably from IMGUI
+        RenderText(
+            GLApp::shdrpgms[3],
+            "Team BLOOP",
+            600.0f, 850.0f,
+            1.0f,
+            glm::vec3(1, 1, 1),
+            m_uiFont);
+    }
+    else {
+        std::cerr << "[GraphicsManager] WARNING: m_uiFont not found!\n";
+    }
 
-			const std::string TEAM_LABEL = "Team BLOOP";
 
-			// bottom-left of game viewport
-			float textX = virtualX + TEXT_PADDING;
-			float textY = virtualY + virtualH - BOTTOM_OFFSET;
 
-			// top right of game viewport
-			float estimatedWidth = TEAM_LABEL.length() * 15.0f * TEAM_LABEL_SCALE;
-			float teamLabelX = virtualX + virtualW - estimatedWidth - TEAM_PADDING_X;
-			float teamLabelY = virtualY + TEAM_PADDING_Y;
+    // FPS counter (while editor hidden)
+   
 
-			// render FPS text; uses font liberation-mono_48
-			std::ostringstream fpsText;
-			fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
 
-			// uses font: 
-			RenderText(GLApp::shdrpgms[3], fpsText.str(), textX, textY, FPS_SCALE, FPS_COLOR, m_debugFont);
 
-			// get top system from profiler
-			auto* profiler = ProfilingManager::GetInstance();
-			const auto& profiles = profiler->GetDisplayProfiles();
+        // // Controls help, anchored at right side
+        // {
+        //     int fbW = 0, fbH = 0;
+        //     glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
 
-			std::string topSystem = "None";
-			double topPercentage = 0.0;
-			for (const auto& [systemName, profile] : profiles) {
-				if (profile.percentage > topPercentage) {
-					topPercentage = profile.percentage;
-					topSystem = systemName;
-				}
-			}
+        // team label using font patrickhand-regular_48
+        //RenderText(textShader, TEAM_LABEL, teamLabelX, teamLabelY, TEAM_LABEL_SCALE, TEAM_COLOR, m_uiFont);
+    	
 
-			// render top system below FPS text
-			std::ostringstream topText;
-			topText << topSystem << ": " << std::fixed
-				<< std::setprecision(2) << topPercentage << "%";
-
-			// uses font liberation-mono_48
-			RenderText(textShader, topText.str(), textX, textY + LINE_SPACING, SYSTEM_SCALE, SYSTEM_COLOR, m_debugFont);
-
-			// team label using font patrickhand-regular_48
-			RenderText(textShader, TEAM_LABEL, teamLabelX, teamLabelY, TEAM_LABEL_SCALE, TEAM_COLOR, m_uiFont);
-		}
-		else {
-			std::cerr << "[GraphicsManager] WARNING: fonts not found!\n";
-		}
-	}
+	
 	 //// Controls help, anchored at right side
 	 //{
 	 //    int fbW = 0, fbH = 0;
@@ -315,229 +355,622 @@ void GraphicsManager::Update()
 	 //}
 }
 
-
 void GraphicsManager::Shutdown()
 {
-	// Unsubscribe from messages - DONT REMOVE
-	{
-		auto* msgMgr = MessageManager::GetInstance();
-		msgMgr->Unsubscribe(Message::Type::INPUT_COMBO, "GraphicsManager");
-	}
+    // Unsubscribe from messages - DONT REMOVE
+    {
+        auto *msgMgr = MessageManager::GetInstance();
+        msgMgr->Unsubscribe(Message::Type::INPUT_COMBO, "GraphicsManager");
+    }
 
-	// Cleanup GLApp
-	if (glapp) {
-		glapp->cleanup();
-		delete glapp;
-		glapp = nullptr;
-	}
+    // Cleanup GLApp with new and delete
+    if (glapp)
+    {
+        glapp->cleanup();
+        delete glapp;
+        glapp = nullptr;
+    }
 
-	// Delete GPU buffers we own for text quads
-	if (VAO) glDeleteVertexArrays(1, &VAO);
-	if (VBO) glDeleteBuffers(1, &VBO);
-	VAO = 0;
-	VBO = 0;
+    // Cleanup GLApp with unique_ptr
+    // if (glapp) {
+    //    glapp->cleanup();  // your custom cleanup
+    //    glapp.reset();     // calls delete automatically (safe if null)
+    //}
 
-	if (whiteTexture) {
-		glDeleteTextures(1, &whiteTexture);
-		whiteTexture = 0;
-	}
+    // Delete GPU buffers we own for text quads
+    if (VAO)
+        glDeleteVertexArrays(1, &VAO);
+    if (VBO)
+        glDeleteBuffers(1, &VBO);
+    VAO = 0;
+    VBO = 0;
 
-	std::cout << "[GraphicsManager] Shutdown completed\n";
+    if (whiteTexture)
+    {
+        glDeleteTextures(1, &whiteTexture);
+        whiteTexture = 0;
+    }
+
+    // Realease fonts
+    ShutdownFonts();
+
+    std::cout << "[GraphicsManager] Shutdown completed\n";
 }
 
 void GraphicsManager::RenderText(
-	GLSLShader& shader,
-	const std::string& text,
-	float x, float y,
-	float scale,
-	const glm::vec3& color,
-	const Framework::FontData* fontData
-)
+    GLSLShader &shader,
+    const std::string &text,
+    float x, float y,
+    float scale,
+    const glm::vec3 &color,
+    const FontData *fontData)
 {
-	if (!fontData)
-		return;
+    if (!fontData) {
+        std::cerr << "[GraphicsManager] : fontData not found!!! in RenderText\n";
+        return;
+    }
+       
 
 	shader.Use();
 
-	glUniformMatrix4fv(
-		glGetUniformLocation(shader.GetHandle(), "projection"),
-		1, GL_FALSE,
-		glm::value_ptr(projection)
-	);
+    glUniformMatrix4fv(
+        glGetUniformLocation(shader.GetHandle(), "projection"),
+        1, GL_FALSE,
+        glm::value_ptr(projection));
 
-	glUniform3f(
-		glGetUniformLocation(shader.GetHandle(), "textColor"),
-		color.x, color.y, color.z
-	);
+    glUniform3f(
+        glGetUniformLocation(shader.GetHandle(), "textColor"),
+        color.x, color.y, color.z);
 
-	glUniform1i(
-		glGetUniformLocation(shader.GetHandle(), "text"),
-		0
-	);
+    glUniform1i(
+        glGetUniformLocation(shader.GetHandle(), "text"),
+        0);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindVertexArray(VAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindVertexArray(VAO);
 
-	for (unsigned char c : text) {
-		auto it = fontData->glyphs.find(c);
-		if (it == fontData->glyphs.end())
-			continue;
+    for (unsigned char c : text)
+    {
+        auto it = fontData->glyphs.find(c);
+        if (it == fontData->glyphs.end())
+            continue;
 
-		const auto& ch = it->second;
+        const auto &ch = it->second;
 
-		// screen quad placement
-		float xpos = x + ch.Bearing.x * scale;
-		float ypos = y - ch.Bearing.y * scale + ch.Size.y * scale;
-		float w = ch.Size.x * scale;
-		float h = ch.Size.y * scale;
+        // screen quad placement
+        float xpos = x + ch.Bearing.x * scale;
+        float ypos = y - ch.Bearing.y * scale + ch.Size.y * scale;
+        float w = ch.Size.x * scale;
+        float h = ch.Size.y * scale;
 
-		// 6 verts, each vert = {pos.x, pos.y, uv.x, uv.y}
-		float verts[6][4] = {
-			{ xpos,     ypos,     0.0f, 1.0f },
-			{ xpos,     ypos - h, 0.0f, 0.0f },
-			{ xpos + w, ypos - h, 1.0f, 0.0f },
+        // 6 verts, each vert = {pos.x, pos.y, uv.x, uv.y}
+        float verts[6][4] = {
+            {xpos, ypos, 0.0f, 1.0f},
+            {xpos, ypos - h, 0.0f, 0.0f},
+            {xpos + w, ypos - h, 1.0f, 0.0f},
 
-			{ xpos,     ypos,     0.0f, 1.0f },
-			{ xpos + w, ypos - h, 1.0f, 0.0f },
-			{ xpos + w, ypos,     1.0f, 1.0f }
-		};
+            {xpos, ypos, 0.0f, 1.0f},
+            {xpos + w, ypos - h, 1.0f, 0.0f},
+            {xpos + w, ypos, 1.0f, 1.0f}};
 
-		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
 
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(verts), verts);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(verts), verts);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		// advance cursor (FreeType gives advance in 1/64 pixels)
-		x += (ch.Advance >> 6) * scale;
-	}
+        // advance cursor (FreeType gives advance in 1/64 pixels)
+        x += (ch.Advance >> 6) * scale;
+    }
 
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+
+   // std::cout << "[GraphicsManager] RenderText successful for " << text << "\n";
 }
 
 void GraphicsManager::OnResize(int width, int height)
 {
-	// Tell GLApp about new viewport etc.
-	GLApp::OnResize(width, height);
+    // Tell GLApp about new viewport etc.
+    GLApp::OnResize(width, height);
 
-	// If you want the projection to react to new size (dynamic UI scaling),
-	// you can rebuild 'projection' here too.
+    // If you want the projection to react to new size (dynamic UI scaling),
+    // you can rebuild 'projection' here too.
 }
 
 void GraphicsManager::RenderUIOverlayElements()
 {
-	auto* coordinator = Coordinator::GetInstance();
-	auto inputMgr = coordinator->GetSystem<InputManager>();
+    auto *coordinator = Coordinator::GetInstance();
+    auto inputMgr = coordinator->GetSystem<InputManager>();
 
-	if (!inputMgr) return;
+    if (!inputMgr) {
+        std::cerr << "[GraphicsManager] : inputMgr not found!!! in RenderUIOverlayElements\n";
+        return;
+    }
+        
 
-	auto& shader = GLApp::shdrpgms[2];
-	shader.Use();
+    auto &shader = GLApp::shdrpgms[2];
+    shader.Use();
 
-	for (auto entity : inputMgr->GUIButtonEntities) {
-		if (!coordinator->HasComponent<GUIButton>(entity)) continue;
-		if (!coordinator->HasComponent<Framework::Transform>(entity)) continue;
+    for (auto entity : inputMgr->GUIButtonEntities)
+    {
+        if (!coordinator->HasComponent<GUIButton>(entity))
+            continue;
+        if (!coordinator->HasComponent<Framework::Transform>(entity))
+            continue;
 
-		auto& button = coordinator->GetComponent<GUIButton>(entity);
-		auto& transform = coordinator->GetComponent<Framework::Transform>(entity);
+        auto &button = coordinator->GetComponent<GUIButton>(entity);
+        auto &transform = coordinator->GetComponent<Framework::Transform>(entity);
 
-		// Skip rendering if entity is hidden
-		if (!transform.isVisible) {
-			continue;
-		}
+        // Skip rendering if entity is hidden
+        if (!transform.isVisible)
+        {
+            continue;
+        }
 
-		// Skip rendering if alpha is 0 (transparent)
-		if (button.normalColor.a <= 0.0f && button.hoverColor.a <= 0.0f) {
-			continue;
-		}
+        // Skip rendering if alpha is 0 (transparent)
+        if (button.normalColor.a <= 0.0f && button.hoverColor.a <= 0.0f)
+        {
+            continue;
+        }
 
-		// Choose color based on button state
-		glm::vec4 color = (button.currentState == ButtonState::Hover)
-			? button.hoverColor
-			: button.normalColor;
+        // Choose color based on button state
+        glm::vec4 color = (button.currentState == ButtonState::Hover)
+                              ? button.hoverColor
+                              : button.normalColor;
 
-		// Convert world coords to screen coords
-		float screenX = transform.Pos.x + 800.0f;
-		float screenY = 450.0f - transform.Pos.y;
+        // Convert world coords to screen coords
+        float screenX = transform.Pos.x + 800.0f;
+        float screenY = 450.0f - transform.Pos.y;
 
-		// Draw colored rectangle
-		RenderColoredQuad(screenX, screenY, transform.Scale.x, transform.Scale.y, color);
+        // Draw colored rectangle
+        RenderColoredQuad(screenX, screenY, transform.Scale.x, transform.Scale.y, color);
 
-		// ADD TEXT LABEL ON THE BUTTON
-		if (m_uiFont) {
-			// Calculate text size to center it properly
-			float textScale = 0.8f;
+        // ADD TEXT LABEL ON THE BUTTON
+        if (m_uiFont)
+        {
+            // Calculate text size to center it properly
+            float textScale = 0.8f;
 
-			float estimatedTextWidth = button.label.length() * 10.0f * textScale;
-			float textX = screenX - (estimatedTextWidth * 0.5f) - 30.0f;
-			float textY = screenY + 5.0f;
+            float estimatedTextWidth = button.label.length() * 10.0f * textScale;
+            float textX = screenX - (estimatedTextWidth * 0.5f) - 30.0f;
+            float textY = screenY + 5.0f;
 
-			// Different adjustments for each button, prevents both text from moving together
-			if (button.buttonID == "btn_create") {
-				textX -= 10.0f;  // Move "Create Hero" left
-				textY += 6.0f;   // Move down
-			}
-			else if (button.buttonID == "btn_destroy") {
-				textX -= 10.0f;  // Move "Destroy Hero" left
-				textY += 6.0f;   // Move down
-			}
+            // Different adjustments for each button, prevents both text from moving together
+            if (button.buttonID == "btn_create")
+            {
+                textX -= 10.0f; // Move "Create Hero" left
+                textY += 6.0f;  // Move down
+            }
+            else if (button.buttonID == "btn_destroy")
+            {
+                textX -= 10.0f; // Move "Destroy Hero" left
+                textY += 6.0f;  // Move down
+            }
 
-			RenderText(
-				GLApp::shdrpgms[3],
-				button.label,
-				textX,
-				textY,
-				textScale,
-				glm::vec3(1.0f, 1.0f, 1.0f),  // White text
-				m_uiFont
-			);
-		}
-	}
+            RenderText(
+                GLApp::shdrpgms[3],
+                button.label,
+                textX,
+                textY,
+                textScale,
+                glm::vec3(1.0f, 1.0f, 1.0f), // White text
+                m_uiFont);
+
+           // std::cerr << "[GraphicsManager] m_uiFont found!!!!!!!!!\n";
+        }
+        else {
+            std::cerr << "[GraphicsManager] m_uiFont not found\n";
+        }
+    }
+}
+
+void GraphicsManager::InitWhiteTexture() {
+    glGenTextures(1, &whiteTexture);
+    glBindTexture(GL_TEXTURE_2D, whiteTexture);
+
+    // 1x1 white pixel
+    unsigned char whitePixel[4] = { 255, 255, 255, 255 };
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    std::cout << "[GraphicsManager] White texture created for GUI buttons\n";
 }
 
 void GraphicsManager::RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color)
 {
-	// DEBUG - only print first few frames
-	//static int count = 0;
-	//if (count++ < 10) {
-	//    std::cout << "[RenderQuad] Rendering at screen: (" << x << ", " << y << ")" << std::endl;
-	//}
+    // DEBUG - only print first few frames
+    // static int count = 0;
+    // if (count++ < 10) {
+    //    std::cout << "[RenderQuad] Rendering at screen: (" << x << ", " << y << ")" << std::endl;
+    //}
 
 	auto& shader = GLApp::shdrpgms[3]; // Text shader
 	shader.Use();
 
-	glUniformMatrix4fv(glGetUniformLocation(shader.GetHandle(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(glGetUniformLocation(shader.GetHandle(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-	// Pass vec4 color including alpha
-	glUniform3f(glGetUniformLocation(shader.GetHandle(), "textColor"), color.r, color.g, color.b);
+    // Pass vec4 color including alpha
+    glUniform3f(glGetUniformLocation(shader.GetHandle(), "textColor"), color.r, color.g, color.b);
 
-	// if shader supports vec4:
-	// glUniform4f(glGetUniformLocation(shader.GetHandle(), "color"), color.r, color.g, color.b, color.a);
+    // if shader supports vec4:
+    // glUniform4f(glGetUniformLocation(shader.GetHandle(), "color"), color.r, color.g, color.b, color.a);
 
-	glBindTexture(GL_TEXTURE_2D, whiteTexture);
-	glBindVertexArray(VAO);
+    // Bind white texture instead of unbinding
+    glBindTexture(GL_TEXTURE_2D, whiteTexture);
+    glBindVertexArray(VAO);
 
-	// Center the quad around the position
-	float halfWidth = width * 0.5f;
-	float halfHeight = height * 0.5f;
+    // Center the quad around the position
+    float halfWidth = width * 0.5f;
+    float halfHeight = height * 0.5f;
 
-	float vertices[6][4] = {
-		{ x - halfWidth, y - halfHeight, 0.0f, 0.0f },
-		{ x - halfWidth, y + halfHeight, 0.0f, 1.0f },
-		{ x + halfWidth, y + halfHeight, 1.0f, 1.0f },
+    float vertices[6][4] = {
+        {x - halfWidth, y - halfHeight, 0.0f, 0.0f},
+        {x - halfWidth, y + halfHeight, 0.0f, 1.0f},
+        {x + halfWidth, y + halfHeight, 1.0f, 1.0f},
 
-		{ x - halfWidth, y - halfHeight, 0.0f, 0.0f },
-		{ x + halfWidth, y + halfHeight, 1.0f, 1.0f },
-		{ x + halfWidth, y - halfHeight, 1.0f, 0.0f }
-	};
+        {x - halfWidth, y - halfHeight, 0.0f, 0.0f},
+        {x + halfWidth, y + halfHeight, 1.0f, 1.0f},
+        {x + halfWidth, y - halfHeight, 1.0f, 0.0f}};
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+    glBindVertexArray(0);
+   glBindTexture(GL_TEXTURE_2D, 0);
+
 }
+
+// Textures
+static GLuint upload_rgba8(int w, int h, unsigned char *data)
+{
+    GLuint tex = 0;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    return tex;
+}
+
+GLuint GraphicsManager::LoadTextureFile(const std::string &path)
+{
+    int w = 0, h = 0, n = 0;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char *data = stbi_load(path.c_str(), &w, &h, &n, 4);
+    if (!data)
+    {
+        std::cerr << "Failed to load texture: " << path
+                  << " reason: " << (stbi_failure_reason() ? stbi_failure_reason() : "unknown") << "\n";
+        return 0;
+    }
+    GLuint tex_id = upload_rgba8(w, h, data);
+    stbi_image_free(data);
+    return tex_id;
+}
+
+bool GraphicsManager::LoadTexturesFromRegistry()
+{
+    if (!mRegistry)
+    {
+        std::cerr << "[Graphics] LoadTexturesFromRegistry called without registry.\n";
+        return false;
+    }
+
+    auto const &texTable = mRegistry->getTexContainer();
+    if (texTable.empty())
+    {
+        std::cout << "[Graphics] No textures listed in registry.\n";
+        return true; // nothing to do, not an error
+    }
+
+    bool ok = true;
+
+    for (auto const &[name, tr] : texTable)
+    {
+        if (tr.path.empty())
+        {
+            std::cerr << "[Texture] Missing path for id='" << name << "'\n";
+            ok = false;
+            continue;
+        }
+
+        // Load from disk to GL
+        GLuint tex_id = LoadTextureFile(tr.path);
+        if (tex_id == 0)
+        {
+            std::cerr << "[Texture] Failed: id='" << name << "' path='" << tr.path << "'\n";
+            ok = false;
+            continue;
+        }
+
+        // textureMap[name] = TextureData{ id, /*w*/0, /*h*/0, /*nr*/0, name, tr.path };
+        texHandle_key[tr.tex_name] = tex_id;
+        // s_idToPath[id] = tr.path;
+
+        std::cout << "[Texture] Loaded: id='" << name << "' path='" << tr.path
+                  << "' -> GL#" << tex_id << "\n";
+    }
+
+    return ok;
+}
+
+GLuint GraphicsManager::GetOrLoad(const std::string &tex_name)
+{
+    if (auto it = texHandle_key.find(tex_name); it != texHandle_key.end())
+        return it->second;
+    GLuint tex_id = LoadTextureFile(tex_name);
+    if (tex_id)
+    {
+        texHandle_key[tex_name] = tex_id;
+        texHandle_id[tex_id] = tex_name;
+    }
+    return tex_id;
+}
+
+std::string const &GraphicsManager::GetTexName(GLuint texID)
+{
+    return texHandle_id.at(texID); // throws if not found (use .find if you prefer no-throw)
+}
+
+void GraphicsManager::Clear()
+{
+    for (auto &kv : texHandle_key)
+        glDeleteTextures(1, &kv.second);
+    texHandle_key.clear();
+    texHandle_id.clear();
+}
+
+GLuint const *GraphicsManager::GM_FindTextureHandle(std::string const &id) const
+{
+    if (auto it = texHandle_key.find(id); it != texHandle_key.end())
+    {
+        return &it->second;
+    }
+    return nullptr;
+}
+
+// Fonts
+bool GraphicsManager::InitFonts()
+{
+    if (FT_Init_FreeType(&m_ft))
+    {
+        std::cerr << "[Font] ERROR: Could not init FreeType library\n";
+        m_ft = nullptr;
+        return false;
+    }
+    return true;
+}
+
+bool GraphicsManager::LoadFontFile(const std::string &fontFilePath,
+                                   const std::string &fontKey,
+                                   unsigned int pixelHeight /* e.g. 48 */)
+{
+    // Don't reload if we already have it
+    if (m_fontMap.find(fontKey) != m_fontMap.end())
+        return true;
+
+    if (!m_ft)
+    {
+        std::cerr << "[Font] ERROR: FreeType not initialized\n";
+        return false;
+    }
+
+    FT_Face face = nullptr;
+    if (FT_New_Face(m_ft, fontFilePath.c_str(), 0, &face))
+    {
+        std::cerr << "[Font] ERROR: Failed to load face " << fontFilePath << "\n";
+        return false;
+    }
+
+    FT_Set_Pixel_Sizes(face, 0, pixelHeight);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    FontData data;
+    data.pixelHeight = pixelHeight;
+
+    for (unsigned char c = 0; c < 128; ++c)
+    {
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+        {
+            // couldn't load this glyph, skip it
+            continue;
+        }
+
+        GLuint tex;
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_R8, // single channel
+            face->glyph->bitmap.width,
+            face->glyph->bitmap.rows,
+            0,
+            GL_RED,
+            GL_UNSIGNED_BYTE,
+            face->glyph->bitmap.buffer);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        Character ch{
+            tex,
+            {(int)face->glyph->bitmap.width, (int)face->glyph->bitmap.rows},
+            {(int)face->glyph->bitmap_left, (int)face->glyph->bitmap_top},
+            (unsigned int)face->glyph->advance.x};
+
+        data.glyphs.emplace((char)c, ch);
+    }
+
+    FT_Done_Face(face);
+    m_fontMap.emplace(fontKey, std::move(data));
+    /*std::cout << "[Font] Loaded font '" << fontKey
+        << "' from " << fontFilePath
+        << " @ " << pixelHeight << "px\n";*/
+    return true;
+}
+
+bool GraphicsManager::LoadFontsFromRegistry()
+{
+    if (!mRegistry)
+    {
+        std::cerr << "[Graphics] LoadFontsFromRegistry called without registry.\n";
+        return false;
+    }
+    if (mRegistry->getFontContainer().empty())
+    {
+        std::cout << "[Graphics] No fonts listed in registry.\n";
+        return true; // nothing to do, but not an error
+    }
+
+    bool ok = true;
+    for (auto const &[key, fr] : mRegistry->getFontContainer())
+    {
+
+        if (fr.pixelHeight == 0)
+        {
+            std::cerr << "[Font] Missing pixelHeight for id='" << fr.font_id
+                      << "' (" << fr.path << ")\n";
+            ok = false;
+            continue;
+        }
+
+        if (!LoadFontFile(fr.path, fr.font_id, fr.pixelHeight))
+        {
+            std::cerr << "[Font] Failed: id='" << fr.font_id
+                      << "' path='" << fr.path
+                      << "' px=" << fr.pixelHeight << "\n";
+            ok = false;
+        }
+        else
+        {
+            std::cout << "[Font] Loaded: id='" << fr.font_id
+                      << "' path='" << fr.path
+                      << "' px=" << fr.pixelHeight << "\n";
+        }
+    }
+    return ok;
+}
+
+void GraphicsManager::ShutdownFonts()
+{
+    // delete glyph textures
+    for (auto &[key, font] : m_fontMap)
+    {
+        for (auto &[chr, glyph] : font.glyphs)
+        {
+            if (glyph.TextureID)
+            {
+            }
+            glDeleteTextures(1, &glyph.TextureID);
+        }
+    }
+    m_fontMap.clear();
+
+    if (m_ft)
+    {
+        FT_Done_FreeType(m_ft);
+        m_ft = nullptr;
+    }
+
+    std::cout << "[GraphicsManager] Fonts Shutdown completed\n";
+}
+
+FontData const *GraphicsManager::GM_FindFont(std::string const &id) const
+{
+    if (auto it = m_fontMap.find(id); it != m_fontMap.end())
+    {
+        std::cout << "Found Font '" << id << "' in font map" << "\n";
+        return &it->second;
+    }
+
+    std::cout << "Not Found Font '" << id << "' in font map" << "\n";
+    return nullptr;
+}
+
+//debug
+
+void GraphicsManager::PrintFontMap()
+{
+    std::cout << "===== FONT MAP DUMP =====\n";
+
+    for (const auto& [fontKey, fontData] : m_fontMap)
+    {
+        std::cout << "Font ID: " << fontKey << "\n";
+        std::cout << "  Pixel Height: " << fontData.pixelHeight << "\n";
+        std::cout << "  Glyph Count:  " << fontData.glyphs.size() << "\n";
+
+        // Print each glyph info (optional � can be large)
+        for (const auto& [ch, glyph] : fontData.glyphs)
+        {
+            std::cout << "    '" << ch << "'"
+                << " (ASCII " << static_cast<int>(ch) << "): "
+                << "TexID=" << glyph.TextureID
+                << ", Size=(" << glyph.Size.x << "," << glyph.Size.y << ")"
+                << ", Bearing=(" << glyph.Bearing.x << "," << glyph.Bearing.y << ")"
+                << ", Advance=" << glyph.Advance
+                << "\n";
+        }
+
+        std::cout << "-------------------------------\n";
+    }
+
+    std::cout << "===== END OF FONT MAP =====\n";
+}
+
+bool GraphicsManager::EvictTexture(std::string const& idOrPath)
+{
+    // Find by key (the same string used in GetOrLoad). Today you store by tex_name.
+    auto it = texHandle_key.find(idOrPath);
+    if (it == texHandle_key.end())
+        return false;
+
+    GLuint oldId = it->second;
+    // Delete GPU object
+    if (oldId)
+        glDeleteTextures(1, &oldId);
+
+    // Remove both directions
+    texHandle_key.erase(it);
+    if (auto it2 = texHandle_id.find(oldId); it2 != texHandle_id.end())
+        texHandle_id.erase(it2);
+
+    std::cout << "[Graphics] Evicted texture: " << idOrPath << "\n";
+    return true;
+}
+
+
+
+//std::ostream& operator<<(std::ostream& os, const FontData& fd)
+//{
+//    os << "FontData { pixelHeight=" << fd.pixelHeight
+//        << ", glyphs=" << fd.glyphs.size() << " }";
+//
+//    // Optional: print first few glyphs for debug
+//    int count = 0;
+//    for (auto const& [ch, glyph] : fd.glyphs)
+//    {
+//        if (count++ >= 5) { os << ", ..."; break; }
+//        os << "\n  '" << ch << "': (size=" << glyph.Size.x << "x" << glyph.Size.y
+//            << ", bearing=" << glyph.Bearing.x << "," << glyph.Bearing.y
+//            << ", advance=" << glyph.Advance << ")";
+//    }
+//
+//    return os;
+//}
