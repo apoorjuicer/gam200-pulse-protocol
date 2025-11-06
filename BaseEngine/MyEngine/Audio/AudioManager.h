@@ -2,7 +2,6 @@
 /**
  * @file        AudioManager.h
  * @project     Pulse Protocol
- * @author      Leu Jun Yong
  * @author      Ban Kai Wei Benjamin
  *
  * @brief       Provides initialization, playback, control, and shutdown of
