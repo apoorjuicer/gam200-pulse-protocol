@@ -33,10 +33,6 @@ namespace Framework
 	{
 		auto *g_coordinator = Coordinator::GetInstance();
 
-		// pull the current game area; fall back if not set
-		const float gw = (GLHelper::GameWidth > 0) ? (float)GLHelper::GameWidth : 1600.0f;
-		const float gh = (GLHelper::GameHeight > 0) ? (float)GLHelper::GameHeight : 900.0f;
-
 		for (auto it : entity)
 		{
 			// IMPORTANT: reference, not copy
