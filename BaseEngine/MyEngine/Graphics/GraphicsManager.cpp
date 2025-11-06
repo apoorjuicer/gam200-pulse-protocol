@@ -52,7 +52,6 @@ GraphicsManager::GraphicsManager(AssetRegistry *registry) : mRegistry{registry}
 GraphicsManager::~GraphicsManager()
 {
     // Cleanup happens in Shutdown()
-    Shutdown();
 }
 
 
