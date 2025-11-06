@@ -378,16 +378,19 @@ void EnemyScript::Update(Entity ID)
         AABB enemyAABB = collision.BuildAABBFromTransform(enemy_transform, enemy_box);
         AABB playerAABB = collision.BuildAABBFromTransform(player_transform, player_box);
 
-        float worldScale = 1.f;
+        /*float worldScale = 1.f;
         float edgeThreshold = (playerAABB.width + enemyAABB.width) * worldScale;
 
         bool edgeContact =
             (playerAABB.max.x >= enemyAABB.min.x - edgeThreshold) &&
             (playerAABB.min.x < enemyAABB.min.x) &&
             (playerAABB.max.y >= enemyAABB.min.y) &&
-            (playerAABB.min.y <= enemyAABB.max.y);
+            (playerAABB.min.y <= enemyAABB.max.y);*/
 
-        if (edgeContact && enemy_health.isAlive && player_health.isAlive)
+        float edgeThreshold = 2.0f; // sensitivity adjustment
+        bool edgeHit = collision.CheckEdgeContactCollision(playerAABB, enemyAABB, edgeThreshold);
+
+        if (edgeHit && enemy_health.isAlive && player_health.isAlive)
         {
             if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
                 audio->PlaySound("collision");
@@ -396,8 +399,8 @@ void EnemyScript::Update(Entity ID)
             enemy_health.isAlive = false;
             player_health.hp -= enemy_health.damage;
 
-            std::cout << ">>> COLLISION (AABB edge)! Player HP: "
-                << player_health.hp << " | Enemy defeated!\n";
+            std::cout << ">>> EDGE COLLISION DETECTED (AABB) <<<\n";
+            std::cout << "Player HP: " << player_health.hp << "\n";
 
             if (player_health.hp <= 0)
             {
@@ -406,10 +409,8 @@ void EnemyScript::Update(Entity ID)
                 std::cout << ">>> PLAYER DEFEATED\n";
             }
 
-            // NOW YOU DIE
             Factory factory;
             factory.DeleteEntity(ID);
-            //enemy_transform.Pos = { -9999.0f, -9999.0f };
         }
     }
 
