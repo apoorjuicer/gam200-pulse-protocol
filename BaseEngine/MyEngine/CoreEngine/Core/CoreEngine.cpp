@@ -861,6 +861,13 @@ void CoreEngine::StopGame()
 		if (!m_originalScenePath.empty())
 		{
 			sceneMgr->LoadSceneFromJson(m_originalScenePath);
+
+			// Sync GUI tracking after scene reload
+			if (auto guiMgr = coord->GetSystem<GUIManager>())
+			{
+				guiMgr->SyncTrackingWithScene();
+				std::cout << "[CoreEngine] GUI tracking synced after Stop" << std::endl;
+			}
 		}
 	}
 }

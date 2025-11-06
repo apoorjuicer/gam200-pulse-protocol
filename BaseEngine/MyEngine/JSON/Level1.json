@@ -11,7 +11,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1.846221923828125,
+                            "x": 5.538482666015625,
                             "y": 0.0
                         },
                         "scale": {
@@ -95,8 +95,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.2638954520225525,
+                        "currentFrame": 2,
+                        "elapsedTime": 0.034742508083581927,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -436,7 +436,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.11617160588502884,
+                        "elapsedTime": 0.015886498615145685,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -450,7 +450,7 @@
                 },
                 {
                     "name": {
-                        "name": "GUICreated_Player_9"
+                        "name": "GUICreated_Player_19"
                     }
                 }
             ]
@@ -498,7 +498,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.11436011642217636,
+                        "elapsedTime": 0.01394639816135168,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -512,255 +512,7 @@
                 },
                 {
                     "name": {
-                        "name": "GUICreated_Player_10"
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "Typing": {
-                        "Type": "Player"
-                    }
-                },
-                {
-                    "transform": {
-                        "position": {
-                            "x": -300.0,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.11149431765079498,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "PlayerScript"
-                    }
-                },
-                {
-                    "name": {
-                        "name": "GUICreated_Player_11"
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "Typing": {
-                        "Type": "Player"
-                    }
-                },
-                {
-                    "transform": {
-                        "position": {
-                            "x": -300.0,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.10928642749786377,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "PlayerScript"
-                    }
-                },
-                {
-                    "name": {
-                        "name": "GUICreated_Player_12"
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "Typing": {
-                        "Type": "Player"
-                    }
-                },
-                {
-                    "transform": {
-                        "position": {
-                            "x": -300.0,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.10745891183614731,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "PlayerScript"
-                    }
-                },
-                {
-                    "name": {
-                        "name": "GUICreated_Player_13"
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "Typing": {
-                        "Type": "Player"
-                    }
-                },
-                {
-                    "transform": {
-                        "position": {
-                            "x": -300.0,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 250.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.10539882630109787,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "PlayerScript"
-                    }
-                },
-                {
-                    "name": {
-                        "name": "GUICreated_Player_14"
+                        "name": "GUICreated_Player_20"
                     }
                 }
             ]
