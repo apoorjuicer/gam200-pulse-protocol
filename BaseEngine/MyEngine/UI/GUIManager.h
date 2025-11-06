@@ -30,7 +30,7 @@ public:
     ~GUIManager();
 
     void Initialize();
-    void Update(float dt);
+    void Update(float);
     void Shutdown();
 
     // Set of all GUI button entities in the scene

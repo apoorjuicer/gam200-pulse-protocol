@@ -59,6 +59,9 @@ public:
     bool IsBGMPlaying(bool *outPlaying = nullptr) const;
     void RestartBGM();
 
+    void PauseBGM();   // Pause the current BGM
+    void ResumeBGM();  // Resume paused BGM
+
     // Pause and Play
     void SetPaused(bool paused);
     bool IsPaused() const;

@@ -624,8 +624,27 @@ float AudioManager::clampto0and1(float v)
     return (v < 0) ? 0 : ((v > 1) ? 1 : v);
 }
 
+void AudioManager::PauseBGM()
+{
+    if (mCurrentBGMCh)
+    {
+        mCurrentBGMCh->setPaused(true);
+        std::cout << "[AudioManager] BGM Paused\n";
+    }
+}
+
+void AudioManager::ResumeBGM()
+{
+    if (mCurrentBGMCh)
+    {
+        mCurrentBGMCh->setPaused(false);
+        std::cout << "[AudioManager] BGM Resumed\n";
+    }
+}
+
 /*
    Every FMOD function returns an FMOD_RESULT
    init FMOD : FMOD::System_Create(*system_var);
 
 */
+

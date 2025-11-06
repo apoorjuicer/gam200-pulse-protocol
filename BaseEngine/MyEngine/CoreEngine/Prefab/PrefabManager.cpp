@@ -60,14 +60,8 @@ std::optional<Entity> PrefabManager::InstantiatePrefab(std::string const& prefab
 
 	if (result.has_value()) {
 		// set entity name without the .json extension
-		auto* coord = Coordinator::GetInstance();
 		Entity entity = result.value();
-			
-		// strip .json from prefabName if it exists
-		std::string cleanName = prefabName;
-		if (cleanName.ends_with(".json")) {
-			cleanName = cleanName.substr(0, cleanName.length() - 5);
-		}
+		auto* coord = Coordinator::GetInstance();
 
 		// if entity has name component alr then just set it to that name in the JSON file
 		if (coord->HasComponent<Name>(entity)) {

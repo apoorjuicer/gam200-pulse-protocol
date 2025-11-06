@@ -30,7 +30,7 @@ void GUIManager::Initialize() {
     std::cout << "[GUIManager] Successfully initialized." << std::endl;
 }
 
-void GUIManager::Update(float dt) {
+void GUIManager::Update(float) {
     // Sync only when scene first loads (check if we need to sync)
     static std::string lastSyncedScene = "";
     auto* g_coordinator = Coordinator::GetInstance();

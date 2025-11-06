@@ -675,6 +675,11 @@ void CoreEngine::RenderDebugDraw()
 	static std::unordered_map<Entity, glm::vec2> s_velocity;
 	static double s_lastTick = glfwGetTime();
 
+	// to fix warnings, previously using same variables 2 times
+	float stressWorldH = 900.0f;
+	float stressAspect = (WindowHeight > 0) ? float(WindowWidth) / float(WindowHeight) : (16.0f / 9.0f);
+	float stressWorldW = stressWorldH * stressAspect;
+
 	if (g_inputSystem->ConsumeStressToggleRequest())
 	{
 		if (!s_stressEntities.empty())
@@ -694,15 +699,15 @@ void CoreEngine::RenderDebugDraw()
 				std::cerr << "[StressTest] Failed to load texture: " << heroPath << "\n";
 			}
 
-			const float worldH = 900.0f;
-			const float aspect = (WindowHeight > 0)
-				? float(WindowWidth) / float(WindowHeight)
-				: (16.0f / 9.0f);
-			const float worldW = worldH * aspect;
+			//const float worldH = 900.0f;
+			//const float aspect = (WindowHeight > 0)
+			//	? float(WindowWidth) / float(WindowHeight)
+			//	: (16.0f / 9.0f);
+			//const float worldW = worldH * aspect;
 
 			std::mt19937 rng{ std::random_device{}() };
-			std::uniform_real_distribution<float> posX(-worldW, worldW);
-			std::uniform_real_distribution<float> posY(-worldH, worldH);
+			std::uniform_real_distribution<float> posX(-stressWorldW, stressWorldW);
+			std::uniform_real_distribution<float> posY(-stressWorldH, stressWorldH);
 			std::uniform_real_distribution<float> vel(-220.0f, 220.0f);
 			std::uniform_real_distribution<float> size(28.0f, 64.0f);
 
@@ -742,16 +747,16 @@ void CoreEngine::RenderDebugDraw()
 		const float dt = float(now - s_lastTick);
 		s_lastTick = now;
 
-		const float worldH = 900.0f;
-		const float aspect = (WindowHeight > 0)
-			? float(WindowWidth) / float(WindowHeight)
-			: (16.0f / 9.0f);
-		const float worldW = worldH * aspect;
+		//const float worldH = 900.0f;
+		//const float aspect = (WindowHeight > 0)
+		//	? float(WindowWidth) / float(WindowHeight)
+		//	: (16.0f / 9.0f);
+		//const float worldW = worldH * aspect;
 
-		const float left = -worldW;
-		const float right = worldW;
-		const float bottom = -worldH;
-		const float top = worldH;
+		const float left = -stressWorldW;
+		const float right = stressWorldW;
+		const float bottom = -stressWorldH;
+		const float top = stressWorldH;
 
 		for (Entity e : s_stressEntities)
 		{
@@ -894,9 +899,19 @@ void CoreEngine::RestartRuntimeForPlay()
 void CoreEngine::PauseGame()
 {
 	m_isPlaying = false;
+	auto coord = Coordinator::GetInstance();
+
+	if (auto audio = coord->GetSystem<AudioManager>()) {
+		audio->PauseBGM();
+	}
 }
 
 void CoreEngine::ResumeGame()
 {
 	m_isPlaying = true;
+	auto coord = Coordinator::GetInstance();
+
+	if (auto audio = coord->GetSystem<AudioManager>()) {
+		audio->ResumeBGM();
+	}
 }
