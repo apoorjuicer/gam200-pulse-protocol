@@ -37,6 +37,9 @@
 #include "Layer.h"
 #include "CoreEngine/ECS/System.h"
 // #include "CoreEngine/ECS/SystemManager.h"
+#include "UI/GUIManager.h"
+#include "UI/GUIButton.h"
+
 #include "glapp.h"
 #include <ft2build.h>
 #include <memory>

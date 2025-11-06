@@ -1,16 +1,20 @@
 /******************************************************************************/
 /**
- * @file        GUIButton.h
+ * @file        GUIButton.cpp
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
- * @brief       Implementation of GUIButton component serialization.
+ * @brief       Implements the InputManager system, handling GLFW-based
+ *              keyboard input for rhythm gameplay. Provides real-time input
+ *              state tracking, combo detection, rhythm timing feedback,
+ *              event broadcasting to subscribed systems, debug toggles.
+ *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
 
-#include "../MyEngine/Input/GUIButton.h"
+#include "GUIButton.h"
 
 void GUIButton::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
     using namespace rapidjson;

@@ -342,11 +342,6 @@ void RhythmGameplayInput::processRhythmTiming(int key)
 
     std::string feedback = getTimingFeedback();
 
-    if (auto audio = g_coordinator->GetSystem<AudioManager>())
-    {
-        audio->PlaySound("beat_placeholder");
-    }
-
     bool comboCompleted = false;
     std::string completedComboName = "";
 

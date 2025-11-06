@@ -204,103 +204,131 @@ void GraphicsManager::Initialize()
 
 void GraphicsManager::Update()
 {
-	// Poll input / advance time
-	glfwPollEvents();
-	GLHelper::update_time(1.0);
-	glapp->update(Engine->GetWindow(), EntityMember);
-	glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
-	glClearDepth(1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//--- Rendering passes ---
-	// Background pass
-	glapp->draw(EntityMember, LAYER_BACKGROUND);
+    // Poll input / advance time
+    glfwPollEvents();
+    GLHelper::update_time(1.0);
+    glapp->update(Engine->GetWindow(), EntityMember);
+    glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
+    glClearDepth(1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //--- Rendering passes ---
+    // Background pass
+    glapp->draw(EntityMember, LAYER_BACKGROUND);
 
-	// Sprites pass
-	glapp->draw(EntityMember, LAYER_WORLD);
-	//------------------------
-	
-	// Draw in-game gui system & UI overlay
-	RenderUIOverlayElements();
+    // Sprites pass
+    glapp->draw(EntityMember, LAYER_WORLD);
+    //------------------------
 
-	// Draw overlay text last
-	auto& textShader = GLApp::shdrpgms[3];
+    // Draw in-game gui system & UI overlay
+    RenderUIOverlayElements();
 
-    // Build FPS string and heaviest system string and render it
-    if (!MyEditor::IsEnabled())
-    {
+    // Draw overlay text last
+    auto& textShader = GLApp::shdrpgms[3];
 
-        if (m_debugFont)
-        {
+    // get the game viewport dimensions from the editor itself
+    MyEditor::GameViewport viewport = MyEditor::ComputeMiddleGameViewportPixels(Engine->GetWindow(), false);
+
+    // only renders if viewport is valid
+    if (viewport.w > 0 && viewport.h > 0) {
+
+        // if the 2 fonts are loaded
+        if (m_debugFont && m_uiFont) {
+            // get framebuffer dimensions
+            int fbW = 0, fbH = 0;
+            glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
+
+            // calculate scaling factors between framebuffer and virtual coordinates
+            float scaleX = static_cast<float>(GLApp::VIRTUAL_W) / static_cast<float>(fbW);
+            float scaleY = static_cast<float>(GLApp::VIRTUAL_H) / static_cast<float>(fbH);
+
+            // convert viewport position to virtual coordinates
+            float virtualX = static_cast<float>(viewport.x) * scaleX;
+            float virtualY = static_cast<float>(viewport.y) * scaleY;
+            float virtualW = static_cast<float>(viewport.w) * scaleX;
+            float virtualH = static_cast<float>(viewport.h) * scaleY;
+
+            // text positioning const
+            const float TEXT_PADDING = -325.0f;
+            const float LINE_SPACING = 60.0f;
+            const float BOTTOM_OFFSET = 60.0f;
+            const float FPS_SCALE = 1.3f;
+            const float SYSTEM_SCALE = 1.0f;
+
+            const float TEAM_PADDING_X = -150.0f;
+            const float TEAM_PADDING_Y = -225.0f;
+            const float TEAM_LABEL_SCALE = 1.3f;
+
+            // text color const
+            const glm::vec3 FPS_COLOR = glm::vec3(0.0f, 1.0f, 1.0f); // yellow
+            const glm::vec3 SYSTEM_COLOR = glm::vec3(1.0f, 0.0f, 1.0f); // green
+            const glm::vec3 TEAM_COLOR = glm::vec3(1.0f, 1.0f, 1.0f); // white
+
+            const std::string TEAM_LABEL = "Team BLOOP";
+
+            // bottom-left of game viewport
+            float textX = virtualX + TEXT_PADDING;
+            float textY = virtualY + virtualH - BOTTOM_OFFSET;
+
+            // top right of game viewport
+            float estimatedWidth = TEAM_LABEL.length() * 15.0f * TEAM_LABEL_SCALE;
+            float teamLabelX = virtualX + virtualW - estimatedWidth - TEAM_PADDING_X;
+            float teamLabelY = virtualY + TEAM_PADDING_Y;
+
+            // render FPS text; uses font liberation-mono_48
             std::ostringstream fpsText;
             fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
 
-            RenderText(GLApp::shdrpgms[3], 
-                fpsText.str(), 
-                100.0f, 850.0f,
-                       1.0f, 
-                glm::vec3(0.5f, 0, 0), 
-                m_debugFont);
+            // uses font: 
+            RenderText(GLApp::shdrpgms[3], fpsText.str(), textX, textY, FPS_SCALE, FPS_COLOR, m_debugFont);
 
-            // Add top system below FPS
-            auto *profiler = ProfilingManager::GetInstance();
-            const auto &profiles = profiler->GetDisplayProfiles();
+            // get top system from profiler
+            auto* profiler = ProfilingManager::GetInstance();
+            const auto& profiles = profiler->GetDisplayProfiles();
 
             std::string topSystem = "None";
             double topPercentage = 0.0;
-            for (const auto &[systemName, profile] : profiles)
-            {
-                if (profile.percentage > topPercentage)
-                {
-                    topPercentage = profile.percentage;
-                    topSystem = systemName;
-                }
-            }
 
+            // render top system below FPS text
             std::ostringstream topText;
-            topText << topSystem << ": " << std::fixed
-                    << std::setprecision(2) << topPercentage << "%";
+            topText << topSystem << ": " << std::fixed << std::setprecision(2) << topPercentage << "%";
 
-            //RenderText(GLApp::shdrpgms[3], topText.str(), 100.0f, 880.0f,
-            //           0.8f, glm::vec3(0.5f, 0.5f, 0), m_debugFont);
+            // uses font liberation-mono_48
+            RenderText(textShader, topText.str(), textX, textY + LINE_SPACING, SYSTEM_SCALE, SYSTEM_COLOR, m_debugFont);
+
+            // team label using font patrickhand-regular_48
+            RenderText(textShader, TEAM_LABEL, teamLabelX, teamLabelY, TEAM_LABEL_SCALE, TEAM_COLOR, m_uiFont);
         }
-        else
-        {
-            std::cerr << "[GraphicsManager] WARNING: m_debugFont not found!\n";
+        else {
+            std::cerr << "[GraphicsManager] WARNING: both fonts not found!\n";
         }
     }
+    //// Team label
+    //RenderText(
+    //    textShader,
+    //    "Team BLOOP",
+    //    600.0f, 850.0f,
+    //    1.0f,
+    //    glm::vec3(1, 1, 1),
+    //    m_uiFont
+    //);
 
-    if (m_uiFont)
-    {
-        // Team label, error probably from IMGUI
-        RenderText(
-            GLApp::shdrpgms[3],
-            "Team BLOOP",
-            600.0f, 850.0f,
-            1.0f,
-            glm::vec3(1, 1, 1),
-            m_uiFont);
-    }
-    else {
-        std::cerr << "[GraphicsManager] WARNING: m_uiFont not found!\n";
-    }
+    //// FPS counter (while editor hidden)
+    //if (!MyEditor::IsEnabled()) {
+    //    std::ostringstream fpsText;
+    //    fpsText << "FPS: " << std::fixed
+    //        << std::setprecision(1)
+    //        << GLHelper::fps;
 
+    //    RenderText(
+    //        textShader,
+    //        fpsText.str(),
+    //        100.0f, 850.0f,
+    //        1.0f,
+    //        glm::vec3(0.5f, 0.0f, 0.0f),
+    //        m_debugFont
+    //    );
+    //}
 
-
-    // FPS counter (while editor hidden)
-   
-
-
-
-        // // Controls help, anchored at right side
-        // {
-        //     int fbW = 0, fbH = 0;
-        //     glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
-
-        // team label using font patrickhand-regular_48
-        //RenderText(textShader, TEAM_LABEL, teamLabelX, teamLabelY, TEAM_LABEL_SCALE, TEAM_COLOR, m_uiFont);
-    	
-
-	
 	 //// Controls help, anchored at right side
 	 //{
 	 //    int fbW = 0, fbH = 0;
@@ -483,9 +511,9 @@ void GraphicsManager::OnResize(int width, int height)
 void GraphicsManager::RenderUIOverlayElements()
 {
     auto *coordinator = Coordinator::GetInstance();
-    auto inputMgr = coordinator->GetSystem<InputManager>();
+    auto guiMgr = coordinator->GetSystem<GUIManager>();
 
-    if (!inputMgr) {
+    if (!guiMgr) {
         std::cerr << "[GraphicsManager] : inputMgr not found!!! in RenderUIOverlayElements\n";
         return;
     }
@@ -494,7 +522,7 @@ void GraphicsManager::RenderUIOverlayElements()
     auto &shader = GLApp::shdrpgms[2];
     shader.Use();
 
-    for (auto entity : inputMgr->GUIButtonEntities)
+    for (auto entity : guiMgr->GUIButtonEntities)
     {
         if (!coordinator->HasComponent<GUIButton>(entity))
             continue;
