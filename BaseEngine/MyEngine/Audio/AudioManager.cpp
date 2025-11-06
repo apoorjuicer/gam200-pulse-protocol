@@ -51,7 +51,7 @@ AudioManager::AudioManager(AssetRegistry *registry) : mRegistry{registry}
 }
 AudioManager::~AudioManager()
 {
-    Shutdown();
+   // Shutdown();
 }
 
 void AudioManager::SetRegistry(AssetRegistry* registry)
