@@ -34,11 +34,11 @@ namespace MyEditor {
     void Shutdown();
     void SetEnabled(bool enabled);
     bool IsEnabled();
-    static std::string OpenJsonFileDialog(); 
+    static std::string OpenJsonFileDialog();
 
     struct GameViewport { int x, y, w, h; };
-    extern const Entity INVALID_ENTITY;     
-    extern Entity selectedEntity;         
+    extern const Entity INVALID_ENTITY;
+    extern Entity selectedEntity;
     static std::vector<std::string> s_pendingOSDrops;
 
     void EnqueueExternalDrop(const std::vector<std::string>& paths);
@@ -51,16 +51,31 @@ namespace MyEditor {
     // Returns the middle "game" rectangle in FRAMEBUFFER PIXELS, computed from current panel sizes
     GameViewport ComputeMiddleGameViewportPixels(GLFWwindow* window, bool keep_16x9 = true);
 
-    struct AssetItem
-{
-    std::string name;        // just the file/folder name
-    std::string fullPath;    // absolute-ish path (../../MyEngine/Assets/...)
-    bool isDir = false;
+    // Simple editor-gizmo state
+    struct GizmoState {
+        bool  dragging = false;
+        Entity active = INVALID_ENTITY;
+        glm::vec2 dragStartMouseScreen{ 0,0 }; // ImGui (screen) px
+        Vector2  dragStartWorld{ 0,0 };        // world coords at press
+        Vector2  entityStartPos{ 0,0 };        // starting entity world pos
+    };
 
-    // thumbnail stuff (for files)
-    unsigned int texID = 0;
-    bool triedLoad = false; // so we don't spam-load every frame
-};
+    // world<->screen helpers
+    Vector2 ScreenToWorld(glm::vec2 screen, const GameViewport& vp);
+    glm::vec2 WorldToScreen(const Vector2& world, const GameViewport& vp);
+
+    void Gizmo_DrawAndHandle(const GameViewport& vp);
+
+    struct AssetItem
+    {
+        std::string name;        // just the file/folder name
+        std::string fullPath;    // absolute-ish path (../../MyEngine/Assets/...)
+        bool isDir = false;
+
+        // thumbnail stuff (for files)
+        unsigned int texID = 0;
+        bool triedLoad = false; // so we don't spam-load every frame
+    };
 
 
 }

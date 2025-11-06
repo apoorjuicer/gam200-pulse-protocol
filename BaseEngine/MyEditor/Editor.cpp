@@ -25,7 +25,7 @@ namespace MyEditor
     // CONSTANTS & BASIC STATE
     // --------------------------------------------------------------------
 
-    const Entity INVALID_ENTITY = static_cast<Entity>(-1);  
+    const Entity INVALID_ENTITY = static_cast<Entity>(-1);
     Entity selectedEntity = INVALID_ENTITY;
 
     // this vector maintains the order entities appear in the hierarchy
@@ -38,6 +38,15 @@ namespace MyEditor
     static bool s_showReplaceModal = false;
     static std::string s_replaceDstPath;   // file being replaced
     static std::string s_replaceSrcPath;
+
+    static GizmoState g_gizmo;
+    static CollisionManager g_col;
+    static inline glm::vec2 ToGlm(const ImVec2& v) { return glm::vec2(v.x, v.y); }
+    static inline ImVec2    ToIm(const glm::vec2& v) { return ImVec2(v.x, v.y); }
+    static inline ImVec2    ToIm(const Vector2& v) { return ImVec2(v.x, v.y); } // your Vector2 (x,y)
+    static inline Vector2   ToV2(const glm::vec2& v) { return Vector2{ v.x, v.y }; }
+    static constexpr float kWorldW = 1920.0f;
+    static constexpr float kWorldH = 1080.0f;
 
     // --------------------------------------------------------------------
     // PANEL RATIOS
@@ -84,24 +93,25 @@ namespace MyEditor
 
         SavedEntityState()
             : id(INVALID_ENTITY),
-              hasTransform(false),
-              hasRenderable(false),
-              hasName(false),
-              hasGuiButton(false)
-        {}
+            hasTransform(false),
+            hasRenderable(false),
+            hasName(false),
+            hasGuiButton(false)
+        {
+        }
     };
 
     static bool s_isPlaying = false;                // current play mode or not
     static bool s_hasEditorBaseline = false;        // whether we have captured a snapshot
     static std::vector<SavedEntityState> s_editorBaseline;
 
-    #ifdef IMGUI_HAS_DOCKING
-        static ImGuiID   g_DockspaceID = 0;
-        static ImGuiID   g_NodeLeft = 0, g_NodeRight = 0, g_NodeBottom = 0, g_NodeCenter = 0;
-        static bool      g_DockLayoutBuilt = false;
+#ifdef IMGUI_HAS_DOCKING
+    static ImGuiID   g_DockspaceID = 0;
+    static ImGuiID   g_NodeLeft = 0, g_NodeRight = 0, g_NodeBottom = 0, g_NodeCenter = 0;
+    static bool      g_DockLayoutBuilt = false;
 
-        enum class DockTarget { Left, Right, Bottom, Center };
-    #endif
+    enum class DockTarget { Left, Right, Bottom, Center };
+#endif
 
 
     // --------------------------------------------------------------------
@@ -186,7 +196,7 @@ namespace MyEditor
 
             ImGui::EndPopup();
         }
-    }   
+    }
 
     // ============================================================================
 // Replace file on disk and hot-swap everywhere using AssetsManager API.
@@ -260,7 +270,7 @@ namespace MyEditor
     }
 
 
-    
+
     static void RefreshCurrentDir()
     {
         s_dirEntries.clear();
@@ -360,6 +370,152 @@ namespace MyEditor
     }
 
 
+    static inline void ComputeGameDrawRect(const GameViewport& vp, float& drawX, float& drawY,
+        float& drawW, float& drawH, float& scale)
+    {
+        const float sx = vp.w / kWorldW;
+        const float sy = vp.h / kWorldH;
+        scale = (sx < sy) ? sx : sy;           // fit inside
+        drawW = kWorldW * scale;
+        drawH = kWorldH * scale;
+        drawX = vp.x + (vp.w - drawW) * 0.5f;  // pillar/letter box offsets
+        drawY = vp.y + (vp.h - drawH) * 0.5f;
+    }
+
+    glm::vec2 WorldToScreen(const Vector2& wpos, const GameViewport& vp)
+    {
+        // 1) world -> NDC   with  N = diag(2/W, 2/H, 1)
+        const float sx = 2.0f / kWorldW;
+        const float sy = 2.0f / kWorldH;
+        const glm::mat3 N(sx, 0, 0,
+            0, sy, 0,
+            0, 0, 1);
+
+        // camera pan/zoom (same one used during drawing) 
+        const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gCamera);
+
+        glm::vec3 ndc = Cam * (N * glm::vec3(wpos.x, wpos.y, 1.0f)); // -1..1
+
+        // 2) NDC -> framebuffer pixels in the drawn game rectangle
+        float x = vp.x + (ndc.x * 0.5f + 0.5f) * vp.w;
+        float y = vp.y + (1.0f - (ndc.y * 0.5f + 0.5f)) * vp.h;
+        return { x, y };
+    }
+
+    Vector2 ScreenToWorld(glm::vec2 screen, const GameViewport& vp)
+    {
+        // 1) framebuffer px inside the game rect -> NDC
+        float ndcX = ((screen.x - vp.x) / vp.w) * 2.0f - 1.0f;
+        float ndcY = 1.0f - ((screen.y - vp.y) / vp.h) * 2.0f;
+        glm::vec3 ndc(ndcX, ndcY, 1.0f);
+
+        // 2) invert camera and normalization
+        const float sx = 2.0f / kWorldW;
+        const float sy = 2.0f / kWorldH;
+        const glm::mat3 N(sx, 0, 0,
+            0, sy, 0,
+            0, 0, 1);
+        const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gCamera); // 
+        glm::mat3 invAll = glm::inverse(Cam * N);
+
+        glm::vec3 w = invAll * ndc;   // back to world units (centered at 0,0)
+        return Vector2{ w.x, w.y };
+    }
+
+
+    // Lightweight: click anywhere inside an entity's AABB to select; drag to move.
+    // Uses BuildAABBFromTransform + CheckMouseCollision.
+    void Gizmo_DrawAndHandle(const GameViewport& vp)
+    {
+        auto* coord = Coordinator::GetInstance();
+        if (!coord) return;
+
+        // 1) gather mouse in both spaces
+        ImGuiIO& io = ImGui::GetIO();
+        glm::vec2 mouseScreen = ToGlm(io.MousePos);
+        Vector2   mouseWorld = ScreenToWorld(mouseScreen, vp);
+
+        // 2) pick test (we still test all so you can select, but we only DRAW selected)
+        Entity hovered = INVALID_ENTITY;
+
+        for (Entity e : coord->GetAllEntities())
+        {
+            if (!coord->HasComponent<Framework::Transform>(e) ||
+                !coord->HasComponent<Framework::Renderable>(e)) continue;
+
+            auto& tr = coord->GetComponent<Framework::Transform>(e);
+            if (!tr.isVisible) continue;
+
+            AABB base; base.width = tr.Scale.x; base.height = tr.Scale.y;
+            AABB worldBox = g_col.BuildAABBFromTransform(tr, base);
+
+            if (g_col.CheckMouseCollision(mouseWorld, worldBox))
+                hovered = e;
+
+            // draw ONLY the selected entity’s box
+            if (e == selectedEntity)
+            {
+                glm::vec2 a = WorldToScreen({ worldBox.min.x, worldBox.min.y }, vp);
+                glm::vec2 b = WorldToScreen({ worldBox.max.x, worldBox.max.y }, vp);
+                ImDrawList* dl = ImGui::GetForegroundDrawList();
+                dl->AddRect(ToIm(a), ToIm(b), IM_COL32(255, 220, 80, 180), 3.0f, 0, 2.0f);
+            }
+        }
+
+        // 3) mouse press → start drag/select (only when cursor inside the drawn game rect)
+        float gx, gy, gw, gh, s; ComputeGameDrawRect(vp, gx, gy, gw, gh, s);
+        bool inGameRect =
+            (mouseScreen.x >= gx && mouseScreen.x <= gx + gw &&
+                mouseScreen.y >= gy && mouseScreen.y <= gy + gh);
+
+        if (inGameRect && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+        {
+            if (hovered != INVALID_ENTITY) {
+                selectedEntity = hovered;
+                auto& tr = coord->GetComponent<Framework::Transform>(selectedEntity);
+                g_gizmo.dragging = true;
+                g_gizmo.active = selectedEntity;
+                g_gizmo.dragStartMouseScreen = mouseScreen;
+                g_gizmo.dragStartWorld = mouseWorld;
+                g_gizmo.entityStartPos = tr.Pos;
+            }
+            else {
+                selectedEntity = INVALID_ENTITY;
+            }
+        }
+
+        // 4) drag to move
+        if (g_gizmo.dragging && g_gizmo.active != INVALID_ENTITY && ImGui::IsMouseDown(ImGuiMouseButton_Left))
+        {
+            if (coord->HasComponent<Framework::Transform>(g_gizmo.active))
+            {
+                auto& tr = coord->GetComponent<Framework::Transform>(g_gizmo.active);
+                Vector2 d = { mouseWorld.x - g_gizmo.dragStartWorld.x,
+                              mouseWorld.y - g_gizmo.dragStartWorld.y };
+
+                if (io.KeyCtrl) { d.x = std::round(d.x / 10.f) * 10.f; d.y = std::round(d.y / 10.f) * 10.f; }
+
+                tr.Pos.x = g_gizmo.entityStartPos.x + d.x;
+                tr.Pos.y = g_gizmo.entityStartPos.y + d.y;
+            }
+        }
+
+        // 5) release → stop drag
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+            g_gizmo.dragging = false;
+            g_gizmo.active = INVALID_ENTITY;
+        }
+
+        // 6) small center handle for selected
+        if (selectedEntity != INVALID_ENTITY && coord->HasComponent<Framework::Transform>(selectedEntity))
+        {
+            auto& tr = coord->GetComponent<Framework::Transform>(selectedEntity);
+            glm::vec2 p = WorldToScreen(tr.Pos, vp);
+            ImDrawList* dl = ImGui::GetForegroundDrawList();
+            dl->AddCircleFilled(ToIm(p), 5.0f, IM_COL32(255, 200, 90, 255));
+            dl->AddCircle(ToIm(p), 8.0f, IM_COL32(255, 200, 90, 200), 18, 1.5f);
+        }
+    }
 
     // ===================== ProjectPanel =====================
     static void ProjectPanel(Entity selectedEntity)
@@ -968,7 +1124,7 @@ namespace MyEditor
         // --- RIGHT HOST ---
         ImGui::SetNextWindowPos(ImVec2(right_x, middle_y));
         ImGui::SetNextWindowSize(ImVec2(right_w, safe_middle_h));
-        
+
         ImGuiID rightDockID = 0;
         if (ImGui::Begin("Right Panel", nullptr, panel_flags)) {
             rightDockID = ImGui::GetID("RightDockSpace");
@@ -1116,7 +1272,7 @@ namespace MyEditor
                             entityDisplayOrder.push_back(newEntity);
                             /*std::cout << "[Editor] Created entity " << newEntity << " at end" << std::endl;*/
                         }
-                        
+
                         // [^] button: insert above selected entity
                         else if (createAboveClicked && selectedEntity != INVALID_ENTITY) {
 
@@ -1140,7 +1296,7 @@ namespace MyEditor
 
                             // finds position of selected entity
                             auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
-                                
+
                             // insert after selected position
                             // etc. [A, B, C] + insert below B → [A, NEW, B, C]
                             if (it != entityDisplayOrder.end()) {
@@ -1291,7 +1447,7 @@ namespace MyEditor
                 ImGui::Separator();
 
 
-                
+
                 // Right click to add component
                 if (selectedEntity != INVALID_ENTITY &&
                     ImGui::BeginPopupContextWindow("AddCompPopup",
@@ -1607,7 +1763,7 @@ namespace MyEditor
 
                     ImGui::Separator();
 
-                        
+
 
                     // --- Animation ---------------------------------------------------------------
                     if (g->HasComponent<Framework::Animation>(selectedEntity))
@@ -1709,7 +1865,7 @@ namespace MyEditor
                     }
 
 
-    
+
 
 
                     // --- GUIButton ---------------------------------------------------------------
@@ -1841,6 +1997,20 @@ namespace MyEditor
         }
         ImGui::End();
 
+        // ===== In-scene picking/dragging (gizmo) on the middle viewport =====
+        MyEditor::GameViewport vp;
+        vp.x = (int)left_w;
+        vp.y = (int)middle_y;
+        vp.w = (int)safe_mid_w;
+        vp.h = (int)safe_middle_h;
+
+
+        MyEditor::Gizmo_DrawAndHandle(vp);
+
+
+
+
+
         // =============================
         // SPLITTER OVERLAY (unchanged)
         // =============================
@@ -1915,6 +2085,7 @@ namespace MyEditor
         }
 
         ImGui::End(); // LayoutOverlay
+
     }
 
     void Render() {
@@ -1929,7 +2100,7 @@ namespace MyEditor
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
         s_Window = nullptr;
-    
+
     }
 
     extern float s_left_ratio;
@@ -2032,7 +2203,7 @@ namespace MyEditor
 
         return { vx, vy, vw, vh };
     }
-    
+
     std::string MyEditor::OpenJsonFileDialog()
     {
         char fileBuf[MAX_PATH] = { 0 };

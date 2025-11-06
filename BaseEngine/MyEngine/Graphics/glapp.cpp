@@ -142,7 +142,7 @@ void GLApp::updateAnimation(Framework::Animation& x, float deltaTime) {
 }
 
 // Convert a framebuffer pixel to NDC inside the current game viewport
-static inline glm::vec2 ScreenToNDC(double x, double y) {
+glm::vec2 GLApp::ScreenToNDC(double x, double y) {
 	// x,y are OS pixels from glfwGetCursorPos
 	const double rx = (x - GLHelper::GameOffsetX) / (double)GLHelper::GameWidth;
 	const double ry = (y - GLHelper::GameOffsetY) / (double)GLHelper::GameHeight;
@@ -150,7 +150,7 @@ static inline glm::vec2 ScreenToNDC(double x, double y) {
 	return glm::vec2(float(rx * 2.0 - 1.0), float(1.0 - ry * 2.0));
 }
 
-static inline glm::mat3 BuildPanZoomNDC(const GLApp::Camera2D& cam) {
+glm::mat3 GLApp::BuildPanZoomNDC(const GLApp::Camera2D& cam) {
 	// column-major: glm::mat3(col0, col1, col2)
 	glm::mat3 S(cam.zoom, 0, 0,
 		0, cam.zoom, 0,
@@ -160,6 +160,7 @@ static inline glm::mat3 BuildPanZoomNDC(const GLApp::Camera2D& cam) {
 		cam.center.x, cam.center.y, 1);
 	return T * S;   // translate after scaling
 }
+
 
 void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 	Framework::Transform& z, const glm::mat3& ZoomNDC)
@@ -257,26 +258,26 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 
 	// Draw entities
 // build drawList
-for (auto it : entities) {
-    auto& lt = g_coordinator->GetComponent<LayerTag>(it);
-    if ((lt.mask & includeMask) == 0) continue;
+	for (auto it : entities) {
+		auto& lt = g_coordinator->GetComponent<LayerTag>(it);
+		if ((lt.mask & includeMask) == 0) continue;
 
-    auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
-    auto& re = g_coordinator->GetComponent<Framework::Renderable>(it);
-    if (!tr.isVisible) continue;
+		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
+		auto& re = g_coordinator->GetComponent<Framework::Renderable>(it);
+		if (!tr.isVisible) continue;
 
-    // ensure texture is ready BEFORE push
-    if (re.textureID == 0 && !re.spriteName.empty()) {
-        re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
-        re.loadedSpriteName = re.spriteName;
-    }
+		// ensure texture is ready BEFORE push
+		if (re.textureID == 0 && !re.spriteName.empty()) {
+			re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+			re.loadedSpriteName = re.spriteName;
+		}
 
-    // if still 0 and you only want textured sprites, you can continue here,
-    // or push anyway if you also render colored quads
-    if (re.textureID == 0) continue;
+		// if still 0 and you only want textured sprites, you can continue here,
+		// or push anyway if you also render colored quads
+		if (re.textureID == 0) continue;
 
-    drawList.push_back(it);
-}
+		drawList.push_back(it);
+	}
 
 	std::stable_sort(drawList.begin(), drawList.end(), [&](Entity a, Entity b) {
 		auto& A = g_coordinator->GetComponent<LayerTag>(a);
