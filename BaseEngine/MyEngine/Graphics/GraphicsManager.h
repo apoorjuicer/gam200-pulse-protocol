@@ -33,6 +33,8 @@
 
 #pragma once
 #include "pch/pch_temp.h"
+
+#include "Layer.h"
 #include "CoreEngine/ECS/System.h"
 // #include "CoreEngine/ECS/SystemManager.h"
 #include "glapp.h"
@@ -59,7 +61,6 @@ struct Character
     glm::ivec2 Bearing;   // offset from baseline to left/top
     unsigned int Advance; // horizontal advance (1/64 px from FreeType)
 };
-
 // Represents an entire font face
 // contain glyph(s) container and pixelHeight
 struct FontData

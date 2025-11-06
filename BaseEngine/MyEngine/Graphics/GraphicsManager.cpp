@@ -26,10 +26,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../Graphics/stb_image.h"
 
-
-float editorWidth;
-float editorHeight;
-
 // These are the asset keys we expect to exist after AssetsManager::LoadAllFonts()
 // namespace {
 //    constexpr const char* UI_FONT_KEY = "patrickhand-regular_48";
@@ -115,11 +111,6 @@ void GraphicsManager::Initialize()
 
     std::cout << "[GraphicsManager] Successfully initialized for graphics.\n";
 
-    // We want text to alpha-blend on top of world
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_CULL_FACE);
 
     // Build a top-left-origin orthographic projection matching our virtual res
     {
@@ -212,21 +203,26 @@ void GraphicsManager::Initialize()
 
 void GraphicsManager::Update()
 {
-    // Poll input / advance time
-    glfwPollEvents();
-    GLHelper::update_time(1.0);
+	// Poll input / advance time
+	glfwPollEvents();
+	GLHelper::update_time(1.0);
+	glapp->update(Engine->GetWindow(), EntityMember);
+	glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
+	glClearDepth(1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//--- Rendering passes ---
+	// Background pass
+	glapp->draw(EntityMember, LAYER_BACKGROUND);
 
-    // 1) Update and draw world (sprites etc.)
-    glapp->update(Engine->GetWindow(), EntityMember);
-    glapp->draw(EntityMember);
-    // 2) then draw text on top
-    // RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
+	// Sprites pass
+	glapp->draw(EntityMember, LAYER_WORLD);
+	//------------------------
+	
+	// Draw in-game gui system & UI overlay
+	RenderUIOverlayElements();
 
-    // 3) Draw in-game gui system & UI overlay
-    RenderUIOverlayElements();
-
-    // 4) Draw overlay text last
-    auto &textShader = GLApp::shdrpgms[3];
+	// Draw overlay text last
+	auto& textShader = GLApp::shdrpgms[3];
 
     // Build FPS string and heaviest system string and render it
     if (!MyEditor::IsEnabled())
@@ -251,28 +247,6 @@ void GraphicsManager::Update()
             // Add top system below FPS
             auto *profiler = ProfilingManager::GetInstance();
             const auto &profiles = profiler->GetDisplayProfiles();
-            // if (!MyEditor::IsEnabled()) {
-            //	std::ostringstream fpsText;
-            //	fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
-            //	RenderText(GLApp::shdrpgms[3], fpsText.str(), 100.0f, 850.0f, 1.0f, glm::vec3(0.5f, 0, 0), Characters2);
-
-            //	// Add top system below FPS
-            //	auto* profiler = ProfilingManager::GetInstance();
-            //	const auto& profiles = profiler->GetDisplayProfiles();
-
-            //	std::string topSystem = "None";
-            //	double topPercentage = 0.0;
-            //	for (const auto& [systemName, profile] : profiles) {
-            //		if (profile.percentage > topPercentage) {
-            //			topPercentage = profile.percentage;
-            //			topSystem = systemName;
-            //		}
-            //	}
-
-            //	std::ostringstream topText;
-            //	topText << topSystem << ": " << std::fixed << std::setprecision(2) << topPercentage << "%";
-            //	RenderText(GLApp::shdrpgms[3], topText.str(), 100.0f, 880.0f, 0.8f, glm::vec3(0.5f, 0.5f, 0), Characters2);
-            //}
 
             std::string topSystem = "None";
             double topPercentage = 0.0;
@@ -337,52 +311,64 @@ void GraphicsManager::Update()
     //     int fbW = 0, fbH = 0;
     //     glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
 
-    //     float startX = fbW - 350.0f;
-    //     float startY = fbH - 200.0f;
-    //     float lineHeight = 25.0f;
+			// team label using font patrickhand-regular_48
+			//RenderText(textShader, TEAM_LABEL, teamLabelX, teamLabelY, TEAM_LABEL_SCALE, TEAM_COLOR, m_uiFont);
+		
+		else {
+			std::cerr << "[GraphicsManager] WARNING: fonts not found!\n";
+		}
+	
+	 //// Controls help, anchored at right side
+	 //{
+	 //    int fbW = 0, fbH = 0;
+	 //    glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
 
-    //     RenderText(textShader, "Controls:",
-    //         startX, startY,
-    //         0.5f,
-    //         glm::vec3(1, 1, 0),
-    //         m_debugFont);
+	 //    float startX = fbW - 350.0f;
+	 //    float startY = fbH - 200.0f;
+	 //    float lineHeight = 25.0f;
 
-    //     RenderText(textShader, "M - Start monsters",
-    //         startX, startY + lineHeight * 1,
-    //         0.4f,
-    //         glm::vec3(1, 1, 1),
-    //         m_debugFont);
+	 //    RenderText(textShader, "Controls:",
+	 //        startX, startY,
+	 //        0.5f,
+	 //        glm::vec3(1, 1, 0),
+	 //        m_debugFont);
 
-    //     RenderText(textShader, "W/A/S/D - Input",
-    //         startX, startY + lineHeight * 2,
-    //         0.4f,
-    //         glm::vec3(1, 1, 1),
-    //         m_debugFont);
+	 //    RenderText(textShader, "M - Start monsters",
+	 //        startX, startY + lineHeight * 1,
+	 //        0.4f,
+	 //        glm::vec3(1, 1, 1),
+	 //        m_debugFont);
 
-    //     RenderText(textShader, "K/L - Scale hero",
-    //         startX, startY + lineHeight * 3,
-    //         0.4f,
-    //         glm::vec3(1, 1, 1),
-    //         m_debugFont);
+	 //    RenderText(textShader, "W/A/S/D - Input",
+	 //        startX, startY + lineHeight * 2,
+	 //        0.4f,
+	 //        glm::vec3(1, 1, 1),
+	 //        m_debugFont);
 
-    //     RenderText(textShader, "H/J - Rotate monsters",
-    //         startX, startY + lineHeight * 4,
-    //         0.4f,
-    //         glm::vec3(1, 1, 1),
-    //         m_debugFont);
+	 //    RenderText(textShader, "K/L - Scale hero",
+	 //        startX, startY + lineHeight * 3,
+	 //        0.4f,
+	 //        glm::vec3(1, 1, 1),
+	 //        m_debugFont);
 
-    //     RenderText(textShader, "O - Toggle editor",
-    //         startX, startY + lineHeight * 5,
-    //         0.4f,
-    //         glm::vec3(1, 1, 1),
-    //         m_debugFont);
+	 //    RenderText(textShader, "H/J - Rotate monsters",
+	 //        startX, startY + lineHeight * 4,
+	 //        0.4f,
+	 //        glm::vec3(1, 1, 1),
+	 //        m_debugFont);
 
-    //     RenderText(textShader, "F1-F6 - Debug draw",
-    //         startX, startY + lineHeight * 6,
-    //         0.4f,
-    //         glm::vec3(1, 1, 1),
-    //         m_debugFont);
-    // }
+	 //    RenderText(textShader, "O - Toggle editor",
+	 //        startX, startY + lineHeight * 5,
+	 //        0.4f,
+	 //        glm::vec3(1, 1, 1),
+	 //        m_debugFont);
+
+	 //    RenderText(textShader, "F1-F6 - Debug draw",
+	 //        startX, startY + lineHeight * 6,
+	 //        0.4f,
+	 //        glm::vec3(1, 1, 1),
+	 //        m_debugFont);
+	 //}
 }
 
 void GraphicsManager::Shutdown()
@@ -441,12 +427,7 @@ void GraphicsManager::RenderText(
     }
        
 
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    shader.Use();
+	shader.Use();
 
     glUniformMatrix4fv(
         glGetUniformLocation(shader.GetHandle(), "projection"),
@@ -623,12 +604,8 @@ void GraphicsManager::RenderColoredQuad(float x, float y, float width, float hei
     //    std::cout << "[RenderQuad] Rendering at screen: (" << x << ", " << y << ")" << std::endl;
     //}
 
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    auto &shader = GLApp::shdrpgms[3]; // Text shader
-    shader.Use();
+	auto& shader = GLApp::shdrpgms[3]; // Text shader
+	shader.Use();
 
     glUniformMatrix4fv(glGetUniformLocation(shader.GetHandle(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -950,7 +927,7 @@ void GraphicsManager::PrintFontMap()
         std::cout << "  Pixel Height: " << fontData.pixelHeight << "\n";
         std::cout << "  Glyph Count:  " << fontData.glyphs.size() << "\n";
 
-        // Print each glyph info (optional — can be large)
+        // Print each glyph info (optional ï¿½ can be large)
         for (const auto& [ch, glyph] : fontData.glyphs)
         {
             std::cout << "    '" << ch << "'"

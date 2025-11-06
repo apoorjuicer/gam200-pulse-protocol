@@ -11,7 +11,6 @@
  */
 /******************************************************************************/
 #include "glapp.h"
-
 #include <filesystem>
 
 /*                                                   objects with file scope
@@ -126,9 +125,8 @@ void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/)
 	GLApp::init_shdrpgms_cont(shdr_strs);
 }
 
-void GLApp::update(GLFWwindow *window, std::set<Entity> entity)
-{
-	GLHelper::update_time(1.0); // updates delta_time and fps
+
+void GLApp::update(GLFWwindow* window, std::set<Entity> entity) {
 	if (window)
 	{
 		glfwSetWindowTitle(window, "Pulse Protocol");
@@ -195,9 +193,8 @@ void GLApp::drawTrans(Framework::Renderable &x, Framework::Animation &y,
 				modelNDC, u0, v0, u1, v1);
 }
 
-void GLApp::draw(std::set<Entity> entities)
-{
-	GLFWwindow *window = glfwGetCurrentContext();
+void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
+	GLFWwindow* window = glfwGetCurrentContext();
 
 	if (MyEditor::IsEnabled())
 	{
@@ -267,11 +264,6 @@ void GLApp::draw(std::set<Entity> entities)
 	}
 	glm::mat3 PanZoom = BuildPanZoomNDC(gCamera);
 
-	// Clear
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
-	glClearDepth(1.0f);
-
 	// Timing
 	auto *g_coordinator = Coordinator::GetInstance();
 
@@ -280,25 +272,51 @@ void GLApp::draw(std::set<Entity> entities)
 	float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
 	lastTime = currentTime;
 	gBatch.Begin();
-	// Draw entities
-	for (auto it : entities)
-	{
-		auto &tr = g_coordinator->GetComponent<Framework::Transform>(it);
-		auto &re = g_coordinator->GetComponent<Framework::Renderable>(it);
-		auto &an = g_coordinator->GetComponent<Framework::Animation>(it);
 
+	std::vector<Entity> drawList;
+	drawList.reserve(entities.size());
+
+	// Draw entities
+// build drawList
+for (auto it : entities) {
+    auto& lt = g_coordinator->GetComponent<LayerTag>(it);
+    if ((lt.mask & includeMask) == 0) continue;
+
+    auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
+    auto& re = g_coordinator->GetComponent<Framework::Renderable>(it);
+    if (!tr.isVisible) continue;
+
+    // ensure texture is ready BEFORE push
+    if (re.textureID == 0 && !re.spriteName.empty()) {
+        re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+        re.loadedSpriteName = re.spriteName;
+    }
+
+    // if still 0 and you only want textured sprites, you can continue here,
+    // or push anyway if you also render colored quads
+    if (re.textureID == 0) continue;
+
+    drawList.push_back(it);
+}
+
+	std::stable_sort(drawList.begin(), drawList.end(), [&](Entity a, Entity b) {
+		auto& A = g_coordinator->GetComponent<LayerTag>(a);
+		auto& B = g_coordinator->GetComponent<LayerTag>(b);
+		if (A.orderInLayer != B.orderInLayer) return A.orderInLayer < B.orderInLayer;
+		return A.z < B.z;
+		});
+
+	// Draw
+	for (auto e : drawList) {
+		auto& tr = g_coordinator->GetComponent<Framework::Transform>(e);
+		auto& re = g_coordinator->GetComponent<Framework::Renderable>(e);
+		auto& an = g_coordinator->GetComponent<Framework::Animation>(e);
 		// BEFORE drawing each entity
-		if (!re.spriteName.empty())
-		{
-			if (re.textureID == 0)
-			{
-				// Only autoload if this is the first time and not dirty
-				if (!re.needsTextureReload)
-				{
-					// re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
-					re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
-					re.loadedSpriteName = re.spriteName;
-				}
+		if (!re.spriteName.empty()) {
+			if (re.textureID == 0) {
+				re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+				re.loadedSpriteName = re.spriteName;
+				re.needsTextureReload = false;
 			}
 			else
 			{
@@ -338,9 +356,10 @@ void GLApp::draw(std::set<Entity> entities)
 			}
 			// ---------------------------------------------------------------------------
 
-			glBindTexture(GL_TEXTURE_2D, re.textureID);
-			drawTrans(re, an, tr, PanZoom);
+
 		}
+		glBindTexture(GL_TEXTURE_2D, re.textureID);
+		drawTrans(re, an, tr, PanZoom);
 	}
 	gBatch.Flush(shdrpgms);
 	GLboolean depthWasOn = glIsEnabled(GL_DEPTH_TEST);
@@ -434,11 +453,7 @@ void GLApp::init_shdrpgms_cont(GLApp::VPSS const &vpss)
 			std::exit(EXIT_FAILURE);
 		}
 		GLSLShader shdr_pgm;
-		const char *tag = (i == 0) ? "test" : (i == 1) ? "bg"
-										  : (i == 2)   ? "sprite"
-													   : "font";
-		if (!shdr_pgm.CompileShaderFromString(GL_VERTEX_SHADER, x.first))
-		{
+		if (!shdr_pgm.CompileShaderFromString(GL_VERTEX_SHADER, x.first)) {
 			std::cout << "Vertex shader failed to compile: ";
 			std::cout << shdr_pgm.GetLog() << std::endl;
 			std::exit(EXIT_FAILURE);

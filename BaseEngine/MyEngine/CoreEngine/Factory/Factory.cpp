@@ -102,6 +102,9 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const& path)
 	// add entity to list of entity in the current scene
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
 	sceneManager->IncrementEntityArray(entity);
+	if (!g_coordinator->HasComponent<LayerTag>(entity)) {
+		g_coordinator->AddComponent(entity, LayerTag{ LAYER_WORLD, 0, 0.0f });
+	}
 	return entity;
 }
 
@@ -122,6 +125,7 @@ Entity Factory::DefaultObj()
 	g_coordinator->AddComponent(entity, t);
 	g_coordinator->AddComponent(entity, r);
 	g_coordinator->AddComponent(entity, a);
+	g_coordinator->AddComponent(entity, LayerTag{ LAYER_WORLD, 0, 0.0f });
 	
 	// add entity to list of entity in the current scene
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();

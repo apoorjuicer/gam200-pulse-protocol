@@ -71,8 +71,7 @@ void RhythmGameplayInput::Update(float deltaTime)
     auto *g_coordinator = Coordinator::GetInstance();
 
     // FIND FeedbackBar on first update
-    if (fontEntity == 0)
-    {
+    //if (fontEntity == 0) {
         auto activeEntities = g_coordinator->GetAllEntities();
 
         for (auto entity : activeEntities)
@@ -122,26 +121,22 @@ void RhythmGameplayInput::Update(float deltaTime)
         {
             return;
         }
-    }
+    //}
 
     processRhythmInputs();
     processComboInputs();
 
     // Timer logic
-    if (fontEntity != 0)
-    {
-        if (g_coordinator->HasComponent<Framework::Transform>(fontEntity))
-        {
-            auto &transform = g_coordinator->GetComponent<Framework::Transform>(fontEntity);
-            if (transform.autoHide)
-            {
+    //if (fontEntity != 0) {
+        if (g_coordinator->HasComponent<Framework::Transform>(fontEntity)) {
+            auto& transform = g_coordinator->GetComponent<Framework::Transform>(fontEntity);
+            if (transform.autoHide) {
                 transform.visibilityTimer -= deltaTime;
                 // std::cout << "[TIMER] Visibility timer: " << transform.visibilityTimer << std::endl;
 
-                if (transform.visibilityTimer <= 0.0f)
-                {
-                    // std::cout << "[HIDING] Hiding FeedbackBar now!" << std::endl;
-                    transform.isVisible = false;
+                if (transform.visibilityTimer <= 0.0f) {
+                    //std::cout << "[HIDING] Hiding FeedbackBar now!" << std::endl;
+                    transform.isVisible = true;
                     transform.autoHide = false;
 
                     if (g_coordinator->HasComponent<GUIButton>(fontEntity))
@@ -153,7 +148,7 @@ void RhythmGameplayInput::Update(float deltaTime)
                 }
             }
         }
-    }
+    //}
 }
 
 void RhythmGameplayInput::Shutdown()
