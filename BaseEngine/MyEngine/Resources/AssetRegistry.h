@@ -41,6 +41,10 @@
 	struct TextureResource {
 		std::string tex_name = "";
 		std::string path = "";
+		std::string vert_shader_path = "";
+		std::string frag_shader_path = "";
+		int mdl_ref = 0;
+		int shd_ref = 0;
 		/*GLuint id = 0; int w = 0; int h = 0;*/
 
 		void Deserialize(rapidjson::Value const& in);
