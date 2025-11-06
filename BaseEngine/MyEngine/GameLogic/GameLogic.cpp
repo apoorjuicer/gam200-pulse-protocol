@@ -378,7 +378,7 @@ void EnemyScript::Update(Entity ID)
         AABB enemyAABB = collision.BuildAABBFromTransform(enemy_transform, enemy_box);
         AABB playerAABB = collision.BuildAABBFromTransform(player_transform, player_box);
 
-        float worldScale = 4.5f;
+        float worldScale = 1.f;
         float edgeThreshold = (playerAABB.width + enemyAABB.width) * worldScale;
 
         bool edgeContact =

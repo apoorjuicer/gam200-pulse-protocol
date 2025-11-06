@@ -53,6 +53,12 @@ public:
 	static void OnResize(int width, int height);
 	void DrawAABB_NDC(const glm::mat3& modelToNDC, const AABB& box, const glm::vec3& color);
 
+
+
+
+	glm::vec2  WorldToScreenPx(const Vector2& wpos);     // world -> framebuffer px
+	Vector2    ScreenPxToWorld(double sx, double sy);    // framebuffer px -> world
+
 	struct BatchRender {
 		struct Vtx { glm::vec2 pos; glm::vec2 uv; };
 		struct Key {
@@ -188,6 +194,10 @@ public:
 		float     maxZoom{ 6.0f };
 	};
 	static Camera2D gCamera;
+
+
+	static glm::vec2 ScreenToNDC(double x, double y);
+	static glm::mat3 BuildPanZoomNDC(const Camera2D& cam);
 
 	static std::vector<GLSLShader> shdrpgms; // singleton in tutorial 3
 

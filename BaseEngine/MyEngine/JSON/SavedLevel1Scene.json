@@ -97,8 +97,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.1287517249584198,
+                        "currentFrame": 0,
+                        "elapsedTime": 0.4585115909576416,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -148,17 +148,19 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 353.0,
+                            "x": 800.0,
                             "y": 0.0
                         },
                         "scale": {
-                            "x": 50.0,
-                            "y": 50.0
+                            "x": 500.0,
+                            "y": 500.0
                         },
                         "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
+                        "angle_disp": 0.0,
+                        "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -168,7 +170,7 @@
                     "render": {
                         "mdl_ref": 1.0,
                         "shd_ref": 2.0,
-                        "textureID": 268,
+                        "textureID": 260,
                         "useTexture": true,
                         "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
                         "tintColor": {

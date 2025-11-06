@@ -51,20 +51,19 @@ AudioManager::AudioManager(AssetRegistry *registry) : mRegistry{registry}
 }
 AudioManager::~AudioManager()
 {
-   // Shutdown();
 }
 
-void AudioManager::SetRegistry(AssetRegistry* registry)
+void AudioManager::SetRegistry(AssetRegistry *registry)
 {
     mRegistry = registry;
 }
 
 void AudioManager::RestartBGM()
 {
-    if (!mSystem) {
+    if (!mSystem)
+    {
         return;
     }
-        
 
     // 1) stop current BGM channel if any
     if (mCurrentBGMCh)
@@ -83,7 +82,7 @@ void AudioManager::RestartBGM()
         }
 
         mCurrentBGMCh->setVolume(1.0f);
-        //mCurrentBGMCh->setPaused(startPaused);
+        // mCurrentBGMCh->setPaused(startPaused);
     }
 
     // remember current pause state (not using pause as of now)
@@ -193,9 +192,9 @@ void AudioManager::Initialize()
 
 void AudioManager::Update()
 {
-    if (!mSystem) return;
+    if (!mSystem)
+        return;
     mSystem->update();
-
 }
 
 void AudioManager::Shutdown()
@@ -210,7 +209,7 @@ void AudioManager::releaseAll()
 
     // 1) Stop all playback through master group
 
-    if (FMOD::ChannelGroup* master = nullptr; // C++17 if statement with an initializer
+    if (FMOD::ChannelGroup *master = nullptr; // C++17 if statement with an initializer
         mSystem->getMasterChannelGroup(&master) == FMOD_OK && master)
     {
         FMOD_RESULT stopResult = master->stop();
@@ -220,7 +219,7 @@ void AudioManager::releaseAll()
     // 2) release any SFX loaded
     mChannels.clear(); // channels already stopped by master group call earlier
 
-    for (auto& [id, sound] : mSfx)
+    for (auto &[id, sound] : mSfx)
     {
         if (sound)
         {
