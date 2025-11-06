@@ -341,7 +341,8 @@ for (auto it : entities) {
 		if (!re.spriteName.empty()) {
 			if (re.textureID == 0) {
 				//re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
-				re.textureID =  mAssets.GetOrLoadTexture(re.spriteName);
+
+				re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
 				re.loadedSpriteName = re.spriteName;
 				re.needsTextureReload = false;
 			}
