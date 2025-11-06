@@ -3,10 +3,10 @@
  * @file        PrefabManager.cpp
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
- * @brief       Implements the InputManager system, handling GLFW-based
- *              keyboard input for rhythm gameplay. Provides real-time input
- *              state tracking, combo detection, rhythm timing feedback,
- *              event broadcasting to subscribed systems, debug toggles.
+ * @brief       Implements the PrefabManager system for entity template management.
+ *              Provides functionality to save entities as JSON-based prefabs,
+ *              instantiate prefabs into active scenes, and enumerate available
+ *              prefabs from the asset directory.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

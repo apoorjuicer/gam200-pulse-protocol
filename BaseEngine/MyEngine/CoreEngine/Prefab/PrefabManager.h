@@ -3,9 +3,9 @@
  * @file        PrefabManager.h
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
- * @brief       Raw input system which handles just the tracking of
-                keyboard and mouse state tracking.
- *              Separated from game logic - just reads input states.
+ * @brief       Declares the PrefabManager class for managing reusable entity templates.
+ *              Handles saving entities as prefabs, instantiating prefabs into scenes,
+ *              and tracking available prefabs in the asset directory.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

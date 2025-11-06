@@ -1,15 +1,17 @@
-/*****************************************************************************/
+/******************************************************************************/
 /**
- * @file      Health.h
- * @author    Reginald
- * @course    CSDXXXX Game Engine Development
- * @brief     Health component used to track an entity's vitality, damage output,
- *            and alive state. This component contains no graphical or collision
- *            data — it is purely for gameplay logic.
- * @date      2025-11-04
- * @copyright Copyright (C) 2025 DigiPen Institute.
- ******************************************************************************/
-
+ * @file        Health.h
+ * @project     Pulse Protocol
+ * @author		Reginald Lew Yee Ren
+ * @brief		Health component used to track an entity's vitality, damage output,
+ *              and alive state. This component contains no graphical or collision
+ *              data — it is purely for gameplay logic.
+ *
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 #include <pch/pch.h>
 

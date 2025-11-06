@@ -3,10 +3,10 @@
  * @file        GUIManager.h
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
- * @brief       Implements the InputManager system, handling GLFW-based
- *              keyboard input for rhythm gameplay. Provides real-time input
- *              state tracking, combo detection, rhythm timing feedback,
- *              event broadcasting to subscribed systems, debug toggles.
+ * @brief       Declares the GUIManager system for managing interactive UI buttons.
+ *              Handles button hover/click detection, entity creation/destruction
+ *              actions, and persistent tracking of GUI-created entities across
+ *              game sessions using JSON serialization.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

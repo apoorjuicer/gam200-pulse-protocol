@@ -1,15 +1,18 @@
-/*****************************************************************************/
+/******************************************************************************/
 /**
- * @file      AABB.h
- * @author    Reginald
- * @course    CSDXXXX Game Engine Development
- * @brief     Axis-Aligned Bounding Box (AABB) component used for collision.
- *            This component defines the bounding region of an entity by its
- *            minimum and maximum corners, along with its width and height.
- *            It is purely geometric and contains no gameplay logic.
- * @date      2025-11-04
- * @copyright Copyright (C) 2025 DigiPen Institute.
- ******************************************************************************/
+ * @file        AABB.h
+ * @project     Pulse Protocol
+ * @author		Reginald Lew Yee Ren
+ * @brief		Axis-Aligned Bounding Box (AABB) component used for collision.
+ *				This component defines the bounding region of an entity by its
+ *				minimum and maximum corners, along with its width and height.
+ *				It is purely geometric and contains no gameplay logic.
+ * 
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 
 #pragma once
 #include "pch/pch.h"

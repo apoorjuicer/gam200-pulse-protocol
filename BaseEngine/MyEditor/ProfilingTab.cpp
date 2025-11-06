@@ -3,7 +3,10 @@
  * @file        ProfilingTab.cpp
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
- * @brief       Simple profiling panel - shows sorted system performance
+ * @brief       Implements the ProfilingPanel UI for displaying real-time performance
+ *              metrics. Shows FPS, frame time, and system statistics sorted by
+ *              percentage of frame time consumed.
+ * 
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.

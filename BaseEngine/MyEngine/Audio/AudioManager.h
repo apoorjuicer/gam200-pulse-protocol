@@ -5,7 +5,8 @@
  * @author      Ban Kai Wei Benjamin
  *
  * @brief       Provides initialization, playback, control, and shutdown of
-                FMOD-based audio for BGM and sound effects.
+ *              FMOD-based audio for BGM and sound effects.
+ *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.

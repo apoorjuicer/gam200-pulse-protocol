@@ -3,10 +3,9 @@
  * @file        GUIButton.cpp
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
- * @brief       Implements the InputManager system, handling GLFW-based
- *              keyboard input for rhythm gameplay. Provides real-time input
- *              state tracking, combo detection, rhythm timing feedback,
- *              event broadcasting to subscribed systems, debug toggles.
+ * @brief       Implements serialization and deserialization methods for GUIButton
+ *              component. Handles conversion to/from JSON format for button
+ *              properties including ID, label, colors, action types, and state.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

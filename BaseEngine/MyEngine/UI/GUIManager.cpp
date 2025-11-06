@@ -4,7 +4,9 @@
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
  * @brief       Implements GUI system for in-game entity creation/destruction
- *              with persistent tracking across game sessions.
+ *              via interactive buttons. Provides mouse hover/click detection,
+ *              entity tracking across sessions, automatic scene syncing, and
+ *              persistent state management through JSON serialization.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

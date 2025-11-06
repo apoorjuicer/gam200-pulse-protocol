@@ -6,6 +6,7 @@
  * @author      Goh Pin Kai (secondary) - 7%
  *              Chloe Lau Rey En (secondary) - 15%
  * @brief       Manages the full ImGui-based editor interface, including initialization, frame updates, rendering, and runtime toggling of editor features.
+ * 
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.

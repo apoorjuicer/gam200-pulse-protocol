@@ -1,11 +1,11 @@
 /******************************************************************************/
 /**
- * @file        Name.h
+ * @file        DisplayName.h
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
- * @brief       Simple Name component for ECS entities to store entity names
-                (Simpler words; display name each game object in the hierarchy panel)
- *              for identification and debugging purposes in the hierarchy.
+ * @brief       Defines the Name component for ECS entities. Provides a simple
+ *              string-based identifier for entities with JSON serialization
+ *              support, used primarily for hierarchy display and debugging.
  * 
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

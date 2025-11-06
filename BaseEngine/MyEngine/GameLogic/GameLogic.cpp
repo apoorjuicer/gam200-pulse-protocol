@@ -1,4 +1,17 @@
-﻿#pragma once
+﻿/******************************************************************************/
+/**
+ * @file        GameLogic.cpp
+ * @project     Pulse Protocol
+ * @author		Chia Wei Xuan Rachael (primary) - 80%
+ * @author		Reginald Lew Yee Ren (secondary) - 20%
+ * @brief		[pls fill in]
+ *
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
+#pragma once
 #include "GameLogic.h"
 
 bool EnemyScript::testAABBCollision = false;
