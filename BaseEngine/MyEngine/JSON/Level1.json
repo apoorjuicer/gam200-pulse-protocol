@@ -22,8 +22,6 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -76,8 +74,6 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -100,7 +96,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.06592430919408798,
+                        "elapsedTime": 0.14539051055908204,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -161,8 +157,6 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -236,8 +230,6 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
                         "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -301,8 +293,6 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "angle_disp": -39.0,
-                        "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -361,8 +351,6 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "angle_disp": 0.0,
-                        "angle_speed": 0.0,
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false

@@ -36,11 +36,6 @@ namespace Framework
 
 		out.AddMember("mdl_ref", mdl_ref, alloc);
 		out.AddMember("shd_ref", shd_ref, alloc);
-<<<<<<< Updated upstream
-		//out.AddMember("textureID", static_cast<uint64_t>(textureID), alloc);
-=======
-		//t.AddMember("textureID", static_cast<uint64_t>(textureID), alloc);
->>>>>>> Stashed changes
 		out.AddMember("useTexture", useTexture, alloc);
 
 		Value spriteNameVal;
@@ -67,13 +62,9 @@ namespace Framework
 			mdl_ref = in["mdl_ref"].GetFloat();
 		if (in.HasMember("shd_ref"))
 			shd_ref = in["shd_ref"].GetFloat();
-<<<<<<< Updated upstream
-		//if (in.HasMember("textureID"))
-			//textureID = static_cast<GLuint>(in["textureID"].GetUint64());
-=======
+
 		/*if (in.HasMember("textureID"))
 			textureID = static_cast<GLuint>(in["textureID"].GetUint64());*/
->>>>>>> Stashed changes
 
 		if (in.HasMember("spriteName"))
 			spriteName = in["spriteName"].GetString();

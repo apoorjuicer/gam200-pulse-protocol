@@ -288,11 +288,7 @@ for (auto it : entities) {
 
     // ensure texture is ready BEFORE push
     if (re.textureID == 0 && !re.spriteName.empty()) {
-<<<<<<< Updated upstream
-        //re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
-=======
-        //.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
->>>>>>> Stashed changes
+
 		re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
         re.loadedSpriteName = re.spriteName;
     }
@@ -320,11 +316,8 @@ for (auto it : entities) {
 		if (!re.spriteName.empty()) {
 			if (re.textureID == 0) {
 				//re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
-<<<<<<< Updated upstream
-				re.textureID =  mAssets.GetOrLoadTexture(re.spriteName);
-=======
+
 				re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
->>>>>>> Stashed changes
 				re.loadedSpriteName = re.spriteName;
 				re.needsTextureReload = false;
 			}
