@@ -364,7 +364,7 @@ void RhythmGameplayInput::processRhythmTiming(int key)
     if (comboCompleted) {
         // plays combo sucess audio file instead of regular beat sound
         if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
-            audio->PlaySound("combo_success", 0.9f);
+            audio->PlaySound("combo_success");
         }
 
         std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << keyToString(key) << " | Combo: " << completedComboName << std::endl;
@@ -375,7 +375,7 @@ void RhythmGameplayInput::processRhythmTiming(int key)
     } else {
         // plays regular beat sfx for regular beat
         if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
-            audio->PlaySound("beat_placeholder", 0.8f);
+            audio->PlaySound("beat_placeholder");
         }
         std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << keyToString(key) << " | Combo: unsuccessful" << std::endl;
     }

@@ -726,7 +726,7 @@ void CoreEngine::StopGame()
 	// pause the bg music
 	if (auto audio = coord->GetSystem<AudioManager>())
 	{
-		audio->SetPaused(true);
+		audio->StopBGM();
 	}
 
 	// reloads original scene to reset all entities to initial starting position

@@ -90,13 +90,6 @@ void AudioManager::RestartBGM()
     /*mPaused = startPaused;*/
 }
 
-void AudioManager::PauseBGM()
-{
-    if (mBGMCh) {
-        mBGMCh->setPaused(true);
-    }
-}
-
 void AudioManager::Initialize()
 {
     // registry should be set before this function call
@@ -191,7 +184,6 @@ void AudioManager::Initialize()
         std::cout << "[AudioManager] load all SFX success.\n";
     }
 
-    PlayBGM("bgm");
     std::string tf = IsBGMPlaying() ? "true" : "false";
     std::cout << "[AudioManager] Playing bgm? " << tf << "\n";
     // PlaySound("beat_placeholder");
@@ -213,36 +205,50 @@ void AudioManager::Shutdown()
 
 void AudioManager::releaseAll()
 {
-    if (!mSystem) return;
+    if (!mSystem)
+        return; // early return no system
 
-    // 1) Stop BGM channel FIRST and nullify
-    if (mBGMCh) {
-        mBGMCh->stop();
-        mBGMCh = nullptr;  // ADD THIS
+    // 1) Stop all playback through master group
+
+    if (FMOD::ChannelGroup* master = nullptr; // C++17 if statement with an initializer
+        mSystem->getMasterChannelGroup(&master) == FMOD_OK && master)
+    {
+        FMOD_RESULT stopResult = master->stop();
+        FMOD_CHECK(stopResult, "master->stop"); // debug
     }
 
-    // 2) Stop master channel group
-    FMOD::ChannelGroup* master = nullptr;
-    if (mSystem->getMasterChannelGroup(&master) == FMOD_OK && master) {
-        master->stop();
+    // 2) release any SFX loaded
+    mChannels.clear(); // channels already stopped by master group call earlier
+
+    for (auto& [id, sound] : mSfx)
+    {
+        if (sound)
+        {
+            FMOD_RESULT res = sound->release();
+            FMOD_CHECK(res, ("sound->release [" + id + "]").c_str()); // debug
+        }
+    }
+    mSfx.clear();
+
+    // 3) release BGM
+    if (mCurrentBGM)
+    {
+        FMOD_RESULT res = mCurrentBGM->release();
+        FMOD_CHECK(res, "BGM->release");
+        mCurrentBGM = nullptr; // set to nullptr
     }
 
-    // 3) DON'T release mBGM here - AssetsManager owns it
-    mBGM = nullptr;  // Just clear the pointer
+    // 4) Close and release FMOD system
+    FMOD_RESULT closeRes = mSystem->close();
+    FMOD_CHECK(closeRes, "System::close");
 
-    // 4) DON'T release mInputSFX here either
-    mInputSFX = nullptr;  // Just clear the pointer
+    // mSystem->release(); invalidates all child FMOD objects internally
+    // however we also release own for safety
+    FMOD_RESULT relRes = mSystem->release();
+    FMOD_CHECK(relRes, "System::release");
 
-    // 5) Unload all sounds (this calls FMOD release internally)
-    Framework::AssetsManager::Instance().UnloadAllSound();
+    mSystem = nullptr;
 
-    // 6) Close and release FMOD system
-    if (mSystem) {
-        mSystem->close();
-        mSystem->release();
-        mSystem = nullptr;
-    }
-    
     std::cout << "[AudioManager] FMOD shutdown complete.\n";
 }
 
