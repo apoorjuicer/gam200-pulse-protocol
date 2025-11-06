@@ -43,6 +43,8 @@ namespace Framework
 	class Renderable
 	{
 	public:
+		int texW = 0;
+		int texH = 0;
 		float mdl_ref = 0.f;		// Model no
 		float shd_ref = 0.f;		// Shader no
 		GLuint textureID = 0;		// Texture ID
