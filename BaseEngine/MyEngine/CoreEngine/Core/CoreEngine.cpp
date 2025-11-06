@@ -371,8 +371,8 @@ void CoreEngine::Update(float dt)
 	}
 
 	// 3) Normal running path
-	//if (g_inputSystem)    g_inputSystem->Update(dt);
-	//if (g_rhythmSystem)   g_rhythmSystem->Update(dt);	
+	if (g_inputSystem)    g_inputSystem->Update(dt);
+	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);	
 }
 
 

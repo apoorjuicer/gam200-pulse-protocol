@@ -73,7 +73,7 @@ void RhythmGameplayInput::Update(float deltaTime) {
                     // Check components
                     bool hasTransform = g_coordinator->HasComponent<Framework::Transform>(entity);
                     bool hasGUIButton = g_coordinator->HasComponent<GUIButton>(entity);
-                    bool hasRenderable = g_coordinator->HasComponent<Framework::Renderable>(entity);
+                    /*bool hasRenderable = g_coordinator->HasComponent<Framework::Renderable>(entity);*/
 
                     //std::cout << "[DEBUG] Has Transform: " << (hasTransform ? "YES" : "NO") << std::endl;
                     //std::cout << "[DEBUG] Has GUIButton: " << (hasGUIButton ? "YES" : "NO") << std::endl;
@@ -174,11 +174,6 @@ void RhythmGameplayInput::processRhythmInputs() {
         if (inputMgr->isKeyTriggered(rhythmKeys[i])) {
 
             std::cout << "[KEY DETECTED] " << keyNames[i] << " key pressed!" << std::endl;
-
-            // Play sound
-            if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
-                audio->PlaySound("beat_placeholder", 0.8f);
-            }
 
             // Show feedback bar by setting alpha to 1.0
             if (g_coordinator->HasComponent<GUIButton>(fontEntity)) {
