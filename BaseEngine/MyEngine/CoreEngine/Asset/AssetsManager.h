@@ -41,6 +41,8 @@ public:
 
     unsigned int GetOrLoadTexture(const std::string &name);
 
+    bool   EvictTexture(std::string const& idOrPath);
+
     std::string GetAudioPath(std::string const& id)  const;
     std::string GetTexturePath(std::string const& id) const;
     std::string GetFontPath(std::string const& id)   const;
