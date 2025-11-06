@@ -425,57 +425,95 @@ namespace MyEditor
 
     // Lightweight: click anywhere inside an entity's AABB to select; drag to move.
     // Uses BuildAABBFromTransform + CheckMouseCollision.
-    void Gizmo_DrawAndHandle(const GameViewport& vp)
+    void MyEditor::Gizmo_DrawAndHandle(const GameViewport& vp)
     {
         auto* coord = Coordinator::GetInstance();
         if (!coord) return;
 
-        // 1) gather mouse in both spaces
         ImGuiIO& io = ImGui::GetIO();
-        glm::vec2 mouseScreen = ToGlm(io.MousePos);
-        Vector2   mouseWorld = ScreenToWorld(mouseScreen, vp);
+        // ImGui UI px  <->  Framebuffer px (handles DPI)
+        const float sx = io.DisplayFramebufferScale.x > 0.f ? io.DisplayFramebufferScale.x : 1.f;
+        const float sy = io.DisplayFramebufferScale.y > 0.f ? io.DisplayFramebufferScale.y : 1.f;
 
-        // 2) pick test (we still test all so you can select, but we only DRAW selected)
+        // Mouse in FB px and in NDC (relative to the game viewport)
+        const glm::vec2 mouseFB(io.MousePos.x * sx, io.MousePos.y * sy);
+        const float ndcX = ((mouseFB.x - vp.x) / vp.w) * 2.0f - 1.0f;
+        const float ndcY = 1.0f - ((mouseFB.y - vp.y) / vp.h) * 2.0f;
+        const glm::vec3 mouseNDC(ndcX, ndcY, 1.0f);
+
+        // Build the camera pan/zoom matrix used by rendering
+        const glm::mat3 PanZoom = GLApp::BuildPanZoomNDC(GLApp::gCamera);  // same as draw() path. :contentReference[oaicite:2]{index=2}
+
+        // Hover/pick using modelToNDC (exactly the same pipeline as the red box)
         Entity hovered = INVALID_ENTITY;
 
         for (Entity e : coord->GetAllEntities())
         {
+            // --- Skip in-game GUI objects completely ---
+            if (coord->HasComponent<GUIButton>(e))
+                continue;
+                
+
             if (!coord->HasComponent<Framework::Transform>(e) ||
                 !coord->HasComponent<Framework::Renderable>(e)) continue;
 
             auto& tr = coord->GetComponent<Framework::Transform>(e);
+            auto& re = coord->GetComponent<Framework::Renderable>(e);
             if (!tr.isVisible) continue;
 
-            AABB base; base.width = tr.Scale.x; base.height = tr.Scale.y;
-            AABB worldBox = g_col.BuildAABBFromTransform(tr, base);
+            // M from the same source the renderer uses
+            glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
+            glm::mat3 modelToNDC = PanZoom * M; // identical to GLApp::draw(). :contentReference[oaicite:3]{index=3}
+            glm::mat3 invModelToNDC = glm::inverse(modelToNDC);
 
-            if (g_col.CheckMouseCollision(mouseWorld, worldBox))
+            // Model-space quad matches your renderer (bg vs sprite). :contentReference[oaicite:4]{index=4}
+            glm::vec2 qmin, qmax;
+            if (re.mdl_ref == 0) { qmin = { -1.f, -1.f }; qmax = { 1.f,  1.f }; }
+            else { qmin = { -0.5f,-0.5f }; qmax = { 0.5f, 0.5f }; }
+
+            // Hit test: bring mouse from NDC -> model space and test inside quad
+            glm::vec3 m = invModelToNDC * mouseNDC;
+            if (m.x >= qmin.x && m.x <= qmax.x && m.y >= qmin.y && m.y <= qmax.y)
                 hovered = e;
 
-            // draw ONLY the selected entity’s box
+            // Draw bounds ONLY for selected; transform corners like the red box
             if (e == selectedEntity)
             {
-                glm::vec2 a = WorldToScreen({ worldBox.min.x, worldBox.min.y }, vp);
-                glm::vec2 b = WorldToScreen({ worldBox.max.x, worldBox.max.y }, vp);
-                ImDrawList* dl = ImGui::GetForegroundDrawList();
-                dl->AddRect(ToIm(a), ToIm(b), IM_COL32(255, 220, 80, 180), 3.0f, 0, 2.0f);
+                auto toFB = [&](glm::vec2 modelP)->ImVec2 {
+                    glm::vec3 n = modelToNDC * glm::vec3(modelP, 1.0f);         // model -> NDC
+                    float x = vp.x + (n.x * 0.5f + 0.5f) * vp.w;                 // NDC -> FB
+                    float y = vp.y + (1.0f - (n.y * 0.5f + 0.5f)) * vp.h;
+                    return ImVec2(x / sx, y / sy);                               // FB -> UI for ImGui
+                    };
+
+                ImVec2 a = toFB({ qmin.x, qmin.y });
+                ImVec2 b = toFB({ qmax.x, qmin.y });
+                ImVec2 c = toFB({ qmax.x, qmax.y });
+                ImVec2 d = toFB({ qmin.x, qmax.y });
+
+                auto* dl = ImGui::GetForegroundDrawList();
+                dl->AddLine(a, b, IM_COL32(255, 220, 80, 180), 2.0f);
+                dl->AddLine(b, c, IM_COL32(255, 220, 80, 180), 2.0f);
+                dl->AddLine(c, d, IM_COL32(255, 220, 80, 180), 2.0f);
+                dl->AddLine(d, a, IM_COL32(255, 220, 80, 180), 2.0f);
             }
         }
 
-        // 3) mouse press → start drag/select (only when cursor inside the drawn game rect)
-        float gx, gy, gw, gh, s; ComputeGameDrawRect(vp, gx, gy, gw, gh, s);
-        bool inGameRect =
-            (mouseScreen.x >= gx && mouseScreen.x <= gx + gw &&
-                mouseScreen.y >= gy && mouseScreen.y <= gy + gh);
+        // Begin drag only if mouse is inside the game viewport (FB px)
+        const bool inGameRect =
+            (mouseFB.x >= vp.x && mouseFB.x <= vp.x + vp.w &&
+                mouseFB.y >= vp.y && mouseFB.y <= vp.y + vp.h);
 
+        // For dragging, keep your existing world-space move (works with your Transform)
+        // Convert mouseFB -> WORLD using your helper, then apply delta to tr.Pos.
         if (inGameRect && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
         {
             if (hovered != INVALID_ENTITY) {
                 selectedEntity = hovered;
                 auto& tr = coord->GetComponent<Framework::Transform>(selectedEntity);
+                Vector2 mouseWorld = ScreenToWorld(mouseFB, vp); // your existing helper
                 g_gizmo.dragging = true;
                 g_gizmo.active = selectedEntity;
-                g_gizmo.dragStartMouseScreen = mouseScreen;
                 g_gizmo.dragStartWorld = mouseWorld;
                 g_gizmo.entityStartPos = tr.Pos;
             }
@@ -484,38 +522,26 @@ namespace MyEditor
             }
         }
 
-        // 4) drag to move
         if (g_gizmo.dragging && g_gizmo.active != INVALID_ENTITY && ImGui::IsMouseDown(ImGuiMouseButton_Left))
         {
             if (coord->HasComponent<Framework::Transform>(g_gizmo.active))
             {
                 auto& tr = coord->GetComponent<Framework::Transform>(g_gizmo.active);
-                Vector2 d = { mouseWorld.x - g_gizmo.dragStartWorld.x,
-                              mouseWorld.y - g_gizmo.dragStartWorld.y };
-
-                if (io.KeyCtrl) { d.x = std::round(d.x / 10.f) * 10.f; d.y = std::round(d.y / 10.f) * 10.f; }
-
+                Vector2 mouseWorld = ScreenToWorld(mouseFB, vp);
+                Vector2 d{ mouseWorld.x - g_gizmo.dragStartWorld.x,
+                           mouseWorld.y - g_gizmo.dragStartWorld.y };
                 tr.Pos.x = g_gizmo.entityStartPos.x + d.x;
                 tr.Pos.y = g_gizmo.entityStartPos.y + d.y;
             }
         }
 
-        // 5) release → stop drag
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
             g_gizmo.dragging = false;
             g_gizmo.active = INVALID_ENTITY;
         }
-
-        // 6) small center handle for selected
-        if (selectedEntity != INVALID_ENTITY && coord->HasComponent<Framework::Transform>(selectedEntity))
-        {
-            auto& tr = coord->GetComponent<Framework::Transform>(selectedEntity);
-            glm::vec2 p = WorldToScreen(tr.Pos, vp);
-            ImDrawList* dl = ImGui::GetForegroundDrawList();
-            dl->AddCircleFilled(ToIm(p), 5.0f, IM_COL32(255, 200, 90, 255));
-            dl->AddCircle(ToIm(p), 8.0f, IM_COL32(255, 200, 90, 200), 18, 1.5f);
-        }
     }
+
+
 
     // ===================== ProjectPanel =====================
     static void ProjectPanel(Entity selectedEntity)
