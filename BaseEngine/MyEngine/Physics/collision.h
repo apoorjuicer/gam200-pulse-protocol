@@ -2,45 +2,74 @@
 /**
  * @file        collision.h
  * @project     Pulse Protocol
- * @author      Reginald Lew Yee Ren (99%)
- * @author      Goh Pin Kai (1%)
- * @brief       Collision management utilities (AABB, sword, distance, and line hit tests).
- *              Contains all collision-related calculations, separated from gameplay logic.
+ * @author      Reginald Lew Yee Ren
+ * @brief       Collision management utilities (AABB, distance, mouse, and GUI hit tests).
+ *              Provides reusable helper functions to build AABBs from Transform and AABB components.
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
- *              Reproduction or disclosure of this file or its contents without the
- *              prior written consent of DigiPen Institute of Technology is prohibited.
- */
- /*****************************************************************************/
+ ******************************************************************************/
+
 #ifndef COLLISION_H
 #define COLLISION_H
 
 #include "../CoreEngine/Assets.h"
 #include "Graphics/Transform.h"
 
-// -----------------------------------------------------------------------------
-// CollisionManager
-// -----------------------------------------------------------------------------
+ // Forward declare
 namespace Framework { class Transform; }
+
+/**
+ * @struct OBB
+ * @brief Represents an Oriented Bounding Box for rotational collision detection.
+ */
+struct OBB
+{
+    Vector2 center;        // Center of the box
+    Vector2 halfExtents;   // Half width / height
+    float rotation;        // Rotation in degrees (use Transform::angle_disp)
+    Vector2 axis[2];       // Local axes for SAT
+};
+
+
+// Converts rotation to radians whether it's already an angle (float)
+// or a 2D direction vector (Vector2) in your Transform.
+inline float ToAngleRadians(float angleRadians) {
+    return angleRadians; // already radians
+}
+
+inline float ToAngleRadians(const Vector2& dir) {
+    // If Rotation is a direction vector, derive angle with atan2(y, x)
+    // Assumes dir is normalized or at least non-zero.
+    return atan2f(dir.y, dir.x);
+}
+
+/**
+ * @class CollisionManager
+ * @brief Handles all collision-related computations, separated from gameplay logic.
+ */
 class CollisionManager : public Systems
 {
 public:
     void Init() override;
     void Update(float dt) override;
 
-    // --- Collision Helper Functions ---
-    AABB BuildHeroHitbox(Framework::Transform& pos, const NPC& npc);
-    AABB BuildMonsterHitbox(Framework::Transform& pos, const NPC& npc);
+    // --- Core AABB Utilities ---
+    AABB BuildAABBFromTransform(const Framework::Transform& transform, const AABB& baseBox);
 
     // --- Collision Detection ---
     bool CheckAABBCollision(const AABB& a, const AABB& b);
     bool CheckDistanceCollision(const Vector2& a, float aradius,
         const Vector2& b, float bradius);
 
-    // --- Mouse Collision ---
+    // --- Mouse and GUI Collisions ---
     bool CheckMouseCollision(const Vector2& mousePos, const AABB& box);
+    bool CheckGUIButtonCollision(const glm::vec2& mouseVirtual,
+        const glm::vec2& buttonPos,
+        const glm::vec2& buttonSize);
 
-    // --- In-Game GUI System Collision Usage (Virtual/Screen Space) -> M2 Rubric ---
-    bool CheckGUIButtonCollision(const glm::vec2& mouseVirtual, const glm::vec2& buttonPos, const glm::vec2& buttonSize);
+    // --- Rotational (OBB) Collision Support ---
+    OBB BuildOBBFromTransform(const Framework::Transform& transform, const AABB& baseBox);
+    bool CheckOBBvsOBB(const OBB& obbA, const OBB& obbB);
+    void ResolveOBBCollision(Framework::Transform& a, Framework::Transform& b, float elasticity = 0.25f);
 };
 
 #endif // COLLISION_H

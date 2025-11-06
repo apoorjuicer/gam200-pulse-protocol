@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include "GameLogic.h"
 
+bool EnemyScript::testAABBCollision = false;
+bool EnemyScript::testOBBCollision = false;
+
 LogicSystem::LogicSystem()
 {
 
@@ -23,10 +26,19 @@ void LogicSystem::Init()
 void LogicSystem::Update(float dt)
 {
 	(void)dt;
+
+    // don't update scripts, if not playing the game
+    if (!Engine->IsPlaying()) {
+        return;
+    }
+
 	auto* g_coordinator = Coordinator::GetInstance();
 
+    // make copy first
+    auto entities = EntityMember;
+
 	// only update all entity that has scripts
-	for (auto const& entity : EntityMember)
+	for (auto const& entity : entities)
 	{
 		// get script name from each entity and feed them to its respective scripts
 		auto& scriptname = g_coordinator->GetComponent<LogicComponent>(entity);
@@ -166,36 +178,87 @@ bool LoadScriptName(LogicComponent& t, std::string const& path)
 }
 
 
+// ---------------------------------------------------------------------
 // FOR SCRIPTS ONLY ONWARDS
+// ---------------------------------------------------------------------
 void PlayerScript::Init(Entity ID) 
 {
 	(void)ID;
+    //autoMoveTimer = 2.0f; // reset timer
 }
 
 void PlayerScript::Update(Entity ID) 
 {
 	auto g_coordinator = Coordinator::GetInstance();
 	auto& hero_transform = g_coordinator->GetComponent<Framework::Transform>(ID);
-	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_W) == GLFW_PRESS)
+
+    // auto-moves right after game starts (for 2 secs)
+    /*if (autoMoveTimer > 0.0f) {
+        hero_transform.Pos.x += 3.0f;
+        autoMoveTimer -= 0.016f;
+    }*/
+
+    // this is just regular WASD
+	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_T) == GLFW_PRESS)
 	{
 		hero_transform.Pos.y += 5.0f;
 	}
 
-	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_A) == GLFW_PRESS)
+	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_F) == GLFW_PRESS)
 	{
 		hero_transform.Pos.x -= 5.0f;
 	}
 
-	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_S) == GLFW_PRESS )
+	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_G) == GLFW_PRESS )
 	{
 		hero_transform.Pos.y -= 5.0f;
 	}
 
-	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_D) == GLFW_PRESS)
+	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_H) == GLFW_PRESS)
 	{
 		hero_transform.Pos.x += 5.0f;
 	}
 
+    // ==============================================================
+    // --- Rotation toggle control (N key) ---
+    // ==============================================================
+    static bool isRotating = false;      // current rotation state
+    static bool wasBPressed = false;     // key press debounce
+
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_N) == GLFW_PRESS)
+    {
+        if (!wasBPressed)
+        {
+            isRotating = !isRotating;   // toggle on/off
+            wasBPressed = true;
+            std::cout << (isRotating ? "[PLAYER] Rotation enabled.\n"
+                : "[PLAYER] Rotation disabled.\n");
+        }
+    }
+    else
+    {
+        wasBPressed = false;            // reset when key released
+    }
+
+    // ==============================================================
+    // --- Apply rotation if toggled on ---
+    // ==============================================================
+    if (isRotating)
+    {
+        static double lastTime = glfwGetTime();
+        double currentTime = glfwGetTime();
+        float dt = static_cast<float>(currentTime - lastTime);
+        lastTime = currentTime;
+
+        float rotationSpeed = 180.0f; // degrees per second
+        hero_transform.Rotation.x += rotationSpeed * dt;
+
+        if (hero_transform.Rotation.x >= 360.0f)
+            hero_transform.Rotation.x -= 360.0f;
+
+        std::cout << "[PLAYER ROTATE] Rotation.x = "
+            << hero_transform.Rotation.x << " degrees\n";
+    }
 }
 
 void PlayerScript::Exit(Entity ID) 
@@ -210,7 +273,195 @@ void EnemyScript::Init(Entity ID)
 
 void EnemyScript::Update(Entity ID)
 {
-	(void)ID;
+    auto g_coordinator = Coordinator::GetInstance();
+    if (!g_coordinator->HasComponent<Framework::Transform>(ID) ||
+        !g_coordinator->HasComponent<AABB>(ID) ||
+        !g_coordinator->HasComponent<Health>(ID))
+        return;
+
+    auto& enemy_transform = g_coordinator->GetComponent<Framework::Transform>(ID);
+    auto& enemy_box = g_coordinator->GetComponent<AABB>(ID);
+    auto& enemy_health = g_coordinator->GetComponent<Health>(ID);
+
+    if (!enemy_health.isAlive)
+        return;
+
+    // --- Movement for enemy ---
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        enemy_transform.Pos.y += 5.0f;
+    }
+
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_LEFT) == GLFW_PRESS)
+    {
+        enemy_transform.Pos.x -= 5.0f;
+    }
+
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        enemy_transform.Pos.y -= 5.0f;
+    }
+
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS)
+    {
+        enemy_transform.Pos.x += 5.0f;
+    }
+
+
+
+    // --- Mode toggles ---
+    static bool aabbMode = true;  // change to m so enemy movement arrow keys
+    static bool obbMode = false;
+    static bool wasMPressed = false;
+    static bool wasNPressed = false;
+
+    // --- Handle M toggle (AABB) ---
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_M) == GLFW_PRESS)
+    {
+        if (!wasMPressed)
+        {
+            //aabbMode = !aabbMode;   // comments so that collision is always on
+            obbMode = false; // disable OBB when AABB is on
+            wasMPressed = true;
+            std::cout << (aabbMode ? "[ENEMY] AABB Mode ON\n" : "[ENEMY] AABB Mode OFF\n");
+        }
+    }
+    else
+        wasMPressed = false;
+
+    // --- Handle N toggle (OBB) ---
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_N) == GLFW_PRESS)
+    {
+        if (!wasNPressed)
+        {
+            obbMode = !obbMode;
+            aabbMode = false; // disable AABB when OBB is on
+            wasNPressed = true;
+            std::cout << (obbMode ? "[ENEMY] OBB Mode ON\n" : "[ENEMY] OBB Mode OFF\n");
+        }
+    }
+    else
+        wasNPressed = false;
+
+    // --- Find Player Entity ---
+    Entity playerEntity = static_cast<Entity>(-1);
+    auto logicSys = g_coordinator->GetSystem<LogicSystem>();
+    for (auto const& e : logicSys->EntityMember)
+    {
+        if (!g_coordinator->HasComponent<LogicComponent>(e))
+            continue;
+
+        auto& logic = g_coordinator->GetComponent<LogicComponent>(e);
+        if (logic.ScriptName == "PlayerScript")
+        {
+            playerEntity = e;
+            break;
+        }
+    }
+
+    if (playerEntity == static_cast<Entity>(-1))
+        return;
+
+    auto& player_transform = g_coordinator->GetComponent<Framework::Transform>(playerEntity);
+    auto& player_box = g_coordinator->GetComponent<AABB>(playerEntity);
+    auto& player_health = g_coordinator->GetComponent<Health>(playerEntity);
+
+    CollisionManager collision;
+
+    // ====================================================================
+    // === MODE 1: AABB SLIDE & EDGE COLLISION (M) ========================
+    // ====================================================================
+    if (aabbMode)
+    {
+        //enemy_transform.Pos.x -= 0.5f; // move left at constant rate
+
+        AABB enemyAABB = collision.BuildAABBFromTransform(enemy_transform, enemy_box);
+        AABB playerAABB = collision.BuildAABBFromTransform(player_transform, player_box);
+
+        float worldScale = 4.5f;
+        float edgeThreshold = (playerAABB.width + enemyAABB.width) * worldScale;
+
+        bool edgeContact =
+            (playerAABB.max.x >= enemyAABB.min.x - edgeThreshold) &&
+            (playerAABB.min.x < enemyAABB.min.x) &&
+            (playerAABB.max.y >= enemyAABB.min.y) &&
+            (playerAABB.min.y <= enemyAABB.max.y);
+
+        if (edgeContact && enemy_health.isAlive && player_health.isAlive)
+        {
+            enemy_health.isAlive = false;
+            player_health.hp -= enemy_health.damage;
+
+            std::cout << ">>> COLLISION (AABB edge)! Player HP: "
+                << player_health.hp << " | Enemy defeated!\n";
+
+            if (player_health.hp <= 0)
+            {
+                player_health.hp = 0;
+                player_health.isAlive = false;
+                std::cout << ">>> PLAYER DEFEATED\n";
+            }
+
+            // NOW YOU DIE
+            Factory factory;
+            factory.DeleteEntity(ID);
+            //enemy_transform.Pos = { -9999.0f, -9999.0f };
+        }
+    }
+
+    // ====================================================================
+    // === MODE 2: OBB ROTATION CHASE & EDGE COLLISION (N) ===============
+    // ====================================================================
+    if (obbMode)
+    {
+        static double last = glfwGetTime();
+        double now = glfwGetTime();
+        float dt = static_cast<float>(now - last);
+        last = now;
+
+        // Spin enemy clockwise
+        enemy_transform.Rotation.x += 180.0f * dt;
+        if (enemy_transform.Rotation.x >= 360.0f)
+            enemy_transform.Rotation.x -= 360.0f;
+
+        // Move toward player
+        Vector2 dir = player_transform.Pos - enemy_transform.Pos;
+        float len = sqrtf(dir.x * dir.x + dir.y * dir.y);
+        if (len > 0.001f)
+        {
+            dir.x /= len;
+            dir.y /= len;
+            enemy_transform.Pos.x += dir.x * 100.0f * dt;
+            enemy_transform.Pos.y += dir.y * 100.0f * dt;
+        }
+
+        // --- Build OBBs & Check ---
+        OBB enemyOBB = collision.BuildOBBFromTransform(enemy_transform, enemy_box);
+        OBB playerOBB = collision.BuildOBBFromTransform(player_transform, player_box);
+
+        bool obbHit = collision.CheckOBBvsOBB(enemyOBB, playerOBB);
+
+        if (obbHit && enemy_health.isAlive && player_health.isAlive)
+        {
+            enemy_health.isAlive = false;
+            player_health.hp -= enemy_health.damage;
+
+            std::cout << ">>> EDGE COLLISION DETECTED via OBB <<<\n";
+            std::cout << "Player HP: " << player_health.hp << "\n";
+
+            if (player_health.hp <= 0)
+            {
+                player_health.hp = 0;
+                player_health.isAlive = false;
+                std::cout << ">>> PLAYER DEFEATED\n";
+            }
+
+            // NOW YOU DIE
+            Factory factory;
+            factory.DeleteEntity(ID);
+            //enemy_transform.Pos = { -9999.0f, -9999.0f };
+        }
+    }
 }
 
 void EnemyScript::Exit(Entity ID)

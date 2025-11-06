@@ -25,7 +25,7 @@
 #include "../Components/EntityType.h"
 #include "../MyEngine/Components/DisplayName.h"
 #include "CoreEngine/Factory/Factory.h"
-
+#include "Graphics/Layer.h"
 
 //Starting scene will be Main Menu
 SceneManager::SceneManager()
@@ -288,6 +288,12 @@ void SceneManager::UnloadCurrentScene()
 
 void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE JSON FILE 
 {
+	// auto-stops if game is playin when switching scsenes, to prevent position from being modified while changing scenes
+	// is scene is switched, automatically STOP the game
+	if (Engine && Engine->IsPlaying()) {
+		Engine->StopGame();
+	}
+
 	UnloadCurrentScene();
 
 #ifdef _DEBUG
@@ -425,7 +431,36 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				g_coordinator->AddComponent<GUIButton>(entity, btn);
 			}
 		}
-			
+		
+		if (!g_coordinator->HasComponent<LayerTag>(entity)) {
+			LayerTag tag{};
+
+			// Sensible defaults:
+			//if (g_coordinator->HasComponent<GUIButton>(entity)) {
+			//	// UI stuff goes to UI layer and on top
+			//	tag.mask = LAYER_UI;
+			//	tag.orderInLayer = 2;
+			//	tag.z = 0.0f;
+			//}
+			//else 
+			if (g_coordinator->HasComponent<Framework::Renderable>(entity)) {
+				// Background quad heuristic: mdl_ref==0
+				auto& r = g_coordinator->GetComponent<Framework::Renderable>(entity);
+				const bool isBackground = (static_cast<int>(r.mdl_ref) == 0);
+				tag.mask = isBackground ? LAYER_BACKGROUND : LAYER_WORLD;
+				tag.orderInLayer = isBackground ? 0 : 1;
+				tag.z = 0.0f;
+			}
+			else {
+				// Everything else defaults to world
+				tag.mask = LAYER_WORLD;
+				tag.orderInLayer = 1;
+				tag.z = 0.0f;
+			}
+
+			g_coordinator->AddComponent(entity, tag);
+		}
+
 		// save obj to a vector for deleting later
 		SceneEntityList.push_back(entity);
 	}

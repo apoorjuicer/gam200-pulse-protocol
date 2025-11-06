@@ -22,6 +22,9 @@
 #include "Animation.h"
 #include "CoreEngine/Assets.h"
 #include "Physics/collision.h" 
+#include "DebugDraw.h"
+#include "Layer.h"
+
 // External transforms list (used elsewhere)   
 namespace Framework { class Transform; class Animation; class Renderable; }
 
@@ -32,7 +35,7 @@ public:
 	void init(/*float inputEditorWidth, float inputEditorHeight*/);
 	//void update(GLFWwindow* window);
 	void update(GLFWwindow* window, std::set<Entity>);
-	void draw(std::set<Entity>);
+	void draw(std::set<Entity> entities, LayerMask includeMask);
 	void cleanup();
 
 	GLuint vaoid; // handle to VAO

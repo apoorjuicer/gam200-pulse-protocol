@@ -31,7 +31,7 @@ static inline void FMOD_CHECK(FMOD_RESULT r, const char* where)
 AudioManager::AudioManager() {}
 AudioManager::~AudioManager() {}
 
-void AudioManager::RestartBGM(bool startPaused)
+void AudioManager::RestartBGM()
 {
     if (!mSystem) return;
 
@@ -46,14 +46,20 @@ void AudioManager::RestartBGM(bool startPaused)
         FMOD_RESULT r = mSystem->playSound(mBGM, nullptr, false, &mBGMCh);
         if (r == FMOD_OK && mBGMCh) {
             mBGMCh->setVolume(1.0f);
-            mBGMCh->setPaused(startPaused);
+            /*mBGMCh->setPaused(startPaused);*/
         }
     }
 
-    // remember current pause state
-    mPaused = startPaused;
+    // remember current pause state (not using pause as of now)
+    /*mPaused = startPaused;*/
 }
 
+void AudioManager::PauseBGM()
+{
+    if (mBGMCh) {
+        mBGMCh->setPaused(true);
+    }
+}
 
 void AudioManager::releaseAll()
 {
@@ -104,12 +110,13 @@ void AudioManager::Initialize()
 
         if (r == FMOD_OK && mBGMCh) {
             mBGMCh->setVolume(1.0f);
-            std::cout << "[AudioManager] BGM started successfully.\n";
+            mBGMCh->setPaused(true);
+            std::cout << "[AudioManager] BGM loaded (paused).\n";
 
             // if engine is already paused at startup, pause FMOD too
-            if (Engine && Engine->IsPaused()) {
-                mBGMCh->setPaused(true);
-            }
+            //if (Engine && Engine->IsPaused()) {
+            //    mBGMCh->setPaused(true);
+            //}
 
         }
         else {
@@ -179,9 +186,9 @@ void AudioManager::PlaySound(const std::string& key, float volume)
         if (r == FMOD_OK && ch) {
             ch->setVolume(volume);
 
-            if (mPaused) {
+            /*if (mPaused) {
                 ch->setPaused(true);
-            }
+            }*/
         }
         else {
             std::cerr << "[Audio] playSound failed: " << FMOD_ErrorString(r) << "\n";
@@ -193,22 +200,22 @@ void AudioManager::PlaySound(const std::string& key, float volume)
 }
 
 
-void AudioManager::SetPaused(bool paused)
-{
-    mPaused = paused;
-
-    if (!mSystem)
-        return;
-
-    FMOD::ChannelGroup* master = nullptr;
-    if (mSystem->getMasterChannelGroup(&master) == FMOD_OK && master) {
-        master->setPaused(paused);
-    }
-
-    if (mBGMCh) {
-        mBGMCh->setPaused(paused);
-    }
-}
+//void AudioManager::SetPaused(bool paused)
+//{
+//    mPaused = paused;
+//
+//    if (!mSystem)
+//        return;
+//
+//    FMOD::ChannelGroup* master = nullptr;
+//    if (mSystem->getMasterChannelGroup(&master) == FMOD_OK && master) {
+//        master->setPaused(paused);
+//    }
+//
+//    if (mBGMCh) {
+//        mBGMCh->setPaused(paused);
+//    }
+//}
 
 
 

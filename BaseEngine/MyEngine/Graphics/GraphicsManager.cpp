@@ -18,12 +18,6 @@
  /******************************************************************************/
 
 #include "GraphicsManager.h"
-#include <iomanip>   // for std::setprecision
-#include <iostream>
-#include <chrono>
-
-float editorWidth;
-float editorHeight;
 
 // These are the asset keys we expect to exist after AssetsManager::LoadAllFonts()
 namespace {
@@ -73,7 +67,6 @@ void GraphicsManager::Initialize()
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_CULL_FACE);
 
 	// Build a top-left-origin orthographic projection matching our virtual res
 	{
@@ -167,17 +160,22 @@ void GraphicsManager::Update()
 	// Poll input / advance time
 	glfwPollEvents();
 	GLHelper::update_time(1.0);
-
-	// 1) Update and draw world (sprites etc.)
 	glapp->update(Engine->GetWindow(), EntityMember);
-	glapp->draw(EntityMember);
-	// 2) then draw text on top
-	//RenderText(GLApp::shdrpgms[3], "Team BLOOP", 600.0f, 850.0f, 1.0f, glm::vec3(1, 1, 1), Characters);
+	glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
+	glClearDepth(1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//--- Rendering passes ---
+	// Background pass
+	glapp->draw(EntityMember, LAYER_BACKGROUND);
 
-	// 3) Draw in-game gui system & UI overlay
+	// Sprites pass
+	glapp->draw(EntityMember, LAYER_WORLD);
+	//------------------------
+	
+	// Draw in-game gui system & UI overlay
 	RenderUIOverlayElements();
 
-	// 4) Draw overlay text last
+	// Draw overlay text last
 	auto& textShader = GLApp::shdrpgms[3];
 
 	// get the game viewport dimensions from the editor itself
@@ -264,57 +262,57 @@ void GraphicsManager::Update()
 			std::cerr << "[GraphicsManager] WARNING: fonts not found!\n";
 		}
 	}
-	// // Controls help, anchored at right side
-	// {
-	//     int fbW = 0, fbH = 0;
-	//     glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
+	 //// Controls help, anchored at right side
+	 //{
+	 //    int fbW = 0, fbH = 0;
+	 //    glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
 
-	//     float startX = fbW - 350.0f;
-	//     float startY = fbH - 200.0f;
-	//     float lineHeight = 25.0f;
+	 //    float startX = fbW - 350.0f;
+	 //    float startY = fbH - 200.0f;
+	 //    float lineHeight = 25.0f;
 
-	//     RenderText(textShader, "Controls:",
-	//         startX, startY,
-	//         0.5f,
-	//         glm::vec3(1, 1, 0),
-	//         m_debugFont);
+	 //    RenderText(textShader, "Controls:",
+	 //        startX, startY,
+	 //        0.5f,
+	 //        glm::vec3(1, 1, 0),
+	 //        m_debugFont);
 
-	//     RenderText(textShader, "M - Start monsters",
-	//         startX, startY + lineHeight * 1,
-	//         0.4f,
-	//         glm::vec3(1, 1, 1),
-	//         m_debugFont);
+	 //    RenderText(textShader, "M - Start monsters",
+	 //        startX, startY + lineHeight * 1,
+	 //        0.4f,
+	 //        glm::vec3(1, 1, 1),
+	 //        m_debugFont);
 
-	//     RenderText(textShader, "W/A/S/D - Input",
-	//         startX, startY + lineHeight * 2,
-	//         0.4f,
-	//         glm::vec3(1, 1, 1),
-	//         m_debugFont);
+	 //    RenderText(textShader, "W/A/S/D - Input",
+	 //        startX, startY + lineHeight * 2,
+	 //        0.4f,
+	 //        glm::vec3(1, 1, 1),
+	 //        m_debugFont);
 
-	//     RenderText(textShader, "K/L - Scale hero",
-	//         startX, startY + lineHeight * 3,
-	//         0.4f,
-	//         glm::vec3(1, 1, 1),
-	//         m_debugFont);
+	 //    RenderText(textShader, "K/L - Scale hero",
+	 //        startX, startY + lineHeight * 3,
+	 //        0.4f,
+	 //        glm::vec3(1, 1, 1),
+	 //        m_debugFont);
 
-	//     RenderText(textShader, "H/J - Rotate monsters",
-	//         startX, startY + lineHeight * 4,
-	//         0.4f,
-	//         glm::vec3(1, 1, 1),
-	//         m_debugFont);
+	 //    RenderText(textShader, "H/J - Rotate monsters",
+	 //        startX, startY + lineHeight * 4,
+	 //        0.4f,
+	 //        glm::vec3(1, 1, 1),
+	 //        m_debugFont);
 
-	//     RenderText(textShader, "O - Toggle editor",
-	//         startX, startY + lineHeight * 5,
-	//         0.4f,
-	//         glm::vec3(1, 1, 1),
-	//         m_debugFont);
+	 //    RenderText(textShader, "O - Toggle editor",
+	 //        startX, startY + lineHeight * 5,
+	 //        0.4f,
+	 //        glm::vec3(1, 1, 1),
+	 //        m_debugFont);
 
-	//     RenderText(textShader, "F1-F6 - Debug draw",
-	//         startX, startY + lineHeight * 6,
-	//         0.4f,
-	//         glm::vec3(1, 1, 1),
-	//         m_debugFont);
-	// }
+	 //    RenderText(textShader, "F1-F6 - Debug draw",
+	 //        startX, startY + lineHeight * 6,
+	 //        0.4f,
+	 //        glm::vec3(1, 1, 1),
+	 //        m_debugFont);
+	 //}
 }
 
 
@@ -358,11 +356,6 @@ void GraphicsManager::RenderText(
 {
 	if (!fontData)
 		return;
-
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	shader.Use();
 
@@ -512,10 +505,6 @@ void GraphicsManager::RenderColoredQuad(float x, float y, float width, float hei
 	//if (count++ < 10) {
 	//    std::cout << "[RenderQuad] Rendering at screen: (" << x << ", " << y << ")" << std::endl;
 	//}
-
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	auto& shader = GLApp::shdrpgms[3]; // Text shader
 	shader.Use();
