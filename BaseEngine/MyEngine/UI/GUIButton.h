@@ -3,7 +3,11 @@
  * @file        GUIButton.h
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
- * @brief       GUI Button component for creation of clickable in-game buttons.
+ * @brief       Implements the InputManager system, handling GLFW-based
+ *              keyboard input for rhythm gameplay. Provides real-time input
+ *              state tracking, combo detection, rhythm timing feedback,
+ *              event broadcasting to subscribed systems, debug toggles.
+ *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.

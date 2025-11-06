@@ -30,6 +30,8 @@
 
 #include "../MyEngine/Components/DisplayName.h"
 #include "../MyEngine/Components/EntityType.h"
+
+#include "../MyEngine/UI/GUIManager.h"
 #pragma comment(lib, "winmm.lib")
 
 // Game window dimensions and title
@@ -383,6 +385,7 @@ void CoreEngine::Setup()
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
 	g_coordinator->RegisterSystem<RhythmGameplayInput>();
+	g_coordinator->RegisterSystem<GUIManager>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<CollisionManager>();
@@ -407,6 +410,11 @@ void CoreEngine::Setup()
 	rhythmSig.set(g_coordinator->GetComponentType<Framework::Renderable>());
 	rhythmSig.set(g_coordinator->GetComponentType<Framework::Animation>());
 	g_coordinator->SetSystemSignature<RhythmGameplayInput>(rhythmSig);
+
+	Signature guiSig;
+	guiSig.set(g_coordinator->GetComponentType<GUIButton>());
+	guiSig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	g_coordinator->SetSystemSignature<GUIManager>(guiSig);
 
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform

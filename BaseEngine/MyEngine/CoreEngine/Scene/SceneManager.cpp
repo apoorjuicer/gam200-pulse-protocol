@@ -466,14 +466,14 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	}
 
 		auto* coordinator = Coordinator::GetInstance();
-		auto inputMgr = coordinator->GetSystem<InputManager>();
+		auto guiMgr = coordinator->GetSystem<GUIManager>();
 
-		if (inputMgr) {
-			inputMgr->GUIButtonEntities.clear();
+		if (guiMgr) {
+			guiMgr->GUIButtonEntities.clear();
 
 			for (auto entity : SceneEntityList) {
 				if (coordinator->HasComponent<GUIButton>(entity)) {
-					inputMgr->GUIButtonEntities.insert(entity);
+					guiMgr->GUIButtonEntities.insert(entity);
 #ifdef _DEBUG
 					//std::cout << "[SceneManager] Registered GUI button entity: " << entity << std::endl;
 #endif

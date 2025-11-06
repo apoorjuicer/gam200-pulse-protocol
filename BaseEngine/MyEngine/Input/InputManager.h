@@ -17,11 +17,6 @@
 #include "pch/pch_temp.h"
 #include "../MyEngine/CoreEngine/ECS/System.h"
 #include "../MyEngine/CoreEngine/Message/MessageManager.h"
-#include "../MyEngine/CoreEngine/Scene/SceneManager.h"
-#include "../MyEngine/CoreEngine/Factory/Factory.h"
-#include "../MyEngine/Components/DisplayName.h"
-
-struct GUIButton;
 
 class InputManager : public Systems {
 public:
@@ -69,7 +64,6 @@ public:
 	}
 
 	std::set<Entity> DebugEntities;
-	std::set<Entity> GUIButtonEntities;
 
 private:
 	GLFWwindow* window = nullptr;
@@ -95,15 +89,6 @@ private:
 	bool debugGridEnabled = false;
 	bool debugToggleKeyPressed[6] = { false };
 	bool stressToggleRequested = false;
-
-	// -------------------------------------------------
-	// In-Game GUI System
-	// -------------------------------------------------
-	std::vector<Entity> createdEntitiesByGUI;
-
-	void updateGUIButtons();
-	bool isMouseOverButton(const glm::vec2& buttonPos, const glm::vec2& buttonSize, const glm::vec2& mouseWorld) const;
-	void executeButtonAction(const GUIButton& button);
 
 	// for raw input functions
 	void updateInputStates();

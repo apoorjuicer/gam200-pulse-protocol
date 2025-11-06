@@ -1,12 +1,10 @@
 {
     "scene": "MainMenu",
-    "entities": 
-    [       
-        {"Type": "Background",
-        "components":
-        [
-            {
-                "transform": {
+    "entities": [
+        {
+            "components": [
+                {
+                    "transform": {
                         "position": {
                             "x": 0.0,
                             "y": 0.0
@@ -15,36 +13,45 @@
                             "x": 1600.0,
                             "y": 900.0
                         },
-                        "isVisible": true
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
                     }
-            },
-
-            {
-                "render": 
+                },
                 {
-                    "mdl_ref": 0.0,
-                    "shd_ref": 1.0,
-                    "textureID": 0,
-                    "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg"
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 12.0
+                    }
                 }
-            },
-
-            {
-                "animation": {
-                    "totalFrames": 1,
-                    "columns": 1,
-                    "rows": 1
-                }
-            }
-           
-        ]
+            ]
         },
-
-        {"Type": "Button",
-        "components":
-        [
-            {
-                "transform": {
+        {
+            "components": [
+                {
+                    "transform": {
                         "position": {
                             "x": -200.0,
                             "y": -500.0
@@ -53,35 +60,45 @@
                             "x": 800.0,
                             "y": 200.0
                         },
-                        "isVisible": true
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
                     }
-            },
-
-            {
-                "render": 
+                },
                 {
-                    "mdl_ref": 1.0,
-                    "shd_ref": 2.0,
-                    "textureID": 0,
-                    "spriteName": "../../MyEngine/Assets/Textures/UI/bar.png"
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/bar.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 12.0
+                    }
                 }
-            },
-
-            {
-                "animation": {
-                    "totalFrames": 1,
-                    "columns": 1,
-                    "rows": 1
-                }
-            }
-        ]
+            ]
         },
-
-        {"Type": "Button",
-        "components":
-        [
-            {
-                "transform": {
+        {
+            "components": [
+                {
+                    "transform": {
                         "position": {
                             "x": 200.0,
                             "y": -500.0
@@ -90,28 +107,40 @@
                             "x": 800.0,
                             "y": 200.0
                         },
-                        "isVisible": true
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
                     }
-            },
-
-            {
-                "render": 
+                },
                 {
-                    "mdl_ref": 1.0,
-                    "shd_ref": 2.0,
-                    "textureID": 0,
-                    "spriteName": "../../MyEngine/Assets/Textures/UI/perfect.png"
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/perfect.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 12.0
+                    }
                 }
-            },
-
-            {
-                "animation": {
-                    "totalFrames": 1,
-                    "columns": 1,
-                    "rows": 1
-                }
-            }
-        ]
+            ]
         }
     ]
 }
