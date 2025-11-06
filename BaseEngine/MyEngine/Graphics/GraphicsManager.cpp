@@ -111,6 +111,8 @@ void GraphicsManager::Initialize()
 
     std::cout << "[GraphicsManager] Successfully initialized for graphics.\n";
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Build a top-left-origin orthographic projection matching our virtual res
     {
@@ -286,20 +288,8 @@ void GraphicsManager::Update()
 
 
     // FPS counter (while editor hidden)
-    if (!MyEditor::IsEnabled())
-    {
-        std::ostringstream fpsText;
-        fpsText << "FPS: " << std::fixed
-                << std::setprecision(1)
-                << GLHelper::fps;
+   
 
-        RenderText(
-            textShader,
-            fpsText.str(),
-            100.0f, 850.0f,
-            1.0f,
-            glm::vec3(0.5f, 0.0f, 0.0f),
-            m_debugFont);
 
 
         // // Controls help, anchored at right side
@@ -309,7 +299,7 @@ void GraphicsManager::Update()
 
         // team label using font patrickhand-regular_48
         //RenderText(textShader, TEAM_LABEL, teamLabelX, teamLabelY, TEAM_LABEL_SCALE, TEAM_COLOR, m_uiFont);
-    }	
+    	
 
 	
 	 //// Controls help, anchored at right side
@@ -569,6 +559,11 @@ void GraphicsManager::RenderUIOverlayElements()
                 textScale,
                 glm::vec3(1.0f, 1.0f, 1.0f), // White text
                 m_uiFont);
+
+           // std::cerr << "[GraphicsManager] m_uiFont found!!!!!!!!!\n";
+        }
+        else {
+            std::cerr << "[GraphicsManager] m_uiFont not found\n";
         }
     }
 }
