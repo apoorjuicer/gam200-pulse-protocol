@@ -74,6 +74,7 @@ How to Run:
 5. Press F5 to build and run
 6. Control player with TFGH keys in rhythm with the music
 7. Control enemy with Arrow keys (for testing/demonstration)
+8. Use M and N keys to toggle collision and rotation visualizations
 
 ═══════════════════════════════════════════════════════════════════════════════
 3. TEAM ROSTER: NAME - ROLE | CHAMPIONING
