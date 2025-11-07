@@ -2,7 +2,7 @@
 /**
  * @file        CoreEngine.h
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael
+ * @author		Chia Wei Xuan Rachael - 100%
  * @brief		Declares the core engine class that manages subsystem
  *				initialization, the main game loop, and development utilities.
  *
