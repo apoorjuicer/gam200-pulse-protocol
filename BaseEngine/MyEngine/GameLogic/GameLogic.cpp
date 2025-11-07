@@ -2,14 +2,22 @@
 /**
  * @file        GameLogic.cpp
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael (primary) - 80%
- * @author		Reginald Lew Yee Ren (secondary) - 20%
- * @brief		Implementation of script management system and entity behavior logic.
- *              Implements LogicSystem's script registration, execution loops, and lifecycle management.
- *              Contains concrete script behavior implementations (PlayerScript, EnemyScript) with
- *              Init/Update/Exit logic. Provides JSON serialization/deserialization for LogicComponent
- *              to enable persistent script-entity associations. Handles script-to-entity binding and
- *              per-frame script update dispatch through the ECS architecture.
+ * @author		Chia Wei Xuan Rachael (primary) - 60%
+ * @author		Reginald Lew Yee Ren (secondary) - 40%
+ * 
+ * @brief		Core Components:
+ *              - LogicSystem: Manages script registration, lifecycle (Init/Update/Exit), 
+ *                and execution for all entities with LogicComponent. Only updates during 
+ *                gameplay (respects Engine->IsPlaying() state).
+ *              - Iscript Interface: Base class for all game scripts with Init, Update, Exit.
+ *              - LogicComponent: Stores script name per entity, supports JSON serialization.
+ *
+ *
+ *              Implements game entity logic for both Player and Enemy.
+ *              Handles entity movement, rotation toggling, and two collision test modes:
+ *              AABB (Axis-Aligned Bounding Box) via 'M' key and 
+ *              OBB (Oriented Bounding Box) via 'N' key.
+ *              Includes the LogicSystem that registers, updates, and executes scripts.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

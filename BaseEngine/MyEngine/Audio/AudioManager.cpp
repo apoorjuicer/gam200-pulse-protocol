@@ -2,7 +2,8 @@
 /**
  * @file       AudioManager.cpp
  * @project    Pulse Protocol
- * @author     Ban Kai Wei Benjamin
+ * @author     Ban Kai Wei Benjamin (primary) - 75%
+ * @author     Leu Jun Yong (secondary) - 25%
  * 
  * @brief      Manages FMOD audio system for BGM and SFX.
  * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
@@ -306,8 +307,8 @@ bool AudioManager::LoadBGM(std::string const &id)
         // }
 
         mBGMCache[id] = s;  // map OWNS the sound
-        mCurrentBGMID = id; // optional: mark as �loaded current�
-        mCurrentBGM = s;    // non-owning alias
+        mCurrentBGMID = id; // optional: mark as loaded current
+        mCurrentBGM = s;    // pointer to current bgm
     }
 
     return true;

@@ -3,9 +3,10 @@
  * @file        Factory.h
  * @project     Pulse Protocol
  * @author		Chia Wei Xuan Rachael
- * @brief		Component for entity type classification with JSON serialization support.
- *				Stores entity category (e.g., "player", "enemy", "button") and provides 
- *				RapidJSON serialization/deserialization for persistence and data-driven design.
+ * @brief		Entity factory system providing CRUD operations for individual game
+ *              entities via JSON prefab files and programmatic creation. Serves as
+ *              the primary interface for entity instantiation in both editor (ImGui)
+ *              and runtime contexts (spawning bullets, enemies, etc.).
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

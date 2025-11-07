@@ -3,15 +3,15 @@
  * @file        collision.cpp
  * @project     Pulse Protocol
  * @author      Reginald Lew Yee Ren
- * @brief       Implements pure collision logic: AABB, distance, and
- *              mouse hit tests and Oriented Bounding Box (OBB).
- *
+ * @brief       Implements all collision mechanics such as AABB overlap, edge detection,
+ *              and SAT-based OBB collision for rotated entities. Contains helper methods
+ *              for building bounding volumes and detecting mouse/GUI interactions.
+ * 
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
- *              Reproduction or disclosure of this file or its contents without
- *              the prior written consent of DigiPen Institute of Technology is
- *              prohibited.
- */
- /******************************************************************************/
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ * 
+ ******************************************************************************/
 
 #include "pch/pch.h"
 
@@ -66,7 +66,7 @@ bool CollisionManager::CheckEdgeContactCollision(const AABB& a, const AABB& b, f
         (std::abs(a.max.y - b.min.y) <= threshold) || // A top vs B bottom
         (std::abs(b.max.y - a.min.y) <= threshold);   // B top vs A bottom
 
-    // Allow slight Y and X proximity so height difference doesn’t block edge collision
+    // Allow slight Y and X proximity so height difference doesnï¿½t block edge collision
     bool yCloseEnough = std::abs(((a.min.y + a.max.y) / 2) - ((b.min.y + b.max.y) / 2)) <= ((a.height + b.height) * 0.5f);
     bool xCloseEnough = std::abs(((a.min.x + a.max.x) / 2) - ((b.min.x + b.max.x) / 2)) <= ((a.width + b.width) * 0.5f);
 
