@@ -1,44 +1,226 @@
 Project Guide - CMake Setup and Visual Studio 2022 Regeneration
 ===============================================================
 
-This guide explains how to set up and regenerate the Visual Studio 2022 solution for the custom engine project.
+This guide explains how to set up and regenerate the Visual Studio 2022 solution 
+for the Pulse Protocol custom engine project.
 
-Folder Structure
-----------------
-After unzipping `BaseEngine.zip`, you should see the following structure:
+═══════════════════════════════════════════════════════════════════════════════
+QUICK START FOR FIRST-TIME USERS
+═══════════════════════════════════════════════════════════════════════════════
 
-BaseEngine/
-├── cmake/              (CMake helper modules, if any)
-├── imgui/              (external library)
-├── MyEditor/           (editor project source)
-├── MyEngine/           (engine project source)
-├── .gitignore
-├── clean.bat           (cleans the build folder)
-├── run.bat             (generates build folder and runs CMake)
-├── CMakeLists.txt      (root CMake configuration)
-├── projectGuide.txt or projectGuide.pdf (this file)
+Prerequisites:
+--------------
+1. Visual Studio 2022 (Community, Professional, or Enterprise)
+   - Download: https://visualstudio.microsoft.com/downloads/
+   - Required workload: "Desktop development with C++"
 
-1. Install CMake
-----------------
-CMake is required to generate Visual Studio 2022 solution files.
+2. CMake (Version 3.15 or higher)
+   - Download: https://cmake.org/download/
+   - Use the Windows x64 installer (.msi)
+   - ✓ Check "Add CMake to system PATH" during installation
 
-- Download CMake from: https://cmake.org/download/
-- On Windows, use the `.msi` installer (64-bit).
-- During installation, check the option to "Add CMake to system PATH".
+Quick Setup Steps:
+------------------
+1. Extract `BaseEngine.zip` to a folder (e.g., C:\Projects\BaseEngine\)
+2. Navigate to the extracted folder
+3. Double-click `run.bat` to generate the Visual Studio solution
+4. Open `build/BaseEngine.sln` in Visual Studio 2022
+5. Set `MyEngine` as the startup project (right-click → Set as Startup Project)
+6. Press F5 to build and run the game
 
-Verify installation:
+═══════════════════════════════════════════════════════════════════════════════
+PROJECT SETTINGS & BUILD MODES
+═══════════════════════════════════════════════════════════════════════════════
+
+Build Configurations:
+---------------------
+The project supports two build modes:
+
+1. **Debug Mode** (Default)
+   - Includes debugging symbols
+   - Slower performance but easier to debug
+   - Console window shows detailed logs
+   - Use for: Development and testing
+
+2. **Release Mode** (Optimized)
+   - Full optimizations enabled (-O2)
+   - Best performance for gameplay
+   - Minimal logging
+   - Use for: Final submission and demos
+
+To Switch Build Modes in Visual Studio 2022:
+---------------------------------------------
+1. Click the dropdown near the top toolbar (shows "Debug" by default)
+2. Select "Release" for optimized build
+3. Rebuild the solution (Build → Rebuild Solution)
+
+═══════════════════════════════════════════════════════════════════════════════
+1. INSTALLING CMAKE
+═══════════════════════════════════════════════════════════════════════════════
+
+CMake is required to generate the Visual Studio 2022 solution files.
+
+Download and Installation:
+--------------------------
+1. Go to: https://cmake.org/download/
+2. Download: "Windows x64 Installer" (cmake-X.XX.X-windows-x86_64.msi)
+3. Run the installer
+4. ✓ Check "Add CMake to the system PATH for all users" or current user
+5. Complete the installation
+
+Verify Installation:
+--------------------
+Open Command Prompt (cmd) and type:
 ```
 cmake --version
 ```
 
-2. Regenerating the Visual Studio 2022 Solution
------------------------------------------------
-1. Double-click `run.bat` in the project root.
-   - This will automatically create a `build/` folder (if missing) and run CMake with the correct generator.
-2. The generated `BaseEngine.sln` file will appear inside the `build/` folder.
-3. Double-click the `.sln` file to open it in Visual Studio 2022.
+Expected output:
+```
+cmake version 3.XX.X
+```
 
-3. Cleaning the Project
------------------------
-- To remove the generated build files, run `clean.bat`.
-- This will delete the `build/` folder so you can regenerate from scratch.
+If you see the version number, CMake is installed correctly.
+
+Troubleshooting:
+----------------
+- If "cmake is not recognized", restart your computer after installation
+- Alternatively, manually add CMake to PATH:
+  - Default location: C:\Program Files\CMake\bin
+  - Add to System Environment Variables → Path
+
+═══════════════════════════════════════════════════════════════════════════════
+2. GENERATING THE VISUAL STUDIO 2022 SOLUTION
+═══════════════════════════════════════════════════════════════════════════════
+
+Method 1: Using run.bat (Recommended)
+--------------------------------------
+1. Navigate to the BaseEngine folder (where run.bat is located)
+2. Double-click `run.bat`
+3. A command window will appear showing CMake progress
+4. Wait for "Build files have been written to..." message
+5. The `build/` folder will be created with `BaseEngine.sln` inside
+
+Method 2: Manual CMake Command
+-------------------------------
+If run.bat doesn't work, open Command Prompt in the BaseEngine folder and run:
+
+```bash
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+```
+
+Breakdown:
+- `-S .` : Source directory (current folder)
+- `-B build` : Build directory (creates 'build' folder)
+- `-G "Visual Studio 17 2022"` : Generator for VS2022
+- `-A x64` : 64-bit architecture
+
+═══════════════════════════════════════════════════════════════════════════════
+3. OPENING AND BUILDING THE PROJECT
+═══════════════════════════════════════════════════════════════════════════════
+
+Step-by-Step:
+-------------
+1. Navigate to: BaseEngine/build/
+2. Double-click `BaseEngine.sln`
+3. Visual Studio 2022 will open the solution
+4. In Solution Explorer, right-click "MyEngine" → "Set as Startup Project"
+5. Select build configuration: Debug or Release (toolbar dropdown)
+6. Press F5 to build and run, or Ctrl+Shift+B to just build
+
+First Build Notes:
+------------------
+- The first build may take 2-5 minutes (compiling all source files)
+- Subsequent builds will be much faster (incremental compilation)
+- Check "Output" window for build progress and errors
+
+═══════════════════════════════════════════════════════════════════════════════
+4. REGENERATING THE SOLUTION
+═══════════════════════════════════════════════════════════════════════════════
+
+How to Regenerate:
+------------------
+Option A: Quick regenerate
+1. Run `clean.bat` to delete the build folder
+2. Run `run.bat` to regenerate fresh
+
+Option B: Incremental regenerate
+1. In Visual Studio, close the solution
+2. Run `run.bat`
+3. Reopen `build/BaseEngine.sln`
+
+═══════════════════════════════════════════════════════════════════════════════
+5. CLEANING THE PROJECT
+═══════════════════════════════════════════════════════════════════════════════
+
+When to Clean:
+--------------
+- Before regenerating the solution
+- When experiencing build errors
+- Before zipping for submission
+- When switching between major code changes
+
+How to Clean:
+-------------
+1. Close Visual Studio 2022 (if open)
+2. Double-click `clean.bat`
+3. The `build/` folder will be deleted
+4. Run `run.bat` to regenerate
+
+Manual Cleaning:
+----------------
+If clean.bat doesn't work:
+1. Close Visual Studio
+2. Manually delete the `build/` folder
+3. Regenerate using run.bat
+
+═══════════════════════════════════════════════════════════════════════════════
+6. COMMON ISSUES AND SOLUTIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+Issue: "CMake is not recognized"
+--------------------------------
+Solution: 
+- Restart computer after installing CMake
+- Or manually add CMake to PATH (see Section 1)
+
+Issue: "Cannot open BaseEngine.sln"
+------------------------------------
+Solution:
+- Ensure Visual Studio 2022 is installed
+- Check that you have "Desktop development with C++" workload
+- Try opening VS2022 first, then File → Open → Project/Solution
+
+Issue: Build fails with "missing dependencies"
+-----------------------------------------------
+Solution:
+- Verify all folders exist (imgui/, MyEngine/, MyEditor/)
+- Run clean.bat, then run.bat
+- Ensure you extracted the ENTIRE BaseEngine.zip
+
+Issue: "LNK1104: cannot open file"
+-----------------------------------
+Solution:
+- Close any running instances of MyEngine.exe
+- Clean and rebuild the solution
+- Check antivirus isn't blocking the build
+
+Issue: Game crashes on startup
+-------------------------------
+Solution:
+- Verify you're running from Visual Studio (not directly clicking .exe)
+- Check that MyEngine/JSON/ folder contains scene files
+- Ensure MyEngine/Resources/ folder has all assets
+- Try Debug mode first for detailed error messages
+
+═══════════════════════════════════════════════════════════════════════════════
+7. ADDITIONAL NOTES
+═══════════════════════════════════════════════════════════════════════════════
+
+Project Structure Notes:
+------------------------
+- MyEngine: Core engine and game runtime
+- MyEditor: Level editor (ImGui-based)
+- Separation allows for clean editor/runtime boundaries
+
+═══════════════════════════════════════════════════════════════════════════════
