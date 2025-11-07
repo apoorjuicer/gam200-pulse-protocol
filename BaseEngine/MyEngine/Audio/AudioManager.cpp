@@ -2,8 +2,8 @@
 /**
  * @file       AudioManager.cpp
  * @project    Pulse Protocol
- * @author     Ban Kai Wei Benjamin (primary) - 80%
- * @author     Leu Jun Yong (secondary) - 20%
+ * @author     Ban Kai Wei Benjamin (primary) - 75%
+ * @author     Leu Jun Yong (secondary) - 25%
  * 
  * @brief      Manages FMOD audio system for BGM and SFX.
  * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
