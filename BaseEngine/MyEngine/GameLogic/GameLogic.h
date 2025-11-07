@@ -1,15 +1,22 @@
-/******************************************************************************/
+/*****************************************************************************/
 /**
  * @file        GameLogic.h
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael
- * @brief		[pls fill in]
+ * @author		Chia Wei Xuan Rachael (primary) - 80%
+ * @author		Reginald Lew Yee Ren (secondary) - 20%
+ * 
+ * @brief       Defines the scripting system for game entities.
+ *              Provides the interface `Iscript` and derived `PlayerScript` and
+ *              `EnemyScript` classes to handle entity-specific logic (movement,
+ *              collision mode toggles, and interactions).
+ *              Managed by `LogicSystem` which handles script registration,
+ *              updating, and serialization of script names to JSON.
  *
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
- *              Reproduction or disclosure of this file or its contents without the
- *              prior written consent of DigiPen Institute of Technology is prohibited.
- */
-/******************************************************************************/
+ * @copyright   Copyright (C) 2025
+ *              DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without
+ *              prior written consent is prohibited.
+ ******************************************************************************/
 #pragma once
 #include "pch/pch_temp.h"
 #include <GLFW/glfw3.h>

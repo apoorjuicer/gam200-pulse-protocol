@@ -2,9 +2,14 @@
 /**
  * @file        GameLogic.cpp
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael (primary) - 80%
- * @author		Reginald Lew Yee Ren (secondary) - 20%
- * @brief		[pls fill in]
+ * @author		Chia Wei Xuan Rachael (primary) - 50%
+ * @author		Reginald Lew Yee Ren (secondary) - 50%
+ * 
+ * @brief		Implements game entity logic for both Player and Enemy.
+ *              Handles entity movement, rotation toggling, and two collision test modes:
+ *              AABB (Axis-Aligned Bounding Box) via 'M' key and 
+ *              OBB (Oriented Bounding Box) via 'N' key.
+ *              Includes the LogicSystem that registers, updates, and executes scripts.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

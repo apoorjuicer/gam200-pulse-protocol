@@ -3,8 +3,15 @@
  * @file        collision.cpp
  * @project     Pulse Protocol
  * @author      Reginald Lew Yee Ren
- * @brief       Implements pure collision logic: AABB, distance, and mouse hit tests and Oriented Bounding Box (OBB).
- *              No gameplay logic or entity spawning occurs here.
+ * 
+ * @brief       Implements all collision mechanics such as AABB overlap, edge detection,
+ *              and SAT-based OBB collision for rotated entities. Contains helper methods
+ *              for building bounding volumes and detecting mouse/GUI interactions.
+ * 
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ * 
  ******************************************************************************/
 
 #include "pch/pch.h"
