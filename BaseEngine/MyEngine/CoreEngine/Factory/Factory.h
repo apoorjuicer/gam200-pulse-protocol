@@ -2,8 +2,11 @@
 /**
  * @file        Factory.h
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael
- * @brief		[pls fill in]
+ * @author		Chia Wei Xuan Rachael - 100%
+ * @brief		Entity factory system providing CRUD operations for individual game
+ *              entities via JSON prefab files and programmatic creation. Serves as
+ *              the primary interface for entity instantiation in both editor (ImGui)
+ *              and runtime contexts (spawning bullets, enemies, etc.).
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

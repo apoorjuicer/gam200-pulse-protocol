@@ -2,8 +2,11 @@
 /**
  * @file        ScritpName.h
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael
- * @brief		[pls fill in]
+ * @author		Chia Wei Xuan Rachael - 100%
+ * @brief		Component that links entities to their scripted behaviors via string-based
+ *              script name lookup. Serves as the bridge between ECS entities and the
+ *              script execution system (LogicSystem). Fully serializable for prefab and
+ *              scene persistence.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

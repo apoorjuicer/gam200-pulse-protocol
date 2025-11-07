@@ -2,11 +2,31 @@
 /**
  * @file       SceneManager.h
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael
- * @brief      Scene management system class that inherits from Systems base class.
- *             Defines Scene enum for game states and provides interface for
- *             scene loading, unloading, and transitioning. Maintains current
- *             scene state and tracks scene-specific entities for cleanup
+ * @author     Chia Wei Xuan Rachael - 100%
+ * @brief      Scene management system that inherits from Systems base class.
+ *             Provides interface for scene lifecycle operations, entity tracking,
+ *             and JSON serialization of game scenes.
+ *
+ *             Public Interface:
+ *             - Init(): Loads StartingScene (configured to Level1.json), sets initial
+ *               CurrentScene and PreviousScene values
+ *             - Update(float dt): Passive scene state tracking, monitors scene changes
+ *             - LoadSceneFromJson(path): Parses JSON scene file, creates entities with
+ *               components, auto-stops game during transition, registers GUI buttons
+ *             - SaveCurrentScene(): Serializes current scene state to JSON file in
+ *               ../../MyEngine/JSON/[SceneName].json format
+ *             - UnloadCurrentScene(): Destroys all entities in SceneEntityList, clears
+ *               tracking container
+ * 
+ *				Scene State Management:
+ *             - GrabCurrentScene(): Returns active scene name
+ *             - ChangeCurrentScene(str): Updates CurrentScene identifier
+ * 
+ *				Entity Tracking:
+ *             - IncrementEntityArray(entity): Adds entity to SceneEntityList for
+ *               ownership tracking and cleanup
+ *             - DecrementEntityArray(entity): Removes specific entity from list using
+ *               std::find + erase (removes ONLY first matching entity)
  * 
  * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
  *             Reproduction or disclosure of this file or its contents without the

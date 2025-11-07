@@ -2,10 +2,18 @@
 /**
  * @file        GameLogic.cpp
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael (primary) - 50%
- * @author		Reginald Lew Yee Ren (secondary) - 50%
+ * @author		Chia Wei Xuan Rachael (primary) - 60%
+ * @author		Reginald Lew Yee Ren (secondary) - 40%
  * 
- * @brief		Implements game entity logic for both Player and Enemy.
+ * @brief		Core Components:
+ *              - LogicSystem: Manages script registration, lifecycle (Init/Update/Exit), 
+ *                and execution for all entities with LogicComponent. Only updates during 
+ *                gameplay (respects Engine->IsPlaying() state).
+ *              - Iscript Interface: Base class for all game scripts with Init, Update, Exit.
+ *              - LogicComponent: Stores script name per entity, supports JSON serialization.
+ *
+ *
+ *              Implements game entity logic for both Player and Enemy.
  *              Handles entity movement, rotation toggling, and two collision test modes:
  *              AABB (Axis-Aligned Bounding Box) via 'M' key and 
  *              OBB (Oriented Bounding Box) via 'N' key.

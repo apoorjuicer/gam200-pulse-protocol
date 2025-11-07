@@ -2,9 +2,9 @@
 /**
  * @file        pch_temp.h
  * @project     Pulse Protocol
- * @author      Chia Wei Xuan Rachael
- * @brief       This is a precompiled header file that centralizes all standard library,
- *				external library, and internal engine headers for optimized
+ * @author      Chia Wei Xuan Rachael - 100%
+ * @brief       This is a precompiled header file that centralizes all and only standard library,
+ *				and external library, for optimized
  *				compilation. We do this to make code clean and organization. :]
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
