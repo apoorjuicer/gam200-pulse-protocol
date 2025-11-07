@@ -2,8 +2,12 @@
 /**
  * @file        Factory.cpp
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael
- * @brief		[pls fill in]
+ * @author		Chia Wei Xuan Rachael (primary) - 98%
+ * @author      Goh Pin Kai (secondary) - 2%
+ * @brief		Implementation of entity factory system with JSON persistence.
+ *				Provides entity creation from JSON specifications, default entity generation for editor,
+ *				entity deletion with scene cleanup, and complete entity serialization to JSON format.
+ *				Handles component detection and dynamic attachment for flexible entity definitions.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

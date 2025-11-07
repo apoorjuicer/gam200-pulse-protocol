@@ -1,12 +1,18 @@
-/*****************************************************************************/
+/******************************************************************************/
 /**
  * @file        collision.h
  * @project     Pulse Protocol
- * @author      Reginald Lew Yee Ren
+ * @author      Reginald Lew Yee Ren (primary) - 98%
+ * @author      Goh Pin Kai (secondary) - 2%
  * @brief       Collision management utilities (AABB, distance, mouse, and GUI hit tests).
  *              Provides reusable helper functions to build AABBs from Transform and AABB components.
+ *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
- ******************************************************************************/
+ *              Reproduction or disclosure of this file or its contents without
+ *              the prior written consent of DigiPen Institute of Technology is
+ *              prohibited.
+ */
+ /******************************************************************************/
 
 #ifndef COLLISION_H
 #define COLLISION_H

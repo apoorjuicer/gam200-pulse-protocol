@@ -4,7 +4,12 @@
  * @project     Pulse Protocol
  * @author		Chia Wei Xuan Rachael (primary) - 80%
  * @author		Reginald Lew Yee Ren (secondary) - 20%
- * @brief		[pls fill in]
+ * @brief		Implementation of script management system and entity behavior logic.
+ *              Implements LogicSystem's script registration, execution loops, and lifecycle management.
+ *              Contains concrete script behavior implementations (PlayerScript, EnemyScript) with
+ *              Init/Update/Exit logic. Provides JSON serialization/deserialization for LogicComponent
+ *              to enable persistent script-entity associations. Handles script-to-entity binding and
+ *              per-frame script update dispatch through the ECS architecture.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

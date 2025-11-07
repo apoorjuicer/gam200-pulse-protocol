@@ -2,9 +2,9 @@
 /**
  * @file        GraphicsManager.cpp
  * @project     Pulse Protocol
- * @author      Goh Pin Kai (primary)
- * @author      Leu Jun Yong (secondary)
- * @author      Ban Kai Wei Benjamin (secondary)
+ * @author      Goh Pin Kai (primary) - 70%
+ * @author      Leu Jun Yong (secondary) - 5%
+ * @author      Ban Kai Wei Benjamin (secondary) - 25%
  *
  * @brief       Implements GraphicsManager:
  *              - Initializes GL rendering systems

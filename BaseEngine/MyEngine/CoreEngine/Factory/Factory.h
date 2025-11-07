@@ -3,7 +3,9 @@
  * @file        Factory.h
  * @project     Pulse Protocol
  * @author		Chia Wei Xuan Rachael
- * @brief		[pls fill in]
+ * @brief		Component for entity type classification with JSON serialization support.
+ *				Stores entity category (e.g., "player", "enemy", "button") and provides 
+ *				RapidJSON serialization/deserialization for persistence and data-driven design.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

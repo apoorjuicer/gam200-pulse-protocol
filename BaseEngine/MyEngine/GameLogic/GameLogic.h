@@ -3,7 +3,11 @@
  * @file        GameLogic.h
  * @project     Pulse Protocol
  * @author		Chia Wei Xuan Rachael
- * @brief		[pls fill in]
+ * @brief		Script management system for entity behavior logic with polymorphic script architecture.
+ *				Defines base script interface (Iscript) for Init/Update/Exit lifecycle, concrete script
+ *				implementations (PlayerScript, EnemyScript), and LogicSystem for script registration and execution.
+ *				LogicComponent stores script names for data-driven behavior attachment with JSON serialization.
+ *				Enables flexible, component-based game logic through script mapping and dynamic script retrieval.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

@@ -3,7 +3,10 @@
  * @file        EntityType.h
  * @project     Pulse Protocol
  * @author		Chia Wei Xuan Rachael
- * @brief		[pls fill in]
+ * @brief		A component for categorizing entities by type (e.g.,
+ *              "player","enemy", "button"). Provides JSON serialization/deserialization
+ *              using RapidJSON to save and load entity type data from files or network
+ *              streams.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

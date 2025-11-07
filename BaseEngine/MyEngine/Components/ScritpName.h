@@ -3,7 +3,10 @@
  * @file        ScritpName.h
  * @project     Pulse Protocol
  * @author		Chia Wei Xuan Rachael
- * @brief		[pls fill in]
+ * @brief		Component for associating game logic scripts with entities via JSON serialization.
+ *              Stores script identifier as a string to enable data-driven behavior attachment.
+ *              Provides RapidJSON serialization/deserialization for script component persistence
+ *              and standalone save/load utilities for script configuration management.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

@@ -1,11 +1,17 @@
-/*****************************************************************************/
+/******************************************************************************/
 /**
  * @file        collision.cpp
  * @project     Pulse Protocol
  * @author      Reginald Lew Yee Ren
- * @brief       Implements pure collision logic: AABB, distance, and mouse hit tests and Oriented Bounding Box (OBB).
- *              No gameplay logic or entity spawning occurs here.
- ******************************************************************************/
+ * @brief       Implements pure collision logic: AABB, distance, and
+ *              mouse hit tests and Oriented Bounding Box (OBB).
+ *
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without
+ *              the prior written consent of DigiPen Institute of Technology is
+ *              prohibited.
+ */
+ /******************************************************************************/
 
 #include "pch/pch.h"
 

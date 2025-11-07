@@ -2,9 +2,9 @@
 /**
  * @file        GraphicsManager.h
  * @project     Pulse Protocol
- * @author      Goh Pin Kai (primary)
- * @author      Leu Jun Yong (secondary)
- * @author      Ban Kai Wei Benjamin (secondary)
+ * @author      Goh Pin Kai (primary) - 90%
+ * @author      Leu Jun Yong (secondary) - 5%
+ * @author      Ban Kai Wei Benjamin (secondary) - 5%
  *
  * @brief       Handles high-level rendering:
  *              - World draw via GLApp
