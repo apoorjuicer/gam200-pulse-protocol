@@ -2310,6 +2310,11 @@ namespace MyEditor
         // 5. Convert to framebuffer coords
         int fbW = 0, fbH = 0;
         glfwGetFramebufferSize(window, &fbW, &fbH);
+        if (fbW <= 0 || fbH <= 0) {
+            // window minimized / no drawable area
+            return {0, 0, 0, 0};
+        }
+
 
         const float sx = (w > 0.f) ? (float)fbW / w : 1.f;
         const float sy = (h > 0.f) ? (float)fbH / h : 1.f;

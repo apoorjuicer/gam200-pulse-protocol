@@ -1076,6 +1076,7 @@ static void ImGui_ImplGlfw_GetWindowSizeAndFramebufferScale(GLFWwindow* window, 
     int display_w, display_h;
     glfwGetWindowSize(window, &w, &h);
     glfwGetFramebufferSize(window, &display_w, &display_h);
+    if (display_w == 0 || display_h == 0) return;
     float fb_scale_x = (w > 0) ? (float)display_w / w : 1.0f;
     float fb_scale_y = (h > 0) ? (float)display_h / h : 1.0f;
 #if GLFW_HAS_X11_OR_WAYLAND
