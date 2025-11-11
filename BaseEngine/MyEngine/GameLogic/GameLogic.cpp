@@ -292,6 +292,12 @@ void PlayerScript::Exit(Entity ID)
 	(void)ID;
 }
 
+void PlayerScript::Serialize() 
+{
+    health++;
+    //enemyDmg; can't use since its enemy.
+}
+
 void EnemyScript::Init(Entity ID)
 {
 	(void)ID;
