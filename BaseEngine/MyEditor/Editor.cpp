@@ -1277,7 +1277,7 @@ namespace MyEditor
 
         // Scene Hierarchy
         if (leftDockID) ImGui::SetNextWindowDockID(leftDockID, ImGuiCond_FirstUseEver);
-        if (ImGui::Begin("Hierarchy", nullptr, panel_flags))
+        if (ImGui::Begin("Hierarchy"))
         {
             // Access ECS Coordinator
             auto* g_coordinator = Coordinator::GetInstance();
