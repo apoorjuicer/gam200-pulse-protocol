@@ -2,7 +2,7 @@
 /**
  * @file        Animation.h
  * @project     Pulse Protocol
- * @author      Goh Pin Kai - 100%
+ * @author      Goh Pin Kai
  * @brief       Declares the Animation component for the ECS framework.
  *              This component stores sprite sheet animation playback state,
  *              including frame indices, timing, and atlas layout information.

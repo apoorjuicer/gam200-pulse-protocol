@@ -2,11 +2,20 @@
 /**
  * @file       SceneManager.cpp
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael
- * @brief      Implementation of scene management system that handles loading,
- *             unloading, and transitioning between game scenes (MainMenu, Pause,
- *             Level1, Dead). Manages scene-specific entity creation/destruction
- *             and maintains a list of entities belonging to the current scene
+ * @author     Chia Wei Xuan Rachael - 95%
+ * @author     Goh Pin Kai (secondary) - 5%
+ * @brief      Manages scene lifecycle, serialization, and entity ownership across
+ *             game scenes (MainMene and level1 for now) .
+ *
+ *             Core Responsibilities:
+ *             - Scene Loading: Parses JSON scene files, creates entities with components,
+ *               registers GUI buttons, and assigns default LayerTag if missing
+ *             - Scene Unloading: Destroys all entities in SceneEntityList and clears tracking
+ *             - Scene Saving: Serializes current scene state to JSON with all entity 
+ *               components (Transform, Renderable, Animation, LogicComponent, Health, 
+ *               AABB, GUIButton, Name, NamingComponent)
+ *             - Scene Tracking: Maintains SceneEntityList for ownership, PreviousScene 
+ *               for save operations, CurrentScene for active scene name
  * 
  * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
  *             Reproduction or disclosure of this file or its contents without the

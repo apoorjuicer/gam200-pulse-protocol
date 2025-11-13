@@ -3,7 +3,42 @@
  * @file        Factory.cpp
  * @project     Pulse Protocol
  * @author		Chia Wei Xuan Rachael
- * @brief		[pls fill in]
+ * @brief		Entity factory system for creating, deleting, and serializing individual
+ *              game entities from JSON prefab files or programmatically. Handles entity
+ *              lifecycle integration with SceneManager tracking and ECS Coordinator.
+ * 
+ *				CreateEntityFromJson(path) -> std::optional<Entity>:
+ *             - Loads entity from JSON prefab file (single entity definition)
+ *             - Parses components array, deserializes each component type
+ *             - Creates entity via Coordinator::CreateEntity()
+ *             - Registers entity with SceneManager::IncrementEntityArray() for tracking
+ *             - Auto-assigns default LayerTag{ LAYER_WORLD, 0, 0.0f } if missing
+ *             - Returns std::optional<Entity>: entity ID on success, std::nullopt on failure
+ *             - Supported components: NamingComponent (Typing), Transform, Renderable,
+ *               Animation, LogicComponent (script), Name, Health, AABB
+ * 
+ * 
+ *				SaveEntityToJson(entity, path) -> bool:
+ *             - Serializes single entity to JSON prefab file
+ *             - Checks for each component type, serializes if present
+ *             - Creates components array structure (no scene wrapper)
+ *             - Uses RapidJSON PrettyWriter for human-readable output
+ *             - Auto-creates parent directory structure via std::filesystem
+ *             - Returns true on successful write, false on file errors
+ * 
+ *			   DeleteEntity(entity):
+ *             - Two-phase deletion: scene tracking removal + ECS destruction
+ *             - Calls SceneManager::DecrementEntityArray() to remove from scene ownership
+ *             - Calls Coordinator::DestroyEntity() to clean up ECS components/systems
+ *             - Used by ImGui editor and game logic (e.g., EnemyScript collision death)
+ *             - Critical for preventing dangling entity references in SceneEntityList
+ *
+ *             DefaultObj() -> Entity:
+ *             - Creates minimal entity for ImGui editor manipulation
+ *             - Default components: Transform (200x200 scale, zero rotation/position),
+ *               empty Renderable, empty Animation, LayerTag (LAYER_WORLD)
+ *             - Automatically registered with SceneManager tracking
+ *             - Provides base template for editor-created entities
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

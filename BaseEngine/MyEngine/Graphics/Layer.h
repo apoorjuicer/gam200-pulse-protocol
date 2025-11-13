@@ -2,7 +2,7 @@
 /**
  * @file        Layer.h
  * @project     Pulse Protocol
- * @author      Goh Pin Kai - 100%
+ * @author      Goh Pin Kai
  * @brief       Defines the rendering layer system used to control draw order.
  *              Objects can be assigned one or more layers (e.g., background,
  *              world, UI) through a bitmask. Rendering passes filter by these

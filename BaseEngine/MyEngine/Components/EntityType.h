@@ -3,7 +3,10 @@
  * @file        EntityType.h
  * @project     Pulse Protocol
  * @author		Chia Wei Xuan Rachael
- * @brief		[pls fill in]
+ * @brief		Entity categorization component for tagging entities with semantic types
+ *              (e.g., "player", "enemy", "button"). Provides runtime type identification
+ *              for game logic, debugging, and editor display. Fully serializable for
+ *              prefab and scene persistence.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
