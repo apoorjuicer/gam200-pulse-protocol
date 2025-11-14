@@ -15,7 +15,7 @@
 
 #pragma once
 #include "pch/pch_temp.h"
-#include "../Resources/AssetRegistry.h"
+#include "../MyEngine/Resources/AssetRegistry.h"
 // #include "../Graphics/GraphicsManager.h"
 // #include "../Audio/AudioManager.h"
 

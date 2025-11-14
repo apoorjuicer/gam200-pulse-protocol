@@ -15,15 +15,15 @@
 /******************************************************************************/
 #pragma once
 #include "pch/pch_temp.h"	
-#include "../Components/EntityType.h"
+#include "../MyEngine/Components/EntityType.h"
 //#include "../Components/AABB.h"
-#include "../Components/Health.h"
-#include "../Graphics/Transform.h"
-#include "../Graphics/Animation.h"
-#include "../Graphics/Renderable.h"
-#include "../GameLogic/GameLogic.h"
-#include "../CoreEngine/ECS/Types.h"
-#include "../CoreEngine/ECS/Coordinator.h"
+#include "../MyEngine/Components/Health.h"
+#include "../MyEngine/Graphics/Transform.h"
+#include "../MyEngine/Graphics/Animation.h"
+#include "../MyEngine/Graphics/Renderable.h"
+#include "../MyEngine/GameLogic/GameLogic.h"
+#include "../MyEngine/CoreEngine/ECS/Types.h"
+#include "../MyEngine/CoreEngine/ECS/Coordinator.h"
 
 //Serialize
 #pragma warning(push, 0)

@@ -22,7 +22,18 @@ if (NOT EDITOR_SRC)
     list(APPEND EDITOR_SRC "${EDITOR_ROOT}/__dummy_editor.cpp")
 endif()
 
-add_library(${EDITOR_NAME} STATIC ${EDITOR_SRC})
+add_executable(${EDITOR_NAME} ${EDITOR_SRC})
+
+target_link_libraries(${EDITOR_NAME}
+    PRIVATE
+        MyEngine          # depends on the engine
+    PUBLIC
+        imgui
+        imgui_backend
+        glfw
+        libglew_static
+        Freetype::Freetype
+)
 
 # Nice Solution Explorer layout
 source_group(TREE "${EDITOR_ROOT}" FILES ${EDITOR_SRC})
@@ -75,3 +86,9 @@ elseif (MSVC)
 endif()
 
 message(STATUS "[${EDITOR_NAME}] sources: ${EDITOR_SRC}")
+
+add_custom_command(TARGET MyEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmodL.dll"
+    $<TARGET_FILE_DIR:MyEditor>
+)

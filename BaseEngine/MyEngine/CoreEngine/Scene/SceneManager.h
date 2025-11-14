@@ -45,7 +45,7 @@
 //#include "../Components/EntityType.h"
 //
 //#include "../MyEngine/Components/DisplayName.h"
-#include "../CoreEngine/ECS/Types.h"
+#include "../MyEngine/CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
 #include "../MyEngine/UI/GUIManager.h"
 

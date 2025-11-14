@@ -108,7 +108,7 @@
 #include "../MyEngine/Serialization/Serialization.h"
 
 // Core Engine
-#include "../MyEngine/CoreEngine/Core/CoreEngine.h"
+#include "../CoreEngine/Core/CoreEngine.h"
 
 // ECS
 #include "../MyEngine/CoreEngine/ECS/Types.h"

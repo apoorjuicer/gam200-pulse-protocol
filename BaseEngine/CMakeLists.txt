@@ -63,16 +63,12 @@ set_property(TARGET imgui_backend PROPERTY FOLDER "3rdparty/ImGui")
 # --- Projects ---
 add_subdirectory(MyEngine)
 
-option(ENABLE_EDITOR "Build Editor and compile it into the Engine" ON)
+option(ENABLE_EDITOR "Build the Editor executable" ON)
 message(STATUS "ENABLE_EDITOR = ${ENABLE_EDITOR}")
 
 if (ENABLE_EDITOR)
-    message(STATUS "==> Adding MyEditor subdirectory")
     add_subdirectory(MyEditor)
-    target_link_libraries(MyEngine PRIVATE MyEditor)
-    target_compile_definitions(MyEngine PRIVATE ENABLE_EDITOR=1)
 endif()
-
 # Keep app targets OUTSIDE any folder
 if(TARGET MyEngine)
     set_property(TARGET MyEngine PROPERTY FOLDER "")
@@ -82,4 +78,4 @@ if(TARGET MyEditor)
 endif()
 
 # Visual Studio startup project
-set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MyEngine)
+set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MyEditor)

@@ -14,8 +14,8 @@
 /******************************************************************************/
 
 #include "AssetsManager.h"
-#include "../Graphics/GraphicsManager.h"
-#include "../Audio/AudioManager.h"
+#include "../MyEngine/Graphics/GraphicsManager.h"
+#include "../MyEngine/Audio/AudioManager.h"
 // namespace Framework {
 
 

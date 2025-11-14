@@ -22,10 +22,10 @@
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "../MyEditor/Editor.h"
-#include "../TestCases/TestCase.h"
+#include "../MyEngine/TestCases/TestCase.h"
 // #include "glapp.h"
 #include "../MyEngine/Resources/AssetRegistry.h"
-#include "../CoreEngine/Asset/AssetsManager.h"
+#include "../MyEngine/CoreEngine/Asset/AssetsManager.h"
 #include "../MyEngine/Serialization/Serialization.h"
 
 #include "../MyEngine/Components/DisplayName.h"
@@ -41,7 +41,7 @@ AssetsManager mAssets;
 
 int WindowWidth;
 int WindowHeight;
-
+CoreEngine* Engine = nullptr;
 // TestCase Test;
 
 void APIENTRY glDebugOutput(GLenum source,

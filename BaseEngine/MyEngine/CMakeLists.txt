@@ -8,9 +8,7 @@ file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_LIST_DIR}/**/*.hpp"
 )
 
-list(APPEND ENGINE_SRC "${CMAKE_CURRENT_LIST_DIR}/main.cpp")
-
-add_executable(${ENGINE_NAME} ${ENGINE_SRC})
+add_library(${ENGINE_NAME} STATIC ${ENGINE_SRC})
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${ENGINE_SRC})
 
 # C++ standard / warnings
