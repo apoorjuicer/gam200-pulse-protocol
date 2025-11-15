@@ -15,10 +15,11 @@
 #include "../../imgui/imgui.h"
 #include "../../imgui/backends/imgui_impl_glfw.h"
 #include "../../imgui/backends/imgui_impl_opengl3.h"
-
 #include "pch/pch_temp.h"
 #include "Gizmo.h"
 #include "ProjectPanel.h"
+#include "Hierarchy.h"
+#include "Inspector.h"
 #include "DebugConsole.h"
 #include "ProfilingTab.h"
 #include "CoreEngine/Factory/Factory.h" // for creating/deleting entities
@@ -42,6 +43,7 @@ namespace MyEditor {
     struct GameViewport { int x, y, w, h; };
     extern const Entity INVALID_ENTITY;
     extern Entity selectedEntity;
+    extern std::vector<Entity> entityDisplayOrder;
     static std::vector<std::string> s_pendingOSDrops;
 
     void EnqueueExternalDrop(const std::vector<std::string>& paths);
