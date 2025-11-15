@@ -116,50 +116,6 @@ namespace MyEditor
         );
     }
 
-
-    // ============================================================================
-    // Replace a texture file on disk, then reload it everywhere in editor/runtime.
-    // Safe version that doesn't need access to AssetsManager internals.
-    // ============================================================================
-    [[maybe_unused]] static bool ReplaceTextureFileOnDisk(const std::string& dstPath, const std::string& srcPath)
-    {
-        namespace fs = std::filesystem;
-        std::error_code ec;
-
-        if (dstPath.empty() || srcPath.empty()) return false;
-        if (!fs::exists(srcPath, ec)) return false;
-
-        // --- Validate image extension ---
-        auto extLower = [](std::string s) {
-            for (auto& c : s) c = (char)tolower(c);
-            return s;
-            };
-        std::string srcExt = extLower(fs::path(srcPath).extension().string());
-        if (!(srcExt == ".png" || srcExt == ".jpg" || srcExt == ".jpeg" ||
-            srcExt == ".bmp" || srcExt == ".tga" || srcExt == ".dds"))
-            return false;
-
-        // --- 1) Copy new file over existing one ---
-        fs::copy_file(srcPath, dstPath, fs::copy_options::overwrite_existing, ec);
-        if (ec) {
-            std::cerr << "[Project] Replace failed: " << srcPath << " -> " << dstPath
-                << " (" << ec.message() << ")\n";
-            return false;
-        }
-
-        // --- 2) Force reload of new texture on next frame ---
-        // We don't need to access the internal cache; just reload the new file.
-        GLuint newTex = mAssets.GetOrLoadTexture(dstPath);
-
-        // Bind it once to ensure GL has the new texture data
-        glBindTexture(GL_TEXTURE_2D, newTex);
-
-        std::cout << "[Project] Replaced texture file: " << dstPath
-            << " with " << srcPath << "\n";
-        return true;
-    }
-
-
     // Draw Gizmo
     void Gizmo_DrawAndHandle(const GameViewport&vp);
 
