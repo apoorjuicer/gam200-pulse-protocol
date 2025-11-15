@@ -20,6 +20,7 @@
 #include "ProjectPanel.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
+#include "TopBarPanel.h"
 #include "DebugConsole.h"
 #include "ProfilingTab.h"
 #include "CoreEngine/Factory/Factory.h" // for creating/deleting entities
@@ -38,7 +39,7 @@ namespace MyEditor {
     void Shutdown();
     void SetEnabled(bool enabled);
     bool IsEnabled();
-    static std::string OpenJsonFileDialog();
+  
 
     struct GameViewport { int x, y, w, h; };
     extern const Entity INVALID_ENTITY;

@@ -14,10 +14,7 @@
  /******************************************************************************/
 
 #include "Editor.h"
-#include <Graphics/glhelper.h>
-#define NOMINMAX        
-#include <windows.h>
-#include <commdlg.h>
+#include <Graphics/glhelper.h>     
 #include "CoreEngine/Asset/AssetsManager.h"
 
 // ==========================================================================
@@ -55,38 +52,8 @@ namespace MyEditor
     static constexpr float MAX_TOTAL_VERT = 0.85f;
 
 
-    // --------------------------------------------------------------------
-    // PLAY MODE SNAPSHOT STATE
-    // --------------------------------------------------------------------
-    struct SavedEntityState
-    {
-        Entity id;
 
-        bool hasTransform;
-        Framework::Transform transform;
 
-        bool hasRenderable;
-        Framework::Renderable renderable;
-
-        bool hasName;
-        Name name;
-
-        bool hasGuiButton;
-        GUIButton guiButton;
-
-        SavedEntityState()
-            : id(INVALID_ENTITY),
-            hasTransform(false),
-            hasRenderable(false),
-            hasName(false),
-            hasGuiButton(false)
-        {
-        }
-    };
-
-    static bool s_isPlaying = false;                // current play mode or not
-    static bool s_hasEditorBaseline = false;        // whether we have captured a snapshot
-    static std::vector<SavedEntityState> s_editorBaseline;
 
 #ifdef IMGUI_HAS_DOCKING
     static ImGuiID   g_DockspaceID = 0;
@@ -119,82 +86,7 @@ namespace MyEditor
     // Draw Gizmo
     void Gizmo_DrawAndHandle(const GameViewport&vp);
 
-
-
-
-    // take current ECS and remember it as "start state"
-    static void CaptureEditorBaseline()
-    {
-        s_editorBaseline.clear();
-
-        auto* coord = Coordinator::GetInstance();
-        if (!coord)
-            return;
-
-        for (auto e : coord->GetAllEntities())
-        {
-            SavedEntityState st;
-            st.id = e;
-
-            if (coord->HasComponent<Framework::Transform>(e))
-            {
-                st.hasTransform = true;
-                st.transform = coord->GetComponent<Framework::Transform>(e);
-            }
-
-            if (coord->HasComponent<Framework::Renderable>(e))
-            {
-                st.hasRenderable = true;
-                st.renderable = coord->GetComponent<Framework::Renderable>(e);
-            }
-
-            if (coord->HasComponent<Name>(e))
-            {
-                st.hasName = true;
-                st.name = coord->GetComponent<Name>(e);
-            }
-
-            if (coord->HasComponent<GUIButton>(e))
-            {
-                st.hasGuiButton = true;
-                st.guiButton = coord->GetComponent<GUIButton>(e);
-            }
-
-            s_editorBaseline.push_back(std::move(st));
-        }
-
-        s_hasEditorBaseline = true;
-        std::cout << "[Editor] Captured baseline with "
-            << s_editorBaseline.size() << " entities.\n";
-    }
-
-    // push the remembered state back into ECS
-    static void RestoreEditorBaseline()
-    {
-        if (!s_hasEditorBaseline)
-            return;
-
-        auto* coord = Coordinator::GetInstance();
-        if (!coord)
-            return;
-
-        for (auto const& st : s_editorBaseline)
-        {
-            if (coord->HasComponent<Framework::Transform>(st.id) && st.hasTransform)
-                coord->GetComponent<Framework::Transform>(st.id) = st.transform;
-
-            if (coord->HasComponent<Framework::Renderable>(st.id) && st.hasRenderable)
-                coord->GetComponent<Framework::Renderable>(st.id) = st.renderable;
-
-            if (coord->HasComponent<Name>(st.id) && st.hasName)
-                coord->GetComponent<Name>(st.id) = st.name;
-
-            if (coord->HasComponent<GUIButton>(st.id) && st.hasGuiButton)
-                coord->GetComponent<GUIButton>(st.id) = st.guiButton;
-        }
-
-        std::cout << "[Editor] Restored baseline.\n";
-    }
+  
 
 #ifdef IMGUI_HAS_DOCKING
     static void BuildMainDockspace()
@@ -365,138 +257,9 @@ namespace MyEditor
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoSavedSettings;
 
-        // ----------------------------
-        // TOP BAR (Play / Pause / Scene Controls)
-        // ----------------------------
-        {
-            ImGuiWindowFlags top_flags =
-                ImGuiWindowFlags_NoTitleBar |
-                ImGuiWindowFlags_NoScrollbar |
-                ImGuiWindowFlags_NoScrollWithMouse |
-                panel_flags;
 
-            ImGui::SetNextWindowPos(ImVec2(0.0f, top_y));
-            ImGui::SetNextWindowSize(ImVec2(W, top_h));
+        DrawTopBarPanel(W, top_y, top_h);
 
-            if (ImGui::Begin("TopBar", nullptr, top_flags)) {
-                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
-
-                ImVec2 framePadding = ImGui::GetStyle().FramePadding;
-                float itemSpacing = ImGui::GetStyle().ItemSpacing.x;
-
-                // Scene control buttons on the left
-                ImVec2 saveTextSize = ImGui::CalcTextSize("Save Scene");
-                ImVec2 loadTextSize = ImGui::CalcTextSize("Load Scene");
-                ImVec2 saveButtonSize = ImVec2(saveTextSize.x + framePadding.x * 2, 0);
-                ImVec2 loadButtonSize = ImVec2(loadTextSize.x + framePadding.x * 2, 0);
-
-                if (ImGui::Button("Save Scene", saveButtonSize)) {
-                    auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>();
-                    if (sceneMgr) {
-                        sceneMgr->SaveCurrentScene();
-                    }
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Load Scene", loadButtonSize)) {
-                    std::string path = OpenJsonFileDialog();
-                    if (!path.empty()) {
-                        if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>()) {
-                            sceneMgr->LoadSceneFromJson(path);
-                            std::cout << "[Editor] Loaded scene: " << path << "\n";
-                            s_hasEditorBaseline = false;
-                            selectedEntity = INVALID_ENTITY;
-                        }
-                    }
-                    else {
-                        std::cout << "[Editor] Load scene cancelled.\n";
-                    }
-                }
-
-                // Calculate button sizes
-                const char* playStopLabel = s_isPlaying ? "Stop" : "Play";
-                ImVec2 playStopTextSize = ImGui::CalcTextSize(playStopLabel);
-
-                // Make Pause button show "Resume" when paused
-                static bool isPaused = false;
-                const char* pauseLabel = isPaused ? "Resume" : "Pause";
-                ImVec2 pauseTextSize = ImGui::CalcTextSize(pauseLabel);
-
-                ImVec2 playStopButtonSize = ImVec2(playStopTextSize.x + framePadding.x * 2 + 20.0f, 0);
-                ImVec2 pauseButtonSize = ImVec2(pauseTextSize.x + framePadding.x * 2 + 20.0f, 0);
-
-                float windowWidth = ImGui::GetWindowWidth();
-                float totalButtonWidth = playStopButtonSize.x + pauseButtonSize.x + itemSpacing;
-                float offset = (windowWidth - totalButtonWidth) * 0.5f;
-
-                // Stay on same line, position at centered offset
-                if (offset > 0.0f) {
-                    ImGui::SameLine(offset);
-                }
-                else {
-                    ImGui::SameLine();
-                }
-
-                // --- Play ---
-                if (ImGui::Button(playStopLabel, playStopButtonSize))
-                {
-                    if (!s_isPlaying) {
-                        // START PLAYING
-                        if (!s_hasEditorBaseline) {
-                            CaptureEditorBaseline();
-                        }
-                        Engine->PlayGame();
-                        s_isPlaying = true;
-                        isPaused = false; // Reset pause when starting fresh
-                        std::cout << "[Editor] Play Started\n";
-                    }
-                    else {
-                        // STOP PLAYING & RESTORE
-                        Engine->StopGame();
-                        s_isPlaying = false;
-                        isPaused = false;
-                        RestoreEditorBaseline();
-                        s_hasEditorBaseline = false;
-                        std::cout << "[Editor] Stopped - Scene Restored\n";
-                    }
-                }
-
-                ImGui::SameLine();
-
-                // --- Pause ---
-
-                if (!s_isPlaying) {
-                    ImGui::BeginDisabled(); // Grey out when not playing
-                }
-
-                if (ImGui::Button(pauseLabel, pauseButtonSize))
-                {
-                    if (s_isPlaying) {
-                        isPaused = !isPaused;
-
-                        if (isPaused) {
-                            Engine->PauseGame();
-                            std::cout << "[Editor] Game Paused\n";
-                        }
-                        else {
-                            Engine->ResumeGame();
-                            std::cout << "[Editor] Game Resumed\n";
-                        }
-                    }
-                }
-
-                if (!s_isPlaying) {
-                    ImGui::EndDisabled(); // End grey out
-                }
-
-                // Show tooltip when hovering over disabled Pause button
-                if (!s_isPlaying && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
-                    ImGui::SetTooltip("Start playing to enable Pause");
-                }
-
-                ImGui::PopStyleVar();
-            }
-            ImGui::End();
-        }
 
         // ======================================================
         // FIXED HOST PANELS WITH DOCKSPACES: Left / Right / Bottom
@@ -802,27 +565,5 @@ namespace MyEditor
         return { vx, vy, vw, vh };
     }
 
-    std::string MyEditor::OpenJsonFileDialog()
-    {
-        char fileBuf[MAX_PATH] = { 0 };
 
-        OPENFILENAMEA ofn{};
-        ofn.lStructSize = sizeof(OPENFILENAMEA);
-        ofn.hwndOwner = nullptr;
-        ofn.lpstrFilter = "JSON Files\0*.json\0All Files\0*.*\0";
-        ofn.lpstrFile = fileBuf;
-        ofn.nMaxFile = MAX_PATH;
-        ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
-        ofn.lpstrTitle = "Select scene JSON";
-
-        namespace fs = std::filesystem;
-        std::string dir = (fs::current_path() / "../../MyEngine/JSON").lexically_normal().string();
-        ofn.lpstrInitialDir = dir.c_str();
-
-
-        if (GetOpenFileNameA(&ofn)) {
-            return std::string(fileBuf);
-        }
-        return {};
-    }
 }
