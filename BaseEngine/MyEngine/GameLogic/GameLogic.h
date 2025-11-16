@@ -57,6 +57,8 @@ public:
 	void Exit(Entity ID) override;
 
 private:
+	bool  isAttacking = false;
+	float attackTimer = 0.0f;
 	/*float autoMoveTimer = 2.0f;*/ // FOR TESTING THE STOP BUTTON FUNCTIONALITY PURPOSE
 };
 
