@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required(VERSION 3.20)
-project(MyEngine VERSION 0.1 LANGUAGES C CXX)
+project(MyEngine VERSION 0.1 LANGUAGES C CXX CSharp)  # ← Add CSharp and C++ here
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
@@ -83,3 +83,7 @@ endif()
 
 # Visual Studio startup project
 set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MyEngine)
+
+# --------------- C# Scripting Support ---------------
+add_subdirectory(ScriptAPI)
+add_subdirectory(ManagedScripts)

@@ -10,6 +10,7 @@ file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS
 
 list(APPEND ENGINE_SRC "${CMAKE_CURRENT_LIST_DIR}/main.cpp")
 
+# Create the executable
 add_executable(${ENGINE_NAME} ${ENGINE_SRC})
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${ENGINE_SRC})
 
@@ -27,6 +28,7 @@ target_compile_definitions(${ENGINE_NAME} PUBLIC GLEW_STATIC)
 # Includes owned by this target (3rd-party includes are carried by their targets)
 target_include_directories(${ENGINE_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}   # Engine headers
+    "${CMAKE_SOURCE_DIR}/extern/dotnet/include"  # .NET Core hosting headers
 )
 
 # ---- Robust FMOD discovery (once) ----
@@ -99,4 +101,21 @@ add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
     COMMENT "Copying Assets to build directory"
 )
 
+#Copy .NET Runtime DLLs to output directory after building
+add_custom_command(TARGET MyEngine POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/extern/dotnet/bin"
+        "$<TARGET_FILE_DIR:MyEngine>"
+    COMMENT "Copying .NET Runtime DLLs to MyEngine output directory"
+)
 
+# Copy ManagedScripts from net8.0 folder to output directory (if it exists)
+add_custom_command(TARGET MyEngine POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "$<TARGET_FILE_DIR:MyEngine>/net8.0"
+        "$<TARGET_FILE_DIR:MyEngine>"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory
+        "$<TARGET_FILE_DIR:MyEngine>/net8.0"
+    COMMENT "Copying ManagedScripts from net8.0 folder"
+    VERBATIM
+)

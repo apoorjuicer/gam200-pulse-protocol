@@ -56,6 +56,10 @@ public:
 
 	//ser
 	virtual void Serialize() {};
+
+
+	// add clone function and = 0, so all kid will have to have it.
+	virtual Iscript* Clone() = 0;
 	
 };
 
@@ -71,7 +75,10 @@ public:
 
 	//std::map<std::string, std::any(bool,float,int,std::string)>;
 	// add in game variables here.
-	int health;
+	int health = 0;
+
+	PlayerScript* Clone() override;
+
 private:
 	/*float autoMoveTimer = 2.0f;*/ // FOR TESTING THE STOP BUTTON FUNCTIONALITY PURPOSE
 };
@@ -86,6 +93,8 @@ public:
 	void Init(Entity ID) override;
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
+
+	EnemyScript* Clone() override;
 
 	// --- Toggles for testing modes ---
 	static bool testAABBCollision;
@@ -114,7 +123,7 @@ public:
 private:
 	// key is the name of script which is a component, then reward is the class parent but can also grab kid functions and data
 	std::unordered_map<std::string, std::shared_ptr<Iscript>> map_of_scripts; // template
-	std::unordered_map<Entity, std::unordered_map<std::string, std::shared_ptr<Iscript>>> map_of_scriptInstances; // copying from template
+	std::unordered_map<Entity, std::unordered_map<std::string, std::shared_ptr<Iscript>>> map_of_scriptInstances; // copying from template (wrap raw ptr into smart ptr(shared) to prevent mem leak ltr )
 };
 
 struct LogicComponent
