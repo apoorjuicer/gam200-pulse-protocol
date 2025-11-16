@@ -240,7 +240,7 @@ void PlayerScript::Init(Entity ID)
             anim.totalFrames = 3;
             anim.columns = 3;
             anim.rows = 1;
-            anim.animationSpeed = 300.0f;
+            anim.animationSpeed = 240.0f;
             anim.currentFrame = 0;
             anim.elapsedTime = 0.0f;
 

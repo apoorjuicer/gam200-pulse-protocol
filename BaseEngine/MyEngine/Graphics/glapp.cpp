@@ -58,6 +58,7 @@ GLApp::Camera2D GLApp::gCamera{};
 void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/)
 {
 	gBatch.Init(/*maxSprites*/ 10000);
+#ifdef ENABLE_EDITOR
 	// --- Compute middle rectangle from window size using fixed ratios ---
 	const float kLeftRatio = 0.20f;	  // 20% width
 	const float kRightRatio = 0.25f;  // 25% width
@@ -116,7 +117,23 @@ void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/)
 
 	// Keep your existing init below
 	GLApp::vps.push_back({300, 200, vpW, vpH});
+#else
+	// ---------- GAME BUILD: NO EDITOR PANELS, NO BLUE BORDER ----------
+	int fbW = 0, fbH = 0;
+	glfwGetFramebufferSize(glfwGetCurrentContext(), &fbW, &fbH);
 
+	GLHelper::EditorWidth = 0;
+	GLHelper::EditorHeight = 0;
+
+	GLHelper::GameOffsetX = 0;
+	GLHelper::GameOffsetY = 0;
+	GLHelper::GameWidth = fbW;
+	GLHelper::GameHeight = fbH;
+
+	glViewport(0, 0, fbW, fbH);
+
+	GLApp::vps.push_back({ 0, 0, fbW, fbH });
+#endif
 	GLApp::VPSS shdr_strs{
 		std::make_pair(test_vs, test_fs),
 		std::make_pair(bg_vs, bg_fs),
@@ -215,8 +232,8 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 }
 
 void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
+#ifdef ENABLE_EDITOR
 	GLFWwindow* window = glfwGetCurrentContext();
-
 	if (MyEditor::IsEnabled())
 	{
 		// Editor ON - render in ImGui panel
@@ -283,6 +300,7 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		gCamera.zoom = 1.0f;
 		gCamera.center = glm::vec2(0.0f);
 	}
+#endif
 	glm::mat3 PanZoom = BuildPanZoomNDC(gCamera);
 
 	// Timing
@@ -394,7 +412,7 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	gBatch.Flush(shdrpgms);
 	GLboolean depthWasOn = glIsEnabled(GL_DEPTH_TEST);
 	glDisable(GL_DEPTH_TEST);
-
+#ifdef ENABLE_EDITOR
 	if (MyEditor::IsEnabled())
 	{
 		DebugDraw::Begin(glm::mat4(1.0f));
@@ -427,6 +445,7 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		glLineWidth(1.0f);
 		DebugDraw::End();
 	}
+#endif
 
 	if (depthWasOn)
 		glEnable(GL_DEPTH_TEST);

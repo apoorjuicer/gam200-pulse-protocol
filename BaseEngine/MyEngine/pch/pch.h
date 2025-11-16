@@ -71,7 +71,9 @@
 #pragma warning(pop)
 
 // Editor Header
+#ifdef ENABLE_EDITOR
 #include "../MyEditor/Editor.h"
+#endif
 
 //Serialize
 #pragma warning(push, 0)

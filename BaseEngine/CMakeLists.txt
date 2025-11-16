@@ -68,7 +68,12 @@ message(STATUS "ENABLE_EDITOR = ${ENABLE_EDITOR}")
 
 if (ENABLE_EDITOR)
     add_subdirectory(MyEditor)
+    target_link_libraries(MyEditor PRIVATE MyEngine)
+    target_compile_definitions(MyEngine PUBLIC ENABLE_EDITOR)
+    target_compile_definitions(MyEditor PUBLIC ENABLE_EDITOR)
 endif()
+# Add the game executable (no editor)
+add_subdirectory(MyGame)
 # Keep app targets OUTSIDE any folder
 if(TARGET MyEngine)
     set_property(TARGET MyEngine PROPERTY FOLDER "")
@@ -76,6 +81,15 @@ endif()
 if(TARGET MyEditor)
     set_property(TARGET MyEditor PROPERTY FOLDER "")
 endif()
+if(TARGET MyGame)
+    set_property(TARGET MyGame PROPERTY FOLDER "")
+endif()
 
+# -------------------------------
 # Visual Studio startup project
-set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MyEditor)
+# -------------------------------
+if (ENABLE_EDITOR)
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MyEditor)
+else()
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MyGame)
+endif()

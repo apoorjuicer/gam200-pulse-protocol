@@ -24,6 +24,8 @@ endif()
 
 add_executable(${EDITOR_NAME} ${EDITOR_SRC})
 
+target_compile_definitions(MyEditor PUBLIC ENABLE_EDITOR)
+
 target_link_libraries(${EDITOR_NAME}
     PRIVATE
         MyEngine          # depends on the engine

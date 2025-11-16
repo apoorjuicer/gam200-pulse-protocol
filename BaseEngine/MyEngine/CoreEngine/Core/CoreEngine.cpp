@@ -14,14 +14,16 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 
 #include <windows.h> // for OutputDebugString, etc.
 #include "pch/pch.h"
 #include "graphics/stb_image.h"
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
+#ifdef ENABLE_EDITOR
 #include "../MyEditor/Editor.h"
+#endif
 #include "../MyEngine/TestCases/TestCase.h"
 // #include "glapp.h"
 #include "../MyEngine/Resources/AssetRegistry.h"
@@ -45,12 +47,12 @@ CoreEngine* Engine = nullptr;
 // TestCase Test;
 
 void APIENTRY glDebugOutput(GLenum source,
-							GLenum type,
-							unsigned int id,
-							GLenum severity,
-							GLsizei,
-							const char *message,
-							const void *userParam)
+	GLenum type,
+	unsigned int id,
+	GLenum severity,
+	GLsizei,
+	const char* message,
+	const void* userParam)
 {
 	(void)userParam;
 	// ignore non-significant error/warning codes
@@ -197,15 +199,15 @@ void CoreEngine::Init()
 	// ar.LoadSceneManifest();
 
 	unsigned int version = 0;
-	FMOD::System *system = nullptr;
+	FMOD::System* system = nullptr;
 
 	FMOD::System_Create(&system);
 	system->getVersion(&version);
 
 	std::cout << "FMOD version: "
-			  << (version >> 16) << "."
-			  << ((version >> 8) & 0xFF) << "."
-			  << (version & 0xFF) << std::endl;
+		<< (version >> 16) << "."
+		<< ((version >> 8) & 0xFF) << "."
+		<< (version & 0xFF) << std::endl;
 
 	system->release();
 
@@ -245,37 +247,35 @@ void CoreEngine::Init()
 
 	glfwMakeContextCurrent(window);
 
+#ifdef ENABLE_EDITOR
 	glfwSetDropCallback(window, [](GLFWwindow*, int count, const char** paths)
-	{
-		for (int i = 0; i < count; ++i)
-			MyEditor::PushOSDropPath(paths[i]);
-	});
-
-
+		{
+			for (int i = 0; i < count; ++i)
+				MyEditor::PushOSDropPath(paths[i]);
+		});
+#else
+	// In game build we don't care about editor file drops
+	glfwSetDropCallback(window, nullptr);
+#endif
 
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwSetFramebufferSizeCallback(window,
-	[](GLFWwindow *, int fbw, int fbh)
-	{
-		if (fbw <= 0 || fbh <= 0)
-			return;
-
-		// Letterboxed viewport + scale
-		GLApp::ComputeLetterbox(fbw, fbh);
-
-		WindowWidth = fbw;
-		WindowHeight = fbh;
-
-		if (auto g = Coordinator::GetInstance()->GetSystem<GraphicsManager>())
+		[](GLFWwindow*, int fbw, int fbh)
 		{
-			g->OnResize(fbw, fbh);
-		}
-	});
+			if (fbw <= 0 || fbh <= 0)
+				return;
+			GLApp::ComputeLetterbox(fbw, fbh);
+
+			WindowWidth = fbw;
+			WindowHeight = fbh;
+
+			if (auto g = Coordinator::GetInstance()->GetSystem<GraphicsManager>())
+			{
+				g->OnResize(fbw, fbh);
+			}
+		});
 
 	int fbw = 0, fbh = 0;
-	glfwGetFramebufferSize(window, &fbw, &fbh);
-	GLApp::ComputeLetterbox(fbw, fbh);
-	glViewport(0, 0, fbw, fbh);
 
 	WindowWidth = fbw;
 	WindowHeight = fbh;
@@ -498,7 +498,7 @@ void CoreEngine::Update(float dt)
 
 	// 3) Normal running path
 	if (g_inputSystem)    g_inputSystem->Update(dt);
-	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);	
+	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);
 }
 
 void CoreEngine::GameLoop()
@@ -667,7 +667,7 @@ void CoreEngine::RenderDebugDraw()
 			DebugDraw::DrawLine({ -800.0f, y }, { 800.0f, y }, { 0.3f, 0.3f, 0.3f });
 		}
 	}
-	
+
 	// ---------------------------------------------------------------------
 	// F7: spawn/delete 1,000 moving sprites (hero)
 	// ---------------------------------------------------------------------
@@ -782,7 +782,7 @@ void CoreEngine::RenderDebugDraw()
 
 
 	DebugDraw::End();
-}	
+}
 
 // void CoreEngine::SetPaused(bool paused)
 //{
@@ -836,9 +836,9 @@ void CoreEngine::PlayGame()
 	// Call Init() on all scripts
 	if (auto logicSys = coord->GetSystem<LogicSystem>())
 	{
-		for (auto const &entity : logicSys->EntityMember)
+		for (auto const& entity : logicSys->EntityMember)
 		{
-			auto &scriptname = coord->GetComponent<LogicComponent>(entity);
+			auto& scriptname = coord->GetComponent<LogicComponent>(entity);
 			auto script = logicSys->GrabScript(scriptname.ScriptName);
 			if (script)
 			{

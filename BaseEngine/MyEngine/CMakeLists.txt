@@ -9,6 +9,9 @@ file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS
 )
 
 add_library(${ENGINE_NAME} STATIC ${ENGINE_SRC})
+if (ENABLE_EDITOR)
+    target_compile_definitions(MyEngine PUBLIC ENABLE_EDITOR)
+endif()
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${ENGINE_SRC})
 
 # C++ standard / warnings

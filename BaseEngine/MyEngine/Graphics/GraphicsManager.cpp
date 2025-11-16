@@ -215,7 +215,7 @@ void GraphicsManager::Update()
 
     // Draw in-game gui system & UI overlay
     RenderUIOverlayElements();
-
+#ifdef ENABLE_EDITOR
     // Draw overlay text last
     auto& textShader = GLApp::shdrpgms[3];
 
@@ -306,6 +306,7 @@ void GraphicsManager::Update()
             std::cerr << "[GraphicsManager] WARNING: both fonts not found!\n";
         }
     }
+#endif
     //// Team label
     //RenderText(
     //    textShader,
