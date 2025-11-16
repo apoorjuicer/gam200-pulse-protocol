@@ -84,7 +84,7 @@
                         "mdl_ref": 1.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
+                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_idle.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -95,12 +95,12 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.08074472099542618,
-                        "totalFrames": 3,
-                        "columns": 3,
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 2,
+                        "columns": 2,
                         "rows": 1,
-                        "animationSpeed": 2.0
+                        "animationSpeed": 24.0
                     }
                 },
                 {
@@ -127,8 +127,8 @@
                             "y": -10.0
                         },
                         "max": {
-                            "x": 550.0,
-                            "y": 470.0
+                            "x": 529.0,
+                            "y": 529.0
                         },
                         "width": 50.0,
                         "height": 50.0

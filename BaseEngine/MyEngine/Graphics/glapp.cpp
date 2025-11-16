@@ -338,7 +338,8 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		auto& an = g_coordinator->GetComponent<Framework::Animation>(e);
 		// BEFORE drawing each entity
 		if (!re.spriteName.empty()) {
-			if (re.textureID == 0) {
+			if (re.textureID == 0 || re.needsTextureReload ||
+				re.spriteName != re.loadedSpriteName) {
 				//re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
 
 				re.textureID = mAssets.GetOrLoadTexture(re.spriteName);

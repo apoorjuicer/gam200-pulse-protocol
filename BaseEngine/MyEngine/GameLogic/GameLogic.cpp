@@ -209,14 +209,84 @@ bool LoadScriptName(LogicComponent& t, std::string const& path)
 // ---------------------------------------------------------------------
 void PlayerScript::Init(Entity ID) 
 {
-	(void)ID;
     //autoMoveTimer = 2.0f; // reset timer
+    auto* coord = Coordinator::GetInstance();
+    auto  rhythm = coord->GetSystem<RhythmGameplayInput>();
+
+    if (!rhythm) return;
+
+    rhythm->registerInputListener("PlayerCombo",
+        [this, ID](const InputEvent& evt)
+        {
+            if (evt.type != InputEvent::Type::COMBO_EXECUTED)
+                return;
+
+            if (evt.comboName != "Basic Strike")
+                return;
+
+            auto* c = Coordinator::GetInstance();
+
+            if (!c->HasComponent<Framework::Renderable>(ID) ||
+                !c->HasComponent<Framework::Animation>(ID))
+                return;
+
+            auto& rend = c->GetComponent<Framework::Renderable>(ID);
+            auto& anim = c->GetComponent<Framework::Animation>(ID);
+
+            // --- SWITCH TO ATTACK SPRITE ---
+            rend.spriteName = "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png";
+            rend.needsTextureReload = true;
+
+            anim.totalFrames = 3;
+            anim.columns = 3;
+            anim.rows = 1;
+            anim.animationSpeed = 300.0f;
+            anim.currentFrame = 0;
+            anim.elapsedTime = 0.0f;
+
+            // enable attack timer (use PlayerScript's members)
+            isAttacking = true;
+            attackTimer = 0.5f;
+        });
 }
 
 void PlayerScript::Update(Entity ID) 
 {
 	auto g_coordinator = Coordinator::GetInstance();
 	auto& hero_transform = g_coordinator->GetComponent<Framework::Transform>(ID);
+
+    static double lastTime = glfwGetTime();
+    double currentTime = glfwGetTime();
+    float dt = static_cast<float>(currentTime - lastTime);
+    lastTime = currentTime;
+
+    // switch back to idle animation
+    if (isAttacking)
+    {
+        attackTimer -= dt;
+        if (attackTimer <= 0.0f)
+        {
+            isAttacking = false;
+
+            if (g_coordinator->HasComponent<Framework::Renderable>(ID) &&
+                g_coordinator->HasComponent<Framework::Animation>(ID))
+            {
+                auto& rend = g_coordinator->GetComponent<Framework::Renderable>(ID);
+                auto& anim = g_coordinator->GetComponent<Framework::Animation>(ID);
+
+                // idle sheet (your 2-frame image)
+                rend.spriteName = "../../MyEngine/Assets/Textures/Characters/hero_idle.png";
+                rend.needsTextureReload = true;
+
+                anim.totalFrames = 2;
+                anim.columns = 2;
+                anim.rows = 1;
+                anim.animationSpeed = 60.0f;
+                anim.currentFrame = 0;
+                anim.elapsedTime = 0.0f;
+            }
+        }
+    }
 
     // auto-moves right after game starts (for 2 secs)
     /*if (autoMoveTimer > 0.0f) {
@@ -271,9 +341,6 @@ void PlayerScript::Update(Entity ID)
     // ==============================================================
     if (isRotating)
     {
-        static double lastTime = glfwGetTime();
-        double currentTime = glfwGetTime();
-        float dt = static_cast<float>(currentTime - lastTime);
         lastTime = currentTime;
 
         float rotationSpeed = 180.0f; // degrees per second
