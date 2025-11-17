@@ -322,7 +322,7 @@ namespace MyEditor
         if (bottomDockID) ImGui::SetNextWindowDockID(bottomDockID, ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Project")) {
             // folder browser
-            ProjectPanel(selectedEntity);
+            ProjectPanel();
         }
         ImGui::End();
 

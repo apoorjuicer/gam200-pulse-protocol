@@ -83,6 +83,35 @@ std::optional<Entity> PrefabManager::InstantiatePrefab(std::string const& prefab
 	return result;
 }
 
+bool PrefabManager::DeletePrefab(std::string const& prefabName) {
+	namespace fs = std::filesystem;
+
+	// strip .json extension if present
+	std::string cleanName = prefabName;
+	if (cleanName.ends_with(".json")) {
+		cleanName = cleanName.substr(0, cleanName.length() - 5);
+	}
+
+	fs::path prefabPath = GetPrefabPath(cleanName);
+
+	// check if file exists
+	if (!fs::exists(prefabPath)) {
+		std::cerr << "[PrefabManager] Cannot delete - prefab not found: " << cleanName << std::endl;
+		return false;
+	}
+
+	try {
+		fs::remove(prefabPath);
+		std::cout << "[PrefabManager] Successfully deleted prefab: " << cleanName << std::endl;
+		return true;
+	}
+	catch (const fs::filesystem_error& e) {
+		std::cerr << "[PrefabManager] Failed to delete prefab: " << e.what() << std::endl;
+		return false;
+	}
+}
+
+
 std::vector<PrefabData> PrefabManager::GetAvailablePrefabs()
 {
 	std::vector<PrefabData> prefabs;

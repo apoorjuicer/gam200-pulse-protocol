@@ -4,17 +4,17 @@
             "transform": {
                 "position": {
                     "x": 0.0,
-                    "y": 0.0
+                    "y": -300.0
                 },
                 "scale": {
-                    "x": 200.0,
-                    "y": 200.0
+                    "x": 600.0,
+                    "y": 90.0
                 },
                 "rotation": {
                     "x": 0.0,
                     "y": 0.0
                 },
-                "isVisible": true,
+                "isVisible": false,
                 "visibilityTimer": 0.0,
                 "autoHide": false
             }
@@ -22,9 +22,9 @@
         {
             "render": {
                 "mdl_ref": 0.0,
-                "shd_ref": 1.0,
-                "useTexture": true,
-                "spriteName": "C:\\Users\\User\\Desktop\\project_repos\\Bloop_CustomEngine\\BaseEngine\\MyEngine\\Assets\\Textures\\Enemies\\RedGorillaEnemy.png",
+                "shd_ref": 0.0,
+                "useTexture": false,
+                "spriteName": "",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -34,13 +34,8 @@
             }
         },
         {
-            "animation": {
-                "currentFrame": 0,
-                "elapsedTime": 0.0,
-                "totalFrames": 1,
-                "columns": 1,
-                "rows": 1,
-                "animationSpeed": 12.0
+            "name": {
+                "name": "FeedbackBar"
             }
         }
     ]

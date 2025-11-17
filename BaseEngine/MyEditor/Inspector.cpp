@@ -544,43 +544,6 @@ namespace MyEditor
             ImGui::Separator();
         }
 
-        // ---------------------------------------------------------------------
-        // Prefab save section
-        // ---------------------------------------------------------------------
-        if (selectedEntity != INVALID_ENTITY)
-        {
-            ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::TextColored(ImVec4(0.4f, 0.7f, 1.0f, 1.0f), "Prefab");
-            ImGui::Separator();
-
-            static char prefabNameBuffer[128] = "";
-            ImGui::SetNextItemWidth(-1);
-            ImGui::InputTextWithHint("##prefabname", "Enter prefab name...", prefabNameBuffer, IM_ARRAYSIZE(prefabNameBuffer));
-
-            bool canSave = (prefabNameBuffer[0] != '\0');
-            if (!canSave) ImGui::BeginDisabled();
-
-            if (ImGui::Button("Save as Prefab"))
-            {
-                PrefabManager prefabMgr;
-                bool success = prefabMgr.SaveEntityAsPrefab(selectedEntity, prefabNameBuffer);
-
-                if (success) {
-                    std::cout << "[Editor] Saved prefab: " << prefabNameBuffer << " with ALL components\n";
-                    memset(prefabNameBuffer, 0, sizeof(prefabNameBuffer));
-                } else {
-                    std::cerr << "[Editor] Failed to save prefab!\n";
-                }
-            }
-
-            if (!canSave) {
-                ImGui::EndDisabled();
-                if (ImGui::IsItemHovered())
-                    ImGui::SetTooltip("Enter a prefab name first");
-            }
-        }
-
         ImGui::End();
     }
 

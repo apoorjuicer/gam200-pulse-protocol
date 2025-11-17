@@ -1,0 +1,83 @@
+{
+    "components": [
+        {
+            "Typing": {
+                "Type": "Player"
+            }
+        },
+        {
+            "transform": {
+                "position": {
+                    "x": -1010.4614868164063,
+                    "y": -260.0
+                },
+                "scale": {
+                    "x": 500.0,
+                    "y": 500.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "isVisible": true,
+                "visibilityTimer": 0.0,
+                "autoHide": false
+            }
+        },
+        {
+            "render": {
+                "mdl_ref": 1.0,
+                "shd_ref": 2.0,
+                "useTexture": true,
+                "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_idle.png",
+                "tintColor": {
+                    "r": 1.0,
+                    "g": 1.0,
+                    "b": 1.0,
+                    "a": 1.0
+                }
+            }
+        },
+        {
+            "animation": {
+                "currentFrame": 0,
+                "elapsedTime": 0.03042660653591156,
+                "totalFrames": 2,
+                "columns": 2,
+                "rows": 1,
+                "animationSpeed": 24.0
+            }
+        },
+        {
+            "script": {
+                "ScriptName": "PlayerScript"
+            }
+        },
+        {
+            "name": {
+                "name": "Jeff"
+            }
+        },
+        {
+            "Health": {
+                "hp": 3,
+                "damage": 1,
+                "isAlive": true
+            }
+        },
+        {
+            "AABB": {
+                "min": {
+                    "x": 0.0,
+                    "y": -10.0
+                },
+                "max": {
+                    "x": 529.0,
+                    "y": 529.0
+                },
+                "width": 50.0,
+                "height": 50.0
+            }
+        }
+    ]
+}

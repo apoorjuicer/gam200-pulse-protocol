@@ -2,18 +2,18 @@
     "components": [
         {
             "Typing": {
-                "Type": "Enemy"
+                "Type": "Background"
             }
         },
         {
             "transform": {
                 "position": {
-                    "x": 644.9229125976563,
-                    "y": -40.615379333496097
+                    "x": -18.461334228515626,
+                    "y": 7.3845672607421879
                 },
                 "scale": {
-                    "x": 500.0,
-                    "y": 500.0
+                    "x": 1600.0,
+                    "y": 900.0
                 },
                 "rotation": {
                     "x": 0.0,
@@ -26,10 +26,10 @@
         },
         {
             "render": {
-                "mdl_ref": 1.0,
-                "shd_ref": 2.0,
+                "mdl_ref": 0.0,
+                "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
+                "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -49,29 +49,8 @@
             }
         },
         {
-            "script": {
-                "ScriptName": "EnemyScript"
-            }
-        },
-        {
-            "Health": {
-                "hp": 1,
-                "damage": 1,
-                "isAlive": true
-            }
-        },
-        {
-            "AABB": {
-                "min": {
-                    "x": 50.0,
-                    "y": 50.0
-                },
-                "max": {
-                    "x": 150.0,
-                    "y": 150.0
-                },
-                "width": 50.0,
-                "height": 50.0
+            "name": {
+                "name": "Background"
             }
         }
     ]

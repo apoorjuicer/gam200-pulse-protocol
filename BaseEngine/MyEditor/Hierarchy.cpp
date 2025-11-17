@@ -1,3 +1,16 @@
+/******************************************************************************/
+/**
+ * @file        Hierarchy.cpp
+ * @project     Pulse Protocol
+ * @author      Chloe Lau Rey En
+ * @brief       TBF
+ *
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
+
 // -----------------------------------------------------------------------------
 // Hierarchy.cpp  -  Scene hierarchy panel (entity list + toolbar)
 // -----------------------------------------------------------------------------
@@ -16,23 +29,165 @@
 namespace MyEditor
 {
     // -------------------------------------------------------------------------
-    // Internal helpers / types (local to this file)
+    // CONFIGURATION CONSTANTS (Change these to customize behavior)
     // -------------------------------------------------------------------------
 
-    struct EntityPrefab {
-        const char* displayName;
-        const char* jsonPath;
-        bool isDefault;
-        float defaultScaleX;
-        float defaultScaleY;
+    namespace HierarchyConfig
+    {
+        // Default name for new entities
+        constexpr const char* DEFAULT_ENTITY_NAME = "GameObject";
+
+        // Default transform scale for new entities
+        constexpr float DEFAULT_SCALE_X = 200.0f;
+        constexpr float DEFAULT_SCALE_Y = 200.0f;
+
+        // Maximum attempts to find a unique name before giving up
+        constexpr int MAX_NAME_ATTEMPTS = 10000;
+
+        // Fallback name if all else fails
+        constexpr const char* FALLBACK_ENTITY_NAME = "GameObject (New)";
+    }
+
+    // -------------------------------------------------------------------------
+    // RENAME STATE (Inline renaming)
+    // -------------------------------------------------------------------------
+
+    struct RenameState
+    {
+        Entity renamingEntity = INVALID_ENTITY;
+        char renameBuffer[256] = "";
+        bool justStartedRenaming = false;
     };
 
+    static RenameState s_renameState;
 
+    // -------------------------------------------------------------------------
+    // HELPER FUNCTIONS
+    // -------------------------------------------------------------------------
 
-     void DrawHierarchyWindow(ImGuiID dockID)
+    // Helper function to generate unique GameObject names
+    static std::string GenerateUniqueGameObjectName()
+    {
+        using namespace HierarchyConfig;
+
+        auto* g_coordinator = Coordinator::GetInstance();
+        if (!g_coordinator)
+            return DEFAULT_ENTITY_NAME;
+
+        std::set<std::string> existingNames;
+
+        // Collect all existing names
+        auto allEntities = g_coordinator->GetAllEntities();
+        for (auto entity : allEntities)
+        {
+            if (g_coordinator->HasComponent<Name>(entity))
+            {
+                existingNames.insert(g_coordinator->GetComponent<Name>(entity).name);
+            }
+        }
+
+        // Try default name first
+        if (existingNames.find(DEFAULT_ENTITY_NAME) == existingNames.end())
+            return DEFAULT_ENTITY_NAME;
+
+        // Then try numbered variants
+        for (int i = 1; i < MAX_NAME_ATTEMPTS; ++i)
+        {
+            std::string candidate = std::string(DEFAULT_ENTITY_NAME) + " (" + std::to_string(i) + ")";
+            if (existingNames.find(candidate) == existingNames.end())
+                return candidate;
+        }
+
+        // Fallback if we exhausted all attempts (shouldn't happen)
+        return FALLBACK_ENTITY_NAME;
+    }
+
+    // Helper function to create entity with auto-generated name
+    Entity CreateEntityWithName(const std::string& baseName = "")
+    {
+        using namespace HierarchyConfig;
+
+        Factory factory;
+        Entity newEntity = factory.DefaultObj();
+
+        if (newEntity == INVALID_ENTITY)
+            return INVALID_ENTITY;
+
+        auto* g_coordinator = Coordinator::GetInstance();
+        if (!g_coordinator)
+            return newEntity;
+
+        // Set default transform scale
+        if (g_coordinator->HasComponent<Framework::Transform>(newEntity))
+        {
+            auto& t = g_coordinator->GetComponent<Framework::Transform>(newEntity);
+            t.Scale = { DEFAULT_SCALE_X, DEFAULT_SCALE_Y };
+        }
+
+        // Auto-generate or use provided name
+        std::string entityName = baseName.empty() ? GenerateUniqueGameObjectName() : baseName;
+
+        // Add or update Name component
+        if (g_coordinator->HasComponent<Name>(newEntity))
+        {
+            g_coordinator->GetComponent<Name>(newEntity).name = entityName;
+        }
+        else
+        {
+            Name nameComp;
+            nameComp.name = entityName;
+            g_coordinator->AddComponent<Name>(newEntity, nameComp);
+        }
+
+        return newEntity;
+    }
+
+    // Helper to start renaming an entity
+    static void StartRenaming(Entity entity)
+    {
+        auto* g_coordinator = Coordinator::GetInstance();
+        if (!g_coordinator || entity == INVALID_ENTITY)
+            return;
+
+        if (g_coordinator->HasComponent<Name>(entity))
+        {
+            s_renameState.renamingEntity = entity;
+            std::string currentName = g_coordinator->GetComponent<Name>(entity).name;
+            std::strncpy(s_renameState.renameBuffer, currentName.c_str(), sizeof(s_renameState.renameBuffer) - 1);
+            s_renameState.renameBuffer[sizeof(s_renameState.renameBuffer) - 1] = '\0';
+            s_renameState.justStartedRenaming = true;
+        }
+    }
+
+    // Helper to finish renaming
+    static void FinishRenaming(bool save)
+    {
+        if (save && s_renameState.renamingEntity != INVALID_ENTITY)
+        {
+            auto* g_coordinator = Coordinator::GetInstance();
+            if (g_coordinator && g_coordinator->HasComponent<Name>(s_renameState.renamingEntity))
+            {
+                std::string newName = s_renameState.renameBuffer;
+                if (!newName.empty())
+                {
+                    g_coordinator->GetComponent<Name>(s_renameState.renamingEntity).name = newName;
+                }
+            }
+        }
+
+        s_renameState.renamingEntity = INVALID_ENTITY;
+        s_renameState.renameBuffer[0] = '\0';
+        s_renameState.justStartedRenaming = false;
+    }
+
+    // -------------------------------------------------------------------------
+    // MAIN HIERARCHY WINDOW
+    // -------------------------------------------------------------------------
+
+    void DrawHierarchyWindow(ImGuiID dockID)
     {
 
-           if (dockID)
+        if (dockID)
             ImGui::SetNextWindowDockID(dockID, ImGuiCond_FirstUseEver);
 
         if (!ImGui::Begin("Hierarchy"))
@@ -49,144 +204,123 @@ namespace MyEditor
             return;
         }
 
-        // --- Entity Creation with Type Selection -----------------------------------
-        static std::vector<EntityPrefab> entityPrefabs = {
-            { "Empty Entity",  nullptr,                                   true, 200.0f, 200.0f },
-            { "Hero",          "../../MyEngine/JSON/HeroPrefab.json",     false, 0.0f,  0.0f   },
-            { "Monster",       "../../MyEngine/JSON/MonsterPrefab.json",  false, 0.0f,  0.0f   },
-            { "Background",    nullptr,                                   true, 800.0f, 600.0f }
-        };
+        // STICK WITH ONLY EMPTY ENTITY FROM NOW ON
 
-        // which entity type to create (index into prefabs array)
-        static int selectedType = 0;
+        //static std::vector<EntityPrefab> entityPrefabs = {
+        //    { "Empty Entity",  nullptr,                                   true, 200.0f, 200.0f },
+        //    { "Hero",          "../../MyEngine/JSON/HeroPrefab.json",     false, 0.0f,  0.0f   },
+        //    { "Monster",       "../../MyEngine/JSON/MonsterPrefab.json",  false, 0.0f,  0.0f   },
+        //    { "Background",    nullptr,                                   true, 800.0f, 600.0f }
+        //};
 
-        // Build display names for combo box
-        std::vector<const char*> displayNames;
-        displayNames.reserve(entityPrefabs.size());
-        for (const auto& prefab : entityPrefabs)
-            displayNames.push_back(prefab.displayName);
+        //// which entity type to create (index into prefabs array)
+        //static int selectedType = 0;
 
-        // ============================================
-        // UNITY-STYLE TOOLBAR
-        // ============================================
-        float windowWidth = ImGui::GetContentRegionAvail().x;
-        float dropdownWidth = 120.0f;
-
-        bool createClicked = ImGui::SmallButton("+");
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Create at End");
-
-        ImGui::SameLine();
-
-        ImGui::BeginDisabled(selectedEntity == INVALID_ENTITY);
-
-        bool createAboveClicked = ImGui::SmallButton("^");
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Create Above Selected");
-
-        ImGui::SameLine();
-        bool createBelowClicked = ImGui::SmallButton("v");
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Create Below Selected");
-
-        ImGui::SameLine();
-        bool deleteClicked = ImGui::SmallButton("X");
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Delete Selected");
-
-        ImGui::EndDisabled();
-
-        ImGui::SameLine(windowWidth - dropdownWidth + 5.0f);
-        ImGui::PushItemWidth(dropdownWidth);
-        ImGui::Combo("##Type", &selectedType, displayNames.data(),
-                     static_cast<int>(displayNames.size()));
-        ImGui::PopItemWidth();
-
-        ImGui::Separator();
+        //// Build display names for combo box
+        //std::vector<const char*> displayNames;
+        //displayNames.reserve(entityPrefabs.size());
+        //for (const auto& prefab : entityPrefabs)
+        //    displayNames.push_back(prefab.displayName);
 
         // ============================================
-        // HANDLE BUTTON CLICKS - Create Entity
+        // TOOLBAR - CREATE & DELETE & REORDER
         // ============================================
-        if (createClicked || createAboveClicked || createBelowClicked)
+
+        // [+] Create Empty Entity at end
+        if (ImGui::Button("+"))
         {
-            Factory defaultEntity;
-            Entity newEntity = INVALID_ENTITY;
-
-            const EntityPrefab& selectedPrefab = entityPrefabs[selectedType];
-
-            if (selectedPrefab.isDefault)
-            {
-                newEntity = defaultEntity.DefaultObj();
-
-                if (g_coordinator->HasComponent<Framework::Transform>(newEntity)) {
-                    auto& t = g_coordinator->GetComponent<Framework::Transform>(newEntity);
-                    t.Scale = { selectedPrefab.defaultScaleX, selectedPrefab.defaultScaleY };
-                }
-            }
-            else if (selectedPrefab.jsonPath != nullptr)
-            {
-                auto result = defaultEntity.CreateEntityFromJson(selectedPrefab.jsonPath);
-                if (result.has_value())
-                    newEntity = result.value();
-                else
-                    newEntity = defaultEntity.DefaultObj();
-            }
-            else
-            {
-                newEntity = defaultEntity.DefaultObj();
-            }
+            Factory factory;
+            Entity newEntity = factory.DefaultObj();
 
             if (newEntity != INVALID_ENTITY)
             {
-                if (createClicked)
-                {
-                    // [+] add to end of list
+                entityDisplayOrder.push_back(newEntity);
+                selectedEntity = newEntity;
+            }
+        }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Create Empty GameObject");
+
+        ImGui::SameLine();
+
+        // Buttons that require selection
+        ImGui::BeginDisabled(selectedEntity == INVALID_ENTITY);
+
+        // [^] Create Above Selected
+        if (ImGui::Button("^"))
+        {
+            Factory factory;
+            Entity newEntity = factory.DefaultObj();
+
+            if (newEntity != INVALID_ENTITY)
+            {
+                auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+                if (it != entityDisplayOrder.end())
+                    entityDisplayOrder.insert(it, newEntity);
+                else
                     entityDisplayOrder.push_back(newEntity);
-                }
-                else if (createAboveClicked && selectedEntity != INVALID_ENTITY)
-                {
-                    auto it = std::find(entityDisplayOrder.begin(),
-                                        entityDisplayOrder.end(), selectedEntity);
-                    if (it != entityDisplayOrder.end())
-                        entityDisplayOrder.insert(it, newEntity);
-                    else
-                        entityDisplayOrder.push_back(newEntity);
-                }
-                else if (createBelowClicked && selectedEntity != INVALID_ENTITY)
-                {
-                    auto it = std::find(entityDisplayOrder.begin(),
-                                        entityDisplayOrder.end(), selectedEntity);
-                    if (it != entityDisplayOrder.end())
-                        entityDisplayOrder.insert(it + 1, newEntity);
-                    else
-                        entityDisplayOrder.push_back(newEntity);
-                }
 
                 selectedEntity = newEntity;
             }
         }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Create Above Selected");
 
-        // ============================================
-        // HANDLE BUTTON CLICKS - Delete Entity
-        // ============================================
-        if (deleteClicked && selectedEntity != INVALID_ENTITY)
+        ImGui::SameLine();
+
+        // [v] Create Below Selected
+        if (ImGui::Button("v"))
         {
-            auto it = std::find(entityDisplayOrder.begin(),
-                                entityDisplayOrder.end(), selectedEntity);
-            if (it != entityDisplayOrder.end())
-                entityDisplayOrder.erase(it);
+            Factory factory;
+            Entity newEntity = factory.DefaultObj();
 
-            Factory defaultEntity;
-            defaultEntity.DeleteEntity(selectedEntity);
+            if (newEntity != INVALID_ENTITY)
+            {
+                auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+                if (it != entityDisplayOrder.end())
+                    entityDisplayOrder.insert(it + 1, newEntity);
+                else
+                    entityDisplayOrder.push_back(newEntity);
 
-            selectedEntity = INVALID_ENTITY;
+                selectedEntity = newEntity;
+            }
+        }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Create Below Selected");
+
+        ImGui::SameLine();
+
+        // [X] Delete Selected Entity
+        if (ImGui::Button("X"))
+        {
+            if (selectedEntity != INVALID_ENTITY)
+            {
+                auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+                if (it != entityDisplayOrder.end())
+                    entityDisplayOrder.erase(it);
+
+                Factory factory;
+                factory.DeleteEntity(selectedEntity);
+
+                selectedEntity = INVALID_ENTITY;
+            }
         }
 
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Spacing();
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Delete Selected GameObject");
 
-        // Scrollable list
+        ImGui::EndDisabled();
+
+        ImGui::Separator();
+
+        // ============================================
+        // ENTITY LIST WITH DRAG-DROP REORDERING & PREFAB CREATION
+        // ============================================
+
         ImGui::BeginChild("HierarchyList",
-                          ImVec2(-FLT_MIN, -FLT_MIN),
-                          true,
-                          ImGuiWindowFlags_AlwaysUseWindowPadding);
+            ImVec2(-FLT_MIN, -FLT_MIN),
+            true,
+            ImGuiWindowFlags_AlwaysUseWindowPadding);
 
         if (ImGui::IsWindowHovered())
             ImGui::SetWindowFocus();
@@ -197,80 +331,224 @@ namespace MyEditor
         auto allEntities = g_coordinator->GetAllEntities();
         std::set<Entity> entitySet(allEntities.begin(), allEntities.end());
 
+        // Remove deleted entities from display order
         entityDisplayOrder.erase(
-            std::remove_if(entityDisplayOrder.begin(), entityDisplayOrder.end(),
-                           [&entitySet](Entity e) { return entitySet.find(e) == entitySet.end(); }),
-            entityDisplayOrder.end()
+            std::remove_if(entityDisplayOrder.begin(), entityDisplayOrder.end(), [&entitySet](Entity e) { return entitySet.find(e) == entitySet.end(); }), entityDisplayOrder.end()
         );
 
+        // Add any new entities not in display order
         for (auto entity : allEntities)
         {
-            if (std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), entity) ==
-                entityDisplayOrder.end())
+            if (std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), entity) == entityDisplayOrder.end())
             {
                 entityDisplayOrder.push_back(entity);
             }
         }
 
-        // Display in tracked order
-        for (auto entity : entityDisplayOrder)
+        // Display entities in tracked order WITH DRAG-DROP
+        static int draggedIndex = -1;
+
+        for (int i = 0; i < static_cast<int>(entityDisplayOrder.size()); ++i)
         {
+            Entity entity = entityDisplayOrder[i];
             std::string display;
 
+            // Get display name from Name component
             if (g_coordinator->HasComponent<Name>(entity))
             {
                 display = g_coordinator->GetComponent<Name>(entity).name;
             }
-            else if (g_coordinator->HasComponent<GUIButton>(entity))
-            {
-                display = g_coordinator->GetComponent<GUIButton>(entity).buttonID;
-            }
-            else if (g_coordinator->HasComponent<Framework::Renderable>(entity))
-            {
-                auto& rend = g_coordinator->GetComponent<Framework::Renderable>(entity);
-                if (!rend.spriteName.empty()) {
-                    size_t lastSlash = rend.spriteName.find_last_of("/\\");
-                    if (lastSlash != std::string::npos)
-                        display = rend.spriteName.substr(lastSlash + 1);
-                    else
-                        display = rend.spriteName;
-
-                    size_t jsonPos = display.find(".json");
-                    if (jsonPos != std::string::npos)
-                        display = display.substr(0, jsonPos);
-                } else {
-                    display = "New Entity";
-                }
-            }
             else
             {
+                // Fallback only for legacy entities without Name component
                 display = "Entity " + std::to_string(static_cast<int>(entity));
             }
 
             bool isSelected = (selectedEntity == entity);
-
             std::string uniqueLabel = display + "##" + std::to_string(static_cast<int>(entity));
-            if (ImGui::Selectable(uniqueLabel.c_str(), isSelected))
+
+            // =================================================================
+            // INLINE RENAMING
+            // =================================================================
+
+            bool isRenaming = (s_renameState.renamingEntity == entity);
+
+            if (isRenaming)
             {
-                selectedEntity = entity;
-                anySelectableClicked = true;
+                // Show text input for renaming
+                ImGui::SetNextItemWidth(-FLT_MIN);
+
+                if (s_renameState.justStartedRenaming)
+                {
+                    ImGui::SetKeyboardFocusHere();
+                    s_renameState.justStartedRenaming = false;
+                }
+
+                ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue |
+                    ImGuiInputTextFlags_AutoSelectAll;
+
+                if (ImGui::InputText(uniqueLabel.c_str(), s_renameState.renameBuffer,
+                    sizeof(s_renameState.renameBuffer), flags))
+                {
+                    // Enter pressed - save and finish
+                    FinishRenaming(true);
+                }
+
+                // Escape pressed - cancel
+                if (ImGui::IsKeyPressed(ImGuiKey_Escape))
+                {
+                    FinishRenaming(false);
+                }
+
+                // Clicked outside - save and finish
+                if (!ImGui::IsItemActive() && ImGui::IsMouseClicked(0))
+                {
+                    FinishRenaming(true);
+                }
+            }
+            else
+            {
+                // Normal selectable display
+                if (ImGui::Selectable(uniqueLabel.c_str(), isSelected))
+                {
+                    selectedEntity = entity;
+                    anySelectableClicked = true;
+                }
+
+                // =================================================================
+                // DROP TARGET - Must be RIGHT AFTER Selectable!
+                // =================================================================
+
+                if (ImGui::BeginDragDropTarget())
+                {
+                    // Visual feedback: Draw a blue line to show where the entity will be inserted
+                    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+                    ImVec2 p_min = ImGui::GetItemRectMin();
+                    ImVec2 p_max = ImGui::GetItemRectMax();
+
+                    // Draw a blue horizontal line above the hovered entity
+                    float line_y = p_min.y;
+                    draw_list->AddLine(
+                        ImVec2(p_min.x, line_y),
+                        ImVec2(p_max.x, line_y),
+                        IM_COL32(0, 150, 255, 255),
+                        3.0f
+                    );
+
+                    // Optional: Add small arrows/indicators at the ends
+                    float arrow_size = 4.0f;
+                    draw_list->AddTriangleFilled(
+                        ImVec2(p_min.x, line_y),
+                        ImVec2(p_min.x + arrow_size, line_y - arrow_size),
+                        ImVec2(p_min.x + arrow_size, line_y + arrow_size),
+                        IM_COL32(0, 150, 255, 255)
+                    );
+                    draw_list->AddTriangleFilled(
+                        ImVec2(p_max.x, line_y),
+                        ImVec2(p_max.x - arrow_size, line_y - arrow_size),
+                        ImVec2(p_max.x - arrow_size, line_y + arrow_size),
+                        IM_COL32(0, 150, 255, 255)
+                    );
+
+                    // Accept drop with flag to disable the default yellow rectangle
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_ENTITY_REORDER", ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+                    {
+                        // Extract data from struct
+                        struct HierarchyDragData {
+                            int index;
+                            Entity entity;
+                        };
+
+                        const HierarchyDragData* dragData = (const HierarchyDragData*)payload->Data;
+                        int sourceIndex = dragData->index;
+                        int targetIndex = i;
+
+                        std::cout << "[Hierarchy] DROP ACCEPTED! Moving index " << sourceIndex << " to " << targetIndex << std::endl;
+
+                        if (sourceIndex != targetIndex &&
+                            sourceIndex >= 0 && sourceIndex < static_cast<int>(entityDisplayOrder.size()) &&
+                            targetIndex >= 0 && targetIndex < static_cast<int>(entityDisplayOrder.size()))
+                        {
+                            std::cout << "[Hierarchy] Performing reorder..." << std::endl;
+
+                            // Reorder: move source entity to target position
+                            Entity movedEntity = entityDisplayOrder[sourceIndex];
+                            entityDisplayOrder.erase(entityDisplayOrder.begin() + sourceIndex);
+
+                            // Adjust target index if we removed an element before it
+                            if (sourceIndex < targetIndex)
+                                targetIndex--;
+
+                            entityDisplayOrder.insert(entityDisplayOrder.begin() + targetIndex, movedEntity);
+
+                            std::cout << "[Hierarchy] Reorder complete!" << std::endl;
+                        }
+                        else
+                        {
+                            std::cout << "[Hierarchy] Reorder BLOCKED - sourceIndex=" << sourceIndex << " targetIndex=" << targetIndex << " size=" << entityDisplayOrder.size() << std::endl;
+                        }
+                    }
+                    ImGui::EndDragDropTarget();
+                }
+                else
+                {
+                    // BeginDragDropTarget returned false - not currently dragging anything
+                }
+
+                // =================================================================
+                // DRAG SOURCE - After drop target to not interfere
+                // =================================================================
+
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+                {
+                    draggedIndex = i;
+
+                    // Store both index and entity data in a struct
+                    struct HierarchyDragData {
+                        int index;
+                        Entity entity;
+                    };
+
+                    static HierarchyDragData s_dragData;
+                    s_dragData.index = i;
+                    s_dragData.entity = entity;
+
+                    // Set payload for hierarchy reordering
+                    ImGui::SetDragDropPayload("HIERARCHY_ENTITY_REORDER", &s_dragData, sizeof(HierarchyDragData));
+
+                    ImGui::Text("%s", display.c_str());
+                    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Drag to reorder");
+                    ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.0f, 1.0f), "Drop in Project to create Prefab");
+                    ImGui::EndDragDropSource();
+                }
+
+                // =================================================================
+                // DOUBLE CLICK TO RENAME - Check last to not interfere with drag/drop
+                // =================================================================
+
+                if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+                {
+                    StartRenaming(entity);
+                }
             }
         }
 
-        // Deselect if clicked empty space
+        // Deselect if clicked on empty space
         if (ImGui::IsWindowHovered() &&
             ImGui::IsMouseClicked(0) &&
             !anySelectableClicked)
         {
             selectedEntity = INVALID_ENTITY;
+
+            // Also cancel renaming if clicking empty space
+            if (s_renameState.renamingEntity != INVALID_ENTITY)
+            {
+                FinishRenaming(true);
+            }
         }
 
         ImGui::EndChild();
         ImGui::End();
-
-
     }
-
-
 
 }
