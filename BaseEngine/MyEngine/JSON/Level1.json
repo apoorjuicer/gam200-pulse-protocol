@@ -68,8 +68,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -800.0,
-                            "y": 0.0
+                            "x": -1010.4614868164063,
+                            "y": -260.0
                         },
                         "scale": {
                             "x": 500.0,
@@ -100,8 +100,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.03204943612217903,
+                        "currentFrame": 1,
+                        "elapsedTime": 0.02722019888460636,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -151,8 +151,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 800.0,
-                            "y": 0.0
+                            "x": 55.92300033569336,
+                            "y": -260.0
                         },
                         "scale": {
                             "x": 500.0,

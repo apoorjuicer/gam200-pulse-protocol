@@ -428,6 +428,39 @@ namespace MyEditor
                 {
                     if (ImGui::Button(item.name.c_str(), thumbSize))
                         clicked = true;
+
+                    if (item.fullPath.ends_with(".json"))
+                    {
+                        if (ImGui::BeginPopupContextItem(""))
+                        {
+                            std::string displayName = item.name;
+                            if (displayName.ends_with(".json"))
+                                displayName.resize(displayName.size() - 5);
+
+                            ImGui::TextDisabled("%s", displayName.c_str());
+                            ImGui::Separator();
+
+                            if (ImGui::MenuItem("Delete Prefab"))
+                            {
+                                PrefabManager prefabMgr;
+                                std::string prefabName = item.name;
+                                if (prefabName.ends_with(".json"))
+                                    prefabName.resize(prefabName.size() - 5);
+
+                                if (prefabMgr.DeletePrefab(prefabName))
+                                {
+                                    std::cout << "[ProjectPanel] Successfully deleted prefab: " << prefabName << std::endl;
+                                    RefreshCurrentDir();
+                                }
+                                else
+                                {
+                                    std::cerr << "[ProjectPanel] Failed to delete prefab: " << prefabName << std::endl;
+                                }
+                            }
+
+                            ImGui::EndPopup();
+                        }
+                    }
                 }
 
                 // Drag source (image files only)

@@ -36,6 +36,9 @@ public:
     // load prefab and create entity
     std::optional<Entity> InstantiatePrefab(std::string const& prefabName);
 
+    // delete prefab from disk
+    bool DeletePrefab(std::string const& prefabName);
+
     // get all available prefabs for the editor
     std::vector<PrefabData> GetAvailablePrefabs();
 
