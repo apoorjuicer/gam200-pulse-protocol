@@ -536,8 +536,8 @@ void EnemyScript::Update(Entity ID)
         if (enemy_transform.Rotation.x >= 360.0f)
             enemy_transform.Rotation.x -= 360.0f;
 
-        Entity playerEntity = playerEntities[0];
-        auto& player_transform = g_coordinator->GetComponent<Framework::Transform>(playerEntity);
+        Entity firstPlayer = playerEntities[0];
+        auto& player_transform = g_coordinator->GetComponent<Framework::Transform>(firstPlayer);
 
         // Move toward player
         Vector2 dir = player_transform.Pos - enemy_transform.Pos;
@@ -558,32 +558,32 @@ void EnemyScript::Update(Entity ID)
                 !g_coordinator->HasComponent<Health>(playerEntity))
                 continue;
 
-            auto& player_transform = g_coordinator->GetComponent<Framework::Transform>(playerEntity);
-            auto& player_box = g_coordinator->GetComponent<AABB>(playerEntity);
-            auto& player_health = g_coordinator->GetComponent<Health>(playerEntity);
+            auto& current_player_transform = g_coordinator->GetComponent<Framework::Transform>(playerEntity);
+            auto& current_player_box = g_coordinator->GetComponent<AABB>(playerEntity);
+            auto& current_player_health = g_coordinator->GetComponent<Health>(playerEntity);
 
             // --- Build OBBs & Check ---
             OBB enemyOBB = collision.BuildOBBFromTransform(enemy_transform, enemy_box);
-            OBB playerOBB = collision.BuildOBBFromTransform(player_transform, player_box);
+            OBB playerOBB = collision.BuildOBBFromTransform(current_player_transform, current_player_box);
 
             bool obbHit = collision.CheckOBBvsOBB(enemyOBB, playerOBB);
 
-            if (obbHit && enemy_health.isAlive && player_health.isAlive)
+            if (obbHit && enemy_health.isAlive && current_player_health.isAlive)
             {
                 if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
                     audio->PlaySound("collision");
                 }
 
                 enemy_health.isAlive = false;
-                player_health.hp -= enemy_health.damage;
+                current_player_health.hp -= enemy_health.damage;
 
                 std::cout << ">>> EDGE COLLISION DETECTED via OBB <<<\n";
-                std::cout << "Player HP: " << player_health.hp << "\n";
+                std::cout << "Player HP: " << current_player_health.hp << "\n";
 
-                if (player_health.hp <= 0)
+                if (current_player_health.hp <= 0)
                 {
-                    player_health.hp = 0;
-                    player_health.isAlive = false;
+                    current_player_health.hp = 0;
+                    current_player_health.isAlive = false;
                     std::cout << ">>> PLAYER DEFEATED\n";
                 }
 

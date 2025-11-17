@@ -103,7 +103,7 @@ namespace MyEditor
     }
 
     // Helper function to create entity with auto-generated name
-    static Entity CreateEntityWithName(const std::string& baseName = "")
+    Entity CreateEntityWithName(const std::string& baseName = "")
     {
         using namespace HierarchyConfig;
 

@@ -235,7 +235,7 @@ namespace MyEditor
     }
 
     // ── Main panel UI ──────────────────────────────────────────
-    void ProjectPanel(Entity selectedEntity)
+    void ProjectPanel()
     {
         // Top bar ------------------------------------------------
         if (ImGui::Button("Refresh"))
