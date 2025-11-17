@@ -668,6 +668,13 @@ static GLuint upload_rgba8(int w, int h, unsigned char *data)
 
 GLuint GraphicsManager::LoadTextureFile(const std::string &path)
 {
+    // skip JSON files
+    if (path.ends_with(".json"))
+    {
+        /*std::cerr << "[Graphics] Skipping JSON file (not a texture): " << path << "\n";*/
+        return 0;
+    }
+
     int w = 0, h = 0, n = 0;
     stbi_set_flip_vertically_on_load(true);
     unsigned char *data = stbi_load(path.c_str(), &w, &h, &n, 4);

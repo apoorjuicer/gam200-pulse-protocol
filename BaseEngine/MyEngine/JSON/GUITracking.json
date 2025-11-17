@@ -1,4 +1,8 @@
 {
-    "guiCreatedEntities": [],
-    "guiEntityCounter": 23
+    "guiCreatedEntities": [
+        "GUICreated_Player_1",
+        "GUICreated_Player_2",
+        "GUICreated_Player_3"
+    ],
+    "guiEntityCounter": 3
 }

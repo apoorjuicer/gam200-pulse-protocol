@@ -1,14 +1,19 @@
 {
     "components": [
         {
+            "Typing": {
+                "Type": "Background"
+            }
+        },
+        {
             "transform": {
                 "position": {
-                    "x": -800.0,
-                    "y": 0.0
+                    "x": -18.461334228515626,
+                    "y": 7.3845672607421879
                 },
                 "scale": {
-                    "x": 50.0,
-                    "y": 50.0
+                    "x": 1600.0,
+                    "y": 900.0
                 },
                 "rotation": {
                     "x": 0.0,
@@ -21,10 +26,10 @@
         },
         {
             "render": {
-                "mdl_ref": 1.0,
-                "shd_ref": 2.0,
+                "mdl_ref": 0.0,
+                "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
+                "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -36,11 +41,16 @@
         {
             "animation": {
                 "currentFrame": 0,
-                "elapsedTime": 0.005202325526624918,
-                "totalFrames": 3,
-                "columns": 3,
+                "elapsedTime": 0.0,
+                "totalFrames": 1,
+                "columns": 1,
                 "rows": 1,
-                "animationSpeed": 24.0
+                "animationSpeed": 2.0
+            }
+        },
+        {
+            "name": {
+                "name": "Background"
             }
         }
     ]

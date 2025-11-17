@@ -11,8 +11,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 0.0,
-                            "y": 0.0
+                            "x": -18.461334228515626,
+                            "y": 7.3845672607421879
                         },
                         "scale": {
                             "x": 1600.0,
@@ -49,6 +49,11 @@
                         "columns": 1,
                         "rows": 1,
                         "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Background"
                     }
                 }
             ]
@@ -96,7 +101,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.0,
+                        "elapsedTime": 0.03204943612217903,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -192,6 +197,11 @@
                     }
                 },
                 {
+                    "name": {
+                        "name": "Blue Gorilla"
+                    }
+                },
+                {
                     "Health": {
                         "hp": 1,
                         "damage": 1,
@@ -282,7 +292,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -600.0,
+                            "x": -546.0,
                             "y": 350.0
                         },
                         "scale": {
@@ -331,6 +341,11 @@
                         "actionType": "CreateEntity",
                         "entityJsonPath": "../../MyEngine/JSON/HeroPrefab.json",
                         "isEnabled": true
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Create"
                     }
                 }
             ]
@@ -389,6 +404,11 @@
                         "actionType": "DestroyEntity",
                         "entityJsonPath": "",
                         "isEnabled": true
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Destroy"
                     }
                 }
             ]

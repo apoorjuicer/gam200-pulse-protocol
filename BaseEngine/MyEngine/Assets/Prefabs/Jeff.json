@@ -2,14 +2,14 @@
     "components": [
         {
             "Typing": {
-                "Type": "Enemy"
+                "Type": "Player"
             }
         },
         {
             "transform": {
                 "position": {
-                    "x": 644.9229125976563,
-                    "y": -40.615379333496097
+                    "x": -800.0,
+                    "y": 0.0
                 },
                 "scale": {
                     "x": 500.0,
@@ -29,7 +29,7 @@
                 "mdl_ref": 1.0,
                 "shd_ref": 2.0,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
+                "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_idle.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -41,21 +41,26 @@
         {
             "animation": {
                 "currentFrame": 0,
-                "elapsedTime": 0.0,
-                "totalFrames": 1,
-                "columns": 1,
+                "elapsedTime": 0.01094641163945198,
+                "totalFrames": 2,
+                "columns": 2,
                 "rows": 1,
-                "animationSpeed": 2.0
+                "animationSpeed": 24.0
             }
         },
         {
             "script": {
-                "ScriptName": "EnemyScript"
+                "ScriptName": "PlayerScript"
+            }
+        },
+        {
+            "name": {
+                "name": "Jeff"
             }
         },
         {
             "Health": {
-                "hp": 1,
+                "hp": 5,
                 "damage": 1,
                 "isAlive": true
             }
@@ -63,12 +68,12 @@
         {
             "AABB": {
                 "min": {
-                    "x": 50.0,
-                    "y": 50.0
+                    "x": 0.0,
+                    "y": -10.0
                 },
                 "max": {
-                    "x": 150.0,
-                    "y": 150.0
+                    "x": 529.0,
+                    "y": 529.0
                 },
                 "width": 50.0,
                 "height": 50.0

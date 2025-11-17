@@ -2,18 +2,18 @@
     "components": [
         {
             "Typing": {
-                "Type": "Player"
+                "Type": "Enemy"
             }
         },
         {
             "transform": {
                 "position": {
-                    "x": -800.0,
+                    "x": 800.0,
                     "y": 0.0
                 },
                 "scale": {
-                    "x": 50.0,
-                    "y": 50.0
+                    "x": 500.0,
+                    "y": 500.0
                 },
                 "rotation": {
                     "x": 0.0,
@@ -29,7 +29,7 @@
                 "mdl_ref": 1.0,
                 "shd_ref": 2.0,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
+                "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -41,26 +41,26 @@
         {
             "animation": {
                 "currentFrame": 0,
-                "elapsedTime": 0.015287214890122414,
-                "totalFrames": 3,
-                "columns": 3,
+                "elapsedTime": 0.0,
+                "totalFrames": 1,
+                "columns": 1,
                 "rows": 1,
-                "animationSpeed": 24.0
+                "animationSpeed": 2.0
             }
         },
         {
             "script": {
-                "ScriptName": "PlayerScript"
+                "ScriptName": "EnemyScript"
             }
         },
         {
             "name": {
-                "name": "Jeff"
+                "name": "Blue Gorilla"
             }
         },
         {
             "Health": {
-                "hp": 5,
+                "hp": 1,
                 "damage": 1,
                 "isAlive": true
             }
@@ -68,12 +68,12 @@
         {
             "AABB": {
                 "min": {
-                    "x": 50.0,
-                    "y": 50.0
+                    "x": 0.0,
+                    "y": 0.0
                 },
                 "max": {
-                    "x": 150.0,
-                    "y": 150.0
+                    "x": 410.0,
+                    "y": 280.0
                 },
                 "width": 50.0,
                 "height": 50.0

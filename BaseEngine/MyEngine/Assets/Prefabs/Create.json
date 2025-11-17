@@ -1,0 +1,42 @@
+{
+    "components": [
+        {
+            "transform": {
+                "position": {
+                    "x": -546.0,
+                    "y": 350.0
+                },
+                "scale": {
+                    "x": 200.0,
+                    "y": 80.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "isVisible": true,
+                "visibilityTimer": 0.0,
+                "autoHide": false
+            }
+        },
+        {
+            "render": {
+                "mdl_ref": 0.0,
+                "shd_ref": 0.0,
+                "useTexture": false,
+                "spriteName": "",
+                "tintColor": {
+                    "r": 1.0,
+                    "g": 0.5,
+                    "b": 0.0,
+                    "a": 1.0
+                }
+            }
+        },
+        {
+            "name": {
+                "name": "Create"
+            }
+        }
+    ]
+}

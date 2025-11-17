@@ -1,3 +1,17 @@
+/******************************************************************************/
+/**
+ * @file        Hierarchy.cpp
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 80%
+ *              Chloe Lau Rey En (secondary) - 20%
+ * @brief       TBF
+ *
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
+
 #include "pch/pch_temp.h"
 #include "ProjectPanel.h"
 
@@ -346,6 +360,57 @@ namespace MyEditor
                     ImGui::EndChild();
                     return;
                 }
+                // Add drop target ONLY for Prefab/Prefabs folder
+                bool isPrefabFolder = (item.name == "Prefab" || item.name == "Prefabs" || item.name == "prefab" || item.name == "prefabs");
+
+                if (isPrefabFolder && ImGui::BeginDragDropTarget())
+                {
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_ENTITY_REORDER", ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+                    {
+                        // Extract entity from the payload
+                        struct HierarchyDragData {
+                            int index;
+                            Entity entity;
+                        };
+
+                        const HierarchyDragData* dragData = (const HierarchyDragData*)payload->Data;
+                        Entity droppedEntity = dragData->entity;
+
+                        //std::cout << "[ProjectPanel] Entity " << droppedEntity << " dropped into Prefabs folder: " << item.fullPath << std::endl;
+
+                        // Get entity name for prefab
+                        auto* coord = Coordinator::GetInstance();
+                        if (coord && droppedEntity != INVALID_ENTITY)
+                        {
+                            std::string prefabName = "Prefab";
+
+                            // Try to get the entity's name
+                            if (coord->HasComponent<Name>(droppedEntity))
+                            {
+                                prefabName = coord->GetComponent<Name>(droppedEntity).name;
+                            }
+                            else
+                            {
+                                prefabName = "Entity_" + std::to_string(static_cast<int>(droppedEntity));
+                            }
+
+                            // Create prefab using PrefabManager
+                            PrefabManager prefabMgr;
+                            std::string prefabPath = item.fullPath + "/" + prefabName + ".json";
+
+                            if (prefabMgr.SaveEntityAsPrefab(droppedEntity, prefabName))
+                            {
+                                std::cout << "[ProjectPanel] Successfully created prefab: " << prefabPath << std::endl;
+                                RefreshCurrentDir();  // Refresh to show the new prefab file
+                            }
+                            else
+                            {
+                                std::cerr << "[ProjectPanel] Failed to create prefab: " << prefabPath << std::endl;
+                            }
+                        }
+                    }
+                    ImGui::EndDragDropTarget();
+                }
             }
             else
             {
@@ -462,6 +527,72 @@ namespace MyEditor
             ImGui::PopID();
             ImGui::EndGroup();
             ++itemIndex;
+        }
+
+        // =====================================================================
+        // DROP ZONE: Accept entity drops in empty space when INSIDE Prefab folder
+        // =====================================================================
+
+        // Check if current directory is the Prefab folder
+        namespace fs = std::filesystem;
+        std::string currentFolderName = fs::path(s_currentDir).filename().string();
+        bool isInPrefabFolder = (currentFolderName == "Prefab" || currentFolderName == "Prefabs" ||
+            currentFolderName == "prefab" || currentFolderName == "prefabs");
+
+        if (isInPrefabFolder)
+        {
+            // Create an invisible button covering the empty space
+            ImVec2 availSpace = ImGui::GetContentRegionAvail();
+            ImGui::InvisibleButton("##prefab_dropzone", availSpace);
+
+            // Add drop target to this empty space
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_ENTITY_REORDER", ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+                {
+                    // Extract entity from the payload
+                    struct HierarchyDragData {
+                        int index;
+                        Entity entity;
+                    };
+
+                    const HierarchyDragData* dragData = (const HierarchyDragData*)payload->Data;
+                    Entity droppedEntity = dragData->entity;
+
+                    std::cout << "[ProjectPanel] Entity " << droppedEntity << " dropped into Prefabs folder (empty space)\n";
+
+                    // Get entity name for prefab
+                    auto* coord = Coordinator::GetInstance();
+                    if (coord && droppedEntity != INVALID_ENTITY)
+                    {
+                        std::string prefabName = "Prefab";
+
+                        // Try to get the entity's name
+                        if (coord->HasComponent<Name>(droppedEntity))
+                        {
+                            prefabName = coord->GetComponent<Name>(droppedEntity).name;
+                        }
+                        else
+                        {
+                            prefabName = "Entity_" + std::to_string(static_cast<int>(droppedEntity));
+                        }
+
+                        // Create prefab using PrefabManager::SaveEntityAsPrefab
+                        PrefabManager prefabMgr;
+
+                        if (prefabMgr.SaveEntityAsPrefab(droppedEntity, prefabName))
+                        {
+                            std::cout << "[ProjectPanel] Successfully created prefab: " << prefabName << ".json" << std::endl;
+                            RefreshCurrentDir();  // Refresh to show the new prefab file
+                        }
+                        else
+                        {
+                            std::cerr << "[ProjectPanel] Failed to create prefab: " << prefabName << ".json" << std::endl;
+                        }
+                    }
+                }
+                ImGui::EndDragDropTarget();
+            }
         }
 
         ImGui::EndChild();
