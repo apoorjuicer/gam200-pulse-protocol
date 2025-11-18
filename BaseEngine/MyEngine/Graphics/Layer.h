@@ -24,7 +24,7 @@ using LayerMask = uint32_t;
 enum : LayerMask {
 	LAYER_BACKGROUND = 1u << 0,	// Elements drawn first (e.g., static backgrounds)
 	LAYER_WORLD = 1u << 1,	 // Game world objects (e.g., characters, props)
-	//LAYER_UI = 1u << 2,	// User interface elements rendered on top
+	LAYER_UI = 1u << 2,	// User interface elements rendered on top
 	LAYER_ALL = 0xFFFFFFFFu	// All Layers
 };
 
