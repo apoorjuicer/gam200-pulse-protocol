@@ -250,16 +250,16 @@ void CoreEngine::Init()
 	glfwMakeContextCurrent(window);
 
 	// move to editor pls
-#ifdef ENABLE_EDITOR
-	glfwSetDropCallback(window, [](GLFWwindow*, int count, const char** paths)
-		{
-			for (int i = 0; i < count; ++i)
-				MyEditor::PushOSDropPath(paths[i]);
-		});
-#else
-	// In game build we don't care about editor file drops
-	glfwSetDropCallback(window, nullptr);
-#endif
+//#ifdef ENABLE_EDITOR
+//	glfwSetDropCallback(window, [](GLFWwindow*, int count, const char** paths)
+//		{
+//			for (int i = 0; i < count; ++i)
+//				MyEditor::PushOSDropPath(paths[i]);
+//		});
+//#else
+//	// In game build we don't care about editor file drops
+//	glfwSetDropCallback(window, nullptr);
+//#endif
 
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwSetFramebufferSizeCallback(window,

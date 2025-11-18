@@ -188,7 +188,7 @@ namespace MyEditor
 
         ImGui::StyleColorsDark();
 
-        //ImGui_ImplGlfw_InitForOpenGL(w, false);
+        ImGui_ImplGlfw_InitForOpenGL(w, false);
         ImGui_ImplOpenGL3_Init("#version 130");
 
         // INIT PROJECT PANEL
