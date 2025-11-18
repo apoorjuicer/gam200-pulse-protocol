@@ -24,6 +24,7 @@
 #include "Physics/collision.h" 
 #include "DebugDraw.h"
 #include "Layer.h"
+#include "CoreEngine/Core/ImportExport.h"
 
 // External transforms list (used elsewhere)   
 namespace Framework { class Transform; class Animation; class Renderable; }
@@ -193,13 +194,13 @@ public:
 		float     minZoom{ 0.25f };
 		float     maxZoom{ 2.0f };
 	};
-	static Camera2D gCamera;
+	static DLL_API Camera2D gCamera;
 
 
 	static glm::vec2 ScreenToNDC(double x, double y);
 	static glm::mat3 BuildPanZoomNDC(const Camera2D& cam);
 
-	static std::vector<GLSLShader> shdrpgms; // singleton in tutorial 3
+	static DLL_API std::vector<GLSLShader> shdrpgms; // singleton in tutorial 3
 
 	using VPSS = std::vector<std::pair<std::string, std::string>>;
 	static void init_shdrpgms_cont(GLApp::VPSS const&);

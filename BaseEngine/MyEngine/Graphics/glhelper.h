@@ -19,6 +19,7 @@
 #include "pch/pch.h"
 #include <string>
 #include <unordered_map>
+#include "CoreEngine/Core/ImportExport.h"
 
 /*  _________________________________________________________________________ */
 struct GLHelper
@@ -55,7 +56,7 @@ struct GLHelper
 	static GLint GameOffsetX, GameOffsetY;
 	static GLint EditorWidth, EditorHeight;  // Keep the static members as they are
 
-	static GLdouble fps;
+	static DLL_API GLdouble fps;
 	static GLdouble delta_time; // time taken to complete most recent game loop
 	static std::string title;
 	static GLFWwindow* ptr_window;

@@ -21,9 +21,11 @@
 #include "graphics/stb_image.h"
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
-#ifdef ENABLE_EDITOR
-#include "../MyEditor/Editor.h"
-#endif
+
+// move to editor pls
+//#ifdef ENABLE_EDITOR
+//#include "../MyEditor/Editor.h"
+//#endif
 #include "../MyEngine/TestCases/TestCase.h"
 // #include "glapp.h"
 #include "../MyEngine/Resources/AssetRegistry.h"
@@ -247,6 +249,7 @@ void CoreEngine::Init()
 
 	glfwMakeContextCurrent(window);
 
+	// move to editor pls
 #ifdef ENABLE_EDITOR
 	glfwSetDropCallback(window, [](GLFWwindow*, int count, const char** paths)
 		{
@@ -528,9 +531,10 @@ void CoreEngine::GameLoop()
 		Update(dt); // This contains all your ECS system profiling
 		profiler->EndFrame();
 
-#ifdef ENABLE_EDITOR
-		MyEditor::NewFrame();
-#endif
+		// move to editor pls
+//#ifdef ENABLE_EDITOR
+//		MyEditor::NewFrame();
+//#endif
 
 		//  4. game update(NOT A WHILE LOOP) gsm
 
@@ -541,10 +545,11 @@ void CoreEngine::GameLoop()
 		profiler->EndFrame();
 
 		//  6. ImGui rendering
-#ifdef ENABLE_EDITOR
-		MyEditor::Draw();
-		MyEditor::Render();
-#endif
+		// move to editor pls
+//#ifdef ENABLE_EDITOR
+//		MyEditor::Draw();
+//		MyEditor::Render();
+//#endif
 
 		RenderDebugDraw();
 

@@ -174,6 +174,7 @@ namespace MyEditor
 
 
     void Init(GLFWwindow* w) {
+
         s_Window = w;
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -187,7 +188,7 @@ namespace MyEditor
 
         ImGui::StyleColorsDark();
 
-        ImGui_ImplGlfw_InitForOpenGL(w, true);
+        //ImGui_ImplGlfw_InitForOpenGL(w, false);
         ImGui_ImplOpenGL3_Init("#version 130");
 
         // INIT PROJECT PANEL

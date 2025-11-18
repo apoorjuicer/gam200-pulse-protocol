@@ -94,3 +94,11 @@ add_custom_command(TARGET MyEditor POST_BUILD
     "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmodL.dll"
     $<TARGET_FILE_DIR:MyEditor>
 )
+
+# Copy MyEngine.dll to MyEditor's output directory after building
+add_custom_command(TARGET MyEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:MyEngine>"
+        "$<TARGET_FILE_DIR:MyEditor>"
+    COMMENT "Copying MyEngine.dll to MyEditor output directory"
+)

@@ -8,10 +8,21 @@ file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_LIST_DIR}/**/*.hpp"
 )
 
-add_library(${ENGINE_NAME} STATIC ${ENGINE_SRC})
+# Make SHARED to be DLL instead of lib
+add_library(${ENGINE_NAME} SHARED ${ENGINE_SRC})
+
+# CRITICAL: Export all symbols automatically
+set_target_properties(${ENGINE_NAME} PROPERTIES
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
+)
+
+# Define DLL export macro
+target_compile_definitions(${ENGINE_NAME} PRIVATE DLL_API_EXPORT)
+
 if (ENABLE_EDITOR)
     target_compile_definitions(MyEngine PUBLIC ENABLE_EDITOR)
 endif()
+
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${ENGINE_SRC})
 
 # C++ standard / warnings

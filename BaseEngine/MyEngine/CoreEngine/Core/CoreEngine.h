@@ -19,6 +19,7 @@
 // #include "../Asset/AssetsManager.h"
 #include "../MyEngine/Components/Health.h"
 #include "../MyEngine/Components/EntityType.h"
+#include "CoreEngine/Core/ImportExport.h"
 
 class Config;
 class AssetManager;
@@ -74,8 +75,8 @@ private:
 };
 
 // A global pointer to the instance of the core
-extern CoreEngine *Engine;
+extern DLL_API CoreEngine *Engine;
 extern Config config; // global scope
-extern AssetsManager mAssets;
+extern DLL_API AssetsManager mAssets;
 extern int WindowWidth;
 extern int WindowHeight;
