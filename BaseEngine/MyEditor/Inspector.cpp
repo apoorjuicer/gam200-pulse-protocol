@@ -7,6 +7,7 @@
 #include "Inspector.h"
 #include "Editor.h"                       // selectedEntity, INVALID_ENTITY, PrefabManager, etc.
 #include "../Graphics/glapp.h"           // GLApp::shdrpgms
+#include "../Graphics/Layer.h"           // GLApp::shdrpgms
 #include "CoreEngine/Asset/AssetsManager.h"
 
 #include <filesystem>
@@ -98,6 +99,62 @@ namespace MyEditor
         }
 
         ImGui::Text("Entity ID: %d", (int)selectedEntity);
+
+        ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
+
+        // Create LayerTag if it doesn't exist
+        if (!g->HasComponent<LayerTag>(selectedEntity))
+        {
+            LayerTag tag{};
+            tag.mask = LAYER_WORLD;
+            tag.orderInLayer = 1;
+            tag.z = 0.0f;
+            g->AddComponent<LayerTag>(selectedEntity, tag);
+        }
+
+        auto& layer = g->GetComponent<LayerTag>(selectedEntity);
+
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f)); // Light blue
+        ImGui::TextUnformatted("Layer:");
+        ImGui::PopStyleColor();
+
+        ImGui::SameLine();
+
+        // Layer dropdown
+        const char* layerNames[] = { "Background", "World", "UI" };
+        int currentLayerIndex = 1; // Default to World
+
+        // Convert LayerMask to dropdown index
+        if (layer.mask == LAYER_BACKGROUND) currentLayerIndex = 0;
+        else if (layer.mask == LAYER_WORLD) currentLayerIndex = 1;
+        else if (layer.mask == LAYER_UI) currentLayerIndex = 2;
+
+        ImGui::SetNextItemWidth(100.0f);
+        if (ImGui::Combo("##LayerDropdown", &currentLayerIndex, layerNames, 3))
+        {
+            // Convert dropdown index back to LayerMask
+            switch (currentLayerIndex)
+            {
+            case 0:
+                layer.mask = LAYER_BACKGROUND;
+                layer.orderInLayer = 0;
+                layer.z = 0.0f;
+                break;
+            case 1:
+                layer.mask = LAYER_WORLD;
+                layer.orderInLayer = 1;
+                layer.z = 0.0f;
+                break;
+            case 2:
+                layer.mask = LAYER_UI;
+                layer.orderInLayer = 10;
+                layer.z = 100.0f;
+                break;
+            }
+        }
+
         ImGui::Separator();
 
         // ---------------------------------------------------------------------
@@ -164,16 +221,17 @@ namespace MyEditor
                 }
             }
 
-            // GUIButton
-            if (!coord->HasComponent<GUIButton>(selectedEntity))
-            {
-                if (ImGui::MenuItem("GUIButton"))
-                {
-                    GUIButton b{};
-                    b.buttonID = "button";
-                    coord->AddComponent<GUIButton>(selectedEntity, b);
-                }
-            }
+            //// GUIButton
+            //if (!coord->HasComponent<UIElement>(selectedEntity))
+            //{
+            //    if (ImGui::MenuItem("UIElement"))
+            //    {
+            //        UIElement ui{};
+            //        ui.elementID = "ui_element";
+            //        ui.type = UIType::HEALTH_BAR;  // Default to health bar for now
+            //        coord->AddComponent<UIElement>(selectedEntity, ui);
+            //    }
+            //} 
 
             ImGui::EndPopup();
         }
@@ -518,28 +576,6 @@ namespace MyEditor
                 if (StepperFloat("Anim Speed (fps)", &sp, 0.0f, 120.0f, 0.1f))
                     a.animationSpeed = std::max(0.0f, sp);
             }
-
-            ImGui::Separator();
-        }
-
-        // ---------------------------------------------------------------------
-        // GUIButton component
-        // ---------------------------------------------------------------------
-        if (g->HasComponent<GUIButton>(selectedEntity))
-        {
-            auto& b = g->GetComponent<GUIButton>(selectedEntity);
-
-            ImGui::TextUnformatted("GUIButton");
-            ImGui::Separator();
-
-            static char idBuf[256];
-            std::strncpy(idBuf, b.buttonID.c_str(), sizeof(idBuf));
-            idBuf[sizeof(idBuf) - 1] = '\0';
-            if (ImGui::InputText("Button ID", idBuf, IM_ARRAYSIZE(idBuf)))
-                b.buttonID = idBuf;
-
-            if (ImGui::Button("Remove GUIButton"))
-                g->RemoveComponent<GUIButton>(selectedEntity);
 
             ImGui::Separator();
         }

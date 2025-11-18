@@ -149,6 +149,15 @@ namespace MyEditor
         if (!g_coordinator || entity == INVALID_ENTITY)
             return;
 
+        // Auto-add Name component if missing
+        if (!g_coordinator->HasComponent<Name>(entity))
+        {
+            Name newName;
+            newName.name = "Entity " + std::to_string(static_cast<int>(entity));
+            g_coordinator->AddComponent<Name>(entity, newName);
+        }
+
+
         if (g_coordinator->HasComponent<Name>(entity))
         {
             s_renameState.renamingEntity = entity;

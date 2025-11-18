@@ -35,15 +35,15 @@ namespace MyEditor
         bool hasName;
         Name name;
 
-        bool hasGuiButton;
-        GUIButton guiButton;
+        //bool hasGuiButton;
+        //GUIButton guiButton;
 
         SavedEntityState()
             : id(INVALID_ENTITY),
             hasTransform(false),
             hasRenderable(false),
-            hasName(false),
-            hasGuiButton(false)
+            hasName(false)
+            //hasGuiButton(false)
         {
         }
     };
@@ -83,11 +83,11 @@ namespace MyEditor
                   st.name = coord->GetComponent<Name>(e);
               }
 
-              if (coord->HasComponent<GUIButton>(e))
-              {
-                  st.hasGuiButton = true;
-                  st.guiButton = coord->GetComponent<GUIButton>(e);
-              }
+              //if (coord->HasComponent<GUIButton>(e))
+              //{
+              //    st.hasGuiButton = true;
+              //    st.guiButton = coord->GetComponent<GUIButton>(e);
+              //}
 
               s_editorBaseline.push_back(std::move(st));
           }
@@ -117,8 +117,8 @@ namespace MyEditor
               if (coord->HasComponent<Name>(st.id) && st.hasName)
                   coord->GetComponent<Name>(st.id) = st.name;
 
-              if (coord->HasComponent<GUIButton>(st.id) && st.hasGuiButton)
-                  coord->GetComponent<GUIButton>(st.id) = st.guiButton;
+              //if (coord->HasComponent<GUIButton>(st.id) && st.hasGuiButton)
+              //    coord->GetComponent<GUIButton>(st.id) = st.guiButton;
           }
 
           std::cout << "[Editor] Restored baseline.\n";
@@ -238,10 +238,6 @@ namespace MyEditor
             if (!s_isPlaying)
             {
                 // START PLAYING
-                if (!s_hasEditorBaseline)
-                {
-                    CaptureEditorBaseline();
-                }
                 Engine->PlayGame();
                 s_isPlaying = true;
                 isPaused = false;
@@ -249,12 +245,10 @@ namespace MyEditor
             }
             else
             {
-                // STOP PLAYING & RESTORE
+                // STOP PLAYING
                 Engine->StopGame();
                 s_isPlaying = false;
                 isPaused = false;
-                RestoreEditorBaseline();
-                s_hasEditorBaseline = false;
                 std::cout << "[Editor] Stopped - Scene Restored\n";
             }
         }
@@ -294,6 +288,40 @@ namespace MyEditor
         if (!s_isPlaying && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
         {
             ImGui::SetTooltip("Start playing to enable Pause");
+        }
+
+        // for the layer dropdown list
+        static int s_layerFilter = 3; // 3 = Show All
+        const char* layerOptions[] = { "Background", "World", "UI", "All" };
+
+        // Calculate positions for right-aligned placement
+        ImVec2 layerTextSize = ImGui::CalcTextSize("Layers:");
+        float comboWidth = 100.0f;
+        float totalLayerWidth = layerTextSize.x + itemSpacing + comboWidth;
+
+        // Position at right side of window with some padding
+        float rightPadding = 20.0f;
+        float layerX = windowWidth - totalLayerWidth - rightPadding;
+
+        // Move cursor to right side
+        ImGui::SameLine(layerX);
+
+        ImGui::Text("Layers:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(100.0f);
+        if (ImGui::Combo("##LayerFilter", &s_layerFilter, layerOptions, 4)) {
+            auto graphicsMgr = Coordinator::GetInstance()->GetSystem<GraphicsManager>();
+            if (graphicsMgr) {
+                LayerMask filterMask = LAYER_ALL;
+                switch (s_layerFilter) {
+                case 0: filterMask = LAYER_BACKGROUND; break;
+                case 1: filterMask = LAYER_WORLD; break;
+                case 2: filterMask = LAYER_UI; break;
+                case 3: filterMask = LAYER_ALL; break;
+                }
+                graphicsMgr->SetEditorLayerFilter(filterMask);/*
+                std::cout << "[TopBar] Layer filter: " << layerOptions[s_layerFilter] << std::endl;*/
+            }
         }
 
         ImGui::PopStyleVar();

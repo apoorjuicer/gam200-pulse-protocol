@@ -206,15 +206,11 @@ void GraphicsManager::Update()
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //--- Rendering passes ---
-    // Background pass
-    glapp->draw(EntityMember, LAYER_BACKGROUND);
-
-    // Sprites pass
-    glapp->draw(EntityMember, LAYER_WORLD);
+    glapp->draw(EntityMember, m_editorLayerFilter);
     //------------------------
 
     // Draw in-game gui system & UI overlay
-    RenderUIOverlayElements();
+    //RenderUIOverlayElements();
 #ifdef ENABLE_EDITOR
     // Draw overlay text last
     auto& textShader = GLApp::shdrpgms[3];
@@ -502,92 +498,107 @@ void GraphicsManager::OnResize(int width, int height)
     // you can rebuild 'projection' here too.
 }
 
-void GraphicsManager::RenderUIOverlayElements()
+void GraphicsManager::SetEditorLayerFilter(LayerMask filter)
 {
-    auto *coordinator = Coordinator::GetInstance();
-    auto guiMgr = coordinator->GetSystem<GUIManager>();
-
-    if (!guiMgr) {
-        std::cerr << "[GraphicsManager] : inputMgr not found!!! in RenderUIOverlayElements\n";
-        return;
-    }
-
-    auto &shader = GLApp::shdrpgms[2];
-    shader.Use();
-
-    for (auto entity : guiMgr->GUIButtonEntities)
-    {
-        if (!coordinator->HasComponent<GUIButton>(entity))
-            continue;
-        if (!coordinator->HasComponent<Framework::Transform>(entity))
-            continue;
-
-        auto &button = coordinator->GetComponent<GUIButton>(entity);
-        auto &transform = coordinator->GetComponent<Framework::Transform>(entity);
-
-        // Skip rendering if entity is hidden
-        if (!transform.isVisible)
-        {
-            continue;
-        }
-
-        // Skip rendering if alpha is 0 (transparent)
-        if (button.normalColor.a <= 0.0f && button.hoverColor.a <= 0.0f)
-        {
-            continue;
-        }
-
-        // Choose color based on button state
-        glm::vec4 color = (button.currentState == ButtonState::Hover)
-                              ? button.hoverColor
-                              : button.normalColor;
-
-        // Convert world coords to screen coords
-        float screenX = transform.Pos.x + 800.0f;
-        float screenY = 450.0f - transform.Pos.y;
-
-        // Draw colored rectangle
-        RenderColoredQuad(screenX, screenY, transform.Scale.x, transform.Scale.y, color);
-
-        // ADD TEXT LABEL ON THE BUTTON
-        if (m_uiFont)
-        {
-            // Calculate text size to center it properly
-            float textScale = 0.8f;
-
-            float estimatedTextWidth = button.label.length() * 10.0f * textScale;
-            float textX = screenX - (estimatedTextWidth * 0.5f) - 30.0f;
-            float textY = screenY + 5.0f;
-
-            // Different adjustments for each button, prevents both text from moving together
-            if (button.buttonID == "btn_create")
-            {
-                textX -= 10.0f; // Move "Create Hero" left
-                textY += 6.0f;  // Move down
-            }
-            else if (button.buttonID == "btn_destroy")
-            {
-                textX -= 10.0f; // Move "Destroy Hero" left
-                textY += 6.0f;  // Move down
-            }
-
-            RenderText(
-                GLApp::shdrpgms[3],
-                button.label,
-                textX,
-                textY,
-                textScale,
-                glm::vec3(1.0f, 1.0f, 1.0f), // White text
-                m_uiFont);
-
-            // std::cerr << "[GraphicsManager] m_uiFont found!!!!!!!!!\n";
-        }
-        else
-        {
-            std::cerr << "[GraphicsManager] m_uiFont not found\n";
-        }
-    }
+    m_editorLayerFilter = filter;
+    std::cout << "[GraphicsManager] Editor layer filter set to: " << filter << std::endl;
 }
+
+//void GraphicsManager::RenderUIOverlayElements()
+//{
+//    auto *coordinator = Coordinator::GetInstance();
+//    auto guiMgr = coordinator->GetSystem<GUIManager>();
+//
+//    if (!guiMgr) {
+//        std::cerr << "[GraphicsManager] : inputMgr not found!!! in RenderUIOverlayElements\n";
+//        return;
+//    }
+//
+//    auto &shader = GLApp::shdrpgms[2];
+//    shader.Use();
+//
+//    for (auto entity : guiMgr->GUIButtonEntities)
+//    {
+//        if (m_editorLayerFilter != LAYER_ALL) {
+//            if (coordinator->HasComponent<LayerTag>(entity)) {
+//                auto& layerTag = coordinator->GetComponent<LayerTag>(entity);
+//                if (!(layerTag.mask & m_editorLayerFilter)) {
+//                    continue; // Skip this entity - doesn't match filter
+//                }
+//            }
+//        }
+//
+//        if (!coordinator->HasComponent<GUIButton>(entity))
+//            continue;
+//        if (!coordinator->HasComponent<Framework::Transform>(entity))
+//            continue;
+//
+//        auto &button = coordinator->GetComponent<GUIButton>(entity);
+//        auto &transform = coordinator->GetComponent<Framework::Transform>(entity);
+//
+//        // Skip rendering if entity is hidden
+//        if (!transform.isVisible)
+//        {
+//            continue;
+//        }
+//
+//        // Skip rendering if alpha is 0 (transparent)
+//        if (button.normalColor.a <= 0.0f && button.hoverColor.a <= 0.0f)
+//        {
+//            continue;
+//        }
+//
+//        // Choose color based on button state
+//        glm::vec4 color = (button.currentState == ButtonState::Hover)
+//                              ? button.hoverColor
+//                              : button.normalColor;
+//
+//        // Convert world coords to screen coords
+//        float screenX = transform.Pos.x + 800.0f;
+//        float screenY = 450.0f - transform.Pos.y;
+//
+//        // Draw colored rectangle
+//        RenderColoredQuad(screenX, screenY, transform.Scale.x, transform.Scale.y, color);
+//
+//        // ADD TEXT LABEL ON THE BUTTON
+//        if (m_uiFont)
+//        {
+//            // Calculate text size to center it properly
+//            float textScale = 0.8f;
+//
+//            float estimatedTextWidth = button.label.length() * 10.0f * textScale;
+//            float textX = screenX - (estimatedTextWidth * 0.5f) - 30.0f;
+//            float textY = screenY + 5.0f;
+//
+//            // Different adjustments for each button, prevents both text from moving together
+//            if (button.buttonID == "btn_create")
+//            {
+//                textX -= 10.0f; // Move "Create Hero" left
+//                textY += 6.0f;  // Move down
+//            }
+//            else if (button.buttonID == "btn_destroy")
+//            {
+//                textX -= 10.0f; // Move "Destroy Hero" left
+//                textY += 6.0f;  // Move down
+//            }
+//
+//            RenderText(
+//                GLApp::shdrpgms[3],
+//                button.label,
+//                textX,
+//                textY,
+//                textScale,
+//                glm::vec3(1.0f, 1.0f, 1.0f), // White text
+//                m_uiFont);
+//
+//            // std::cerr << "[GraphicsManager] m_uiFont found!!!!!!!!!\n";
+//        }
+//        else
+//        {
+//            std::cerr << "[GraphicsManager] m_uiFont not found\n";
+//        }
+//    }
+//}
 
 void GraphicsManager::InitWhiteTexture()
 {
@@ -808,6 +819,7 @@ bool GraphicsManager::LoadFontFile(const std::string &fontFilePath,
 
     FontData data;
     data.pixelHeight = pixelHeight;
+
 
     for (unsigned char c = 0; c < 128; ++c)
     {

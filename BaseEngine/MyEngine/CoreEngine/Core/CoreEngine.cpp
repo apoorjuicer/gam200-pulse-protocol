@@ -378,14 +378,14 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<Health>();
 	g_coordinator->RegisterComponent<LogicComponent>();
 	g_coordinator->RegisterComponent<NamingComponent>();
-	g_coordinator->RegisterComponent<GUIButton>();
+	g_coordinator->RegisterComponent<UIElement>();
 	g_coordinator->RegisterComponent<Name>();
 	g_coordinator->RegisterComponent<LayerTag>();
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
 	g_coordinator->RegisterSystem<RhythmGameplayInput>();
-	g_coordinator->RegisterSystem<GUIManager>();
+	//g_coordinator->RegisterSystem<GUIManager>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<CollisionManager>();
@@ -411,10 +411,10 @@ void CoreEngine::Setup()
 	rhythmSig.set(g_coordinator->GetComponentType<Framework::Animation>());
 	g_coordinator->SetSystemSignature<RhythmGameplayInput>(rhythmSig);
 
-	Signature guiSig;
-	guiSig.set(g_coordinator->GetComponentType<GUIButton>());
-	guiSig.set(g_coordinator->GetComponentType<Framework::Transform>());
-	g_coordinator->SetSystemSignature<GUIManager>(guiSig);
+	//Signature UISig;
+	//UISig.set(g_coordinator->GetComponentType<UIElement>());
+	//UISig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	//g_coordinator->SetSystemSignature<GUIManager>(UISig);
 
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
@@ -860,21 +860,21 @@ void CoreEngine::StopGame()
 		audio->StopBGM();
 	}
 
-	// reloads original scene to reset all entities to initial starting position
-	if (auto sceneMgr = coord->GetSystem<SceneManager>())
-	{
-		if (!m_originalScenePath.empty())
-		{
-			sceneMgr->LoadSceneFromJson(m_originalScenePath);
+	//// reloads original scene to reset all entities to initial starting position
+	//if (auto sceneMgr = coord->GetSystem<SceneManager>())
+	//{
+	//	if (!m_originalScenePath.empty())
+	//	{
+	//		sceneMgr->LoadSceneFromJson(m_originalScenePath);
 
-			// Sync GUI tracking after scene reload
-			if (auto guiMgr = coord->GetSystem<GUIManager>())
-			{
-				guiMgr->SyncTrackingWithScene();
-				std::cout << "[CoreEngine] GUI tracking synced after Stop" << std::endl;
-			}
-		}
-	}
+	//		// Sync GUI tracking after scene reload
+	//		//if (auto guiMgr = coord->GetSystem<GUIManager>())
+	//		//{
+	//		//	guiMgr->SyncTrackingWithScene();
+	//		//	std::cout << "[CoreEngine] GUI tracking synced after Stop" << std::endl;
+	//		//}
+	//	}
+	//}
 }
 
 // this might have been causing the random crash cus its calling restartBGM() too

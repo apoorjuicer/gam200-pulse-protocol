@@ -38,7 +38,7 @@
 #include "CoreEngine/ECS/System.h"
 // #include "CoreEngine/ECS/SystemManager.h"
 #include "UI/GUIManager.h"
-#include "UI/GUIButton.h"
+#include "UI/UIElement.h"
 
 #include "glapp.h"
 #include <ft2build.h>
@@ -91,6 +91,7 @@ public:
     void Update();
     void Shutdown();
     void OnResize(int width, int height);
+    void SetEditorLayerFilter(LayerMask filter);
 
     GraphicsManager(GraphicsManager const &) = delete; // no copy
     GraphicsManager &operator=(GraphicsManager const &) = delete;
@@ -123,7 +124,7 @@ private:
     // void RenderGUIButtons();
     // void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
 
-    // // For In-Game GUI System & ui overlay
+    // For In-Game GUI System & ui overlay
     void RenderUIOverlayElements();
     void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
 
@@ -180,6 +181,8 @@ private:
 
     FT_Library m_ft = nullptr; // FreeType main library handle
     std::unordered_map<std::string, FontData> m_fontMap;
+
+    LayerMask m_editorLayerFilter = LAYER_ALL;
 
     //debug
     void PrintFontMap();

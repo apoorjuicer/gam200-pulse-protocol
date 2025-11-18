@@ -101,7 +101,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.012111336924135685,
+                        "elapsedTime": 0.03021443821489811,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -257,27 +257,6 @@
                             "b": 1.0,
                             "a": 1.0
                         }
-                    }
-                },
-                {
-                    "ui": {
-                        "buttonID": "feedback_bar",
-                        "label": "",
-                        "normalColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 0.0
-                        },
-                        "hoverColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 0.0
-                        },
-                        "actionType": "",
-                        "entityJsonPath": "",
-                        "isEnabled": false
                     }
                 },
                 {

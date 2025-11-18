@@ -91,21 +91,21 @@ void RhythmGameplayInput::Update(float deltaTime)
 
                     // Check components
                     bool hasTransform = g_coordinator->HasComponent<Framework::Transform>(entity);
-                    bool hasGUIButton = g_coordinator->HasComponent<GUIButton>(entity);
+                    //bool hasUIElement = g_coordinator->HasComponent<UIElement>(entity);
                     /*bool hasRenderable = g_coordinator->HasComponent<Framework::Renderable>(entity);*/
 
                     // std::cout << "[DEBUG] Has Transform: " << (hasTransform ? "YES" : "NO") << std::endl;
                     // std::cout << "[DEBUG] Has GUIButton: " << (hasGUIButton ? "YES" : "NO") << std::endl;
                     // std::cout << "[DEBUG] Has Renderable: " << (hasRenderable ? "YES" : "NO") << std::endl;
 
-                    if (hasGUIButton)
-                    {
-                        auto &button = g_coordinator->GetComponent<GUIButton>(entity);
-                        // std::cout << "[DEBUG] Initial normalColor alpha: " << button.normalColor.a << std::endl;
-                        button.normalColor.a = 0.0f;
-                        button.hoverColor.a = 0.0f;
-                        /*std::cout << "[DEBUG] Set alpha to 0.0" << std::endl;*/
-                    }
+                    //if (hasUIElement)
+                    //{
+                    //    auto &button = g_coordinator->GetComponent<UIElement>(entity);
+                    //    // std::cout << "[DEBUG] Initial normalColor alpha: " << button.normalColor.a << std::endl;
+                    //    button.normalColor.a = 0.0f;
+                    //    button.hoverColor.a = 0.0f;
+                    //    /*std::cout << "[DEBUG] Set alpha to 0.0" << std::endl;*/
+                    //}
 
                     if (hasTransform)
                     {
@@ -143,12 +143,12 @@ void RhythmGameplayInput::Update(float deltaTime)
                     transform.isVisible = true;
                     transform.autoHide = false;
 
-                    if (g_coordinator->HasComponent<GUIButton>(fontEntity))
-                    {
-                        auto &button = g_coordinator->GetComponent<GUIButton>(fontEntity);
-                        button.normalColor.a = 0.0f;
-                        button.hoverColor.a = 0.0f;
-                    }
+                    //if (g_coordinator->HasComponent<GUIButton>(fontEntity))
+                    //{
+                    //    auto &button = g_coordinator->GetComponent<GUIButton>(fontEntity);
+                    //    button.normalColor.a = 0.0f;
+                    //    button.hoverColor.a = 0.0f;
+                    //}
                 }
             }
         }
@@ -208,16 +208,16 @@ void RhythmGameplayInput::processRhythmInputs()
             std::cout << "[KEY DETECTED] " << keyNames[i] << " key pressed!" << std::endl;
 
             // Show feedback bar by setting alpha to 1.0
-            if (g_coordinator->HasComponent<GUIButton>(fontEntity))
-            {
-                auto &button = g_coordinator->GetComponent<GUIButton>(fontEntity);
-                button.normalColor.a = 1.0f; // Make visible
-                button.hoverColor.a = 1.0f;
+            //if (g_coordinator->HasComponent<GUIButton>(fontEntity))
+            //{
+            //    auto &button = g_coordinator->GetComponent<GUIButton>(fontEntity);
+            //    button.normalColor.a = 1.0f; // Make visible
+            //    button.hoverColor.a = 1.0f;
 
-                auto &transform = g_coordinator->GetComponent<Framework::Transform>(fontEntity);
-                transform.visibilityTimer = 2.0f;
-                transform.autoHide = true;
-            }
+            //    auto &transform = g_coordinator->GetComponent<Framework::Transform>(fontEntity);
+            //    transform.visibilityTimer = 2.0f;
+            //    transform.autoHide = true;
+            //}
 
             processRhythmTiming(rhythmKeys[i]);
             broadcastInputEvent(InputEvent(InputEvent::Type::RHYTHM_INPUT, rhythmKeys[i], glfwGetTime()));
