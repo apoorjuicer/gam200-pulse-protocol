@@ -88,9 +88,16 @@ elseif (MSVC)
 endif()
 
 message(STATUS "[${EDITOR_NAME}] sources: ${EDITOR_SRC}")
-
+# Debug DLL
 add_custom_command(TARGET MyEditor POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmodL.dll"
+    $<TARGET_FILE_DIR:MyEditor>
+)
+
+# Release DLL
+add_custom_command(TARGET MyEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmod.dll"
     $<TARGET_FILE_DIR:MyEditor>
 )
