@@ -175,7 +175,7 @@ int main() {
     
     // Create 2500 objects for rendering
     //CreateRenderObjects(2500);
-
+      
     // this is where the update() is 
     Engine->GameLoop();
 

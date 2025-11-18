@@ -359,6 +359,16 @@ void PlayerScript::Exit(Entity ID)
 	(void)ID;
 }
 
+void PlayerScript::Serialize() 
+{
+    health++;
+    //enemyDmg; can't use since its enemy.
+}
+
+PlayerScript* PlayerScript::Clone() {
+    return new PlayerScript{};
+}
+
 void EnemyScript::Init(Entity ID)
 {
 	(void)ID;
@@ -569,5 +579,10 @@ void EnemyScript::Update(Entity ID)
 void EnemyScript::Exit(Entity ID)
 {
 	(void)ID;
+}
+
+EnemyScript* EnemyScript::Clone()
+{
+    return new EnemyScript{};
 }
 
