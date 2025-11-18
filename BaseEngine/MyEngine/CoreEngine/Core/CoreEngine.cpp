@@ -247,6 +247,29 @@ void CoreEngine::Init()
 
 	glfwMakeContextCurrent(window);
 
+	// Pause/resume on focus change (covers ALT+TAB and returning from Ctrl+Alt+Del)
+	glfwSetWindowFocusCallback(window,
+		[](GLFWwindow* win, int focused)
+		{
+			(void)win;
+			if (!Engine) return;
+			if (focused)
+				Engine->SetPaused(false);
+			else
+				Engine->SetPaused(true);
+		});
+
+	// Also pause when minimized / restored
+	glfwSetWindowIconifyCallback(window,
+		[](GLFWwindow* win, int iconified)
+		{
+			(void)win;
+			if (!Engine) return;
+			if (iconified == GLFW_TRUE)
+				Engine->SetPaused(false);
+			// When restored, focus callback will unpause if the window regains focus
+		});
+
 #ifdef ENABLE_EDITOR
 	glfwSetDropCallback(window, [](GLFWwindow*, int count, const char** paths)
 		{
@@ -446,8 +469,30 @@ void CoreEngine::Update(float dt)
 	auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
-
 	auto profiler = ProfilingManager::GetInstance();
+
+	if (!m_paused)
+	{
+		profiler->StartSystem("Scene System");
+		if (g_sceneSystem) g_sceneSystem->Update(dt);
+		profiler->EndSystem("Scene System");
+
+		profiler->StartSystem("LogicSystem");
+		g_coordinator->UpdateAllSystems(dt);
+		profiler->EndSystem("LogicSystem");
+
+		profiler->StartSystem("Input System");
+		if (g_inputSystem) g_inputSystem->Update(dt);
+		profiler->EndSystem("Input System");
+
+		profiler->StartSystem("RhythmGameplayInput");
+		if (g_rhythmSystem) g_rhythmSystem->Update(dt);
+		profiler->EndSystem("RhythmGameplayInput");
+
+		profiler->StartSystem("Audio System");
+		if (g_audioSystem) g_audioSystem->Update();
+		profiler->EndSystem("Audio System");
+	}
 
 	profiler->StartSystem("Scene System");
 	if (g_sceneSystem)
@@ -784,21 +829,21 @@ void CoreEngine::RenderDebugDraw()
 	DebugDraw::End();
 }
 
-// void CoreEngine::SetPaused(bool paused)
-//{
-//	if (m_paused == paused) return;
-//	m_paused = paused;
-//
-//	// Pause/resume audio, too
-//	if (auto audio = Coordinator::GetInstance()->GetSystem<AudioManager>()) {
-//		audio->SetPaused(paused);
-//	}
-// }
-//
-// void CoreEngine::TogglePaused()
-//{
-//	SetPaused(!m_paused);
-// }
+ void CoreEngine::SetPaused(bool paused)
+{
+	if (m_paused == paused) return;
+	m_paused = paused;
+
+	// Pause/resume audio, too
+	if (auto audio = Coordinator::GetInstance()->GetSystem<AudioManager>()) {
+		audio->SetPaused(paused);
+	}
+ }
+
+ void CoreEngine::TogglePaused()
+{
+	SetPaused(!m_paused);
+ }
 
 void CoreEngine::PlayGame()
 {

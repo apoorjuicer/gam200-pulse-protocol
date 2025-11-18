@@ -36,9 +36,9 @@ public:
 	void GameLoop();
 	void Exit();
 
-	// void SetPaused(bool p);
-	// void TogglePaused();
-	// bool IsPaused() const { return m_paused; }
+	void SetPaused(bool p);
+	void TogglePaused();
+	bool IsPaused() const { return m_paused; }
 
 	// One of the ways to glue systems tgt.
 	// void BroadcastMessage(Message* message);
@@ -59,7 +59,6 @@ public:
 	void RestartRuntimeForPlay();
 
 	// AssetsManager& getAssetsManager() { return mAssets; }
-
 private:
 	bool GameRunning;
 	bool DebugMode = false;
