@@ -7,11 +7,16 @@ add_library(ScriptAPI SHARED
     TestAPI.cpp
 )
 
+# VSC properties setting for ScriptAPI (Cos its C++/CLI, its a lil complicated so we automatically export it)
+set_target_properties(ScriptAPI PROPERTIES
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
+)
+
 # Enable C++/CLI (Common Language Runtime)
 set_target_properties(ScriptAPI PROPERTIES
     COMMON_LANGUAGE_RUNTIME ""
     VS_GLOBAL_CLRSupport "true"
-    CXX_STANDARD 17
+    CXX_STANDARD 20
     CXX_STANDARD_REQUIRED ON
 )
 
@@ -30,3 +35,8 @@ set_target_properties(ScriptAPI PROPERTIES
     
 # Set folder organization for Visual Studio
 set_property(TARGET ScriptAPI PROPERTY FOLDER "")
+
+# Enables multi-processor parallel compilation in Visual Studio
+if(MSVC)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif()

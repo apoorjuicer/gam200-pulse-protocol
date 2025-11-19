@@ -1,9 +1,11 @@
 set(CMAKE_FOLDER "Libraries")
+
 include(FetchContent)
 
 # Macro to import GLFW
 macro(import_glfw)
  if(NOT TARGET glfw)
+        set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
         FetchContent_Declare(
             glfw
             GIT_REPOSITORY https://github.com/glfw/glfw.git
@@ -13,9 +15,11 @@ macro(import_glfw)
         set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
         set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
         set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+        set(GLFW_BUILD_DLL ON CACHE BOOL "" FORCE)
 
         # Works on CMake >=3.14, including 3.29.2 and all 4.x
         FetchContent_MakeAvailable(glfw)
+        set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
         # no add_subdirectory(), no include_directories()
     endif()
 endmacro()

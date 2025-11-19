@@ -102,3 +102,18 @@ add_custom_command(TARGET MyEditor POST_BUILD
         "$<TARGET_FILE_DIR:MyEditor>"
     COMMENT "Copying MyEngine.dll to MyEditor output directory"
 )
+
+# Automatically copies all third-party runtime DLLs(GLFW) that MyEditor depends on to the executable directory
+add_custom_command(TARGET MyEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_RUNTIME_DLLS:MyEditor>"
+        "$<TARGET_FILE_DIR:MyEditor>"
+    COMMAND_EXPAND_LISTS
+    COMMENT "Copying DLL Dependencies like glfw3.dll to editor executable directory."
+    VERBATIM
+)
+
+# Enables multi-processor parallel compilation in Visual Studio
+if(MSVC)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif()

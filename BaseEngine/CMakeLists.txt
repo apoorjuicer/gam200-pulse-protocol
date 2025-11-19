@@ -69,11 +69,31 @@ message(STATUS "ENABLE_EDITOR = ${ENABLE_EDITOR}")
 if (ENABLE_EDITOR)
     add_subdirectory(MyEditor)
     target_link_libraries(MyEditor PRIVATE MyEngine)
+
+    # MyEditor waits for C# and C++/CLI Dll to build first
+    if(TARGET ScriptAPI)
+        add_dependencies(MyEditor ScriptAPI)
+    endif()
+    if(TARGET ManagedScripts)
+        add_dependencies(MyEditor ManagedScripts)
+    endif()
+
     target_compile_definitions(MyEngine PUBLIC ENABLE_EDITOR)
     target_compile_definitions(MyEditor PUBLIC ENABLE_EDITOR)
 endif()
+
 # Add the game executable (no editor)
 add_subdirectory(MyGame)
+
+# Add C# scripting and C++/CLI dependencies for MyGame
+if(TARGET ScriptAPI)
+    add_dependencies(MyGame ScriptAPI)
+endif()
+if(TARGET ManagedScripts)
+    add_dependencies(MyGame ManagedScripts)
+endif()
+
+
 # Keep app targets OUTSIDE any folder
 if(TARGET MyEngine)
     set_property(TARGET MyEngine PROPERTY FOLDER "")

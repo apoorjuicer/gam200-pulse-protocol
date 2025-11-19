@@ -23,9 +23,9 @@
 #include "CoreEngine/Factory/Factory.h"
 
 // move to editor pls
-//#ifdef ENABLE_EDITOR
-//#include "../MyEditor/Editor.h"
-//#endif
+#ifdef ENABLE_EDITOR
+#include "../MyEditor/Editor.h"
+#endif
 #include "../MyEngine/TestCases/TestCase.h"
 // #include "glapp.h"
 #include "../MyEngine/Resources/AssetRegistry.h"
@@ -260,6 +260,7 @@ void CoreEngine::Init()
 //	// In game build we don't care about editor file drops
 //	glfwSetDropCallback(window, nullptr);
 //#endif
+	 
 
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwSetFramebufferSizeCallback(window,
@@ -346,23 +347,8 @@ void CoreEngine::Init()
 
 	GameRunning = true;
 
-	// std::string filePath = "../../MyEngine/JSON/test.json";//AssetManager.mPrefabMap[path];
-	// Factory factory;
-	// SceneManager SM;
-	// factory.CreateEntityFromJson(filePath);
 
-	// std::string filePath2 = "../../MyEngine/JSON/test2.json";
-	// Entity entity = factory.DefaultObj();
-	// LogicComponent l;
-	// l.ScriptName = "IT WORKS!!!!";
-	// g_coordinator->AddComponent(entity, l);
-	// factory.SaveEntityToJson(entity, filePath2);
 
-	// std::string filePath3 = "../../MyEngine/JSON/MainMenu.json";
-	// SM.LoadSceneFromJson(filePath3);
-	// SM.SaveCurrentScene();
-
-	// Test.Init();
 }
 
 void CoreEngine::Setup()
@@ -532,7 +518,8 @@ void CoreEngine::GameLoop()
 		profiler->EndFrame();
 
 		// move to editor pls
-//#ifdef ENABLE_EDITOR
+//#ifdef 
+// 
 //		MyEditor::NewFrame();
 //#endif
 

@@ -19,7 +19,9 @@ set_target_properties(${ENGINE_NAME} PROPERTIES
 # Define DLL export macro
 target_compile_definitions(${ENGINE_NAME} PRIVATE DLL_API_EXPORT)
 
-if (ENABLE_EDITOR)
+if (
+
+)
     target_compile_definitions(MyEngine PUBLIC ENABLE_EDITOR)
 endif()
 
@@ -46,7 +48,8 @@ target_include_directories(${ENGINE_NAME} PUBLIC
 if (NOT DEFINED FMOD_API_DIR_FOUND)
   set(_FMOD_CANDIDATES
       "${FMOD_API_DIR}"                                   # user-provided -DFMOD_API_DIR=...
-      "${CMAKE_CURRENT_LIST_DIR}/../FMOD_API"             # project root / FMOD_API
+      #"${CMAKE_CURRENT_LIST_DIR}/../FMOD_API"             # project root / FMOD_API
+      "${CMAKE_CURRENT_LIST_DIR}/FMOD_API"             # project root / FMOD_API
       "${CMAKE_CURRENT_LIST_DIR}/FMOD_API"                # MyEngine/FMOD_API
       "${CMAKE_SOURCE_DIR}/FMOD_API"                      # top-level / FMOD_API
       "${CMAKE_SOURCE_DIR}/ThirdParty/FMOD_API"           # typical thirdparty layout
@@ -76,6 +79,7 @@ target_link_libraries(${ENGINE_NAME} PUBLIC
     imgui
     imgui_backend
     Freetype::Freetype
+    ScriptAPI
 )
 
 # FMOD libraries (multi-config safe for MSVC)
@@ -120,13 +124,16 @@ add_custom_command(TARGET MyEngine POST_BUILD
     COMMENT "Copying .NET Runtime DLLs to MyEngine output directory"
 )
 
-# Copy ManagedScripts from net8.0 folder to output directory (if it exists)
-add_custom_command(TARGET MyEngine POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "$<TARGET_FILE_DIR:MyEngine>/net8.0"
-        "$<TARGET_FILE_DIR:MyEngine>"
-    COMMAND ${CMAKE_COMMAND} -E remove_directory
-        "$<TARGET_FILE_DIR:MyEngine>/net8.0"
-    COMMENT "Copying ManagedScripts from net8.0 folder"
-    VERBATIM
-)
+# MyEngine wait for ManagedScripts to build first and include it in the build dependencies
+if(TARGET ManagedScripts)
+    add_dependencies(MyEngine ManagedScripts)
+endif()
+
+if(TARGET ScriptAPI)
+    add_dependencies(MyEngine ScriptAPI)
+endif()
+
+# Enables multi-processor parallel compilation in Visual Studio
+if(MSVC)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif()

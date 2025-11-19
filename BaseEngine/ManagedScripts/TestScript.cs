@@ -1,8 +1,13 @@
-// Placeholder C# file
-public class Placeholder 
+using System;
+
+namespace ManagedScripts
 {
-    public static void Hello() 
+    public class TestScript
     {
-        System.Console.WriteLine("Hello from ManagedScripts!");
+        public static void SayHello()
+        {
+            Console.WriteLine("[C#] Hello from ManagedScripts!");
+        }
+        
     }
 }

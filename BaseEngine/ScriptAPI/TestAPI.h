@@ -8,7 +8,6 @@ namespace ScriptAPI
     {
     public:
         static void SayHello();
-        static int Add(int a, int b);
     };
 }
 
