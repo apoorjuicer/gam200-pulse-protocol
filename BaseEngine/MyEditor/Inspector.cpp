@@ -1,3 +1,17 @@
+/******************************************************************************/
+/**
+ * @file        Inspector.cpp
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 70%
+ *              Chloe Lau Rey En (secondary) - 30%
+ * @brief       TBF
+ *
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
+
 // -----------------------------------------------------------------------------
 // Inspector.cpp  -  Entity inspector (components UI, prefab save, etc.)
 // -----------------------------------------------------------------------------
@@ -9,10 +23,7 @@
 #include "../Graphics/glapp.h"           // GLApp::shdrpgms
 #include "../Graphics/Layer.h"           // GLApp::shdrpgms
 #include "CoreEngine/Asset/AssetsManager.h"
-
-#include <filesystem>
-#include <algorithm>
-#include <cstring>
+#include "CoreEngine/Prefab/PrefabInstance.h"
 
 namespace MyEditor
 {
@@ -156,6 +167,84 @@ namespace MyEditor
         }
 
         ImGui::Separator();
+
+        // ---------------------------------------------------------------------
+        // Prefab Instance Info
+        // ---------------------------------------------------------------------
+        if (g->HasComponent<PrefabInstance>(selectedEntity))
+        {
+            auto& prefabInstance = g->GetComponent<PrefabInstance>(selectedEntity);
+
+            // Show prefab info in a colored header (like Unity)
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.4f, 0.7f, 0.8f));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+            if (ImGui::CollapsingHeader("Prefab Instance", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGui::PopStyleColor(2);
+
+                ImGui::Indent();
+
+                // Show prefab name
+                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "Prefab:");
+                ImGui::SameLine();
+                ImGui::Text("%s", prefabInstance.prefabName.c_str());
+
+                // Linked checkbox
+                bool isLinked = prefabInstance.isLinked;
+                if (ImGui::Checkbox("Linked to Prefab", &isLinked))
+                {
+                    prefabInstance.isLinked = isLinked;
+                    if (!isLinked) {
+                        std::cout << "[Inspector] Unlinked entity " << selectedEntity
+                            << " from prefab '" << prefabInstance.prefabName << "'" << std::endl;
+                    }
+                    else {
+                        std::cout << "[Inspector] Linked entity " << selectedEntity
+                            << " to prefab '" << prefabInstance.prefabName << "'" << std::endl;
+                    }
+                }
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::SetTooltip("Uncheck to make this instance independent from the prefab.\n"
+                        "When unchecked, this entity won't update when the prefab changes.");
+                }
+
+                ImGui::Spacing();
+
+                // CRITICAL: Apply to Prefab button
+                if (ImGui::Button("Apply to Prefab", ImVec2(-1, 30)))
+                {
+                    PrefabManager prefabMgr;
+
+                    // Save this entity's current state as the new prefab definition
+                    if (prefabMgr.SaveEntityAsPrefab(selectedEntity, prefabInstance.prefabName))
+                    {
+                        std::cout << "[Inspector] Saved entity " << selectedEntity
+                            << " as prefab '" << prefabInstance.prefabName << "'" << std::endl;
+
+                        // Update all other instances
+                        prefabMgr.UpdateAllInstancesOfPrefab(prefabInstance.prefabName);
+
+                        std::cout << "[Inspector] Updated all instances of prefab '"
+                            << prefabInstance.prefabName << "'" << std::endl;
+                    }
+                }
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::SetTooltip("Save this entity's current properties as the new prefab definition.\n"
+                        "All other instances of this prefab will update to match.");
+                }
+
+                ImGui::Unindent();
+            }
+            else
+            {
+                ImGui::PopStyleColor(2);
+            }
+
+            ImGui::Separator();
+        }
 
         // ---------------------------------------------------------------------
         // Right-click anywhere in inspector to add components

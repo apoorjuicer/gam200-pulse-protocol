@@ -1,22 +1,17 @@
 {
     "components": [
         {
-            "Typing": {
-                "Type": "Background"
-            }
-        },
-        {
             "transform": {
                 "position": {
-                    "x": -18.461334228515626,
-                    "y": 7.3845672607421879
+                    "x": 361.8460693359375,
+                    "y": -446.76922607421877
                 },
                 "scale": {
-                    "x": 1600.0,
-                    "y": 900.0
+                    "x": 600.0,
+                    "y": 100.0
                 },
                 "rotation": {
-                    "x": 0.0,
+                    "x": -360.0,
                     "y": 0.0
                 },
                 "isVisible": true,
@@ -29,7 +24,7 @@
                 "mdl_ref": 0.0,
                 "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg",
+                "spriteName": "C:\\Users\\User\\Desktop\\project_repos\\Bloop_CustomEngine\\BaseEngine\\MyEngine\\Assets\\Textures\\UI\\green bar.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -50,7 +45,14 @@
         },
         {
             "name": {
-                "name": "Background"
+                "name": "HealthBar"
+            }
+        },
+        {
+            "LayerTag": {
+                "mask": 4,
+                "orderInLayer": 10,
+                "z": 100.0
             }
         }
     ]

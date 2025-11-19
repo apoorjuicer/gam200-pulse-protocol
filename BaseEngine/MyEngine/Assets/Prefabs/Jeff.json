@@ -8,15 +8,15 @@
         {
             "transform": {
                 "position": {
-                    "x": -1010.4614868164063,
-                    "y": -260.0
+                    "x": 149.2308349609375,
+                    "y": 478.4615478515625
                 },
                 "scale": {
-                    "x": 500.0,
-                    "y": 500.0
+                    "x": 700.0,
+                    "y": 700.0
                 },
                 "rotation": {
-                    "x": 0.0,
+                    "x": 45.0,
                     "y": 0.0
                 },
                 "isVisible": true,
@@ -41,7 +41,7 @@
         {
             "animation": {
                 "currentFrame": 0,
-                "elapsedTime": 0.03042660653591156,
+                "elapsedTime": 0.012658986262977124,
                 "totalFrames": 2,
                 "columns": 2,
                 "rows": 1,
@@ -60,7 +60,7 @@
         },
         {
             "Health": {
-                "hp": 3,
+                "hp": 4,
                 "damage": 1,
                 "isAlive": true
             }
@@ -77,6 +77,13 @@
                 },
                 "width": 50.0,
                 "height": 50.0
+            }
+        },
+        {
+            "LayerTag": {
+                "mask": 2,
+                "orderInLayer": 1,
+                "z": 0.0
             }
         }
     ]

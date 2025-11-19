@@ -45,9 +45,15 @@ public:
     // get prefab path by name
     std::string GetPrefabPath(std::string const& prefabName);
 
+    // updates all entities that were instantiated from this prefab
+    void UpdateAllInstancesOfPrefab(std::string const& prefabName);
+
 private:
     std::string prefabDirectory = "../../MyEngine/Assets/Prefabs/";
-    
+
+    // updates a single entity from a prefab file (private helper)
+    bool UpdateEntityFromPrefab(Entity entity, std::string const& prefabPath);
+
     // using Factory internally
     Factory* factory;
 };

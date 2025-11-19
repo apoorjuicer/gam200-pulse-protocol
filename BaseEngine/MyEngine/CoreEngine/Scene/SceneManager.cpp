@@ -28,13 +28,14 @@
 #include "../MyEngine/Graphics/Transform.h"
 #include "../MyEngine/Graphics/Animation.h"
 #include "../MyEngine/Graphics/Renderable.h"
-//#include "../Components/AABB.h"
 #include "../MyEngine/CoreEngine/Assets.h"
+#include "../MyEngine/CoreEngine/Prefab/PrefabInstance.h"
 #include "../MyEngine/Components/Health.h"
 #include "../MyEngine/Components/EntityType.h"
 #include "../MyEngine/Components/DisplayName.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "Graphics/Layer.h"
+//#include "../Components/AABB.h"
 
 //Starting scene will be Main Menu
 SceneManager::SceneManager()
@@ -230,6 +231,19 @@ void SceneManager::SaveCurrentScene()
 			ComponentObj.AddMember("AABB", AABBVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
 			
+		}
+
+		// Save PrefabInstance component if entity has it
+		if (g_coordinator->HasComponent<PrefabInstance>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value PrefabInstanceVal;
+
+			auto& prefabInstance = g_coordinator->GetComponent<PrefabInstance>(entity);
+			prefabInstance.Serialize(PrefabInstanceVal, alloc);
+
+			ComponentObj.AddMember("prefabInstance", PrefabInstanceVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
 		//if (g_coordinator->HasComponent<UIElement>(entity))
@@ -442,6 +456,14 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				AABB aabb;
 				aabb.Deserialize(component["AABB"]);
 				g_coordinator->AddComponent<AABB>(entity, aabb);
+			}
+
+			// Load PrefabInstance component if present
+			if (component.HasMember("prefabInstance") && component["prefabInstance"].IsObject())
+			{
+				PrefabInstance pi;
+				pi.Deserialize(component["prefabInstance"]);
+				g_coordinator->AddComponent<PrefabInstance>(entity, pi);
 			}
 
 			// this is purely for the in-game basic GUI system & on screen UI elements

@@ -8,12 +8,12 @@
         {
             "transform": {
                 "position": {
-                    "x": 800.0,
-                    "y": 0.0
+                    "x": 1111.9228515625,
+                    "y": -448.30767822265627
                 },
                 "scale": {
-                    "x": 500.0,
-                    "y": 500.0
+                    "x": 600.0,
+                    "y": 600.0
                 },
                 "rotation": {
                     "x": 0.0,
@@ -27,9 +27,9 @@
         {
             "render": {
                 "mdl_ref": 1.0,
-                "shd_ref": 2.0,
+                "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
+                "spriteName": "C:\\Users\\User\\Desktop\\project_repos\\Bloop_CustomEngine\\BaseEngine\\MyEngine\\Assets\\Textures\\Enemies\\RedGorillaEnemy.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -77,6 +77,13 @@
                 },
                 "width": 50.0,
                 "height": 50.0
+            }
+        },
+        {
+            "LayerTag": {
+                "mask": 2,
+                "orderInLayer": 1,
+                "z": 0.0
             }
         }
     ]

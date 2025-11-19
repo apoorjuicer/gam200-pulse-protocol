@@ -21,6 +21,7 @@
 #include "graphics/stb_image.h"
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
+#include "../MyEngine/CoreEngine/Prefab/PrefabInstance.h"
 #ifdef ENABLE_EDITOR
 #include "../MyEditor/Editor.h"
 #endif
@@ -404,6 +405,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<UIElement>();
 	g_coordinator->RegisterComponent<Name>();
 	g_coordinator->RegisterComponent<LayerTag>();
+	g_coordinator->RegisterComponent<PrefabInstance>();
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
