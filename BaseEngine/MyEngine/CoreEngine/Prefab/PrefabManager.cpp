@@ -16,6 +16,7 @@
 
 #include "PrefabManager.h"
 #include "../Factory/Factory.h"
+#include "../MyEngine/Components/DisplayName.h"
 
 PrefabManager::PrefabManager()
 {

@@ -17,6 +17,7 @@
 #include "pch/pch_temp.h"
 #include "../MyEngine/Input/RhythmGameplayInput.h"
 #include "../MyEngine/CoreEngine/Core/CoreEngine.h"
+#include "../MyEngine/Components/DisplayName.h"
 
 static std::string keyToString(int key)
 {
