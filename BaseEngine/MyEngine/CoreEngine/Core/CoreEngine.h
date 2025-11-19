@@ -2,7 +2,8 @@
 /**
  * @file        CoreEngine.h
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael - 100%
+ * @author		Chia Wei Xuan Rachael - 90%
+ *				Goh Pin Kai - 10%
  * @brief		Declares the core engine class that manages subsystem
  *				initialization, the main game loop, and development utilities.
  *
@@ -57,7 +58,7 @@ public:
 	void StopGame(); // stop button functionality
 
 	void RestartRuntimeForPlay();
-
+	void ToggleFullscreen();
 	// AssetsManager& getAssetsManager() { return mAssets; }
 private:
 	bool GameRunning;

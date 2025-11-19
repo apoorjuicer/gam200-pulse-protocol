@@ -248,6 +248,21 @@ void CoreEngine::Init()
 
 	glfwMakeContextCurrent(window);
 
+	// === FORCE FULLSCREEN AT STARTUP ===
+	{
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+		glfwSetWindowMonitor(
+			window,
+			monitor,         // full screen monitor
+			0, 0,            // position
+			mode->width,     // resolution
+			mode->height,
+			mode->refreshRate
+		);
+	}
+
 	// Pause/resume on focus change (covers ALT+TAB and returning from Ctrl+Alt+Del)
 	glfwSetWindowFocusCallback(window,
 		[](GLFWwindow* win, int focused)
@@ -961,4 +976,39 @@ void CoreEngine::ResumeGame()
 	if (auto audio = coord->GetSystem<AudioManager>()) {
 		audio->ResumeBGM();
 	}
+}
+
+void CoreEngine::ToggleFullscreen()
+{
+	static bool isFullscreen = true;	
+
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+	if (!isFullscreen)
+	{
+		// SWITCH TO FULLSCREEN
+		glfwSetWindowMonitor(
+			window,
+			monitor,
+			0, 0,
+			mode->width,
+			mode->height,
+			mode->refreshRate
+		);
+	}
+	else
+	{
+		// SWITCH TO WINDOWED MODE (use config size)
+		glfwSetWindowMonitor(
+			window,
+			nullptr,
+			100, 100,                    // position
+			config.GetWindowWidth(),
+			config.GetWindowHeight(),
+			GLFW_DONT_CARE
+		);
+	}
+
+	isFullscreen = !isFullscreen;
 }

@@ -58,6 +58,13 @@ void InputManager::Update(float) {
 		std::cout << "[INPUT] Queued delayed combo (5s)" << std::endl;
 	}
 
+	// Toggle fullscreen with F11
+	if (isKeyTriggered(GLFW_KEY_F11))
+	{
+		if (Engine)
+			Engine->ToggleFullscreen();
+	}
+
 	// FOR MOUSE TESTING; CAN USE FOR MAIN MENU
 	//if (isMouseButtonTriggered(0)) {
 	//	std::cout << "[MOUSE] Left Click at " << getMousePosition().x << ", " << getMousePosition().y << std::endl;
