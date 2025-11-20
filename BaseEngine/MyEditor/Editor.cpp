@@ -19,6 +19,7 @@
 
 // ==========================================================================
 
+
 namespace MyEditor
 {
     // --------------------------------------------------------------------
@@ -32,9 +33,8 @@ namespace MyEditor
     std::vector<Entity> entityDisplayOrder;
 
     static GLFWwindow* s_Window = nullptr;
-    static bool s_enabled = true;
+    static bool s_enabled = false;
     static bool s_restoreNextFrame = false;
-
 
 
     // --------------------------------------------------------------------
@@ -50,8 +50,6 @@ namespace MyEditor
     static constexpr float MIN_RATIO_H = 0.05f;   // min 5% for top/bottom heights
     static constexpr float MAX_TOTAL_SIDE = 0.85f;
     static constexpr float MAX_TOTAL_VERT = 0.85f;
-
-
 
 
 
@@ -173,30 +171,32 @@ namespace MyEditor
 #endif
 
 
-    void Init(GLFWwindow* w) {
-
+    void Init(GLFWwindow* w)
+    {
+        std::cout << "[DEBUG] Editor Init got window ptr: " << w << "\n";
         s_Window = w;
+
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
 
         ImGuiIO& io = ImGui::GetIO();
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // optional
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       //  docking ON
-        // IMPORTANT: keep viewports OFF so nothing pops outside the GLFW window
-        // (turn this on later only if you want multi-window OS-level popouts)
-        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   //  leave disabled
+        io.IniFilename = nullptr;
+
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        // Viewports OFF (keep editor inside GLFW window)
+        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
         ImGui::StyleColorsDark();
 
-        ImGui_ImplGlfw_InitForOpenGL(w, false);
+        // NOTE: install_callbacks = false so we don't hook WndProc
+        ImGui_ImplGlfw_InitForOpenGL(w, /*install_callbacks=*/false);
         ImGui_ImplOpenGL3_Init("#version 130");
 
-        // INIT PROJECT PANEL
-        InitProjectPanel();
+        InitProjectPanel();      // your panel init
 
         s_enabled = true;
 
-        // Tiny runtime check (prints once)
         std::cout << "[ImGui] Docking: "
             << ((io.ConfigFlags & ImGuiConfigFlags_DockingEnable) ? "ON" : "OFF")
             << ", Viewports: "
@@ -207,13 +207,29 @@ namespace MyEditor
 
     void SetEnabled(bool enabled) { s_enabled = enabled; }
     bool IsEnabled() { return s_enabled; }
-
+    
     void NewFrame() {
         if (!s_enabled) return;
+
+        // Backends: time, input, etc.
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
+
+        ImGuiIO& io = ImGui::GetIO();
+
+        // Drive ImGui from the engine's window size
+        float w = (float)WindowWidth;
+        float h = (float)WindowHeight;
+
+        if (w <= 0.0f) w = 1.0f;
+        if (h <= 0.0f) h = 1.0f;
+
+        io.DisplaySize = ImVec2(w, h);
+        io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);  // simple case
+
         ImGui::NewFrame();
     }
+
 
     void Draw() {
         if (!s_enabled) return;
@@ -317,7 +333,7 @@ namespace MyEditor
             DrawInspectorWindow(rightDockID);
             ImGui::End();
         }
-  
+
 
         // Project (Assets & Prefabs)
         if (bottomDockID) ImGui::SetNextWindowDockID(bottomDockID, ImGuiCond_FirstUseEver);
@@ -445,6 +461,7 @@ namespace MyEditor
 
     }
 
+
     void Render() {
         if (!s_enabled) return;
         ImGui::Render();
@@ -452,12 +469,16 @@ namespace MyEditor
     }
 
 
-    void Shutdown() {
+    void Shutdown()
+    {
+        if (!s_enabled)
+            return;
+
+        s_enabled = false;
+
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
-        s_Window = nullptr;
-
     }
 
     extern float s_left_ratio;

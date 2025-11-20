@@ -22,12 +22,9 @@
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
 
-// move to editor pls
-//#ifdef ENABLE_EDITOR
-//#include "../MyEditor/Editor.h"
-//#endif
+
 #include "../MyEngine/TestCases/TestCase.h"
-// #include "glapp.h"
+
 #include "../MyEngine/Resources/AssetRegistry.h"
 #include "../MyEngine/CoreEngine/Asset/AssetsManager.h"
 #include "../MyEngine/Serialization/Serialization.h"
@@ -45,6 +42,8 @@ AssetsManager mAssets;
 
 int WindowWidth;
 int WindowHeight;
+
+
 CoreEngine* Engine = nullptr;
 // TestCase Test;
 
@@ -279,13 +278,13 @@ void CoreEngine::Init()
 		});
 
 	int fbw = 0, fbh = 0;
+	glfwGetFramebufferSize(window, &fbw, &fbh);
 
 	WindowWidth = fbw;
 	WindowHeight = fbh;
+
 	glewInit();
 
-	// Initialize DebugDraw AFTER glewInit()
-	DebugDraw::Init();
 
 	int flags;
 	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
@@ -506,59 +505,39 @@ void CoreEngine::Update(float dt)
 
 void CoreEngine::GameLoop()
 {
-	LastTime = timeGetTime();
-	auto profiler = ProfilingManager::GetInstance();
+    LastTime = timeGetTime();
+    auto profiler = ProfilingManager::GetInstance();
 
-	// application loop
-	static bool keystateP = false;
-	static bool PKeyWasPressed = false;
-	while (!glfwWindowShouldClose(window) && GameRunning)
-	{
-		// Get the current time in milliseconds
-		unsigned currenttime = timeGetTime();
+    while (!glfwWindowShouldClose(window) && GameRunning)
+    {
+        // --- dt calculation ---
+        unsigned currenttime = timeGetTime();
+        float dt = (currenttime - LastTime) / 1000.0f;
+        LastTime = currenttime;
 
-		// Convert it to the time passed since the last frame (in seconds)
-		float dt = (currenttime - LastTime) / 1000.0f;
+        glfwPollEvents();
 
-		// Update the when the last update started
-		LastTime = currenttime;
+        // --- Game update (ECS systems) ---
+        profiler->StartFrame();
+        Update(dt);
+        profiler->EndFrame();
 
-		// Don't start frame here
-		glfwPollEvents();
+        // --- Game rendering ---
+        RenderDebugDraw();      // your OpenGL game draw
 
-		// Start profiling ONLY for ECS systems
-		profiler->StartFrame();
-		Update(dt); // This contains all your ECS system profiling
-		profiler->EndFrame();
+        // --- Editor (ImGui) on top of game ---
+        if (m_editorFrameCallback)
+        {
+            m_editorFrameCallback();   // calls NewFrame + Draw + Render
+        }
 
-		// move to editor pls
-//#ifdef ENABLE_EDITOR
-//		MyEditor::NewFrame();
-//#endif
+        // --- Present frame ---
+        glfwSwapBuffers(window);
 
-		//  4. game update(NOT A WHILE LOOP) gsm
-
-		//  5. game rendering
-		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
-
-		profiler->EndFrame();
-
-		//  6. ImGui rendering
-		// move to editor pls
-//#ifdef ENABLE_EDITOR
-//		MyEditor::Draw();
-//		MyEditor::Render();
-//#endif
-
-		RenderDebugDraw();
-
-		// 7. Swap Buffer(like two window)
-		glfwSwapBuffers(window);
-
-		profiler->Reset();
-	}
+        profiler->Reset();
+    }
 }
+
 
 void CoreEngine::Exit()
 {
@@ -919,4 +898,9 @@ void CoreEngine::ResumeGame()
 	if (auto audio = coord->GetSystem<AudioManager>()) {
 		audio->ResumeBGM();
 	}
+}
+
+void CoreEngine::SetEditorFrameCallback(const std::function<void()>& cb)
+{
+	m_editorFrameCallback = cb;
 }

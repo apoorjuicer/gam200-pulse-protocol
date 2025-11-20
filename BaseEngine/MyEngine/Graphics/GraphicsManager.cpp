@@ -309,6 +309,8 @@ void GraphicsManager::Update()
 //        }
 //    }
 //#endif
+// 
+// 
     // Team label
     /*RenderText(
         textShader,

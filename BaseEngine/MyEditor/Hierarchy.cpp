@@ -42,6 +42,8 @@ namespace MyEditor
         }
 
         auto* g_coordinator = Coordinator::GetInstance();
+
+
         if (!g_coordinator)
         {
             ImGui::TextColored(ImVec4(1, 0, 0, 1), "Coordinator not found!");

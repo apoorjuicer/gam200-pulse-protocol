@@ -27,13 +27,21 @@ int main()
     // Hook ImGui editor to the GLFW window
     MyEditor::Init(Engine->GetWindow());
 
+    //Connect Editor to Engine using a per - frame callback
+    Engine->SetEditorFrameCallback([]() {
+        MyEditor::NewFrame();
+        MyEditor::Draw();
+        MyEditor::Render();
+
+     });
+
+
     // Main loop
     Engine->GameLoop();
 
     // Shutdown editor + engine
     MyEditor::Shutdown();
     Engine->Exit();
-
     delete Engine;
     Engine = nullptr;
 

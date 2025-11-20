@@ -20,9 +20,11 @@
 #include "../MyEngine/Components/Health.h"
 #include "../MyEngine/Components/EntityType.h"
 #include "CoreEngine/Core/ImportExport.h"
+#include <functional>
 
 class Config;
 class AssetManager;
+
 
 class CoreEngine
 {
@@ -59,7 +61,10 @@ public:
 
 	void RestartRuntimeForPlay();
 
+	void SetEditorFrameCallback(const std::function<void()>& cb);
+
 	// AssetsManager& getAssetsManager() { return mAssets; }
+
 
 private:
 	bool GameRunning;
@@ -72,11 +77,12 @@ private:
 	void RenderDebugDraw();
 
 	GLFWwindow *window;
+	std::function<void()> m_editorFrameCallback;
 };
 
 // A global pointer to the instance of the core
 extern DLL_API CoreEngine *Engine;
 extern Config config; // global scope
 extern DLL_API AssetsManager mAssets;
-extern int WindowWidth;
-extern int WindowHeight;
+extern DLL_API int WindowWidth;
+extern DLL_API int WindowHeight;

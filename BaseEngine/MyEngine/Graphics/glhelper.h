@@ -51,7 +51,7 @@ struct GLHelper
 	static std::pair<double, double> s_mousePos;
 	static std::unordered_map<int, bool> keyState;
 
-	static GLint width, height;
+	static DLL_API GLint width, height;
 	static GLint GameWidth, GameHeight;
 	static GLint GameOffsetX, GameOffsetY;
 	static GLint EditorWidth, EditorHeight;  // Keep the static members as they are
