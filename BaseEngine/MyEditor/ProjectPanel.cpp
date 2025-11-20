@@ -542,7 +542,20 @@ namespace MyEditor
                             coord->HasComponent<Framework::Renderable>(selectedEntity))
                         {
                             auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
-                            rend.spriteName = item.fullPath;
+                            // Convert absolute path to relative path before storing
+                            namespace fs = std::filesystem;
+                            std::error_code ec;
+                            fs::path relPath = fs::relative(item.fullPath, fs::current_path(), ec);
+
+                            if (!ec && !relPath.empty()) {
+                                std::string pathStr = relPath.string();
+                                std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
+                                rend.spriteName = pathStr;
+                            }
+                            else {
+                                // Fallback to absolute if relative conversion fails
+                                rend.spriteName = item.fullPath;
+                            }
                             rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
                         }
                     }

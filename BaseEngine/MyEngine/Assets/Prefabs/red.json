@@ -1,19 +1,14 @@
 {
     "components": [
         {
-            "Typing": {
-                "Type": "Enemy"
-            }
-        },
-        {
             "transform": {
                 "position": {
-                    "x": 1089.7689208984376,
-                    "y": -304.3077392578125
+                    "x": 1394.4617919921876,
+                    "y": 696.6154174804688
                 },
                 "scale": {
-                    "x": 600.0,
-                    "y": 600.0
+                    "x": 100.0,
+                    "y": 120.0
                 },
                 "rotation": {
                     "x": 0.0,
@@ -26,10 +21,10 @@
         },
         {
             "render": {
-                "mdl_ref": 1.0,
+                "mdl_ref": 0.0,
                 "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "BlueGorillaEnemy",
+                "spriteName": "../../MyEngine/Assets/Textures/UI/hover_btn_placeholder.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -49,40 +44,14 @@
             }
         },
         {
-            "script": {
-                "ScriptName": "EnemyScript"
-            }
-        },
-        {
             "name": {
-                "name": "Blue Gorilla"
-            }
-        },
-        {
-            "Health": {
-                "hp": 1,
-                "damage": 1,
-                "isAlive": true
-            }
-        },
-        {
-            "AABB": {
-                "min": {
-                    "x": 0.0,
-                    "y": 0.0
-                },
-                "max": {
-                    "x": 410.0,
-                    "y": 280.0
-                },
-                "width": 50.0,
-                "height": 50.0
+                "name": "button"
             }
         },
         {
             "LayerTag": {
-                "mask": 2,
-                "orderInLayer": 1,
+                "mask": 1,
+                "orderInLayer": 0,
                 "z": 0.0
             }
         }

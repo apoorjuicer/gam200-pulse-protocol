@@ -147,6 +147,9 @@ void SceneManager::SaveCurrentScene()
 			Value RenderVal;
 
 			auto& render = g_coordinator->GetComponent<Framework::Renderable>(entity);
+
+			/*std::cout << "[DEBUG] Saving entity with spriteName: " << render.spriteName << std::endl;*/
+
 			render.Serialize(RenderVal, alloc);
 
 			ComponentObj.AddMember("render", RenderVal, alloc);

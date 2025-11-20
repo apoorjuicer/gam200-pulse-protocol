@@ -24,7 +24,7 @@
                 "mdl_ref": 0.0,
                 "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "C:\\Users\\Chloe\\source\\repos\\csd2401f25_team_bloop\\BaseEngine\\MyEngine\\Assets\\Textures\\UI\\health bar.png",
+                "spriteName": "../../MyEngine/Assets/Textures/UI/health bar.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -50,7 +50,7 @@
         },
         {
             "LayerTag": {
-                "mask": 2,
+                "mask": 1,
                 "orderInLayer": 0,
                 "z": 0.0
             }
