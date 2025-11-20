@@ -545,7 +545,21 @@ namespace MyEditor
                             }
 
                             if (!resolved.empty())
-                                r.spriteName = resolved;
+                            {
+                                // Convert absolute path to relative path from working directory
+                                std::error_code ec2;
+                                fs::path relPath = fs::relative(resolved, fs::current_path(), ec2);
+
+                                if (!ec2 && !relPath.empty()) {
+                                    std::string pathStr = relPath.string();
+                                    std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
+                                    r.spriteName = pathStr;
+                                }
+                                else {
+                                    // Fallback: use the resolved path if relative conversion fails
+                                    r.spriteName = resolved;
+                                }
+                            }
                         }
                     }
 
