@@ -150,6 +150,9 @@ namespace MyEditor
 
     void DrawTopBarPanel(float W, float top_y, float top_h)
     {
+        // Static variable to defer scene loading after dialog closes
+        static std::string s_pendingScenePath;
+
         ImGuiWindowFlags top_flags =
             ImGuiWindowFlags_NoTitleBar |
             ImGuiWindowFlags_NoScrollbar |
@@ -189,25 +192,32 @@ namespace MyEditor
             }
         }
 
+        //ImGui::SameLine();
+
+        //if (ImGui::Button("Load Scene", loadButtonSize))
+        //{
+        //    std::string path = OpenJsonFileDialog();
+        //    if (!path.empty())
+        //    {
+        //        if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>())
+        //        {
+        //            sceneMgr->LoadSceneFromJson(path);
+        //            std::cout << "[Editor] Loaded scene: " << path << "\n";
+        //            s_hasEditorBaseline = false;
+        //            selectedEntity = INVALID_ENTITY;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        std::cout << "[Editor] Load scene cancelled.\n";
+        //    }
+        //}
+
         ImGui::SameLine();
 
         if (ImGui::Button("Load Scene", loadButtonSize))
         {
-            std::string path = OpenJsonFileDialog();
-            if (!path.empty())
-            {
-                if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>())
-                {
-                    sceneMgr->LoadSceneFromJson(path);
-                    std::cout << "[Editor] Loaded scene: " << path << "\n";
-                    s_hasEditorBaseline = false;
-                    selectedEntity = INVALID_ENTITY;
-                }
-            }
-            else
-            {
-                std::cout << "[Editor] Load scene cancelled.\n";
-            }
+            s_pendingScenePath = OpenJsonFileDialog();
         }
 
         // ------------------------------------------------------------
@@ -322,6 +332,36 @@ namespace MyEditor
                 graphicsMgr->SetEditorLayerFilter(filterMask);/*
                 std::cout << "[TopBar] Layer filter: " << layerOptions[s_layerFilter] << std::endl;*/
             }
+        }
+
+        // Process pending scene load (deferred from file dialog)
+        if (!s_pendingScenePath.empty())
+        {
+            // End current ImGui frame completely
+            ImGui::End(); // End TopBar window
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            glfwSwapBuffers(Engine->GetWindow());
+
+            // Load the scene
+            if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>())
+            {
+                sceneMgr->LoadSceneFromJson(s_pendingScenePath);
+                std::cout << "[Editor] Loaded scene: " << s_pendingScenePath << "\n";
+                s_hasEditorBaseline = false;
+                selectedEntity = INVALID_ENTITY;
+            }
+            s_pendingScenePath.clear();
+
+            // Start fresh frame for next iteration
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            // Need to restart the TopBar window
+            ImGui::SetNextWindowPos(ImVec2(0.0f, top_y));
+            ImGui::SetNextWindowSize(ImVec2(W, top_h));
+            ImGui::Begin("TopBar", nullptr, top_flags);
         }
 
         ImGui::PopStyleVar();

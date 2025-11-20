@@ -3,12 +3,12 @@
         {
             "transform": {
                 "position": {
-                    "x": 674.4617309570313,
-                    "y": 331.0769348144531
+                    "x": -756.3988037109375,
+                    "y": -10.641441345214844
                 },
                 "scale": {
-                    "x": -156.0,
-                    "y": -18.5
+                    "x": 352.5,
+                    "y": 109.0
                 },
                 "rotation": {
                     "x": 0.0,
@@ -24,7 +24,7 @@
                 "mdl_ref": 0.0,
                 "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/UI/hover_btn_placeholder.png",
+                "spriteName": "../../MyEngine/Assets/Textures/UI/new game.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -45,7 +45,7 @@
         },
         {
             "name": {
-                "name": "button"
+                "name": "Button"
             }
         },
         {

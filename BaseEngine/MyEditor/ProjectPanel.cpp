@@ -557,6 +557,16 @@ namespace MyEditor
                                 rend.spriteName = item.fullPath;
                             }
                             rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
+
+                            // Auto-detect spritesheet based on filename
+                            std::string filename = fs::path(rend.spriteName).filename().string();
+                            std::string lowerName = filename;
+                            for (auto& c : lowerName) c = (char)tolower(c);
+
+                            bool isSheet = (lowerName.find("sheet") != std::string::npos ||
+                                lowerName.find("atlas") != std::string::npos);
+
+                            rend.shd_ref = isSheet ? 2.0f : 1.0f;  // 2 for spritesheet, 1 for sprite
                         }
                     }
                 }
