@@ -3,15 +3,15 @@
         {
             "transform": {
                 "position": {
-                    "x": 361.8460693359375,
-                    "y": -446.76922607421877
+                    "x": -587.6921997070313,
+                    "y": -600.0
                 },
                 "scale": {
-                    "x": 600.0,
-                    "y": 100.0
+                    "x": 433.0,
+                    "y": 103.0
                 },
                 "rotation": {
-                    "x": -360.0,
+                    "x": 0.0,
                     "y": 0.0
                 },
                 "isVisible": true,
@@ -24,7 +24,7 @@
                 "mdl_ref": 0.0,
                 "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "C:\\Users\\User\\Desktop\\project_repos\\Bloop_CustomEngine\\BaseEngine\\MyEngine\\Assets\\Textures\\UI\\green bar.png",
+                "spriteName": "C:\\Users\\Chloe\\source\\repos\\csd2401f25_team_bloop\\BaseEngine\\MyEngine\\Assets\\Textures\\UI\\health bar.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -45,14 +45,14 @@
         },
         {
             "name": {
-                "name": "HealthBar"
+                "name": "health"
             }
         },
         {
             "LayerTag": {
-                "mask": 4,
-                "orderInLayer": 10,
-                "z": 100.0
+                "mask": 2,
+                "orderInLayer": 0,
+                "z": 0.0
             }
         }
     ]

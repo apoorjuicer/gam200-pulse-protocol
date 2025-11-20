@@ -18,6 +18,7 @@
 #include "graphics/stb_image.h"
 #include "../MyEngine/Input/InputManager.h"
 #include "../MyEngine/CoreEngine/ECS/Coordinator.h"
+#include "../MyEngine/Graphics/GraphicsManager.h"
 
 InputManager::InputManager() : window(nullptr) {
 	std::memset(currentKeys, 0, sizeof(currentKeys));
@@ -162,7 +163,18 @@ void InputManager::processDebugToggles() {
 	if (isKeyTriggered(GLFW_KEY_F7)) {
 		stressToggleRequested = true;
 	}
-
+	
+	// F8: Toggle debug overlay (FPS counter, performance stats)
+	if (isKeyTriggered(GLFW_KEY_F8)) {
+		auto* coord = Coordinator::GetInstance();
+		auto graphics = coord->GetSystem<GraphicsManager>();
+		if (graphics) {
+			graphics->ToggleDebugOverlay();
+			std::cout << "[DEBUG OVERLAY] "
+				<< (graphics->IsDebugOverlayEnabled() ? "ENABLED" : "DISABLED")
+				<< std::endl;
+		}
+	}
 }
 
 // -------------------------------------------------

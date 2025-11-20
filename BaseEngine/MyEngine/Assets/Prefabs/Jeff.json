@@ -8,15 +8,15 @@
         {
             "transform": {
                 "position": {
-                    "x": 149.2308349609375,
-                    "y": 478.4615478515625
+                    "x": 337.53875732421877,
+                    "y": -381.84613037109377
                 },
                 "scale": {
                     "x": 700.0,
                     "y": 700.0
                 },
                 "rotation": {
-                    "x": 45.0,
+                    "x": 0.0,
                     "y": 0.0
                 },
                 "isVisible": true,
@@ -40,8 +40,8 @@
         },
         {
             "animation": {
-                "currentFrame": 0,
-                "elapsedTime": 0.012658986262977124,
+                "currentFrame": 1,
+                "elapsedTime": 0.010138466954231263,
                 "totalFrames": 2,
                 "columns": 2,
                 "rows": 1,

@@ -8,8 +8,8 @@
         {
             "transform": {
                 "position": {
-                    "x": 1111.9228515625,
-                    "y": -448.30767822265627
+                    "x": 1089.7689208984376,
+                    "y": -304.3077392578125
                 },
                 "scale": {
                     "x": 600.0,
@@ -29,7 +29,7 @@
                 "mdl_ref": 1.0,
                 "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "C:\\Users\\User\\Desktop\\project_repos\\Bloop_CustomEngine\\BaseEngine\\MyEngine\\Assets\\Textures\\Enemies\\RedGorillaEnemy.png",
+                "spriteName": "BlueGorillaEnemy",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,

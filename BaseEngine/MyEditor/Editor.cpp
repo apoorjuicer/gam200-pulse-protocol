@@ -209,6 +209,13 @@ namespace MyEditor
 
     void NewFrame() {
         if (!s_enabled) return;
+
+        // Skip if window is minimized
+        int display_w, display_h;
+        glfwGetFramebufferSize(s_Window, &display_w, &display_h);
+        if (display_w <= 0 || display_h <= 0)
+            return;
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -216,6 +223,11 @@ namespace MyEditor
 
     void Draw() {
         if (!s_enabled) return;
+
+        int display_w, display_h;
+        glfwGetFramebufferSize(s_Window, &display_w, &display_h);
+        if (display_w <= 0 || display_h <= 0)
+            return;
 
         if (s_restoreNextFrame) {
             RestoreEditorBaseline();
@@ -446,6 +458,12 @@ namespace MyEditor
 
     void Render() {
         if (!s_enabled) return;
+
+        int display_w, display_h;
+        glfwGetFramebufferSize(s_Window, &display_w, &display_h);
+        if (display_w <= 0 || display_h <= 0)
+            return;
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }

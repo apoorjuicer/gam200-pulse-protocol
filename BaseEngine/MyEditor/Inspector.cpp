@@ -486,7 +486,13 @@ namespace MyEditor
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
                     {
                         const char* droppedPath = static_cast<const char*>(payload->Data);
-                        r.spriteName = droppedPath ? std::string(droppedPath) : std::string();
+                        if (droppedPath)
+                        {
+                            // Convert full path to asset ID (filename without extension)
+                            namespace fs = std::filesystem;
+                            std::string assetID = fs::path(droppedPath).stem().string();
+                            r.spriteName = assetID;  // Store as asset ID, not path!
+                        }
                         reloadClicked = true;
                     }
                     ImGui::EndDragDropTarget();

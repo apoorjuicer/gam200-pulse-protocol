@@ -216,26 +216,57 @@ void GraphicsManager::Update()
     auto& textShader = GLApp::shdrpgms[3];
 
     // get the game viewport dimensions from the editor itself
-    MyEditor::GameViewport viewport = MyEditor::ComputeMiddleGameViewportPixels(Engine->GetWindow(), false);
+    /*MyEditor::GameViewport viewport = MyEditor::ComputeMiddleGameViewportPixels(Engine->GetWindow(), false);*/
+    int fbW = 0, fbH = 0;
+    glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
 
     // only renders if viewport is valid
-    if (viewport.w > 0 && viewport.h > 0) {
+    if (fbW > 0 && fbH > 0 && m_showDebugOverlay) {
 
         // if the 2 fonts are loaded
         if (m_debugFont && m_uiFont) {
-            // get framebuffer dimensions
-            int fbW = 0, fbH = 0;
-            glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
+            //// get framebuffer dimensions
+            //glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
+
+            //// calculate scaling factors between framebuffer and virtual coordinates
+            //float scaleX = static_cast<float>(GLApp::VIRTUAL_W) / static_cast<float>(fbW);
+            //float scaleY = static_cast<float>(GLApp::VIRTUAL_H) / static_cast<float>(fbH);
+
+            //// convert viewport position to virtual coordinates
+            //float virtualX = 0.0f;
+            //float virtualY = 0.0f;
+            //float virtualW = static_cast<float>(GLApp::VIRTUAL_W);
+            //float virtualH = static_cast<float>(GLApp::VIRTUAL_H);
+
+            // Calculate game viewport (16:9 aspect ratio, centered)
+            const float targetAspect = 16.0f / 9.0f;
+            const float windowAspect = static_cast<float>(fbW) / static_cast<float>(fbH);
+
+            int vpX, vpY, vpW, vpH;
+            if (windowAspect > targetAspect) {
+                // Wider window - letterbox on sides
+                vpH = fbH;
+                vpW = static_cast<int>(fbH * targetAspect);
+                vpX = (fbW - vpW) / 2;
+                vpY = 0;
+            }
+            else {
+                // Taller window - letterbox top/bottom
+                vpW = fbW;
+                vpH = static_cast<int>(fbW / targetAspect);
+                vpX = 0;
+                vpY = (fbH - vpH) / 2;
+            }
 
             // calculate scaling factors between framebuffer and virtual coordinates
             float scaleX = static_cast<float>(GLApp::VIRTUAL_W) / static_cast<float>(fbW);
             float scaleY = static_cast<float>(GLApp::VIRTUAL_H) / static_cast<float>(fbH);
 
             // convert viewport position to virtual coordinates
-            float virtualX = static_cast<float>(viewport.x) * scaleX;
-            float virtualY = static_cast<float>(viewport.y) * scaleY;
-            float virtualW = static_cast<float>(viewport.w) * scaleX;
-            float virtualH = static_cast<float>(viewport.h) * scaleY;
+            float virtualX = static_cast<float>(vpX) * scaleX;
+            float virtualY = static_cast<float>(vpY) * scaleY;
+            float virtualW = static_cast<float>(vpW) * scaleX;
+            float virtualH = static_cast<float>(vpH) * scaleY;
 
             // text positioning const
             const float TEXT_PADDING = -325.0f;
@@ -618,49 +649,49 @@ void GraphicsManager::InitWhiteTexture()
     std::cout << "[GraphicsManager] White texture created for GUI buttons\n";
 }
 
-void GraphicsManager::RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color)
-{
-    // DEBUG - only print first few frames
-    // static int count = 0;
-    // if (count++ < 10) {
-    //    std::cout << "[RenderQuad] Rendering at screen: (" << x << ", " << y << ")" << std::endl;
-    //}
-
-    auto &shader = GLApp::shdrpgms[3]; // Text shader
-    shader.Use();
-
-    glUniformMatrix4fv(glGetUniformLocation(shader.GetHandle(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-    // Pass vec4 color including alpha
-    glUniform3f(glGetUniformLocation(shader.GetHandle(), "textColor"), color.r, color.g, color.b);
-
-    // if shader supports vec4:
-    // glUniform4f(glGetUniformLocation(shader.GetHandle(), "color"), color.r, color.g, color.b, color.a);
-
-    // Bind white texture instead of unbinding
-    glBindTexture(GL_TEXTURE_2D, whiteTexture);
-    glBindVertexArray(VAO);
-
-    // Center the quad around the position
-    float halfWidth = width * 0.5f;
-    float halfHeight = height * 0.5f;
-
-    float vertices[6][4] = {
-        {x - halfWidth, y - halfHeight, 0.0f, 0.0f},
-        {x - halfWidth, y + halfHeight, 0.0f, 1.0f},
-        {x + halfWidth, y + halfHeight, 1.0f, 1.0f},
-
-        {x - halfWidth, y - halfHeight, 0.0f, 0.0f},
-        {x + halfWidth, y + halfHeight, 1.0f, 1.0f},
-        {x + halfWidth, y - halfHeight, 1.0f, 0.0f}};
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
+//void GraphicsManager::RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color)
+//{
+//    // DEBUG - only print first few frames
+//    // static int count = 0;
+//    // if (count++ < 10) {
+//    //    std::cout << "[RenderQuad] Rendering at screen: (" << x << ", " << y << ")" << std::endl;
+//    //}
+//
+//    auto &shader = GLApp::shdrpgms[3]; // Text shader
+//    shader.Use();
+//
+//    glUniformMatrix4fv(glGetUniformLocation(shader.GetHandle(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+//
+//    // Pass vec4 color including alpha
+//    glUniform3f(glGetUniformLocation(shader.GetHandle(), "textColor"), color.r, color.g, color.b);
+//
+//    // if shader supports vec4:
+//    // glUniform4f(glGetUniformLocation(shader.GetHandle(), "color"), color.r, color.g, color.b, color.a);
+//
+//    // Bind white texture instead of unbinding
+//    glBindTexture(GL_TEXTURE_2D, whiteTexture);
+//    glBindVertexArray(VAO);
+//
+//    // Center the quad around the position
+//    float halfWidth = width * 0.5f;
+//    float halfHeight = height * 0.5f;
+//
+//    float vertices[6][4] = {
+//        {x - halfWidth, y - halfHeight, 0.0f, 0.0f},
+//        {x - halfWidth, y + halfHeight, 0.0f, 1.0f},
+//        {x + halfWidth, y + halfHeight, 1.0f, 1.0f},
+//
+//        {x - halfWidth, y - halfHeight, 0.0f, 0.0f},
+//        {x + halfWidth, y + halfHeight, 1.0f, 1.0f},
+//        {x + halfWidth, y - halfHeight, 1.0f, 0.0f}};
+//
+//    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+//    glDrawArrays(GL_TRIANGLES, 0, 6);
+//
+//    glBindVertexArray(0);
+//    glBindTexture(GL_TEXTURE_2D, 0);
+//}
 
 // Textures
 static GLuint upload_rgba8(int w, int h, unsigned char *data)

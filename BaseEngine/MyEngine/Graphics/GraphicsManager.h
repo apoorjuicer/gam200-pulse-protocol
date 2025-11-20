@@ -98,6 +98,10 @@ public:
     GraphicsManager(GraphicsManager &&) noexcept = default; // move ok
     GraphicsManager &operator=(GraphicsManager &&) noexcept = default;
 
+    // Debug overlay toggle (hidden by default in Release, auto shown in Debug)
+    void ToggleDebugOverlay() { m_showDebugOverlay = !m_showDebugOverlay; }
+    bool IsDebugOverlayEnabled() const { return m_showDebugOverlay; }
+
     // Texture
     GLuint LoadTextureFile(std::string const &path);
     GLuint GetOrLoad(std::string const &id);
@@ -125,11 +129,8 @@ private:
     // void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
 
     // For In-Game GUI System & ui overlay
-    void RenderUIOverlayElements();
-    void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
+    // void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
 
-    //
-    //
     bool LoadTexturesFromRegistry();
 
     // Fonts
@@ -183,6 +184,13 @@ private:
     std::unordered_map<std::string, FontData> m_fontMap;
 
     LayerMask m_editorLayerFilter = LAYER_ALL;
+
+    // Debug overlay toggle - shown in Debug builds, hidden in Release builds
+#ifdef _DEBUG
+    bool m_showDebugOverlay = true;   // Show by default in Debug builds
+#else
+    bool m_showDebugOverlay = false;  // Hidden by default in Release builds (rubric compliance)
+#endif
 
     //debug
     void PrintFontMap();
