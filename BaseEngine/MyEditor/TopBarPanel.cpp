@@ -334,16 +334,11 @@ namespace MyEditor
             }
         }
 
-        // Process pending scene load (deferred from file dialog)
+        ImGui::PopStyleVar();
+        ImGui::End();
+
         if (!s_pendingScenePath.empty())
         {
-            // End current ImGui frame completely
-            ImGui::End(); // End TopBar window
-            ImGui::Render();
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-            glfwSwapBuffers(Engine->GetWindow());
-
-            // Load the scene
             if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>())
             {
                 sceneMgr->LoadSceneFromJson(s_pendingScenePath);
@@ -352,20 +347,7 @@ namespace MyEditor
                 selectedEntity = INVALID_ENTITY;
             }
             s_pendingScenePath.clear();
-
-            // Start fresh frame for next iteration
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-
-            // Need to restart the TopBar window
-            ImGui::SetNextWindowPos(ImVec2(0.0f, top_y));
-            ImGui::SetNextWindowSize(ImVec2(W, top_h));
-            ImGui::Begin("TopBar", nullptr, top_flags);
         }
-
-        ImGui::PopStyleVar();
-        ImGui::End();
     }
 
 } // namespace MyEditor
