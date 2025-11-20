@@ -1,3 +1,17 @@
+/******************************************************************************/
+/**
+ * @file        Inspector.cpp
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 70%
+ *              Chloe Lau Rey En (secondary) - 30%
+ * @brief       TBF
+ *
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
+
 // -----------------------------------------------------------------------------
 // Inspector.cpp  -  Entity inspector (components UI, prefab save, etc.)
 // -----------------------------------------------------------------------------
@@ -7,11 +21,9 @@
 #include "Inspector.h"
 #include "Editor.h"                       // selectedEntity, INVALID_ENTITY, PrefabManager, etc.
 #include "../Graphics/glapp.h"           // GLApp::shdrpgms
+#include "../Graphics/Layer.h"           // GLApp::shdrpgms
 #include "CoreEngine/Asset/AssetsManager.h"
-
-#include <filesystem>
-#include <algorithm>
-#include <cstring>
+#include "CoreEngine/Prefab/PrefabInstance.h"
 
 namespace MyEditor
 {
@@ -98,7 +110,141 @@ namespace MyEditor
         }
 
         ImGui::Text("Entity ID: %d", (int)selectedEntity);
+
+        ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
+
+        // Create LayerTag if it doesn't exist
+        if (!g->HasComponent<LayerTag>(selectedEntity))
+        {
+            LayerTag tag{};
+            tag.mask = LAYER_WORLD;
+            tag.orderInLayer = 1;
+            tag.z = 0.0f;
+            g->AddComponent<LayerTag>(selectedEntity, tag);
+        }
+
+        auto& layer = g->GetComponent<LayerTag>(selectedEntity);
+
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f)); // Light blue
+        ImGui::TextUnformatted("Layer:");
+        ImGui::PopStyleColor();
+
+        ImGui::SameLine();
+
+        // Layer dropdown
+        const char* layerNames[] = { "Background", "World", "UI" };
+        int currentLayerIndex = 1; // Default to World
+
+        // Convert LayerMask to dropdown index
+        if (layer.mask == LAYER_BACKGROUND) currentLayerIndex = 0;
+        else if (layer.mask == LAYER_WORLD) currentLayerIndex = 1;
+        else if (layer.mask == LAYER_UI) currentLayerIndex = 2;
+
+        ImGui::SetNextItemWidth(100.0f);
+        if (ImGui::Combo("##LayerDropdown", &currentLayerIndex, layerNames, 3))
+        {
+            // Convert dropdown index back to LayerMask
+            switch (currentLayerIndex)
+            {
+            case 0:
+                layer.mask = LAYER_BACKGROUND;
+                layer.orderInLayer = 0;
+                layer.z = 0.0f;
+                break;
+            case 1:
+                layer.mask = LAYER_WORLD;
+                layer.orderInLayer = 1;
+                layer.z = 0.0f;
+                break;
+            case 2:
+                layer.mask = LAYER_UI;
+                layer.orderInLayer = 10;
+                layer.z = 100.0f;
+                break;
+            }
+        }
+
         ImGui::Separator();
+
+        // ---------------------------------------------------------------------
+        // Prefab Instance Info
+        // ---------------------------------------------------------------------
+        if (g->HasComponent<PrefabInstance>(selectedEntity))
+        {
+            auto& prefabInstance = g->GetComponent<PrefabInstance>(selectedEntity);
+
+            // Show prefab info in a colored header (like Unity)
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.4f, 0.7f, 0.8f));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+            if (ImGui::CollapsingHeader("Prefab Instance", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGui::PopStyleColor(2);
+
+                ImGui::Indent();
+
+                // Show prefab name
+                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "Prefab:");
+                ImGui::SameLine();
+                ImGui::Text("%s", prefabInstance.prefabName.c_str());
+
+                // Linked checkbox
+                bool isLinked = prefabInstance.isLinked;
+                if (ImGui::Checkbox("Linked to Prefab", &isLinked))
+                {
+                    prefabInstance.isLinked = isLinked;
+                    if (!isLinked) {
+                        std::cout << "[Inspector] Unlinked entity " << selectedEntity
+                            << " from prefab '" << prefabInstance.prefabName << "'" << std::endl;
+                    }
+                    else {
+                        std::cout << "[Inspector] Linked entity " << selectedEntity
+                            << " to prefab '" << prefabInstance.prefabName << "'" << std::endl;
+                    }
+                }
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::SetTooltip("Uncheck to make this instance independent from the prefab.\n"
+                        "When unchecked, this entity won't update when the prefab changes.");
+                }
+
+                ImGui::Spacing();
+
+                // CRITICAL: Apply to Prefab button
+                if (ImGui::Button("Apply to Prefab", ImVec2(-1, 30)))
+                {
+                    PrefabManager prefabMgr;
+
+                    // Save this entity's current state as the new prefab definition
+                    if (prefabMgr.SaveEntityAsPrefab(selectedEntity, prefabInstance.prefabName))
+                    {
+                        std::cout << "[Inspector] Saved entity " << selectedEntity
+                            << " as prefab '" << prefabInstance.prefabName << "'" << std::endl;
+
+                        // Update all other instances
+                        prefabMgr.UpdateAllInstancesOfPrefab(prefabInstance.prefabName);
+
+                        std::cout << "[Inspector] Updated all instances of prefab '"
+                            << prefabInstance.prefabName << "'" << std::endl;
+                    }
+                }
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::SetTooltip("Save this entity's current properties as the new prefab definition.\n"
+                        "All other instances of this prefab will update to match.");
+                }
+
+                ImGui::Unindent();
+            }
+            else
+            {
+                ImGui::PopStyleColor(2);
+            }
+
+            ImGui::Separator();
+        }
 
         // ---------------------------------------------------------------------
         // Right-click anywhere in inspector to add components
@@ -164,16 +310,17 @@ namespace MyEditor
                 }
             }
 
-            // GUIButton
-            if (!coord->HasComponent<GUIButton>(selectedEntity))
-            {
-                if (ImGui::MenuItem("GUIButton"))
-                {
-                    GUIButton b{};
-                    b.buttonID = "button";
-                    coord->AddComponent<GUIButton>(selectedEntity, b);
-                }
-            }
+            //// GUIButton
+            //if (!coord->HasComponent<UIElement>(selectedEntity))
+            //{
+            //    if (ImGui::MenuItem("UIElement"))
+            //    {
+            //        UIElement ui{};
+            //        ui.elementID = "ui_element";
+            //        ui.type = UIType::HEALTH_BAR;  // Default to health bar for now
+            //        coord->AddComponent<UIElement>(selectedEntity, ui);
+            //    }
+            //} 
 
             ImGui::EndPopup();
         }
@@ -339,7 +486,13 @@ namespace MyEditor
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
                     {
                         const char* droppedPath = static_cast<const char*>(payload->Data);
-                        r.spriteName = droppedPath ? std::string(droppedPath) : std::string();
+                        if (droppedPath)
+                        {
+                            // Convert full path to asset ID (filename without extension)
+                            namespace fs = std::filesystem;
+                            std::string assetID = fs::path(droppedPath).stem().string();
+                            r.spriteName = assetID;  // Store as asset ID, not path!
+                        }
                         reloadClicked = true;
                     }
                     ImGui::EndDragDropTarget();
@@ -520,65 +673,6 @@ namespace MyEditor
             }
 
             ImGui::Separator();
-        }
-
-        // ---------------------------------------------------------------------
-        // GUIButton component
-        // ---------------------------------------------------------------------
-        if (g->HasComponent<GUIButton>(selectedEntity))
-        {
-            auto& b = g->GetComponent<GUIButton>(selectedEntity);
-
-            ImGui::TextUnformatted("GUIButton");
-            ImGui::Separator();
-
-            static char idBuf[256];
-            std::strncpy(idBuf, b.buttonID.c_str(), sizeof(idBuf));
-            idBuf[sizeof(idBuf) - 1] = '\0';
-            if (ImGui::InputText("Button ID", idBuf, IM_ARRAYSIZE(idBuf)))
-                b.buttonID = idBuf;
-
-            if (ImGui::Button("Remove GUIButton"))
-                g->RemoveComponent<GUIButton>(selectedEntity);
-
-            ImGui::Separator();
-        }
-
-        // ---------------------------------------------------------------------
-        // Prefab save section
-        // ---------------------------------------------------------------------
-        if (selectedEntity != INVALID_ENTITY)
-        {
-            ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::TextColored(ImVec4(0.4f, 0.7f, 1.0f, 1.0f), "Prefab");
-            ImGui::Separator();
-
-            static char prefabNameBuffer[128] = "";
-            ImGui::SetNextItemWidth(-1);
-            ImGui::InputTextWithHint("##prefabname", "Enter prefab name...", prefabNameBuffer, IM_ARRAYSIZE(prefabNameBuffer));
-
-            bool canSave = (prefabNameBuffer[0] != '\0');
-            if (!canSave) ImGui::BeginDisabled();
-
-            if (ImGui::Button("Save as Prefab"))
-            {
-                PrefabManager prefabMgr;
-                bool success = prefabMgr.SaveEntityAsPrefab(selectedEntity, prefabNameBuffer);
-
-                if (success) {
-                    std::cout << "[Editor] Saved prefab: " << prefabNameBuffer << " with ALL components\n";
-                    memset(prefabNameBuffer, 0, sizeof(prefabNameBuffer));
-                } else {
-                    std::cerr << "[Editor] Failed to save prefab!\n";
-                }
-            }
-
-            if (!canSave) {
-                ImGui::EndDisabled();
-                if (ImGui::IsItemHovered())
-                    ImGui::SetTooltip("Enter a prefab name first");
-            }
         }
 
         ImGui::End();

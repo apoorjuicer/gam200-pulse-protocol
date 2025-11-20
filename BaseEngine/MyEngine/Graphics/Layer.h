@@ -24,7 +24,7 @@ using LayerMask = uint32_t;
 enum : LayerMask {
 	LAYER_BACKGROUND = 1u << 0,	// Elements drawn first (e.g., static backgrounds)
 	LAYER_WORLD = 1u << 1,	 // Game world objects (e.g., characters, props)
-	//LAYER_UI = 1u << 2,	// User interface elements rendered on top
+	LAYER_UI = 1u << 2,	// User interface elements rendered on top
 	LAYER_ALL = 0xFFFFFFFFu	// All Layers
 };
 
@@ -32,4 +32,19 @@ struct LayerTag {
 	LayerMask mask;
 	int   orderInLayer;	//Higher = draws later = appears in front
 	float z = 0.f;	// depth offset for fine-grained ordering (screen-space depth) <this is for 3D>
+
+	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
+		using namespace rapidjson;
+		out.SetObject();
+		out.AddMember("mask", mask, alloc);
+		out.AddMember("orderInLayer", orderInLayer, alloc);
+		out.AddMember("z", z, alloc);
+	}
+
+	void Deserialize(const rapidjson::Value& in) {
+		if (!in.IsObject()) return;
+		if (in.HasMember("mask")) mask = in["mask"].GetUint();
+		if (in.HasMember("orderInLayer")) orderInLayer = in["orderInLayer"].GetInt();
+		if (in.HasMember("z")) z = in["z"].GetFloat();
+	}
 };

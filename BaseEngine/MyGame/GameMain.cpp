@@ -1,3 +1,13 @@
+/******************************************************************************/
+/**
+ * @file        GameMain.cpp
+ * @project     Pulse Protocol
+ * @author      Goh Pin Kai
+ * @brief		
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #include "pch/pch.h"            // same PCH as engine/editor
 
 int main()

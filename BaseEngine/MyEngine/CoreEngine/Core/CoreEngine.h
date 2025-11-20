@@ -2,7 +2,8 @@
 /**
  * @file        CoreEngine.h
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael - 100%
+ * @author		Chia Wei Xuan Rachael - 90%
+ *				Goh Pin Kai - 10%
  * @brief		Declares the core engine class that manages subsystem
  *				initialization, the main game loop, and development utilities.
  *
@@ -39,9 +40,9 @@ public:
 	void GameLoop();
 	void Exit();
 
-	// void SetPaused(bool p);
-	// void TogglePaused();
-	// bool IsPaused() const { return m_paused; }
+	void SetPaused(bool p);
+	void TogglePaused();
+	bool IsPaused() const { return m_paused; }
 
 	// One of the ways to glue systems tgt.
 	// void BroadcastMessage(Message* message);
@@ -66,6 +67,8 @@ public:
 	// AssetsManager& getAssetsManager() { return mAssets; }
 
 
+	void ToggleFullscreen();
+	// AssetsManager& getAssetsManager() { return mAssets; }
 private:
 	bool GameRunning;
 	bool DebugMode = false;

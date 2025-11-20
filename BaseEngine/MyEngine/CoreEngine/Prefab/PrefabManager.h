@@ -36,15 +36,24 @@ public:
     // load prefab and create entity
     std::optional<Entity> InstantiatePrefab(std::string const& prefabName);
 
+    // delete prefab from disk
+    bool DeletePrefab(std::string const& prefabName);
+
     // get all available prefabs for the editor
     std::vector<PrefabData> GetAvailablePrefabs();
 
     // get prefab path by name
     std::string GetPrefabPath(std::string const& prefabName);
 
+    // updates all entities that were instantiated from this prefab
+    void UpdateAllInstancesOfPrefab(std::string const& prefabName);
+
 private:
     std::string prefabDirectory = "../../MyEngine/Assets/Prefabs/";
-    
+
+    // updates a single entity from a prefab file (private helper)
+    bool UpdateEntityFromPrefab(Entity entity, std::string const& prefabPath);
+
     // using Factory internally
     Factory* factory;
 };

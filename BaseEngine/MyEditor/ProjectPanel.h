@@ -12,7 +12,7 @@ namespace MyEditor
     void InitProjectPanel();
 
     // Draw the assets browser
-    void ProjectPanel(Entity selectedEntity);
+    void ProjectPanel();
 
 
 

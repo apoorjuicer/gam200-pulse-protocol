@@ -8,12 +8,12 @@
         {
             "transform": {
                 "position": {
-                    "x": 644.9229125976563,
-                    "y": -40.615379333496097
+                    "x": 1089.7689208984376,
+                    "y": -304.3077392578125
                 },
                 "scale": {
-                    "x": 500.0,
-                    "y": 500.0
+                    "x": 600.0,
+                    "y": 600.0
                 },
                 "rotation": {
                     "x": 0.0,
@@ -27,9 +27,9 @@
         {
             "render": {
                 "mdl_ref": 1.0,
-                "shd_ref": 2.0,
+                "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
+                "spriteName": "BlueGorillaEnemy",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -54,6 +54,11 @@
             }
         },
         {
+            "name": {
+                "name": "Blue Gorilla"
+            }
+        },
+        {
             "Health": {
                 "hp": 1,
                 "damage": 1,
@@ -63,15 +68,22 @@
         {
             "AABB": {
                 "min": {
-                    "x": 50.0,
-                    "y": 50.0
+                    "x": 0.0,
+                    "y": 0.0
                 },
                 "max": {
-                    "x": 150.0,
-                    "y": 150.0
+                    "x": 410.0,
+                    "y": 280.0
                 },
                 "width": 50.0,
                 "height": 50.0
+            }
+        },
+        {
+            "LayerTag": {
+                "mask": 2,
+                "orderInLayer": 1,
+                "z": 0.0
             }
         }
     ]

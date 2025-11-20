@@ -48,6 +48,7 @@
 #pragma once
 #include "Factory.h"
 #include "../MyEngine/CoreEngine/Assets.h"
+#include "../MyEngine/Components/DisplayName.h"
 
 
 using namespace rapidjson;
@@ -144,7 +145,19 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const& path)
 			g_coordinator->AddComponent<AABB>(entity, aabb);
 		}
 
+		if (component.HasMember("LayerTag") && component["LayerTag"].IsObject())
+		{
+			LayerTag layerTag;
+			layerTag.Deserialize(component["LayerTag"]);
+			g_coordinator->AddComponent<LayerTag>(entity, layerTag);
+		}
 		
+		if (component.HasMember("ui") && component["ui"].IsObject())
+		{
+			UIElement ui;
+			ui.Deserialize(component["ui"]);
+			g_coordinator->AddComponent<UIElement>(entity, ui);
+		}
 	}
 	// add entity to list of entity in the current scene
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
@@ -169,9 +182,14 @@ Entity Factory::DefaultObj()
 
 	Framework::Animation a;
 
+	// Add default Name component so entity can be renamed in hierarchy
+	Name n;
+	n.name = "GameObject"; // Default name
+
 	g_coordinator->AddComponent(entity, t);
 	g_coordinator->AddComponent(entity, r);
 	g_coordinator->AddComponent(entity, a);
+	g_coordinator->AddComponent(entity, n);
 	g_coordinator->AddComponent(entity, LayerTag{ LAYER_WORLD, 0, 0.0f });
 	
 	// add entity to list of entity in the current scene
@@ -298,6 +316,30 @@ bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const& path)
 		aabb.Serialize(AABBVal, alloc);
 
 		ComponentObj.AddMember("AABB", AABBVal, alloc);
+		componentsArray.PushBack(ComponentObj, alloc);
+	}
+
+	if (g_coordinator->HasComponent<LayerTag>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value LayerTagVal;
+
+		auto& layerTag = g_coordinator->GetComponent<LayerTag>(entity);
+		layerTag.Serialize(LayerTagVal, alloc);
+
+		ComponentObj.AddMember("LayerTag", LayerTagVal, alloc);
+		componentsArray.PushBack(ComponentObj, alloc);
+	}
+
+	if (g_coordinator->HasComponent<UIElement>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value UIVal;
+
+		auto& uiElement = g_coordinator->GetComponent<UIElement>(entity);
+		uiElement.Serialize(UIVal, alloc);
+
+		ComponentObj.AddMember("ui", UIVal, alloc);
 		componentsArray.PushBack(ComponentObj, alloc);
 	}
 

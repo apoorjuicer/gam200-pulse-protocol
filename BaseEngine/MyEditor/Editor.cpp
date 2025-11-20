@@ -173,7 +173,6 @@ namespace MyEditor
 
     void Init(GLFWwindow* w)
     {
-        std::cout << "[DEBUG] Editor Init got window ptr: " << w << "\n";
         s_Window = w;
 
         IMGUI_CHECKVERSION();
@@ -211,7 +210,6 @@ namespace MyEditor
     void NewFrame() {
         if (!s_enabled) return;
 
-        // Backends: time, input, etc.
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
 
@@ -229,6 +227,7 @@ namespace MyEditor
 
         ImGui::NewFrame();
     }
+
 
 
     void Draw() {
@@ -339,7 +338,7 @@ namespace MyEditor
         if (bottomDockID) ImGui::SetNextWindowDockID(bottomDockID, ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Project")) {
             // folder browser
-            ProjectPanel(selectedEntity);
+            ProjectPanel();
         }
         ImGui::End();
 
@@ -464,9 +463,11 @@ namespace MyEditor
 
     void Render() {
         if (!s_enabled) return;
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
+
 
 
     void Shutdown()

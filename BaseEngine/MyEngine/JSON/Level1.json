@@ -11,8 +11,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 0.0,
-                            "y": 0.0
+                            "x": -9.23065185546875,
+                            "y": -60.92315673828125
                         },
                         "scale": {
                             "x": 1600.0,
@@ -32,7 +32,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg",
+                        "spriteName": "C:\\Users\\Chloe\\source\\repos\\csd2401f25_team_bloop\\BaseEngine\\MyEngine\\Assets\\Textures\\Backgrounds\\Background1.jpg",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -50,6 +50,11 @@
                         "rows": 1,
                         "animationSpeed": 2.0
                     }
+                },
+                {
+                    "name": {
+                        "name": "Background"
+                    }
                 }
             ]
         },
@@ -63,15 +68,15 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -800.0,
-                            "y": 0.0
+                            "x": -1050.769287109375,
+                            "y": -133.8461151123047
                         },
                         "scale": {
-                            "x": 500.0,
-                            "y": 500.0
+                            "x": 700.0,
+                            "y": 700.0
                         },
                         "rotation": {
-                            "x": 0.0,
+                            "x": 45.0,
                             "y": 0.0
                         },
                         "isVisible": true,
@@ -95,8 +100,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.028779827058315278,
+                        "currentFrame": 0,
+                        "elapsedTime": 0.016068274155259134,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -115,7 +120,7 @@
                 },
                 {
                     "Health": {
-                        "hp": 5,
+                        "hp": 4,
                         "damage": 1,
                         "isAlive": true
                     }
@@ -133,6 +138,54 @@
                         "width": 50.0,
                         "height": 50.0
                     }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "Jeff",
+                        "isLinked": true
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": -300.0
+                        },
+                        "scale": {
+                            "x": 600.0,
+                            "y": 90.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": -0.016998864710330964,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": false,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "name": {
+                        "name": "FeedbackBar"
+                    }
                 }
             ]
         },
@@ -146,12 +199,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 800.0,
-                            "y": 0.0
+                            "x": 1008.5380859375,
+                            "y": -404.00006103515627
                         },
                         "scale": {
-                            "x": 500.0,
-                            "y": 500.0
+                            "x": 600.0,
+                            "y": 600.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -165,9 +218,9 @@
                 {
                     "render": {
                         "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
+                        "spriteName": "BlueGorillaEnemy",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -192,6 +245,11 @@
                     }
                 },
                 {
+                    "name": {
+                        "name": "Blue Gorilla"
+                    }
+                },
+                {
                     "Health": {
                         "hp": 1,
                         "damage": 1,
@@ -211,36 +269,47 @@
                         "width": 50.0,
                         "height": 50.0
                     }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "Blue Gorilla",
+                        "isLinked": true
+                    }
                 }
             ]
         },
         {
             "components": [
                 {
+                    "Typing": {
+                        "Type": "Enemy"
+                    }
+                },
+                {
                     "transform": {
                         "position": {
-                            "x": 0.0,
-                            "y": -300.0
+                            "x": -509.6158752441406,
+                            "y": 479.69232177734377
                         },
                         "scale": {
                             "x": 600.0,
-                            "y": 90.0
+                            "y": 600.0
                         },
                         "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
-                        "useTexture": false,
-                        "spriteName": "",
+                        "mdl_ref": 1.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "RedGorillaEnemy",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -250,29 +319,139 @@
                     }
                 },
                 {
-                    "ui": {
-                        "buttonID": "feedback_bar",
-                        "label": "",
-                        "normalColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 0.0
-                        },
-                        "hoverColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 0.0
-                        },
-                        "actionType": "",
-                        "entityJsonPath": "",
-                        "isEnabled": false
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "EnemyScript"
                     }
                 },
                 {
                     "name": {
-                        "name": "FeedbackBar"
+                        "name": "diffEne"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 1,
+                        "damage": 1,
+                        "isAlive": true
+                    }
+                },
+                {
+                    "AABB": {
+                        "min": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "max": {
+                            "x": 410.0,
+                            "y": 280.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "Blue Gorilla",
+                        "isLinked": false
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "Typing": {
+                        "Type": "Enemy"
+                    }
+                },
+                {
+                    "transform": {
+                        "position": {
+                            "x": 519.3072509765625,
+                            "y": 445.8460998535156
+                        },
+                        "scale": {
+                            "x": 600.0,
+                            "y": 600.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "BlueGorillaEnemy",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "EnemyScript"
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Blue Gorilla"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 1,
+                        "damage": 1,
+                        "isAlive": true
+                    }
+                },
+                {
+                    "AABB": {
+                        "min": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "max": {
+                            "x": 410.0,
+                            "y": 280.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "Blue Gorilla",
+                        "isLinked": true
                     }
                 }
             ]
@@ -282,12 +461,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -600.0,
-                            "y": 350.0
+                            "x": -587.6921997070313,
+                            "y": -600.0
                         },
                         "scale": {
-                            "x": 200.0,
-                            "y": 80.0
+                            "x": 433.0,
+                            "y": 103.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -301,36 +480,36 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
-                        "useTexture": false,
-                        "spriteName": "",
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "C:\\Users\\Chloe\\source\\repos\\csd2401f25_team_bloop\\BaseEngine\\MyEngine\\Assets\\Textures\\UI\\health bar.png",
                         "tintColor": {
                             "r": 1.0,
-                            "g": 0.5,
-                            "b": 0.0,
+                            "g": 1.0,
+                            "b": 1.0,
                             "a": 1.0
                         }
                     }
                 },
                 {
-                    "ui": {
-                        "buttonID": "btn_create",
-                        "label": "Create Hero",
-                        "normalColor": {
-                            "r": 0.0,
-                            "g": 0.699999988079071,
-                            "b": 0.0,
-                            "a": 1.0
-                        },
-                        "hoverColor": {
-                            "r": 0.0,
-                            "g": 0.5,
-                            "b": 0.0,
-                            "a": 1.0
-                        },
-                        "actionType": "CreateEntity",
-                        "entityJsonPath": "../../MyEngine/JSON/HeroPrefab.json",
-                        "isEnabled": true
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "health"
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "health",
+                        "isLinked": true
                     }
                 }
             ]
@@ -340,12 +519,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -300.0,
-                            "y": 350.5
+                            "x": 172.307861328125,
+                            "y": -418.4615478515625
                         },
                         "scale": {
-                            "x": 200.0,
-                            "y": 80.0
+                            "x": 433.0,
+                            "y": 103.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -359,36 +538,152 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
-                        "useTexture": false,
-                        "spriteName": "",
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "C:\\Users\\Chloe\\source\\repos\\csd2401f25_team_bloop\\BaseEngine\\MyEngine\\Assets\\Textures\\UI\\health bar.png",
                         "tintColor": {
                             "r": 1.0,
-                            "g": 0.5,
-                            "b": 0.0,
+                            "g": 1.0,
+                            "b": 1.0,
                             "a": 1.0
                         }
                     }
                 },
                 {
-                    "ui": {
-                        "buttonID": "btn_destroy",
-                        "label": "Destroy Hero",
-                        "normalColor": {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "health"
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "health",
+                        "isLinked": true
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -92.30758666992188,
+                            "y": -55.38458251953125
+                        },
+                        "scale": {
+                            "x": 433.0,
+                            "y": 103.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "C:\\Users\\Chloe\\source\\repos\\csd2401f25_team_bloop\\BaseEngine\\MyEngine\\Assets\\Textures\\UI\\health bar.png",
+                        "tintColor": {
                             "r": 1.0,
-                            "g": 0.0,
-                            "b": 0.0,
+                            "g": 1.0,
+                            "b": 1.0,
                             "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "health"
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "health",
+                        "isLinked": true
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 218.46165466308595,
+                            "y": 46.15380859375
                         },
-                        "hoverColor": {
-                            "r": 0.800000011920929,
-                            "g": 0.0,
-                            "b": 0.0,
+                        "scale": {
+                            "x": 433.0,
+                            "y": 103.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "C:\\Users\\Chloe\\source\\repos\\csd2401f25_team_bloop\\BaseEngine\\MyEngine\\Assets\\Textures\\UI\\green bar.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
                             "a": 1.0
-                        },
-                        "actionType": "DestroyEntity",
-                        "entityJsonPath": "",
-                        "isEnabled": true
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "health"
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "health",
+                        "isLinked": false
                     }
                 }
             ]

@@ -9,7 +9,7 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 #include "glapp.h"
 #include <filesystem>
 
@@ -24,7 +24,7 @@ static GLApp::BatchRender gBatch;
 
 namespace fs = std::filesystem;
 
-static std::string LoadFile(const char *relativeToGraphicsShader)
+static std::string LoadFile(const char* relativeToGraphicsShader)
 {
 	fs::path here = fs::path(__FILE__).parent_path(); // ...\MyEngine\Graphics
 	fs::path full = here / "shader" / relativeToGraphicsShader;
@@ -141,7 +141,7 @@ void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/)
 		std::make_pair(test_vs, test_fs),
 		std::make_pair(bg_vs, bg_fs),
 		std::make_pair(sprite_vs, sprite_fs),
-		std::make_pair(font_vs, font_fs)};
+		std::make_pair(font_vs, font_fs) };
 	GLApp::init_shdrpgms_cont(shdr_strs);
 }
 
@@ -155,7 +155,7 @@ void GLApp::update(GLFWwindow* window, std::set<Entity> entity) {
 	Framework::Transform transformSystem;
 	transformSystem.update(GLHelper::delta_time, entity);
 }
-void GLApp::updateAnimation(Framework::Animation &x, float deltaTime)
+void GLApp::updateAnimation(Framework::Animation& x, float deltaTime)
 {
 	if (x.totalFrames <= 1 || x.animationSpeed <= 0.0f)
 		return;
@@ -202,11 +202,11 @@ glm::vec2 GLApp::ScreenToNDC(double x, double y) {
 glm::mat3 GLApp::BuildPanZoomNDC(const GLApp::Camera2D& cam) {
 	// column-major: glm::mat3(col0, col1, col2)
 	glm::mat3 S(cam.zoom, 0, 0,
-				0, cam.zoom, 0,
-				0, 0, 1);
+		0, cam.zoom, 0,
+		0, 0, 1);
 	glm::mat3 T(1, 0, 0,
-				0, 1, 0,
-				cam.center.x, cam.center.y, 1);
+		0, 1, 0,
+		cam.center.x, cam.center.y, 1);
 	return T * S; // translate after scaling
 }
 
@@ -229,9 +229,9 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 
 	// NOTE: re.shd_ref / re.mdl_ref are floats in your component; cast to uint16
 	gBatch.Push(static_cast<uint16_t>(x.shd_ref),
-				static_cast<uint16_t>(x.mdl_ref),
-				x.textureID,
-				modelNDC, u0, v0, u1, v1);
+		static_cast<uint16_t>(x.mdl_ref),
+		x.textureID,
+		modelNDC, u0, v0, u1, v1);
 }
 
 void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
@@ -309,7 +309,7 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	glm::mat3 PanZoom = BuildPanZoomNDC(gCamera);
 
 	// Timing
-	auto *g_coordinator = Coordinator::GetInstance();
+	auto* g_coordinator = Coordinator::GetInstance();
 
 	static auto lastTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -330,15 +330,15 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		auto& re = g_coordinator->GetComponent<Framework::Renderable>(it);
 		if (!tr.isVisible) continue;
 
-    // ensure texture is ready BEFORE push
-    if (re.textureID == 0 && !re.spriteName.empty()) {
-        //re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
-		int w = 0, h = 0;
-		re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
-		re.texW = w;
-		re.texH = h;
-        re.loadedSpriteName = re.spriteName;
-    }
+		// ensure texture is ready BEFORE push
+		if (re.textureID == 0 && !re.spriteName.empty()) {
+			//re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
+			int w = 0, h = 0;
+			re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
+			re.texW = w;
+			re.texH = h;
+			re.loadedSpriteName = re.spriteName;
+		}
 
 		// if still 0 and you only want textured sprites, you can continue here,
 		// or push anyway if you also render colored quads
@@ -485,12 +485,12 @@ void GLApp::cleanup()
 }
 
 // Shader Program Container
-void GLApp::init_shdrpgms_cont(GLApp::VPSS const &vpss)
+void GLApp::init_shdrpgms_cont(GLApp::VPSS const& vpss)
 {
 	shdrpgms.clear();
 	shdrpgms.reserve(vpss.size());
 	int i = 0;
-	for (auto const &x : vpss)
+	for (auto const& x : vpss)
 	{
 		if (x.first.empty())
 		{
@@ -553,19 +553,19 @@ void GLApp::OnResize(int width, int height)
 }
 
 // Convert vec2 in model space to NDC using your existing 2D pipeline
-static inline glm::vec2 ToNDC(const glm::mat3 &M, const glm::vec2 &v)
+static inline glm::vec2 ToNDC(const glm::mat3& M, const glm::vec2& v)
 {
 	glm::vec3 h = M * glm::vec3(v, 1.0f);
-	return {h.x, h.y}; // already NDC
+	return { h.x, h.y }; // already NDC
 }
 
 // Draw an AABB as 4 lines in NDC
-void GLApp::DrawAABB_NDC(const glm::mat3 &modelToNDC, const AABB &box, const glm::vec3 &color)
+void GLApp::DrawAABB_NDC(const glm::mat3& modelToNDC, const AABB& box, const glm::vec3& color)
 {
-	const glm::vec2 a{box.min.x, box.min.y};
-	const glm::vec2 b{box.max.x, box.min.y};
-	const glm::vec2 c{box.max.x, box.max.y};
-	const glm::vec2 d{box.min.x, box.max.y};
+	const glm::vec2 a{ box.min.x, box.min.y };
+	const glm::vec2 b{ box.max.x, box.min.y };
+	const glm::vec2 c{ box.max.x, box.max.y };
+	const glm::vec2 d{ box.min.x, box.max.y };
 
 	glm::vec2 qa = ToNDC(modelToNDC, a);
 	glm::vec2 qb = ToNDC(modelToNDC, b);

@@ -52,6 +52,7 @@
 #include <filesystem>
 #include <cstdlib>
 #include <optional>
+#include <ranges>
 
 // Graphics Library Headers
 #include <GL/glew.h>

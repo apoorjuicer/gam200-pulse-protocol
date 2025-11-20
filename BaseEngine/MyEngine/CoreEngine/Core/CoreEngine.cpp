@@ -21,8 +21,7 @@
 #include "graphics/stb_image.h"
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
-
-
+#include "../MyEngine/CoreEngine/Prefab/PrefabInstance.h"
 #include "../MyEngine/TestCases/TestCase.h"
 
 #include "../MyEngine/Resources/AssetRegistry.h"
@@ -248,17 +247,44 @@ void CoreEngine::Init()
 
 	glfwMakeContextCurrent(window);
 
-	// move to editor pls
-//#ifdef ENABLE_EDITOR
-//	glfwSetDropCallback(window, [](GLFWwindow*, int count, const char** paths)
-//		{
-//			for (int i = 0; i < count; ++i)
-//				MyEditor::PushOSDropPath(paths[i]);
-//		});
-//#else
-//	// In game build we don't care about editor file drops
-//	glfwSetDropCallback(window, nullptr);
-//#endif
+	// === FORCE FULLSCREEN AT STARTUP ===
+	{
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+		glfwSetWindowMonitor(
+			window,
+			monitor,         // full screen monitor
+			0, 0,            // position
+			mode->width,     // resolution
+			mode->height,
+			mode->refreshRate
+		);
+	}
+
+	// Pause/resume on focus change (covers ALT+TAB and returning from Ctrl+Alt+Del)
+	glfwSetWindowFocusCallback(window,
+		[](GLFWwindow* win, int focused)
+		{
+			(void)win;
+			if (!Engine) return;
+			if (focused)
+				Engine->SetPaused(false);
+			else
+				Engine->SetPaused(true);
+		});
+
+	// Also pause when minimized / restored
+	glfwSetWindowIconifyCallback(window,
+		[](GLFWwindow* win, int iconified)
+		{
+			(void)win;
+			if (!Engine) return;
+			if (iconified == GLFW_TRUE)
+				Engine->SetPaused(false);
+			// When restored, focus callback will unpause if the window regains focus
+		});
+
 
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwSetFramebufferSizeCallback(window,
@@ -380,14 +406,15 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<Health>();
 	g_coordinator->RegisterComponent<LogicComponent>();
 	g_coordinator->RegisterComponent<NamingComponent>();
-	g_coordinator->RegisterComponent<GUIButton>();
+	g_coordinator->RegisterComponent<UIElement>();
 	g_coordinator->RegisterComponent<Name>();
 	g_coordinator->RegisterComponent<LayerTag>();
+	g_coordinator->RegisterComponent<PrefabInstance>();
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
 	g_coordinator->RegisterSystem<RhythmGameplayInput>();
-	g_coordinator->RegisterSystem<GUIManager>();
+	//g_coordinator->RegisterSystem<GUIManager>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<CollisionManager>();
@@ -413,10 +440,10 @@ void CoreEngine::Setup()
 	rhythmSig.set(g_coordinator->GetComponentType<Framework::Animation>());
 	g_coordinator->SetSystemSignature<RhythmGameplayInput>(rhythmSig);
 
-	Signature guiSig;
-	guiSig.set(g_coordinator->GetComponentType<GUIButton>());
-	guiSig.set(g_coordinator->GetComponentType<Framework::Transform>());
-	g_coordinator->SetSystemSignature<GUIManager>(guiSig);
+	//Signature UISig;
+	//UISig.set(g_coordinator->GetComponentType<UIElement>());
+	//UISig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	//g_coordinator->SetSystemSignature<GUIManager>(UISig);
 
 	Signature graphicsSig;
 	graphicsSig.set(g_coordinator->GetComponentType<Framework::Transform>());  // <-- needs Transform
@@ -448,8 +475,30 @@ void CoreEngine::Update(float dt)
 	auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
-
 	auto profiler = ProfilingManager::GetInstance();
+
+	if (!m_paused)
+	{
+		profiler->StartSystem("Scene System");
+		if (g_sceneSystem) g_sceneSystem->Update(dt);
+		profiler->EndSystem("Scene System");
+
+		profiler->StartSystem("LogicSystem");
+		g_coordinator->UpdateAllSystems(dt);
+		profiler->EndSystem("LogicSystem");
+
+		profiler->StartSystem("Input System");
+		if (g_inputSystem) g_inputSystem->Update(dt);
+		profiler->EndSystem("Input System");
+
+		profiler->StartSystem("RhythmGameplayInput");
+		if (g_rhythmSystem) g_rhythmSystem->Update(dt);
+		profiler->EndSystem("RhythmGameplayInput");
+
+		profiler->StartSystem("Audio System");
+		if (g_audioSystem) g_audioSystem->Update();
+		profiler->EndSystem("Audio System");
+	}
 
 	profiler->StartSystem("Scene System");
 	if (g_sceneSystem)
@@ -768,21 +817,21 @@ void CoreEngine::RenderDebugDraw()
 	DebugDraw::End();
 }
 
-// void CoreEngine::SetPaused(bool paused)
-//{
-//	if (m_paused == paused) return;
-//	m_paused = paused;
-//
-//	// Pause/resume audio, too
-//	if (auto audio = Coordinator::GetInstance()->GetSystem<AudioManager>()) {
-//		audio->SetPaused(paused);
-//	}
-// }
-//
-// void CoreEngine::TogglePaused()
-//{
-//	SetPaused(!m_paused);
-// }
+ void CoreEngine::SetPaused(bool paused)
+{
+	if (m_paused == paused) return;
+	m_paused = paused;
+
+	// Pause/resume audio, too
+	if (auto audio = Coordinator::GetInstance()->GetSystem<AudioManager>()) {
+		audio->SetPaused(paused);
+	}
+ }
+
+ void CoreEngine::TogglePaused()
+{
+	SetPaused(!m_paused);
+ }
 
 void CoreEngine::PlayGame()
 {
@@ -844,21 +893,21 @@ void CoreEngine::StopGame()
 		audio->StopBGM();
 	}
 
-	// reloads original scene to reset all entities to initial starting position
-	if (auto sceneMgr = coord->GetSystem<SceneManager>())
-	{
-		if (!m_originalScenePath.empty())
-		{
-			sceneMgr->LoadSceneFromJson(m_originalScenePath);
+	//// reloads original scene to reset all entities to initial starting position
+	//if (auto sceneMgr = coord->GetSystem<SceneManager>())
+	//{
+	//	if (!m_originalScenePath.empty())
+	//	{
+	//		sceneMgr->LoadSceneFromJson(m_originalScenePath);
 
-			// Sync GUI tracking after scene reload
-			if (auto guiMgr = coord->GetSystem<GUIManager>())
-			{
-				guiMgr->SyncTrackingWithScene();
-				std::cout << "[CoreEngine] GUI tracking synced after Stop" << std::endl;
-			}
-		}
-	}
+	//		// Sync GUI tracking after scene reload
+	//		//if (auto guiMgr = coord->GetSystem<GUIManager>())
+	//		//{
+	//		//	guiMgr->SyncTrackingWithScene();
+	//		//	std::cout << "[CoreEngine] GUI tracking synced after Stop" << std::endl;
+	//		//}
+	//	}
+	//}
 }
 
 // this might have been causing the random crash cus its calling restartBGM() too
@@ -903,4 +952,39 @@ void CoreEngine::ResumeGame()
 void CoreEngine::SetEditorFrameCallback(const std::function<void()>& cb)
 {
 	m_editorFrameCallback = cb;
+}
+
+void CoreEngine::ToggleFullscreen()
+{
+	static bool isFullscreen = true;	
+
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+	if (!isFullscreen)
+	{
+		// SWITCH TO FULLSCREEN
+		glfwSetWindowMonitor(
+			window,
+			monitor,
+			0, 0,
+			mode->width,
+			mode->height,
+			mode->refreshRate
+		);
+	}
+	else
+	{
+		// SWITCH TO WINDOWED MODE (use config size)
+		glfwSetWindowMonitor(
+			window,
+			nullptr,
+			100, 100,                    // position
+			config.GetWindowWidth(),
+			config.GetWindowHeight(),
+			GLFW_DONT_CARE
+		);
+	}
+
+	isFullscreen = !isFullscreen;
 }
