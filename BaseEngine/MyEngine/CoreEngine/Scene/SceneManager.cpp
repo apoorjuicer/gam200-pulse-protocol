@@ -62,13 +62,13 @@ void SceneManager::Update(float dt)
 		std::cout << dt << std::endl;
 	}*/
 
-	//if (CurrentScene != PreviousScene)
-	//{
-	//	//SaveCurrentScene(); // normally just for ImGui but can use here for testing
+	if (CurrentScene != PreviousScene)
+	{
+		//SaveCurrentScene(); // normally just for ImGui but can use here for testing
 
-	//	std::string NewScenePath = "../../MyEngine/JSON/" + CurrentScene +".json";
-	//	LoadSceneFromJson(NewScenePath);
-	//}
+		std::string NewScenePath = "../../MyEngine/JSON/" + CurrentScene +".json";
+		LoadSceneFromJson(NewScenePath);
+	}
 
 	// update previous scene for the next loop
 	PreviousScene = CurrentScene;
@@ -183,20 +183,6 @@ void SceneManager::SaveCurrentScene()
 			
 		}
 
-		// purely for testing in-game GUI system
-		//if (g_coordinator->HasComponent<GUIButton>(entity))
-		//{
-		//	Value ComponentObj(rapidjson::kObjectType);
-		//	Value ButtonVal;
-
-		//	auto& btn = g_coordinator->GetComponent<GUIButton>(entity);
-		//	btn.Serialize(ButtonVal, alloc);
-
-		//	ComponentObj.AddMember("ui", ButtonVal, alloc);
-		//	componentsArray.PushBack(ComponentObj, alloc);
-		//	
-		//}
-
 		if (g_coordinator->HasComponent<Name>(entity))
 		{
 			Value ComponentObj(rapidjson::kObjectType);
@@ -249,17 +235,18 @@ void SceneManager::SaveCurrentScene()
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
-		//if (g_coordinator->HasComponent<UIElement>(entity))
-		//{
-		//	Value ComponentObj(rapidjson::kObjectType);
-		//	Value UIVal;
+		// Save LayerTag component if entity has it
+		if (g_coordinator->HasComponent<LayerTag>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value LayerTagVal;
 
-		//	auto& uiElement = g_coordinator->GetComponent<UIElement>(entity);
-		//	uiElement.Serialize(UIVal, alloc);
+			auto& layerTag = g_coordinator->GetComponent<LayerTag>(entity);
+			layerTag.Serialize(LayerTagVal, alloc);
 
-		//	ComponentObj.AddMember("ui", UIVal, alloc);
-		//	componentsArray.PushBack(ComponentObj, alloc);
-		//}
+			ComponentObj.AddMember("layerTag", LayerTagVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
 
 		// So for this entity, we add compoennt array
 		entityObj.AddMember("components", componentsArray, alloc);
@@ -469,13 +456,13 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				g_coordinator->AddComponent<PrefabInstance>(entity, pi);
 			}
 
-			// this is purely for the in-game basic GUI system & on screen UI elements
-			//if (component.HasMember("ui") && component["ui"].IsObject())
-			//{
-			//	UIElement ui;
-			//	ui.Deserialize(component["ui"]);
-			//	g_coordinator->AddComponent<UIElement>(entity, ui);
-			//}
+			// Load LayerTag
+			if (component.HasMember("layerTag") && component["layerTag"].IsObject())
+			{
+				LayerTag layerTag;
+				layerTag.Deserialize(component["layerTag"]);
+				g_coordinator->AddComponent<LayerTag>(entity, layerTag);
+			}
 		}
 		
 		if (!g_coordinator->HasComponent<LayerTag>(entity)) {

@@ -50,6 +50,14 @@
                     "name": {
                         "name": "MainMenuBG"
                     }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "Background",
+                        "mask": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
                 }
             ]
         },
@@ -99,6 +107,11 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": "ButtonScript"
+                    }
+                },
+                {
                     "name": {
                         "name": "NewGameBtn"
                     }
@@ -107,6 +120,14 @@
                     "prefabInstance": {
                         "prefabName": "Button",
                         "isLinked": false
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "orderInLayer": 10,
+                        "z": 100.0
                     }
                 }
             ]
@@ -157,6 +178,11 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": "ButtonScript"
+                    }
+                },
+                {
                     "name": {
                         "name": "ContinueBtn"
                     }
@@ -165,6 +191,14 @@
                     "prefabInstance": {
                         "prefabName": "Button",
                         "isLinked": false
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "orderInLayer": 10,
+                        "z": 100.0
                     }
                 }
             ]
@@ -215,6 +249,11 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": "ButtonScript"
+                    }
+                },
+                {
                     "name": {
                         "name": "SettingsBtn"
                     }
@@ -223,6 +262,14 @@
                     "prefabInstance": {
                         "prefabName": "Button",
                         "isLinked": false
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "orderInLayer": 10,
+                        "z": 100.0
                     }
                 }
             ]
@@ -273,6 +320,11 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": "ButtonScript"
+                    }
+                },
+                {
                     "name": {
                         "name": "QuitBtn"
                     }
@@ -281,6 +333,14 @@
                     "prefabInstance": {
                         "prefabName": "Button",
                         "isLinked": false
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "orderInLayer": 10,
+                        "z": 100.0
                     }
                 }
             ]

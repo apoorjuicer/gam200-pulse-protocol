@@ -257,8 +257,6 @@ bool PrefabManager::UpdateEntityFromPrefab(Entity entity, std::string const& pre
 		coord->RemoveComponent<Health>(entity);
 	if (coord->HasComponent<AABB>(entity))
 		coord->RemoveComponent<AABB>(entity);
-	if (coord->HasComponent<UIElement>(entity))
-		coord->RemoveComponent<UIElement>(entity);
 
 	// Add updated components from prefab
 	for (rapidjson::SizeType i = 0; i < components.Size(); ++i)
@@ -299,12 +297,6 @@ bool PrefabManager::UpdateEntityFromPrefab(Entity entity, std::string const& pre
 			AABB aabb;
 			aabb.Deserialize(component["AABB"]);
 			coord->AddComponent<AABB>(entity, aabb);
-		}
-
-		if (component.HasMember("ui") && component["ui"].IsObject()) {
-			UIElement ui;
-			ui.Deserialize(component["ui"]);
-			coord->AddComponent<UIElement>(entity, ui);
 		}
 	}
 

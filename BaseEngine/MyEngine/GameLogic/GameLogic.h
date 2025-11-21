@@ -74,6 +74,20 @@ public:
 	static bool testOBBCollision;
 };
 
+class ButtonScript : public Iscript
+{
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
+
+private:
+	std::string buttonName;
+	std::string normalTexture;
+	std::string hoverTexture;
+	bool isHovering = false;
+};
+
 
 class LogicSystem: public Systems
 {

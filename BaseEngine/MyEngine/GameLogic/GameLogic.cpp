@@ -603,3 +603,101 @@ void EnemyScript::Exit(Entity ID)
 	(void)ID;
 }
 
+void ButtonScript::Init(Entity ID)
+{
+    auto* coord = Coordinator::GetInstance();
+
+    if (!coord->HasComponent<Name>(ID)) return;
+    auto& name = coord->GetComponent<Name>(ID);
+    buttonName = name.name;
+
+    // Get textures from Renderable
+    if (coord->HasComponent<Framework::Renderable>(ID)) {
+        auto& renderable = coord->GetComponent<Framework::Renderable>(ID);
+        normalTexture = renderable.spriteName;
+
+        // Construct hover texture name
+        size_t extPos = normalTexture.find_last_of('.');
+        if (extPos != std::string::npos) {
+            hoverTexture = normalTexture.substr(0, extPos) + "_hover" + normalTexture.substr(extPos);
+        }
+    }
+
+    std::cout << "[ButtonScript] Init: " << buttonName << std::endl;
+}
+
+void ButtonScript::Update(Entity ID)
+{
+    auto* coord = Coordinator::GetInstance();
+    auto inputMgr = coord->GetSystem<InputManager>();
+    if (!inputMgr) return;
+
+    if (!coord->HasComponent<Framework::Transform>(ID)) return;
+    if (!coord->HasComponent<Framework::Renderable>(ID)) return;
+
+    auto& transform = coord->GetComponent<Framework::Transform>(ID);
+    auto& renderable = coord->GetComponent<Framework::Renderable>(ID);
+
+    if (!transform.isVisible) return;
+
+    // Get mouse position
+    float mouseX = inputMgr->getMousePositionVirtual().x;
+    float mouseY = inputMgr->getMousePositionVirtual().y;
+    bool mouseInViewport = inputMgr->isMouseInGameViewport();
+
+    // Check hover
+    float halfW = transform.Scale.x * 0.5f;
+    float halfH = transform.Scale.y * 0.5f;
+    float left = transform.Pos.x - halfW;
+    float right = transform.Pos.x + halfW;
+    float bottom = transform.Pos.y - halfH;
+    float top = transform.Pos.y + halfH;
+
+    bool wasHovering = isHovering;
+    isHovering = (mouseX >= left && mouseX <= right &&
+        mouseY >= bottom && mouseY <= top &&
+        mouseInViewport);
+
+    // Handle texture swap
+    if (isHovering && !wasHovering) {
+        // Just started hovering
+        renderable.spriteName = hoverTexture;
+        renderable.needsTextureReload = true;
+        std::cout << "[ButtonScript] Hover: " << buttonName << std::endl;
+    }
+    else if (!isHovering && wasHovering) {
+        // Just stopped hovering
+        renderable.spriteName = normalTexture;
+        renderable.needsTextureReload = true;
+    }
+
+    // Handle click
+    if (isHovering && inputMgr->isMouseButtonTriggered(0)) {
+        std::cout << "[ButtonScript] Clicked: " << buttonName << std::endl;
+
+        auto sceneMgr = coord->GetSystem<SceneManager>();
+        if (!sceneMgr) return;
+
+        // Handle button actions based on name
+        if (buttonName == "NewGameBtn") {
+            sceneMgr->CurrentScene = "Level1";
+        }
+        else if (buttonName == "ContinueBtn") {
+            // TODO: Load save file
+            std::cout << "[ButtonScript] Continue not implemented yet" << std::endl;
+        }
+        else if (buttonName == "SettingsBtn") {
+            std::cout << "[ButtonScript] Settings not implemented yet" << std::endl;
+        }
+        else if (buttonName == "QuitBtn") {
+            if (Engine) {
+                glfwSetWindowShouldClose(Engine->GetWindow(), GLFW_TRUE);
+            }
+        }
+    }
+}
+
+void ButtonScript::Exit(Entity ID)
+{
+    (void)ID;
+}

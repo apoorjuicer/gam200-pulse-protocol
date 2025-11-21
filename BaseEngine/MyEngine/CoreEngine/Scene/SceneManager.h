@@ -70,6 +70,7 @@ public:
 	void SaveCurrentScene();
 	void UnloadCurrentScene();
 
+	std::string CurrentScene; // i need this public for me to call in GUImanager when i press the nbutton in hovered state
 	
 	std::string GrabCurrentScene() const { return CurrentScene; }
 	void ChangeCurrentScene(std::string const& str) { CurrentScene = str; }
@@ -84,7 +85,6 @@ public:
 	}
 
 private:
-	std::string CurrentScene;
 	std::string PreviousScene;
 	std::vector<Entity> SceneEntityList;
 

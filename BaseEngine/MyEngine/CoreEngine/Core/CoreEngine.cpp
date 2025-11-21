@@ -417,7 +417,6 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<Health>();
 	g_coordinator->RegisterComponent<LogicComponent>();
 	g_coordinator->RegisterComponent<NamingComponent>();
-	g_coordinator->RegisterComponent<UIElement>();
 	g_coordinator->RegisterComponent<Name>();
 	g_coordinator->RegisterComponent<LayerTag>();
 	g_coordinator->RegisterComponent<PrefabInstance>();
@@ -425,7 +424,6 @@ void CoreEngine::Setup()
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
 	g_coordinator->RegisterSystem<RhythmGameplayInput>();
-	//g_coordinator->RegisterSystem<GUIManager>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<CollisionManager>();
@@ -452,8 +450,10 @@ void CoreEngine::Setup()
 	g_coordinator->SetSystemSignature<RhythmGameplayInput>(rhythmSig);
 
 	//Signature UISig;
-	//UISig.set(g_coordinator->GetComponentType<UIElement>());
 	//UISig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	//UISig.set(g_coordinator->GetComponentType<Framework::Renderable>());
+	//UISig.set(g_coordinator->GetComponentType<Name>());
+	//UISig.set(g_coordinator->GetComponentType<LayerTag>());
 	//g_coordinator->SetSystemSignature<GUIManager>(UISig);
 
 	Signature graphicsSig;

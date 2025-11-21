@@ -151,13 +151,6 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const& path)
 			layerTag.Deserialize(component["LayerTag"]);
 			g_coordinator->AddComponent<LayerTag>(entity, layerTag);
 		}
-		
-		if (component.HasMember("ui") && component["ui"].IsObject())
-		{
-			UIElement ui;
-			ui.Deserialize(component["ui"]);
-			g_coordinator->AddComponent<UIElement>(entity, ui);
-		}
 	}
 	// add entity to list of entity in the current scene
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
@@ -330,19 +323,6 @@ bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const& path)
 		ComponentObj.AddMember("LayerTag", LayerTagVal, alloc);
 		componentsArray.PushBack(ComponentObj, alloc);
 	}
-
-	if (g_coordinator->HasComponent<UIElement>(entity))
-	{
-		Value ComponentObj(rapidjson::kObjectType);
-		Value UIVal;
-
-		auto& uiElement = g_coordinator->GetComponent<UIElement>(entity);
-		uiElement.Serialize(UIVal, alloc);
-
-		ComponentObj.AddMember("ui", UIVal, alloc);
-		componentsArray.PushBack(ComponentObj, alloc);
-	}
-
 
 	// ADD AS ONE BIG ARRAY WITH ALL THE COMPONENTS AVAILABLE ABOVE! >:]
 	d.AddMember("components", componentsArray, alloc);
