@@ -109,7 +109,7 @@ namespace MyEditor
             ImGui::TextUnformatted("No entity selected.");
             ImGui::End();
             return;
-        }   
+        }
 
         // Disable all editing when playing
         bool isPlaying = IsPlaying();
@@ -774,7 +774,7 @@ namespace MyEditor
                         // Add more scripts here as you create them
                     };
                     const int numScripts = 3;  // Update this when adding more scripts
-                    
+
                     // Find current script index
                     int currentScriptIndex = 0;
                     for (int i = 0; i < numScripts; i++) {
@@ -783,7 +783,7 @@ namespace MyEditor
                             break;
                         }
                     }
-                    
+
                     ImGui::Text("Script:");
                     ImGui::SameLine();
                     ImGui::SetNextItemWidth(200.0f);
@@ -792,7 +792,7 @@ namespace MyEditor
                         script.ScriptName = scriptOptions[currentScriptIndex];
                         std::cout << "[Inspector] Changed script to: " << script.ScriptName << std::endl;
                     }
-                    
+
                     // Display current script (visual confirmation)
                     ImGui::Spacing();
                     ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Active: %s", script.ScriptName.c_str());
@@ -822,14 +822,14 @@ namespace MyEditor
                     g->RemoveComponent<AudioSource>(selectedEntity);
                 }
                 else
-                {         
+                {
                     std::string full_path{};
                     // If audio_id is known & valid, use its path
                     if (!mAssets.HasAudio(audio.audio_id)) {
                         wantMissingAudioPopup = true;
                     }
                     else {
-                         full_path = mAssets.GetAudioPath(audio.audio_id);
+                        full_path = mAssets.GetAudioPath(audio.audio_id);
                     }
                     if (wantMissingAudioPopup)
                     {
@@ -890,15 +890,15 @@ namespace MyEditor
                     //could add:
                     // - Play / Stop preview buttons
                     // - Mute toggle, etc.
-                        
-                        
-                          
 
-                    
 
-                
+
+
+
+
+
                 }
-           
+
                 ImGui::Unindent();
             }
             ImGui::Separator();
@@ -908,6 +908,7 @@ namespace MyEditor
         if (isPlaying)
         {
             ImGui::EndDisabled();
+        }
 
         ImGui::End();
     }
