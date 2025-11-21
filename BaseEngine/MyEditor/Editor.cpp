@@ -6,7 +6,7 @@
  * @author      Goh Pin Kai (secondary) - 7%
  *              Chloe Lau Rey En (secondary) - 15%
  * @brief       Manages the full ImGui-based editor interface, including initialization, frame updates, rendering, and runtime toggling of editor features.
- * 
+ *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
@@ -14,7 +14,7 @@
  /******************************************************************************/
 
 #include "Editor.h"
-#include <Graphics/glhelper.h>     
+#include "Graphics/glhelper.h"
 #include "CoreEngine/Asset/AssetsManager.h"
 
 // ==========================================================================
@@ -34,8 +34,7 @@ namespace MyEditor
     static GLFWwindow* s_Window = nullptr;
     static bool s_enabled = true;
     static bool s_restoreNextFrame = false;
-
-
+    static bool s_frameStarted = false;
 
     // --------------------------------------------------------------------
     // PANEL RATIOS
@@ -84,9 +83,9 @@ namespace MyEditor
     }
 
     // Draw Gizmo
-    void Gizmo_DrawAndHandle(const GameViewport&vp);
+    void Gizmo_DrawAndHandle(const GameViewport& vp);
 
-  
+
 
 #ifdef IMGUI_HAS_DOCKING
     static void BuildMainDockspace()
@@ -208,6 +207,15 @@ namespace MyEditor
     bool IsEnabled() { return s_enabled; }
 
     void NewFrame() {
+        // IMPORTANT! If previous frame was started but not completed, force complete it
+        if (s_frameStarted) {
+            /*std::cerr << "[Editor] WARNING: Previous frame not completed! Force completing..." << std::endl;*/
+            // This can happen during scene loading when framebuffer becomes invalid mid-frame
+            ImGui::Render(); // Complete the previous frame
+            ImGui::EndFrame(); // Ensure frame is fully ended
+        }
+
+        s_frameStarted = false;
         if (!s_enabled) return;
 
         // Skip if window is minimized
@@ -219,6 +227,8 @@ namespace MyEditor
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+        s_frameStarted = true;
     }
 
     void Draw() {
@@ -227,6 +237,10 @@ namespace MyEditor
         int display_w, display_h;
         glfwGetFramebufferSize(s_Window, &display_w, &display_h);
         if (display_w <= 0 || display_h <= 0)
+            return;
+
+        // Don't draw if NewFrame() wasn't called
+        if (!s_frameStarted)
             return;
 
         if (s_restoreNextFrame) {
@@ -328,7 +342,7 @@ namespace MyEditor
             DrawInspectorWindow(rightDockID);
             ImGui::End();
         }
-  
+
 
         // Project (Assets & Prefabs)
         if (bottomDockID) ImGui::SetNextWindowDockID(bottomDockID, ImGuiCond_FirstUseEver);
@@ -459,6 +473,10 @@ namespace MyEditor
     void Render() {
         if (!s_enabled) return;
 
+        // Don't render if NewFrame() wasn't called
+        if (!s_frameStarted)
+            return;
+
         int display_w, display_h;
         glfwGetFramebufferSize(s_Window, &display_w, &display_h);
         if (display_w <= 0 || display_h <= 0)
@@ -540,7 +558,7 @@ namespace MyEditor
         glfwGetFramebufferSize(window, &fbW, &fbH);
         if (fbW <= 0 || fbH <= 0) {
             // window minimized / no drawable area
-            return {0, 0, 0, 0};
+            return { 0, 0, 0, 0 };
         }
 
 
