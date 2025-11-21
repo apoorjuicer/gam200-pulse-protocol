@@ -48,6 +48,7 @@ void LogicSystem::Init()
     
     AddScript("PlayerScript", std::make_shared<PlayerScript>());
     AddScript("EnemyScript", std::make_shared<EnemyScript>());
+    AddScript("ButtonScript", std::make_shared<ButtonScript>());
 }
 
 void LogicSystem::Update(float dt)
