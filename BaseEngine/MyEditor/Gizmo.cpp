@@ -105,6 +105,12 @@ namespace MyEditor
     // -------------------------------------------------------------------------
     void Gizmo_DrawAndHandle(const GameViewport& vp)
     {
+        // Don't allow gizmo interaction during play mode
+        if (IsPlaying())
+        {
+            return;
+        }
+
         auto* coord = Coordinator::GetInstance();
         if (!coord) return;
 

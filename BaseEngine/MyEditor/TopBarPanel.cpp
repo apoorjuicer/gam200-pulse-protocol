@@ -35,15 +35,11 @@ namespace MyEditor
         bool hasName;
         Name name;
 
-        //bool hasGuiButton;
-        //GUIButton guiButton;
-
         SavedEntityState()
             : id(INVALID_ENTITY),
             hasTransform(false),
             hasRenderable(false),
             hasName(false)
-            //hasGuiButton(false)
         {
         }
     };
@@ -51,6 +47,11 @@ namespace MyEditor
     static bool s_isPlaying = false;               
     static bool s_hasEditorBaseline = false;       
     static std::vector<SavedEntityState> s_editorBaseline;
+
+    bool IsPlaying()
+    {
+        return s_isPlaying;
+    }
 
       void CaptureEditorBaseline()
     {
@@ -191,27 +192,6 @@ namespace MyEditor
                 sceneMgr->SaveCurrentScene();
             }
         }
-
-        //ImGui::SameLine();
-
-        //if (ImGui::Button("Load Scene", loadButtonSize))
-        //{
-        //    std::string path = OpenJsonFileDialog();
-        //    if (!path.empty())
-        //    {
-        //        if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>())
-        //        {
-        //            sceneMgr->LoadSceneFromJson(path);
-        //            std::cout << "[Editor] Loaded scene: " << path << "\n";
-        //            s_hasEditorBaseline = false;
-        //            selectedEntity = INVALID_ENTITY;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        std::cout << "[Editor] Load scene cancelled.\n";
-        //    }
-        //}
 
         ImGui::SameLine();
 

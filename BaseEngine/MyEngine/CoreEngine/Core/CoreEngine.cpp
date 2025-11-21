@@ -372,14 +372,6 @@ void CoreEngine::Init()
 	ProfilingManager::GetInstance()->SetResetInterval(60.0);
 	ProfilingManager::GetInstance()->SetDisplayUpdateInterval(1.0);
 
-	// GLuint barTexture = LoadTexture("../../MyEngine/Assets/Sprites/perfect.png");
-	// if (barTexture > 0) {
-	//	Entity box2 = g_inputSystem->GetFeedbackEntity2();  // Use getter
-	//	auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(box2);
-	//	transform2.textureID = barTexture;
-	//	std::cout << "Texture loaded and assigned to box 2: " << barTexture << std::endl;
-	// }
-
 	GameRunning = true;
 
 	// std::string filePath = "../../MyEngine/JSON/test.json";//AssetManager.mPrefabMap[path];
@@ -498,8 +490,14 @@ void CoreEngine::Update(float dt)
 		g_coordinator->UpdateAllSystems(dt);
 		profiler->EndSystem("LogicSystem");
 
+		profiler->StartSystem("Graphics System");
+		if (g_graphicsSystem)
+			g_graphicsSystem->Update();
+		profiler->EndSystem("Graphics System");
+
 		profiler->StartSystem("Input System");
-		if (g_inputSystem) g_inputSystem->Update(dt);
+		if (g_inputSystem)
+			g_inputSystem->Update(dt);
 		profiler->EndSystem("Input System");
 
 		profiler->StartSystem("RhythmGameplayInput");
@@ -520,6 +518,11 @@ void CoreEngine::Update(float dt)
 	g_coordinator->UpdateAllSystems(dt);
 	profiler->EndSystem("LogicSystem");
 
+	profiler->StartSystem("Graphics System");
+	if (g_graphicsSystem)
+		g_graphicsSystem->Update();
+	profiler->EndSystem("Graphics System");
+
 	profiler->StartSystem("Input System");
 	if (g_inputSystem)
 		g_inputSystem->Update(dt);
@@ -529,11 +532,6 @@ void CoreEngine::Update(float dt)
 	if (g_rhythmSystem)
 		g_rhythmSystem->Update(dt);
 	profiler->EndSystem("RhythmGameplayInput");
-
-	profiler->StartSystem("Graphics System");
-	if (g_graphicsSystem)
-		g_graphicsSystem->Update();
-	profiler->EndSystem("Graphics System");
 
 	profiler->StartSystem("Audio System");
 	if (g_audioSystem)

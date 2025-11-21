@@ -70,9 +70,11 @@ public:
 	void SaveCurrentScene();
 	void UnloadCurrentScene();
 
-	std::string CurrentScene; // i need this public for me to call in GUImanager when i press the nbutton in hovered state
+	std::string CurrentScene; // i need this public for me to call in other systems when i press the nbutton in hovered state
 	
 	std::string GrabCurrentScene() const { return CurrentScene; }
+	std::string GrabLastScene() const { return LastScene; }
+	void ClearLastScene() { LastScene = ""; }
 	void ChangeCurrentScene(std::string const& str) { CurrentScene = str; }
 	void IncrementEntityArray(Entity entity) { SceneEntityList.push_back(entity); }
 	void DecrementEntityArray(Entity entity)
@@ -85,7 +87,8 @@ public:
 	}
 
 private:
-	std::string PreviousScene;
+	std::string PreviousScene;		// For change detection in Update()
+	std::string LastScene;			// For ESC navigation - the scene we came FROM
 	std::vector<Entity> SceneEntityList;
 
 	std::string StartingScene = "../../MyEngine/JSON/MainMenu.json"; 

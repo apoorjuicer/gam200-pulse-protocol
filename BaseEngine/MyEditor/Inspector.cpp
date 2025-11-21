@@ -20,6 +20,7 @@
 
 #include "Inspector.h"
 #include "Editor.h"                       // selectedEntity, INVALID_ENTITY, PrefabManager, etc.
+#include "TopBarPanel.h" 
 
 #include "Graphics/glapp.h"           // GLApp::shdrpgms
 #include "Graphics/Layer.h"           // GLApp::shdrpgms
@@ -108,6 +109,13 @@ namespace MyEditor
             ImGui::TextUnformatted("No entity selected.");
             ImGui::End();
             return;
+        }   
+
+        // Disable all editing when playing
+        bool isPlaying = IsPlaying();
+        if (isPlaying)
+        {
+            ImGui::BeginDisabled();
         }
 
         ImGui::Text("Entity ID: %d", (int)selectedEntity);
@@ -766,7 +774,7 @@ namespace MyEditor
                         }
                     }
                     
-                    ImGui::Text("Script Type:");
+                    ImGui::Text("Script:");
                     ImGui::SameLine();
                     ImGui::SetNextItemWidth(200.0f);
                     if (ImGui::Combo("##ScriptDropdown", &currentScriptIndex, scriptOptions, numScripts))
@@ -784,6 +792,12 @@ namespace MyEditor
             }
 
             ImGui::Separator();
+        }
+
+        // Re-enable if we disabled for play mode
+        if (isPlaying)
+        {
+            ImGui::EndDisabled();
         }
 
         ImGui::End();

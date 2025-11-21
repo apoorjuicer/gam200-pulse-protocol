@@ -17,6 +17,7 @@
 #include "pch/pch_temp.h"
 #include "../MyEngine/CoreEngine/ECS/System.h"
 #include "../MyEngine/CoreEngine/Message/MessageManager.h"
+#include "Graphics\glhelper.h"
 
 class InputManager : public Systems {
 public:

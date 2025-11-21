@@ -15,10 +15,48 @@
  /******************************************************************************/
 
 #include "pch/pch_temp.h"
+
 #include "graphics/stb_image.h"
 #include "../MyEngine/Input/InputManager.h"
 #include "../MyEngine/CoreEngine/ECS/Coordinator.h"
 #include "../MyEngine/Graphics/GraphicsManager.h"
+
+static Vector2 ScreenToWorld_ForInput(double fbX, double fbY)
+{
+	// World size (matches gizmo)
+	static constexpr float kWorldW = 1920.0f;
+	static constexpr float kWorldH = 1080.0f;
+
+	// Get the game viewport (letterbox-aware)
+	float drawX = static_cast<float>(GLHelper::GameOffsetX);
+	float drawY = static_cast<float>(GLHelper::GameOffsetY);
+	float drawW = static_cast<float>(GLHelper::GameWidth);
+	float drawH = static_cast<float>(GLHelper::GameHeight);
+
+	// Convert framebuffer pixels to NDC
+	const float ndcX = ((fbX - drawX) / drawW) * 2.0f - 1.0f;
+	const float ndcY = 1.0f - ((fbY - drawY) / drawH) * 2.0f;
+	const glm::vec3 ndc(ndcX, ndcY, 1.0f);
+
+	// Convert NDC to world using camera and normalization matrix
+	const float sx = 2.0f / kWorldW;
+	const float sy = 2.0f / kWorldH;
+	const glm::mat3 N(sx, 0, 0, 0, sy, 0, 0, 0, 1);
+	const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gCamera);
+	const glm::mat3 invAll = glm::inverse(Cam * N);
+
+	//static int frameCount = 0;
+	//frameCount++;
+	//if (frameCount % 60 == 0) {
+	//	std::cout << "Camera center: (" << GLApp::gCamera.center.x << ", " << GLApp::gCamera.center.y << ")" << std::endl;
+	//	std::cout << "Camera zoom: " << GLApp::gCamera.zoom << std::endl;
+	//}
+
+	const glm::vec3 w = invAll * ndc;
+
+	// Shift Y UP to align buttons
+	return Vector2{ w.x, w.y - 830.0f };  // Add 660 to Y (shift UP)
+}
 
 InputManager::InputManager() : window(nullptr) {
 	std::memset(currentKeys, 0, sizeof(currentKeys));
@@ -49,6 +87,32 @@ void InputManager::Update(float) {
 	/*std::cout << "[INPUT MANAGER UPDATE]" << std::endl;*/
 	updateInputStates();
 	processDebugToggles();
+
+	auto* coord = Coordinator::GetInstance();
+	auto sceneManager = coord->GetSystem<SceneManager>();
+
+	// ESC key: Go back to previous scene
+	if (isKeyTriggered(GLFW_KEY_ESCAPE) && sceneManager) {
+		std::string currentScene = sceneManager->CurrentScene;
+
+		// If we're at MainMenu, ESC does nothing
+		if (currentScene == "MainMenu") {
+			std::cout << "[InputManager] ESC pressed - already at MainMenu, doing nothing" << std::endl;
+			return; // Early exit - don't process ESC further
+		}
+
+		// For all other scenes, go back to LastScene
+		std::string lastScene = sceneManager->GrabLastScene();
+
+		if (!lastScene.empty() && lastScene != currentScene) {
+			sceneManager->CurrentScene = lastScene;
+			sceneManager->ClearLastScene();  // Clear so we can't toggle back
+			std::cout << "[InputManager] ESC pressed - returning to: " << lastScene << std::endl;
+		}
+		else {
+			std::cout << "[InputManager] ESC pressed - no previous scene to return to" << std::endl;
+		}
+	}
 
 	// Test delayed message (Advanced Feature: Message Queuing)
 	if (isKeyTriggered(GLFW_KEY_SPACE)) {
@@ -121,29 +185,13 @@ void InputManager::updateInputStates() {
 		fbY = yw * static_cast<double>(fbH) / static_cast<double>(winH);
 	}
 
-	// Get position relative to game viewport
-	double localX = fbX - GLApp::GameOffsetX;
-	double localY = fbY - GLApp::GameOffsetY;
+	Vector2 worldPos = ScreenToWorld_ForInput(fbX, fbY);
+	mousePositionVirtual = glm::vec2(worldPos.x, worldPos.y);
 
-	mouseInGameViewport =
-		(localX >= 0.0 && localY >= 0.0 &&
-			localX <= GLApp::GameWidth &&
-			localY <= GLApp::GameHeight);
-
-	// SIMPLE conversion matching Transform system exactly
-	// Transform does: PnormX = Pos.x / GameWidth
-	// So: Pos.x = PnormX * GameWidth
-	// Our buttons are stored directly as Pos.x (e.g., -600)
-
-	// Map mouse from [0, GameWidth] to [-GameWidth/2, GameWidth/2]
-	float vx = static_cast<float>(localX) - (GLApp::GameWidth * 0.5f);
-
-	// Map mouse from [0, GameHeight] (top) to [-GameHeight/2, GameHeight/2] (bottom-left)
-	float vy = (GLApp::GameHeight * 0.5f) - static_cast<float>(localY);
-
-	vx += -150.0f;  // Start with 300 and adjust up or down as needed
-
-	mousePositionVirtual = glm::vec2(vx, vy);
+	// Check if mouse is in the game viewport
+	double localX = fbX - GLHelper::GameOffsetX;
+	double localY = fbY - GLHelper::GameOffsetY;
+	mouseInGameViewport = (localX >= 0.0 && localY >= 0.0 && localX <= GLHelper::GameWidth && localY <= GLHelper::GameHeight);
 }
 
 void InputManager::processDebugToggles() {
@@ -163,7 +211,7 @@ void InputManager::processDebugToggles() {
 	if (isKeyTriggered(GLFW_KEY_F7)) {
 		stressToggleRequested = true;
 	}
-	
+
 	// F8: Toggle debug overlay (FPS counter, performance stats)
 	if (isKeyTriggered(GLFW_KEY_F8)) {
 		auto* coord = Coordinator::GetInstance();

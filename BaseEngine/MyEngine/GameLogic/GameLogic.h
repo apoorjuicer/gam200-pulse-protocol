@@ -74,6 +74,15 @@ public:
 	static bool testOBBCollision;
 };
 
+// Per-button data structure
+struct ButtonData
+{
+	std::string buttonName;
+	std::string normalTexture;
+	std::string hoverTexture;
+	bool isHovering = false;
+};
+
 class ButtonScript : public Iscript
 {
 public:
@@ -82,10 +91,8 @@ public:
 	void Exit(Entity ID) override;
 
 private:
-	std::string buttonName;
-	std::string normalTexture;
-	std::string hoverTexture;
-	bool isHovering = false;
+	// Store data per entity ID
+	std::unordered_map<Entity, ButtonData> buttonDataMap;
 };
 
 

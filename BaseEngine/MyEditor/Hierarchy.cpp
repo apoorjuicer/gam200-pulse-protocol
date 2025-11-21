@@ -19,9 +19,10 @@
 
 #include "Hierarchy.h"
 #include "Editor.h"   // selectedEntity, INVALID_ENTITY, entityDisplayOrder, Game/ECS helpers
+#include "TopBarPanel.h"
 
 // ImGui
-#include <imgui.h>
+#include "imgui.h"
 
 // Everything else (Factory, Name, GUIButton, Renderable, Transform, Animation)
 // is already included via Editor.h
@@ -234,6 +235,13 @@ namespace MyEditor
         // ============================================
         // TOOLBAR - CREATE & DELETE & REORDER
         // ============================================
+
+        // Disable all editing when playing
+        bool isPlaying = IsPlaying();
+        if (isPlaying)
+        {
+            ImGui::BeginDisabled();
+        }
 
         // [+] Create Empty Entity at end
         if (ImGui::Button("+"))
@@ -557,6 +565,12 @@ namespace MyEditor
         }
 
         ImGui::EndChild();
+
+        if (isPlaying)
+        {
+            ImGui::EndDisabled();
+        }
+
         ImGui::End();
     }
 

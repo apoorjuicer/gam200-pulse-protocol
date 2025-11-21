@@ -13,20 +13,16 @@
  /******************************************************************************/
 
 #include "pch/pch_temp.h"
-#include "ProjectPanel.h"
 
+#include "ProjectPanel.h"
+#include "TopBarPanel.h"
+#include "imgui.h"
 
 #include "../CoreEngine/Asset/AssetsManager.h"
 #include "../CoreEngine/ECS/Coordinator.h"
 #include "../Graphics/Renderable.h"
 #include "../Graphics/Transform.h"
 #include "CoreEngine/Prefab/PrefabManager.h"
-
-#include <filesystem>
-#include <imgui.h>
-#include <algorithm>
-#include <cctype>
-#include <cstring>                         // for std::strncpy
 
 namespace MyEditor
 {
@@ -237,6 +233,13 @@ namespace MyEditor
     // ── Main panel UI ──────────────────────────────────────────
     void ProjectPanel()
     {
+        // Disable all editing when playing
+        bool isPlaying = IsPlaying();
+        if (isPlaying)
+        {
+            ImGui::BeginDisabled();
+        }
+
         // Top bar ------------------------------------------------
         if (ImGui::Button("Refresh"))
         {
@@ -652,5 +655,11 @@ namespace MyEditor
         }
 
         ImGui::EndChild();
+
+        // Re-enable if we disabled for play mode
+        if (isPlaying)
+        {
+            ImGui::EndDisabled();
+        }
     }
 }

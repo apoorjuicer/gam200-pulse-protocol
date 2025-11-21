@@ -11,17 +11,17 @@
  *             - Scene Loading: Parses JSON scene files, creates entities with components,
  *               registers GUI buttons, and assigns default LayerTag if missing
  *             - Scene Unloading: Destroys all entities in SceneEntityList and clears tracking
- *             - Scene Saving: Serializes current scene state to JSON with all entity 
- *               components (Transform, Renderable, Animation, LogicComponent, Health, 
+ *             - Scene Saving: Serializes current scene state to JSON with all entity
+ *               components (Transform, Renderable, Animation, LogicComponent, Health,
  *               AABB, GUIButton, Name, NamingComponent)
- *             - Scene Tracking: Maintains SceneEntityList for ownership, PreviousScene 
+ *             - Scene Tracking: Maintains SceneEntityList for ownership, PreviousScene
  *               for save operations, CurrentScene for active scene name
- * 
+ *
  * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
  *             Reproduction or disclosure of this file or its contents without the
  *             prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 #pragma once
 #include "SceneManager.h"
 #include "../MyEngine/GameLogic/GameLogic.h"
@@ -40,7 +40,7 @@
 //Starting scene will be Main Menu
 SceneManager::SceneManager()
 {
-	
+
 }
 
 void SceneManager::Init()
@@ -66,13 +66,15 @@ void SceneManager::Update(float dt)
 	{
 		//SaveCurrentScene(); // normally just for ImGui but can use here for testing
 
-		std::string NewScenePath = "../../MyEngine/JSON/" + CurrentScene +".json";
+		// Save the scene we're LEAVING for ESC navigation
+		LastScene = PreviousScene;
+
+		std::string NewScenePath = "../../MyEngine/JSON/" + CurrentScene + ".json";
 		LoadSceneFromJson(NewScenePath);
+
+		// Update PreviousScene for change detection next frame
+		PreviousScene = CurrentScene;
 	}
-
-	// update previous scene for the next loop
-	PreviousScene = CurrentScene;
-
 }
 
 
@@ -106,7 +108,7 @@ void SceneManager::SaveCurrentScene()
 	Value JsonEntityArray(kArrayType);
 
 	// save one entity one at a time into 1 Json file
-	for (auto const& entity: g_coordinator->GetAllEntities())
+	for (auto const& entity : g_coordinator->GetAllEntities())
 	{
 		// We make an object first for JsonEntityArray[i]
 		Value entityObj(kObjectType);
@@ -125,7 +127,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("Typing", NameVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			
+
 		}
 
 		if (g_coordinator->HasComponent<Framework::Transform>(entity))
@@ -138,7 +140,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("transform", TransfromVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			
+
 		}
 
 		if (g_coordinator->HasComponent<Framework::Renderable>(entity))
@@ -154,7 +156,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("render", RenderVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			
+
 		}
 
 		if (g_coordinator->HasComponent<Framework::Animation>(entity))
@@ -167,7 +169,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("animation", AnimationVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			
+
 		}
 
 		if (g_coordinator->HasComponent<LogicComponent>(entity))
@@ -180,7 +182,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("script", ScriptVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			
+
 		}
 
 		if (g_coordinator->HasComponent<Name>(entity))
@@ -193,7 +195,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("name", NameVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			
+
 		}
 
 		if (g_coordinator->HasComponent<Health>(entity))
@@ -206,7 +208,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("Health", HealthVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			
+
 		}
 
 		if (g_coordinator->HasComponent<AABB>(entity))
@@ -219,7 +221,7 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("AABB", AABBVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
-			
+
 		}
 
 		// Save PrefabInstance component if entity has it
@@ -280,7 +282,7 @@ void SceneManager::SaveCurrentScene()
 		std::cerr << "Error: Failed to write JSON to file: " << path << "\n";
 		return;
 	}
-	
+
 #ifdef _DEBUG
 	std::cout << "\n================================================" << std::endl;
 	std::cout << "  [SceneManager]: " << PreviousScene << " has been saved!" << std::endl;
@@ -297,18 +299,53 @@ void SceneManager::UnloadCurrentScene()
 #endif
 
 	auto* g_coordinator = Coordinator::GetInstance();
-	for(auto const& entity: SceneEntityList)
+	std::cout << "[SceneManager::UnloadCurrentScene] Got coordinator: " << (g_coordinator ? "YES" : "NO") << std::endl;
+	std::cout << "[SceneManager::UnloadCurrentScene] SceneEntityList size: " << SceneEntityList.size() << std::endl;
+
+	// Call Exit() on all scripts BEFORE destroying entities
+	auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
+	std::cout << "[SceneManager::UnloadCurrentScene] Got LogicSystem: " << (logicSystem ? "YES" : "NO") << std::endl;
+
+	if (logicSystem) {
+		std::cout << "[SceneManager::UnloadCurrentScene] Calling Exit() on scripts..." << std::endl;
+		int exitCount = 0;
+		for (auto const& entity : SceneEntityList) {
+			std::cout << "  -> Checking entity " << entity << std::endl;
+			if (g_coordinator->HasComponent<LogicComponent>(entity)) {
+				std::cout << "  -> Entity " << entity << " has LogicComponent" << std::endl;
+				auto& logic = g_coordinator->GetComponent<LogicComponent>(entity);
+				auto script = logicSystem->GrabScript(logic.ScriptName);
+				if (script) {
+					std::cout << "  -> Calling Exit() on " << logic.ScriptName << " for entity " << entity << std::endl;
+					script->Exit(entity);
+					exitCount++;
+				}
+				else {
+					std::cout << "  -> WARNING: Could not get script for " << logic.ScriptName << std::endl;
+				}
+			}
+			else {
+				std::cout << "  -> Entity " << entity << " does NOT have LogicComponent" << std::endl;
+			}
+		}
+		std::cout << "[SceneManager::UnloadCurrentScene] Total Exit() calls: " << exitCount << std::endl;
+	}
+	else {
+		std::cout << "[SceneManager::UnloadCurrentScene] WARNING: LogicSystem not found!" << std::endl;
+	}
+
+	for (auto const& entity : SceneEntityList)
 	{
 		g_coordinator->DestroyEntity(entity);
 	}
 
 	//This class owns entity container is cleared
 	SceneEntityList.clear();
-	#ifdef _DEBUG
-		std::cout << "\n================================================" << std::endl;
-		std::cout << "    [SceneManager] Scene successfully unloaded!" << std::endl;
-		std::cout << "================================================" << std::endl;
-	#endif
+#ifdef _DEBUG
+	std::cout << "\n================================================" << std::endl;
+	std::cout << "    [SceneManager] Scene successfully unloaded!" << std::endl;
+	std::cout << "================================================" << std::endl;
+#endif
 }
 
 void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE JSON FILE 
@@ -464,7 +501,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				g_coordinator->AddComponent<LayerTag>(entity, layerTag);
 			}
 		}
-		
+
 		if (!g_coordinator->HasComponent<LayerTag>(entity)) {
 			LayerTag tag{};
 
@@ -476,7 +513,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			//	tag.z = 0.0f;
 			//}
 			//else 
-			
+
 			// check for UI first
 			//if (g_coordinator->HasComponent<UIElement>(entity)) {
 			//	tag.mask = LAYER_UI;
@@ -506,31 +543,30 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 		SceneEntityList.push_back(entity);
 	}
 
-//		auto* coordinator = Coordinator::GetInstance();
-//		auto guiMgr = coordinator->GetSystem<GUIManager>();
-//
-//		if (guiMgr) {
-//			guiMgr->GUIButtonEntities.clear();
-//
-//			for (auto entity : SceneEntityList) {
-//				if (coordinator->HasComponent<UIElement>(entity)) {
-//					guiMgr->GUIButtonEntities.insert(entity);
-//#ifdef _DEBUG
-//					//std::cout << "[SceneManager] Registered GUI button entity: " << entity << std::endl;
-//#endif
-//				}
-//			}
-//
-//#ifdef _DEBUG
-//			//std::cout << "[SceneManager] Total GUI buttons: " << inputMgr->GUIButtonEntities.size() << std::endl;
-//#endif
-//		}
+	// Initialize all scripts for entities with LogicComponent
+	auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
+	if (logicSystem) {
+		std::cout << "[SceneManager] Initializing scripts for loaded entities..." << std::endl;
+		int scriptCount = 0;
+		for (Entity entity : SceneEntityList) {
+			if (g_coordinator->HasComponent<LogicComponent>(entity)) {
+				auto& logic = g_coordinator->GetComponent<LogicComponent>(entity);
+				auto script = logicSystem->GrabScript(logic.ScriptName);
+				if (script) {
+					script->Init(entity);
+					scriptCount++;
+					std::cout << "  -> Initialized " << logic.ScriptName << " for entity " << entity << std::endl;
+				}
+			}
+		}
+		std::cout << "[SceneManager] Total scripts initialized: " << scriptCount << std::endl;
+	}
 
-		ChangeCurrentScene(d["scene"].GetString());
+	ChangeCurrentScene(d["scene"].GetString());
 #ifdef _DEBUG
-		std::cout << "\n===================================================" << std::endl;
-		std::cout << "   [Scene Manager]: " << CurrentScene << " loaded successfully!" << std::endl;
-		std::cout << "===================================================" << std::endl;
+	std::cout << "\n===================================================" << std::endl;
+	std::cout << "   [Scene Manager]: " << CurrentScene << " loaded successfully!" << std::endl;
+	std::cout << "===================================================" << std::endl;
 #endif
 }
 

@@ -244,6 +244,22 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		GLHelper::GameOffsetY = vp.y;
 		GLHelper::GameWidth = vp.w;
 		GLHelper::GameHeight = vp.h;
+
+		//// DEBUG PURPOSE
+		//static int frameCount = 0;
+		//frameCount++;
+		//if (frameCount % 60 == 0) {  // Print once per second
+		//	std::cout << "\n===== GLAPP DRAW DEBUG =====" << std::endl;
+		//	std::cout << "VIRTUAL_W: " << VIRTUAL_W << ", VIRTUAL_H: " << VIRTUAL_H << std::endl;
+		//	std::cout << "Editor viewport (vp): x=" << vp.x << ", y=" << vp.y
+		//		<< ", w=" << vp.w << ", h=" << vp.h << std::endl;
+		//	std::cout << "Set GameOffsetX=" << GLHelper::GameOffsetX
+		//		<< ", GameOffsetY=" << GLHelper::GameOffsetY << std::endl;
+		//	std::cout << "Set GameWidth=" << GLHelper::GameWidth
+		//		<< ", GameHeight=" << GLHelper::GameHeight << std::endl;
+		//	std::cout << "============================\n" << std::endl;
+		//}
+
 		static double s_scrollY = 0.0;
 		static bool s_scrollInit = false;
 		if (!s_scrollInit)

@@ -608,23 +608,26 @@ void ButtonScript::Init(Entity ID)
 {
     auto* coord = Coordinator::GetInstance();
 
+    // Create button data for this entity
+    ButtonData& data = buttonDataMap[ID];
+
     if (!coord->HasComponent<Name>(ID)) return;
     auto& name = coord->GetComponent<Name>(ID);
-    buttonName = name.name;
+    data.buttonName = name.name;
 
     // Get textures from Renderable
     if (coord->HasComponent<Framework::Renderable>(ID)) {
         auto& renderable = coord->GetComponent<Framework::Renderable>(ID);
-        normalTexture = renderable.spriteName;
+        data.normalTexture = renderable.spriteName;
 
         // Construct hover texture name
-        size_t extPos = normalTexture.find_last_of('.');
+        size_t extPos = data.normalTexture.find_last_of('.');
         if (extPos != std::string::npos) {
-            hoverTexture = normalTexture.substr(0, extPos) + "_hover" + normalTexture.substr(extPos);
+            data.hoverTexture = data.normalTexture.substr(0, extPos) + "_hover" + data.normalTexture.substr(extPos);
         }
     }
 
-    std::cout << "[ButtonScript] Init: " << buttonName << std::endl;
+    std::cout << "[ButtonScript] Init: " << data.buttonName << " Normal: " << data.normalTexture  << " Hover: " << data.hoverTexture << std::endl;
 }
 
 void ButtonScript::Update(Entity ID)
@@ -633,64 +636,84 @@ void ButtonScript::Update(Entity ID)
     auto inputMgr = coord->GetSystem<InputManager>();
     if (!inputMgr) return;
 
+    // Get this button's data - if missing, initialize it
+    auto it = buttonDataMap.find(ID);
+    if (it == buttonDataMap.end()) {
+        std::cout << "[ButtonScript] Re-initializing button entity " << ID << std::endl;
+        Init(ID);  // Re-initialize if missing
+        it = buttonDataMap.find(ID);
+        if (it == buttonDataMap.end()) return; // Still missing, bail out
+    }
+    ButtonData& data = it->second;
+
     if (!coord->HasComponent<Framework::Transform>(ID)) return;
     if (!coord->HasComponent<Framework::Renderable>(ID)) return;
 
     auto& transform = coord->GetComponent<Framework::Transform>(ID);
     auto& renderable = coord->GetComponent<Framework::Renderable>(ID);
-
     if (!transform.isVisible) return;
 
     // Get mouse position
-    float mouseX = inputMgr->getMousePositionVirtual().x;
-    float mouseY = inputMgr->getMousePositionVirtual().y;
+    glm::vec2 mouseVirtual = inputMgr->getMousePositionVirtual();
+    Vector2 mousePos{ mouseVirtual.x, mouseVirtual.y };
     bool mouseInViewport = inputMgr->isMouseInGameViewport();
 
-    // Check hover
-    float halfW = transform.Scale.x * 0.5f;
-    float halfH = transform.Scale.y * 0.5f;
-    float left = transform.Pos.x - halfW;
-    float right = transform.Pos.x + halfW;
-    float bottom = transform.Pos.y - halfH;
-    float top = transform.Pos.y + halfH;
+    // Calculate AABB directly (DON'T use BuildAABBFromTransform)
+    AABB buttonAABB;
+    buttonAABB.width = transform.Scale.x;
+    buttonAABB.height = transform.Scale.y;
+    buttonAABB.min.x = transform.Pos.x - (buttonAABB.width * 0.5f);
+    buttonAABB.max.x = transform.Pos.x + (buttonAABB.width * 0.5f);
+    buttonAABB.min.y = transform.Pos.y - (buttonAABB.height * 0.5f);
+    buttonAABB.max.y = transform.Pos.y + (buttonAABB.height * 0.5f);
 
-    bool wasHovering = isHovering;
-    isHovering = (mouseX >= left && mouseX <= right &&
-        mouseY >= bottom && mouseY <= top &&
-        mouseInViewport);
+    // DEBUG - print every second for NEW GAME button
+    //static int debugFrameCount = 0;
+    //debugFrameCount++;
+    //if (debugFrameCount % 60 == 0) {
+    //    std::cout << "\n===== " << data.buttonName << " =====" << std::endl;
+    //    std::cout << "Transform.Pos: (" << transform.Pos.x << ", " << transform.Pos.y << ")" << std::endl;
+    //    std::cout << "Transform.Scale: (" << transform.Scale.x << ", " << transform.Scale.y << ")" << std::endl;
+    //    std::cout << "AABB: [" << buttonAABB.min.x << " to " << buttonAABB.max.x
+    //        << ", " << buttonAABB.min.y << " to " << buttonAABB.max.y << "]" << std::endl;
+    //    std::cout << "Mouse: (" << mousePos.x << ", " << mousePos.y << ")" << std::endl;
+    //    std::cout << "========================\n" << std::endl;
+    //}
+
+    // Check if mouse is in bounds
+    bool wasHovering = data.isHovering;
+    bool inX = (mousePos.x >= buttonAABB.min.x && mousePos.x <= buttonAABB.max.x);
+    bool inY = (mousePos.y >= buttonAABB.min.y && mousePos.y <= buttonAABB.max.y);
+    data.isHovering = inX && inY && mouseInViewport;
 
     // Handle texture swap
-    if (isHovering && !wasHovering) {
-        // Just started hovering
-        renderable.spriteName = hoverTexture;
+    if (data.isHovering && !wasHovering) {
+        renderable.spriteName = data.hoverTexture;
         renderable.needsTextureReload = true;
-        std::cout << "[ButtonScript] Hover: " << buttonName << std::endl;
+        std::cout << "[ButtonScript] Hover: " << data.buttonName << std::endl;
     }
-    else if (!isHovering && wasHovering) {
-        // Just stopped hovering
-        renderable.spriteName = normalTexture;
+    else if (!data.isHovering && wasHovering) {
+        renderable.spriteName = data.normalTexture;
         renderable.needsTextureReload = true;
     }
 
     // Handle click
-    if (isHovering && inputMgr->isMouseButtonTriggered(0)) {
-        std::cout << "[ButtonScript] Clicked: " << buttonName << std::endl;
+    if (data.isHovering && inputMgr->isMouseButtonTriggered(0)) {
+        std::cout << "[ButtonScript] Clicked: " << data.buttonName << std::endl;
 
         auto sceneMgr = coord->GetSystem<SceneManager>();
         if (!sceneMgr) return;
 
-        // Handle button actions based on name
-        if (buttonName == "NewGameBtn") {
+        if (data.buttonName == "NewGameBtn") {
             sceneMgr->CurrentScene = "Level1";
         }
-        else if (buttonName == "ContinueBtn") {
-            // TODO: Load save file
+        else if (data.buttonName == "ContinueBtn") {
             std::cout << "[ButtonScript] Continue not implemented yet" << std::endl;
         }
-        else if (buttonName == "SettingsBtn") {
+        else if (data.buttonName == "SettingsBtn") {
             std::cout << "[ButtonScript] Settings not implemented yet" << std::endl;
         }
-        else if (buttonName == "QuitBtn") {
+        else if (data.buttonName == "QuitBtn") {
             if (Engine) {
                 glfwSetWindowShouldClose(Engine->GetWindow(), GLFW_TRUE);
             }
@@ -700,5 +723,6 @@ void ButtonScript::Update(Entity ID)
 
 void ButtonScript::Exit(Entity ID)
 {
-    (void)ID;
+    // Clean up button data for this entity
+    buttonDataMap.erase(ID);
 }

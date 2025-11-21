@@ -85,7 +85,7 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "../../MyEngine/Assets/Textures/UI/new game.png",
                         "tintColor": {
@@ -138,7 +138,7 @@
                     "transform": {
                         "position": {
                             "x": -756.3988037109375,
-                            "y": -226.64100646972657
+                            "y": -229.7178955078125
                         },
                         "scale": {
                             "x": 352.5,
@@ -156,7 +156,7 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "../../MyEngine/Assets/Textures/UI/continue.png",
                         "tintColor": {
@@ -227,7 +227,7 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "../../MyEngine/Assets/Textures/UI/settings.png",
                         "tintColor": {
