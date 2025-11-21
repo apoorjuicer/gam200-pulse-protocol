@@ -12,16 +12,14 @@ file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS
 add_library(${ENGINE_NAME} SHARED ${ENGINE_SRC})
 
 # CRITICAL: Export all symbols automatically
-set_target_properties(${ENGINE_NAME} PROPERTIES
-    WINDOWS_EXPORT_ALL_SYMBOLS ON
-)
+#set_target_properties(${ENGINE_NAME} PROPERTIES
+#    WINDOWS_EXPORT_ALL_SYMBOLS ON
+#)
 
 # Define DLL export macro
 target_compile_definitions(${ENGINE_NAME} PRIVATE DLL_API_EXPORT)
 
-if (
-
-)
+if (ENABLE_EDITOR)
     target_compile_definitions(MyEngine PUBLIC ENABLE_EDITOR)
 endif()
 
@@ -79,7 +77,6 @@ target_link_libraries(${ENGINE_NAME} PUBLIC
     imgui
     imgui_backend
     Freetype::Freetype
-    ScriptAPI
 )
 
 # FMOD libraries (multi-config safe for MSVC)
@@ -102,6 +99,7 @@ add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
     $<TARGET_FILE_DIR:${ENGINE_NAME}>
   )
 
+  # Copy JSON config files to build directory
 add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/JSON
@@ -109,6 +107,7 @@ add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
     COMMENT "Copying JSON config files to build directory"
 )
 
+# Copy Assets to build directory
 add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/Assets
@@ -116,7 +115,7 @@ add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
     COMMENT "Copying Assets to build directory"
 )
 
-#Copy .NET Runtime DLLs to output directory after building
+# Copy .NET Runtime DLLs (post-build event that copies these DLLs into the output directory.)
 add_custom_command(TARGET MyEngine POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/extern/dotnet/bin"
@@ -125,13 +124,33 @@ add_custom_command(TARGET MyEngine POST_BUILD
 )
 
 # MyEngine wait for ManagedScripts to build first and include it in the build dependencies
-if(TARGET ManagedScripts)
-    add_dependencies(MyEngine ManagedScripts)
-endif()
+#if(TARGET ManagedScripts)
+# add_dependencies(MyEngine ManagedScripts)
+#endif()
 
-if(TARGET ScriptAPI)
-    add_dependencies(MyEngine ScriptAPI)
-endif()
+#if(TARGET ScriptAPI)
+#    add_dependencies(MyEngine ScriptAPI)
+#endif()
+
+
+# (THESE ARE ONLY FOR EXE)
+# Automatically copies all third-party runtime DLLs(GLFW) that MyEditor depends on to the executable directory 
+# add_custom_command(TARGET MyEngine POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#         "$<TARGET_RUNTIME_DLLS:MyEngine>"
+#         "$<TARGET_FILE_DIR:MyEngine>"
+#     COMMAND_EXPAND_LISTS
+#     COMMENT "Copying DLL Dependencies like ManagedScript.dll to editor executable directory."
+#     VERBATIM
+# )
+
+# # Copy ScriptAPI.dll to MyEngine output
+# add_custom_command(TARGET MyEngine POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#         "$<TARGET_FILE:ScriptAPI>"
+#         "$<TARGET_FILE_DIR:MyEngine>"
+#     COMMENT "Copying ScriptAPI.dll to MyEngine output directory"
+# )
 
 # Enables multi-processor parallel compilation in Visual Studio
 if(MSVC)

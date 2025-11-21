@@ -23,9 +23,9 @@
 #include "CoreEngine/Factory/Factory.h"
 
 // move to editor pls
-#ifdef ENABLE_EDITOR
-#include "../MyEditor/Editor.h"
-#endif
+//#ifdef ENABLE_EDITOR
+//#include "../MyEditor/Editor.h"
+//#endif
 #include "../MyEngine/TestCases/TestCase.h"
 // #include "glapp.h"
 #include "../MyEngine/Resources/AssetRegistry.h"
@@ -38,6 +38,9 @@
 #include "../MyEngine/UI/GUIManager.h"
 #pragma comment(lib, "winmm.lib")
 
+#include <shlwapi.h>                // GetModuleFileNameA(), PathRemoveFileSpecA()
+#pragma comment(lib, "shlwapi.lib") // Needed for <shlwapi.h>
+
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
 Config config;
@@ -46,7 +49,145 @@ AssetsManager mAssets;
 int WindowWidth;
 int WindowHeight;
 CoreEngine* Engine = nullptr;
-// TestCase Test;
+
+using HelloWorldFunctionPtr = void(*)(void);
+using InitFunctionPtr = void(*)(CoreEngine*);
+
+////testing .net
+//void CoreEngine::HelloWorld()
+//{
+//	std::cout << "Hello Native World!" << std::endl;
+//}
+
+// Load coreclr.dll from our application so that we are able to use the functions 
+// contained within it to interface with the .NET runtime
+void CoreEngine::startScriptEngine()
+{
+	// Steppppppppppp 1, we get the current executable directory so that we can find the coreclr.dll to load
+	std::string runtimePath(MAX_PATH, '\0');
+
+	// Get the path to MyEngine.dll instead of the .exe
+	HMODULE hEngine = GetModuleHandleA("MyEngine.dll");
+	if (!hEngine)
+	{
+		throw std::runtime_error("Failed to get MyEngine.dll module handle");
+	}
+
+	GetModuleFileNameA(hEngine, runtimePath.data(), MAX_PATH);
+	PathRemoveFileSpecA(runtimePath.data());
+
+	// Since PathRemoveFileSpecA() removes from data(), the size is not updated, so we must manually update it
+	runtimePath.resize(std::strlen(runtimePath.data()));
+
+	//std::cout << "[CoreEngine] Runtime path: \n\n\n\n\n\n\n\n" << runtimePath << std::endl;
+	
+	// Also, while we're at it, set the current working directory to the current executable directory
+	std::filesystem::current_path(runtimePath);
+
+
+	// Construct the CoreCLR path
+	std::string coreClrPath(runtimePath); // Works
+	coreClrPath += "\\coreclr.dll";
+	
+	//std::cout << "[CoreEngine] Looking for:  \n\n\n\n\n\n\n\n" << coreClrPath << std::endl;
+
+	// Load the CoreCLR DLL
+	coreClr = LoadLibraryExA(coreClrPath.c_str(), nullptr, 0);
+	if (!coreClr)
+	{
+		DWORD error = GetLastError();  
+		std::cout << error << std::endl;
+
+		std::ostringstream oss;
+		oss << "Failed to load CoreCLR from: " << coreClrPath
+			<< "\nWindows Error Code: " << error;
+
+		throw std::runtime_error("Failed to load CoreCLR.");
+	}
+
+	// Step 2, we get CoreCLR hosting functions
+	initializeCoreClr = getCoreClrFuncPtr<coreclr_initialize_ptr>("coreclr_initialize");
+	createManagedDelegate = getCoreClrFuncPtr<coreclr_create_delegate_ptr>("coreclr_create_delegate");
+	shutdownCoreClr = getCoreClrFuncPtr<coreclr_shutdown_ptr>("coreclr_shutdown");
+
+	// Step 3, we then construct AppDomain properties used when starting the runtime
+	std::string tpaList = buildTpaList(runtimePath);
+	// Define CoreCLR properties
+	std::array propertyKeys =
+	{
+		"TRUSTED_PLATFORM_ASSEMBLIES",      // Trusted assemblies (like the GAC)
+		"APP_PATHS",                        // Directories to probe for application assemblies
+	};
+	std::array propertyValues =
+	{
+		tpaList.c_str(),
+		runtimePath.c_str()
+	};
+
+	//Step 4, kms.. jk, start the CoreCLR runtime (linking part)
+	int result = initializeCoreClr
+	(
+		runtimePath.c_str(),     // AppDomain base path
+		"SampleHost",            // AppDomain friendly name, this can be anything you want really
+		static_cast<int>(propertyKeys.size()),     // Property count
+		propertyKeys.data(),     // Property names
+		propertyValues.data(),   // Property values
+		&hostHandle,             // Host handle
+		&domainId                // AppDomain ID
+	);
+
+	// Check if intiialization of CoreCLR failed
+	if (result < 0)
+	{
+		std::ostringstream oss;
+		oss << std::hex << std::setfill('0') << std::setw(8)
+			<< "Failed to initialize CoreCLR. Error 0x" << result << "\n";
+		throw std::runtime_error(oss.str());
+	}
+
+
+}
+
+// Unload the .NET runtime 
+void CoreEngine::stopScriptEngine()
+{
+    // Shutdown CoreCLR
+    const int RESULT = shutdownCoreClr(hostHandle, domainId);
+    if (RESULT < 0)
+    {
+        std::stringstream oss;
+        oss << std::hex << std::setfill('0') << std::setw(8)
+            << "Failed to shut down CoreCLR. Error 0x" << RESULT << "\n";
+        throw std::runtime_error(oss.str());
+    }
+}
+
+// Construct a list of DLLs that tells the CLR which are the DLLs it can load at runtime and 
+// where to find them. Any DLLs not a part of this list will not be able to be loaded. SO RMB TO ADD
+std::string CoreEngine::buildTpaList(const std::string& directory)
+{
+	// Constants
+	static const std::string SEARCH_PATH = directory + "\\*.dll";
+	static constexpr char PATH_DELIMITER = ';';
+
+	// Create a osstream object to compile the string
+	std::ostringstream tpaList;
+	
+	// Search the current directory for the TPAs (.DLLs)
+	WIN32_FIND_DATAA findData;
+	HANDLE fileHandle = FindFirstFileA(SEARCH_PATH.c_str(), &findData);
+	if (fileHandle != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			// Append the assembly to the list
+			tpaList << directory << '\\' << findData.cFileName << PATH_DELIMITER;
+		} while (FindNextFileA(fileHandle, &findData));
+		FindClose(fileHandle);
+	}
+	return tpaList.str();
+}
+
 
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
@@ -345,10 +486,46 @@ void CoreEngine::Init()
 	//	std::cout << "Texture loaded and assigned to box 2: " << barTexture << std::endl;
 	// }
 
-	GameRunning = true;
+	GameRunning = true;	 // 3.. 2.. 1.. GAME START
+	startScriptEngine(); // 3.. 2.. 1.. DLL SCRIPT! START ROLLINGGGGGGGGGGGGGGGGGG
 
+	// Step 1. Get the function ptrs
+	InitFunctionPtr initFunc = GetFunctionPtr<InitFunctionPtr>
+		(
+			"ScriptAPI",                 // Name of the Assembly
+			"ScriptAPI.EngineInterface", // Full name of the class
+			"Init"                 // Name of the function
+		);
 
+	auto addScript = GetFunctionPtr<bool(*)(int, const char*)>
+		(
+			"ScriptAPI",
+			"ScriptAPI.EngineInterface",
+			"AddScriptViaName"
+		);
 
+	/*auto executeUpdate = GetFunctionPtr<void(*)(void)>
+		(
+			"ScriptAPI",
+			"ScriptAPI.EngineInterface",
+			"ExecuteUpdate"
+		);*/
+
+	// Step 2: Initialize it with  pointer to CoreEngine as param
+	initFunc(this); 
+	
+	// Step 3: Adding script to an entity[please work ;-; ]
+	addScript(0, "TestScript");
+	
+	
+	// this is for testing
+	HelloWorldFunctionPtr hwFunc = GetFunctionPtr<HelloWorldFunctionPtr>
+		(
+			"ScriptAPI",                 // Name of the Assembly
+			"ScriptAPI.EngineInterface", // Full name of the class
+			"HelloWorld"                 // Name of the function
+		);
+	hwFunc();
 }
 
 void CoreEngine::Setup()
@@ -438,6 +615,20 @@ void CoreEngine::Update(float dt)
 
 	auto profiler = ProfilingManager::GetInstance();
 
+	auto executeUpdate = GetFunctionPtr<void(*)(void)>
+		(
+			"ScriptAPI",
+			"ScriptAPI.EngineInterface",
+			"ExecuteUpdate"
+		);
+	executeUpdate();
+
+	// Update loop for our scripts
+	/*if (executeUpdateFunc)
+	{
+		executeUpdateFunc();
+	}*/
+
 	profiler->StartSystem("Scene System");
 	if (g_sceneSystem)
 		g_sceneSystem->Update(dt);
@@ -488,6 +679,7 @@ void CoreEngine::Update(float dt)
 	// 3) Normal running path
 	if (g_inputSystem)    g_inputSystem->Update(dt);
 	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);
+
 }
 
 void CoreEngine::GameLoop()
@@ -549,6 +741,8 @@ void CoreEngine::GameLoop()
 
 void CoreEngine::Exit()
 {
+	stopScriptEngine(); // stop the Csharp Scripts from using "bridge". iykyk
+
 	auto g_coordinator = Coordinator::GetInstance();
 
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();

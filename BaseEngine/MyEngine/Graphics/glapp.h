@@ -24,12 +24,16 @@
 #include "Physics/collision.h" 
 #include "DebugDraw.h"
 #include "Layer.h"
+
+// for .net
 #include "CoreEngine/Core/ImportExport.h"
+#pragma warning(push)
+#pragma warning(disable: 4251) // stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
 
 // External transforms list (used elsewhere)   
 namespace Framework { class Transform; class Animation; class Renderable; }
 
-class GLApp {
+class DLL_API GLApp {
 public:
 	static inline int VIRTUAL_W = 1920;
 	static inline int VIRTUAL_H = 1080;
@@ -194,13 +198,13 @@ public:
 		float     minZoom{ 0.25f };
 		float     maxZoom{ 2.0f };
 	};
-	static DLL_API Camera2D gCamera;
+	static Camera2D gCamera;
 
 
 	static glm::vec2 ScreenToNDC(double x, double y);
 	static glm::mat3 BuildPanZoomNDC(const Camera2D& cam);
 
-	static DLL_API std::vector<GLSLShader> shdrpgms; // singleton in tutorial 3
+	static std::vector<GLSLShader> shdrpgms; // singleton in tutorial 3
 
 	using VPSS = std::vector<std::pair<std::string, std::string>>;
 	static void init_shdrpgms_cont(GLApp::VPSS const&);
@@ -211,5 +215,5 @@ public:
 	};
 	static std::vector<GLViewport> vps; // container for viewports
 };
-
+#pragma warning(pop)
 #endif /* GLAPP_H */

@@ -1,4 +1,4 @@
-﻿namespace ManageScripts
+﻿namespace TestScript
 {
     public class Class1
     {

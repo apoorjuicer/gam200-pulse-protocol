@@ -1,13 +1,13 @@
 using System;
 
-namespace ManagedScripts
+public class TestScript : ScriptAPI.Script
 {
-    public class TestScript
+    public static void SayHello()
     {
-        public static void SayHello()
-        {
-            Console.WriteLine("[C#] Hello from ManagedScripts!");
-        }
-        
+        Console.WriteLine("[C#] Hello from ManagedScripts!");
+    }
+    public override void Update()
+    {
+        Console.WriteLine("Testing! PLEASE FUCKING WORK!\n\n\n\n\n\n\n\n");
     }
 }

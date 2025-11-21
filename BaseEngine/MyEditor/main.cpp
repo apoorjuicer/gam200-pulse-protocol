@@ -22,7 +22,18 @@ int main()
     Engine->Setup();
 
     // Init window, OpenGL, FMOD, systems, etc.
-    Engine->Init();
+    //Engine->Init();
+
+    //try
+    //{
+        Engine->Init();
+    //}
+    /*catch (const std::exception& e)
+    {
+        std::cerr << "[MAIN] Exception during Engine->Init(): " << e.what() << std::endl;
+        MessageBoxA(nullptr, e.what(), "Engine Init Failed", MB_OK | MB_ICONERROR);
+        return -1;
+    }*/
 
     // Hook ImGui editor to the GLFW window
     MyEditor::Init(Engine->GetWindow());

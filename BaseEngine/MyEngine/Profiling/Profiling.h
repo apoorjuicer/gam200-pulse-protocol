@@ -17,8 +17,13 @@
 
 #pragma once
 #include "pch/pch_temp.h"
+// for .net
+#include "CoreEngine/Core/ImportExport.h"
+#pragma warning(push)
+#pragma warning(disable: 4251) // stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
 
-class ProfilingManager {
+
+class DLL_API ProfilingManager {
 public:
     struct SystemProfile {
         double totalTime = 0.0;
@@ -77,3 +82,4 @@ private:
 };
 
 #define PROFILE_SCOPE(name) ScopedProfiler profiler_##__LINE__(name)
+#pragma warning(pop)

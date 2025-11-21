@@ -61,37 +61,46 @@ target_link_libraries(imgui_backend PRIVATE imgui glfw)
 set_property(TARGET imgui_backend PROPERTY FOLDER "3rdparty/ImGui")
 
 # --- Projects ---
+
+# --------------- C# Scripting Support ---------------
+add_subdirectory(ScriptAPI)
+add_subdirectory(ManagedScripts)
+
+
 add_subdirectory(MyEngine)
+# if(TARGET ScriptAPI)
+#     add_dependencies(MyEngine ScriptAPI)
+# endif()
+# if(TARGET ManagedScripts)
+#     add_dependencies(MyEngine ManagedScripts)
+# endif()
 
 option(ENABLE_EDITOR "Build the Editor executable" ON)
 message(STATUS "ENABLE_EDITOR = ${ENABLE_EDITOR}")
 
+
+
 if (ENABLE_EDITOR)
     add_subdirectory(MyEditor)
-    target_link_libraries(MyEditor PRIVATE MyEngine)
-
-    # MyEditor waits for C# and C++/CLI Dll to build first
-    if(TARGET ScriptAPI)
-        add_dependencies(MyEditor ScriptAPI)
-    endif()
-    if(TARGET ManagedScripts)
-        add_dependencies(MyEditor ManagedScripts)
-    endif()
-
+    target_link_libraries(MyEditor PRIVATE MyEngine )
+    #target_link_libraries(MyEditor PRIVATE MyEngine ScriptAPI)
+    
     target_compile_definitions(MyEngine PUBLIC ENABLE_EDITOR)
     target_compile_definitions(MyEditor PUBLIC ENABLE_EDITOR)
+
+    add_dependencies(MyEditor ScriptAPI ManagedScripts)
 endif()
 
 # Add the game executable (no editor)
 add_subdirectory(MyGame)
 
 # Add C# scripting and C++/CLI dependencies for MyGame
-if(TARGET ScriptAPI)
-    add_dependencies(MyGame ScriptAPI)
-endif()
-if(TARGET ManagedScripts)
-    add_dependencies(MyGame ManagedScripts)
-endif()
+# if(TARGET ScriptAPI)
+#     add_dependencies(MyGame ScriptAPI)
+# endif()
+# if(TARGET ManagedScripts)
+#     add_dependencies(MyGame ManagedScripts)
+# endif()
 
 
 # Keep app targets OUTSIDE any folder
@@ -113,7 +122,3 @@ if (ENABLE_EDITOR)
 else()
     set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MyGame)
 endif()
-
-# --------------- C# Scripting Support ---------------
-add_subdirectory(ScriptAPI)
-add_subdirectory(ManagedScripts)

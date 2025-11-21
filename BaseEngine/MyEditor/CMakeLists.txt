@@ -35,6 +35,7 @@ target_link_libraries(${EDITOR_NAME}
         glfw
         libglew_static
         Freetype::Freetype
+        #ScriptAPI
 )
 
 # Nice Solution Explorer layout
@@ -75,7 +76,10 @@ target_link_libraries(${EDITOR_NAME} PUBLIC
     glfw
     libglew_static
     Freetype::Freetype
+    #ScriptAPI
 )
+
+add_dependencies(MyEditor ScriptAPI)
 
 # Keep GLEW usage consistent
 target_compile_definitions(${EDITOR_NAME} PUBLIC GLEW_STATIC)
@@ -88,6 +92,7 @@ elseif (MSVC)
 endif()
 
 message(STATUS "[${EDITOR_NAME}] sources: ${EDITOR_SRC}")
+
 
 add_custom_command(TARGET MyEditor POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -111,6 +116,23 @@ add_custom_command(TARGET MyEditor POST_BUILD
     COMMAND_EXPAND_LISTS
     COMMENT "Copying DLL Dependencies like glfw3.dll to editor executable directory."
     VERBATIM
+)
+
+
+# Copy MyEngine.dll and all its output to MyEditor
+add_custom_command(TARGET MyEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_BINARY_DIR}/MyEngine/$<CONFIG>"
+        "$<TARGET_FILE_DIR:MyEditor>"
+    COMMENT "Copying MyEngine.dll, ScriptAPI.dll, ManagedScripts.dll to MyEditor"
+)
+
+# Copy .NET Runtime DLLs for C# scripting
+add_custom_command(TARGET MyEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/extern/dotnet/bin"
+        "$<TARGET_FILE_DIR:MyEditor>"
+    COMMENT "Copying .NET Runtime DLLs to MyEditor output directory"
 )
 
 # Enables multi-processor parallel compilation in Visual Studio

@@ -17,6 +17,12 @@
 #include "pch/pch_temp.h"
 #include "../ECS/Types.h"
 
+//for .NET
+#include "CoreEngine/Core/ImportExport.h" // for DLL_API
+// stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
+#pragma warning(push)
+#pragma warning(disable: 4251)
+
 class Factory;
 
 struct PrefabData {
@@ -24,7 +30,7 @@ struct PrefabData {
     std::string filePath;
 };
 
-class PrefabManager
+class DLL_API PrefabManager
 {
 public:
     PrefabManager();   // Constructor
@@ -48,3 +54,5 @@ private:
     // using Factory internally
     Factory* factory;
 };
+
+#pragma warning(pop)

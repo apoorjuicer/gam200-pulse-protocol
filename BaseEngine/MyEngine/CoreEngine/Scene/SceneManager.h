@@ -35,19 +35,14 @@
 /******************************************************************************/
 #pragma once
 #include "pch/pch_temp.h"
-//#include "../GameLogic/GameLogic.h"
-//#include "../Graphics/Transform.h"
-//#include "../Graphics/Animation.h"
-//#include "../Graphics/Renderable.h"
-////#include "../Components/AABB.h"
-//#include "../CoreEngine/Assets.h"
-//#include "../Components/Health.h"
-//#include "../Components/EntityType.h"
-//
+
 //#include "../MyEngine/Components/DisplayName.h"
 #include "../MyEngine/CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
 #include "../MyEngine/UI/GUIManager.h"
+
+//for .NET
+#include "CoreEngine/Core/ImportExport.h" // for DLL_API
 
 
 #pragma warning(push, 0)
@@ -57,7 +52,12 @@
 #include <rapidjson/istreamwrapper.h>
 #pragma warning(pop)
 
-class SceneManager: public Systems
+// .NET stuff
+// stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
+#pragma warning(push)
+#pragma warning(disable: 4251)
+
+class DLL_API SceneManager: public Systems
 {
 public:
 	SceneManager();
@@ -95,3 +95,5 @@ private:
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
 };
 //ALL ENTITY IN THE ARRAY MUST BE EXACTLY LIKE A PREFAB. But it is not a prefab, just all its component. (for scene json)
+
+#pragma warning(pop)
