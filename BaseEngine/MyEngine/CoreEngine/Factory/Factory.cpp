@@ -151,6 +151,12 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const& path)
 			layerTag.Deserialize(component["LayerTag"]);
 			g_coordinator->AddComponent<LayerTag>(entity, layerTag);
 		}
+		if (component.HasMember("audiosource") && component["audiosource"].IsObject())
+		{
+			AudioSource as;
+			as.Deserialize(component["audiosource"]);
+			g_coordinator->AddComponent<AudioSource>(entity, as);
+		}
 	}
 	// add entity to list of entity in the current scene
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();

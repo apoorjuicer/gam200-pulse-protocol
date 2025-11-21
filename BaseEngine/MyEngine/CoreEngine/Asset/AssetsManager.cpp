@@ -79,7 +79,6 @@ bool AssetsManager::EvictTexture(std::string const& idOrPath)
     return mGraphics ? mGraphics->EvictTexture(idOrPath) : false;
 }
 
-
 std::string AssetsManager::GetAudioPath(std::string const& id)  const {
     return mRegistry.GetAudioItemPath(id);
 }
@@ -96,6 +95,38 @@ std::string AssetsManager::GetAnimationPath(std::string const& id)   const {
     return mRegistry.GetAnimationItemPath(id);
 }
 
+std::unordered_map<std::string, AudioResource> const& AssetsManager::getAudioRegContainer() const {
+    return mRegistry.getAudioContainer();
+}
+
+std::unordered_map<std::string, TextureResource> const& AssetsManager::getTexRegContainer() const {
+    return mRegistry.getTexContainer();
+}
+std::unordered_map<std::string, FontResource>const& AssetsManager::getFontRegContainer() const {
+    return mRegistry.getFontContainer();
+}
+std::unordered_map<std::string, SceneResource> const& AssetsManager::getSceneRegContainer() const {
+    return mRegistry.getSceneContainer();
+}
+std::unordered_map<std::string, AnimationResource>const& AssetsManager::getAnimRegContainer() const {
+    return mRegistry.getAnimContainer();
+}
+
+bool AssetsManager::HasAudio(std::string const& id)const {
+    return getAudioRegContainer().contains(id);
+}
+bool AssetsManager::HasTexture(std::string const& id)const {
+    return getTexRegContainer().contains(id);
+}
+bool AssetsManager::HasFont(std::string const& id)const {
+    return getFontRegContainer().contains(id);
+}
+bool AssetsManager::HasScene(std::string const& id) const {
+    return getSceneRegContainer().contains(id);
+}
+bool AssetsManager::HasAnimation(std::string const& id)const {
+    return getAnimRegContainer().contains(id);
+}
 
 bool AssetsManager::PlaySFX(std::string const& id) {
     if (mAudio) {
