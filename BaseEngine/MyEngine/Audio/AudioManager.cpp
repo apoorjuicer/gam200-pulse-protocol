@@ -14,10 +14,13 @@
 
 #include "AudioManager.h"
 #include "../Resources/AssetRegistry.h"
-
+#include "AudioSource.h"
+#include "../CoreEngine/ECS/Coordinator.h"
+#include "../CoreEngine/ECS/Types.h"
 #pragma warning(push, 0)
 #include "../MyEngine/FMOD_API/api/core/inc/fmod.hpp"
 #include "../MyEngine/FMOD_API/api/core/inc/fmod_errors.h"
+
 #pragma warning(pop)
 
 // #include "../CoreEngine/Core/CoreEngine.h"
@@ -192,8 +195,12 @@ void AudioManager::Initialize()
 
 void AudioManager::Update()
 {
+   // std::cout << "Processing AudioManager Update\n";
     if (!mSystem)
         return;
+    // ecs, audio component
+    // Audio Component -> Audio Source
+    ProcessAudioSources(); // 
     mSystem->update();
 }
 
@@ -219,7 +226,7 @@ void AudioManager::releaseAll()
     // 2) release any SFX loaded
     mChannels.clear(); // channels already stopped by master group call earlier
 
-    for (auto &[id, sound] : mSfx)
+    for (auto &[id, sound] : mSfxCache)
     {
         if (sound)
         {
@@ -227,7 +234,7 @@ void AudioManager::releaseAll()
             FMOD_CHECK(res, ("sound->release [" + id + "]").c_str()); // debug
         }
     }
-    mSfx.clear();
+    mSfxCache.clear();
 
     // 3) release BGM
     if (mCurrentBGM)
@@ -338,7 +345,7 @@ bool AudioManager::PlayBGM(const std::string &id)
     if (!mBGMCache.count(id) && !LoadBGM(id))
         return false;
 
-    // stop previous current channel (no crossfade here; add one later if desired)
+    // stop previous current channel (no crossfade here; add one later if want)
     if (mCurrentBGMCh)
     {
         mCurrentBGMCh->stop();
@@ -351,10 +358,12 @@ bool AudioManager::PlayBGM(const std::string &id)
     if (!FMOD_CHECK(r, ("playSound(" + id + ")").c_str()) || !ch)
         return false;
 
-    // per-track volume (multiplied by a global mMusicVol if you keep one)
+    // per-track volume 
     float vol = 1.0f;
-    if (const auto *ar = mRegistry->FindAudio(id))
+    if (const auto* ar = mRegistry->FindAudio(id)) {
         vol = ar->volume;
+    }
+       
     ch->setVolume(clampto0and1(vol * mMusicVol));
 
     // book-keeping
@@ -430,7 +439,7 @@ bool AudioManager::LoadSFX(std::string const &id)
         return false;
 
     // Avoid reloading if already loaded
-    if (mSfx.find(id) != mSfx.end())
+    if (mSfxCache.find(id) != mSfxCache.end())
     {
         return true;
     }
@@ -459,7 +468,7 @@ bool AudioManager::LoadSFX(std::string const &id)
             return false;
         }
         // Store in map
-        mSfx[soundefx->audio_id] = sound; // assigned temp ptr to sfx map
+        mSfxCache[soundefx->audio_id] = sound; // assigned temp ptr to sfx map
     }
 
     std::cout << "[AudioManager] Loaded SFX '" << id << "' (" << soundefx->path << ")\n";
@@ -493,16 +502,16 @@ void AudioManager::PlaySound(std::string const &id)
         return;
 
     // Find preloaded sound
-    auto it = mSfx.find(id);
-    if (it == mSfx.end())
+    auto it = mSfxCache.find(id);
+    if (it == mSfxCache.end())
     {
         std::cerr << "[AudioManager] PlaySound(): Sound '" << id << "' not loaded. Attempting to load.\n";
         if (!LoadSFX(id))
         {
             return;
         }
-        it = mSfx.find(id);
-        if (it == mSfx.end())
+        it = mSfxCache.find(id);
+        if (it == mSfxCache.end())
         {
             return;
         }
@@ -547,8 +556,8 @@ double AudioManager::GetBGMPositionSeconds() const
 }
 bool AudioManager::UnloadAudio(std::string const &id)
 {
-    auto it = mSfx.find(id);
-    if (it != mSfx.end())
+    auto it = mSfxCache.find(id);
+    if (it != mSfxCache.end())
     {
 
         // Stop any channels currently playing this SFX
@@ -570,7 +579,7 @@ bool AudioManager::UnloadAudio(std::string const &id)
             FMOD_RESULT res = it->second->release();
             FMOD_CHECK(res, ("releaseSound(" + id + ")").c_str());
         }
-        mSfx.erase(it);
+        mSfxCache.erase(it);
         std::cout << "[AudioManager] Unloaded SFX: " << id << "\n";
         return true;
     }
@@ -641,10 +650,167 @@ void AudioManager::ResumeBGM()
         std::cout << "[AudioManager] BGM Resumed\n";
     }
 }
+//====================================================
+
+void AudioManager::PlayFromAudioSource(AudioSource& src) {
+
+    //std::cout << "playing from audio source\n";
+    if (!mSystem || !mRegistry) {
+        return; //return if no FMOD or registry
+    }
+     
+    if (src.audio_id.empty()) {
+        return; // return if no KEY. audio id
+    }
+       
+    AudioResource const* res = mRegistry->FindAudio(src.audio_id);
+    if (!res)
+    {
+        std::cerr << "[AudioManager] PlayFromSource: No AudioResource for id '"
+            << src.audio_id << "'\n";
+        return;
+    }
+    // --------------------------------------------------------
+    // BGM case 
+    // --------------------------------------------------------
+    if (res->audiotype == "BGM")
+    {
+        // Route to BGM pipeline, use existing bgm in registry
+        if(!PlayBGM(src.audio_id))
+        {
+            std::cerr << "[AudioManager] PlayFromSource: PlayBGM failed for '"
+                << src.audio_id << "'\n";
+            return;
+        }
+
+        // apply per-source volume override + per-track
+        auto it = mBGMChannels.find(src.audio_id);
+        if (it != mBGMChannels.end())
+        {
+            FMOD::Channel* ch = it->second;
+            src.channel = ch;   //playOnAwake guard 
+
+            if (ch)
+            {
+                float baseVol = res->volume;              // volume from registry
+                float finalVol = clampto0and1(baseVol * mMusicVol * src.volume);
+                ch->setVolume(finalVol);
+                ch->setMode(src.loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF);
+            }
+        }        
+        return; 
+    }
+    // --------------------------------------------------------
+    // SFX case 
+    // --------------------------------------------------------
+    if (res->audiotype == "SFX") //redundant statement but more readable
+    {
+        PlaySound(src.audio_id);
+
+        // Get the channel we just played for this id
+        auto it = mChannels.find(src.audio_id);
+        if (it != mChannels.end())
+        {
+            FMOD::Channel* ch = it->second;
+            src.channel = ch;
+
+            if (ch)
+            {
+                // Start from registry volume and apply per-source and SFX group
+                float baseVol = res->volume;  // base SFX volume from JSON
+                float finalVol = clampto0and1(baseVol * mSfxVol * src.volume);
+                ch->setVolume(finalVol);
+                ch->setMode(src.loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF);
+            }
+        }
+    }
+}
+
+//private
+void AudioManager::ProcessAudioSources()
+{
+    //std::cout << "Processing Audio componenets\n";
+    auto g_coordinator = Coordinator::GetInstance();
+
+    if (!g_coordinator || !mRegistry) return;
+
+
+    for (Entity entity = 0; entity < MaxEntity; ++entity)
+    {
+        if (!g_coordinator->HasComponent<AudioSource>(entity))
+            continue;
+
+        auto& src = g_coordinator->GetComponent<AudioSource>(entity);
+
+        // -------- PLAY ON AWAKE (PLAY ONLY ONCE) --------
+        if (src.playOnAwake && src.channel == nullptr && !src.audio_id.empty())
+        {
+            PlayFromAudioSource(src);  // sets src.channel for SFX *and* BGM
+            //src.playOnAwake = false;   // prevent replay every frame
+        }
+
+        if (src.audio_id.empty())
+            continue;
+
+        AudioResource const* res = mRegistry->FindAudio(src.audio_id);
+        if (!res) continue;
+        // -------- ACTIVE CHANNEL (SFX or BGM) --------
+        if (src.channel)
+        {
+            bool playing = false;
+            src.channel->isPlaying(&playing);
+
+            if (!playing) // Channel has stopped; clean up all references to it.
+            {
+                //dead becomes invalid w hen fmod channel stopped
+                //fmod internally destroys or recycles channel
+                //when channel->isPlaying(&playing), playing == false
+                FMOD::Channel* dead = src.channel;  //hold dead as oldptr
+                src.channel = nullptr; //clear Component side ptr
+
+                if (res->audiotype == "SFX")
+                {
+                    // SFX cleanup: remove from mChannels if pointing to this channel
+                    auto sfxIt = mChannels.find(src.audio_id);
+                    if (sfxIt != mChannels.end() && sfxIt->second == dead)
+                        mChannels.erase(sfxIt);
+                }
+                // BGM cleanup: only if this resource is BGM
+                if (res->audiotype == "BGM")
+                {
+                    // remove from mBGMChannels if it points to the same channel
+                    auto it = mBGMChannels.find(src.audio_id);
+                    if (it != mBGMChannels.end() && it->second == dead)
+                        mBGMChannels.erase(it);
+
+                    // clear mCurrentBGMCh if it was this channel
+                    if (mCurrentBGMCh == dead)
+                        mCurrentBGMCh = nullptr;
+                }
+
+                continue; // go to next entity
+            }
+            else
+            {
+                float base = res->volume;
+                float user = std::clamp(src.volume, 0.0f, 1.0f);
+                float final = clampto0and1(base * mSfxVol * user);
+
+                src.channel->setVolume(final);
+                src.channel->setMode(src.loop ? FMOD_LOOP_NORMAL
+                    : FMOD_LOOP_OFF);
+            }
+            continue; // go to next entity
+        }   
+    }
+}
+
 
 /*
    Every FMOD function returns an FMOD_RESULT
    init FMOD : FMOD::System_Create(*system_var);
 
+   fmod internally destroys or recycles channel
+   when channel->isPlaying(&playing), playing == false
 */
 
