@@ -22,10 +22,6 @@ cmake --build . --config Debug
 
 popd
 
-REM (Docs copy is optional for game; add if you want)
-REM cmake -E copy_if_different "%~dp0MyEngine\Bloop_ReadMe.txt" "%~dp0build\Bloop_ReadMe.txt"
-REM cmake -E copy_if_different "%~dp0MyEngine\projectGuide.txt" "%~dp0build\projectGuide.txt"
-
 echo.
 echo ============================================
 echo Game build done. Open:
