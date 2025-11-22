@@ -28,6 +28,7 @@
 
 //components:
 #include "../Graphics/Transform.h"
+#include "./Components/DisplayName.h"
 
 
 //Serialize
