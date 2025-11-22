@@ -109,7 +109,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.6213876605033875,
+                        "elapsedTime": 0.21979300677776338,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -469,7 +469,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../Assets/Textures/UI/health bar.png",
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/health bar.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -529,7 +529,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../Assets/Textures/UI/green bar.png",
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/green bar.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -557,7 +557,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
-                        "orderInLayer": 10,
+                        "orderInLayer": 999999,
                         "z": 100.0
                     }
                 }
@@ -568,8 +568,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 3.6923828125,
-                            "y": -3.6923828125
+                            "x": 2.79150390625,
+                            "y": 89.75482177734375
                         },
                         "scale": {
                             "x": 1650.0,
@@ -589,12 +589,12 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../Assets/Textures/UI/border_frame.png",
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/border_frame.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
-                            "a": 0.9786804914474487
+                            "a": 0.8182596564292908
                         }
                     }
                 },
@@ -622,7 +622,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
-                        "orderInLayer": 10,
+                        "orderInLayer": 1,
                         "z": 100.0
                     }
                 },
