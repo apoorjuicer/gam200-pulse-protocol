@@ -892,10 +892,6 @@ void CoreEngine::PlayGame()
 		std::cout << "[CoreEngine] Original scene path: " << m_originalScenePath << std::endl; // DEBUG
 	}
 
-	if (auto audio = coord->GetSystem<AudioManager>()) {
-		audio->RestartBGM();
-	}
-
 	// Call Init() on all scripts
 	if (auto logicSys = coord->GetSystem<LogicSystem>())
 	{
@@ -917,27 +913,25 @@ void CoreEngine::StopGame()
 
 	auto coord = Coordinator::GetInstance();
 
-	// pause the bg music
+	// Stop all audio (BGM and AudioSource components)
 	if (auto audio = coord->GetSystem<AudioManager>())
 	{
-		audio->StopBGM();
+		audio->StopBGM(); // Stop any direct BGM calls
+
+		// Stop all AudioSource components
+		for (Entity entity = 0; entity < MaxEntity; ++entity)
+		{
+			if (coord->HasComponent<AudioSource>(entity))
+			{
+				auto& audioSrc = coord->GetComponent<AudioSource>(entity);
+				if (audioSrc.channel)
+				{
+					audioSrc.channel->stop();
+					audioSrc.channel = nullptr;
+				}
+			}
+		}
 	}
-
-	//// reloads original scene to reset all entities to initial starting position
-	//if (auto sceneMgr = coord->GetSystem<SceneManager>())
-	//{
-	//	if (!m_originalScenePath.empty())
-	//	{
-	//		sceneMgr->LoadSceneFromJson(m_originalScenePath);
-
-	//		// Sync GUI tracking after scene reload
-	//		//if (auto guiMgr = coord->GetSystem<GUIManager>())
-	//		//{
-	//		//	guiMgr->SyncTrackingWithScene();
-	//		//	std::cout << "[CoreEngine] GUI tracking synced after Stop" << std::endl;
-	//		//}
-	//	}
-	//}
 }
 
 // this might have been causing the random crash cus its calling restartBGM() too

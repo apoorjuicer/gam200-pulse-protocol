@@ -330,6 +330,18 @@ bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const& path)
 		componentsArray.PushBack(ComponentObj, alloc);
 	}
 
+	if (g_coordinator->HasComponent<AudioSource>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value AudioSourceVal;
+
+		auto& audioSrc = g_coordinator->GetComponent<AudioSource>(entity);
+		audioSrc.Serialize(AudioSourceVal, alloc);
+
+		ComponentObj.AddMember("audiosource", AudioSourceVal, alloc);
+		componentsArray.PushBack(ComponentObj, alloc);
+	}
+
 	// ADD AS ONE BIG ARRAY WITH ALL THE COMPONENTS AVAILABLE ABOVE! >:]
 	d.AddMember("components", componentsArray, alloc);
 

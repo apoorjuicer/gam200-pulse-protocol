@@ -250,6 +250,19 @@ void SceneManager::SaveCurrentScene()
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
+		// Save AudiOsource component if entity has it
+		if (g_coordinator->HasComponent<AudioSource>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value AudioSourceVal;
+
+			auto& audioSrc = g_coordinator->GetComponent<AudioSource>(entity);
+			audioSrc.Serialize(AudioSourceVal, alloc);
+
+			ComponentObj.AddMember("audiosource", AudioSourceVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
 		// So for this entity, we add compoennt array
 		entityObj.AddMember("components", componentsArray, alloc);
 
@@ -493,6 +506,13 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				LayerTag layerTag;
 				layerTag.Deserialize(component["layerTag"]);
 				g_coordinator->AddComponent<LayerTag>(entity, layerTag);
+			}
+
+			if (component.HasMember("audiosource") && component["audiosource"].IsObject())
+			{
+				AudioSource audioSrc;
+				audioSrc.Deserialize(component["audiosource"]);
+				g_coordinator->AddComponent<AudioSource>(entity, audioSrc);
 			}
 		}
 

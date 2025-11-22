@@ -331,15 +331,21 @@ namespace MyEditor
             }
 
             // AudioSource
-            if (!coord->HasComponent<AudioSource>(selectedEntity))
+            if (!g->HasComponent<AudioSource>(selectedEntity))
             {
                 if (ImGui::MenuItem("AudioSource"))
                 {
-                    AudioSource audiosource{};
-                    audiosource.audio_id = "";  // Default
-                    coord->AddComponent<AudioSource>(selectedEntity, audiosource);
+                    AudioSource audioSrc{};
+                    audioSrc.audio_id = "";
+                    audioSrc.volume = 1.0f;
+                    audioSrc.loop = false;
+                    audioSrc.playOnAwake = false;
+                    audioSrc.channel = nullptr;
+                    g->AddComponent<AudioSource>(selectedEntity, audioSrc);
+                    ImGui::CloseCurrentPopup();
                 }
             }
+
             ImGui::EndPopup();
         }
 
@@ -805,13 +811,11 @@ namespace MyEditor
         }
 
         // ---------------------------------------------------------------------
-        // Audio component
-        // ---------------------------------------------------------------------
+// Audio component
+// ---------------------------------------------------------------------
         if (g->HasComponent<AudioSource>(selectedEntity))
         {
             auto& audio = g->GetComponent<AudioSource>(selectedEntity);
-            static bool wantInvalidExtPopup = false;
-            static bool wantMissingAudioPopup = false;
 
             if (ImGui::CollapsingHeader("AudioSource", ImGuiTreeNodeFlags_DefaultOpen))
             {
@@ -823,80 +827,125 @@ namespace MyEditor
                 }
                 else
                 {
-                    std::string full_path{};
-                    // If audio_id is known & valid, use its path
-                    if (!mAssets.HasAudio(audio.audio_id)) {
-                        wantMissingAudioPopup = true;
-                    }
-                    else {
-                        full_path = mAssets.GetAudioPath(audio.audio_id);
-                    }
-                    if (wantMissingAudioPopup)
-                    {
-                        ImGui::OpenPopup("Missing Audio Asset");
-                        wantMissingAudioPopup = false;   // reset so it opens once
-                    }
+                    ImGui::Text("Audio File:");
+                    ImGui::SameLine();
 
-                    //std::cout << "[Inspector] audio source path: " << full_path << "\n";
-
-                    std::filesystem::path p = full_path;
-                    std::string folder = p.parent_path().string();
-                    std::string file = p.filename().string();
-                    std::string ext = p.extension().string(); //extension
-                    bool validExt =
-                        (ext == ".wav") ||
-                        (ext == ".mp3") ||
-                        (ext == ".mp4");
-
-                    if (!validExt)
-                    {
-                        wantInvalidExtPopup = true;   // request popup
-                    }
-
-                    if (!folder.empty())
-                        ImGui::TextWrapped("Folder: %s", folder.c_str());
-                    else
-                        ImGui::TextWrapped("Folder: <none>");
-
-                    ImGui::TextWrapped("File: %s", file.c_str());
-
-                    ImGui::Spacing();
-
-                    // ---------------- Editable clip ID ---------------------
-                    static char idBuf[128];
-                    std::strncpy(idBuf, audio.audio_id.c_str(), sizeof(idBuf));
-                    idBuf[sizeof(idBuf) - 1] = '\0';
+                    // Get available audio from global AssetsManager
+                    auto& audioResources = mAssets.getAudioRegContainer();
+                    std::string preview = audio.audio_id.empty() ? "<None>" : audio.audio_id;
 
                     ImGui::SetNextItemWidth(300.0f);
-                    if (ImGui::InputText("Clip name:", idBuf, IM_ARRAYSIZE(idBuf)))
+                    if (ImGui::BeginCombo("##AudioFile", preview.c_str()))
                     {
-                        audio.audio_id = idBuf;
-                        std::cout << "[Inspector] AudioSource audio_id = "
-                            << audio.audio_id << '\n';
-                    }
+                        // Option for no audio
+                        if (ImGui::Selectable("<None>", audio.audio_id.empty()))
+                        {
+                            audio.audio_id = "";
+                        }
 
+                        // List all available audio files
+                        for (auto const& [id, resource] : audioResources)
+                        {
+                            bool isSelected = (audio.audio_id == id);
+
+                            // Show with type label [BGM] or [SFX]
+                            std::string label = id + " [" + resource.audiotype + "]";
+
+                            if (ImGui::Selectable(label.c_str(), isSelected))
+                            {
+                                audio.audio_id = id;
+                                std::cout << "[Inspector] Selected audio: " << id << "\n";
+                            }
+
+                            if (isSelected)
+                                ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
+                    }
 
                     ImGui::Spacing();
 
-                    // --- Basic flags: Loop / Play on Awake -------------------------
-                    ImGui::Checkbox("Loop", &audio.loop);
-                    ImGui::SameLine();
-                    ImGui::Checkbox("Play on Awake", &audio.playOnAwake);
+                    // Show audio details if one is selected
+                    if (!audio.audio_id.empty() && mAssets.HasAudio(audio.audio_id))
+                    {
+                        std::string path = mAssets.GetAudioPath(audio.audio_id);
+                        ImGui::TextWrapped("Path: %s", path.c_str());
 
-                    // --- Volume slider (optional) ----------------------------------
+                        if (auto* resource = mAssets.getRegistry().FindAudio(audio.audio_id))
+                        {
+                            ImGui::Text("Type: %s", resource->audiotype.c_str());
+                        }
+                    }
+
+                    ImGui::Separator();
+
+                    // Volume slider
                     ImGui::SetNextItemWidth(200.0f);
                     ImGui::SliderFloat("Volume", &audio.volume, 0.0f, 1.0f, "%.2f");
 
-                    //could add:
-                    // - Play / Stop preview buttons
-                    // - Mute toggle, etc.
+                    // Checkboxes
+                    ImGui::Checkbox("Loop", &audio.loop);
+                    ImGui::Checkbox("Play on Awake", &audio.playOnAwake);
 
+                    ImGui::Spacing();
 
+                    // Runtime preview controls (only when NOT playing)
+                    if (!IsPlaying())
+                    {
+                        ImGui::Text("Preview:");
+                        ImGui::SameLine();
 
+                        if (ImGui::SmallButton("Play"))
+                        {
+                            if (!audio.audio_id.empty())
+                            {
+                                auto audioManager = g->GetSystem<AudioManager>();
+                                if (audioManager)
+                                {
+                                    auto* resource = mAssets.getRegistry().FindAudio(audio.audio_id);
+                                    if (resource)
+                                    {
+                                        if (resource->audiotype == "BGM")
+                                        {
+                                            audioManager->LoadBGM(audio.audio_id);
+                                            audioManager->PlayBGM(audio.audio_id);
+                                        }
+                                        else
+                                        {
+                                            audioManager->LoadSFX(audio.audio_id);
+                                            audioManager->PlaySound(audio.audio_id);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        ImGui::SameLine();
 
-
-
-
+                        if (ImGui::SmallButton("Stop"))
+                        {
+                            auto audioManager = g->GetSystem<AudioManager>();
+                            if (audioManager)
+                            {
+                                audioManager->StopBGM();
+                                if (audio.channel)
+                                {
+                                    audio.channel->stop();
+                                    audio.channel = nullptr;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // When game is playing
+                        ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Game is running");
+                        if (audio.channel)
+                        {
+                            bool isPlaying = false;
+                            audio.channel->isPlaying(&isPlaying);
+                            ImGui::Text("Status: %s", isPlaying ? "Playing" : "Stopped");
+                        }
+                    }
                 }
 
                 ImGui::Unindent();

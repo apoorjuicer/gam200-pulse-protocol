@@ -33,6 +33,8 @@
 
 // namespace fs = std::filesystem;
 
+extern CoreEngine* Engine;
+
 // Minimal error printer (doesn't throw; just logs)
 // better to return bool for early return incase smth fails
 static inline bool FMOD_CHECK(FMOD_RESULT r, const char *where)
@@ -734,6 +736,8 @@ void AudioManager::ProcessAudioSources()
 
     if (!g_coordinator || !mRegistry) return;
 
+    // IMPT!!!! ONLY PROCESS IF GAME IS ACTUALLY PLAYING
+    if (!Engine || !Engine->IsPlaying()) return;
 
     for (Entity entity = 0; entity < MaxEntity; ++entity)
     {
