@@ -656,7 +656,6 @@ void ButtonScript::Update(Entity ID)
     // Get mouse position
     glm::vec2 mouseVirtual = inputMgr->getMousePositionVirtual();
     Vector2 mousePos{ mouseVirtual.x, mouseVirtual.y };
-    bool mouseInViewport = inputMgr->isMouseInGameViewport();
 
     // Calculate AABB directly (DON'T use BuildAABBFromTransform)
     AABB buttonAABB;

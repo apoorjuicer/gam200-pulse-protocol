@@ -350,12 +350,6 @@ void SceneManager::UnloadCurrentScene()
 
 void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE JSON FILE 
 {
-	// auto-stops if game is playin when switching scsenes, to prevent position from being modified while changing scenes
-	// is scene is switched, automatically STOP the game
-	if (Engine && Engine->IsPlaying()) {
-		Engine->StopGame();
-	}
-
 	UnloadCurrentScene();
 
 #ifdef _DEBUG
@@ -543,6 +537,8 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 		SceneEntityList.push_back(entity);
 	}
 
+	ChangeCurrentScene(d["scene"].GetString());
+
 	// Initialize all scripts for entities with LogicComponent
 	auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
 	if (logicSystem) {
@@ -562,7 +558,6 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 		std::cout << "[SceneManager] Total scripts initialized: " << scriptCount << std::endl;
 	}
 
-	ChangeCurrentScene(d["scene"].GetString());
 #ifdef _DEBUG
 	std::cout << "\n===================================================" << std::endl;
 	std::cout << "   [Scene Manager]: " << CurrentScene << " loaded successfully!" << std::endl;
