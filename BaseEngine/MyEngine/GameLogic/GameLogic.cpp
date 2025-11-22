@@ -3,7 +3,8 @@
  * @file        GameLogic.cpp
  * @project     Pulse Protocol
  * @author		Chia Wei Xuan Rachael (primary) - 60%
- * @author		Reginald Lew Yee Ren (secondary) - 40%
+ * @author		Reginald Lew Yee Ren (secondary) - 20%
+ * @author		Chloe Lau Rey En (secondary) - 20%
  *
  * @brief		Core Components:
  *              - LogicSystem: Manages script registration, lifecycle (Init/Update/Exit),
@@ -49,6 +50,13 @@ void LogicSystem::Init()
     AddScript("PlayerScript", std::make_shared<PlayerScript>());
     AddScript("EnemyScript", std::make_shared<EnemyScript>());
     AddScript("ButtonScript", std::make_shared<ButtonScript>());
+    AddScript("PulsingBorderScript", std::make_shared<PulsingBorderScript>());
+
+    //std::cout << "=== REGISTERED SCRIPTS ===" << std::endl;
+    //for (const auto& [name, script] : map_of_scripts) {
+    //    std::cout << "  - " << name << std::endl;
+    //}
+    //std::cout << "=========================" << std::endl;
 }
 
 void LogicSystem::Update(float dt)
@@ -209,6 +217,10 @@ bool LoadScriptName(LogicComponent& t, std::string const& path)
 // ---------------------------------------------------------------------
 // FOR SCRIPTS ONLY ONWARDS
 // ---------------------------------------------------------------------
+
+// =====================================================================
+// PLAYER SCRIPT
+// =====================================================================
 void PlayerScript::Init(Entity ID)
 {
     //autoMoveTimer = 2.0f; // reset timer
@@ -360,6 +372,10 @@ void PlayerScript::Exit(Entity ID)
 {
     (void)ID;
 }
+
+// =====================================================================
+// ENEMY SCRIPT
+// =====================================================================
 
 void EnemyScript::Init(Entity ID)
 {
@@ -604,6 +620,9 @@ void EnemyScript::Exit(Entity ID)
     (void)ID;
 }
 
+// =====================================================================
+// BUTTON SCRIPT
+// =====================================================================
 void ButtonScript::Init(Entity ID)
 {
     auto* coord = Coordinator::GetInstance();
@@ -735,4 +754,63 @@ void ButtonScript::Exit(Entity ID)
 {
     // Clean up button data for this entity
     buttonDataMap.erase(ID);
+}
+
+// =====================================================================
+// PULSING BORDER SCRIPT
+// =====================================================================
+void PulsingBorderScript::Init(Entity ID)
+{
+    (void)ID;
+
+    auto* g_coordinator = Coordinator::GetInstance();
+
+    // Sync BPM with RhythmGameplayInput if available
+    auto rhythmInput = g_coordinator->GetSystem<RhythmGameplayInput>();
+    if (rhythmInput)
+    {
+        bpm = rhythmInput->songBPM;
+    }
+
+    pulseTimer = 0.0f;
+
+    //std::cout << "[PulsingBorderScript] Initialized for entity " << ID
+    //    << " at " << bpm << " BPM" << std::endl;
+}
+
+void PulsingBorderScript::Update(Entity ID)
+{
+    auto* g_coordinator = Coordinator::GetInstance();
+
+    // Use GLHelper's delta_time
+    float dt = static_cast<float>(GLHelper::delta_time);
+
+    pulseTimer += dt;
+
+    // Calculate beat interval (70 BPM = 60/70 ≈ 0.857 seconds per beat)
+    float beatInterval = 60.0f / bpm;
+
+    // Normalize time within beat (0 to 1)
+    float normalizedTime = fmodf(pulseTimer, beatInterval) / beatInterval;
+
+    // Create triangle wave: 0 → 1 → 0
+    float fadeValue = 1.0f - std::abs(2.0f * normalizedTime - 1.0f);
+
+    // Smooth with ease-in-out
+    fadeValue = fadeValue * fadeValue * (3.0f - 2.0f * fadeValue);
+
+    // Calculate alpha
+    float currentAlpha = minAlpha + (maxAlpha - minAlpha) * fadeValue;
+
+    // Apply to this entity's Renderable component
+    if (g_coordinator->HasComponent<Framework::Renderable>(ID))
+    {
+        auto& renderable = g_coordinator->GetComponent<Framework::Renderable>(ID);
+        renderable.tintColor.a = currentAlpha;
+    }
+}
+
+void PulsingBorderScript::Exit(Entity ID)
+{
+    std::cout << "[PulsingBorderScript] Shutdown for entity " << ID << std::endl;
 }

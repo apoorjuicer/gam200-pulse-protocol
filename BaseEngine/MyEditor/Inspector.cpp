@@ -159,20 +159,29 @@ namespace MyEditor
             {
             case 0:
                 layer.mask = LAYER_BACKGROUND;
-                layer.orderInLayer = 0;
                 layer.z = 0.0f;
                 break;
             case 1:
                 layer.mask = LAYER_WORLD;
-                layer.orderInLayer = 1;
                 layer.z = 0.0f;
                 break;
             case 2:
                 layer.mask = LAYER_UI;
-                layer.orderInLayer = 10;
                 layer.z = 100.0f;
                 break;
             }
+        }
+
+        // orderInLayer control (for fine-tuning draw order within layer)
+        ImGui::Text("Draw Order:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(150.0f);
+        ImGui::DragInt("##OrderInLayer", &layer.orderInLayer, 1.0f, 0, 999);
+        ImGui::SameLine();
+        ImGui::TextDisabled("(?)");
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("Higher number = drawn on top.\nControls render order within the same layer.");
         }
 
         ImGui::Separator();
@@ -776,10 +785,11 @@ namespace MyEditor
                     const char* scriptOptions[] = {
                         "PlayerScript",
                         "EnemyScript",
-                        "ButtonScript"
+                        "ButtonScript",
+                        "PulsingBorderScript"
                         // Add more scripts here as you create them
                     };
-                    const int numScripts = 3;  // Update this when adding more scripts
+                    const int numScripts = 4;  // Update this when adding more scripts
 
                     // Find current script index
                     int currentScriptIndex = 0;
