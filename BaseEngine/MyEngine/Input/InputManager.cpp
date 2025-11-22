@@ -23,9 +23,9 @@
 
 static Vector2 ScreenToWorld_ForInput(double fbX, double fbY)
 {
-	// World size (matches gizmo)
-	static constexpr float kWorldW = 1920.0f;
-	static constexpr float kWorldH = 1080.0f;
+	// World size - MUST match Transform.cpp VIRTUAL_W/H (1600x900)
+	static constexpr float kWorldW = 1600.0f;
+	static constexpr float kWorldH = 900.0f;
 
 	// Get the game viewport (letterbox-aware)
 	float drawX = static_cast<float>(GLHelper::GameOffsetX);
@@ -55,7 +55,7 @@ static Vector2 ScreenToWorld_ForInput(double fbX, double fbY)
 	const glm::vec3 w = invAll * ndc;
 
 	// Shift Y UP to align buttons
-	return Vector2{ w.x, w.y - 830.0f };  // Add 660 to Y (shift UP)
+	return Vector2{ w.x, w.y - 760.0f };  // Add 660 to Y (shift UP)
 }
 
 InputManager::InputManager() : window(nullptr) {
@@ -91,28 +91,29 @@ void InputManager::Update(float) {
 	auto* coord = Coordinator::GetInstance();
 	auto sceneManager = coord->GetSystem<SceneManager>();
 
-	// ESC key: Go back to previous scene
-	if (isKeyTriggered(GLFW_KEY_ESCAPE) && sceneManager) {
-		std::string currentScene = sceneManager->CurrentScene;
+	// will re-implemnt when editor is fully polished
+	//// ESC key: Go back to previous scene
+	//if (isKeyTriggered(GLFW_KEY_ESCAPE) && sceneManager) {
+	//	std::string currentScene = sceneManager->CurrentScene;
 
-		// If we're at MainMenu, ESC does nothing
-		if (currentScene == "MainMenu") {
-			std::cout << "[InputManager] ESC pressed - already at MainMenu, doing nothing" << std::endl;
-			return; // Early exit - don't process ESC further
-		}
+	//	// If we're at MainMenu, ESC does nothing
+	//	if (currentScene == "MainMenu") {
+	//		std::cout << "[InputManager] ESC pressed - already at MainMenu, doing nothing" << std::endl;
+	//		return; // Early exit - don't process ESC further
+	//	}
 
-		// For all other scenes, go back to LastScene
-		std::string lastScene = sceneManager->GrabLastScene();
+	//	// For all other scenes, go back to LastScene
+	//	std::string lastScene = sceneManager->GrabLastScene();
 
-		if (!lastScene.empty() && lastScene != currentScene) {
-			sceneManager->CurrentScene = lastScene;
-			sceneManager->ClearLastScene();  // Clear so we can't toggle back
-			std::cout << "[InputManager] ESC pressed - returning to: " << lastScene << std::endl;
-		}
-		else {
-			std::cout << "[InputManager] ESC pressed - no previous scene to return to" << std::endl;
-		}
-	}
+	//	if (!lastScene.empty() && lastScene != currentScene) {
+	//		sceneManager->CurrentScene = lastScene;
+	//		sceneManager->ClearLastScene();  // Clear so we can't toggle back
+	//		std::cout << "[InputManager] ESC pressed - returning to: " << lastScene << std::endl;
+	//	}
+	//	else {
+	//		std::cout << "[InputManager] ESC pressed - no previous scene to return to" << std::endl;
+	//	}
+	//}
 
 	// Test delayed message (Advanced Feature: Message Queuing)
 	if (isKeyTriggered(GLFW_KEY_SPACE)) {

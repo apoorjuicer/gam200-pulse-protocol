@@ -4,10 +4,10 @@
  * @project     Pulse Protocol
  * @author		Chia Wei Xuan Rachael (primary) - 60%
  * @author		Reginald Lew Yee Ren (secondary) - 40%
- * 
+ *
  * @brief		Core Components:
- *              - LogicSystem: Manages script registration, lifecycle (Init/Update/Exit), 
- *                and execution for all entities with LogicComponent. Only updates during 
+ *              - LogicSystem: Manages script registration, lifecycle (Init/Update/Exit),
+ *                and execution for all entities with LogicComponent. Only updates during
  *                gameplay (respects Engine->IsPlaying() state).
  *              - Iscript Interface: Base class for all game scripts with Init, Update, Exit.
  *              - LogicComponent: Stores script name per entity, supports JSON serialization.
@@ -15,7 +15,7 @@
  *
  *              Implements game entity logic for both Player and Enemy.
  *              Handles entity movement, rotation toggling, and two collision test modes:
- *              AABB (Axis-Aligned Bounding Box) via 'M' key and 
+ *              AABB (Axis-Aligned Bounding Box) via 'M' key and
  *              OBB (Oriented Bounding Box) via 'N' key.
  *              Includes the LogicSystem that registers, updates, and executes scripts.
  *
@@ -23,7 +23,7 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 #pragma once
 #include "GameLogic.h"
 #include "../MyEngine/CoreEngine/Factory/Factory.h"
@@ -43,9 +43,9 @@ LogicSystem::~LogicSystem()
 
 void LogicSystem::Init()
 {
-	//register scripts here. I think it it will be the Csharp / Lua game code here. Ask Eli if i did it right 
+    //register scripts here. I think it it will be the Csharp / Lua game code here. Ask Eli if i did it right 
     // AddScript("PlayerScript", std::function<void(Entity)> function);
-    
+
     AddScript("PlayerScript", std::make_shared<PlayerScript>());
     AddScript("EnemyScript", std::make_shared<EnemyScript>());
     AddScript("ButtonScript", std::make_shared<ButtonScript>());
@@ -53,39 +53,39 @@ void LogicSystem::Init()
 
 void LogicSystem::Update(float dt)
 {
-	(void)dt;
+    (void)dt;
 
     // don't update scripts, if not playing the game
     if (!Engine->IsPlaying()) {
         return;
     }
 
-	auto* g_coordinator = Coordinator::GetInstance();
+    auto* g_coordinator = Coordinator::GetInstance();
 
     // make copy first
     auto entities = EntityMember;
 
-	// only update all entity that has scripts
-	for (auto const& entity : entities)
-	{
-		// get script name from each entity and feed them to its respective scripts
-		auto& scriptname = g_coordinator->GetComponent<LogicComponent>(entity);
+    // only update all entity that has scripts
+    for (auto const& entity : entities)
+    {
+        // get script name from each entity and feed them to its respective scripts
+        auto& scriptname = g_coordinator->GetComponent<LogicComponent>(entity);
 
-		// find reward (script update function) using script name
-		auto func = map_of_scripts.find(scriptname.ScriptName);
+        // find reward (script update function) using script name
+        auto func = map_of_scripts.find(scriptname.ScriptName);
 
-		// if we can find it then good, we did it right XD. and now we call said function
-		if (func != map_of_scripts.end())
-		{
+        // if we can find it then good, we did it right XD. and now we call said function
+        if (func != map_of_scripts.end())
+        {
             func->second->Update(entity);
-		}
+        }
 
-		else
-		{
+        else
+        {
             // THIS IS WHERE U LEFT OFF DUMBASS: CheeseBuger
-			//std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
-		}
-	}
+            //std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
+        }
+    }
 }
 
 void LogicSystem::Exit()
@@ -110,25 +110,25 @@ void LogicSystem::Exit()
 // Might change std::function to a class of the init(), update(), and exit(). Smth like Iscript, can i sub in Iscript for std::function
 void LogicSystem::AddScript(std::string const& ScriptName, std::shared_ptr<Iscript> script)
 {
-	// add this type of script to unlock this kind of update function. 
-	// exp: name = monsterscript. Unlocks => monsters script class functions  
+    // add this type of script to unlock this kind of update function. 
+    // exp: name = monsterscript. Unlocks => monsters script class functions  
     map_of_scripts[ScriptName] = script;
 }
 
 std::shared_ptr<Iscript> LogicSystem::GrabScript(std::string const& ScriptName)
 {
-	// grab reward(script update function)
-	auto func = map_of_scripts.find(ScriptName);
-	if(func != map_of_scripts.end())
-	{
-		return func->second;
-	}
+    // grab reward(script update function)
+    auto func = map_of_scripts.find(ScriptName);
+    if (func != map_of_scripts.end())
+    {
+        return func->second;
+    }
 
-	else
-	{
-		//std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
-		return nullptr;
-	}
+    else
+    {
+        //std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
+        return nullptr;
+    }
 }
 
 void LogicComponent::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
@@ -156,7 +156,7 @@ bool SaveScriptName(LogicComponent const& t, std::string const& path)
 
     rapidjson::Value ScriptComponents;
     t.Serialize(ScriptComponents, alloc);
-   // d.AddMember("ScriptName", ScriptComponents, alloc);
+    // d.AddMember("ScriptName", ScriptComponents, alloc);
 
     rapidjson::StringBuffer buffer;
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
@@ -209,7 +209,7 @@ bool LoadScriptName(LogicComponent& t, std::string const& path)
 // ---------------------------------------------------------------------
 // FOR SCRIPTS ONLY ONWARDS
 // ---------------------------------------------------------------------
-void PlayerScript::Init(Entity ID) 
+void PlayerScript::Init(Entity ID)
 {
     //autoMoveTimer = 2.0f; // reset timer
     auto* coord = Coordinator::GetInstance();
@@ -252,10 +252,10 @@ void PlayerScript::Init(Entity ID)
         });
 }
 
-void PlayerScript::Update(Entity ID) 
+void PlayerScript::Update(Entity ID)
 {
-	auto g_coordinator = Coordinator::GetInstance();
-	auto& hero_transform = g_coordinator->GetComponent<Framework::Transform>(ID);
+    auto g_coordinator = Coordinator::GetInstance();
+    auto& hero_transform = g_coordinator->GetComponent<Framework::Transform>(ID);
 
     static double lastTime = glfwGetTime();
     double currentTime = glfwGetTime();
@@ -297,25 +297,25 @@ void PlayerScript::Update(Entity ID)
     }*/
 
     // this is just regular WASD
-	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_T) == GLFW_PRESS)
-	{
-		hero_transform.Pos.y += 5.0f;
-	}
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_T) == GLFW_PRESS)
+    {
+        hero_transform.Pos.y += 5.0f;
+    }
 
-	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_F) == GLFW_PRESS)
-	{
-		hero_transform.Pos.x -= 5.0f;
-	}
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_F) == GLFW_PRESS)
+    {
+        hero_transform.Pos.x -= 5.0f;
+    }
 
-	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_G) == GLFW_PRESS )
-	{
-		hero_transform.Pos.y -= 5.0f;
-	}
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_G) == GLFW_PRESS)
+    {
+        hero_transform.Pos.y -= 5.0f;
+    }
 
-	if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_H) == GLFW_PRESS)
-	{
-		hero_transform.Pos.x += 5.0f;
-	}
+    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_H) == GLFW_PRESS)
+    {
+        hero_transform.Pos.x += 5.0f;
+    }
 
     // ==============================================================
     // --- Rotation toggle control (N key) ---
@@ -356,14 +356,14 @@ void PlayerScript::Update(Entity ID)
     }
 }
 
-void PlayerScript::Exit(Entity ID) 
+void PlayerScript::Exit(Entity ID)
 {
-	(void)ID;
+    (void)ID;
 }
 
 void EnemyScript::Init(Entity ID)
 {
-	(void)ID;
+    (void)ID;
 }
 
 void EnemyScript::Update(Entity ID)
@@ -601,7 +601,7 @@ void EnemyScript::Update(Entity ID)
 
 void EnemyScript::Exit(Entity ID)
 {
-	(void)ID;
+    (void)ID;
 }
 
 void ButtonScript::Init(Entity ID)
@@ -627,7 +627,7 @@ void ButtonScript::Init(Entity ID)
         }
     }
 
-    std::cout << "[ButtonScript] Init: " << data.buttonName << " Normal: " << data.normalTexture  << " Hover: " << data.hoverTexture << std::endl;
+    /*std::cout << "[ButtonScript] Init: " << data.buttonName << " Normal: " << data.normalTexture  << " Hover: " << data.hoverTexture << std::endl;*/
 }
 
 void ButtonScript::Update(Entity ID)
@@ -639,7 +639,7 @@ void ButtonScript::Update(Entity ID)
     // Get this button's data - if missing, initialize it
     auto it = buttonDataMap.find(ID);
     if (it == buttonDataMap.end()) {
-        std::cout << "[ButtonScript] Re-initializing button entity " << ID << std::endl;
+        /*std::cout << "[ButtonScript] Re-initializing button entity " << ID << std::endl;*/
         Init(ID);  // Re-initialize if missing
         it = buttonDataMap.find(ID);
         if (it == buttonDataMap.end()) return; // Still missing, bail out
@@ -684,7 +684,8 @@ void ButtonScript::Update(Entity ID)
     bool wasHovering = data.isHovering;
     bool inX = (mousePos.x >= buttonAABB.min.x && mousePos.x <= buttonAABB.max.x);
     bool inY = (mousePos.y >= buttonAABB.min.y && mousePos.y <= buttonAABB.max.y);
-    data.isHovering = inX && inY && mouseInViewport;
+    // UI buttons work without viewport check (fixes Level1 camera issue)
+    data.isHovering = inX && inY;
 
     // Handle texture swap
     if (data.isHovering && !wasHovering) {
@@ -697,8 +698,13 @@ void ButtonScript::Update(Entity ID)
         renderable.needsTextureReload = true;
     }
 
-    // Handle click
-    if (data.isHovering && inputMgr->isMouseButtonTriggered(0)) {
+    // Handle click - track button press state per entity
+    static std::unordered_map<Entity, bool> wasClickedLastFrame;
+    bool isClickedThisFrame = data.isHovering && inputMgr->isMouseButtonPressed(0);
+    bool wasClickedPreviously = wasClickedLastFrame[ID];
+
+    // Trigger action on button RELEASE while still hovering (prevents double-triggers)
+    if (data.isHovering && wasClickedPreviously && !isClickedThisFrame) {
         std::cout << "[ButtonScript] Clicked: " << data.buttonName << std::endl;
 
         auto sceneMgr = coord->GetSystem<SceneManager>();
@@ -713,12 +719,17 @@ void ButtonScript::Update(Entity ID)
         else if (data.buttonName == "SettingsBtn") {
             std::cout << "[ButtonScript] Settings not implemented yet" << std::endl;
         }
+        else if (data.buttonName == "BackBtn") {
+            sceneMgr->CurrentScene = "MainMenu";
+        }
         else if (data.buttonName == "QuitBtn") {
             if (Engine) {
                 glfwSetWindowShouldClose(Engine->GetWindow(), GLFW_TRUE);
             }
         }
     }
+
+    wasClickedLastFrame[ID] = isClickedThisFrame;
 }
 
 void ButtonScript::Exit(Entity ID)
