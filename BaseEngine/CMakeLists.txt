@@ -1,6 +1,9 @@
 ﻿cmake_minimum_required(VERSION 3.20)
 project(MyEngine VERSION 0.1 LANGUAGES C CXX)
-
+set(JSON_BuildTests OFF CACHE BOOL "Disable nlohmann_json tests" FORCE)
+set(RAPIDJSON_BUILD_TESTS    OFF CACHE BOOL "Disable RapidJSON tests"    FORCE)
+set(RAPIDJSON_BUILD_EXAMPLES OFF CACHE BOOL "Disable RapidJSON examples" FORCE)
+set(RAPIDJSON_BUILD_DOC      OFF CACHE BOOL "Disable RapidJSON docs"     FORCE)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 # Suppress warnings from external libraries (MSVC only)
@@ -22,6 +25,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # --- Import all 3rd-party deps (GLFW, GLEW, GLM, JSON, FreeType, spdlog) ---
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
 include(ImportDependencies OPTIONAL)
 include(Utilities OPTIONAL)
 
@@ -71,9 +75,10 @@ if (ENABLE_EDITOR)
     target_link_libraries(MyEditor PRIVATE MyEngine)
     target_compile_definitions(MyEngine PUBLIC ENABLE_EDITOR)
     target_compile_definitions(MyEditor PUBLIC ENABLE_EDITOR)
+else()
+    # Build game only
+    add_subdirectory(MyGame)
 endif()
-# Add the game executable (no editor)
-add_subdirectory(MyGame)
 # Keep app targets OUTSIDE any folder
 if(TARGET MyEngine)
     set_property(TARGET MyEngine PROPERTY FOLDER "")
