@@ -26,6 +26,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../Graphics/stb_image.h"
 
+//ECS
+#include "../CoreEngine/ECS/Coordinator.h"
+#include "../CoreEngine/ECS/Types.h"
+
 // These are the asset keys we expect to exist after AssetsManager::LoadAllFonts()
 // namespace {
 //    constexpr const char* UI_FONT_KEY = "patrickhand-regular_48";
@@ -36,6 +40,8 @@ namespace
 {
     constexpr const char *UI_FONT_KEY = "PatrickHand_font";
     constexpr const char *DEBUG_FONT_KEY = "liberation_font";
+
+    
 }
 
 // GraphicsManager::GraphicsManager()
@@ -1043,3 +1049,75 @@ bool GraphicsManager::EvictTexture(std::string const &idOrPath)
 //
 //     return os;
 // }
+
+
+//text Component
+void GraphicsManager::DrawText2D(
+    std::string const& text,
+    std::string const& fontId,
+    float x, float y,
+    float pixelHeight,
+     glm::vec3 const& color
+) {
+    if (text.empty()) { //empty text dont need draw
+        return;
+    }
+
+    FontData const* fontData = GM_FindFont(fontId);
+    if (!fontData)
+    {
+        std::cerr << "[GraphicsManager] DrawText2D: font '" << fontId << "' not found\n";
+        return;
+    }
+
+    float scale = 1.0f;
+    //Font height is baked at 48pixels need to scale accordingly
+    if (fontData->pixelHeight > 0u) {
+        scale = pixelHeight / static_cast<float>(fontData->pixelHeight);
+    }
+
+    //text shader
+    GLSLShader& textShader = GLApp::shdrpgms[3];
+    RenderText(textShader, text, x, y, scale, color, fontData);
+}
+
+
+void GraphicsManager::Update2DTextComponent() {
+    // --- Draw Text components (screen-space UI text) ---
+    auto* g_coordinator = Coordinator::GetInstance();
+
+    for (Entity entity = 0; entity < MaxEntity; ++entity)
+    {
+        if (!g_coordinator->HasComponent<Text>(entity) ||
+            !g_coordinator->HasComponent<Framework::Transform>(entity)) {
+            continue; //skip game object need transform(offset) and text
+        }
+           
+        auto& txt = g_coordinator->GetComponent<Text>(entity);
+        auto& tr = g_coordinator->GetComponent<Framework::Transform>(entity);
+
+        //not visible or empty text dont render
+        if (!txt.visible || txt.text.empty()) { 
+            continue;
+        }
+           
+
+        //  pick font (fallback if empty)
+        std::string fontId = txt.font_id.empty()
+            ? UI_FONT_KEY // "PatrickHand_font"
+            : txt.font_id;
+
+        //offset pos based on transform
+        float screenX = tr.Pos.x  + txt.offset.x;
+        float screenY = tr.Pos.y  + txt.offset.y;
+
+        DrawText2D(
+            txt.text,
+            fontId,
+            screenX,
+            screenY,
+            txt.font_size,
+            txt.color
+        );
+    }
+}

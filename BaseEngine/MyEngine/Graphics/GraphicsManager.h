@@ -48,13 +48,9 @@
 class AssetRegistry; // fwd
 class GLApp;         // fwd
 
-// struct FontData; // already defined in AssetsManager.h, but forward-declare is fine in header
 /**************************************************************************
  * Font rendering data types
- * These are at namespace scope so systems like GraphicsManager can use
- * them without including the whole AssetsManager implementation details.
  **************************************************************************/
-
 // cache of all glyphs(characters) loaded in a font
 // for rendering FreeType + OpenGL, represents 1 letter(a single glyph)
 struct Character
@@ -71,14 +67,6 @@ struct FontData
     std::map<char, Character> glyphs; // ASCII glyph table
     unsigned int pixelHeight = 0;     // baked pixel height (e.g. 48)
 };
-
-// struct TextureData {
-//     GLuint textureID = 0;
-//     int width = 0, height = 0, nrChannels = 0;
-//     // (Optional) debug info only:
-//     std::string textureName;
-//     std::string filePath;
-// };
 
 class GraphicsManager : public Systems
 {
@@ -114,6 +102,18 @@ public:
     bool   EvictTexture(std::string const& idOrPath);
 
     void SetRegistry(AssetRegistry* registry);
+
+    //text component
+    // Draw Text component at a given position
+    void DrawText2D(
+        std::string const& text,
+        std::string const& fontId,
+        float x, float y,
+        float pixelHeight,
+        glm::vec3 const& color
+    );
+
+    void Update2DTextComponent();
 private:
     // Draw text (world overlay / debug text etc.)
     void RenderText(
@@ -145,7 +145,6 @@ private:
     bool LoadFontsFromRegistry();
 
     void InitWhiteTexture();
-
 private:
     // std::unique_ptr<GLApp> glapp;
     GLApp *glapp = nullptr; // owning raw pointer
