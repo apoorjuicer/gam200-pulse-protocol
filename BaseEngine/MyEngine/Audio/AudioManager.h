@@ -82,6 +82,7 @@ public:
 
     //audiosource
     void PlayFromAudioSource(AudioSource& src);
+    void StopPlayingAllAudio();
 
 private:
     FMOD::System *mSystem = nullptr;

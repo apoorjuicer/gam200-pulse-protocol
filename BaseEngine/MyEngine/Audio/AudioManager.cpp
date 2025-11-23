@@ -125,7 +125,7 @@ void AudioManager::Initialize()
 
     // 3) Get the master channel group
     // Master Channel Group is the top-level mixer fader for everything
-    // don�t route individual sounds to it on purpose
+    // dont route individual sounds to it on purpose
     // route to your own submix groups
     // set mMasterGroup as MASTER CHANNEL GROUP!!
     if (mSystem->getMasterChannelGroup(&mMasterGroup) != FMOD_OK)
@@ -202,8 +202,14 @@ void AudioManager::Update()
         return;
     // ecs, audio component
     // Audio Component -> Audio Source
-    ProcessAudioSources(); // 
-    mSystem->update();
+    if (!Engine || !Engine->IsPlaying()) {
+        if (!Engine || !Engine->IsPlaying()) return;
+    }
+    else {
+        ProcessAudioSources(); // 
+        mSystem->update();
+    }
+
 }
 
 void AudioManager::Shutdown()
@@ -373,6 +379,8 @@ bool AudioManager::PlayBGM(const std::string &id)
     mCurrentBGMID = id;
     mCurrentBGM = mBGMCache[id];
     mCurrentBGMCh = ch;
+
+
     return true;
 }
 
@@ -737,7 +745,7 @@ void AudioManager::ProcessAudioSources()
     if (!g_coordinator || !mRegistry) return;
 
     // IMPT!!!! ONLY PROCESS IF GAME IS ACTUALLY PLAYING
-    if (!Engine || !Engine->IsPlaying()) return;
+    //if (!Engine || !Engine->IsPlaying()) return;
 
     for (Entity entity = 0; entity < MaxEntity; ++entity)
     {
@@ -749,6 +757,7 @@ void AudioManager::ProcessAudioSources()
         // -------- PLAY ON AWAKE (PLAY ONLY ONCE) --------
         if (src.playOnAwake && src.channel == nullptr && !src.audio_id.empty())
         {
+
             PlayFromAudioSource(src);  // sets src.channel for SFX *and* BGM
             //src.playOnAwake = false;   // prevent replay every frame
         }
@@ -809,6 +818,25 @@ void AudioManager::ProcessAudioSources()
     }
 }
 
+
+void AudioManager::StopPlayingAllAudio() {
+
+    if(!mSystem)
+        return;
+
+    if (mMasterGroup)
+    {
+        mMasterGroup->stop();  // FMOD will stop all child groups & channels
+        return;
+    }
+
+    // if mMasterGroup==nullptr:ask FMOD again for the master group and stop that
+    FMOD::ChannelGroup* master = nullptr;
+    if (mSystem->getMasterChannelGroup(&master) == FMOD_OK && master)
+    {
+        master->stop();
+    }
+}
 
 /*
    Every FMOD function returns an FMOD_RESULT
