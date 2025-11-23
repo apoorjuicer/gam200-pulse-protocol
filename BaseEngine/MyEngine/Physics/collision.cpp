@@ -89,42 +89,33 @@ OBB CollisionManager::BuildOBBFromTransform(const Framework::Transform& transfor
 {
     OBB obb;
 
-    // === 1. Set OBB center from world position ===
+    // === 1. Center remains the transform position ===
     obb.center = transform.Pos;
 
-    // === 2. Compute realistic half extents (edge-sensitive) ===
-    // The earlier logic gave better edge collisions, so we keep that approach.
-    // We assume Transform.Scale is already world-relative; just clamp to avoid extremes.
-    float scaleX = std::clamp(transform.Scale.x, 0.1f, 10.0f);
-    float scaleY = std::clamp(transform.Scale.y, 0.1f, 10.0f);
+    // === 2. Build an aligned AABB first ===
+    AABB aabb = BuildAABBFromTransform(transform, baseBox);
 
+    // Compute half extents directly from AABB size
     obb.halfExtents = Vector2(
-        (baseBox.width * 0.6f) * scaleX,
-        (baseBox.height * 0.6f) * scaleY
+        (aabb.max.x - aabb.min.x) * 0.5f,
+        (aabb.max.y - aabb.min.y) * 0.5f
     );
 
     // === 3. Assign rotation from Transform ===
     obb.rotation = transform.Rotation.x;
 
-    // === 4. Compute local axes for SAT projection ===
-    // Convert rotation to radians
+    // === 4. Compute orientation axes ===
     float rad = obb.rotation * (3.14159265359f / 180.0f);
 
-    // Axis X points along the rotated local X direction
-    obb.axis[0] = Vector2(std::cos(rad), std::sin(rad));
+    obb.axis[0] = Vector2(std::cos(rad), std::sin(rad));     // X axis
+    obb.axis[1] = Vector2(-std::sin(rad), std::cos(rad));    // Y axis
 
-    // Axis Y is perpendicular to Axis X
-    obb.axis[1] = Vector2(-std::sin(rad), std::cos(rad));
-
-    // === 5. Optional Debug Info ===
+    // === 5. Debug (optional, keep yours) ===
     std::cout << std::fixed << std::setprecision(2)
         << "[DEBUG] BuildOBBFromTransform -> Pos("
         << transform.Pos.x << "," << transform.Pos.y << ") "
-        << "Scale(" << transform.Scale.x << "," << transform.Scale.y << ") "
-        << "HalfExtents(" << obb.halfExtents.x << "," << obb.halfExtents.y << ") "
-        << "Rotation=" << obb.rotation << " deg\n"
-        << "[DEBUG] OBB Axes: X(" << obb.axis[0].x << "," << obb.axis[0].y << ") "
-        << "Y(" << obb.axis[1].x << "," << obb.axis[1].y << ")\n";
+        << "AABB Extents(" << obb.halfExtents.x << "," << obb.halfExtents.y << ") "
+        << "Rotation=" << obb.rotation << " deg\n";
 
     return obb;
 }

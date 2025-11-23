@@ -76,8 +76,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -936.3077392578125,
-                            "y": -217.53839111328126
+                            "x": -880.923095703125,
+                            "y": -322.15380859375
                         },
                         "scale": {
                             "x": 700.0,
@@ -109,11 +109,11 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.17294499278068543,
+                        "elapsedTime": 0.20306232571601869,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
-                        "animationSpeed": 2.0999999046325685
+                        "animationSpeed": 1.5
                     }
                 },
                 {
@@ -157,7 +157,57 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "orderInLayer": 5,
+                        "orderInLayer": 1,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": -300.0
+                        },
+                        "scale": {
+                            "x": 600.0,
+                            "y": 90.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": -0.016998864710330964,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": false,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "name": {
+                        "name": "FeedbackBar"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "Background",
+                        "mask": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 }
@@ -173,7 +223,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1911.30712890625,
+                            "x": 1863.30712890625,
                             "y": -344.3077087402344
                         },
                         "scale": {
@@ -254,7 +304,104 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "orderInLayer": 10,
+                        "orderInLayer": 1,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "Typing": {
+                        "Type": "Enemy"
+                    }
+                },
+                {
+                    "transform": {
+                        "position": {
+                            "x": 1863.30712890625,
+                            "y": -344.3077087402344
+                        },
+                        "scale": {
+                            "x": 600.0,
+                            "y": 600.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "BlueGorillaEnemy",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "EnemyScript"
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Blue Gorilla"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 1,
+                        "damage": 1,
+                        "isAlive": true
+                    }
+                },
+                {
+                    "AABB": {
+                        "min": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "max": {
+                            "x": 410.0,
+                            "y": 280.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "Blue Gorilla",
+                        "isLinked": true
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 1,
                         "z": 0.0
                     }
                 }
@@ -265,8 +412,74 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1367.384521484375,
-                            "y": 677.5386352539063
+                            "x": -981.5381469726563,
+                            "y": 655.3846435546875
+                        },
+                        "scale": {
+                            "x": 433.0,
+                            "y": 91.5
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/green bar.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "HealthBar"
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "health",
+                        "isLinked": false
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "orderInLayer": 10,
+                        "z": 100.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 1403.0771484375,
+                            "y": 708.9231567382813
                         },
                         "scale": {
                             "x": 100.0,
@@ -386,200 +599,7 @@
                 {
                     "audiosource": {
                         "audio_id": "bgm",
-                        "volume": 0.30000001192092898,
-                        "loop": false,
-                        "playOnAwake": true
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -910.1537475585938,
-                            "y": 564.3076782226563
-                        },
-                        "scale": {
-                            "x": 547.5,
-                            "y": 211.5
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/UI/health bar.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "ContainerHealth"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "orderInLayer": 10,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -779.0767822265625,
-                            "y": 542.769287109375
-                        },
-                        "scale": {
-                            "x": 398.0,
-                            "y": 55.5
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/UI/green bar.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "HealthBar"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "orderInLayer": 11,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -3.977447509765625,
-                            "y": 0.5242919921875
-                        },
-                        "scale": {
-                            "x": 1650.0,
-                            "y": 950.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/UI/border_frame.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 0.6192570924758911
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "PulsingBorderScript"
-                    }
-                },
-                {
-                    "name": {
-                        "name": "PulsingBorder"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "orderInLayer": 1,
-                        "z": 100.0
-                    }
-                },
-                {
-                    "audiosource": {
-                        "audio_id": "beat_placeholder",
-                        "volume": 1.0,
+                        "volume": 0.4000000059604645,
                         "loop": false,
                         "playOnAwake": true
                     }
