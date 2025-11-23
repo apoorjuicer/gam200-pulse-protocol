@@ -83,28 +83,6 @@ bool CollisionManager::CheckDistanceCollision(const Vector2& a, float aradius,
 }
 
 // =============================================================================
-// Mouse / GUI Collisions
-// =============================================================================
-bool CollisionManager::CheckMouseCollision(const Vector2& mousePos, const AABB& box)
-{
-    return (mousePos.x >= box.min.x && mousePos.x <= box.max.x &&
-        mousePos.y >= box.min.y && mousePos.y <= box.max.y);
-}
-
-bool CollisionManager::CheckGUIButtonCollision(const glm::vec2& mouseVirtual,
-    const glm::vec2& buttonPos,
-    const glm::vec2& buttonSize)
-{
-    float left = buttonPos.x - buttonSize.x * 0.5f;
-    float right = buttonPos.x + buttonSize.x * 0.5f;
-    float bottom = buttonPos.y - buttonSize.y * 0.5f;
-    float top = buttonPos.y + buttonSize.y * 0.5f;
-
-    return (mouseVirtual.x >= left && mouseVirtual.x <= right &&
-        mouseVirtual.y >= bottom && mouseVirtual.y <= top);
-}
-
-// =============================================================================
 // Rotational Oriented Bounding Box (OBB) Collision
 // =============================================================================
 OBB CollisionManager::BuildOBBFromTransform(const Framework::Transform& transform, const AABB& baseBox)

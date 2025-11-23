@@ -340,9 +340,15 @@ namespace MyEditor
         if (rightDockID) ImGui::SetNextWindowDockID(rightDockID, ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Inspector")) {
             DrawInspectorWindow(rightDockID);
-            ImGui::End();
         }
+        ImGui::End();
 
+        // Layer Manager
+        if (rightDockID) ImGui::SetNextWindowDockID(rightDockID, ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("Layer Manager")) {
+            DrawLayerManagerWindow();
+        }
+        ImGui::End();
 
         // Project (Assets & Prefabs)
         if (bottomDockID) ImGui::SetNextWindowDockID(bottomDockID, ImGuiCond_FirstUseEver);

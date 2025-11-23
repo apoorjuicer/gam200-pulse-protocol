@@ -4,14 +4,17 @@
 
 #include "pch/pch_temp.h"
 
+#include <algorithm>  // for std::sort
+
 // Core editor / engine headers
 #include "Editor.h"   // for GameViewport, GizmoState, selectedEntity, INVALID_ENTITY
 #include "Gizmo.h"
+#include "LayerManagerPanel.h"  // for IsLayerVisible, IsLayerLocked
 #include "../CoreEngine/ECS/Coordinator.h"
 #include "../CoreEngine/ECS/Types.h"
 #include "../Graphics/Transform.h"
 #include "../Graphics/glapp.h"
-
+#include "../Graphics/Layer.h"
 
 // If you have a dedicated gizmo type, include it here
 // #include "GizmoState.h"
@@ -62,7 +65,7 @@ namespace MyEditor
     // World <-> Screen conversion
     // -------------------------------------------------------------------------
 
-       glm::vec2 WorldToScreen(const Vector2& wpos, const GameViewport& vp)
+    glm::vec2 WorldToScreen(const Vector2& wpos, const GameViewport& vp)
     {
         // world -> NDC
         const float sx = 2.0f / kWorldW, sy = 2.0f / kWorldH;
@@ -160,14 +163,44 @@ namespace MyEditor
             (mouseFB.x >= drawX && mouseFB.x <= drawX + drawW &&
                 mouseFB.y >= drawY && mouseFB.y <= drawY + drawH);
 
+        // Collect entities with their draw order for proper hit-testing
+        std::vector<std::pair<Entity, int>> entitiesWithOrder;
+
         for (Entity e : coord->GetAllEntities())
         {
             if (!coord->HasComponent<Framework::Transform>(e) ||
                 !coord->HasComponent<Framework::Renderable>(e)) continue;
 
             auto& tr = coord->GetComponent<Framework::Transform>(e);
-            auto& re = coord->GetComponent<Framework::Renderable>(e);
             if (!tr.isVisible) continue;
+
+            // CHECK LAYER VISIBILITY - Skip hidden layers
+            if (coord->HasComponent<LayerTag>(e)) {
+                auto& tag = coord->GetComponent<LayerTag>(e);
+                if (!IsLayerVisible(tag.mask)) {
+                    continue;  // Layer is hidden - skip this entity completely
+                }
+            }
+
+            // Get draw order from LayerTag (default 0)
+            int order = 0;
+            if (coord->HasComponent<LayerTag>(e)) {
+                order = coord->GetComponent<LayerTag>(e).orderInLayer;
+            }
+
+            entitiesWithOrder.push_back({ e, order });
+        }
+
+        // Sort by draw order (lower values = drawn first = behind)
+        std::sort(entitiesWithOrder.begin(), entitiesWithOrder.end(),
+            [](const auto& a, const auto& b) { return a.second < b.second; });
+
+        // Hit-test in REVERSE order (check highest order first)
+        for (auto it = entitiesWithOrder.rbegin(); it != entitiesWithOrder.rend(); ++it)
+        {
+            Entity e = it->first;
+            auto& tr = coord->GetComponent<Framework::Transform>(e);
+            auto& re = coord->GetComponent<Framework::Renderable>(e);
 
             // Model->NDC (same as draw path)
             glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
@@ -179,11 +212,20 @@ namespace MyEditor
             if (re.mdl_ref == 0) { qmin = { -1.f, -1.f }; qmax = { 1.f,  1.f }; }
             else { qmin = { -0.5f,-0.5f }; qmax = { 0.5f, 0.5f }; }
 
-            // Hit test
-            if (inGameRect) {
-                glm::vec3 m = invModelToNDC * mouseNDC;
-                if (m.x >= qmin.x && m.x <= qmax.x && m.y >= qmin.y && m.y <= qmax.y)
-                    hovered = e;
+            // Hit test - only set hovered once (first/topmost hit wins)
+            if (inGameRect && hovered == INVALID_ENTITY) {
+                // CHECK IF LAYER IS LOCKED - Skip locked layers for selection
+                bool isLocked = false;
+                if (coord->HasComponent<LayerTag>(e)) {
+                    auto& tag = coord->GetComponent<LayerTag>(e);
+                    isLocked = IsLayerLocked(tag.mask);
+                }
+
+                if (!isLocked) {
+                    glm::vec3 m = invModelToNDC * mouseNDC;
+                    if (m.x >= qmin.x && m.x <= qmax.x && m.y >= qmin.y && m.y <= qmax.y)
+                        hovered = e;
+                }
             }
 
             // Draw bounds for the selected entity
@@ -246,6 +288,6 @@ namespace MyEditor
         dl->PopClipRect();
     }
 
-   
+
 
 } // namespace MyEditor

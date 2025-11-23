@@ -364,8 +364,22 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	// Draw entities
 // build drawList
 	for (auto it : entities) {
-		auto& lt = g_coordinator->GetComponent<LayerTag>(it);
-		if ((lt.mask & includeMask) == 0) continue;
+		// BEFORE (ORIGINAL CODE):
+		//     auto& lt = g_coordinator->GetComponent<LayerTag>(it);
+		//     if ((lt.mask & includeMask) == 0) continue;
+		//
+
+		// AFTER:
+		// Check if entity has LayerTag component first
+		if (!g_coordinator->HasComponent<LayerTag>(it)) {
+			// No LayerTag - treat as LAYER_ALL (always visible)
+			// Skip to normal rendering checks below
+		}
+		else {
+			// Has LayerTag - check if it matches the filter
+			auto& lt = g_coordinator->GetComponent<LayerTag>(it);
+			if ((lt.mask & includeMask) == 0) continue;  // Layer filtered out
+		}
 
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
 		auto& re = g_coordinator->GetComponent<Framework::Renderable>(it);
@@ -388,12 +402,37 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		drawList.push_back(it);
 	}
 
+	// BEFORE (ORIGINAL CODE):
+	//     std::stable_sort(drawList.begin(), drawList.end(), [&](Entity a, Entity b) {
+	//         auto& A = g_coordinator->GetComponent<LayerTag>(a);
+	//         auto& B = g_coordinator->GetComponent<LayerTag>(b);
+	//         if (A.orderInLayer != B.orderInLayer) return A.orderInLayer < B.orderInLayer;
+	//         return A.z < B.z;
+	//     });
+
+	// AFTER:
 	std::stable_sort(drawList.begin(), drawList.end(), [&](Entity a, Entity b) {
-		auto& A = g_coordinator->GetComponent<LayerTag>(a);
-		auto& B = g_coordinator->GetComponent<LayerTag>(b);
-		if (A.orderInLayer != B.orderInLayer) return A.orderInLayer < B.orderInLayer;
-		return A.z < B.z;
-		});
+		// Entities without LayerTag get default values: orderInLayer=0, z=0
+		int orderA = 0, orderB = 0;
+		float zA = 0.0f, zB = 0.0f;
+
+		// Safely get LayerTag data if it exists
+		if (g_coordinator->HasComponent<LayerTag>(a)) {
+			auto& A = g_coordinator->GetComponent<LayerTag>(a);
+			orderA = A.orderInLayer;
+			zA = A.z;
+		}
+
+		if (g_coordinator->HasComponent<LayerTag>(b)) {
+			auto& B = g_coordinator->GetComponent<LayerTag>(b);
+			orderB = B.orderInLayer;
+			zB = B.z;
+		}
+
+		// Sort by orderInLayer first, then by z depth
+		if (orderA != orderB) return orderA < orderB;
+		return zA < zB;
+	});
 
 	// Draw
 	for (auto e : drawList) {

@@ -23,6 +23,7 @@
 #include "TopBarPanel.h"
 #include "DebugConsole.h"
 #include "ProfilingTab.h"
+#include "LayerManagerPanel.h"
 #include "CoreEngine/Factory/Factory.h" // for creating/deleting entities
 #include "CoreEngine/Prefab/PrefabManager.h"
 #include "CoreEngine/ECS/System.h"   // For Entity type
