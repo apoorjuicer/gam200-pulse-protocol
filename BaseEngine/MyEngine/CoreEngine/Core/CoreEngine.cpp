@@ -416,7 +416,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<LayerTag>();
 	g_coordinator->RegisterComponent<PrefabInstance>();
 	g_coordinator->RegisterComponent<AudioSource>();
-	g_coordinator->RegisterComponent<TextComponent>();
+	g_coordinator->RegisterComponent<Text>();
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();

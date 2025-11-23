@@ -11,20 +11,20 @@
  */
  /******************************************************************************/
 
-#pragma once
-
 #include <string>
-#include <glm/vec4.hpp> 
+#include <glm/vec3.hpp> 
 #include <rapidjson/document.h>
 #include <iostream>
+#include "../Math/math.h"
 
 struct Text
 {
     std::string text{};        // Text to display
     std::string font_id{};     // key to font registry
-    float x{}, y{}; //might change to offset
+    // float x{}, y{}; //might change to offset
+    Vector2 offset{ 0,0 };
     float font_size{};      // pixel height
-    glm::vec4 color = {1,1,1,1};  // RGBA
+    glm::vec3 color = { 1,1,1 };  // RGB
     bool visible = true;     // toggle on/off
     //To be added, probably typed class enum
     //std::string font_style;
@@ -49,21 +49,23 @@ struct Text
             static_cast<SizeType>(font_id.length()),
             alloc);
         out.AddMember("font_id", fond_idVal, alloc);
-        //float
-        out.AddMember("x", x, alloc);
-        out.AddMember("y", y, alloc);
+        //out.AddMember("x", x, alloc);
+        //out.AddMember("y", y, alloc);
+        // Vector2
+        Value offsetVal;
+        offset.Serialize(offsetVal, alloc);
+        out.AddMember("offset", offsetVal, alloc);
+        //font size
         out.AddMember("font_size", font_size, alloc);
-        //vec4
-        
-            rapidjson::Value colorArr(rapidjson::kArrayType);
+        //vec3
 
-            colorArr.PushBack(color.r, alloc);
-            colorArr.PushBack(color.g, alloc);
-            colorArr.PushBack(color.b, alloc);
-            colorArr.PushBack(color.a, alloc);
+        rapidjson::Value colorArr(rapidjson::kArrayType);
+        colorArr.PushBack(color.r, alloc);
+        colorArr.PushBack(color.g, alloc);
+        colorArr.PushBack(color.b, alloc);
 
-            out.AddMember("color", colorArr, alloc);
-       
+        out.AddMember("color", colorArr, alloc);
+
         //bool        
         out.AddMember("visible", visible, alloc);
     }
@@ -87,14 +89,19 @@ struct Text
             font_id = (in["font_id"].GetString());
         }
         //float
-        if (in.HasMember("x") && in["x"].IsNumber())
-        {
-            x = (in["x"].GetFloat());
+        //if (in.HasMember("x") && in["x"].IsNumber())
+        //{
+        //    x = (in["x"].GetFloat());
+        //}
+        //if (in.HasMember("y") && in["y"].IsNumber())
+        //{
+        //    y = (in["y"].GetFloat());
+        //}
+
+        if (in.HasMember("offset")) {
+            offset.Deserialize(in["offset"]);
         }
-        if (in.HasMember("y") && in["y"].IsNumber())
-        {
-            y = (in["y"].GetFloat());
-        }
+
         if (in.HasMember("font_size") && in["font_size"].IsNumber())
         {
             font_size = (in["font_size"].GetFloat());
@@ -102,19 +109,18 @@ struct Text
 
         // glm::vec4 color
         //check if contain color member and if its an array
-        if (in.HasMember("color") && in["color"].IsArray()) 
+        if (in.HasMember("color") && in["color"].IsArray())
         {
             auto const& arr = in["color"].GetArray();
-            if (arr.Size() == 4) //fixed size 4
+            if (arr.Size() == 3) //fixed size 3, vec3
             {
                 color.r = arr[0].GetFloat();
                 color.g = arr[1].GetFloat();
                 color.b = arr[2].GetFloat();
-                color.a = arr[3].GetFloat();
             }
             else
             {
-                std::cerr << "[TextComponent] 'color' array must have 4 elements (r,g,b,a)\n";
+                std::cerr << "[TextComponent] 'color' array must have 3 elements (r,g,b)\n";
             }
         }
 
