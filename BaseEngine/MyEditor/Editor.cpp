@@ -16,6 +16,7 @@
 #include "Editor.h"
 #include <Graphics/glhelper.h>     
 #include "CoreEngine/Asset/AssetsManager.h"
+#include "Input/InputManager.h"
 
 // ==========================================================================
 
@@ -31,6 +32,7 @@ namespace MyEditor
 
     // this vector maintains the order entities appear in the hierarchy
     std::vector<Entity> entityDisplayOrder;
+    std::vector<std::string> s_pendingOSDrops;
 
     static GLFWwindow* s_Window = nullptr;
     static bool s_enabled = false;
@@ -170,6 +172,51 @@ namespace MyEditor
     }
 #endif
 
+    static ImGuiKey TranslateGLFWKeyToImGuiKey(int key)
+    {
+        if (key >= GLFW_KEY_A && key <= GLFW_KEY_Z)
+            return (ImGuiKey)(ImGuiKey_A + (key - GLFW_KEY_A));
+
+        if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9)
+            return (ImGuiKey)(ImGuiKey_0 + (key - GLFW_KEY_0));
+
+        switch (key)
+        {
+        case GLFW_KEY_SPACE:        return ImGuiKey_Space;
+        case GLFW_KEY_ESCAPE:       return ImGuiKey_Escape;
+        case GLFW_KEY_ENTER:        return ImGuiKey_Enter;
+        case GLFW_KEY_TAB:          return ImGuiKey_Tab;
+        case GLFW_KEY_BACKSPACE:    return ImGuiKey_Backspace;
+
+        case GLFW_KEY_LEFT:         return ImGuiKey_LeftArrow;
+        case GLFW_KEY_RIGHT:        return ImGuiKey_RightArrow;
+        case GLFW_KEY_UP:           return ImGuiKey_UpArrow;
+        case GLFW_KEY_DOWN:         return ImGuiKey_DownArrow;
+
+        case GLFW_KEY_LEFT_CONTROL:
+        case GLFW_KEY_RIGHT_CONTROL:
+            return ImGuiKey_LeftCtrl;  
+
+        case GLFW_KEY_LEFT_SHIFT:
+        case GLFW_KEY_RIGHT_SHIFT:
+            return ImGuiKey_LeftShift;
+
+        case GLFW_KEY_LEFT_ALT:
+        case GLFW_KEY_RIGHT_ALT:
+            return ImGuiKey_LeftAlt;
+
+        case GLFW_KEY_LEFT_SUPER:
+        case GLFW_KEY_RIGHT_SUPER:
+            return ImGuiKey_LeftSuper;
+
+
+        default:
+            return ImGuiKey_None;
+        }
+    }
+
+
+
 
     void Init(GLFWwindow* w)
     {
@@ -177,6 +224,9 @@ namespace MyEditor
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+
+        Engine->m_editorFrameCallback = Editor_FrameCallback;
+
 
         ImGuiIO& io = ImGui::GetIO();
         io.IniFilename = nullptr;
@@ -207,26 +257,62 @@ namespace MyEditor
     void SetEnabled(bool enabled) { s_enabled = enabled; }
     bool IsEnabled() { return s_enabled; }
     
-    void NewFrame() {
-        if (!s_enabled) return;
+  
+    void NewFrame()
+    {
+        if (!s_enabled)
+            return;
 
+        // Backend begins new frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
 
         ImGuiIO& io = ImGui::GetIO();
 
-        // Drive ImGui from the engine's window size
+        // --- Display size ---
         float w = (float)WindowWidth;
         float h = (float)WindowHeight;
-
         if (w <= 0.0f) w = 1.0f;
         if (h <= 0.0f) h = 1.0f;
 
         io.DisplaySize = ImVec2(w, h);
-        io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);  // simple case
+        io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
+        // --- Input injection ---
+        if (auto input = Coordinator::GetInstance()->GetSystem<InputManager>())
+        {
+            // mouse
+            glm::vec2 mp = input->getMousePosition();
+            io.AddMousePosEvent(mp.x, mp.y);
+
+            io.AddMouseButtonEvent(0, input->isMouseButtonPressed(0));
+            io.AddMouseButtonEvent(1, input->isMouseButtonPressed(1));
+            io.AddMouseButtonEvent(2, input->isMouseButtonPressed(2));
+
+            io.AddMouseWheelEvent(0.0f, 0.0f);
+
+            // keyboard
+            for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++)
+            {
+                bool down = input->isKeyPressed(key);
+                ImGuiKey imKey = TranslateGLFWKeyToImGuiKey(key);
+                if (imKey != ImGuiKey_None)
+                    io.AddKeyEvent(imKey, down);
+            }
+
+            // text input
+            unsigned int c = input->getLastCharTyped();
+            if (c != 0 && c != '\b')
+                io.AddInputCharacter(c);
+            input->clearLastChar();
+        }
+
+        // THIS WAS MISSING — CRASH FIX
         ImGui::NewFrame();
     }
+
+
+
 
 
 
@@ -588,5 +674,16 @@ namespace MyEditor
         return { vx, vy, vw, vh };
     }
 
+    void Editor_FrameCallback()
+    {
 
+        // 1. Start a new ImGui frame
+        MyEditor::NewFrame();
+
+        // 3. Draw the editor
+        MyEditor::Draw();
+        MyEditor::Render();
+    }
+   
 }
+

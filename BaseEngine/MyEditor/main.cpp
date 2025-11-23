@@ -15,35 +15,21 @@
 
 int main()
 {
-    // Create engine
     Engine = new CoreEngine();
-
-    // Register components/systems
     Engine->Setup();
+    Engine->Init();                     
 
-    // Init window, OpenGL, FMOD, systems, etc.
-    Engine->Init();
-
-    // Hook ImGui editor to the GLFW window
-    MyEditor::Init(Engine->GetWindow());
-
-    //Connect Editor to Engine using a per - frame callback
-    Engine->SetEditorFrameCallback([]() {
-        MyEditor::NewFrame();
-        MyEditor::Draw();
-        MyEditor::Render();
-
-     });
+    GLFWwindow* win = Engine->GetWindow(); 
 
 
-    // Main loop
+    MyEditor::Init(win);           
+
+
+    Engine->SetEditorFrameCallback(MyEditor::Editor_FrameCallback);
     Engine->GameLoop();
 
-    // Shutdown editor + engine
     MyEditor::Shutdown();
     Engine->Exit();
     delete Engine;
-    Engine = nullptr;
-
     return 0;
 }

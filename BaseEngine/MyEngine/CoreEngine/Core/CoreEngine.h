@@ -65,7 +65,7 @@ public:
 	void SetEditorFrameCallback(const std::function<void()>& cb);
 
 	// AssetsManager& getAssetsManager() { return mAssets; }
-
+	std::function<void()> m_editorFrameCallback;
 
 	void ToggleFullscreen();
 	// AssetsManager& getAssetsManager() { return mAssets; }
@@ -80,7 +80,7 @@ private:
 	void RenderDebugDraw();
 
 	GLFWwindow *window;
-	std::function<void()> m_editorFrameCallback;
+
 };
 
 // A global pointer to the instance of the core

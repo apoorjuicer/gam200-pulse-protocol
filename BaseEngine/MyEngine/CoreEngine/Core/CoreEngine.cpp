@@ -246,6 +246,9 @@ void CoreEngine::Init()
 	}
 
 	glfwMakeContextCurrent(window);
+	GLHelper::ptr_window = window;
+
+	GLHelper::setup_event_callbacks();
 
 	// === FORCE FULLSCREEN AT STARTUP ===
 	{
