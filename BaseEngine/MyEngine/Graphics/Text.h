@@ -9,55 +9,56 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/
-
+/******************************************************************************/
+#pragma once
 #include <string>
-#include <glm/vec3.hpp> 
+#include <glm/vec3.hpp>
 #include <rapidjson/document.h>
 #include <iostream>
 #include "../Math/math.h"
 
-struct Text
+struct TextComponent
 {
-    std::string text{};        // Text to display
-    std::string font_id{};     // key to font registry
+    std::string text{};    // Text to display
+    std::string font_id{}; // key to font registry
     // float x{}, y{}; //might change to offset
-    Vector2 offset{ 0,0 };
-    float font_size{};      // pixel height
-    glm::vec3 color = { 1,1,1 };  // RGB
-    bool visible = true;     // toggle on/off
-    //To be added, probably typed class enum
-    //std::string font_style;
-    //std::string aligment;
+    Vector2 offset{0, 0};
+    float font_size{};           // pixel height
+    glm::vec3 color = {1, 1, 1}; // RGB
+    bool visible = true;         // toggle on/off
+    // To be added, probably typed class enum
+    // std::string font_style;
+    // std::string aligment;
 
     // ---------------------------------------------------
-        // Serialize
-        // ---------------------------------------------------
-    void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
+    // Serialize
+    // ---------------------------------------------------
+    void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
+    {
         using namespace rapidjson;
         out.SetObject();
 
-        //string
+        // string
         Value TextVal;
         TextVal.SetString(text.c_str(),
-            static_cast<SizeType>(text.length()),
-            alloc);
+                          static_cast<SizeType>(text.length()),
+                          alloc);
         out.AddMember("text", TextVal, alloc);
 
         Value fond_idVal;
         fond_idVal.SetString(font_id.c_str(),
-            static_cast<SizeType>(font_id.length()),
-            alloc);
+                             static_cast<SizeType>(font_id.length()),
+                             alloc);
         out.AddMember("font_id", fond_idVal, alloc);
-        //out.AddMember("x", x, alloc);
-        //out.AddMember("y", y, alloc);
-        // Vector2
+        // out.AddMember("x", x, alloc);
+        // out.AddMember("y", y, alloc);
+        //  Vector2
         Value offsetVal;
         offset.Serialize(offsetVal, alloc);
         out.AddMember("offset", offsetVal, alloc);
-        //font size
+        // font size
         out.AddMember("font_size", font_size, alloc);
-        //vec3
+        // vec3
 
         rapidjson::Value colorArr(rapidjson::kArrayType);
         colorArr.PushBack(color.r, alloc);
@@ -66,20 +67,21 @@ struct Text
 
         out.AddMember("color", colorArr, alloc);
 
-        //bool        
+        // bool
         out.AddMember("visible", visible, alloc);
     }
     // ---------------------------------------------------
     // Deserialize
     // ---------------------------------------------------
-    void Deserialize(const rapidjson::Value& in) {
+    void Deserialize(const rapidjson::Value &in)
+    {
 
         if (!in.IsObject())
         {
             std::cerr << "[TextComponent] Invalid JSON format for TextComponent\n";
             return;
         }
-        //string
+        // string
         if (in.HasMember("text") && in["text"].IsString())
         {
             text = (in["text"].GetString());
@@ -88,17 +90,18 @@ struct Text
         {
             font_id = (in["font_id"].GetString());
         }
-        //float
-        //if (in.HasMember("x") && in["x"].IsNumber())
+        // float
+        // if (in.HasMember("x") && in["x"].IsNumber())
         //{
-        //    x = (in["x"].GetFloat());
-        //}
-        //if (in.HasMember("y") && in["y"].IsNumber())
+        //     x = (in["x"].GetFloat());
+        // }
+        // if (in.HasMember("y") && in["y"].IsNumber())
         //{
-        //    y = (in["y"].GetFloat());
-        //}
+        //     y = (in["y"].GetFloat());
+        // }
 
-        if (in.HasMember("offset")) {
+        if (in.HasMember("offset"))
+        {
             offset.Deserialize(in["offset"]);
         }
 
@@ -108,11 +111,11 @@ struct Text
         }
 
         // glm::vec4 color
-        //check if contain color member and if its an array
+        // check if contain color member and if its an array
         if (in.HasMember("color") && in["color"].IsArray())
         {
-            auto const& arr = in["color"].GetArray();
-            if (arr.Size() == 3) //fixed size 3, vec3
+            auto const &arr = in["color"].GetArray();
+            if (arr.Size() == 3) // fixed size 3, vec3
             {
                 color.r = arr[0].GetFloat();
                 color.g = arr[1].GetFloat();
@@ -124,12 +127,10 @@ struct Text
             }
         }
 
-        //bool
+        // bool
         if (in.HasMember("visible") && in["visible"].IsBool())
         {
             visible = (in["visible"].GetBool());
         }
-
     }
-
 };

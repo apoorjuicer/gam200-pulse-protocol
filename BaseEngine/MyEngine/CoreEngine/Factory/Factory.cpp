@@ -157,11 +157,11 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const& path)
 			as.Deserialize(component["audiosource"]);
 			g_coordinator->AddComponent<AudioSource>(entity, as);
 		}
-		if (component.HasMember("Text") && component["Text"].IsObject())
+		if (component.HasMember("TextComponent") && component["TextComponent"].IsObject())
 		{
-			Text txt_component;
+			TextComponent txt_component;
 			txt_component.Deserialize(component["audiosource"]);
-			g_coordinator->AddComponent<Text>(entity, txt_component);
+			g_coordinator->AddComponent<TextComponent>(entity, txt_component);
 		}
 	}
 	// add entity to list of entity in the current scene

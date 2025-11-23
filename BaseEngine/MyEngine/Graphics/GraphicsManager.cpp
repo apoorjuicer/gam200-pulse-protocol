@@ -1051,7 +1051,7 @@ bool GraphicsManager::EvictTexture(std::string const &idOrPath)
 // }
 
 
-//text Component
+//draw 2d text Component
 void GraphicsManager::DrawText2D(
     std::string const& text,
     std::string const& fontId,
@@ -1088,12 +1088,12 @@ void GraphicsManager::Update2DTextComponent() {
 
     for (Entity entity = 0; entity < MaxEntity; ++entity)
     {
-        if (!g_coordinator->HasComponent<Text>(entity) ||
+        if (!g_coordinator->HasComponent<TextComponent>(entity) ||
             !g_coordinator->HasComponent<Framework::Transform>(entity)) {
             continue; //skip game object need transform(offset) and text
         }
            
-        auto& txt = g_coordinator->GetComponent<Text>(entity);
+        auto& txt = g_coordinator->GetComponent<TextComponent>(entity);
         auto& tr = g_coordinator->GetComponent<Framework::Transform>(entity);
 
         //not visible or empty text dont render
