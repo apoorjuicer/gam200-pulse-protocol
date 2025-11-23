@@ -382,6 +382,7 @@ void PlayerScript::Exit(Entity ID)
 void EnemyScript::Init(Entity ID)
 {
     (void)ID;
+    /*std::cout << "*** EnemyScript Init() called for entity " << ID << " ***\n";*/
 }
 
 void EnemyScript::Update(Entity ID)
@@ -397,10 +398,7 @@ void EnemyScript::Update(Entity ID)
     auto& enemy_health = g_coordinator->GetComponent<Health>(ID);
 
     // ====== Time (for time-based movement) ======
-    static double lastTime = glfwGetTime();
-    double currentTime = glfwGetTime();
-    float dt = static_cast<float>(currentTime - lastTime);
-    lastTime = currentTime;
+    float dt = static_cast<float>(GLHelper::delta_time);
 
     if (!enemy_health.isAlive)
         return;

@@ -347,6 +347,21 @@ void SceneManager::UnloadCurrentScene()
 		std::cout << "[SceneManager::UnloadCurrentScene] WARNING: LogicSystem not found!" << std::endl;
 	}
 
+	// Stop AudioSource channels before destroying entities
+	auto* g_coord = Coordinator::GetInstance();
+	auto audioMgr = g_coord->GetSystem<AudioManager>();
+	if (audioMgr) {
+		for (auto const& entity : SceneEntityList) {
+			if (g_coord->HasComponent<AudioSource>(entity)) {
+				auto& audioSrc = g_coord->GetComponent<AudioSource>(entity);
+				if (audioSrc.channel) {
+					audioSrc.channel->stop();
+					audioSrc.channel = nullptr;
+				}
+			}
+		}
+	}
+
 	for (auto const& entity : SceneEntityList)
 	{
 		g_coordinator->DestroyEntity(entity);

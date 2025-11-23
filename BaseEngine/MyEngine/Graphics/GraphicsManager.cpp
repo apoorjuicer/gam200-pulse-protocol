@@ -204,7 +204,8 @@ void GraphicsManager::Update()
     glapp->update(Engine->GetWindow(), EntityMember);
     glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
     glClearDepth(1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);  // Don't clear depth
+    glDisable(GL_DEPTH_TEST);      // Disable depth test for 2D
     //--- Rendering passes ---
     glapp->draw(EntityMember, m_editorLayerFilter);
     //------------------------

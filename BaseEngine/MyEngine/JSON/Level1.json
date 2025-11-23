@@ -76,8 +76,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -880.923095703125,
-                            "y": -322.15380859375
+                            "x": -906.075927734375,
+                            "y": -309.5775146484375
                         },
                         "scale": {
                             "x": 700.0,
@@ -108,8 +108,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.20306232571601869,
+                        "currentFrame": 1,
+                        "elapsedTime": 0.48225584626197817,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -157,7 +157,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "orderInLayer": 1,
+                        "orderInLayer": 50,
                         "z": 0.0
                     }
                 }
@@ -166,30 +166,35 @@
         {
             "components": [
                 {
+                    "Typing": {
+                        "Type": "Enemy"
+                    }
+                },
+                {
                     "transform": {
                         "position": {
-                            "x": 0.0,
-                            "y": -300.0
+                            "x": 1338.0413818359376,
+                            "y": -344.3077087402344
                         },
                         "scale": {
                             "x": 600.0,
-                            "y": 90.0
+                            "y": 600.0
                         },
                         "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
-                        "visibilityTimer": -0.016998864710330964,
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
-                        "useTexture": false,
-                        "spriteName": "",
+                        "mdl_ref": 1.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "BlueGorillaEnemy",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -199,276 +204,155 @@
                     }
                 },
                 {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "EnemyScript"
+                    }
+                },
+                {
                     "name": {
-                        "name": "FeedbackBar"
+                        "name": "Blue Gorilla"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 1,
+                        "damage": 1,
+                        "isAlive": true
+                    }
+                },
+                {
+                    "AABB": {
+                        "min": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "max": {
+                            "x": 410.0,
+                            "y": 280.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "Blue Gorilla",
+                        "isLinked": true
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "Background",
-                        "mask": 1,
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 1,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "Typing": {
+                        "Type": "Enemy"
+                    }
+                },
+                {
+                    "transform": {
+                        "position": {
+                            "x": 1863.30712890625,
+                            "y": -344.3077087402344
+                        },
+                        "scale": {
+                            "x": 600.0,
+                            "y": 600.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "BlueGorillaEnemy",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "EnemyScript"
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Blue Gorilla"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 1,
+                        "damage": 1,
+                        "isAlive": true
+                    }
+                },
+                {
+                    "AABB": {
+                        "min": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "max": {
+                            "x": 410.0,
+                            "y": 280.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "Blue Gorilla",
+                        "isLinked": true
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
                         "orderInLayer": 0,
                         "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "Typing": {
-                        "Type": "Enemy"
-                    }
-                },
-                {
-                    "transform": {
-                        "position": {
-                            "x": 1863.30712890625,
-                            "y": -344.3077087402344
-                        },
-                        "scale": {
-                            "x": 600.0,
-                            "y": 600.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "BlueGorillaEnemy",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "EnemyScript"
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Blue Gorilla"
-                    }
-                },
-                {
-                    "Health": {
-                        "hp": 1,
-                        "damage": 1,
-                        "isAlive": true
-                    }
-                },
-                {
-                    "AABB": {
-                        "min": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "max": {
-                            "x": 410.0,
-                            "y": 280.0
-                        },
-                        "width": 50.0,
-                        "height": 50.0
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "Blue Gorilla",
-                        "isLinked": true
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 1,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "Typing": {
-                        "Type": "Enemy"
-                    }
-                },
-                {
-                    "transform": {
-                        "position": {
-                            "x": 1863.30712890625,
-                            "y": -344.3077087402344
-                        },
-                        "scale": {
-                            "x": 600.0,
-                            "y": 600.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "BlueGorillaEnemy",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "EnemyScript"
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Blue Gorilla"
-                    }
-                },
-                {
-                    "Health": {
-                        "hp": 1,
-                        "damage": 1,
-                        "isAlive": true
-                    }
-                },
-                {
-                    "AABB": {
-                        "min": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "max": {
-                            "x": 410.0,
-                            "y": 280.0
-                        },
-                        "width": 50.0,
-                        "height": 50.0
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "Blue Gorilla",
-                        "isLinked": true
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 1,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -981.5381469726563,
-                            "y": 655.3846435546875
-                        },
-                        "scale": {
-                            "x": 433.0,
-                            "y": 91.5
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/UI/green bar.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "HealthBar"
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "health",
-                        "isLinked": false
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "orderInLayer": 10,
-                        "z": 100.0
                     }
                 }
             ]
@@ -602,6 +486,186 @@
                         "volume": 0.4000000059604645,
                         "loop": false,
                         "playOnAwake": true
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -793.73291015625,
+                            "y": 551.3954467773438
+                        },
+                        "scale": {
+                            "x": 582.5,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../MyEngine/Assets/Textures/UI/health bar.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "ContaineRHealth"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "orderInLayer": 15,
+                        "z": 100.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 1650.0,
+                            "y": 950.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../MyEngine/Assets/Textures/UI/border_frame.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "BeatBorder\\"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "orderInLayer": 0,
+                        "z": 100.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -661.9229736328125,
+                            "y": 516.7310180664063
+                        },
+                        "scale": {
+                            "x": 421.5,
+                            "y": 57.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../MyEngine/Assets/Textures/UI/green bar.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "GameObject"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "orderInLayer": 16,
+                        "z": 100.0
                     }
                 }
             ]

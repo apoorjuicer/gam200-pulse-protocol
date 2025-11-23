@@ -372,6 +372,16 @@ namespace MyEditor
 
         if (!s_pendingScenePath.empty())
         {
+            // Editor "Load Scene" button should stop the game
+            // (This is an editor action, not in-game navigation)
+            if (s_isPlaying)
+            {
+                std::cout << "[Editor] Stopping game before loading scene (editor action)\n";
+                Engine->StopGame();
+                s_isPlaying = false;
+                isPaused = false;
+            }
+
             if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>())
             {
                 sceneMgr->LoadSceneFromJson(s_pendingScenePath);
