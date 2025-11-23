@@ -296,25 +296,27 @@ void PlayerScript::Update(Entity ID)
         autoMoveTimer -= 0.016f;
     }*/
 
+    float moveSpeed = 300.0f;
+
     // this is just regular WASD
     if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_T) == GLFW_PRESS)
     {
-        hero_transform.Pos.y += 5.0f;
+        hero_transform.Pos.y += moveSpeed * dt;
     }
 
     if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_F) == GLFW_PRESS)
     {
-        hero_transform.Pos.x -= 5.0f;
+        hero_transform.Pos.x -= moveSpeed * dt;
     }
 
     if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_G) == GLFW_PRESS)
     {
-        hero_transform.Pos.y -= 5.0f;
+        hero_transform.Pos.y -= moveSpeed * dt;
     }
 
     if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_H) == GLFW_PRESS)
     {
-        hero_transform.Pos.x += 5.0f;
+        hero_transform.Pos.x += moveSpeed * dt;
     }
 
     // ==============================================================
@@ -378,35 +380,41 @@ void EnemyScript::Update(Entity ID)
     auto& enemy_box = g_coordinator->GetComponent<AABB>(ID);
     auto& enemy_health = g_coordinator->GetComponent<Health>(ID);
 
+    // ====== Time (for time-based movement) ======
+    static double lastTime = glfwGetTime();
+    double currentTime = glfwGetTime();
+    float dt = static_cast<float>(currentTime - lastTime);
+    lastTime = currentTime;
+
     if (!enemy_health.isAlive)
         return;
 
-    // --- Movement for enemy ---
+    // ====== Manual arrow-key movement (kept for debug) ======
+    float enemyMoveSpeed = 300.0f;
+
     if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_UP) == GLFW_PRESS)
     {
-        enemy_transform.Pos.y += 5.0f;
+        enemy_transform.Pos.y += enemyMoveSpeed * dt;
     }
 
     if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_LEFT) == GLFW_PRESS)
     {
-        enemy_transform.Pos.x -= 5.0f;
+        enemy_transform.Pos.x -= enemyMoveSpeed * dt;
     }
 
     if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-        enemy_transform.Pos.y -= 5.0f;
+        enemy_transform.Pos.y -= enemyMoveSpeed * dt;
     }
 
     if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS)
     {
-        enemy_transform.Pos.x += 5.0f;
+        enemy_transform.Pos.x += enemyMoveSpeed * dt;
     }
 
-
-
-    // --- Mode toggles ---
-    static bool aabbMode = false;  // change to m so enemy movement arrow keys
-    static bool obbMode = false;
+    // ====== Mode toggles (your original AABB / OBB debug modes) ======
+    static bool aabbMode = false;  // AABB slide + edge collision
+    static bool obbMode = false;  // OBB spin + chase test
     static bool wasMPressed = false;
     static bool wasNPressed = false;
 
@@ -415,7 +423,7 @@ void EnemyScript::Update(Entity ID)
     {
         if (!wasMPressed)
         {
-            aabbMode = !aabbMode;   // comments so that collision is always on
+            aabbMode = !aabbMode;
             obbMode = false; // disable OBB when AABB is on
             wasMPressed = true;
             std::cout << (aabbMode ? "[ENEMY] AABB Mode ON\n" : "[ENEMY] AABB Mode OFF\n");
@@ -438,7 +446,7 @@ void EnemyScript::Update(Entity ID)
     else
         wasNPressed = false;
 
-    // --- Find ALL Player Entities ---
+    // ====== Find ALL Player Entities (unchanged) ======
     std::vector<Entity> playerEntities;
     auto logicSys = g_coordinator->GetSystem<LogicSystem>();
     for (auto const& e : logicSys->EntityMember)
@@ -456,10 +464,6 @@ void EnemyScript::Update(Entity ID)
     if (playerEntities.empty())
         return;
 
-    //auto& player_transform = g_coordinator->GetComponent<Framework::Transform>(playerEntity);
-    //auto& player_box = g_coordinator->GetComponent<AABB>(playerEntity);
-    //auto& player_health = g_coordinator->GetComponent<Health>(playerEntity);
-
     CollisionManager collision;
 
     // ====================================================================
@@ -467,11 +471,12 @@ void EnemyScript::Update(Entity ID)
     // ====================================================================
     if (aabbMode)
     {
-        enemy_transform.Pos.x -= 0.5f; // move left at constant rate
+        float slideSpeed = 300.0f;   // units per second
+        enemy_transform.Pos.x -= slideSpeed * dt;
 
         AABB enemyAABB = collision.BuildAABBFromTransform(enemy_transform, enemy_box);
 
-        // Changed: Loop through ALL players to check collision
+        // Loop through ALL players to check collision
         for (Entity playerEntity : playerEntities)
         {
             if (!g_coordinator->HasComponent<Framework::Transform>(playerEntity) ||
@@ -484,15 +489,6 @@ void EnemyScript::Update(Entity ID)
             auto& player_health = g_coordinator->GetComponent<Health>(playerEntity);
 
             AABB playerAABB = collision.BuildAABBFromTransform(player_transform, player_box);
-
-            /*float worldScale = 1.f;
-            float edgeThreshold = (playerAABB.width + enemyAABB.width) * worldScale;
-
-            bool edgeContact =
-                (playerAABB.max.x >= enemyAABB.min.x - edgeThreshold) &&
-                (playerAABB.min.x < enemyAABB.min.x) &&
-                (playerAABB.max.y >= enemyAABB.min.y) &&
-                (playerAABB.min.y <= enemyAABB.max.y);*/
 
             float edgeThreshold = 2.0f; // sensitivity adjustment
             bool edgeHit = collision.CheckEdgeContactCollision(playerAABB, enemyAABB, edgeThreshold);
@@ -521,6 +517,9 @@ void EnemyScript::Update(Entity ID)
                 return;  // Exit after collision
             }
         }
+
+        // If in AABB debug mode, don't run rhythm logic
+        return;
     }
 
     // ====================================================================
@@ -530,11 +529,11 @@ void EnemyScript::Update(Entity ID)
     {
         static double last = glfwGetTime();
         double now = glfwGetTime();
-        float dt = static_cast<float>(now - last);
+        float dtOBB = static_cast<float>(now - last);
         last = now;
 
         // Spin enemy clockwise
-        enemy_transform.Rotation.x += 180.0f * dt;
+        enemy_transform.Rotation.x += 180.0f * dtOBB;
         if (enemy_transform.Rotation.x >= 360.0f)
             enemy_transform.Rotation.x -= 360.0f;
 
@@ -548,8 +547,8 @@ void EnemyScript::Update(Entity ID)
         {
             dir.x /= len;
             dir.y /= len;
-            enemy_transform.Pos.x += dir.x * 100.0f * dt;
-            enemy_transform.Pos.y += dir.y * 100.0f * dt;
+            enemy_transform.Pos.x += dir.x * 100.0f * dtOBB;
+            enemy_transform.Pos.y += dir.y * 100.0f * dtOBB;
         }
 
         // loop through ALL players to check collision
@@ -589,13 +588,190 @@ void EnemyScript::Update(Entity ID)
                     std::cout << ">>> PLAYER DEFEATED\n";
                 }
 
-                // NOW YOU DIE
                 Factory factory;
                 factory.DeleteEntity(ID);
                 return;  // Exit after collision
-                //enemy_transform.Pos = { -9999.0f, -9999.0f };
             }
         }
+
+        // If in OBB debug mode, don't run rhythm logic
+        return;
+    }
+
+    // ====================================================================
+    // === RHYTHM MODE (DEFAULT) ==========================================
+    // ====================================================================
+    // Only runs when BOTH aabbMode and obbMode are OFF.
+    // There are 2 enemies using this script. Second enemy starts AFTER first dies.
+
+    // ---- Grab first player (for direction) ----
+    Entity mainPlayer = playerEntities[0];
+    auto& main_player_transform = g_coordinator->GetComponent<Framework::Transform>(mainPlayer);
+    auto& main_player_box = g_coordinator->GetComponent<AABB>(mainPlayer);
+    auto& main_player_health = g_coordinator->GetComponent<Health>(mainPlayer);
+
+    // ---- Per-enemy rhythm state (stored in a static map) ----
+    struct RhythmState
+    {
+        int   phase = 0;     // 0 = EnterFromRight, 1 = Combo_MoveLeft, 2 = PreAttack, 3 = FinalRush
+        float phaseTimer = 0.0f;
+        bool  started = false;
+    };
+
+    static std::unordered_map<Entity, RhythmState> s_rhythmStates;
+    static Entity s_firstEnemyId = static_cast<Entity>(-1);
+    static bool   s_firstEnemyCompleted = false;
+
+    RhythmState& rs = s_rhythmStates[ID];
+
+    // ------------------------------------------------------------
+    // DETERMINE FIRST AND SECOND ENEMY BEHAVIOR
+    // ------------------------------------------------------------
+    if (!rs.started)
+    {
+        // FIRST enemy logic
+        if (s_firstEnemyId == static_cast<Entity>(-1))
+        {
+            // This enemy becomes the FIRST enemy
+            s_firstEnemyId = ID;
+            rs.started = true;         // allow phase updates
+            rs.phase = 0;
+            rs.phaseTimer = 0.0f;
+        }
+        else
+        {
+            // This enemy is SECOND enemy.
+
+            // If first enemy NOT YET completed → second enemy MUST WAIT.
+            if (!s_firstEnemyCompleted)
+            {
+                // IMPORTANT FIX:
+                // Do NOT allow phaseTimer to increase, do NOT allow rs.started to become true.
+                // Enemy is completely frozen until first enemy dies.
+                return;
+            }
+
+            // First enemy is completed → now second enemy may begin
+            rs.started = true;
+            rs.phase = 0;
+            rs.phaseTimer = 0.0f;
+        }
+    }
+
+
+    // ---- Speeds and settings for rhythm behavior ----
+    float slowSpeed = 330.0f;    // entering + during combo
+    float mediumSpeed = 200.0f;   // pre-attack approach
+    float fastSpeed = 300.0f;   // final rush
+    float stopDistance = 150.0f;  // leave space before player during pre-attack
+
+    // ---- Rhythm Phase Machine ----
+    rs.phaseTimer += dt;
+
+    switch (rs.phase)
+    {
+        // =====================================================
+        // PHASE 1:
+        // Enter from right → move left for 2 seconds
+        // Then FREEZE for 4 seconds
+        // =====================================================
+    case 0:
+    {
+        if (rs.phaseTimer < 2.0f)
+        {
+            // Move left for the first 2 seconds
+            enemy_transform.Pos.x -= slowSpeed * dt;
+        }
+        else if (rs.phaseTimer < 6.0f)
+        {
+            // Freeze enemy for 4 seconds (no movement)
+            // do nothing
+        }
+        else
+        {
+            // After 6 seconds total → move to phase 1
+            rs.phase = 1;
+            rs.phaseTimer = 0.0f;
+        }
+        break;
+    }
+
+    // =====================================================
+    // PHASE 2:
+    // Combo window → move left for 4 seconds
+    // Then FREEZE for 4 seconds
+    // =====================================================
+    case 1:
+    {
+        if (rs.phaseTimer < 4.0f)
+        {
+            // Move left slowly during combo duration
+            enemy_transform.Pos.x -= mediumSpeed * dt;
+        }
+        else if (rs.phaseTimer < 8.0f)
+        {
+            // Freeze enemy for 4 seconds
+            // do nothing
+        }
+        else
+        {
+            // After 8 seconds → move to phase 2
+            rs.phase = 2;
+            rs.phaseTimer = 0.0f;
+        }
+        break;
+    }
+
+    // =====================================================
+    // PHASE 3:
+    // Final rush → full-speed toward player
+    // AABB collision kills enemy
+    // =====================================================
+    case 2:
+    {
+        Vector2 diff = main_player_transform.Pos - enemy_transform.Pos;
+        float dist = sqrtf(diff.x * diff.x + diff.y * diff.y);
+
+        if (dist > 0.001f)
+        {
+            diff.x /= dist;
+            diff.y /= dist;
+        }
+
+        enemy_transform.Pos.x += diff.x * fastSpeed * dt;
+        enemy_transform.Pos.y += diff.y * fastSpeed * dt;
+
+        // AABB collision check
+        AABB enemyAABB = collision.BuildAABBFromTransform(enemy_transform, enemy_box);
+        AABB playerAABB = collision.BuildAABBFromTransform(main_player_transform, main_player_box);
+
+        if (collision.CheckAABBCollision(enemyAABB, playerAABB))
+        {
+            if (auto audio = g_coordinator->GetSystem<AudioManager>())
+                audio->PlaySound("collision");
+
+            enemy_health.isAlive = false;
+            main_player_health.hp -= enemy_health.damage;
+
+            if (main_player_health.hp <= 0)
+            {
+                main_player_health.hp = 0;
+                main_player_health.isAlive = false;
+            }
+
+            // Mark first enemy as completed
+            if (ID == s_firstEnemyId)
+                s_firstEnemyCompleted = true;
+
+            Factory factory;
+            factory.DeleteEntity(ID);
+            return;
+        }
+        break;
+    }
+
+    default:
+        break;
     }
 }
 
