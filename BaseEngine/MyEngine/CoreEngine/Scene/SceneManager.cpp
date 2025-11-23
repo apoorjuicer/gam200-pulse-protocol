@@ -578,6 +578,18 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
 	if (logicSystem) {
 		std::cout << "[SceneManager] Initializing scripts for loaded entities..." << std::endl;
+		std::cout << "[SceneManager] Total entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
+
+		// DEBUG: Show ALL entities in list
+		for (Entity entity : SceneEntityList) {
+			std::string name = "Unnamed";
+			if (g_coordinator->HasComponent<Name>(entity)) {
+				name = g_coordinator->GetComponent<Name>(entity).name;
+			}
+			bool hasScript = g_coordinator->HasComponent<LogicComponent>(entity);
+			std::cout << "  -> Entity " << entity << " (" << name << ") - Has script: " << (hasScript ? "YES" : "NO") << std::endl;
+		}
+
 		int scriptCount = 0;
 		for (Entity entity : SceneEntityList) {
 			if (g_coordinator->HasComponent<LogicComponent>(entity)) {

@@ -32,6 +32,12 @@
 bool EnemyScript::testAABBCollision = false;
 bool EnemyScript::testOBBCollision = false;
 
+// CRITICAL: Shared static variable for rhythm state reset
+// This is accessed by both Init() and Update()
+namespace {
+    bool g_enemyRhythmNeedsReset = true;
+}
+
 LogicSystem::LogicSystem()
 {
 
@@ -381,8 +387,9 @@ void PlayerScript::Exit(Entity ID)
 
 void EnemyScript::Init(Entity ID)
 {
-    (void)ID;
-    /*std::cout << "*** EnemyScript Init() called for entity " << ID << " ***\n";*/
+    std::cout << "[EnemyScript] Init() called for entity " << ID << " - marking for rhythm reset\n";
+
+    g_enemyRhythmNeedsReset = true;
 }
 
 void EnemyScript::Update(Entity ID)
@@ -635,6 +642,13 @@ void EnemyScript::Update(Entity ID)
     static std::unordered_map<Entity, RhythmState> s_rhythmStates;
     static Entity s_firstEnemyId = static_cast<Entity>(-1);
     static bool   s_firstEnemyCompleted = false;
+
+    if (g_enemyRhythmNeedsReset) {
+        std::cout << "[EnemyScript] Resetting rhythm state after scene reload\n";
+        s_rhythmStates.clear();
+        s_firstEnemyId = static_cast<Entity>(-1);
+        g_enemyRhythmNeedsReset = false;
+    }
 
     RhythmState& rs = s_rhythmStates[ID];
 
