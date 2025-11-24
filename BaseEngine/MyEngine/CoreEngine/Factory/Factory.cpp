@@ -157,6 +157,12 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const& path)
 			as.Deserialize(component["audiosource"]);
 			g_coordinator->AddComponent<AudioSource>(entity, as);
 		}
+		if (component.HasMember("TextComponent") && component["TextComponent"].IsObject())
+		{
+			TextComponent txt_component;
+			txt_component.Deserialize(component["audiosource"]);
+			g_coordinator->AddComponent<TextComponent>(entity, txt_component);
+		}
 	}
 	// add entity to list of entity in the current scene
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();

@@ -823,6 +823,18 @@ namespace MyEditor
         // ---------------------------------------------------------------------
 // Audio component
 // ---------------------------------------------------------------------
+        AudioComponent(g);
+
+        // Re-enable if we disabled for play mode
+        if (isPlaying)
+        {
+            ImGui::EndDisabled();
+        }
+
+        ImGui::End();
+    }//end of function
+
+    void AudioComponent(Coordinator* g) {
         if (g->HasComponent<AudioSource>(selectedEntity))
         {
             auto& audio = g->GetComponent<AudioSource>(selectedEntity);
@@ -914,17 +926,8 @@ namespace MyEditor
                                 {
                                     auto* resource = mAssets.getRegistry().FindAudio(audio.audio_id);
                                     if (resource)
-                                    {
-                                        if (resource->audiotype == "BGM")
-                                        {
-                                            audioManager->LoadBGM(audio.audio_id);
-                                            audioManager->PlayBGM(audio.audio_id);
-                                        }
-                                        else
-                                        {
-                                            audioManager->LoadSFX(audio.audio_id);
-                                            audioManager->PlaySound(audio.audio_id);
-                                        }
+                                    {                    
+                                       audioManager->PlayFromAudioSource(audio);                           
                                     }
                                 }
                             }
@@ -936,13 +939,24 @@ namespace MyEditor
                             auto audioManager = g->GetSystem<AudioManager>();
                             if (audioManager)
                             {
-                                audioManager->StopBGM();
-                                if (audio.channel)
-                                {
-                                    audio.channel->stop();
-                                    audio.channel = nullptr;
-                                }
+                                audioManager->StopPlayingAllAudio();
+                                //auto* resource = mAssets.getRegistry().FindAudio(audio.audio_id);
+                                //if (resource)
+                                //{
+                                //    if (resource->audiotype == "BGM")
+                                //    {
+                                //        audioManager->StopBGM();
+                                //    }
+
+                                //}
+
+                                //if (audio.channel)
+                                //{
+                                //    audio.channel->stop();
+                                //    audio.channel = nullptr;
+                                //}
                             }
+                            
                         }
                     }
                     else
@@ -962,14 +976,11 @@ namespace MyEditor
             }
             ImGui::Separator();
         }
+    }// End of Function AudioComponent
 
-        // Re-enable if we disabled for play mode
-        if (isPlaying)
-        {
-            ImGui::EndDisabled();
-        }
 
-        ImGui::End();
-    }
+
 
 } // namespace MyEditor
+
+
