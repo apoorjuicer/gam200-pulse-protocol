@@ -9,7 +9,7 @@ file(GLOB_RECURSE SCRIPTAPI_SRC CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_LIST_DIR}/*.h"
 )
 
-
+ 
 # Create library with placeholder
 add_library(ScriptAPI SHARED ${SCRIPTAPI_SRC})
 
