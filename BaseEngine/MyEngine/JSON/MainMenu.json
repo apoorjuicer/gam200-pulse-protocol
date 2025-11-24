@@ -58,6 +58,14 @@
                         "orderInLayer": 0,
                         "z": 0.0
                     }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "bgm",
+                        "volume": 1.0,
+                        "loop": true,
+                        "playOnAwake": true
+                    }
                 }
             ]
         },
