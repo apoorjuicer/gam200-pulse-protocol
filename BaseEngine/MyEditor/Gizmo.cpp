@@ -117,6 +117,27 @@ namespace MyEditor
         auto* coord = Coordinator::GetInstance();
         if (!coord) return;
 
+        if (selectedEntity != INVALID_ENTITY)
+        {
+            // Check if entity still exists
+            if (!coord->HasComponent<Framework::Transform>(selectedEntity))
+            {
+                selectedEntity = INVALID_ENTITY;
+            }
+            // Check if entity's layer is hidden or locked
+            else if (coord->HasComponent<LayerTag>(selectedEntity))
+            {
+                auto& tag = coord->GetComponent<LayerTag>(selectedEntity);
+                if (!IsLayerVisible(tag.mask) || IsLayerLocked(tag.mask))
+                {
+                    selectedEntity = INVALID_ENTITY;
+                    // Also stop any dragging
+                    g_gizmo.dragging = false;
+                    g_gizmo.active = INVALID_ENTITY;
+                }
+            }
+        }
+
         ImGuiIO& io = ImGui::GetIO();
 
         // ImGui UI px  <->  Framebuffer px (handles DPI / HiDPI)
