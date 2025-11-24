@@ -79,6 +79,31 @@ namespace MyEditor
     }
 
     // -------------------------------------------------------------------------
+    // Helper: Draw inline remove button for component headers
+    // -------------------------------------------------------------------------
+    static bool DrawInlineRemoveButton(const char* componentName)
+    {
+        ImGui::SameLine(ImGui::GetWindowWidth() - 60);  // Changed from 35 to 60 for wider button
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 0.15f, 0.15f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.7f, 0.2f, 0.2f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.9f, 0.1f, 0.1f, 1.0f));
+
+        char buttonId[64];
+        snprintf(buttonId, sizeof(buttonId), "Remove##%s", componentName);  // Changed from "X##Remove%s"
+
+        bool clicked = ImGui::SmallButton(buttonId);
+
+        ImGui::PopStyleColor(3);
+
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("Remove %s", componentName);
+        }
+
+        return clicked;
+    }
+
+    // -------------------------------------------------------------------------
     // Main Inspector window
     // -------------------------------------------------------------------------
     void DrawInspectorWindow(ImGuiID rightDockID)
@@ -365,23 +390,23 @@ namespace MyEditor
         {
             auto& nm = g->GetComponent<Name>(selectedEntity);
 
-            if (ImGui::CollapsingHeader("Name", ImGuiTreeNodeFlags_DefaultOpen))
+            bool removeName = false;
+            bool nameOpen = ImGui::CollapsingHeader("Name", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
+            removeName = DrawInlineRemoveButton("Name");
+
+            if (removeName)
+            {
+                g->RemoveComponent<Name>(selectedEntity);
+            }
+            else if (nameOpen)
             {
                 ImGui::Indent();
 
-                if (ImGui::Button("Remove Name"))
-                {
-                    g->RemoveComponent<Name>(selectedEntity);
-                }
-                else
-                {
-                    static char nameBuf[256];
-                    std::strncpy(nameBuf, nm.name.c_str(), sizeof(nameBuf));
-                    nameBuf[sizeof(nameBuf) - 1] = '\0';
-                    if (ImGui::InputText("Entity Name", nameBuf, IM_ARRAYSIZE(nameBuf)))
-                        nm.name = nameBuf;
-
-                } // end else (not removing)
+                static char nameBuf[256];
+                std::strncpy(nameBuf, nm.name.c_str(), sizeof(nameBuf));
+                nameBuf[sizeof(nameBuf) - 1] = '\0';
+                if (ImGui::InputText("Entity Name", nameBuf, IM_ARRAYSIZE(nameBuf)))
+                    nm.name = nameBuf;
 
                 ImGui::Unindent();
             }
@@ -396,34 +421,33 @@ namespace MyEditor
         {
             auto& tr = g->GetComponent<Framework::Transform>(selectedEntity);
 
-            if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+            bool removeTransform = false;
+            bool transformOpen = ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
+            removeTransform = DrawInlineRemoveButton("Transform");
+
+            if (removeTransform)
+            {
+                g->RemoveComponent<Framework::Transform>(selectedEntity);
+            }
+            else if (transformOpen)
             {
                 ImGui::Indent();
 
-                if (ImGui::Button("Remove Transform"))
+                float pos[2] = { tr.Pos.x, tr.Pos.y };
+                if (ImGui::DragFloat2("Position", pos, 0.5f))
                 {
-                    g->RemoveComponent<Framework::Transform>(selectedEntity);
+                    tr.Pos.x = pos[0]; tr.Pos.y = pos[1];
                 }
-                else
+
+                float sc[2] = { tr.Scale.x, tr.Scale.y };
+                if (ImGui::DragFloat2("Scale", sc, 0.5f))
                 {
+                    tr.Scale.x = sc[0]; tr.Scale.y = sc[1];
+                }
 
-                    float pos[2] = { tr.Pos.x, tr.Pos.y };
-                    if (ImGui::DragFloat2("Position", pos, 0.5f))
-                    {
-                        tr.Pos.x = pos[0]; tr.Pos.y = pos[1];
-                    }
-
-                    float sc[2] = { tr.Scale.x, tr.Scale.y };
-                    if (ImGui::DragFloat2("Scale", sc, 0.5f))
-                    {
-                        tr.Scale.x = sc[0]; tr.Scale.y = sc[1];
-                    }
-
-                    ImGui::DragFloat("Rotation (deg)", &tr.Rotation.x, 1.0f, -360.f, 360.f);
-                    ImGui::DragFloat("Rotation Speed", &tr.Rotation.y, 0.1f, -10.0f, 10.0f);
-                    ImGui::Checkbox("Visible", &tr.isVisible);
-
-                } // end else (not removing)
+                ImGui::DragFloat("Rotation (deg)", &tr.Rotation.x, 1.0f, -360.f, 360.f);
+                ImGui::DragFloat("Rotation Speed", &tr.Rotation.y, 0.1f, -10.0f, 10.0f);
+                ImGui::Checkbox("Visible", &tr.isVisible);
 
                 ImGui::Unindent();
             }
@@ -438,227 +462,217 @@ namespace MyEditor
         {
             auto& r = g->GetComponent<Framework::Renderable>(selectedEntity);
 
-            if (ImGui::CollapsingHeader("Renderable", ImGuiTreeNodeFlags_DefaultOpen))
+            bool removeRenderable = false;
+            bool renderableOpen = ImGui::CollapsingHeader("Renderable", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
+            removeRenderable = DrawInlineRemoveButton("Renderable");
+
+            if (removeRenderable)
+            {
+                g->RemoveComponent<Framework::Renderable>(selectedEntity);
+            }
+            else if (renderableOpen)
             {
                 ImGui::Indent();
 
-                if (ImGui::Button("Remove Renderable"))
+                // --- Model reference (background vs sprite) ----------------------
                 {
-                    g->RemoveComponent<Framework::Renderable>(selectedEntity);
+                    int modelIdx = static_cast<int>(r.mdl_ref);
+                    modelIdx = std::clamp(modelIdx, 0, 1);
+
+                    const char* kModelNames[2] = { "Background Quad", "Sprite Quad" };
+
+                    ImGui::Text("Model: %s", kModelNames[modelIdx]);
+                    ImGui::SameLine();
+                    if (ImGui::SmallButton(" - ##model")) modelIdx = std::max(0, modelIdx - 1);
+                    ImGui::SameLine();
+                    if (ImGui::SmallButton(" + ##model")) modelIdx = std::min(1, modelIdx + 1);
+
+                    r.mdl_ref = static_cast<float>(modelIdx);
                 }
-                else
+
+                // --- Shader reference --------------------------------------------
                 {
+                    const int maxShaders = static_cast<int>(GLApp::shdrpgms.size());
+                    int shaderIdx = std::clamp(static_cast<int>(r.shd_ref), 0, std::max(0, maxShaders - 1));
 
-                    // --- Model reference (background vs sprite) ----------------------
-                    {
-                        int modelIdx = static_cast<int>(r.mdl_ref);
-                        modelIdx = std::clamp(modelIdx, 0, 1);
-
-                        const char* kModelNames[2] = { "Background Quad", "Sprite Quad" };
-
-                        ImGui::Text("Model: %s", kModelNames[modelIdx]);
-                        ImGui::SameLine();
-                        if (ImGui::SmallButton(" - ##model")) modelIdx = std::max(0, modelIdx - 1);
-                        ImGui::SameLine();
-                        if (ImGui::SmallButton(" + ##model")) modelIdx = std::min(1, modelIdx + 1);
-
-                        r.mdl_ref = static_cast<float>(modelIdx);
-                    }
-
-                    // --- Shader reference --------------------------------------------
-                    {
-                        const int maxShaders = static_cast<int>(GLApp::shdrpgms.size());
-                        int shaderIdx = std::clamp(static_cast<int>(r.shd_ref), 0, std::max(0, maxShaders - 1));
-
-                        auto ShaderName = [&](int i) -> const char*
-                            {
-                                switch (i) {
-                                case 0: return "Test Shader";
-                                case 1: return "Background Shader";
-                                case 2: return "Sprite Shader";
-                                case 3: return "Font Shader";
-                                default: return "Shader (unnamed)";
-                                }
-                            };
-
-                        ImGui::Text("Shader: %s", ShaderName(shaderIdx));
-                        ImGui::SameLine();
-                        if (ImGui::SmallButton(" - ##shader")) shaderIdx = std::max(0, shaderIdx - 1);
-                        ImGui::SameLine();
-                        if (ImGui::SmallButton(" + ##shader")) shaderIdx = std::min(std::max(0, maxShaders - 1), shaderIdx + 1);
-
-                        r.shd_ref = static_cast<float>(shaderIdx);
-                    }
-
-                    // --- Texture info ------------------------------------------------
-                    ImGui::Text("Texture ID: %u", r.textureID);
-
-                    // --- Sprite filename editing (name only) -------------------------
-                    {
-                        const std::string& full = r.spriteName;
-                        std::string dir, fileNoExt, ext;
-
-                        if (!full.empty()) {
-                            size_t slash = full.find_last_of("/\\");
-                            std::string filename = (slash != std::string::npos) ? full.substr(slash + 1) : full;
-                            size_t dot = filename.find_last_of('.');
-                            if (dot != std::string::npos) {
-                                fileNoExt = filename.substr(0, dot);
-                                ext = filename.substr(dot);
+                    auto ShaderName = [&](int i) -> const char*
+                        {
+                            switch (i) {
+                            case 0: return "Test Shader";
+                            case 1: return "Background Shader";
+                            case 2: return "Sprite Shader";
+                            case 3: return "Font Shader";
+                            default: return "Shader (unnamed)";
                             }
-                            else fileNoExt = filename;
-                            if (slash != std::string::npos)
-                                dir = full.substr(0, slash + 1);
+                        };
+
+                    ImGui::Text("Shader: %s", ShaderName(shaderIdx));
+                    ImGui::SameLine();
+                    if (ImGui::SmallButton(" - ##shader")) shaderIdx = std::max(0, shaderIdx - 1);
+                    ImGui::SameLine();
+                    if (ImGui::SmallButton(" + ##shader")) shaderIdx = std::min(std::max(0, maxShaders - 1), shaderIdx + 1);
+
+                    r.shd_ref = static_cast<float>(shaderIdx);
+                }
+
+                // --- Texture info ------------------------------------------------
+                ImGui::Text("Texture ID: %u", r.textureID);
+
+                // --- Sprite filename editing (name only) -------------------------
+                {
+                    const std::string& full = r.spriteName;
+                    std::string dir, fileNoExt, ext;
+
+                    if (!full.empty()) {
+                        size_t slash = full.find_last_of("/\\");
+                        std::string filename = (slash != std::string::npos) ? full.substr(slash + 1) : full;
+                        size_t dot = filename.find_last_of('.');
+                        if (dot != std::string::npos) {
+                            fileNoExt = filename.substr(0, dot);
+                            ext = filename.substr(dot);
                         }
-
-                        if (!dir.empty())
-                            ImGui::TextWrapped("Folder: %s", dir.c_str());
-
-                        static char fileBuf[256];
-                        std::strncpy(fileBuf, fileNoExt.c_str(), sizeof(fileBuf));
-                        fileBuf[sizeof(fileBuf) - 1] = '\0';
-
-                        if (ImGui::InputText("Sprite Name", fileBuf, IM_ARRAYSIZE(fileBuf)))
-                        {
-                            std::string newName = fileBuf;
-
-                            // Strip extension if user typed one
-                            size_t dot = newName.find_last_of('.');
-                            if (dot != std::string::npos)
-                                newName = newName.substr(0, dot);
-
-                            if (ext.empty())
-                                ext = ".png";
-
-                            bool typedHasSlash = newName.find_first_of("/\\") != std::string::npos;
-                            if (typedHasSlash) r.spriteName = newName + ext;
-                            else               r.spriteName = newName + ext;
-
-                            r.needsTextureReload = true;
-                        }
+                        else fileNoExt = filename;
+                        if (slash != std::string::npos)
+                            dir = full.substr(0, slash + 1);
                     }
 
-                    // --- Reload texture button + drag & drop target ------------------
+                    if (!dir.empty())
+                        ImGui::TextWrapped("Folder: %s", dir.c_str());
+
+                    static char fileBuf[256];
+                    std::strncpy(fileBuf, fileNoExt.c_str(), sizeof(fileBuf));
+                    fileBuf[sizeof(fileBuf) - 1] = '\0';
+
+                    if (ImGui::InputText("Sprite Name", fileBuf, IM_ARRAYSIZE(fileBuf)))
                     {
-                        bool reloadClicked = ImGui::Button("Reload Texture");
+                        std::string newName = fileBuf;
 
-                        if (ImGui::BeginDragDropTarget())
+                        // Strip extension if user typed one
+                        size_t dot = newName.find_last_of('.');
+                        if (dot != std::string::npos)
+                            newName = newName.substr(0, dot);
+
+                        if (ext.empty())
+                            ext = ".png";
+
+                        bool typedHasSlash = newName.find_first_of("/\\") != std::string::npos;
+                        if (typedHasSlash) r.spriteName = newName + ext;
+                        else               r.spriteName = newName + ext;
+
+                        r.needsTextureReload = true;
+                    }
+                }
+
+                // --- Reload texture button + drag & drop target ------------------
+                {
+                    bool reloadClicked = ImGui::Button("Reload Texture");
+
+                    if (ImGui::BeginDragDropTarget())
+                    {
+                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
                         {
-                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
+                            const char* droppedPath = static_cast<const char*>(payload->Data);
+                            if (droppedPath)
                             {
-                                const char* droppedPath = static_cast<const char*>(payload->Data);
-                                if (droppedPath)
-                                {
-                                    // Convert full path to asset ID (filename without extension)
-                                    namespace fs = std::filesystem;
-                                    std::string assetID = fs::path(droppedPath).stem().string();
-                                    r.spriteName = assetID;  // Store as asset ID, not path!
-                                }
-                                reloadClicked = true;
+                                namespace fs = std::filesystem;
+                                std::string assetID = fs::path(droppedPath).stem().string();
+                                r.spriteName = assetID;
                             }
-                            ImGui::EndDragDropTarget();
+                            reloadClicked = true;
                         }
+                        ImGui::EndDragDropTarget();
+                    }
 
-                        if (reloadClicked)
+                    if (reloadClicked)
+                    {
+                        namespace fs = std::filesystem;
+                        const std::string kTexturesRoot = "../../MyEngine/Assets/Textures";
+
+                        constexpr int SPRITE_SHADER_INDEX = 1;
+                        constexpr int SPRITESHEET_SHADER_INDEX = 2;
+
                         {
-                            namespace fs = std::filesystem;
-                            const std::string kTexturesRoot = "../../MyEngine/Assets/Textures";
+                            std::string candidate = r.spriteName;
+                            std::error_code ec;
 
-                            constexpr int SPRITE_SHADER_INDEX = 1;
-                            constexpr int SPRITESHEET_SHADER_INDEX = 2;
-
-                            // 1) Resolve path if user typed only a filename or invalid path
+                            if ((fs::path(candidate).has_parent_path() || fs::path(candidate).is_absolute()) &&
+                                fs::exists(candidate, ec))
                             {
-                                std::string candidate = r.spriteName;
-                                std::error_code ec;
+                            }
+                            else
+                            {
+                                std::string base = fs::path(candidate).filename().string();
+                                if (base.empty()) base = candidate;
 
-                                if ((fs::path(candidate).has_parent_path() || fs::path(candidate).is_absolute()) &&
-                                    fs::exists(candidate, ec))
+                                const fs::path roots[] = {
+                                    fs::path(kTexturesRoot),
+                                    fs::path("../../MyEngine/Assets")
+                                };
+
+                                std::string resolved;
+                                for (const fs::path& root : roots)
                                 {
-                                    // Already valid
-                                }
-                                else
-                                {
-                                    std::string base = fs::path(candidate).filename().string();
-                                    if (base.empty()) base = candidate;
+                                    fs::path rootAbs = fs::weakly_canonical(root, ec);
+                                    if (ec || rootAbs.empty() || !fs::exists(rootAbs, ec)) continue;
 
-                                    const fs::path roots[] = {
-                                        fs::path(kTexturesRoot),
-                                        fs::path("../../MyEngine/Assets")
-                                    };
-
-                                    std::string resolved;
-                                    for (const fs::path& root : roots)
+                                    for (fs::recursive_directory_iterator it(rootAbs, ec), end; it != end && !ec; ++it)
                                     {
-                                        fs::path rootAbs = fs::weakly_canonical(root, ec);
-                                        if (ec || rootAbs.empty() || !fs::exists(rootAbs, ec)) continue;
-
-                                        for (fs::recursive_directory_iterator it(rootAbs, ec), end; it != end && !ec; ++it)
+                                        if (!it->is_regular_file(ec)) continue;
+                                        if (it->path().filename().string() == base)
                                         {
-                                            if (!it->is_regular_file(ec)) continue;
-                                            if (it->path().filename().string() == base)
-                                            {
-                                                resolved = it->path().lexically_normal().string();
-                                                break;
-                                            }
+                                            resolved = it->path().lexically_normal().string();
+                                            break;
                                         }
-                                        if (!resolved.empty()) break;
                                     }
+                                    if (!resolved.empty()) break;
+                                }
 
-                                    if (!resolved.empty())
+                                if (!resolved.empty())
+                                {
+                                    std::string pathStr = resolved;
+                                    std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
+
+                                    size_t myEnginePos = pathStr.find("MyEngine/Assets");
+                                    if (myEnginePos != std::string::npos)
                                     {
-                                        // Find "MyEngine" in the path and build relative path from there
-                                        std::string pathStr = resolved;
-                                        std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
-
-                                        size_t myEnginePos = pathStr.find("MyEngine/Assets");
-                                        if (myEnginePos != std::string::npos)
-                                        {
-                                            // Build path as ../../MyEngine/Assets/...
-                                            r.spriteName = "../../" + pathStr.substr(myEnginePos);
-                                        }
-                                        else
-                                        {
-                                            // Fallback: just use resolved path
-                                            r.spriteName = pathStr;
-                                        }
+                                        r.spriteName = "../../" + pathStr.substr(myEnginePos);
+                                    }
+                                    else
+                                    {
+                                        r.spriteName = pathStr;
                                     }
                                 }
                             }
-
-                            // 2) Load (cached by AssetsManager)
-                            r.textureID = mAssets.GetOrLoadTexture(r.spriteName);
-                            r.loadedSpriteName = r.spriteName;
-                            r.needsTextureReload = false;
-
-                            // 3) Choose shader based on filename hint, but DO NOT touch Animation
-                            int  hintRows = 1, hintCols = 1;
-                            bool isSheet = false;
-
-                            {
-                                int rr = 1, cc = 1;
-                                std::string base = fs::path(r.spriteName).filename().string();
-                                if (ParseGridFromFilename(base, rr, cc) && rr * cc > 1) {
-                                    hintRows = rr; hintCols = cc;
-                                    isSheet = true;
-                                }
-                            }
-
-                            if (!isSheet)
-                            {
-                                std::string base = fs::path(r.spriteName).filename().string();
-                                for (auto& c : base) c = (char)tolower(c);
-                                if (base.find("sheet") != std::string::npos ||
-                                    base.find("atlas") != std::string::npos)
-                                    isSheet = true;
-                            }
-
-                            r.shd_ref = static_cast<float>(isSheet ? SPRITESHEET_SHADER_INDEX
-                                : SPRITE_SHADER_INDEX);
                         }
-                    }
 
-                } // end else (not removing)
+                        r.textureID = mAssets.GetOrLoadTexture(r.spriteName);
+                        r.loadedSpriteName = r.spriteName;
+                        r.needsTextureReload = false;
+
+                        int hintRows = 1, hintCols = 1;
+                        bool isSheet = false;
+
+                        {
+                            int rr = 1, cc = 1;
+                            std::string base = fs::path(r.spriteName).filename().string();
+                            if (ParseGridFromFilename(base, rr, cc) && rr * cc > 1) {
+                                hintRows = rr; hintCols = cc;
+                                isSheet = true;
+                            }
+                        }
+
+                        if (!isSheet)
+                        {
+                            std::string base = fs::path(r.spriteName).filename().string();
+                            for (auto& c : base) c = (char)tolower(c);
+                            if (base.find("sheet") != std::string::npos ||
+                                base.find("atlas") != std::string::npos)
+                                isSheet = true;
+                        }
+
+                        r.shd_ref = static_cast<float>(isSheet ? SPRITESHEET_SHADER_INDEX : SPRITE_SHADER_INDEX);
+                    }
+                }
 
                 ImGui::Unindent();
             }
@@ -673,92 +687,91 @@ namespace MyEditor
         {
             auto& a = g->GetComponent<Framework::Animation>(selectedEntity);
 
-            if (ImGui::CollapsingHeader("Animation", ImGuiTreeNodeFlags_DefaultOpen))
+            bool removeAnimation = false;
+            bool animationOpen = ImGui::CollapsingHeader("Animation", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
+            removeAnimation = DrawInlineRemoveButton("Animation");
+
+            if (removeAnimation)
+            {
+                g->RemoveComponent<Framework::Animation>(selectedEntity);
+            }
+            else if (animationOpen)
             {
                 ImGui::Indent();
 
-                if (ImGui::Button("Remove Animation"))
+                auto StepperInt = [&](const char* label, int* v, int minv, int maxv, int step = 1)
+                    {
+                        ImGui::PushID(label);
+                        ImGui::SetNextItemWidth(120.0f);
+                        bool changed = ImGui::InputInt("", v);
+                        ImGui::SameLine();
+                        if (ImGui::SmallButton(" - ")) { *v = std::max(minv, *v - step); changed = true; }
+                        ImGui::SameLine();
+                        if (ImGui::SmallButton(" + ")) { *v = std::min(maxv, *v + step); changed = true; }
+                        ImGui::SameLine();
+                        ImGui::TextUnformatted(label);
+                        ImGui::PopID();
+                        return changed;
+                    };
+
+                auto StepperFloat = [&](const char* label, float* v, float minv, float maxv, float step = 0.1f)
+                    {
+                        ImGui::PushID(label);
+                        ImGui::SetNextItemWidth(120.0f);
+                        bool changed = ImGui::InputFloat("", v, 0.0f, 0.0f, "%.1f");
+                        ImGui::SameLine();
+                        if (ImGui::SmallButton(" - ")) { *v = std::max(minv, *v - step); changed = true; }
+                        ImGui::SameLine();
+                        if (ImGui::SmallButton(" + ")) { *v = std::min(maxv, *v + step); changed = true; }
+                        ImGui::SameLine();
+                        ImGui::TextUnformatted(label);
+                        ImGui::PopID();
+                        return changed;
+                    };
+
+                // Rows
                 {
-                    g->RemoveComponent<Framework::Animation>(selectedEntity);
+                    int rows = a.rows;
+                    if (StepperInt("Rows", &rows, 1, 999))
+                    {
+                        a.rows = std::max(1, rows);
+                        a.totalFrames = std::max(1, a.rows * a.columns);
+                        a.currentFrame = std::min(a.currentFrame, a.totalFrames - 1);
+                        a.elapsedTime = 0.0f;
+                    }
                 }
-                else
+
+                // Columns
                 {
-
-                    auto StepperInt = [&](const char* label, int* v, int minv, int maxv, int step = 1)
-                        {
-                            ImGui::PushID(label);
-                            ImGui::SetNextItemWidth(120.0f);
-                            bool changed = ImGui::InputInt("", v);
-                            ImGui::SameLine();
-                            if (ImGui::SmallButton(" - ")) { *v = std::max(minv, *v - step); changed = true; }
-                            ImGui::SameLine();
-                            if (ImGui::SmallButton(" + ")) { *v = std::min(maxv, *v + step); changed = true; }
-                            ImGui::SameLine();
-                            ImGui::TextUnformatted(label);
-                            ImGui::PopID();
-                            return changed;
-                        };
-
-                    auto StepperFloat = [&](const char* label, float* v, float minv, float maxv, float step = 0.1f)
-                        {
-                            ImGui::PushID(label);
-                            ImGui::SetNextItemWidth(120.0f);
-                            bool changed = ImGui::InputFloat("", v, 0.0f, 0.0f, "%.1f");
-                            ImGui::SameLine();
-                            if (ImGui::SmallButton(" - ")) { *v = std::max(minv, *v - step); changed = true; }
-                            ImGui::SameLine();
-                            if (ImGui::SmallButton(" + ")) { *v = std::min(maxv, *v + step); changed = true; }
-                            ImGui::SameLine();
-                            ImGui::TextUnformatted(label);
-                            ImGui::PopID();
-                            return changed;
-                        };
-
-                    // Rows
+                    int cols = a.columns;
+                    if (StepperInt("Columns", &cols, 1, 999))
                     {
-                        int rows = a.rows;
-                        if (StepperInt("Rows", &rows, 1, 999))
-                        {
-                            a.rows = std::max(1, rows);
-                            a.totalFrames = std::max(1, a.rows * a.columns);
-                            a.currentFrame = std::min(a.currentFrame, a.totalFrames - 1);
-                            a.elapsedTime = 0.0f;
-                        }
+                        a.columns = std::max(1, cols);
+                        a.totalFrames = std::max(1, a.rows * a.columns);
+                        a.currentFrame = std::min(a.currentFrame, a.totalFrames - 1);
+                        a.elapsedTime = 0.0f;
                     }
+                }
 
-                    // Columns
+                ImGui::Text("Total Frames: %d", a.totalFrames);
+
+                // Current frame
+                {
+                    const int maxFrame = std::max(0, a.totalFrames - 1);
+                    int cur = std::clamp(a.currentFrame, 0, maxFrame);
+                    if (ImGui::SliderInt("Current Frame", &cur, 0, maxFrame))
                     {
-                        int cols = a.columns;
-                        if (StepperInt("Columns", &cols, 1, 999))
-                        {
-                            a.columns = std::max(1, cols);
-                            a.totalFrames = std::max(1, a.rows * a.columns);
-                            a.currentFrame = std::min(a.currentFrame, a.totalFrames - 1);
-                            a.elapsedTime = 0.0f;
-                        }
+                        a.currentFrame = cur;
+                        a.elapsedTime = 0.0f;
                     }
+                }
 
-                    ImGui::Text("Total Frames: %d", a.totalFrames);
-
-                    // Current frame
-                    {
-                        const int maxFrame = std::max(0, a.totalFrames - 1);
-                        int cur = std::clamp(a.currentFrame, 0, maxFrame);
-                        if (ImGui::SliderInt("Current Frame", &cur, 0, maxFrame))
-                        {
-                            a.currentFrame = cur;
-                            a.elapsedTime = 0.0f;
-                        }
-                    }
-
-                    // Animation speed
-                    {
-                        float sp = a.animationSpeed;
-                        if (StepperFloat("Anim Speed (fps)", &sp, 0.0f, 120.0f, 0.1f))
-                            a.animationSpeed = std::max(0.0f, sp);
-                    }
-
-                } // end else (not removing)
+                // Animation speed
+                {
+                    float sp = a.animationSpeed;
+                    if (StepperFloat("Anim Speed (fps)", &sp, 0.0f, 120.0f, 0.1f))
+                        a.animationSpeed = std::max(0.0f, sp);
+                }
 
                 ImGui::Unindent();
             }
@@ -773,48 +786,45 @@ namespace MyEditor
         {
             auto& script = g->GetComponent<LogicComponent>(selectedEntity);
 
-            if (ImGui::CollapsingHeader("Script", ImGuiTreeNodeFlags_DefaultOpen))
+            bool removeScript = false;
+            bool scriptOpen = ImGui::CollapsingHeader("Script", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
+            removeScript = DrawInlineRemoveButton("Script");
+
+            if (removeScript)
+            {
+                g->RemoveComponent<LogicComponent>(selectedEntity);
+            }
+            else if (scriptOpen)
             {
                 ImGui::Indent();
 
-                if (ImGui::Button("Remove Script"))
-                {
-                    g->RemoveComponent<LogicComponent>(selectedEntity);
-                }
-                else
-                {
-                    // List of available scripts
-                    const char* scriptOptions[] = {
-                        "PlayerScript",
-                        "EnemyScript",
-                        "ButtonScript",
-                        "PulsingBorderScript"
-                        // Add more scripts here as you create them
-                    };
-                    const int numScripts = 4;  // Update this when adding more scripts
+                const char* scriptOptions[] = {
+                    "PlayerScript",
+                    "EnemyScript",
+                    "ButtonScript",
+                    "PulsingBorderScript"
+                };
+                const int numScripts = 4;
 
-                    // Find current script index
-                    int currentScriptIndex = 0;
-                    for (int i = 0; i < numScripts; i++) {
-                        if (script.ScriptName == scriptOptions[i]) {
-                            currentScriptIndex = i;
-                            break;
-                        }
+                int currentScriptIndex = 0;
+                for (int i = 0; i < numScripts; i++) {
+                    if (script.ScriptName == scriptOptions[i]) {
+                        currentScriptIndex = i;
+                        break;
                     }
-
-                    ImGui::Text("Script:");
-                    ImGui::SameLine();
-                    ImGui::SetNextItemWidth(200.0f);
-                    if (ImGui::Combo("##ScriptDropdown", &currentScriptIndex, scriptOptions, numScripts))
-                    {
-                        script.ScriptName = scriptOptions[currentScriptIndex];
-                        std::cout << "[Inspector] Changed script to: " << script.ScriptName << std::endl;
-                    }
-
-                    // Display current script (visual confirmation)
-                    ImGui::Spacing();
-                    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Active: %s", script.ScriptName.c_str());
                 }
+
+                ImGui::Text("Script:");
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(200.0f);
+                if (ImGui::Combo("##ScriptDropdown", &currentScriptIndex, scriptOptions, numScripts))
+                {
+                    script.ScriptName = scriptOptions[currentScriptIndex];
+                    std::cout << "[Inspector] Changed script to: " << script.ScriptName << std::endl;
+                }
+
+                ImGui::Spacing();
+                ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Active: %s", script.ScriptName.c_str());
 
                 ImGui::Unindent();
             }
@@ -823,8 +833,8 @@ namespace MyEditor
         }
 
         // ---------------------------------------------------------------------
-// Audio component
-// ---------------------------------------------------------------------
+        // Audio component
+        // ---------------------------------------------------------------------
         AudioComponent(g);
 
         // Re-enable if we disabled for play mode
@@ -834,151 +844,128 @@ namespace MyEditor
         }
 
         ImGui::End();
-    }//end of function
 
-    void AudioComponent(Coordinator* g) {
-        if (g->HasComponent<AudioSource>(selectedEntity))
-        {
-            auto& audio = g->GetComponent<AudioSource>(selectedEntity);
+     }//end of function
 
-            if (ImGui::CollapsingHeader("AudioSource", ImGuiTreeNodeFlags_DefaultOpen))
-            {
-                ImGui::Indent();
+     void AudioComponent(Coordinator* g) {
+         if (g->HasComponent<AudioSource>(selectedEntity))
+         {
+             auto& audio = g->GetComponent<AudioSource>(selectedEntity);
 
-                if (ImGui::Button("Remove AudioSource"))
-                {
-                    g->RemoveComponent<AudioSource>(selectedEntity);
-                }
-                else
-                {
-                    ImGui::Text("Audio File:");
-                    ImGui::SameLine();
+             bool removeAudio = false;
+             bool audioOpen = ImGui::CollapsingHeader("AudioSource", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
+             removeAudio = DrawInlineRemoveButton("AudioSource");
 
-                    // Get available audio from global AssetsManager
-                    auto& audioResources = mAssets.getAudioRegContainer();
-                    std::string preview = audio.audio_id.empty() ? "<None>" : audio.audio_id;
+             if (removeAudio)
+             {
+                 g->RemoveComponent<AudioSource>(selectedEntity);
+             }
+             else if (audioOpen)
+             {
+                 ImGui::Indent();
 
-                    ImGui::SetNextItemWidth(300.0f);
-                    if (ImGui::BeginCombo("##AudioFile", preview.c_str()))
-                    {
-                        // Option for no audio
-                        if (ImGui::Selectable("<None>", audio.audio_id.empty()))
-                        {
-                            audio.audio_id = "";
-                        }
+                 ImGui::Text("Audio File:");
+                 ImGui::SameLine();
 
-                        // List all available audio files
-                        for (auto const& [id, resource] : audioResources)
-                        {
-                            bool isSelected = (audio.audio_id == id);
+                 auto& audioResources = mAssets.getAudioRegContainer();
+                 std::string preview = audio.audio_id.empty() ? "<None>" : audio.audio_id;
 
-                            // Show with type label [BGM] or [SFX]
-                            std::string label = id + " [" + resource.audiotype + "]";
+                 ImGui::SetNextItemWidth(300.0f);
+                 if (ImGui::BeginCombo("##AudioFile", preview.c_str()))
+                 {
+                     if (ImGui::Selectable("<None>", audio.audio_id.empty()))
+                     {
+                         audio.audio_id = "";
+                     }
 
-                            if (ImGui::Selectable(label.c_str(), isSelected))
-                            {
-                                audio.audio_id = id;
-                                std::cout << "[Inspector] Selected audio: " << id << "\n";
-                            }
+                     for (auto const& [id, resource] : audioResources)
+                     {
+                         bool isSelected = (audio.audio_id == id);
+                         std::string label = id + " [" + resource.audiotype + "]";
 
-                            if (isSelected)
-                                ImGui::SetItemDefaultFocus();
-                        }
-                        ImGui::EndCombo();
-                    }
+                         if (ImGui::Selectable(label.c_str(), isSelected))
+                         {
+                             audio.audio_id = id;
+                             std::cout << "[Inspector] Selected audio: " << id << "\n";
+                         }
 
-                    ImGui::Spacing();
+                         if (isSelected)
+                             ImGui::SetItemDefaultFocus();
+                     }
+                     ImGui::EndCombo();
+                 }
 
-                    // Show audio details if one is selected
-                    if (!audio.audio_id.empty() && mAssets.HasAudio(audio.audio_id))
-                    {
-                        std::string path = mAssets.GetAudioPath(audio.audio_id);
-                        ImGui::TextWrapped("Path: %s", path.c_str());
+                 ImGui::Spacing();
 
-                        if (auto* resource = mAssets.getRegistry().FindAudio(audio.audio_id))
-                        {
-                            ImGui::Text("Type: %s", resource->audiotype.c_str());
-                        }
-                    }
+                 if (!audio.audio_id.empty() && mAssets.HasAudio(audio.audio_id))
+                 {
+                     std::string path = mAssets.GetAudioPath(audio.audio_id);
+                     ImGui::TextWrapped("Path: %s", path.c_str());
 
-                    ImGui::Separator();
+                     if (auto* resource = mAssets.getRegistry().FindAudio(audio.audio_id))
+                     {
+                         ImGui::Text("Type: %s", resource->audiotype.c_str());
+                     }
+                 }
 
-                    // Volume slider
-                    ImGui::SetNextItemWidth(200.0f);
-                    ImGui::SliderFloat("Volume", &audio.volume, 0.0f, 1.0f, "%.2f");
+                 ImGui::Separator();
 
-                    // Checkboxes
-                    ImGui::Checkbox("Loop", &audio.loop);
-                    ImGui::Checkbox("Play on Awake", &audio.playOnAwake);
+                 ImGui::SetNextItemWidth(200.0f);
+                 ImGui::SliderFloat("Volume", &audio.volume, 0.0f, 1.0f, "%.2f");
 
-                    ImGui::Spacing();
+                 ImGui::Checkbox("Loop", &audio.loop);
+                 ImGui::Checkbox("Play on Awake", &audio.playOnAwake);
 
-                    // Runtime preview controls (only when NOT playing)
-                    if (!IsPlaying())
-                    {
-                        ImGui::Text("Preview:");
-                        ImGui::SameLine();
+                 ImGui::Spacing();
 
-                        if (ImGui::SmallButton("Play"))
-                        {
-                            if (!audio.audio_id.empty())
-                            {
-                                auto audioManager = g->GetSystem<AudioManager>();
-                                if (audioManager)
-                                {
-                                    auto* resource = mAssets.getRegistry().FindAudio(audio.audio_id);
-                                    if (resource)
-                                    {                    
-                                       audioManager->PlayFromAudioSource(audio);                           
-                                    }
-                                }
-                            }
-                        }
-                        ImGui::SameLine();
+                 if (!IsPlaying())
+                 {
+                     ImGui::Text("Preview:");
+                     ImGui::SameLine();
 
-                        if (ImGui::SmallButton("Stop"))
-                        {
-                            auto audioManager = g->GetSystem<AudioManager>();
-                            if (audioManager)
-                            {
-                                audioManager->StopPlayingAllAudio();
-                                //auto* resource = mAssets.getRegistry().FindAudio(audio.audio_id);
-                                //if (resource)
-                                //{
-                                //    if (resource->audiotype == "BGM")
-                                //    {
-                                //        audioManager->StopBGM();
-                                //    }
+                     if (ImGui::SmallButton("Play"))
+                     {
+                         if (!audio.audio_id.empty())
+                         {
+                             auto audioManager = g->GetSystem<AudioManager>();
+                             if (audioManager)
+                             {
+                                 auto* resource = mAssets.getRegistry().FindAudio(audio.audio_id);
+                                 if (resource)
+                                 {
+                                     audioManager->PlayFromAudioSource(audio);
+                                 }
+                             }
+                         }
+                     }
+                     ImGui::SameLine();
 
-                                //}
+                     if (ImGui::SmallButton("Stop"))
+                     {
+                         auto audioManager = g->GetSystem<AudioManager>();
+                         if (audioManager)
+                         {
+                             audioManager->StopPlayingAllAudio();
+                         }
+                     }
+                 }
+                 else
+                 {
+                     ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Game is running");
+                     if (audio.channel)
+                     {
+                         bool isChannelPlaying = false;
+                         audio.channel->isPlaying(&isChannelPlaying);
+                         ImGui::Text("Status: %s", isChannelPlaying ? "Playing" : "Stopped");
+                     }
+                 }
 
-                                //if (audio.channel)
-                                //{
-                                //    audio.channel->stop();
-                                //    audio.channel = nullptr;
-                                //}
-                            }
-                            
-                        }
-                    }
-                    else
-                    {
-                        // When game is playing
-                        ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Game is running");
-                        if (audio.channel)
-                        {
-                            bool isChannelPlaying = false;
-                            audio.channel->isPlaying(&isChannelPlaying);
-                            ImGui::Text("Status: %s", isChannelPlaying ? "Playing" : "Stopped");
-                        }
-                    }
-                }
+                 ImGui::Unindent();
+             }
 
-                ImGui::Unindent();
-            }
-            ImGui::Separator();
-        }
-    }// End of Function AudioComponent
+             ImGui::Separator();
+         }
+     }
 
 
 
