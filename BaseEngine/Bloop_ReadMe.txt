@@ -65,19 +65,41 @@ The engine includes runtime game state controls:
 - All entities and components can be edited in real-time
 - Scene changes persist when saved to JSON files
 
-How to Run:
------------
+═══════════════════════════════════════════════════════════════════════════════
+3. HOW TO RUN
+═══════════════════════════════════════════════════════════════════════════════
+
+Running with Level Editor:
+--------------------------
 1. Extract BaseEngine.zip
-2. Double-click run.bat to generate Visual Studio solution
-3. Open build/BaseEngine.sln in Visual Studio 2022
+2. Double-click run_editor.bat
+3. Open build/MyEngine.sln in Visual Studio 2022
 4. Set MyEngine as startup project
 5. Press F5 to build and run
-6. Control player with TFGH keys in rhythm with the music
-7. Control enemy with Arrow keys (for testing/demonstration)
-8. Use M and N keys to toggle collision and rotation visualizations
+
+Running Game Only (No Editor):
+------------------------------
+1. Extract BaseEngine.zip
+2. Double-click run_game.bat
+3. Open build/MyEngine.sln in Visual Studio 2022
+4. Set MyEngine as startup project
+5. Press F5 to build and run
+
+Switching Between Modes:
+------------------------
+1. Close Visual Studio
+2. Run clean.bat
+3. Run run_editor.bat OR run_game.bat
+4. Reopen build/MyEngine.sln
+
+Gameplay:
+---------
+- Control player with TFGH keys in rhythm with the music
+- Control enemy with Arrow keys (for testing)
+- Use M and N keys to toggle collision and rotation visualizations
 
 ═══════════════════════════════════════════════════════════════════════════════
-3. TEAM ROSTER: NAME - ROLE | CHAMPIONING
+4. TEAM ROSTER: NAME - ROLE | CHAMPIONING
 ═══════════════════════════════════════════════════════════════════════════════
 
 Chloe Lau Rey En (IMGD)
