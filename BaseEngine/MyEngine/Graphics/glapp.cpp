@@ -412,27 +412,31 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 
 	// AFTER:
 	std::stable_sort(drawList.begin(), drawList.end(), [&](Entity a, Entity b) {
-		// Entities without LayerTag get default values: orderInLayer=0, z=0
+		LayerMask maskA = LAYER_WORLD, maskB = LAYER_WORLD;
 		int orderA = 0, orderB = 0;
 		float zA = 0.0f, zB = 0.0f;
 
-		// Safely get LayerTag data if it exists
 		if (g_coordinator->HasComponent<LayerTag>(a)) {
 			auto& A = g_coordinator->GetComponent<LayerTag>(a);
+			maskA = A.mask;
 			orderA = A.orderInLayer;
 			zA = A.z;
 		}
 
 		if (g_coordinator->HasComponent<LayerTag>(b)) {
 			auto& B = g_coordinator->GetComponent<LayerTag>(b);
+			maskB = B.mask;
 			orderB = B.orderInLayer;
 			zB = B.z;
 		}
 
-		// Sort by orderInLayer first, then by z depth
+		// Sort by layer first (Background < World < UI)
+		if (maskA != maskB) return maskA < maskB;
+		// Then by orderInLayer within same layer
 		if (orderA != orderB) return orderA < orderB;
+		// Then by z depth
 		return zA < zB;
-	});
+		});
 
 	// Draw
 	for (auto e : drawList) {

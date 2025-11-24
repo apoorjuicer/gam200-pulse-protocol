@@ -607,18 +607,20 @@ namespace MyEditor
 
                                     if (!resolved.empty())
                                     {
-                                        // Convert absolute path to relative path from working directory
-                                        std::error_code ec2;
-                                        fs::path relPath = fs::relative(resolved, fs::current_path(), ec2);
+                                        // Find "MyEngine" in the path and build relative path from there
+                                        std::string pathStr = resolved;
+                                        std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
 
-                                        if (!ec2 && !relPath.empty()) {
-                                            std::string pathStr = relPath.string();
-                                            std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
-                                            r.spriteName = pathStr;
+                                        size_t myEnginePos = pathStr.find("MyEngine/Assets");
+                                        if (myEnginePos != std::string::npos)
+                                        {
+                                            // Build path as ../../MyEngine/Assets/...
+                                            r.spriteName = "../../" + pathStr.substr(myEnginePos);
                                         }
-                                        else {
-                                            // Fallback: use the resolved path if relative conversion fails
-                                            r.spriteName = resolved;
+                                        else
+                                        {
+                                            // Fallback: just use resolved path
+                                            r.spriteName = pathStr;
                                         }
                                     }
                                 }
@@ -951,9 +953,9 @@ namespace MyEditor
                         ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Game is running");
                         if (audio.channel)
                         {
-                            bool isPlaying = false;
-                            audio.channel->isPlaying(&isPlaying);
-                            ImGui::Text("Status: %s", isPlaying ? "Playing" : "Stopped");
+                            bool isChannelPlaying = false;
+                            audio.channel->isPlaying(&isChannelPlaying);
+                            ImGui::Text("Status: %s", isChannelPlaying ? "Playing" : "Stopped");
                         }
                     }
                 }

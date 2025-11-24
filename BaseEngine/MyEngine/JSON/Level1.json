@@ -109,7 +109,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.48225584626197817,
+                        "elapsedTime": 0.0009528398513793945,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -173,8 +173,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1338.0413818359376,
-                            "y": -344.3077087402344
+                            "x": 1861.738037109375,
+                            "y": -348.4979553222656
                         },
                         "scale": {
                             "x": 600.0,
@@ -254,8 +254,16 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "orderInLayer": 1,
+                        "orderInLayer": 10,
                         "z": 0.0
+                    }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "collision",
+                        "volume": 1.0,
+                        "loop": false,
+                        "playOnAwake": false
                     }
                 }
             ]
@@ -270,8 +278,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1863.30712890625,
-                            "y": -344.3077087402344
+                            "x": 1861.738037109375,
+                            "y": -348.4979553222656
                         },
                         "scale": {
                             "x": 600.0,
@@ -351,8 +359,16 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "orderInLayer": 0,
+                        "orderInLayer": 10,
                         "z": 0.0
+                    }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "collision",
+                        "volume": 1.0,
+                        "loop": false,
+                        "playOnAwake": false
                     }
                 }
             ]
@@ -362,8 +378,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1403.0771484375,
-                            "y": 708.9231567382813
+                            "x": 1380.9234619140626,
+                            "y": 694.1539306640625
                         },
                         "scale": {
                             "x": 100.0,
@@ -484,7 +500,7 @@
                     "audiosource": {
                         "audio_id": "bgm",
                         "volume": 0.4000000059604645,
-                        "loop": false,
+                        "loop": true,
                         "playOnAwake": true
                     }
                 }
@@ -495,8 +511,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -793.73291015625,
-                            "y": 551.3954467773438
+                            "x": -801.1173095703125,
+                            "y": 555.0877685546875
                         },
                         "scale": {
                             "x": 582.5,
@@ -516,7 +532,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../MyEngine/Assets/Textures/UI/health bar.png",
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/health bar.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -566,7 +582,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -576,12 +592,12 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../MyEngine/Assets/Textures/UI/border_frame.png",
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/border_transparent.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
-                            "a": 1.0
+                            "a": 0.0
                         }
                     }
                 },
@@ -596,8 +612,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": "PulsingBorderScript"
+                    }
+                },
+                {
                     "name": {
-                        "name": "BeatBorder\\"
+                        "name": "BeatBorder"
                     }
                 },
                 {
@@ -606,6 +627,14 @@
                         "mask": 4,
                         "orderInLayer": 0,
                         "z": 100.0
+                    }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "beat_placeholder",
+                        "volume": 0.47999998927116396,
+                        "loop": false,
+                        "playOnAwake": false
                     }
                 }
             ]
@@ -636,7 +665,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../MyEngine/Assets/Textures/UI/green bar.png",
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/green bar.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -657,14 +686,14 @@
                 },
                 {
                     "name": {
-                        "name": "GameObject"
+                        "name": "HealthBar"
                     }
                 },
                 {
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
-                        "orderInLayer": 16,
+                        "orderInLayer": 150,
                         "z": 100.0
                     }
                 }
