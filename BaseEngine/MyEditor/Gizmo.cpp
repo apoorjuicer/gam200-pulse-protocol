@@ -108,30 +108,36 @@ namespace MyEditor
     // -------------------------------------------------------------------------
     void Gizmo_DrawAndHandle(const GameViewport& vp)
     {
+        auto* coord = Coordinator::GetInstance();
+        if (!coord) return;
+
+        // ALWAYS check if selected entity still exists (even during play)
+        // This handles scene changes during gameplay
+        if (selectedEntity != INVALID_ENTITY)
+        {
+            if (!coord->HasComponent<Framework::Transform>(selectedEntity))
+            {
+                selectedEntity = INVALID_ENTITY;
+                g_gizmo.dragging = false;
+                g_gizmo.active = INVALID_ENTITY;
+            }
+        }
+
         // Don't allow gizmo interaction during play mode
         if (IsPlaying())
         {
             return;
         }
 
-        auto* coord = Coordinator::GetInstance();
-        if (!coord) return;
-
+        // Check layer visibility/lock (only in edit mode)
         if (selectedEntity != INVALID_ENTITY)
         {
-            // Check if entity still exists
-            if (!coord->HasComponent<Framework::Transform>(selectedEntity))
-            {
-                selectedEntity = INVALID_ENTITY;
-            }
-            // Check if entity's layer is hidden or locked
-            else if (coord->HasComponent<LayerTag>(selectedEntity))
+            if (coord->HasComponent<LayerTag>(selectedEntity))
             {
                 auto& tag = coord->GetComponent<LayerTag>(selectedEntity);
                 if (!IsLayerVisible(tag.mask) || IsLayerLocked(tag.mask))
                 {
                     selectedEntity = INVALID_ENTITY;
-                    // Also stop any dragging
                     g_gizmo.dragging = false;
                     g_gizmo.active = INVALID_ENTITY;
                 }
