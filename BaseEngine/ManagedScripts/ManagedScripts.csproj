@@ -4,14 +4,11 @@
     <OutputType>Library</OutputType>
     <PlatformTarget>x64</PlatformTarget>
     
-    <!-- Output to build\MyEngine\Debug or build\MyEngine\Release -->
-    <OutputPath>..\build\MyEngine\$(Configuration)\</OutputPath>
+    <OutputPath>$(MSBuildProjectDirectory)\..\build\MyEngine\$(Configuration)\</OutputPath>
     
-    <!-- Don't append net8.0-windows folder -->
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   
-  <!-- Reference to ScriptAPI C++/CLI bridge -->
   <ItemGroup>
     <ProjectReference Include="..\build\ScriptAPI\ScriptAPI.vcxproj" />
   </ItemGroup>

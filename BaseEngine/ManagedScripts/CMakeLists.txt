@@ -6,10 +6,20 @@ include_external_msproject(
     ManagedScripts 
     "${CMAKE_CURRENT_SOURCE_DIR}/ManagedScripts.csproj"
     TYPE FAE04EC0-301F-11D3-BF4B-00C04F79EFBC
+    #PLATFORM x64
 )
 
 # Tell CMake that ManagedScripts depends on ScriptAPI (In the guide, manage needs script)
 add_dependencies(ManagedScripts ScriptAPI)
+
+#Force it to be included in ALL build configurations
+set_target_properties(ManagedScripts PROPERTIES
+    EXCLUDE_FROM_DEFAULT_BUILD FALSE
+    EXCLUDE_FROM_DEFAULT_BUILD_DEBUG FALSE
+    EXCLUDE_FROM_DEFAULT_BUILD_RELEASE FALSE
+    EXCLUDE_FROM_DEFAULT_BUILD_RELWITHDEBINFO FALSE
+    EXCLUDE_FROM_DEFAULT_BUILD_MINSIZEREL FALSE
+)
 
 # Set folder organization for Visual Studio
 set_property(TARGET ManagedScripts PROPERTY FOLDER "")

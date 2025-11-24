@@ -135,6 +135,14 @@ add_custom_command(TARGET MyEditor POST_BUILD
     COMMENT "Copying .NET Runtime DLLs to MyEditor output directory"
 )
 
+# Explicitly copy ManagedScripts.dll (sometimes the directory copy misses it)
+add_custom_command(TARGET MyEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_BINARY_DIR}/MyEngine/$<CONFIG>/ManagedScripts.dll"
+        "$<TARGET_FILE_DIR:MyEditor>/ManagedScripts.dll"
+    COMMENT "Explicitly copying ManagedScripts.dll to MyEditor"
+)
+
 # Enables multi-processor parallel compilation in Visual Studio
 if(MSVC)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")

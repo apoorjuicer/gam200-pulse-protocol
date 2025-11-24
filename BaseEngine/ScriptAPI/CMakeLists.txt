@@ -13,11 +13,8 @@ file(GLOB_RECURSE SCRIPTAPI_SRC CONFIGURE_DEPENDS
 # Create library with placeholder
 add_library(ScriptAPI SHARED ${SCRIPTAPI_SRC})
 
-# Disable spdlog in C++/CLI
-target_compile_definitions(ScriptAPI PRIVATE SPDLOG_DISABLE_DEFAULT_LOGGER)
-
 # add to build depen
-add_dependencies(ScriptAPI MyEngine)
+#add_dependencies(ScriptAPI MyEngine)
 
 target_link_libraries(ScriptAPI
     PRIVATE
