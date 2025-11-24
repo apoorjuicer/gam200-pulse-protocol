@@ -285,6 +285,23 @@ namespace MyEditor
             g_gizmo.active = INVALID_ENTITY;
         }
 
+        // Delete selected entity with Del key
+        if (selectedEntity != INVALID_ENTITY && ImGui::IsKeyPressed(ImGuiKey_Delete))
+        {
+            // Stop any active dragging first
+            if (g_gizmo.dragging && g_gizmo.active == selectedEntity)
+            {
+                g_gizmo.dragging = false;
+                g_gizmo.active = INVALID_ENTITY;
+            }
+
+            // Destroy the entity
+            coord->DestroyEntity(selectedEntity);
+
+            // Clear selection
+            selectedEntity = INVALID_ENTITY;
+        }
+
         dl->PopClipRect();
     }
 
