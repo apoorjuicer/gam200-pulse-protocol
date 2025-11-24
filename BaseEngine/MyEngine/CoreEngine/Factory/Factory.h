@@ -25,6 +25,7 @@
 #include "../MyEngine/CoreEngine/ECS/Types.h"
 #include "../MyEngine/CoreEngine/ECS/Coordinator.h"
 #include "../MyEngine/Audio/AudioSource.h"
+#include "../MyEngine/Graphics/Text.h"
 //Serialize
 #pragma warning(push, 0)
 #include <rapidjson/document.h>     // for Document, Value, AllocatorType

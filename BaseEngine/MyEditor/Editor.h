@@ -74,5 +74,5 @@ namespace MyEditor {
         bool triedLoad = false; // so we don't spam-load every frame
     };
 
-
-}
+    
+}// end of namespace MyEditor

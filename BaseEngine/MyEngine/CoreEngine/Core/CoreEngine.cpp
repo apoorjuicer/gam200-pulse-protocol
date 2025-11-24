@@ -37,6 +37,7 @@
 #include "../MyEngine/UI/GUIManager.h"
 
 #include "../MyEngine/Audio/AudioSource.h"
+#include "../MyEngine/Graphics/Text.h"
 #pragma comment(lib, "winmm.lib")
 
 // Game window dimensions and title
@@ -415,6 +416,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<LayerTag>();
 	g_coordinator->RegisterComponent<PrefabInstance>();
 	g_coordinator->RegisterComponent<AudioSource>();
+	g_coordinator->RegisterComponent<TextComponent>();
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
