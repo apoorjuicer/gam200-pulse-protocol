@@ -16,11 +16,16 @@
  */
  /******************************************************************************/
 
-#include <windows.h> // for OutputDebugString, etc.
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX 
+#include <windows.h>			   // for OutputDebugString, etc.
+#include <mmsystem.h>			   // for timeGetTime()
+#pragma comment(lib, "winmm.lib")  //shortcut instead of doing in CMake cos fuck me cmake is hard
+
 #include "pch/pch.h"
 #include "graphics/stb_image.h"
-#include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
+
 
 // move to editor pls
 //#ifdef ENABLE_EDITOR
@@ -53,11 +58,11 @@ CoreEngine* Engine = nullptr;
 using HelloWorldFunctionPtr = void(*)(void);
 using InitFunctionPtr = void(*)(CoreEngine*);
 
-////testing .net
-//void CoreEngine::HelloWorld()
-//{
-//	std::cout << "Hello Native World!" << std::endl;
-//}
+Framework::Transform* CoreEngine::GetTransformComponent(int ID)
+{
+	auto g_coordinator = Coordinator::GetInstance();
+	return &g_coordinator->GetComponent <Framework::Transform>(ID);
+}
 
 // Load coreclr.dll from our application so that we are able to use the functions 
 // contained within it to interface with the .NET runtime
@@ -330,7 +335,7 @@ void CoreEngine::Init()
 
 	if (!glfwInit())
 	{
-		spdlog::error("Failed to initialize GLFW");
+		//spdlog::error("Failed to initialize GLFW");
 		return;
 	}
 
@@ -515,10 +520,10 @@ void CoreEngine::Init()
 	initFunc(this); 
 	
 	// Step 3: Adding script to an entity[please work ;-; ]
-	addScript(0, "TestScript");
+	addScript(0, "TestScript"); // THE 0 IS ENTITY ID 0
 	
 	
-	// this is for testing
+	//this is for testing
 	HelloWorldFunctionPtr hwFunc = GetFunctionPtr<HelloWorldFunctionPtr>
 		(
 			"ScriptAPI",                 // Name of the Assembly

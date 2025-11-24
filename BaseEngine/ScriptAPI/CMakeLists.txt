@@ -5,18 +5,16 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 # Auto-collect sources (keeps Solution Explorer in sync)
 file(GLOB_RECURSE SCRIPTAPI_SRC CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_LIST_DIR}/*.c"
     "${CMAKE_CURRENT_LIST_DIR}/*.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/*.h"
-    "${CMAKE_CURRENT_LIST_DIR}/*.hpp"
-    "${CMAKE_CURRENT_LIST_DIR}/**/*.c"
-    "${CMAKE_CURRENT_LIST_DIR}/**/*.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/**/*.h"
-    "${CMAKE_CURRENT_LIST_DIR}/**/*.hpp"
 )
+
 
 # Create library with placeholder
 add_library(ScriptAPI SHARED ${SCRIPTAPI_SRC})
+
+# Disable spdlog in C++/CLI
+target_compile_definitions(ScriptAPI PRIVATE SPDLOG_DISABLE_DEFAULT_LOGGER)
 
 # add to build depen
 add_dependencies(ScriptAPI MyEngine)

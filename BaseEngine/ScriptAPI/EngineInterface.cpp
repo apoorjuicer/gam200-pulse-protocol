@@ -1,5 +1,5 @@
 ﻿#include "EngineInterface.h"
-#include "CoreEngine/Core/CoreEngine.h"
+#include "CoreEngine/Core/ScriptingBridge.h"
 #pragma comment(lib, "MyEngine.lib")
 
 namespace ScriptAPI
@@ -127,6 +127,9 @@ namespace ScriptAPI
         // Create the script (Default construct an object of the specified type)
         Script^ script = safe_cast<Script^>(System::Activator::CreateInstance(scriptType));
 
+        // make is so ECS ID and script ID is the same
+        script->SetEntityID(entityId);
+
         // Add the script
         scripts[entityId]->Add(script);
         return true;
@@ -148,6 +151,6 @@ namespace ScriptAPI
     void EngineInterface::HelloWorld()
     {
         System::Console::WriteLine("Hello Managed World!");
-        coreEngine->HelloWorld();
+        //coreEngine->HelloWorld();
     }
 } 

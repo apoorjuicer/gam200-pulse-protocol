@@ -120,19 +120,19 @@ macro(import_freetype)
   endif()
 endmacro()
 
-macro(import_spdlog)
-    if(NOT TARGET spdlog)  # Guard to prevent multiple inclusion
-        FetchContent_Declare(
-          spdlog
-          GIT_REPOSITORY https://github.com/gabime/spdlog.git
-          GIT_TAG v1.14.1
-        )
+# macro(import_spdlog)
+#     if(NOT TARGET spdlog)  # Guard to prevent multiple inclusion
+#         FetchContent_Declare(
+#           spdlog
+#           GIT_REPOSITORY https://github.com/gabime/spdlog.git
+#           GIT_TAG v1.14.1
+#         )
 
-        FetchContent_MakeAvailable(spdlog)
+#         FetchContent_MakeAvailable(spdlog)
 
-        include_directories(${spdlog_SOURCE_DIR}/include)
-    endif()
-endmacro()
+#         include_directories(${spdlog_SOURCE_DIR}/include)
+#     endif()
+# endmacro()
 
 # Macro to import all dependencies
 macro(importDependencies)
@@ -140,6 +140,6 @@ macro(importDependencies)
     import_glew()
     import_glm()
     import_freetype()
-    import_spdlog()
+    #import_spdlog()
     import_json()
 endmacro()

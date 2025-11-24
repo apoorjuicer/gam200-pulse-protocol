@@ -7,7 +7,7 @@ set(GAME_ROOT ${CMAKE_CURRENT_LIST_DIR})
 file(GLOB_RECURSE GAME_SRC CONFIGURE_DEPENDS
     "${GAME_ROOT}/*.cpp"
     "${GAME_ROOT}/*.h"
-)
+) 
 
 add_executable(${GAME_NAME} ${GAME_SRC})
 

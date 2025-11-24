@@ -1,6 +1,6 @@
 using System;
-
-public class TestScript : ScriptAPI.Script
+using ScriptAPI;
+public class TestScript : Script
 {
     public static void SayHello()
     {
@@ -8,6 +8,16 @@ public class TestScript : ScriptAPI.Script
     }
     public override void Update()
     {
-        Console.WriteLine("Testing! PLEASE FUCKING WORK!\n\n\n\n\n\n\n\n");
+        Console.WriteLine("[Testing CSHARP]: Hello from ManagedScripts! \n ");
+
+        TransformComponent TFC = GetTransform();
+
+        TFC.ScaleX += 0.01f;
+        TFC.ScaleY += 0.01f;
+
+        TFC.RotX += 1.0f;
+     
+        TFC.X += 1.0f;
+        TFC.Y += 1.0f;
     }
 }

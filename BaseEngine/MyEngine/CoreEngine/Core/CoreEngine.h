@@ -26,11 +26,13 @@
 #pragma warning(disable: 4251) // stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
 
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX 
 #include <Windows.h>
 
 // forward declaration
 class Config;
 class AssetManager;
+namespace Framework { class Transform; }
 
 class DLL_API CoreEngine
 {
@@ -47,6 +49,7 @@ public:
 	void HelloWorld() {
 		std::cout << "Hello Native World!" << std::endl;
 	}
+	static Framework::Transform* GetTransformComponent(int ID);
 	
 	// void BroadcastMessage(Message* message);	  // One of the ways to glue systems tgt.
 	// AssetsManager& getAssetsManager() { return mAssets; }

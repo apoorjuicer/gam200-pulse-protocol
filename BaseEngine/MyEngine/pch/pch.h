@@ -84,13 +84,6 @@
 #include <rapidjson/stringbuffer.h> // for StringBuffer
 #pragma warning(pop)
 
-//Logging library
-#pragma warning(push, 0)  // Disable all warnings
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/rotating_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#pragma warning(pop)  // Restore warnings
-
 // System Library Headers
 #include "Graphics/glhelper.h"
 #include "Graphics/glslshader.h"
@@ -125,7 +118,6 @@
 
 // Systems
 #include "../MyEngine/GameLogic/GameLogic.h"
-#include "../MyEngine/CoreEngine/Window.h"
 #include "../MyEngine/CoreEngine/Assets.h"
 #include "../MyEngine/CoreEngine/Scene/SceneManager.h"
 #include "../MyEngine/CoreEngine/Asset/AssetsManager.h"
