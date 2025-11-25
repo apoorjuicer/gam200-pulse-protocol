@@ -233,9 +233,6 @@ namespace MyEditor
                 s_isPlaying = true;
                 isPaused = false;
 
-                // to prevent creating a new empty entity when transitioning
-                selectedEntity = INVALID_ENTITY;
-
                 std::cout << "[Editor] Play Started\n";
             }
             else
@@ -244,9 +241,6 @@ namespace MyEditor
                 Engine->StopGame();
                 s_isPlaying = false;
                 isPaused = false;
-
-                // to prevent creating a new empty entity when transitioning
-                selectedEntity = INVALID_ENTITY;
 
                 std::cout << "[Editor] Stopped - Scene Restored\n";
             }

@@ -545,19 +545,19 @@ namespace MyEditor
                             coord->HasComponent<Framework::Renderable>(selectedEntity))
                         {
                             auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
-                            // Convert absolute path to relative path before storing
+                            // Convert to relative path with ../../MyEngine/Assets prefix
                             namespace fs = std::filesystem;
-                            std::error_code ec;
-                            fs::path relPath = fs::relative(item.fullPath, fs::current_path(), ec);
+                            std::string pathStr = item.fullPath;
+                            std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
 
-                            if (!ec && !relPath.empty()) {
-                                std::string pathStr = relPath.string();
-                                std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
-                                rend.spriteName = pathStr;
+                            size_t myEnginePos = pathStr.find("MyEngine/Assets");
+                            if (myEnginePos != std::string::npos)
+                            {
+                                rend.spriteName = "../../" + pathStr.substr(myEnginePos);
                             }
-                            else {
-                                // Fallback to absolute if relative conversion fails
-                                rend.spriteName = item.fullPath;
+                            else
+                            {
+                                rend.spriteName = pathStr;
                             }
                             rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
 

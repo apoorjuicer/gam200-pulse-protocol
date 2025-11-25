@@ -1,0 +1,99 @@
+{
+    "components": [
+        {
+            "Typing": {
+                "Type": "Enemy"
+            }
+        },
+        {
+            "transform": {
+                "position": {
+                    "x": 1861.738037109375,
+                    "y": -348.4979553222656
+                },
+                "scale": {
+                    "x": 600.0,
+                    "y": 600.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "isVisible": true,
+                "visibilityTimer": 0.0,
+                "autoHide": false
+            }
+        },
+        {
+            "render": {
+                "mdl_ref": 1.0,
+                "shd_ref": 1.0,
+                "useTexture": true,
+                "spriteName": "BlueGorillaEnemy",
+                "tintColor": {
+                    "r": 1.0,
+                    "g": 1.0,
+                    "b": 1.0,
+                    "a": 1.0
+                }
+            }
+        },
+        {
+            "animation": {
+                "currentFrame": 0,
+                "elapsedTime": 0.0,
+                "totalFrames": 1,
+                "columns": 1,
+                "rows": 1,
+                "animationSpeed": 2.0
+            }
+        },
+        {
+            "script": {
+                "ScriptName": "EnemyScript"
+            }
+        },
+        {
+            "name": {
+                "name": "Blue Gorilla"
+            }
+        },
+        {
+            "Health": {
+                "hp": 1,
+                "damage": 1,
+                "isAlive": true
+            }
+        },
+        {
+            "AABB": {
+                "min": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "max": {
+                    "x": 410.0,
+                    "y": 280.0
+                },
+                "width": 50.0,
+                "height": 50.0
+            }
+        },
+        {
+            "LayerTag": {
+                "layerName": "World",
+                "mask": 2,
+                "orderInLayer": 10,
+                "z": 0.0
+            }
+        },
+        {
+            "audiosource": {
+                "audio_id": "collision",
+                "volume": 1.0,
+                "loop": false,
+                "playOnAwake": false
+            }
+        }
+    ]
+}

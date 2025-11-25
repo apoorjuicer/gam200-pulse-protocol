@@ -516,8 +516,14 @@ void EnemyScript::Update(Entity ID)
 
             if (edgeHit && enemy_health.isAlive && player_health.isAlive)
             {
-                if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
-                    audio->PlaySound("collision");
+                // Play sound from enemy's AudioSource component
+                if (g_coordinator->HasComponent<AudioSource>(ID)) {
+                    auto& audioSrc = g_coordinator->GetComponent<AudioSource>(ID);
+                    if (!audioSrc.audio_id.empty()) {
+                        if (auto audioManager = g_coordinator->GetSystem<AudioManager>()) {
+                            audioManager->PlaySound(audioSrc.audio_id);
+                        }
+                    }
                 }
 
                 enemy_health.isAlive = false;
@@ -592,8 +598,14 @@ void EnemyScript::Update(Entity ID)
 
             if (obbHit && enemy_health.isAlive && current_player_health.isAlive)
             {
-                if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
-                    audio->PlaySound("collision");
+                // Play sound from enemy's AudioSource component
+                if (g_coordinator->HasComponent<AudioSource>(ID)) {
+                    auto& audioSrc = g_coordinator->GetComponent<AudioSource>(ID);
+                    if (!audioSrc.audio_id.empty()) {
+                        if (auto audioManager = g_coordinator->GetSystem<AudioManager>()) {
+                            audioManager->PlaySound(audioSrc.audio_id);
+                        }
+                    }
                 }
 
                 enemy_health.isAlive = false;
@@ -691,7 +703,7 @@ void EnemyScript::Update(Entity ID)
     float slowSpeed = 330.0f;    // entering + during combo
     float mediumSpeed = 200.0f;   // pre-attack approach
     float fastSpeed = 300.0f;   // final rush
-    float stopDistance = 150.0f;  // leave space before player during pre-attack
+    /*float stopDistance = 150.0f;*/  // leave space before player during pre-attack
 
     // ---- Rhythm Phase Machine ----
     rs.phaseTimer += dt;
@@ -775,8 +787,15 @@ void EnemyScript::Update(Entity ID)
 
         if (collision.CheckAABBCollision(enemyAABB, playerAABB))
         {
-            if (auto audio = g_coordinator->GetSystem<AudioManager>())
-                audio->PlaySound("collision");
+            // Play sound from enemy's AudioSource component
+            if (g_coordinator->HasComponent<AudioSource>(ID)) {
+                auto& audioSrc = g_coordinator->GetComponent<AudioSource>(ID);
+                if (!audioSrc.audio_id.empty()) {
+                    if (auto audioManager = g_coordinator->GetSystem<AudioManager>()) {
+                        audioManager->PlaySound(audioSrc.audio_id);
+                    }
+                }
+            }
 
             enemy_health.isAlive = false;
             main_player_health.hp -= enemy_health.damage;
@@ -895,9 +914,10 @@ void ButtonScript::Update(Entity ID)
 
     // Handle texture swap
     if (data.isHovering && !wasHovering) {
+        /*std::cout << "[ButtonScript] Trying to load hover texture: " << data.hoverTexture << std::endl;*/
         renderable.spriteName = data.hoverTexture;
         renderable.needsTextureReload = true;
-        std::cout << "[ButtonScript] Hover: " << data.buttonName << std::endl;
+        /*std::cout << "[ButtonScript] Hover: " << data.buttonName << std::endl;*/
     }
     else if (!data.isHovering && wasHovering) {
         renderable.spriteName = data.normalTexture;
@@ -911,7 +931,7 @@ void ButtonScript::Update(Entity ID)
 
     // Trigger action on button RELEASE while still hovering (prevents double-triggers)
     if (data.isHovering && wasClickedPreviously && !isClickedThisFrame) {
-        std::cout << "[ButtonScript] Clicked: " << data.buttonName << std::endl;
+        /*std::cout << "[ButtonScript] Clicked: " << data.buttonName << std::endl;*/
 
         auto sceneMgr = coord->GetSystem<SceneManager>();
         if (!sceneMgr) return;
@@ -949,11 +969,8 @@ void ButtonScript::Exit(Entity ID)
 // =====================================================================
 void PulsingBorderScript::Init(Entity ID)
 {
-    (void)ID;
-
     auto* g_coordinator = Coordinator::GetInstance();
 
-    // Sync BPM with RhythmGameplayInput if available
     auto rhythmInput = g_coordinator->GetSystem<RhythmGameplayInput>();
     if (rhythmInput)
     {
@@ -962,39 +979,58 @@ void PulsingBorderScript::Init(Entity ID)
 
     pulseTimer = 0.0f;
 
-    //std::cout << "[PulsingBorderScript] Initialized for entity " << ID
-    //    << " at " << bpm << " BPM" << std::endl;
+    // Hide border at start
+    if (g_coordinator->HasComponent<Framework::Transform>(ID))
+    {
+        auto& transform = g_coordinator->GetComponent<Framework::Transform>(ID);
+        transform.isVisible = false;
+    }
 }
 
 void PulsingBorderScript::Update(Entity ID)
 {
     auto* g_coordinator = Coordinator::GetInstance();
 
-    // Use GLHelper's delta_time
-    float dt = static_cast<float>(GLHelper::delta_time);
+    auto audioSystem = g_coordinator->GetSystem<AudioManager>();
+    if (!audioSystem)
+        return;
 
-    pulseTimer += dt;
+    double musicPosition = audioSystem->GetBGMPositionSeconds();
 
-    // Calculate beat interval (70 BPM = 60/70 ≈ 0.857 seconds per beat)
-    float beatInterval = 60.0f / bpm;
-
-    // Normalize time within beat (0 to 1)
-    float normalizedTime = fmodf(pulseTimer, beatInterval) / beatInterval;
-
-    // Create triangle wave: 0 → 1 → 0
-    float fadeValue = 1.0f - std::abs(2.0f * normalizedTime - 1.0f);
-
-    // Smooth with ease-in-out
-    fadeValue = fadeValue * fadeValue * (3.0f - 2.0f * fadeValue);
-
-    // Calculate alpha
-    float currentAlpha = minAlpha + (maxAlpha - minAlpha) * fadeValue;
-
-    // Apply to this entity's Renderable component
-    if (g_coordinator->HasComponent<Framework::Renderable>(ID))
+    if (musicPosition <= 0.0)
     {
-        auto& renderable = g_coordinator->GetComponent<Framework::Renderable>(ID);
-        renderable.tintColor.a = currentAlpha;
+        if (g_coordinator->HasComponent<Framework::Transform>(ID))
+        {
+            auto& transform = g_coordinator->GetComponent<Framework::Transform>(ID);
+            transform.isVisible = false;
+        }
+        return;
+    }
+
+    float beatInterval = 0.5f;  // Every 1 second
+    float normalizedTime = fmodf((float)musicPosition, beatInterval) / beatInterval;
+    float beatWindow = 0.15f;
+
+    bool shouldBeVisible = (normalizedTime < beatWindow || normalizedTime >(1.0f - beatWindow));
+
+    if (g_coordinator->HasComponent<Framework::Transform>(ID))
+    {
+        auto& transform = g_coordinator->GetComponent<Framework::Transform>(ID);
+
+        bool wasVisible = transform.isVisible;
+        if (shouldBeVisible && !wasVisible)
+        {
+            if (g_coordinator->HasComponent<AudioSource>(ID))
+            {
+                auto& audioSrc = g_coordinator->GetComponent<AudioSource>(ID);
+                if (!audioSrc.audio_id.empty())
+                {
+                    audioSystem->PlayFromAudioSource(audioSrc);
+                }
+            }
+        }
+
+        transform.isVisible = shouldBeVisible;
     }
 }
 
