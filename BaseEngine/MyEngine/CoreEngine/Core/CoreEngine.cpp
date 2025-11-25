@@ -255,7 +255,6 @@ void CoreEngine::Init()
 	{
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-
 		glfwSetWindowMonitor(
 			window,
 			monitor,         // full screen monitor
