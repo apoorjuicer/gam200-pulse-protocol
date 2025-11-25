@@ -238,8 +238,6 @@ namespace MyEditor
 
         ImGui::StyleColorsDark();
 
-        // NOTE: install_callbacks = false so we don't hook WndProc
-        ImGui_ImplGlfw_InitForOpenGL(w, /*install_callbacks=*/false);
         ImGui_ImplOpenGL3_Init("#version 130");
 
         InitProjectPanel();      // your panel init
@@ -265,7 +263,6 @@ namespace MyEditor
 
         // Backend begins new frame
         ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
 
         ImGuiIO& io = ImGui::GetIO();
 
@@ -278,8 +275,9 @@ namespace MyEditor
         io.DisplaySize = ImVec2(w, h);
         io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
+        auto g_coordinator = Coordinator::GetInstance();
         // --- Input injection ---
-        if (auto input = Coordinator::GetInstance()->GetSystem<InputManager>())
+        if (auto input = g_coordinator->GetSystem<InputManager>())
         {
             // mouse
             glm::vec2 mp = input->getMousePosition();

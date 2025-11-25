@@ -36,13 +36,14 @@
 
 #include "Layer.h"
 #include "CoreEngine/ECS/System.h"
+#include "CoreEngine/Core/ImportExport.h"
 // #include "CoreEngine/ECS/SystemManager.h"
 #include "UI/GUIManager.h"
 #include "UI/UIElement.h"
 
 #include "glapp.h"
 #include <ft2build.h>
-#include <memory>
+#include <memory> // redundant, alr in pch_temp
 #include FT_FREETYPE_H
 
 class AssetRegistry; // fwd
@@ -80,7 +81,7 @@ struct FontData
 //     std::string filePath;
 // };
 
-class GraphicsManager : public Systems
+class DLL_API GraphicsManager : public Systems
 {
 public:
     GraphicsManager() = default;

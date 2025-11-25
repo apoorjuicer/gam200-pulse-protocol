@@ -393,7 +393,7 @@ void CoreEngine::Init()
 	glfwMakeContextCurrent(window);
 	GLHelper::ptr_window = window;
 
-	GLHelper::setup_event_callbacks();
+	//GLHelper::setup_event_callbacks();
 
 	// === FORCE FULLSCREEN AT STARTUP ===
 	{
@@ -748,6 +748,12 @@ void CoreEngine::GameLoop()
         unsigned currenttime = timeGetTime();
         float dt = (currenttime - LastTime) / 1000.0f;
         LastTime = currenttime;
+
+		// Prime ImGui with first frame BEFORE polling events
+		/*if (m_editorFrameCallback)
+		{
+			m_editorFrameCallback();
+		}*/
 
         glfwPollEvents();
 

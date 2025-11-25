@@ -24,13 +24,14 @@
 #include "EntityManager.h"
 #include "ComponentArray.h"
 #include "ComponentManager.h"
+#include "CoreEngine/Core/ImportExport.h"
 #include "../MyEngine/CoreEngine/ECS/Singleton.h"
 
 //  Acts as a mediator that allows us to have a single instance of the coordinator to use for all 3 manager :D
-class Coordinator //: public Singleton<Coordinator>
+class DLL_API Coordinator : public Singleton<Coordinator>
 {
 public:	
-	static Coordinator* GetInstance();
+	//static Coordinator* GetInstance();
 	void init()
 	{
 		// Create pointers to each manager

@@ -15,10 +15,11 @@
 
 #pragma once
 #include "pch/pch_temp.h"
+#include "CoreEngine/Core/ImportExport.h"
 #include "../MyEngine/CoreEngine/ECS/System.h"
 #include "../MyEngine/CoreEngine/Message/MessageManager.h"
 
-class InputManager : public Systems {
+class DLL_API InputManager : public Systems {
 public:
 	InputManager();
 	~InputManager();

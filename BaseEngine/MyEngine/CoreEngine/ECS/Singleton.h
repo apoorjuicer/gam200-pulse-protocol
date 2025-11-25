@@ -15,7 +15,7 @@
 #pragma once
 #include "pch/pch.h"
 
-// allows it so that once it is made, it will never create another instance of that system again
+// allows it so that once it is made, it will never create another instance of that system again. Parent of g_coordinator(included in coordinator class)
 template<typename T>
 class Singleton
 {
