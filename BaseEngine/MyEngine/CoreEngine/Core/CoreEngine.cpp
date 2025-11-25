@@ -251,20 +251,37 @@ void CoreEngine::Init()
 
 	glfwMakeContextCurrent(window);
 
+	//// === FORCE FULLSCREEN AT STARTUP ===
+	//{
+	//	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	//	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+	//	glfwSetWindowMonitor(
+	//		window,
+	//		monitor,         // full screen monitor
+	//		0, 0,            // position
+	//		mode->width,     // resolution
+	//		mode->height,
+	//		mode->refreshRate
+	//	);
+	//}
+
 	// === FORCE FULLSCREEN AT STARTUP ===
+#ifdef NDEBUG  // Only fullscreen in Release mode
 	{
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
 		glfwSetWindowMonitor(
 			window,
-			monitor,         // full screen monitor
-			0, 0,            // position
-			mode->width,     // resolution
+			monitor,
+			0, 0,
+			mode->width,
 			mode->height,
 			mode->refreshRate
 		);
 	}
+#endif
 
 	// Pause/resume on focus change (covers ALT+TAB and returning from Ctrl+Alt+Del)
 	glfwSetWindowFocusCallback(window,
@@ -340,7 +357,7 @@ void CoreEngine::Init()
 	mAssets.Initialize(); //loaded registry inside
 	//std::cout << mAssets.getRegistry().FindTexture("hero") << "\n";
 	// Singleton for Engine, but once game use EventBus/messaging system
-	std::cout << "path for bgm : " << mAssets.getRegistry().FindAudio("bgm")->path << "\n";
+	/*std::cout << "path for bgm : " << mAssets.getRegistry().FindAudio("BGM_L1")->path << "\n";*/
 	// PLEASE CALL THIS EVERY SINGLE U WANT 2 USE SINGLETON
 	auto g_coordinator = Coordinator::GetInstance();
 

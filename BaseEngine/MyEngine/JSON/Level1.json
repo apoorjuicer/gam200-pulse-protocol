@@ -4,6 +4,54 @@
         {
             "components": [
                 {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 1,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 1,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 1,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 1,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
                     "Typing": {
                         "Type": "Background"
                     }
@@ -108,8 +156,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.0009528398513793945,
+                        "currentFrame": 0,
+                        "elapsedTime": 0.6192066669464111,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -498,7 +546,7 @@
                 },
                 {
                     "audiosource": {
-                        "audio_id": "bgm",
+                        "audio_id": "BGM_L1",
                         "volume": 0.4000000059604645,
                         "loop": true,
                         "playOnAwake": true
@@ -631,8 +679,8 @@
                 },
                 {
                     "audiosource": {
-                        "audio_id": "beat_placeholder",
-                        "volume": 0.47999998927116396,
+                        "audio_id": "SFX_Border_Beat",
+                        "volume": 0.38999998569488528,
                         "loop": false,
                         "playOnAwake": false
                     }
