@@ -14,7 +14,7 @@
 #ifndef GLAPP_H
 #define GLAPP_H
 #include "glhelper.h"
-#include "pch/pch.h"
+#include "pch/pch_temp.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Transform.h"
