@@ -321,8 +321,14 @@ namespace MyEditor
                 g_gizmo.active = INVALID_ENTITY;
             }
 
-            // Destroy the entity
-            coord->DestroyEntity(selectedEntity);
+            // Remove from entityDisplayOrder
+            auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+            if (it != entityDisplayOrder.end())
+                entityDisplayOrder.erase(it);
+
+            // Destroy the entity PROPERLY (removes from SceneEntityList too!)
+            Factory factory;
+            factory.DeleteEntity(selectedEntity);
 
             // Clear selection
             selectedEntity = INVALID_ENTITY;

@@ -3,12 +3,12 @@
         {
             "transform": {
                 "position": {
-                    "x": -756.398681640625,
-                    "y": -670.1409912109375
+                    "x": 423.6398010253906,
+                    "y": -116.71722412109375
                 },
                 "scale": {
-                    "x": 350.0,
-                    "y": 109.0
+                    "x": 200.0,
+                    "y": 200.0
                 },
                 "rotation": {
                     "x": 0.0,
@@ -24,7 +24,7 @@
                 "mdl_ref": 0.0,
                 "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/UI/quit.png",
+                "spriteName": "../../MyEngine/Assets/Textures/UI/bar.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -44,21 +44,16 @@
             }
         },
         {
-            "script": {
-                "ScriptName": "ButtonScript"
-            }
-        },
-        {
             "name": {
-                "name": "QuitBtn"
+                "name": "test"
             }
         },
         {
             "LayerTag": {
-                "layerName": "UI",
-                "mask": 4,
-                "orderInLayer": 10,
-                "z": 100.0
+                "layerName": "World",
+                "mask": 2,
+                "orderInLayer": 0,
+                "z": 0.0
             }
         }
     ]
