@@ -251,37 +251,37 @@ void CoreEngine::Init()
 
 	glfwMakeContextCurrent(window);
 
-	//// === FORCE FULLSCREEN AT STARTUP ===
-	//{
-	//	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-	//	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-
-	//	glfwSetWindowMonitor(
-	//		window,
-	//		monitor,         // full screen monitor
-	//		0, 0,            // position
-	//		mode->width,     // resolution
-	//		mode->height,
-	//		mode->refreshRate
-	//	);
-	//}
-
 	// === FORCE FULLSCREEN AT STARTUP ===
-#ifdef NDEBUG  // Only fullscreen in Release mode
 	{
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
 		glfwSetWindowMonitor(
 			window,
-			monitor,
-			0, 0,
-			mode->width,
+			monitor,         // full screen monitor
+			0, 0,            // position
+			mode->width,     // resolution
 			mode->height,
 			mode->refreshRate
 		);
 	}
-#endif
+
+//	// === FORCE FULLSCREEN AT STARTUP ===
+//#ifdef NDEBUG  // Only fullscreen in Release mode
+//	{
+//		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+//		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+//
+//		glfwSetWindowMonitor(
+//			window,
+//			monitor,
+//			0, 0,
+//			mode->width,
+//			mode->height,
+//			mode->refreshRate
+//		);
+//	}
+//#endif
 
 	// Pause/resume on focus change (covers ALT+TAB and returning from Ctrl+Alt+Del)
 	glfwSetWindowFocusCallback(window,
