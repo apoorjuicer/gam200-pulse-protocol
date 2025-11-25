@@ -35,6 +35,8 @@
 #include "pch/pch_temp.h"
 
 #include "Layer.h"
+#include "Transform.h"
+#include "Text.h"
 #include "CoreEngine/ECS/System.h"
 // #include "CoreEngine/ECS/SystemManager.h"
 #include "UI/GUIManager.h"
