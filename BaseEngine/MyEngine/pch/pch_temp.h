@@ -54,6 +54,7 @@
 #include <optional>
 #include <stdexcept>      
 
+#include <ranges>
 
 // Graphics Library Headers
 #include <GL/glew.h>

@@ -48,6 +48,11 @@ public:
 
 	bool isMouseInGameViewport() const { return mouseInGameViewport; }
 
+
+	unsigned int getLastCharTyped() const { return lastCharTyped; }
+	void pushChar(unsigned int c) { lastCharTyped = c; }
+	void clearLastChar() { lastCharTyped = 0; }
+
 	// -------------------------------------------------
 	// Debug toggles
 	// -------------------------------------------------
@@ -62,15 +67,19 @@ public:
 		stressToggleRequested = false;
 		return out;
 	}
-
+	void SetWindow(GLFWwindow* w) { window = w; }
 	std::set<Entity> DebugEntities;
 
 private:
 	GLFWwindow* window = nullptr;
+	unsigned int lastCharTyped = 0;
 
 	// Keyboard state
 	bool currentKeys[GLFW_KEY_LAST + 1];
 	bool previousKeys[GLFW_KEY_LAST + 1];
+	bool keyRepeat[GLFW_KEY_LAST + 1] = { false };
+	bool isKeyRepeating(int key) const { return keyRepeat[key]; }
+
 
 	// Mouse state
 	bool currentMouseButtons[8];

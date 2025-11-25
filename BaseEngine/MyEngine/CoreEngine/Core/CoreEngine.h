@@ -2,7 +2,8 @@
 /**
  * @file        CoreEngine.h
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael - 100%
+ * @author		Chia Wei Xuan Rachael - 90%
+ *				Goh Pin Kai - 10%
  * @brief		Declares the core engine class that manages subsystem
  *				initialization, the main game loop, and development utilities.
  *
@@ -60,6 +61,9 @@ public:
 	GLFWwindow *GetWindow() const { return window; }	// modifier for window
 	bool IsGameRunning() const { return GameRunning; }	// for controlling main game loop
 	bool IsPlaying() const { return m_isPlaying; }		// for controlling scripts
+	void SetPaused(bool p);
+	void TogglePaused();
+	bool IsPaused() const { return m_paused; }
 
 	void PlayGame();	// play button functionality
 	void PauseGame();	// pause btn functionality
@@ -67,6 +71,13 @@ public:
 	void StopGame();	// stop button functionality
 	void RestartRuntimeForPlay();
 
+	void SetEditorFrameCallback(const std::function<void()>& cb);
+
+	// AssetsManager& getAssetsManager() { return mAssets; }
+	std::function<void()> m_editorFrameCallback;
+
+	void ToggleFullscreen();
+	// AssetsManager& getAssetsManager() { return mAssets; }
 private:
 	bool GameRunning;
 	bool DebugMode = false;
@@ -95,7 +106,7 @@ private:
 	// Helper Functions (same as/for the one below)
 	std::string buildTpaList(const std::string& directory);
 
-	// Helper Functions for grabbing functions from the DLL for managing the .NET Runtime’s lifecycle
+	// Helper Functions for grabbing functions from the DLL for managing the .NET Runtimeï¿½s lifecycle
 	template<typename FunctType>
 	FunctType getCoreClrFuncPtr(const std::string& functionName)
 	{
@@ -140,5 +151,5 @@ private:
 extern DLL_API CoreEngine *Engine;
 extern Config config; // global scope
 extern DLL_API AssetsManager mAssets;
-extern int WindowWidth;
-extern int WindowHeight;
+extern DLL_API int WindowWidth;
+extern DLL_API int WindowHeight;

@@ -156,7 +156,7 @@ namespace MyEditor
 
         for (Entity e : coord->GetAllEntities())
         {
-            if (coord->HasComponent<GUIButton>(e)) continue;
+            if (coord->HasComponent<UIElement>(e)) continue;
             if (!coord->HasComponent<Framework::Transform>(e) ||
                 !coord->HasComponent<Framework::Renderable>(e)) continue;
 

@@ -143,12 +143,21 @@ bool GLHelper::init(GLint awidth, GLint aheight, std::string atitle) {
 }
 
 void GLHelper::setup_event_callbacks() {
+
 	glfwSetFramebufferSizeCallback(GLHelper::ptr_window, GLHelper::fbsize_cb);
 	glfwSetKeyCallback(GLHelper::ptr_window, GLHelper::key_cb);
 	glfwSetMouseButtonCallback(GLHelper::ptr_window, GLHelper::mousebutton_cb);
 	glfwSetCursorPosCallback(GLHelper::ptr_window, GLHelper::mousepos_cb);
 	glfwSetScrollCallback(GLHelper::ptr_window, GLHelper::mousescroll_cb);
 	glfwSetWindowFocusCallback(GLHelper::ptr_window, GLHelper::focus_cb);
+
+	glfwSetCharCallback(ptr_window,
+		[](GLFWwindow*, unsigned int c)
+		{
+			if (auto input = Coordinator::GetInstance()->GetSystem<InputManager>())
+				input->pushChar(c);
+		}
+	);
 }
 /*  _________________________________________________________________________ */
 /*! cleanup
@@ -257,7 +266,7 @@ void GLHelper::key_cb(GLFWwindow* pwin, int key, int scancode, int action, int m
 		keyLeft = GL_FALSE;
 		keyRight = GL_FALSE;
 
-		keyState[key] = false;
+		keyState[key] = true;
 #ifdef _DEBUG
 		std::cout << "Key repeatedly pressed" << std::endl;
 #endif

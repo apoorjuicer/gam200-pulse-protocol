@@ -94,11 +94,13 @@ endif()
 message(STATUS "[${EDITOR_NAME}] sources: ${EDITOR_SRC}")
 
 
+# Debug DLL
 add_custom_command(TARGET MyEditor POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmodL.dll"
     $<TARGET_FILE_DIR:MyEditor>
 )
+
 
 # Copy MyEngine.dll to MyEditor's output directory after building
 add_custom_command(TARGET MyEditor POST_BUILD
@@ -147,3 +149,10 @@ add_custom_command(TARGET MyEditor POST_BUILD
 if(MSVC)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif()
+
+# Release DLL, ACCECPTED BOTH BUT COMMENTED OUT FOR NOW 
+# add_custom_command(TARGET MyEditor POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#     "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmod.dll"
+#     $<TARGET_FILE_DIR:MyEditor>
+# )

@@ -31,6 +31,7 @@
 
 struct GLFWwindow;
 
+
 namespace MyEditor {
     void Init(GLFWwindow* window);
     void NewFrame();
@@ -45,10 +46,11 @@ namespace MyEditor {
     extern const Entity INVALID_ENTITY;
     extern Entity selectedEntity;
     extern std::vector<Entity> entityDisplayOrder;
-    static std::vector<std::string> s_pendingOSDrops;
+    extern std::vector<std::string> s_pendingOSDrops;
 
     void EnqueueExternalDrop(const std::vector<std::string>& paths);
     void PushOSDropPath(const char* path);
+    void Editor_FrameCallback();
     
     // Returns the middle "game" rectangle in FRAMEBUFFER PIXELS, computed from current panel sizes
     GameViewport ComputeMiddleGameViewportPixels(GLFWwindow* window, bool keep_16x9 = true);

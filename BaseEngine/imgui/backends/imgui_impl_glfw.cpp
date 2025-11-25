@@ -767,12 +767,22 @@ static bool ImGui_ImplGlfw_Init(GLFWwindow* window, bool install_callbacks, Glfw
 
     // Windows: register a WndProc hook so we can intercept some messages.
 #ifdef _WIN32
-    HWND hwnd = (HWND)main_viewport->PlatformHandleRaw;
-    ::SetPropA(hwnd, "IMGUI_BACKEND_DATA", bd);
+    HWND hwnd = glfwGetWin32Window(window);
     bd->PrevWndProc = (WNDPROC)::GetWindowLongPtrW(hwnd, GWLP_WNDPROC);
-    IM_ASSERT(bd->PrevWndProc != nullptr);
-    ::SetWindowLongPtrW((HWND)main_viewport->PlatformHandleRaw, GWLP_WNDPROC, (LONG_PTR)ImGui_ImplGlfw_WndProc);
+
+    // If we fail to get the previous WndProc, just *don’t* hook.
+    // You’ll still get normal input; you just lose fancy touch/pen detection.
+    if (bd->PrevWndProc == nullptr)
+    {
+        // Optional: you can log this if you want
+        // printf("[ImGui][GLFW] Warning: PrevWndProc is null, skipping WndProc hook.\n");
+    }
+    else
+    {
+        ::SetWindowLongPtrW(hwnd, GWLP_WNDPROC, (LONG_PTR)ImGui_ImplGlfw_WndProc);
+    }
 #endif
+
 
     // Emscripten: the same application can run on various platforms, so we detect the Apple platform at runtime
     // to override io.ConfigMacOSXBehaviors from its default (which is always false in Emscripten).

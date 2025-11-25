@@ -28,13 +28,14 @@
 #include "../MyEngine/Graphics/Transform.h"
 #include "../MyEngine/Graphics/Animation.h"
 #include "../MyEngine/Graphics/Renderable.h"
-//#include "../Components/AABB.h"
 #include "../MyEngine/CoreEngine/Assets.h"
+#include "../MyEngine/CoreEngine/Prefab/PrefabInstance.h"
 #include "../MyEngine/Components/Health.h"
 #include "../MyEngine/Components/EntityType.h"
 #include "../MyEngine/Components/DisplayName.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "Graphics/Layer.h"
+//#include "../Components/AABB.h"
 
 //Starting scene will be Main Menu
 SceneManager::SceneManager()
@@ -146,6 +147,9 @@ void SceneManager::SaveCurrentScene()
 			Value RenderVal;
 
 			auto& render = g_coordinator->GetComponent<Framework::Renderable>(entity);
+
+			/*std::cout << "[DEBUG] Saving entity with spriteName: " << render.spriteName << std::endl;*/
+
 			render.Serialize(RenderVal, alloc);
 
 			ComponentObj.AddMember("render", RenderVal, alloc);
@@ -180,18 +184,18 @@ void SceneManager::SaveCurrentScene()
 		}
 
 		// purely for testing in-game GUI system
-		if (g_coordinator->HasComponent<GUIButton>(entity))
-		{
-			Value ComponentObj(rapidjson::kObjectType);
-			Value ButtonVal;
+		//if (g_coordinator->HasComponent<GUIButton>(entity))
+		//{
+		//	Value ComponentObj(rapidjson::kObjectType);
+		//	Value ButtonVal;
 
-			auto& btn = g_coordinator->GetComponent<GUIButton>(entity);
-			btn.Serialize(ButtonVal, alloc);
+		//	auto& btn = g_coordinator->GetComponent<GUIButton>(entity);
+		//	btn.Serialize(ButtonVal, alloc);
 
-			ComponentObj.AddMember("ui", ButtonVal, alloc);
-			componentsArray.PushBack(ComponentObj, alloc);
-			
-		}
+		//	ComponentObj.AddMember("ui", ButtonVal, alloc);
+		//	componentsArray.PushBack(ComponentObj, alloc);
+		//	
+		//}
 
 		if (g_coordinator->HasComponent<Name>(entity))
 		{
@@ -231,6 +235,31 @@ void SceneManager::SaveCurrentScene()
 			componentsArray.PushBack(ComponentObj, alloc);
 			
 		}
+
+		// Save PrefabInstance component if entity has it
+		if (g_coordinator->HasComponent<PrefabInstance>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value PrefabInstanceVal;
+
+			auto& prefabInstance = g_coordinator->GetComponent<PrefabInstance>(entity);
+			prefabInstance.Serialize(PrefabInstanceVal, alloc);
+
+			ComponentObj.AddMember("prefabInstance", PrefabInstanceVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		//if (g_coordinator->HasComponent<UIElement>(entity))
+		//{
+		//	Value ComponentObj(rapidjson::kObjectType);
+		//	Value UIVal;
+
+		//	auto& uiElement = g_coordinator->GetComponent<UIElement>(entity);
+		//	uiElement.Serialize(UIVal, alloc);
+
+		//	ComponentObj.AddMember("ui", UIVal, alloc);
+		//	componentsArray.PushBack(ComponentObj, alloc);
+		//}
 
 		// So for this entity, we add compoennt array
 		entityObj.AddMember("components", componentsArray, alloc);
@@ -432,13 +461,21 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				g_coordinator->AddComponent<AABB>(entity, aabb);
 			}
 
-			// this is purely for the in-game basic GUI system & on screen UI elements
-			if (component.HasMember("ui") && component["ui"].IsObject())
+			// Load PrefabInstance component if present
+			if (component.HasMember("prefabInstance") && component["prefabInstance"].IsObject())
 			{
-				GUIButton btn;
-				btn.Deserialize(component["ui"]);
-				g_coordinator->AddComponent<GUIButton>(entity, btn);
+				PrefabInstance pi;
+				pi.Deserialize(component["prefabInstance"]);
+				g_coordinator->AddComponent<PrefabInstance>(entity, pi);
 			}
+
+			// this is purely for the in-game basic GUI system & on screen UI elements
+			//if (component.HasMember("ui") && component["ui"].IsObject())
+			//{
+			//	UIElement ui;
+			//	ui.Deserialize(component["ui"]);
+			//	g_coordinator->AddComponent<UIElement>(entity, ui);
+			//}
 		}
 		
 		if (!g_coordinator->HasComponent<LayerTag>(entity)) {
@@ -452,6 +489,14 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			//	tag.z = 0.0f;
 			//}
 			//else 
+			
+			// check for UI first
+			//if (g_coordinator->HasComponent<UIElement>(entity)) {
+			//	tag.mask = LAYER_UI;
+			//	tag.orderInLayer = 10;
+			//	tag.z = 100.0f;
+			//}
+
 			if (g_coordinator->HasComponent<Framework::Renderable>(entity)) {
 				// Background quad heuristic: mdl_ref==0
 				auto& r = g_coordinator->GetComponent<Framework::Renderable>(entity);
@@ -474,25 +519,25 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 		SceneEntityList.push_back(entity);
 	}
 
-		auto* coordinator = Coordinator::GetInstance();
-		auto guiMgr = coordinator->GetSystem<GUIManager>();
-
-		if (guiMgr) {
-			guiMgr->GUIButtonEntities.clear();
-
-			for (auto entity : SceneEntityList) {
-				if (coordinator->HasComponent<GUIButton>(entity)) {
-					guiMgr->GUIButtonEntities.insert(entity);
-#ifdef _DEBUG
-					//std::cout << "[SceneManager] Registered GUI button entity: " << entity << std::endl;
-#endif
-				}
-			}
-
-#ifdef _DEBUG
-			//std::cout << "[SceneManager] Total GUI buttons: " << inputMgr->GUIButtonEntities.size() << std::endl;
-#endif
-		}
+//		auto* coordinator = Coordinator::GetInstance();
+//		auto guiMgr = coordinator->GetSystem<GUIManager>();
+//
+//		if (guiMgr) {
+//			guiMgr->GUIButtonEntities.clear();
+//
+//			for (auto entity : SceneEntityList) {
+//				if (coordinator->HasComponent<UIElement>(entity)) {
+//					guiMgr->GUIButtonEntities.insert(entity);
+//#ifdef _DEBUG
+//					//std::cout << "[SceneManager] Registered GUI button entity: " << entity << std::endl;
+//#endif
+//				}
+//			}
+//
+//#ifdef _DEBUG
+//			//std::cout << "[SceneManager] Total GUI buttons: " << inputMgr->GUIButtonEntities.size() << std::endl;
+//#endif
+//		}
 
 		ChangeCurrentScene(d["scene"].GetString());
 #ifdef _DEBUG
