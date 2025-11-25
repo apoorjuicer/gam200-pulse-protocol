@@ -219,9 +219,6 @@ void InputManager::processDebugToggles() {
 		auto graphics = coord->GetSystem<GraphicsManager>();
 		if (graphics) {
 			graphics->ToggleDebugOverlay();
-			std::cout << "[DEBUG OVERLAY] "
-				<< (graphics->IsDebugOverlayEnabled() ? "ENABLED" : "DISABLED")
-				<< std::endl;
 		}
 	}
 }

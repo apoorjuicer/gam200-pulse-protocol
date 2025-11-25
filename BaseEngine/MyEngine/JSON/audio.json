@@ -65,14 +65,14 @@
         },
         {
             "id": "SFX_SwordSwing_1",
-            "path": "../../MyEngine/Assets/Sound/Keys/SFX_SwordSwing_1.mp3",
+            "path": "../../MyEngine/Assets/Sound/Player/SFX_SwordSwing_1.mp3",
             "loop": false,
             "volume": 1.0,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_SwordSwing_2",
-            "path": "../../MyEngine/Assets/Sound/Keys/SFX_SwordSwing_2.mp3",
+            "path": "../../MyEngine/Assets/Sound/Player/SFX_SwordSwing_2.mp3",
             "loop": false,
             "volume": 1.0,
             "audiotype": "SFX"

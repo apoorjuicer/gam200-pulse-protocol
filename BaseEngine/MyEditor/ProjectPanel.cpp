@@ -51,6 +51,9 @@ namespace MyEditor
     [[maybe_unused]] static bool ReplaceTextureFileOnDisk(const std::string& dstPath,
         const std::string& srcPath);
 
+    static bool s_showEngineManagedWarning = false;
+    static std::string s_blockedEntityName = "";
+
     // ── Init ────────────────────────────────────────────────────
     void InitProjectPanel()
     {
@@ -636,22 +639,78 @@ namespace MyEditor
                             prefabName = "Entity_" + std::to_string(static_cast<int>(droppedEntity));
                         }
 
-                        // Create prefab using PrefabManager::SaveEntityAsPrefab
+                        // =====================================================
+                        // Check if entity can be saved as prefab
+                        // =====================================================
                         PrefabManager prefabMgr;
 
-                        if (prefabMgr.SaveEntityAsPrefab(droppedEntity, prefabName))
+                        if (!prefabMgr.CanSaveAsPrefab(droppedEntity))
                         {
-                            std::cout << "[ProjectPanel] Successfully created prefab: " << prefabName << ".json" << std::endl;
-                            RefreshCurrentDir();  // Refresh to show the new prefab file
+                            // Entity is engine-managed - show warning popup
+                            s_showEngineManagedWarning = true;
+                            s_blockedEntityName = prefabName;
+                            //std::cout << "[ProjectPanel] Blocked: Cannot save engine-managed entity as prefab: " << prefabName << std::endl;
                         }
                         else
                         {
-                            std::cerr << "[ProjectPanel] Failed to create prefab: " << prefabName << ".json" << std::endl;
+                            // Safe to save
+                            if (prefabMgr.SaveEntityAsPrefab(droppedEntity, prefabName))
+                            {
+                                //std::cout << "[ProjectPanel] Successfully created prefab: " << prefabName << ".json" << std::endl;
+                                RefreshCurrentDir();  // Refresh to show the new prefab file
+                            }
+                            else
+                            {
+                                std::cerr << "[ProjectPanel] Failed to create prefab: " << prefabName << ".json" << std::endl;
+                            }
                         }
                     }
                 }
                 ImGui::EndDragDropTarget();
             }
+        }
+
+        // =====================================================
+        // Warning Popup for Engine-Managed Entities (Debug Text) 
+        // =====================================================
+        if (s_showEngineManagedWarning)
+        {
+            ImGui::OpenPopup("Cannot Save as Prefab##EngineManagedWarning");
+            s_showEngineManagedWarning = false;
+        }
+
+        if (ImGui::BeginPopupModal("Cannot Save as Prefab##EngineManagedWarning", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), "  Warning  ");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::Text("Cannot save '%s' as prefab.", s_blockedEntityName.c_str());
+            ImGui::Spacing();
+            ImGui::TextWrapped("Entities with names starting with '_' are engine-managed "
+                "(e.g., _FPS_Display, _TopSystem_Display) and cannot be saved as prefabs.");
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // Center the OK button
+            float buttonWidth = 120.0f;
+            float windowWidth = ImGui::GetWindowSize().x;
+            ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
+
+            if (ImGui::Button("OK", ImVec2(buttonWidth, 0)))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+
+            // Also close on Enter key
+            if (ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_Escape))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
         }
 
         ImGui::EndChild();

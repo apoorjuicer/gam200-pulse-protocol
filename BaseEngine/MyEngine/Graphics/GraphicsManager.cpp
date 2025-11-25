@@ -41,7 +41,7 @@ namespace
     constexpr const char *UI_FONT_KEY = "PatrickHand_font";
     constexpr const char *DEBUG_FONT_KEY = "liberation_font";
 
-    
+    constexpr Entity NULL_ENTITY = static_cast<Entity>(-1);
 }
 
 // GraphicsManager::GraphicsManager()
@@ -200,6 +200,9 @@ void GraphicsManager::Initialize()
 
     // create white texture for colored quads
     InitWhiteTexture();
+
+    // create FPS/debug text entities (proper text objects - rubric compliant)
+    CreateDebugTextEntities();
 }
 
 void GraphicsManager::Update()
@@ -212,203 +215,16 @@ void GraphicsManager::Update()
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT);  // Don't clear depth
     glDisable(GL_DEPTH_TEST);      // Disable depth test for 2D
+
     //--- Rendering passes ---
     glapp->draw(EntityMember, m_editorLayerFilter);
+
+    // Update FPS text content (syncs visibility with m_showDebugOverlay)
+    UpdateDebugTextEntities();
+
+    // Render ALL TextComponent entities (including FPS text objects)
+    Update2DTextComponent();
     //------------------------
-
-    // Draw in-game gui system & UI overlay
-    //RenderUIOverlayElements();
-#ifdef ENABLE_EDITOR
-    // Draw overlay text last
-    auto& textShader = GLApp::shdrpgms[3];
-
-    // get the game viewport dimensions from the editor itself
-    /*MyEditor::GameViewport viewport = MyEditor::ComputeMiddleGameViewportPixels(Engine->GetWindow(), false);*/
-    int fbW = 0, fbH = 0;
-    glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
-
-    // only renders if viewport is valid
-    if (fbW > 0 && fbH > 0 && m_showDebugOverlay) {
-
-        // if the 2 fonts are loaded
-        if (m_debugFont && m_uiFont) {
-            //// get framebuffer dimensions
-            //glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
-
-            //// calculate scaling factors between framebuffer and virtual coordinates
-            //float scaleX = static_cast<float>(GLApp::VIRTUAL_W) / static_cast<float>(fbW);
-            //float scaleY = static_cast<float>(GLApp::VIRTUAL_H) / static_cast<float>(fbH);
-
-            //// convert viewport position to virtual coordinates
-            //float virtualX = 0.0f;
-            //float virtualY = 0.0f;
-            //float virtualW = static_cast<float>(GLApp::VIRTUAL_W);
-            //float virtualH = static_cast<float>(GLApp::VIRTUAL_H);
-
-            // Calculate game viewport (16:9 aspect ratio, centered)
-            const float targetAspect = 16.0f / 9.0f;
-            const float windowAspect = static_cast<float>(fbW) / static_cast<float>(fbH);
-
-            int vpX, vpY, vpW, vpH;
-            if (windowAspect > targetAspect) {
-                // Wider window - letterbox on sides
-                vpH = fbH;
-                vpW = static_cast<int>(fbH * targetAspect);
-                vpX = (fbW - vpW) / 2;
-                vpY = 0;
-            }
-            else {
-                // Taller window - letterbox top/bottom
-                vpW = fbW;
-                vpH = static_cast<int>(fbW / targetAspect);
-                vpX = 0;
-                vpY = (fbH - vpH) / 2;
-            }
-
-            // calculate scaling factors between framebuffer and virtual coordinates
-            float scaleX = static_cast<float>(GLApp::VIRTUAL_W) / static_cast<float>(fbW);
-            float scaleY = static_cast<float>(GLApp::VIRTUAL_H) / static_cast<float>(fbH);
-
-            // convert viewport position to virtual coordinates
-            float virtualX = static_cast<float>(vpX) * scaleX;
-            float virtualY = static_cast<float>(vpY) * scaleY;
-            float virtualW = static_cast<float>(vpW) * scaleX;
-            float virtualH = static_cast<float>(vpH) * scaleY;
-
-            // text positioning const
-            const float TEXT_PADDING = -325.0f;
-            const float LINE_SPACING = 60.0f;
-            const float BOTTOM_OFFSET = 60.0f;
-            const float FPS_SCALE = 1.3f;
-            const float SYSTEM_SCALE = 1.0f;
-
-            const float TEAM_PADDING_X = -150.0f;
-            const float TEAM_PADDING_Y = -225.0f;
-            const float TEAM_LABEL_SCALE = 1.3f;
-
-            // text color const
-            const glm::vec3 FPS_COLOR = glm::vec3(0.0f, 1.0f, 1.0f); // yellow
-            const glm::vec3 SYSTEM_COLOR = glm::vec3(1.0f, 0.0f, 1.0f); // green
-            const glm::vec3 TEAM_COLOR = glm::vec3(1.0f, 1.0f, 1.0f); // white
-
-            const std::string TEAM_LABEL = "Team BLOOP";
-
-            // bottom-left of game viewport
-            float textX = virtualX + TEXT_PADDING;
-            float textY = virtualY + virtualH - BOTTOM_OFFSET;
-
-            // top right of game viewport
-            float estimatedWidth = TEAM_LABEL.length() * 15.0f * TEAM_LABEL_SCALE;
-            float teamLabelX = virtualX + virtualW - estimatedWidth - TEAM_PADDING_X;
-            float teamLabelY = virtualY + TEAM_PADDING_Y;
-
-            // render FPS text; uses font liberation-mono_48
-            std::ostringstream fpsText;
-            fpsText << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
-
-            // uses font: 
-            RenderText(GLApp::shdrpgms[3], fpsText.str(), textX, textY, FPS_SCALE, FPS_COLOR, m_debugFont);
-
-            // get top system from profiler
-            auto* profiler = ProfilingManager::GetInstance();
-            const auto& profiles = profiler->GetDisplayProfiles();
-
-            std::string topSystem = "None";
-            double topPercentage = 0.0;
-
-            if (!profiles.empty()) {
-                // Find the system with highest percentage
-                for (const auto& profile : profiles) {
-                    if (profile.second.percentage > topPercentage) {
-                        topPercentage = profile.second.percentage;
-                        topSystem = profile.first;  // Use the key (system name)
-                    }
-                }
-            }
-
-            // render top system below FPS text
-            std::ostringstream topText;
-            topText << topSystem << ": " << std::fixed << std::setprecision(2) << topPercentage << "%";
-
-            // uses font liberation-mono_48
-            RenderText(textShader, topText.str(), textX, textY + LINE_SPACING, SYSTEM_SCALE, SYSTEM_COLOR, m_debugFont);
-
-            // team label using font patrickhand-regular_48
-            RenderText(textShader, TEAM_LABEL, teamLabelX, teamLabelY, TEAM_LABEL_SCALE, TEAM_COLOR, m_uiFont);
-        }
-        else {
-            std::cerr << "[GraphicsManager] WARNING: both fonts not found!\n";
-        }
-    }
-#endif
-    //// Team label
-    //RenderText(
-    //    textShader,
-    //    "Team BLOOP",
-    //    600.0f, 850.0f,
-    //    1.0f,
-    //    glm::vec3(1, 1, 1),
-    //    m_uiFont
-    //);
-
-    //// FPS counter (while editor hidden)
-    //if (!MyEditor::IsEnabled()) {
-    //    std::ostringstream fpsText;
-    //    fpsText << "FPS: " << std::fixed
-    //        << std::setprecision(1)
-    //        << GLHelper::fps;
-
-    //    RenderText(
-    //        textShader,
-    //        fpsText.str(),
-    //        100.0f, 850.0f,
-    //        1.0f,
-    //        glm::vec3(0.5f, 0.0f, 0.0f),
-    //        m_debugFont
-    //    );
-    //}
-
-	 //// Controls help, anchored at right side
-	 //{
-	 //    int fbW = 0, fbH = 0;
-	 //    glfwGetFramebufferSize(Engine->GetWindow(), &fbW, &fbH);
-
-    //    RenderText(textShader, "M - Start monsters",
-    //        startX, startY + lineHeight * 1,
-    //        0.4f,
-    //        glm::vec3(1, 1, 1),
-    //        m_debugFont);
-
-    //    RenderText(textShader, "W/A/S/D - Input",
-    //        startX, startY + lineHeight * 2,
-    //        0.4f,
-    //        glm::vec3(1, 1, 1),
-    //        m_debugFont);
-
-    //    RenderText(textShader, "K/L - Scale hero",
-    //        startX, startY + lineHeight * 3,
-    //        0.4f,
-    //        glm::vec3(1, 1, 1),
-    //        m_debugFont);
-
-    //    RenderText(textShader, "H/J - Rotate monsters",
-    //        startX, startY + lineHeight * 4,
-    //        0.4f,
-    //        glm::vec3(1, 1, 1),
-    //        m_debugFont);
-
-    //    RenderText(textShader, "O - Toggle editor",
-    //        startX, startY + lineHeight * 5,
-    //        0.4f,
-    //        glm::vec3(1, 1, 1),
-    //        m_debugFont);
-
-    //    RenderText(textShader, "F1-F6 - Debug draw",
-    //        startX, startY + lineHeight * 6,
-    //        0.4f,
-    //        glm::vec3(1, 1, 1),
-    //        m_debugFont);
-    //}
 }
 
 void GraphicsManager::Shutdown()
@@ -451,6 +267,27 @@ void GraphicsManager::Shutdown()
     ShutdownFonts();
 
     std::cout << "[GraphicsManager] Shutdown completed\n";
+}
+
+void GraphicsManager::ToggleDebugOverlay()
+{
+    m_showDebugOverlay = !m_showDebugOverlay;
+
+    // Immediately update visibility on text entities
+    auto* g = Coordinator::GetInstance();
+    if (g)
+    {
+        if (m_fpsTextEntity != NULL_ENTITY && g->HasComponent<TextComponent>(m_fpsTextEntity))
+            g->GetComponent<TextComponent>(m_fpsTextEntity).visible = m_showDebugOverlay;
+
+        if (m_topSystemTextEntity != NULL_ENTITY && g->HasComponent<TextComponent>(m_topSystemTextEntity))
+            g->GetComponent<TextComponent>(m_topSystemTextEntity).visible = m_showDebugOverlay;
+
+        if (m_teamLabelEntity != NULL_ENTITY && g->HasComponent<TextComponent>(m_teamLabelEntity))
+            g->GetComponent<TextComponent>(m_teamLabelEntity).visible = m_showDebugOverlay;
+    }
+
+    std::cout << "[DEBUG OVERLAY] " << (m_showDebugOverlay ? "SHOWN" : "HIDDEN") << " (F8 to toggle)\n";
 }
 
 void GraphicsManager::RenderText(
@@ -974,11 +811,11 @@ FontData const *GraphicsManager::GM_FindFont(std::string const &id) const
 {
     if (auto it = m_fontMap.find(id); it != m_fontMap.end())
     {
-        std::cout << "Found Font '" << id << "' in font map" << "\n";
+        //std::cout << "Found Font '" << id << "' in font map" << "\n";
         return &it->second;
     }
 
-    std::cout << "Not Found Font '" << id << "' in font map" << "\n";
+    //std::cout << "Not Found Font '" << id << "' in font map" << "\n";
     return nullptr;
 }
 
@@ -1120,5 +957,185 @@ void GraphicsManager::Update2DTextComponent() {
             txt.font_size,
             txt.color
         );
+    }
+}
+
+// =============================================================================
+// Debug Text Entities (FPS, Top System, Team Label)
+// These are proper text objects that can be moved/edited in the editor
+// =============================================================================
+
+void GraphicsManager::CreateDebugTextEntities()
+{
+    auto* g = Coordinator::GetInstance();
+    if (!g) return;
+
+    // ===== FPS TEXT ENTITY =====
+    m_fpsTextEntity = g->CreateEntity();
+
+    {
+        Framework::Transform t;
+        t.Pos = { 100.0f, 80.0f };
+        t.Scale = { 1.0f, 1.0f };
+        t.Rotation = { 0.0f, 0.0f };
+        t.isVisible = true;
+        t.autoHide = false;
+        g->AddComponent(m_fpsTextEntity, t);
+    }
+
+    {
+        TextComponent txt;
+        txt.text = "FPS: --";
+        txt.font_id = "liberation_font";
+        txt.font_size = 40.0f;
+        txt.color = { 0.0f, 1.0f, 1.0f };  // Cyan
+        txt.offset = { 0.0f, 0.0f };
+        txt.visible = m_showDebugOverlay;
+        g->AddComponent(m_fpsTextEntity, txt);
+    }
+
+    {
+        LayerTag layer;
+        layer.mask = LAYER_UI;
+        layer.orderInLayer = 999;
+        layer.z = 100.0f;
+        g->AddComponent(m_fpsTextEntity, layer);
+    }
+
+    {
+        Name name;
+        name.name = "_FPS_Display";
+        g->AddComponent(m_fpsTextEntity, name);
+    }
+
+    // ===== TOP SYSTEM TEXT ENTITY =====
+    m_topSystemTextEntity = g->CreateEntity();
+
+    {
+        Framework::Transform t;
+        t.Pos = { 100.0f, 130.0f };
+        t.Scale = { 1.0f, 1.0f };
+        t.Rotation = { 0.0f, 0.0f };
+        t.isVisible = true;
+        t.autoHide = false;
+        g->AddComponent(m_topSystemTextEntity, t);
+    }
+
+    {
+        TextComponent txt;
+        txt.text = "Top: --";
+        txt.font_id = "liberation_font";
+        txt.font_size = 40.0f;
+        txt.color = { 1.0f, 0.0f, 1.0f };  // Magenta
+        txt.offset = { 0.0f, 0.0f };
+        txt.visible = m_showDebugOverlay;
+        g->AddComponent(m_topSystemTextEntity, txt);
+    }
+
+    {
+        LayerTag layer;
+        layer.mask = LAYER_UI;
+        layer.orderInLayer = 998;
+        layer.z = 100.0f;
+        g->AddComponent(m_topSystemTextEntity, layer);
+    }
+
+    {
+        Name name;
+        name.name = "_TopSystem_Display";
+        g->AddComponent(m_topSystemTextEntity, name);
+    }
+
+    // ===== TEAM LABEL ENTITY =====
+    m_teamLabelEntity = g->CreateEntity();
+
+    {
+        Framework::Transform t;
+        t.Pos = { 1500.0f, 130.0f };  // Top-right area
+        t.Scale = { 1.0f, 1.0f };
+        t.Rotation = { 0.0f, 0.0f };
+        t.isVisible = true;
+        t.autoHide = false;
+        g->AddComponent(m_teamLabelEntity, t);
+    }
+
+    {
+        TextComponent txt;
+        txt.text = "Team BLOOP";
+        txt.font_id = "PatrickHand_font";
+        txt.font_size = 60.0f;
+        txt.color = { 1.0f, 1.0f, 1.0f };  // White
+        txt.offset = { 0.0f, 0.0f };
+        txt.visible = m_showDebugOverlay;
+        g->AddComponent(m_teamLabelEntity, txt);
+    }
+
+    {
+        LayerTag layer;
+        layer.mask = LAYER_UI;
+        layer.orderInLayer = 997;
+        layer.z = 100.0f;
+        g->AddComponent(m_teamLabelEntity, layer);
+    }
+
+    {
+        Name name;
+        name.name = "_Team_Label";
+        g->AddComponent(m_teamLabelEntity, name);
+    }
+
+    std::cout << "[GraphicsManager] Created debug text entities (F8 to toggle)\n";
+    std::cout << "                  FPS: Entity " << m_fpsTextEntity << "\n";
+    std::cout << "                  TopSystem: Entity " << m_topSystemTextEntity << "\n";
+    std::cout << "                  TeamLabel: Entity " << m_teamLabelEntity << "\n";
+}
+
+void GraphicsManager::UpdateDebugTextEntities()
+{
+    auto* g = Coordinator::GetInstance();
+    if (!g) return;
+
+    // Update FPS text
+    if (m_fpsTextEntity != NULL_ENTITY && g->HasComponent<TextComponent>(m_fpsTextEntity))
+    {
+        auto& txt = g->GetComponent<TextComponent>(m_fpsTextEntity);
+
+        std::ostringstream ss;
+        ss << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
+        txt.text = ss.str();
+        txt.visible = m_showDebugOverlay;
+    }
+
+    // Update top system text
+    if (m_topSystemTextEntity != NULL_ENTITY && g->HasComponent<TextComponent>(m_topSystemTextEntity))
+    {
+        auto& txt = g->GetComponent<TextComponent>(m_topSystemTextEntity);
+
+        auto* profiler = ProfilingManager::GetInstance();
+        const auto& profiles = profiler->GetDisplayProfiles();
+
+        std::string topSystem = "None";
+        double topPercentage = 0.0;
+
+        for (const auto& [name, profile] : profiles)
+        {
+            if (profile.percentage > topPercentage)
+            {
+                topPercentage = profile.percentage;
+                topSystem = name;
+            }
+        }
+
+        std::ostringstream ss;
+        ss << topSystem << ": " << std::fixed << std::setprecision(2) << topPercentage << "%";
+        txt.text = ss.str();
+        txt.visible = m_showDebugOverlay;
+    }
+
+    // Update team label visibility (text is static)
+    if (m_teamLabelEntity != NULL_ENTITY && g->HasComponent<TextComponent>(m_teamLabelEntity))
+    {
+        auto& txt = g->GetComponent<TextComponent>(m_teamLabelEntity);
+        txt.visible = m_showDebugOverlay;
     }
 }

@@ -89,7 +89,7 @@ public:
     GraphicsManager &operator=(GraphicsManager &&) noexcept = default;
 
     // Debug overlay toggle (hidden by default in Release, auto shown in Debug)
-    void ToggleDebugOverlay() { m_showDebugOverlay = !m_showDebugOverlay; }
+    void ToggleDebugOverlay();
     bool IsDebugOverlayEnabled() const { return m_showDebugOverlay; }
 
     // Texture
@@ -147,6 +147,17 @@ private:
     bool LoadFontsFromRegistry();
 
     void InitWhiteTexture();
+
+    // =========================================================================
+    // FPS/Debug text entities (proper text objects)
+    // These are normal entities that can be moved/edited in the editor
+    // =========================================================================
+    Entity m_fpsTextEntity = static_cast<Entity>(-1);
+    Entity m_topSystemTextEntity = static_cast<Entity>(-1);
+    Entity m_teamLabelEntity = static_cast<Entity>(-1);
+
+    void CreateDebugTextEntities();
+    void UpdateDebugTextEntities();
 private:
     // std::unique_ptr<GLApp> glapp;
     GLApp *glapp = nullptr; // owning raw pointer

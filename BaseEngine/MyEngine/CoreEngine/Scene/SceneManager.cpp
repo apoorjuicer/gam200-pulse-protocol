@@ -28,6 +28,8 @@
 #include "../MyEngine/Graphics/Transform.h"
 #include "../MyEngine/Graphics/Animation.h"
 #include "../MyEngine/Graphics/Renderable.h"
+#include "../MyEngine/Graphics/Text.h"
+#include "../MyEngine/Graphics/Text.h"
 #include "../MyEngine/CoreEngine/Assets.h"
 #include "../MyEngine/CoreEngine/Prefab/PrefabInstance.h"
 #include "../MyEngine/Components/Health.h"
@@ -110,6 +112,14 @@ void SceneManager::SaveCurrentScene()
 	// save one entity one at a time into 1 Json file
 	for (auto const& entity : g_coordinator->GetAllEntities())
 	{
+		// Skip engine-managed entities (names starting with underscore)
+		if (g_coordinator->HasComponent<Name>(entity)) {
+			auto& name = g_coordinator->GetComponent<Name>(entity).name;
+			if (!name.empty() && name[0] == '_') {
+				continue;  // Don't save _FPS_Display, _TopSystem_Display, etc.
+			}
+		}
+
 		// We make an object first for JsonEntityArray[i]
 		Value entityObj(kObjectType);
 
@@ -260,6 +270,19 @@ void SceneManager::SaveCurrentScene()
 			audioSrc.Serialize(AudioSourceVal, alloc);
 
 			ComponentObj.AddMember("audiosource", AudioSourceVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// Save TextComponent if entity has it
+		if (g_coordinator->HasComponent<TextComponent>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value TextVal;
+
+			auto& textComp = g_coordinator->GetComponent<TextComponent>(entity);
+			textComp.Serialize(TextVal, alloc);
+
+			ComponentObj.AddMember("TextComponent", TextVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
@@ -536,6 +559,13 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				audioSrc.Deserialize(component["audiosource"]);
 				g_coordinator->AddComponent<AudioSource>(entity, audioSrc);
 			}
+
+			if (component.HasMember("TextComponent") && component["TextComponent"].IsObject())
+			{
+				TextComponent txtComp;
+				txtComp.Deserialize(component["TextComponent"]);
+				g_coordinator->AddComponent<TextComponent>(entity, txtComp);
+			}
 		}
 
 		if (!g_coordinator->HasComponent<LayerTag>(entity)) {
@@ -575,12 +605,21 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			g_coordinator->AddComponent(entity, tag);
 		}
 
+		if (g_coordinator->HasComponent<Name>(entity)) {
+			auto& name = g_coordinator->GetComponent<Name>(entity).name;
+			if (!name.empty() && name[0] == '_') {
+				//std::cout << "[SceneManager] Skipping engine-managed entity: " << name << std::endl;
+				g_coordinator->DestroyEntity(entity);
+				continue;  // Skip to next entity in JSON
+			}
+		}
+
 		// save obj to a vector for deleting later
 		SceneEntityList.push_back(entity);
 
-		std::cout << "[SceneManager] Created " << SceneEntityList.size() << " entities" << std::endl;
-		std::cout << "[SceneManager] Total entities in system: "
-			<< g_coordinator->GetAllEntities().size() << std::endl;
+		//std::cout << "[SceneManager] Created " << SceneEntityList.size() << " entities" << std::endl;
+		//std::cout << "[SceneManager] Total entities in system: "
+		//	<< g_coordinator->GetAllEntities().size() << std::endl;
 	}
 
 	ChangeCurrentScene(d["scene"].GetString());
@@ -588,8 +627,8 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	// Initialize all scripts for entities with LogicComponent
 	auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
 	if (logicSystem) {
-		std::cout << "[SceneManager] Initializing scripts for loaded entities..." << std::endl;
-		std::cout << "[SceneManager] Total entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
+		//std::cout << "[SceneManager] Initializing scripts for loaded entities..." << std::endl;
+		//std::cout << "[SceneManager] Total entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
 
 		// DEBUG: Show ALL entities in list
 		for (Entity entity : SceneEntityList) {
@@ -597,8 +636,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			if (g_coordinator->HasComponent<Name>(entity)) {
 				name = g_coordinator->GetComponent<Name>(entity).name;
 			}
-			bool hasScript = g_coordinator->HasComponent<LogicComponent>(entity);
-			std::cout << "  -> Entity " << entity << " (" << name << ") - Has script: " << (hasScript ? "YES" : "NO") << std::endl;
+			/*bool hasScript = g_coordinator->HasComponent<LogicComponent>(entity);*/
 		}
 
 		int scriptCount = 0;
@@ -609,11 +647,9 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				if (script) {
 					script->Init(entity);
 					scriptCount++;
-					std::cout << "  -> Initialized " << logic.ScriptName << " for entity " << entity << std::endl;
 				}
 			}
 		}
-		std::cout << "[SceneManager] Total scripts initialized: " << scriptCount << std::endl;
 	}
 
 #ifdef _DEBUG

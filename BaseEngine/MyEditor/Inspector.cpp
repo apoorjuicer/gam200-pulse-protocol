@@ -24,6 +24,7 @@
 
 #include "Graphics/glapp.h"           // GLApp::shdrpgms
 #include "Graphics/Layer.h"           // GLApp::shdrpgms
+#include "Graphics/Text.h"
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "CoreEngine/Prefab/PrefabInstance.h"
 
@@ -380,6 +381,23 @@ namespace MyEditor
                 }
             }
 
+            // TextComponent
+            if (!g->HasComponent<TextComponent>(selectedEntity))
+            {
+                if (ImGui::MenuItem("TextComponent"))
+                {
+                    TextComponent txtComp{};
+                    txtComp.text = "New Text";
+                    txtComp.font_id = "";  // Empty = use default font
+                    txtComp.font_size = 48.0f;
+                    txtComp.color = { 1.0f, 1.0f, 1.0f };
+                    txtComp.offset = { 0.0f, 0.0f };
+                    txtComp.visible = true;
+                    g->AddComponent<TextComponent>(selectedEntity, txtComp);
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+
             ImGui::EndPopup();
         }
 
@@ -447,7 +465,7 @@ namespace MyEditor
 
                 ImGui::DragFloat("Rotation (deg)", &tr.Rotation.x, 1.0f, -360.f, 360.f);
                 ImGui::DragFloat("Rotation Speed", &tr.Rotation.y, 0.1f, -10.0f, 10.0f);
-                ImGui::Checkbox("Visible", &tr.isVisible);
+                ImGui::Checkbox("Visible##Transform", &tr.isVisible);
 
                 ImGui::Unindent();
             }
@@ -837,6 +855,11 @@ namespace MyEditor
         // ---------------------------------------------------------------------
         AudioComponent(g);
 
+        // ---------------------------------------------------------------------
+        // Text component
+        // ---------------------------------------------------------------------
+        TextComponentUI(g);
+
         // Re-enable if we disabled for play mode
         if (isPlaying)
         {
@@ -967,6 +990,126 @@ namespace MyEditor
          }
      }
 
+     void TextComponentUI(Coordinator* g)
+     {
+         if (!g->HasComponent<TextComponent>(selectedEntity))
+             return;
+
+         auto& txt = g->GetComponent<TextComponent>(selectedEntity);
+
+         bool removeText = false;
+         bool textOpen = ImGui::CollapsingHeader("TextComponent", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
+         removeText = DrawInlineRemoveButton("TextComponent");
+
+         if (removeText)
+         {
+             g->RemoveComponent<TextComponent>(selectedEntity);
+         }
+         else if (textOpen)
+         {
+             ImGui::Indent();
+
+             // === Text Content ===
+             ImGui::Text("Text:");
+             ImGui::SameLine();
+
+             static char textBuf[1024];
+             std::strncpy(textBuf, txt.text.c_str(), sizeof(textBuf));
+             textBuf[sizeof(textBuf) - 1] = '\0';
+
+             ImGui::SetNextItemWidth(300.0f);
+             if (ImGui::InputTextMultiline("##TextContent", textBuf, IM_ARRAYSIZE(textBuf),
+                 ImVec2(300.0f, 60.0f)))
+             {
+                 txt.text = textBuf;
+             }
+
+             ImGui::Spacing();
+
+             // === Font Selection ===
+             ImGui::Text("Font:");
+             ImGui::SameLine();
+
+             auto& fontResources = mAssets.getRegistry().getFontContainer();
+             std::string fontPreview = txt.font_id.empty() ? "<Default>" : txt.font_id;
+
+             ImGui::SetNextItemWidth(250.0f);
+             if (ImGui::BeginCombo("##FontSelect", fontPreview.c_str()))
+             {
+                 // Default font option
+                 if (ImGui::Selectable("<Default>", txt.font_id.empty()))
+                 {
+                     txt.font_id = "";
+                     std::cout << "[Inspector] Using default font\n";
+                 }
+
+                 // List all registered fonts
+                 for (auto const& [id, fontRes] : fontResources)
+                 {
+                     bool isSelected = (txt.font_id == id);
+                     std::string label = id + " (" + std::to_string(fontRes.pixelHeight) + "px)";
+
+                     if (ImGui::Selectable(label.c_str(), isSelected))
+                     {
+                         txt.font_id = id;
+                         std::cout << "[Inspector] Selected font: " << id << "\n";
+                     }
+
+                     if (isSelected)
+                         ImGui::SetItemDefaultFocus();
+                 }
+                 ImGui::EndCombo();
+             }
+
+             // === Font Size ===
+             ImGui::Text("Size:");
+             ImGui::SameLine();
+             ImGui::SetNextItemWidth(150.0f);
+             ImGui::DragFloat("##FontSize", &txt.font_size, 1.0f, 8.0f, 200.0f, "%.0f px");
+
+             // === Text Color ===
+             ImGui::Text("Color:");
+             ImGui::SameLine();
+             float col[3] = { txt.color.r, txt.color.g, txt.color.b };
+             if (ImGui::ColorEdit3("##TextColor", col))
+             {
+                 txt.color = { col[0], col[1], col[2] };
+             }
+
+             // === Offset from Transform ===
+             ImGui::Text("Offset:");
+             ImGui::SameLine();
+             float offset[2] = { txt.offset.x, txt.offset.y };
+             ImGui::SetNextItemWidth(200.0f);
+             if (ImGui::DragFloat2("##TextOffset", offset, 1.0f))
+             {
+                 txt.offset = { offset[0], offset[1] };
+             }
+             ImGui::SameLine();
+             ImGui::TextDisabled("(?)");
+             if (ImGui::IsItemHovered())
+             {
+                 ImGui::SetTooltip("Offset from the entity's Transform position.\nUseful for positioning text relative to a sprite.");
+             }
+
+             // === Visibility Toggle ===
+             ImGui::Checkbox("Visible##TextComponent", &txt.visible);
+
+             ImGui::Spacing();
+             ImGui::Separator();
+
+             // === Preview Info ===
+             if (!txt.text.empty())
+             {
+                 ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Preview:");
+                 ImGui::TextWrapped("%s", txt.text.c_str());
+             }
+
+             ImGui::Unindent();
+         }
+
+         ImGui::Separator();
+     }
 
 
 

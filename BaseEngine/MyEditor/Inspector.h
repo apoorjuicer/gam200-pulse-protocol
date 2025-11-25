@@ -11,4 +11,7 @@ namespace MyEditor
     void DrawInspectorWindow(ImGuiID rightDockID);
 
     void AudioComponent(Coordinator* g);
+
+    // TextComponent inspector UI
+    void TextComponentUI(Coordinator* g);
 }// end of namespace MyEditor

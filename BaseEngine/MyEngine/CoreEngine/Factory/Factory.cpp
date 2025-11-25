@@ -160,7 +160,7 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const& path)
 		if (component.HasMember("TextComponent") && component["TextComponent"].IsObject())
 		{
 			TextComponent txt_component;
-			txt_component.Deserialize(component["audiosource"]);
+			txt_component.Deserialize(component["TextComponent"]);
 			g_coordinator->AddComponent<TextComponent>(entity, txt_component);
 		}
 	}
@@ -345,6 +345,18 @@ bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const& path)
 		audioSrc.Serialize(AudioSourceVal, alloc);
 
 		ComponentObj.AddMember("audiosource", AudioSourceVal, alloc);
+		componentsArray.PushBack(ComponentObj, alloc);
+	}
+
+	if (g_coordinator->HasComponent<TextComponent>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value TextVal;
+
+		auto& textComp = g_coordinator->GetComponent<TextComponent>(entity);
+		textComp.Serialize(TextVal, alloc);
+
+		ComponentObj.AddMember("TextComponent", TextVal, alloc);
 		componentsArray.PushBack(ComponentObj, alloc);
 	}
 
