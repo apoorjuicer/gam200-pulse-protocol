@@ -113,11 +113,10 @@ namespace MyEditor
 
         // ALWAYS check if selected entity still exists (even during play)
         // This handles scene changes during gameplay
-        if (selectedEntity != INVALID_ENTITY)
+        if (selectedEntity != INVALID_ENTITY && g_gizmo.dragging)
         {
             if (!coord->HasComponent<Framework::Transform>(selectedEntity))
             {
-                selectedEntity = INVALID_ENTITY;
                 g_gizmo.dragging = false;
                 g_gizmo.active = INVALID_ENTITY;
             }

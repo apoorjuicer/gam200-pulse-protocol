@@ -8,7 +8,7 @@
         {
             "transform": {
                 "position": {
-                    "x": 1861.738037109375,
+                    "x": 1918.79296875,
                     "y": -348.4979553222656
                 },
                 "scale": {
@@ -29,7 +29,7 @@
                 "mdl_ref": 1.0,
                 "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "BlueGorillaEnemy",
+                "spriteName": "../../MyEngine/Assets/Textures/Enemies/RedGorillaEnemy.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -55,7 +55,7 @@
         },
         {
             "name": {
-                "name": "Blue Gorilla"
+                "name": "Red Gorilla"
             }
         },
         {
@@ -89,7 +89,7 @@
         },
         {
             "audiosource": {
-                "audio_id": "collision",
+                "audio_id": "SFX_WrongInput",
                 "volume": 1.0,
                 "loop": false,
                 "playOnAwake": false

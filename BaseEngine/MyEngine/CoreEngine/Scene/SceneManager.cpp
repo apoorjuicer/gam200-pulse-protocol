@@ -362,10 +362,17 @@ void SceneManager::UnloadCurrentScene()
 		}
 	}
 
+	std::cout << "[SceneManager] Entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
+	std::cout << "[SceneManager] Total entities before unload: "
+		<< g_coordinator->GetAllEntities().size() << std::endl;
+
 	for (auto const& entity : SceneEntityList)
 	{
 		g_coordinator->DestroyEntity(entity);
 	}
+
+	std::cout << "[SceneManager] Total entities after unload: "
+		<< g_coordinator->GetAllEntities().size() << std::endl;
 
 	//This class owns entity container is cleared
 	SceneEntityList.clear();
@@ -570,6 +577,10 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 		// save obj to a vector for deleting later
 		SceneEntityList.push_back(entity);
+
+		std::cout << "[SceneManager] Created " << SceneEntityList.size() << " entities" << std::endl;
+		std::cout << "[SceneManager] Total entities in system: "
+			<< g_coordinator->GetAllEntities().size() << std::endl;
 	}
 
 	ChangeCurrentScene(d["scene"].GetString());

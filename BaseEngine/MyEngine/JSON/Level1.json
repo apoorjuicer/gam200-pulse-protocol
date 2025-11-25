@@ -108,8 +108,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.5526729226112366,
+                        "currentFrame": 1,
+                        "elapsedTime": 0.3686886131763458,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -128,7 +128,7 @@
                 },
                 {
                     "Health": {
-                        "hp": 4,
+                        "hp": 3,
                         "damage": 1,
                         "isAlive": true
                     }
@@ -173,7 +173,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1861.738037109375,
+                            "x": 1918.79296875,
                             "y": -348.4979553222656
                         },
                         "scale": {
@@ -247,7 +247,7 @@
                 {
                     "prefabInstance": {
                         "prefabName": "Blue Gorilla",
-                        "isLinked": true
+                        "isLinked": false
                     }
                 },
                 {
@@ -260,112 +260,7 @@
                 },
                 {
                     "audiosource": {
-                        "audio_id": "collision",
-                        "volume": 1.0,
-                        "loop": false,
-                        "playOnAwake": false
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "Typing": {
-                        "Type": "Enemy"
-                    }
-                },
-                {
-                    "transform": {
-                        "position": {
-                            "x": 1861.738037109375,
-                            "y": -348.4979553222656
-                        },
-                        "scale": {
-                            "x": 600.0,
-                            "y": 600.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 1.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "BlueGorillaEnemy",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": "EnemyScript"
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Blue Gorilla"
-                    }
-                },
-                {
-                    "Health": {
-                        "hp": 1,
-                        "damage": 1,
-                        "isAlive": true
-                    }
-                },
-                {
-                    "AABB": {
-                        "min": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "max": {
-                            "x": 410.0,
-                            "y": 280.0
-                        },
-                        "width": 50.0,
-                        "height": 50.0
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "Blue Gorilla",
-                        "isLinked": true
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 10,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "audiosource": {
-                        "audio_id": "collision",
+                        "audio_id": "SFX_WrongInput",
                         "volume": 1.0,
                         "loop": false,
                         "playOnAwake": false
@@ -695,6 +590,111 @@
                         "mask": 4,
                         "orderInLayer": 150,
                         "z": 100.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "Typing": {
+                        "Type": "Enemy"
+                    }
+                },
+                {
+                    "transform": {
+                        "position": {
+                            "x": 1918.79296875,
+                            "y": -348.4979553222656
+                        },
+                        "scale": {
+                            "x": 600.0,
+                            "y": 600.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/Enemies/RedGorillaEnemy.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "EnemyScript"
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Red Gorilla"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 1,
+                        "damage": 1,
+                        "isAlive": true
+                    }
+                },
+                {
+                    "AABB": {
+                        "min": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "max": {
+                            "x": 410.0,
+                            "y": 280.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "Blue Gorilla",
+                        "isLinked": false
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 10,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "SFX_WrongInput",
+                        "volume": 1.0,
+                        "loop": false,
+                        "playOnAwake": false
                     }
                 }
             ]

@@ -3,12 +3,12 @@
         {
             "transform": {
                 "position": {
-                    "x": -587.6921997070313,
-                    "y": -600.0
+                    "x": -756.398681640625,
+                    "y": -670.1409912109375
                 },
                 "scale": {
-                    "x": 433.0,
-                    "y": 103.0
+                    "x": 350.0,
+                    "y": 109.0
                 },
                 "rotation": {
                     "x": 0.0,
@@ -24,7 +24,7 @@
                 "mdl_ref": 0.0,
                 "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/UI/health bar.png",
+                "spriteName": "../../MyEngine/Assets/Textures/UI/quit.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -44,15 +44,21 @@
             }
         },
         {
+            "script": {
+                "ScriptName": "ButtonScript"
+            }
+        },
+        {
             "name": {
-                "name": "health"
+                "name": "QuitBtn"
             }
         },
         {
             "LayerTag": {
-                "mask": 1,
-                "orderInLayer": 0,
-                "z": 0.0
+                "layerName": "UI",
+                "mask": 4,
+                "orderInLayer": 10,
+                "z": 100.0
             }
         }
     ]
