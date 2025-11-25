@@ -548,7 +548,7 @@ void AudioManager::PlaySound(std::string const &id)
     // Track the channel ( for stopping later)
     mChannels[id] = channel;
 
-    std::cout << "[AudioManager] Playing SFX: " << id << "\n";
+    //std::cout << "[AudioManager] Playing SFX: " << id << "\n";
 }
 
 /**/

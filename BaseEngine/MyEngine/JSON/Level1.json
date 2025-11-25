@@ -4,54 +4,6 @@
         {
             "components": [
                 {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 1,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 1,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 1,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 1,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
                     "Typing": {
                         "Type": "Background"
                     }
@@ -157,7 +109,7 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.6192066669464111,
+                        "elapsedTime": 0.5526729226112366,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
