@@ -821,9 +821,10 @@ namespace MyEditor
                     "EnemyScript",
                     "ButtonScript",
                     "PulsingBorderScript",
-                    "CountdownScript"
+                    "CountdownScript",
+                    "FeedbackScript"
                 };
-                const int numScripts = 5;
+                const int numScripts = 6;
 
                 int currentScriptIndex = 0;
                 for (int i = 0; i < numScripts; i++) {

@@ -4,6 +4,18 @@
         {
             "components": [
                 {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 1,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
                     "Typing": {
                         "Type": "Background"
                     }
@@ -77,7 +89,7 @@
                     "transform": {
                         "position": {
                             "x": -931.922119140625,
-                            "y": -305.8852233886719
+                            "y": -348.49798583984377
                         },
                         "scale": {
                             "x": 636.3574829101563,
@@ -109,7 +121,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.5968675017356873,
+                        "elapsedTime": 0.36804431676864626,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -160,6 +172,14 @@
                         "orderInLayer": 50,
                         "z": 0.0
                     }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "SFX_SwordSwing_2",
+                        "volume": 1.0,
+                        "loop": false,
+                        "playOnAwake": false
+                    }
                 }
             ]
         },
@@ -173,7 +193,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1918.79296875,
+                            "x": 1622.7440185546876,
                             "y": -348.4979553222656
                         },
                         "scale": {
@@ -260,7 +280,7 @@
                 },
                 {
                     "audiosource": {
-                        "audio_id": "SFX_WrongInput",
+                        "audio_id": "SFX_Invalid_Key",
                         "volume": 1.0,
                         "loop": false,
                         "playOnAwake": false
@@ -338,12 +358,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -801.1173095703125,
-                            "y": 555.0877685546875
+                            "x": -1016.5015869140625,
+                            "y": 628.3078002929688
                         },
                         "scale": {
-                            "x": 582.5,
-                            "y": 200.0
+                            "x": 440.83599853515627,
+                            "y": 154.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -459,7 +479,7 @@
                 {
                     "audiosource": {
                         "audio_id": "SFX_Border_Beat",
-                        "volume": 0.38999998569488528,
+                        "volume": 0.18000000715255738,
                         "loop": false,
                         "playOnAwake": false
                     }
@@ -471,12 +491,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -661.9229736328125,
-                            "y": 516.7310180664063
+                            "x": -909.3074340820313,
+                            "y": 601.6539306640625
                         },
                         "scale": {
-                            "x": 421.5,
-                            "y": 57.0
+                            "x": 308.0627746582031,
+                            "y": 42.99285125732422
                         },
                         "rotation": {
                             "x": 0.0,
@@ -536,7 +556,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1918.79296875,
+                            "x": 1622.74365234375,
                             "y": -348.4979553222656
                         },
                         "scale": {
@@ -623,7 +643,7 @@
                 },
                 {
                     "audiosource": {
-                        "audio_id": "SFX_WrongInput",
+                        "audio_id": "SFX_Invalid_Key",
                         "volume": 1.0,
                         "loop": false,
                         "playOnAwake": false
@@ -636,7 +656,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 0.0,
+                            "x": -44.30799865722656,
                             "y": 0.0
                         },
                         "scale": {
@@ -697,7 +717,7 @@
                 {
                     "audiosource": {
                         "audio_id": "BGM_L1",
-                        "volume": 1.0,
+                        "volume": 0.1899999976158142,
                         "loop": false,
                         "playOnAwake": false
                     }
@@ -717,6 +737,251 @@
                             1.0
                         ],
                         "visible": true
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 73.846435546875,
+                            "y": 675.6923828125
+                        },
+                        "scale": {
+                            "x": 250.0,
+                            "y": 90.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/Sword UI.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Sword"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -179.69252014160157,
+                            "y": 450.46160888671877
+                        },
+                        "scale": {
+                            "x": 95.0,
+                            "y": 95.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/W.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "W"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 285.5381774902344,
+                            "y": 450.4620056152344
+                        },
+                        "scale": {
+                            "x": 96.0,
+                            "y": 96.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/A.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "A"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -938.4615478515625,
+                            "y": 159.99996948242188
+                        },
+                        "scale": {
+                            "x": 146.60443115234376,
+                            "y": 146.60443115234376
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/perfect.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "FeedbackScript"
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Feedback"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 0,
+                        "z": 0.0
                     }
                 }
             ]

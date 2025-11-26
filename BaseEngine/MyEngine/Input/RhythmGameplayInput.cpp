@@ -14,7 +14,6 @@
  */
 /******************************************************************************/
 
-#include "pch/pch_temp.h"
 #include "../MyEngine/Input/RhythmGameplayInput.h"
 #include "../MyEngine/CoreEngine/Core/CoreEngine.h"
 #include "../MyEngine/Components/DisplayName.h"
@@ -69,91 +68,27 @@ void RhythmGameplayInput::Initialize()
 
 void RhythmGameplayInput::Update(float deltaTime)
 {
+    (void)deltaTime;
+
     if (!Engine->IsPlaying()) {
         return;
     }
 
-    auto *g_coordinator = Coordinator::GetInstance();
-
-    // FIND FeedbackBar on first update
-    //if (fontEntity == 0) {
-        auto activeEntities = g_coordinator->GetAllEntities();
-
-        for (auto entity : activeEntities)
-        {
-            if (g_coordinator->HasComponent<Name>(entity))
-            {
-                auto &nameComp = g_coordinator->GetComponent<Name>(entity);
-                if (nameComp.name == "FeedbackBar")
-                {
-                    fontEntity = entity;
-                    // std::cout << "========================================" << std::endl;
-                    // std::cout << "[RhythmGameplayInput] Found FeedbackBar: " << entity << std::endl;
-
-                    // Check components
-                    bool hasTransform = g_coordinator->HasComponent<Framework::Transform>(entity);
-                    //bool hasUIElement = g_coordinator->HasComponent<UIElement>(entity);
-                    /*bool hasRenderable = g_coordinator->HasComponent<Framework::Renderable>(entity);*/
-
-                    // std::cout << "[DEBUG] Has Transform: " << (hasTransform ? "YES" : "NO") << std::endl;
-                    // std::cout << "[DEBUG] Has GUIButton: " << (hasGUIButton ? "YES" : "NO") << std::endl;
-                    // std::cout << "[DEBUG] Has Renderable: " << (hasRenderable ? "YES" : "NO") << std::endl;
-
-                    //if (hasUIElement)
-                    //{
-                    //    auto &button = g_coordinator->GetComponent<UIElement>(entity);
-                    //    // std::cout << "[DEBUG] Initial normalColor alpha: " << button.normalColor.a << std::endl;
-                    //    button.normalColor.a = 0.0f;
-                    //    button.hoverColor.a = 0.0f;
-                    //    /*std::cout << "[DEBUG] Set alpha to 0.0" << std::endl;*/
-                    //}
-
-                    if (hasTransform)
-                    {
-                        auto &transform = g_coordinator->GetComponent<Framework::Transform>(entity);
-                        /*std::cout << "[DEBUG] isVisible: " << transform.isVisible << std::endl;*/
-                        transform.isVisible = false;
-                        /*std::cout << "[DEBUG] Set isVisible to false" << std::endl;*/
-                    }
-
-                    /*std::cout << "========================================" << std::endl;*/
-                    break;
-                }
-            }
-        }
-
-        if (fontEntity == 0)
+    // Don't process rhythm inputs on menus
+    auto* coord = Coordinator::GetInstance();
+    auto sceneManager = coord->GetSystem<SceneManager>();
+    if (sceneManager)
+    {
+        std::string currentScene = sceneManager->GrabCurrentScene();
+        if (currentScene.find("MainMenu") != std::string::npos)
+            //currentScene.find("Settings") != std::string::npos ||
+            //currentScene.find("Credits") != std::string::npos)
         {
             return;
         }
-    //}
+    }
 
     processRhythmInputs();
-    processComboInputs();
-
-    // Timer logic
-    //if (fontEntity != 0) {
-        if (g_coordinator->HasComponent<Framework::Transform>(fontEntity)) {
-            auto& transform = g_coordinator->GetComponent<Framework::Transform>(fontEntity);
-            if (transform.autoHide) {
-                transform.visibilityTimer -= deltaTime;
-                // std::cout << "[TIMER] Visibility timer: " << transform.visibilityTimer << std::endl;
-
-                if (transform.visibilityTimer <= 0.0f) {
-                    //std::cout << "[HIDING] Hiding FeedbackBar now!" << std::endl;
-                    transform.isVisible = true;
-                    transform.autoHide = false;
-
-                    //if (g_coordinator->HasComponent<GUIButton>(fontEntity))
-                    //{
-                    //    auto &button = g_coordinator->GetComponent<GUIButton>(fontEntity);
-                    //    button.normalColor.a = 0.0f;
-                    //    button.hoverColor.a = 0.0f;
-                    //}
-                }
-            }
-        }
-    //}
 }
 
 void RhythmGameplayInput::Shutdown()
@@ -206,7 +141,7 @@ void RhythmGameplayInput::processRhythmInputs()
         if (inputMgr->isKeyTriggered(rhythmKeys[i]))
         {
 
-            std::cout << "[KEY DETECTED] " << keyNames[i] << " key pressed!" << std::endl;
+            std::cout << "[KEY DETECTED] " << keyToString(rhythmKeys[i]) << " key pressed!" << std::endl;
 
             // Show feedback bar by setting alpha to 1.0
             //if (g_coordinator->HasComponent<GUIButton>(fontEntity))
@@ -305,23 +240,24 @@ void RhythmGameplayInput::initializeSwordCombos()
 {
     swordCombos.clear();
     swordCombos.emplace_back(std::vector<int>{GLFW_KEY_W, GLFW_KEY_A}, "Basic Strike");
-    swordCombos.emplace_back(std::vector<int>{GLFW_KEY_S, GLFW_KEY_D}, "Swift Slash");
-    swordCombos.emplace_back(std::vector<int>{GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D}, "Power Combo");
+    swordCombos.emplace_back(std::vector<int>{GLFW_KEY_S, GLFW_KEY_D}, "Swift Slash"); // not yet implemented
+    swordCombos.emplace_back(std::vector<int>{GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D}, "Power Combo"); // not yet implemented
 }
 
 std::string RhythmGameplayInput::getTimingFeedback()
 {
-    auto *g_coordinator = Coordinator::GetInstance();
+    auto* g_coordinator = Coordinator::GetInstance();
     auto audioSystem = g_coordinator->GetSystem<AudioManager>();
 
     if (!audioSystem)
-    {
-        return "GOOD";
-    }
+        return "MISS";
 
     double musicPosition = audioSystem->GetBGMPositionSeconds();
+    if (musicPosition <= 0.0)
+        return "MISS";
+
     double beatPosition = fmod(musicPosition, beatInterval);
-    double distance = std::min(beatPosition, fabs(beatInterval - beatPosition));
+    double distance = std::min(beatPosition, beatInterval - beatPosition);
 
     if (distance <= 0.05)
         return "PERFECT";
@@ -334,50 +270,64 @@ void RhythmGameplayInput::processRhythmTiming(int key)
 {
     if (!canInput)
         return;
-    auto *g_coordinator = Coordinator::GetInstance();
 
-    inputReceivedOnThisBeat = true;
-
-    if (currentComboSequence.empty())
-    {
-        comboStartBeat = currentBeatIndex;
-    }
+    auto* g_coordinator = Coordinator::GetInstance();
 
     currentComboSequence.push_back(key);
 
-    std::string feedback = getTimingFeedback();
-
-    bool comboCompleted = false;
-    std::string completedComboName = "";
-
-    for (const auto &combo : swordCombos)
+    if (currentComboSequence.size() == 2)
     {
-        if (currentComboSequence.size() == combo.keySequence.size() &&
-            currentComboSequence == combo.keySequence)
+        if (currentComboSequence[0] == GLFW_KEY_W && currentComboSequence[1] == GLFW_KEY_A)
         {
-            comboCompleted = true;
-            completedComboName = combo.name;
-            break;
+            // COMBO SUCCESS - no key sound, PlayerScript plays sword swing
+            std::string feedback = getTimingFeedback();
+            if (feedback == "MISS") feedback = "GOOD";
+
+            std::cout << "[" << feedback << "] COMBO: Basic Strike!" << std::endl;
+
+            broadcastInputEvent(InputEvent(InputEvent::Type::COMBO_EXECUTED, key, glfwGetTime(), feedback, "Basic Strike"));
+
+            currentComboSequence.clear();
+        }
+        else
+        {
+            // WRONG COMBO - play fail sound
+            std::cout << "[MISS] Wrong combo sequence!" << std::endl;
+
+            if (auto audio = g_coordinator->GetSystem<AudioManager>())
+            {
+                audio->PlaySound("SFX_WrongInput");
+            }
+
+            broadcastInputEvent(InputEvent(InputEvent::Type::COMBO_EXECUTED, key, glfwGetTime(), "MISS", ""));
+
+            currentComboSequence.clear();
         }
     }
-
-    if (comboCompleted) {
-        // plays combo sucess audio file instead of regular beat sound
-        if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
-            audio->PlaySound("combo_success");
+    else if (currentComboSequence.size() == 1)
+    {
+        if (currentComboSequence[0] == GLFW_KEY_W)
+        {
+            // FIRST KEY CORRECT - play W sound
+            if (auto audio = g_coordinator->GetSystem<AudioManager>())
+            {
+                audio->PlaySound("SFX_W_Key");
+            }
         }
+        else
+        {
+            // WRONG START KEY - play fail sound
+            std::cout << "[MISS] Wrong start key!" << std::endl;
 
-        std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << keyToString(key) << " | Combo: " << completedComboName << std::endl;
+            if (auto audio = g_coordinator->GetSystem<AudioManager>())
+            {
+                audio->PlaySound("SFX_WrongInput");
+            }
 
-        auto *msgMgr = MessageManager::GetInstance();
-        InputComboMessage msg(completedComboName, glfwGetTime());
-        msgMgr->Publish(msg);
-    } else {
-        // plays regular beat sfx for regular beat
-        if (auto audio = g_coordinator->GetSystem<AudioManager>()) {
-            audio->PlaySound("beat_placeholder");
+            broadcastInputEvent(InputEvent(InputEvent::Type::COMBO_EXECUTED, key, glfwGetTime(), "MISS", ""));
+
+            currentComboSequence.clear();
         }
-        std::cout << "[INPUT WINDOW - " << feedback << "] Key Pressed: " << keyToString(key) << " | Combo: unsuccessful" << std::endl;
     }
 }
 

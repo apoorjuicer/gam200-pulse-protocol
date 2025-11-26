@@ -60,6 +60,7 @@ void LogicSystem::Init()
     AddScript("ButtonScript", std::make_shared<ButtonScript>());
     AddScript("PulsingBorderScript", std::make_shared<PulsingBorderScript>());
     AddScript("CountdownScript", std::make_shared<CountdownScript>());
+    AddScript("FeedbackScript", std::make_shared<FeedbackScript>());
 
     //std::cout << "=== REGISTERED SCRIPTS ===" << std::endl;
     //for (const auto& [name, script] : map_of_scripts) {
@@ -244,7 +245,7 @@ void PlayerScript::Init(Entity ID)
             if (evt.type != InputEvent::Type::COMBO_EXECUTED)
                 return;
 
-            if (evt.comboName != "Basic Strike")
+            if (evt.comboName.empty() || evt.comboName != "Basic Strike")
                 return;
 
             auto* c = Coordinator::GetInstance();
@@ -256,7 +257,17 @@ void PlayerScript::Init(Entity ID)
             auto& rend = c->GetComponent<Framework::Renderable>(ID);
             auto& anim = c->GetComponent<Framework::Animation>(ID);
 
-            // --- SWITCH TO ATTACK SPRITE ---
+            // PLAY SUCCESS SFX FROM PLAYER'S AUDIOSOURCE
+            if (c->HasComponent<AudioSource>(ID))
+            {
+                auto& audioSrc = c->GetComponent<AudioSource>(ID);
+                if (auto audio = c->GetSystem<AudioManager>())
+                {
+                    audio->PlayFromAudioSource(audioSrc);
+                }
+            }
+
+            // SWITCH TO ATTACK SPRITE
             rend.spriteName = "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png";
             rend.needsTextureReload = true;
 
@@ -267,7 +278,6 @@ void PlayerScript::Init(Entity ID)
             anim.currentFrame = 0;
             anim.elapsedTime = 0.0f;
 
-            // enable attack timer (use PlayerScript's members)
             isAttacking = true;
             attackTimer = 0.5f;
         });
@@ -276,7 +286,6 @@ void PlayerScript::Init(Entity ID)
 void PlayerScript::Update(Entity ID)
 {
     auto g_coordinator = Coordinator::GetInstance();
-    auto& hero_transform = g_coordinator->GetComponent<Framework::Transform>(ID);
 
     static double lastTime = glfwGetTime();
     double currentTime = glfwGetTime();
@@ -310,73 +319,6 @@ void PlayerScript::Update(Entity ID)
             }
         }
     }
-
-    // auto-moves right after game starts (for 2 secs)
-    /*if (autoMoveTimer > 0.0f) {
-        hero_transform.Pos.x += 3.0f;
-        autoMoveTimer -= 0.016f;
-    }*/
-
-    float moveSpeed = 300.0f;
-
-    // this is just regular WASD
-    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_T) == GLFW_PRESS)
-    {
-        hero_transform.Pos.y += moveSpeed * dt;
-    }
-
-    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_F) == GLFW_PRESS)
-    {
-        hero_transform.Pos.x -= moveSpeed * dt;
-    }
-
-    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_G) == GLFW_PRESS)
-    {
-        hero_transform.Pos.y -= moveSpeed * dt;
-    }
-
-    if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_H) == GLFW_PRESS)
-    {
-        hero_transform.Pos.x += moveSpeed * dt;
-    }
-
-    //// ==============================================================
-    //// --- Rotation toggle control (N key) ---
-    //// ==============================================================
-    //static bool isRotating = false;      // current rotation state
-    //static bool wasBPressed = false;     // key press debounce
-
-    //if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_N) == GLFW_PRESS)
-    //{
-    //    if (!wasBPressed)
-    //    {
-    //        isRotating = !isRotating;   // toggle on/off
-    //        wasBPressed = true;
-    //        std::cout << (isRotating ? "[PLAYER] Rotation enabled.\n"
-    //            : "[PLAYER] Rotation disabled.\n");
-    //    }
-    //}
-    //else
-    //{
-    //    wasBPressed = false;            // reset when key released
-    //}
-
-    //// ==============================================================
-    //// --- Apply rotation if toggled on ---
-    //// ==============================================================
-    //if (isRotating)
-    //{
-    //    lastTime = currentTime;
-
-    //    float rotationSpeed = 180.0f; // degrees per second
-    //    hero_transform.Rotation.x += rotationSpeed * dt;
-
-    //    if (hero_transform.Rotation.x >= 360.0f)
-    //        hero_transform.Rotation.x -= 360.0f;
-
-    //    std::cout << "[PLAYER ROTATE] Rotation.x = "
-    //        << hero_transform.Rotation.x << " degrees\n";
-    //}
 }
 
 void PlayerScript::Exit(Entity ID)
@@ -493,6 +435,10 @@ void EnemyScript::Init(Entity ID)
 
 void EnemyScript::Update(Entity ID)
 {
+    // FREEZE DURING COUNTDOWN
+    if (!g_countdownFinished)
+        return;
+
     auto g = Coordinator::GetInstance();
     if (!g->HasComponent<Framework::Transform>(ID) ||
         !g->HasComponent<AABB>(ID) ||
@@ -540,19 +486,43 @@ void EnemyScript::Update(Entity ID)
     }
 
     // ============================================================
-    // HOPPER MOVEMENT  
+    // HOPPER MOVEMENT (NOW BEAT-SYNCED) 
     // ============================================================
-    static std::unordered_map<Entity, float> hopTimer;
-    hopTimer[ID] += dt;
+    //static std::unordered_map<Entity, float> hopTimer;
+    //hopTimer[ID] += dt;
 
-    const float hopInterval = 0.50f;   // seconds between hops
-    const float hopDistance = 100.0f;  // teleport left
+    //const float hopInterval = 0.50f;   // seconds between hops
+    //const float hopDistance = 100.0f;  // teleport left
 
-    if (hopTimer[ID] >= hopInterval)
+    //if (hopTimer[ID] >= hopInterval)
+    //{
+    //    enemy_transform.Pos.x -= hopDistance;
+    //    hopTimer[ID] = 0.0f;
+    //}
+
+    // chloe -> ur previous one was not moving according to the beat
+    static std::unordered_map<Entity, bool> wasOnBeat;
+
+    auto audioSystem = g->GetSystem<AudioManager>();
+    if (!audioSystem)
+        return;
+
+    double musicPos = audioSystem->GetBGMPositionSeconds();
+    if (musicPos <= 0.0)
+        return;
+
+    float beatInterval = 0.5f;
+    float normalizedTime = fmodf((float)musicPos, beatInterval) / beatInterval;
+    float beatWindow = 0.15f;
+
+    bool onBeat = (normalizedTime < beatWindow || normalizedTime >(1.0f - beatWindow));
+
+    if (onBeat && !wasOnBeat[ID])
     {
-        enemy_transform.Pos.x -= hopDistance;
-        hopTimer[ID] = 0.0f;
+        enemy_transform.Pos.x -= 100.0f;
     }
+
+    wasOnBeat[ID] = onBeat;
 
     // ============================================================
     // MANUAL DEBUG MOVEMENT (unchanged)
@@ -1309,12 +1279,11 @@ void PulsingBorderScript::Update(Entity ID)
     auto* g_coordinator = Coordinator::GetInstance();
 
     float beatInterval = 0.5f;
-
     double timeSource = 0.0;
 
     if (!g_countdownFinished)
     {
-        timeSource = glfwGetTime() - pulseTimer;  // Elapsed since start
+        timeSource = glfwGetTime() - pulseTimer;
     }
     else
     {
@@ -1324,15 +1293,9 @@ void PulsingBorderScript::Update(Entity ID)
 
         timeSource = audioSystem->GetBGMPositionSeconds();
 
-        if (timeSource <= 0.0)
-        {
-            if (g_coordinator->HasComponent<Framework::Transform>(ID))
-            {
-                auto& transform = g_coordinator->GetComponent<Framework::Transform>(ID);
-                transform.isVisible = false;
-            }
+        // Only skip if BGM not started yet (negative), 0.0 is valid first beat
+        if (timeSource < 0.0)
             return;
-        }
     }
 
     float normalizedTime = fmodf((float)timeSource, beatInterval) / beatInterval;
@@ -1369,7 +1332,7 @@ void PulsingBorderScript::Exit(Entity ID)
 }
 
 // =====================================================================
-// COUNTDOWN SCRIPT (120 BPM synced)
+// COUNTDOWN SCRIPT
 // =====================================================================
 void CountdownScript::Init(Entity ID)
 {
@@ -1436,4 +1399,84 @@ void CountdownScript::Exit(Entity ID)
 {
     (void)ID;
     g_countdownFinished = false;
+}
+
+// =====================================================================
+// FEEDBACK SCRIPT (PERFECT/GOOD/MISS images)
+// =====================================================================
+void FeedbackScript::Init(Entity ID)
+{
+    auto* coord = Coordinator::GetInstance();
+
+    // Hide initially
+    if (coord->HasComponent<Framework::Transform>(ID))
+    {
+        auto& transform = coord->GetComponent<Framework::Transform>(ID);
+        transform.isVisible = false;
+    }
+
+    // Register listener for combo events
+    auto rhythm = coord->GetSystem<RhythmGameplayInput>();
+    if (!rhythm) return;
+
+    rhythm->registerInputListener("FeedbackDisplay",
+        [this, ID](const InputEvent& evt)
+        {
+            if (evt.type != InputEvent::Type::COMBO_EXECUTED)
+                return;
+
+            auto* c = Coordinator::GetInstance();
+
+            if (!c->HasComponent<Framework::Renderable>(ID) ||
+                !c->HasComponent<Framework::Transform>(ID))
+                return;
+
+            auto& rend = c->GetComponent<Framework::Renderable>(ID);
+            auto& transform = c->GetComponent<Framework::Transform>(ID);
+
+            // Change texture based on feedback
+            if (evt.feedback == "PERFECT")
+            {
+                rend.spriteName = "../../MyEngine/Assets/Textures/UI/perfect.png";
+            }
+            else if (evt.feedback == "GOOD")
+            {
+                rend.spriteName = "../../MyEngine/Assets/Textures/UI/great.png";
+            }
+            else // MISS
+            {
+                rend.spriteName = "../../MyEngine/Assets/Textures/UI/miss.png";
+            }
+
+            rend.needsTextureReload = true;
+            transform.isVisible = true;
+            isShowing = true;
+            startTime = static_cast<float>(glfwGetTime());
+            displayTimer = 0.5f;  // Show for 0.5 seconds
+        });
+}
+
+void FeedbackScript::Update(Entity ID)
+{
+    if (!isShowing)
+        return;
+
+    auto* coord = Coordinator::GetInstance();
+
+    float elapsed = static_cast<float>(glfwGetTime()) - startTime;
+
+    if (elapsed >= displayTimer)
+    {
+        if (coord->HasComponent<Framework::Transform>(ID))
+        {
+            auto& transform = coord->GetComponent<Framework::Transform>(ID);
+            transform.isVisible = false;
+        }
+        isShowing = false;
+    }
+}
+
+void FeedbackScript::Exit(Entity ID)
+{
+    (void)ID;
 }

@@ -143,6 +143,19 @@ private:
 	float countdownTimer = 0.0f;
 };
 
+class FeedbackScript : public Iscript
+{
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
+
+private:
+	float displayTimer = 0.0f;
+	bool isShowing = false;
+	float startTime = 0.0f;
+};
+
 class LogicSystem: public Systems
 {
 public:
