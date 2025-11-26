@@ -38,8 +38,6 @@ namespace MyEditor {
     void Draw();
     void Render();
     void Shutdown();
-    void SetEnabled(bool enabled);
-    bool IsEnabled();
   
 
     struct GameViewport { int x, y, w, h; };
@@ -54,6 +52,9 @@ namespace MyEditor {
     
     // Returns the middle "game" rectangle in FRAMEBUFFER PIXELS, computed from current panel sizes
     GameViewport ComputeMiddleGameViewportPixels(GLFWwindow* window, bool keep_16x9 = true);
+    // update cursor
+    static void UpdateImGuiCursor(GLFWwindow* window);
+
 
     // Simple editor-gizmo state
     struct GizmoState {

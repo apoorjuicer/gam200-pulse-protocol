@@ -391,9 +391,7 @@ void CoreEngine::Init()
 	}
 
 	glfwMakeContextCurrent(window);
-	GLHelper::ptr_window = window;
 
-	//GLHelper::setup_event_callbacks();
 
 	// === FORCE FULLSCREEN AT STARTUP ===
 	{
@@ -409,6 +407,13 @@ void CoreEngine::Init()
 			mode->refreshRate
 		);
 	}
+
+	glfwSetCharCallback(window, [](GLFWwindow*, unsigned int c)
+		{
+			auto input = Coordinator::GetInstance()->GetSystem<InputManager>();
+			if (input)
+				input->pushChar(c);
+	});
 
 	// Pause/resume on focus change (covers ALT+TAB and returning from Ctrl+Alt+Del)
 	glfwSetWindowFocusCallback(window,

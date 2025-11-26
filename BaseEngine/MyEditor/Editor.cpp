@@ -18,6 +18,7 @@
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "Input/InputManager.h"
 
+
 // ==========================================================================
 
 
@@ -35,8 +36,8 @@ namespace MyEditor
     std::vector<std::string> s_pendingOSDrops;
 
     static GLFWwindow* s_Window = nullptr;
-    static bool s_enabled = false;
     static bool s_restoreNextFrame = false;
+    static bool s_prevKeys[GLFW_KEY_LAST + 1] = { false };
 
 
     // --------------------------------------------------------------------
@@ -227,95 +228,119 @@ namespace MyEditor
 
         Engine->m_editorFrameCallback = Editor_FrameCallback;
 
-
         ImGuiIO& io = ImGui::GetIO();
         io.IniFilename = nullptr;
 
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        // Viewports OFF (keep editor inside GLFW window)
-        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
         ImGui::StyleColorsDark();
 
         ImGui_ImplOpenGL3_Init("#version 130");
 
-        InitProjectPanel();      // your panel init
+        InitProjectPanel();
 
-        s_enabled = true;
 
-        std::cout << "[ImGui] Docking: "
-            << ((io.ConfigFlags & ImGuiConfigFlags_DockingEnable) ? "ON" : "OFF")
-            << ", Viewports: "
-            << ((io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) ? "ON" : "OFF")
-            << "\n";
     }
 
 
-    void SetEnabled(bool enabled) { s_enabled = enabled; }
-    bool IsEnabled() { return s_enabled; }
     
   
+
+
     void NewFrame()
     {
-        if (!s_enabled)
-            return;
 
-        // Backend begins new frame
+        // --- Backend: OpenGL only ---
         ImGui_ImplOpenGL3_NewFrame();
 
         ImGuiIO& io = ImGui::GetIO();
 
-        // --- Display size ---
+        // ============================================================
+        // 1. Proper DeltaTime (fix cursor blink, animation speed, etc)
+        // ============================================================
+        {
+            static double lastTime = glfwGetTime();
+            double now = glfwGetTime();
+            io.DeltaTime = (float)(now - lastTime);
+
+            // fallback (avoid zero or negative values)
+            if (io.DeltaTime <= 0.0f)
+                io.DeltaTime = 1.0f / 60.0f;
+
+            lastTime = now;
+        }
+
+        // ============================================================
+        // 2. Display size
+        // ============================================================
         float w = (float)WindowWidth;
         float h = (float)WindowHeight;
-        if (w <= 0.0f) w = 1.0f;
-        if (h <= 0.0f) h = 1.0f;
+        if (w <= 0) w = 1;
+        if (h <= 0) h = 1;
 
         io.DisplaySize = ImVec2(w, h);
         io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
+        // ============================================================
+        // 3. Manual input injection (NO glfw backend)
+        // ============================================================
         auto g_coordinator = Coordinator::GetInstance();
-        // --- Input injection ---
         if (auto input = g_coordinator->GetSystem<InputManager>())
         {
-            // mouse
+            // --- Mouse position ---
             glm::vec2 mp = input->getMousePosition();
             io.AddMousePosEvent(mp.x, mp.y);
 
-            io.AddMouseButtonEvent(0, input->isMouseButtonPressed(0));
-            io.AddMouseButtonEvent(1, input->isMouseButtonPressed(1));
-            io.AddMouseButtonEvent(2, input->isMouseButtonPressed(2));
-
-            io.AddMouseWheelEvent(0.0f, 0.0f);
-
-            // keyboard
-            for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++)
+            // --- Mouse buttons ---
+            for (int i = 0; i < 3; i++)
             {
-                bool down = input->isKeyPressed(key);
-                ImGuiKey imKey = TranslateGLFWKeyToImGuiKey(key);
-                if (imKey != ImGuiKey_None)
-                    io.AddKeyEvent(imKey, down);
+                io.AddMouseButtonEvent(i, input->isMouseButtonPressed(i));
             }
 
-            // text input
+            // --- Mouse scroll (your engine probably uses scrollY) ---
+            io.AddMouseWheelEvent(0.0f, 0.0f); // keep unchanged if no real scroll
+
+            // --- Keyboard events (ONLY on state change!!!) ---
+            for (int key = 32; key <= GLFW_KEY_LAST; key++)
+            {
+                bool down = input->isKeyPressed(key);
+
+                // Only send a key event when state changes
+                if (down != s_prevKeys[key])
+                {
+                    ImGuiKey imKey = TranslateGLFWKeyToImGuiKey(key);
+                    if (imKey != ImGuiKey_None)
+                    {
+                        io.AddKeyEvent(imKey, down);
+                    }
+
+                    s_prevKeys[key] = down;
+                }
+            }
+
+            // --- Text input (typing real characters) ---
             unsigned int c = input->getLastCharTyped();
             if (c != 0 && c != '\b')
+            {
                 io.AddInputCharacter(c);
+            }
             input->clearLastChar();
         }
 
-        // THIS WAS MISSING — CRASH FIX
+        // ============================================================
+        // 4. ImGui internal start
+        // ============================================================
         ImGui::NewFrame();
-    }
 
+
+    }
 
 
 
 
 
     void Draw() {
-        if (!s_enabled) return;
 
         if (s_restoreNextFrame) {
             RestoreEditorBaseline();
@@ -541,13 +566,18 @@ namespace MyEditor
         }
 
         ImGui::End(); // LayoutOverlay
+        UpdateImGuiCursor(s_Window);
 
     }
 
 
-    void Render() {
-        if (!s_enabled) return;
+    void Render()
+    {
+        // --- Apply viewport ---
+        auto glvp = ComputeMiddleGameViewportPixels(s_Window, true);
+        glViewport(glvp.x, glvp.y, glvp.w, glvp.h);
 
+        // --- Render ImGui ---
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
@@ -556,15 +586,11 @@ namespace MyEditor
 
     void Shutdown()
     {
-        if (!s_enabled)
-            return;
-
-        s_enabled = false;
 
         ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
     }
+
 
     extern float s_left_ratio;
     extern float s_right_ratio;
@@ -671,6 +697,53 @@ namespace MyEditor
 
         return { vx, vy, vw, vh };
     }
+
+    static void UpdateImGuiCursor(GLFWwindow* window)
+    {
+        ImGuiIO& io = ImGui::GetIO();
+
+        // If ImGui draws its own cursor (software cursor), hide OS cursor
+        if (io.MouseDrawCursor)
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+            return;
+        }
+
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+        // Ask ImGui what cursor it wants
+        ImGuiMouseCursor cursor = ImGui::GetMouseCursor();
+        GLFWcursor* glfwCursor = nullptr;
+
+        switch (cursor)
+        {
+        case ImGuiMouseCursor_ResizeNS:
+            glfwCursor = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+            break;
+
+        case ImGuiMouseCursor_ResizeEW:
+            glfwCursor = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+            break;
+
+        case ImGuiMouseCursor_Hand:
+            glfwCursor = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+            break;
+
+            // GLFW does NOT support diagonal resize → use arrow instead
+        case ImGuiMouseCursor_ResizeNWSE:
+        case ImGuiMouseCursor_ResizeNESW:
+            glfwCursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            break;
+
+        default:
+            glfwCursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            break;
+        }
+
+        if (glfwCursor)
+            glfwSetCursor(window, glfwCursor);
+    }
+
 
     void Editor_FrameCallback()
     {

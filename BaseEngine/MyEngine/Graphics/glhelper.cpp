@@ -39,9 +39,6 @@ GLboolean GLHelper::keyPause = GL_FALSE;
 GLint  GLHelper::GameWidth;
 GLint  GLHelper::GameHeight;
 
-GLint  GLHelper::EditorWidth;
-GLint  GLHelper::EditorHeight;
-
 GLint  GLHelper::GameOffsetX;
 GLint  GLHelper::GameOffsetY;
 std::pair<double, double> GLHelper::s_mousePos = { 0.0, 0.0 };
@@ -150,14 +147,6 @@ void GLHelper::setup_event_callbacks() {
 	glfwSetCursorPosCallback(GLHelper::ptr_window, GLHelper::mousepos_cb);
 	glfwSetScrollCallback(GLHelper::ptr_window, GLHelper::mousescroll_cb);
 	glfwSetWindowFocusCallback(GLHelper::ptr_window, GLHelper::focus_cb);
-
-	glfwSetCharCallback(ptr_window,
-		[](GLFWwindow*, unsigned int c)
-		{
-			if (auto input = Coordinator::GetInstance()->GetSystem<InputManager>())
-				input->pushChar(c);
-		}
-	);
 }
 /*  _________________________________________________________________________ */
 /*! cleanup
@@ -484,21 +473,21 @@ void GLHelper::fbsize_cb(GLFWwindow* ptr_win, int fbwidth, int fbheight) {
 	GLHelper::width = fbwidth;
 	GLHelper::height = fbheight;
 
-	GLint w = GLHelper::width - GLHelper::EditorWidth, h = GLHelper::height - GLHelper::EditorHeight;
-	float a = (9.0f / 16.0f) * w; // a has a 9:16 ratio with w
-	float b = (16.0f / 9.0f) * h; // b has a 16:9 ratio with h
+	/*GLint w = GLHelper::width - GLHelper::EditorWidth, h = GLHelper::height - GLHelper::EditorHeight;*/
+	//float a = (9.0f / 16.0f) * w; // a has a 9:16 ratio with w
+	//float b = (16.0f / 9.0f) * h; // b has a 16:9 ratio with h
 
-	if (h > a) {
-		h = static_cast<GLint>(a);
-	}
-	else if (w > b) {
-		w = static_cast<GLint>(b);
-	}
+	//if (h > a) {
+	//	h = static_cast<GLint>(a);
+	//}
+	//else if (w > b) {
+	//	w = static_cast<GLint>(b);
+	//}
 
-	GLHelper::GameWidth = w;
-	GLHelper::GameHeight = h;
+	//GLHelper::GameWidth = w;
+	//GLHelper::GameHeight = h;
 
-	glViewport(GameOffsetX, GameOffsetY, w, h);
+	/*glViewport(GameOffsetX, GameOffsetY, w, h);*/
 }
 
 void GLHelper::focus_cb(GLFWwindow* window, int focused) {

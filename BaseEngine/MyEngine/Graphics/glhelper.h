@@ -52,9 +52,9 @@ struct GLHelper
 	static std::unordered_map<int, bool> keyState;
 
 	static DLL_API GLint width, height;
-	static GLint GameWidth, GameHeight;
-	static GLint GameOffsetX, GameOffsetY;
-	static GLint EditorWidth, EditorHeight;  // Keep the static members as they are
+	static DLL_API GLint GameWidth, GameHeight;
+	static DLL_API GLint GameOffsetX, GameOffsetY;
+	//static GLint EditorWidth, EditorHeight;  // Keep the static members as they are
 
 	static DLL_API GLdouble fps;
 	static GLdouble delta_time; // time taken to complete most recent game loop
