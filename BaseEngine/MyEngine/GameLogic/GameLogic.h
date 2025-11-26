@@ -77,6 +77,24 @@ public:
 	static bool testOBBCollision;
 };
 
+//class EnemySpawnerScript : public Iscript
+//{
+//public:
+//	void Init(Entity ID) override;
+//	void Update(Entity ID) override;
+//	void Exit(Entity ID) override;
+//
+//	// Track the two enemies
+//	static Entity Enemy1ID;
+//	static Entity Enemy2ID;
+//
+//	// True when Enemy 1 has died
+//	static bool Enemy1Dead;
+//
+//	// Per-enemy hop timer (moved here)
+//	static std::unordered_map<Entity, float> HopTimer;
+//};
+
 // Per-button data structure
 struct ButtonData
 {
