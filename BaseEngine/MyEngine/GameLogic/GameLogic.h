@@ -25,9 +25,12 @@
 #include "../CoreEngine/ECS/Coordinator.h"
 //#include "../MyEngine/Components/ScriptName.h"
 #include "../MyEngine/Serialization/Serialization.h"
+#include "../Input/RhythmGameplayInput.h"
 
 //components:
 #include "../Graphics/Transform.h"
+#include "./Components/DisplayName.h"
+#include "../Graphics/Renderable.h"
 
 
 //Serialize
@@ -105,6 +108,40 @@ public:
 	float enemyDmg;
 };
 
+// Per-button data structure
+struct ButtonData
+{
+	std::string buttonName;
+	std::string normalTexture;
+	std::string hoverTexture;
+	bool isHovering = false;
+};
+
+class ButtonScript : public Iscript
+{
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
+
+private:
+	// Store data per entity ID
+	std::unordered_map<Entity, ButtonData> buttonDataMap;
+};
+
+class PulsingBorderScript : public Iscript
+{
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
+
+private:
+	float pulseTimer = 0.0f;
+	float bpm = 120.0f;
+	float minAlpha = 0.2f;
+	float maxAlpha = 1.0f;
+};
 
 class LogicSystem: public Systems
 {

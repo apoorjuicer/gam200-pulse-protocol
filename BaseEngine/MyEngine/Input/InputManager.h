@@ -18,6 +18,7 @@
 #include "CoreEngine/Core/ImportExport.h"
 #include "../MyEngine/CoreEngine/ECS/System.h"
 #include "../MyEngine/CoreEngine/Message/MessageManager.h"
+#include "Graphics\glhelper.h"
 
 class DLL_API InputManager : public Systems {
 public:

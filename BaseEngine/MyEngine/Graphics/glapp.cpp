@@ -58,8 +58,6 @@ GLApp::Camera2D GLApp::gCamera{};
 void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/)
 {
 	gBatch.Init(/*maxSprites*/ 10000);
-
-	// move to editor pls
 	//#ifdef ENABLE_EDITOR
 //	// --- Compute middle rectangle from window size using fixed ratios ---
 //	const float kLeftRatio = 0.20f;	  // 20% width
@@ -236,7 +234,6 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 
 void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 
-	// move to editor pls
 	//#ifdef ENABLE_EDITOR
 //	GLFWwindow* window = glfwGetCurrentContext();
 //	if (MyEditor::IsEnabled())
@@ -321,10 +318,24 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	drawList.reserve(entities.size());
 
 	// Draw entities
-// build drawList
+    // build drawList
 	for (auto it : entities) {
-		auto& lt = g_coordinator->GetComponent<LayerTag>(it);
-		if ((lt.mask & includeMask) == 0) continue;
+		// BEFORE (ORIGINAL CODE):
+		//     auto& lt = g_coordinator->GetComponent<LayerTag>(it);
+		//     if ((lt.mask & includeMask) == 0) continue;
+		//
+
+		// AFTER:
+		// Check if entity has LayerTag component first
+		if (!g_coordinator->HasComponent<LayerTag>(it)) {
+			// No LayerTag - treat as LAYER_ALL (always visible)
+			// Skip to normal rendering checks below
+		}
+		else {
+			// Has LayerTag - check if it matches the filter
+			auto& lt = g_coordinator->GetComponent<LayerTag>(it);
+			if ((lt.mask & includeMask) == 0) continue;  // Layer filtered out
+		}
 
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
 		auto& re = g_coordinator->GetComponent<Framework::Renderable>(it);
@@ -347,11 +358,40 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		drawList.push_back(it);
 	}
 
+	// BEFORE (ORIGINAL CODE):
+	//     std::stable_sort(drawList.begin(), drawList.end(), [&](Entity a, Entity b) {
+	//         auto& A = g_coordinator->GetComponent<LayerTag>(a);
+	//         auto& B = g_coordinator->GetComponent<LayerTag>(b);
+	//         if (A.orderInLayer != B.orderInLayer) return A.orderInLayer < B.orderInLayer;
+	//         return A.z < B.z;
+	//     });
+
+	// AFTER:
 	std::stable_sort(drawList.begin(), drawList.end(), [&](Entity a, Entity b) {
-		auto& A = g_coordinator->GetComponent<LayerTag>(a);
-		auto& B = g_coordinator->GetComponent<LayerTag>(b);
-		if (A.orderInLayer != B.orderInLayer) return A.orderInLayer < B.orderInLayer;
-		return A.z < B.z;
+		LayerMask maskA = LAYER_WORLD, maskB = LAYER_WORLD;
+		int orderA = 0, orderB = 0;
+		float zA = 0.0f, zB = 0.0f;
+
+		if (g_coordinator->HasComponent<LayerTag>(a)) {
+			auto& A = g_coordinator->GetComponent<LayerTag>(a);
+			maskA = A.mask;
+			orderA = A.orderInLayer;
+			zA = A.z;
+		}
+
+		if (g_coordinator->HasComponent<LayerTag>(b)) {
+			auto& B = g_coordinator->GetComponent<LayerTag>(b);
+			maskB = B.mask;
+			orderB = B.orderInLayer;
+			zB = B.z;
+		}
+
+		// Sort by layer first (Background < World < UI)
+		if (maskA != maskB) return maskA < maskB;
+		// Then by orderInLayer within same layer
+		if (orderA != orderB) return orderA < orderB;
+		// Then by z depth
+		return zA < zB;
 		});
 
 	// Draw

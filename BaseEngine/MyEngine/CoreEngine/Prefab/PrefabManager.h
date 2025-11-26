@@ -4,14 +4,15 @@
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
  * @brief       Declares the PrefabManager class for managing reusable entity templates.
- *              Handles saving entities as prefabs, instantiating prefabs into scenes,
- *              and tracking available prefabs in the asset directory.
+ *
+ *              UPDATED:
+ *              - Added CanSaveAsPrefab() - checks if entity can be saved
+ *              - Added GetBlockReason() - returns reason why entity cannot be saved
+ *              - Blocks '_' prefix entities (engine-managed), allows game text
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
- *              Reproduction or disclosure of this file or its contents without the
- *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 
 #pragma once
 #include "pch/pch_temp.h"
@@ -36,7 +37,13 @@ public:
     PrefabManager();   // Constructor
     ~PrefabManager();  // Destructor
 
-    // save entity as prefab
+    // Check if entity can be saved as prefab (returns false for '_' prefix entities)
+    bool CanSaveAsPrefab(Entity entity) const;
+
+    // Get reason why entity cannot be saved (empty string if it can be saved)
+    std::string GetBlockReason(Entity entity) const;
+
+    // save entity as prefab (returns false if entity has '_' prefix name)
     bool SaveEntityAsPrefab(Entity entity, std::string const& prefabName);
 
     // load prefab and create entity

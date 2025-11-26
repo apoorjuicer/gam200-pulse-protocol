@@ -19,9 +19,12 @@
 
 #include "Hierarchy.h"
 #include "Editor.h"   // selectedEntity, INVALID_ENTITY, entityDisplayOrder, Game/ECS helpers
+#include "TopBarPanel.h"
+
+#include "../CoreEngine/Prefab/PrefabInstance.h"
 
 // ImGui
-#include <imgui.h>
+#include "imgui.h"
 
 // Everything else (Factory, Name, GUIButton, Renderable, Transform, Animation)
 // is already included via Editor.h
@@ -237,6 +240,13 @@ namespace MyEditor
         // TOOLBAR - CREATE & DELETE & REORDER
         // ============================================
 
+        // Disable all editing when playing
+        bool isPlaying = IsPlaying();
+        if (isPlaying)
+        {
+            ImGui::BeginDisabled();
+        }
+
         // [+] Create Empty Entity at end
         if (ImGui::Button("+"))
         {
@@ -362,9 +372,8 @@ namespace MyEditor
         for (int i = 0; i < static_cast<int>(entityDisplayOrder.size()); ++i)
         {
             Entity entity = entityDisplayOrder[i];
+            // Get display name
             std::string display;
-
-            // Get display name from Name component
             if (g_coordinator->HasComponent<Name>(entity))
             {
                 display = g_coordinator->GetComponent<Name>(entity).name;
@@ -373,6 +382,15 @@ namespace MyEditor
             {
                 // Fallback only for legacy entities without Name component
                 display = "Entity " + std::to_string(static_cast<int>(entity));
+            }
+
+            // Check if prefab instance
+            bool isPrefabInstance = g_coordinator->HasComponent<PrefabInstance>(entity);
+
+            // Add prefix for prefab instances
+            if (isPrefabInstance)
+            {
+                display = "[P] " + display;
             }
 
             bool isSelected = (selectedEntity == entity);
@@ -419,11 +437,21 @@ namespace MyEditor
             }
             else
             {
-                // Normal selectable display
+                // Blue color for prefab instances
+                if (isPrefabInstance)
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
+                }
+
                 if (ImGui::Selectable(uniqueLabel.c_str(), isSelected))
                 {
                     selectedEntity = entity;
                     anySelectableClicked = true;
+                }
+
+                if (isPrefabInstance)
+                {
+                    ImGui::PopStyleColor();
                 }
 
                 // =================================================================
@@ -559,6 +587,12 @@ namespace MyEditor
         }
 
         ImGui::EndChild();
+
+        if (isPlaying)
+        {
+            ImGui::EndDisabled();
+        }
+
         ImGui::End();
     }
 

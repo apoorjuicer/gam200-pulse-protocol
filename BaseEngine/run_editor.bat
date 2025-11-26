@@ -22,10 +22,6 @@ cmake --build . --config Debug
 
 popd
 
-REM ---- COPY DOCS INTO EDITOR BUILD FOLDER (optional, same as your old script)
-cmake -E copy_if_different "%~dp0MyEngine\Bloop_ReadMe.txt" "%~dp0build\Bloop_ReadMe.txt"
-cmake -E copy_if_different "%~dp0MyEngine\projectGuide.txt" "%~dp0build\projectGuide.txt"
-
 echo.
 echo ============================================
 echo Editor build done. Open:

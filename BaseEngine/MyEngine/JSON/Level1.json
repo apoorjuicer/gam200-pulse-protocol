@@ -55,6 +55,14 @@
                     "name": {
                         "name": "Background"
                     }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "Background",
+                        "mask": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
                 }
             ]
         },
@@ -68,8 +76,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -880.923095703125,
-                            "y": -322.15380859375
+                            "x": -906.075927734375,
+                            "y": -309.5775146484375
                         },
                         "scale": {
                             "x": 700.0,
@@ -101,7 +109,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.13594092428684236,
+                        "elapsedTime": 0.6310111284255981,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -120,7 +128,7 @@
                 },
                 {
                     "Health": {
-                        "hp": 4,
+                        "hp": 3,
                         "damage": 1,
                         "isAlive": true
                     }
@@ -144,6 +152,184 @@
                         "prefabName": "Jeff",
                         "isLinked": true
                     }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 50,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "Typing": {
+                        "Type": "Enemy"
+                    }
+                },
+                {
+                    "transform": {
+                        "position": {
+                            "x": 1918.79296875,
+                            "y": -348.4979553222656
+                        },
+                        "scale": {
+                            "x": 600.0,
+                            "y": 600.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "BlueGorillaEnemy",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "EnemyScript"
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Blue Gorilla"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 1,
+                        "damage": 1,
+                        "isAlive": true
+                    }
+                },
+                {
+                    "AABB": {
+                        "min": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "max": {
+                            "x": 410.0,
+                            "y": 280.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "Blue Gorilla",
+                        "isLinked": false
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 10,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "SFX_WrongInput",
+                        "volume": 1.0,
+                        "loop": false,
+                        "playOnAwake": false
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 1380.9234619140626,
+                            "y": 694.1539306640625
+                        },
+                        "scale": {
+                            "x": 100.0,
+                            "y": 100.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/back.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "ButtonScript"
+                    }
+                },
+                {
+                    "name": {
+                        "name": "BackBtn"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "orderInLayer": 10,
+                        "z": 100.0
+                    }
                 }
             ]
         },
@@ -153,18 +339,18 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": -300.0
+                            "y": 0.0
                         },
                         "scale": {
-                            "x": 600.0,
-                            "y": 90.0
+                            "x": 200.0,
+                            "y": 200.0
                         },
                         "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
-                        "visibilityTimer": -0.016998864710330964,
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
@@ -172,7 +358,7 @@
                     "render": {
                         "mdl_ref": 0.0,
                         "shd_ref": 0.0,
-                        "useTexture": false,
+                        "useTexture": true,
                         "spriteName": "",
                         "tintColor": {
                             "r": 1.0,
@@ -183,8 +369,34 @@
                     }
                 },
                 {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
                     "name": {
-                        "name": "FeedbackBar"
+                        "name": "BGMusic"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "Background",
+                        "mask": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "BGM_L1",
+                        "volume": 0.4000000059604645,
+                        "loop": true,
+                        "playOnAwake": true
                     }
                 }
             ]
@@ -192,19 +404,14 @@
         {
             "components": [
                 {
-                    "Typing": {
-                        "Type": "Enemy"
-                    }
-                },
-                {
                     "transform": {
                         "position": {
-                            "x": 657.768798828125,
-                            "y": -359.6923522949219
+                            "x": -801.1173095703125,
+                            "y": 555.0877685546875
                         },
                         "scale": {
-                            "x": 600.0,
-                            "y": 600.0
+                            "x": 582.5,
+                            "y": 200.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -217,10 +424,10 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 1.0,
+                        "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "BlueGorillaEnemy",
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/health bar.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -240,40 +447,16 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": "EnemyScript"
-                    }
-                },
-                {
                     "name": {
-                        "name": "Blue Gorilla"
+                        "name": "ContaineRHealth"
                     }
                 },
                 {
-                    "Health": {
-                        "hp": 1,
-                        "damage": 1,
-                        "isAlive": true
-                    }
-                },
-                {
-                    "AABB": {
-                        "min": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "max": {
-                            "x": 410.0,
-                            "y": 280.0
-                        },
-                        "width": 50.0,
-                        "height": 50.0
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "Blue Gorilla",
-                        "isLinked": true
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "orderInLayer": 15,
+                        "z": 100.0
                     }
                 }
             ]
@@ -281,40 +464,35 @@
         {
             "components": [
                 {
-                    "Typing": {
-                        "Type": "Enemy"
-                    }
-                },
-                {
                     "transform": {
                         "position": {
-                            "x": 1863.30712890625,
-                            "y": -344.3077087402344
+                            "x": 0.0,
+                            "y": 0.0
                         },
                         "scale": {
-                            "x": 600.0,
-                            "y": 600.0
+                            "x": 1650.0,
+                            "y": 950.0
                         },
                         "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 1.0,
+                        "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "BlueGorillaEnemy",
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/border_transparent.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
-                            "a": 1.0
+                            "a": 0.0
                         }
                     }
                 },
@@ -330,39 +508,28 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "EnemyScript"
+                        "ScriptName": "PulsingBorderScript"
                     }
                 },
                 {
                     "name": {
-                        "name": "Blue Gorilla"
+                        "name": "BeatBorder"
                     }
                 },
                 {
-                    "Health": {
-                        "hp": 1,
-                        "damage": 1,
-                        "isAlive": true
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "orderInLayer": 0,
+                        "z": 100.0
                     }
                 },
                 {
-                    "AABB": {
-                        "min": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "max": {
-                            "x": 410.0,
-                            "y": 280.0
-                        },
-                        "width": 50.0,
-                        "height": 50.0
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "Blue Gorilla",
-                        "isLinked": true
+                    "audiosource": {
+                        "audio_id": "SFX_Border_Beat",
+                        "volume": 0.38999998569488528,
+                        "loop": false,
+                        "playOnAwake": false
                     }
                 }
             ]
@@ -372,12 +539,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -944.615234375,
-                            "y": 592.6154174804688
+                            "x": -661.9229736328125,
+                            "y": 516.7310180664063
                         },
                         "scale": {
-                            "x": 433.0,
-                            "y": 103.0
+                            "x": 421.5,
+                            "y": 57.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -414,245 +581,120 @@
                 },
                 {
                     "name": {
-                        "name": "health"
+                        "name": "HealthBar"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "orderInLayer": 150,
+                        "z": 100.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "Typing": {
+                        "Type": "Enemy"
+                    }
+                },
+                {
+                    "transform": {
+                        "position": {
+                            "x": 1918.79296875,
+                            "y": -348.4979553222656
+                        },
+                        "scale": {
+                            "x": 600.0,
+                            "y": 600.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/Enemies/RedGorillaEnemy.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": "EnemyScript"
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Red Gorilla"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 1,
+                        "damage": 1,
+                        "isAlive": true
+                    }
+                },
+                {
+                    "AABB": {
+                        "min": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "max": {
+                            "x": 410.0,
+                            "y": 280.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
                     }
                 },
                 {
                     "prefabInstance": {
-                        "prefabName": "health",
+                        "prefabName": "Blue Gorilla",
                         "isLinked": false
                     }
-                }
-            ]
-        },
-        {
-            "components": [
+                },
                 {
-                    "transform": {
-                        "position": {
-                            "x": 1394.4617919921876,
-                            "y": 696.6154174804688
-                        },
-                        "scale": {
-                            "x": 100.0,
-                            "y": 120.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 10,
+                        "z": 0.0
                     }
                 },
                 {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/UI/hover_btn_placeholder.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "button"
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "red",
-                        "isLinked": true
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 674.4617309570313,
-                            "y": 331.0769348144531
-                        },
-                        "scale": {
-                            "x": -156.0,
-                            "y": -18.5
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/UI/hover_btn_placeholder.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "button"
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "button",
-                        "isLinked": true
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 711.384765625,
-                            "y": 512.0000610351563
-                        },
-                        "scale": {
-                            "x": -373.0,
-                            "y": 120.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/UI/hover_btn_placeholder.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "button"
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "button",
-                        "isLinked": false
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 626.4615478515625,
-                            "y": 76.30772399902344
-                        },
-                        "scale": {
-                            "x": -156.0,
-                            "y": -18.5
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/UI/hover_btn_placeholder.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "button"
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "button",
-                        "isLinked": true
+                    "audiosource": {
+                        "audio_id": "SFX_WrongInput",
+                        "volume": 1.0,
+                        "loop": false,
+                        "playOnAwake": false
                     }
                 }
             ]

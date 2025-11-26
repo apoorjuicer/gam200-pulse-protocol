@@ -53,7 +53,7 @@ public:
 
 	void setFontEntity(Entity entity) { fontEntity = entity; }
 
-    float songBPM = 70.0f;
+    float songBPM = 120.0f;
     float beatInterval = 60.0f / songBPM;
     float beatTolerance = 0.3f;
     int playerChances = 3;

@@ -55,7 +55,7 @@ namespace Framework
 	{
 		if (!in.IsObject())
 		{
-			throw std::runtime_error("Invalid JSON for Transform");
+			throw std::runtime_error("Invalid JSON for Renderable");
 		}
 
 		if (in.HasMember("mdl_ref"))

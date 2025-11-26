@@ -26,7 +26,7 @@ namespace FMOD
     class Channel;
     class ChannelGroup;
 }
-
+struct AudioSource; //fwd
 class AssetRegistry; // fwd
 
 // Simple audio system for BGM playback using FMOD Core
@@ -80,6 +80,10 @@ public:
 
     void SetRegistry(AssetRegistry* registry);
 
+    //audiosource
+    void PlayFromAudioSource(AudioSource& src);
+    void StopPlayingAllAudio();
+
 private:
     FMOD::System *mSystem = nullptr;
 
@@ -95,7 +99,7 @@ private:
     void releaseAll(); // stop channel, release sound/system
 
     // registry
-    std::unordered_map<std::string, FMOD::Sound *> mSfx;        // id -> sound
+    std::unordered_map<std::string, FMOD::Sound *> mSfxCache;        // id -> sound
     std::unordered_map<std::string, FMOD::Channel *> mChannels; // id -> active Channel
     AssetRegistry *mRegistry = nullptr;                         // link to asset registry
 
@@ -110,4 +114,13 @@ private:
     void applyMusicVolume();
     void applySfxVolume();
     static float clampto0and1(float v);
+
+
+    void ProcessAudioSources();
 };
+
+/*
+    FMOD caches Audio as FMOD::Sound*
+
+    FMOD plays Audio from FMOD::Channel*
+*/

@@ -14,7 +14,7 @@
 #ifndef GLAPP_H
 #define GLAPP_H
 #include "glhelper.h"
-#include "pch/pch.h"
+#include "pch/pch_temp.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Transform.h"
@@ -162,9 +162,18 @@ public:
 		}
 
 		void Flush(std::vector<GLSLShader>& shaderPrograms) {
-			glBindVertexArray(vao); // <-- bind BATCH VAO
+			glBindVertexArray(vao);
 
-			for (const auto& bucket : buckets) {
+			// Sort buckets by shader/model to ensure consistent draw order
+			std::vector<std::pair<Key, std::vector<Vtx>>> sortedBuckets(buckets.begin(), buckets.end());
+			std::sort(sortedBuckets.begin(), sortedBuckets.end(), [](const auto& a, const auto& b) {
+				// Draw lower shader indices first (background shader before sprite shader)
+				if (a.first.shd != b.first.shd) return a.first.shd < b.first.shd;
+				if (a.first.mdl != b.first.mdl) return a.first.mdl < b.first.mdl;
+				return a.first.tex < b.first.tex;
+				});
+
+			for (const auto& bucket : sortedBuckets) {
 				const Key& k = bucket.first;
 				const auto& verts = bucket.second;
 				const size_t spriteCount = verts.size() / 4;
@@ -184,7 +193,7 @@ public:
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, k.tex);
 
-				glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(spriteCount * 6), GL_UNSIGNED_SHORT, 0);   //  using only 1 draw call based on number of sprites in this bucket
+				glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(spriteCount * 6), GL_UNSIGNED_SHORT, 0);
 				shader.UnUse();
 			}
 
