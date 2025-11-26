@@ -604,6 +604,16 @@ void EnemyScript::Update(Entity ID)
 
         if (collision.CheckAABBCollision(enemyAABB, playerAABB))
         {
+            // Play sound from enemy's AudioSource component
+            if (g->HasComponent<AudioSource>(ID)) {
+                auto& audioSrc = g->GetComponent<AudioSource>(ID);
+                if (!audioSrc.audio_id.empty()) {
+                    if (auto audioManager = g->GetSystem<AudioManager>()) {
+                        audioManager->PlayFromAudioSource(audioSrc);
+                    }
+                }
+            }
+
             enemy_health.isAlive = false;
             ph.hp -= enemy_health.damage;
 
