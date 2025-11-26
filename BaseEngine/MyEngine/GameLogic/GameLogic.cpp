@@ -33,8 +33,6 @@
 
 // ===== GLOBAL COUNTDOWN STATE =====
 bool g_countdownFinished = false;
-float g_countdownTimer = 0.0f;
-int g_beatCount = 0;
 
 // ===== GLOBAL STATIC TRACKING FOR ENEMY ORDER =====
 Entity g_firstEnemy = (Entity)-1;
@@ -1297,8 +1295,7 @@ void PulsingBorderScript::Init(Entity ID)
 {
     auto* g_coordinator = Coordinator::GetInstance();
 
-    pulseTimer = 0.0f;
-    g_beatCount = 0;  // ADD THIS
+    pulseTimer = static_cast<float>(glfwGetTime());  // Store START time
 
     if (g_coordinator->HasComponent<Framework::Transform>(ID))
     {
@@ -1311,18 +1308,13 @@ void PulsingBorderScript::Update(Entity ID)
 {
     auto* g_coordinator = Coordinator::GetInstance();
 
-    float dt = static_cast<float>(GLHelper::delta_time);
-    float beatInterval = g_countdownFinished ? 0.5f : 0.3f;
-
-    // ALWAYS increment our timer
-    pulseTimer += dt;
+    float beatInterval = 0.5f;
 
     double timeSource = 0.0;
 
     if (!g_countdownFinished)
     {
-        // Use our OWN timer during countdown
-        timeSource = pulseTimer;
+        timeSource = glfwGetTime() - pulseTimer;  // Elapsed since start
     }
     else
     {
@@ -1355,8 +1347,6 @@ void PulsingBorderScript::Update(Entity ID)
         bool wasVisible = transform.isVisible;
         if (shouldBeVisible && !wasVisible)
         {
-            g_beatCount++;
-
             if (g_coordinator->HasComponent<AudioSource>(ID))
             {
                 auto audioSystem = g_coordinator->GetSystem<AudioManager>();
@@ -1384,8 +1374,7 @@ void PulsingBorderScript::Exit(Entity ID)
 void CountdownScript::Init(Entity ID)
 {
     (void)ID;
-    countdownTimer = 0.0f;
-    g_countdownTimer = 0.0f;
+    countdownTimer = static_cast<float>(glfwGetTime());  // Store START time
     g_countdownFinished = false;
 }
 
@@ -1396,44 +1385,41 @@ void CountdownScript::Update(Entity ID)
     if (!coord->HasComponent<TextComponent>(ID))
         return;
 
+    auto& text = coord->GetComponent<TextComponent>(ID);
+
     if (g_countdownFinished)
     {
-        if (coord->HasComponent<Framework::Transform>(ID))
-        {
-            auto& transform = coord->GetComponent<Framework::Transform>(ID);
-            transform.isVisible = false;
-        }
+        text.visible = false;
         return;
     }
 
-    auto& text = coord->GetComponent<TextComponent>(ID);
+    float elapsed = static_cast<float>(glfwGetTime()) - countdownTimer;
 
-    // Change text every 2 beats
-    if (g_beatCount < 2)
+    if (elapsed < 1.0f)
     {
         text.text = "Ready?";
     }
-    else if (g_beatCount < 4)
+    else if (elapsed < 2.0f)
     {
         text.text = "3";
     }
-    else if (g_beatCount < 6)
+    else if (elapsed < 3.0f)
     {
         text.text = "2";
     }
-    else if (g_beatCount < 8)
+    else if (elapsed < 4.0f)
     {
         text.text = "1";
     }
-    else if (g_beatCount < 10)
+    else if (elapsed < 5.0f)
     {
         text.text = "GO!";
     }
     else
     {
         g_countdownFinished = true;
+        text.visible = false;
 
-        // Play BGM
         if (coord->HasComponent<AudioSource>(ID))
         {
             auto& audioSrc = coord->GetComponent<AudioSource>(ID);
@@ -1442,13 +1428,6 @@ void CountdownScript::Update(Entity ID)
             {
                 audioManager->PlayFromAudioSource(audioSrc);
             }
-        }
-
-        // Hide text
-        if (coord->HasComponent<Framework::Transform>(ID))
-        {
-            auto& transform = coord->GetComponent<Framework::Transform>(ID);
-            transform.isVisible = false;
         }
     }
 }

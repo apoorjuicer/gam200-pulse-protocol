@@ -42,8 +42,6 @@
 #pragma warning(pop)
 
 extern bool g_countdownFinished;
-extern float g_countdownTimer;
-extern int g_beatCount;
 
 // base class for scripts
 class Iscript
