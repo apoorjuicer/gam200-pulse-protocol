@@ -2,8 +2,8 @@
 /**
  * @file        Inspector.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 70%
- *              Chloe Lau Rey En (secondary) - 30%
+ * @author      Leu Jun Yong (primary) - 50%
+ *              Chloe Lau Rey En (secondary) - 50%
  * @brief       TBF
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.

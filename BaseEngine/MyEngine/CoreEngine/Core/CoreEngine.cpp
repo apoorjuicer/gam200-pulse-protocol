@@ -34,8 +34,6 @@
 #include "../MyEngine/Components/DisplayName.h"
 #include "../MyEngine/Components/EntityType.h"
 
-#include "../MyEngine/UI/GUIManager.h"
-
 #include "../MyEngine/Audio/AudioSource.h"
 #include "../MyEngine/Graphics/Text.h"
 #pragma comment(lib, "winmm.lib")

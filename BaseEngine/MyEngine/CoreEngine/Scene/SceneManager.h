@@ -47,7 +47,6 @@
 //#include "../MyEngine/Components/DisplayName.h"
 #include "../MyEngine/CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
-#include "../MyEngine/UI/GUIManager.h"
 
 
 #pragma warning(push, 0)

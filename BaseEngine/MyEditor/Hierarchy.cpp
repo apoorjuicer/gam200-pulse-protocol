@@ -2,7 +2,8 @@
 /**
  * @file        Hierarchy.cpp
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Leu Jun Yong (primary) - 60%
+ * @author      Chloe Lau Rey En (secondary) - 40%
  * @brief       TBF
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
@@ -240,6 +241,36 @@ namespace MyEditor
 
         // Disable all editing when playing
         bool isPlaying = IsPlaying();
+
+        // Track scene changes during play mode
+        static std::string lastSceneDuringPlay = "";
+
+        if (isPlaying)
+        {
+            // Get current scene from SceneManager
+            auto sceneManager = g_coordinator->GetSystem<SceneManager>();
+            std::string currentScene = sceneManager ? sceneManager->GrabCurrentScene() : "";
+
+            // If scene changed while playing, deselect
+            if (!lastSceneDuringPlay.empty() && currentScene != lastSceneDuringPlay)
+            {
+                selectedEntity = INVALID_ENTITY;
+
+                // Also cancel any renaming in progress
+                if (s_renameState.renamingEntity != INVALID_ENTITY)
+                {
+                    FinishRenaming(false);
+                }
+            }
+
+            lastSceneDuringPlay = currentScene;
+        }
+        else
+        {
+            // Reset tracking when not playing
+            lastSceneDuringPlay = "";
+        }
+
         if (isPlaying)
         {
             ImGui::BeginDisabled();

@@ -1,10 +1,28 @@
 /******************************************************************************/
 /**
- * @file        Hierarchy.cpp
+ * @file        ProjectPanel.cpp
  * @project     Pulse Protocol
  * @author      Leu Jun Yong (primary) - 80%
  *              Chloe Lau Rey En (secondary) - 20%
- * @brief       TBF
+ * @brief       Implements the Project Panel (asset browser) for the editor.
+ *
+ *              Features:
+ *              - Directory browsing with navigation and thumbnail previews
+ *              - Adjustable thumbnail size via slider
+ *              - Drag-and-drop texture assignment to selected entities
+ *              - Drag-and-drop entity-to-prefab creation (from Hierarchy)
+ *              - OS file import via external drag-and-drop
+ *              - Texture hot-swapping: drop image onto another to replace
+ *              - Prefab instantiation on click, deletion via context menu
+ *              - Auto-detection of spritesheets based on filename keywords
+ *              - Editing disabled during play mode
+ *
+ *              Prefab Drop Zones:
+ *              - Dropping onto Prefab folder button (from parent directory)
+ *              - Dropping into empty space inside Prefab folder
+ *              Both zones validate entities via PrefabManager::CanSaveAsPrefab()
+ *              and display a warning popup for engine-managed entities
+ *              (names starting with '_', e.g., _FPS_Display).
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
@@ -151,7 +169,7 @@ namespace MyEditor
         item.texID = mAssets.GetOrLoadTexture(item.fullPath);
     }
 
-    
+
     // Replace file on disk and hot-swap everywhere using AssetsManager API.
     static bool ReplaceTextureFileOnDisk_AndRefreshAll(const std::string& dstPath,
         const std::string& srcPath)
@@ -402,16 +420,30 @@ namespace MyEditor
 
                             // Create prefab using PrefabManager
                             PrefabManager prefabMgr;
-                            std::string prefabPath = item.fullPath + "/" + prefabName + ".json";
 
-                            if (prefabMgr.SaveEntityAsPrefab(droppedEntity, prefabName))
+                            // =====================================================
+                            // Check if entity can be saved as prefab
+                            // =====================================================
+                            if (!prefabMgr.CanSaveAsPrefab(droppedEntity))
                             {
-                                std::cout << "[ProjectPanel] Successfully created prefab: " << prefabPath << std::endl;
-                                RefreshCurrentDir();  // Refresh to show the new prefab file
+                                // Entity is engine-managed - show warning popup
+                                s_showEngineManagedWarning = true;
+                                s_blockedEntityName = prefabName;
                             }
                             else
                             {
-                                std::cerr << "[ProjectPanel] Failed to create prefab: " << prefabPath << std::endl;
+                                // Safe to save
+                                if (prefabMgr.SaveEntityAsPrefab(droppedEntity, prefabName))
+                                {
+                                    std::cout << "[ProjectPanel] Successfully created prefab: "
+                                        << prefabName << ".json" << std::endl;
+                                    RefreshCurrentDir();  // Refresh to show the new prefab file
+                                }
+                                else
+                                {
+                                    std::cerr << "[ProjectPanel] Failed to create prefab: "
+                                        << prefabName << ".json" << std::endl;
+                                }
                             }
                         }
                     }
@@ -687,7 +719,7 @@ namespace MyEditor
 
             ImGui::Text("Cannot save '%s' as prefab.", s_blockedEntityName.c_str());
             ImGui::Spacing();
-            ImGui::TextWrapped("Entities with names starting with '_' are engine-managed "
+            ImGui::TextWrapped("Entities with names starting with '_' are debug texts "
                 "(e.g., _FPS_Display, _TopSystem_Display) and cannot be saved as prefabs.");
 
             ImGui::Spacing();
