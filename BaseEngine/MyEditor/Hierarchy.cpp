@@ -240,6 +240,36 @@ namespace MyEditor
 
         // Disable all editing when playing
         bool isPlaying = IsPlaying();
+
+        // Track scene changes during play mode
+        static std::string lastSceneDuringPlay = "";
+
+        if (isPlaying)
+        {
+            // Get current scene from SceneManager
+            auto sceneManager = g_coordinator->GetSystem<SceneManager>();
+            std::string currentScene = sceneManager ? sceneManager->GrabCurrentScene() : "";
+
+            // If scene changed while playing, deselect
+            if (!lastSceneDuringPlay.empty() && currentScene != lastSceneDuringPlay)
+            {
+                selectedEntity = INVALID_ENTITY;
+
+                // Also cancel any renaming in progress
+                if (s_renameState.renamingEntity != INVALID_ENTITY)
+                {
+                    FinishRenaming(false);
+                }
+            }
+
+            lastSceneDuringPlay = currentScene;
+        }
+        else
+        {
+            // Reset tracking when not playing
+            lastSceneDuringPlay = "";
+        }
+
         if (isPlaying)
         {
             ImGui::BeginDisabled();

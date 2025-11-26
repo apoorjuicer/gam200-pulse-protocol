@@ -38,9 +38,6 @@
 #include "Transform.h"
 #include "Text.h"
 #include "CoreEngine/ECS/System.h"
-// #include "CoreEngine/ECS/SystemManager.h"
-#include "UI/GUIManager.h"
-#include "UI/UIElement.h"
 
 #include "glapp.h"
 #include <ft2build.h>

@@ -12,8 +12,7 @@
  /******************************************************************************/
 #pragma once
 #include "pch/pch_temp.h"
-#include "../Math/math.h"
-#include "../CoreEngine/ECS/Types.h"
+#include "Math/math.h"
 
 // Base Message class
 class Message {

@@ -14,7 +14,6 @@
 /******************************************************************************/
 
 #pragma once
-// #include "pch/pch.h"
 #include "pch/pch_temp.h"
 #include "CoreEngine/ECS/System.h"
 
