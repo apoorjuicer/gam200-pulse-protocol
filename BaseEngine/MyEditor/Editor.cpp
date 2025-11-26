@@ -299,7 +299,8 @@ namespace MyEditor
             }
 
             // --- Mouse scroll (your engine probably uses scrollY) ---
-            io.AddMouseWheelEvent(0.0f, 0.0f); // keep unchanged if no real scroll
+            io.AddMouseWheelEvent(0.0f, (float)g_scrollY);
+            g_scrollY = 0.0;
 
             // --- Keyboard events (ONLY on state change!!!) ---
             for (int key = 32; key <= GLFW_KEY_LAST; key++)

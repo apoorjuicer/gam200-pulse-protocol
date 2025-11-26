@@ -48,6 +48,7 @@ AssetsManager mAssets;
 
 int WindowWidth;
 int WindowHeight;
+double g_scrollY;
 
 
 CoreEngine* Engine = nullptr;
@@ -407,6 +408,14 @@ void CoreEngine::Init()
 			mode->refreshRate
 		);
 	}
+
+	// --- Scroll wheel callback (for Editor + ImGui) ---
+	glfwSetScrollCallback(window,
+		[](GLFWwindow*, double /*x*/, double y)
+		{
+			g_scrollY += y;
+		});
+
 
 	glfwSetCharCallback(window, [](GLFWwindow*, unsigned int c)
 		{
