@@ -18,8 +18,8 @@
 
 namespace Framework
 {
-	constexpr float VIRTUAL_W = 1600.0f;
-	constexpr float VIRTUAL_H = 900.0f;
+	//constexpr float VIRTUAL_W = 1600.0f;
+	//constexpr float VIRTUAL_H = 900.0f;
 	Transform::Transform()
 	{
 		mdl_to_ndc_xform.SetToIdentity();
@@ -68,9 +68,9 @@ namespace Framework
 
 			// M = T * R * S
 			Matrix3x3 ScreenToNDC(
-				2.0f / VIRTUAL_W, 0, 0,
-				0, 2.0f / VIRTUAL_H, 0,
-				0.0f, 0.0f, 1);
+				2.0f / static_cast<float>(GLApp::VIRTUAL_W), 0.0f, 0.0f,
+				0.0f, 2.0f / static_cast<float>(GLApp::VIRTUAL_H), 0.0f,
+				0.0f, 0.0f, 1.0f);
 
 			x.mdl_to_ndc_xform = ScreenToNDC * (Translating * Rotating * Scaling);
 

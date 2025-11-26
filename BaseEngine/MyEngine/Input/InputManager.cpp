@@ -24,8 +24,8 @@
 static Vector2 ScreenToWorld_ForInput(double fbX, double fbY)
 {
 	// World size - MUST match Transform.cpp VIRTUAL_W/H (1600x900)
-	static constexpr float kWorldW = 1600.0f;
-	static constexpr float kWorldH = 900.0f;
+	static float kWorldW = static_cast<float>(GLApp::VIRTUAL_W);
+	static float kWorldH = static_cast<float>(GLApp::VIRTUAL_H);
 
 	// Get the game viewport (letterbox-aware)
 	float drawX = static_cast<float>(GLHelper::GameOffsetX);
@@ -42,7 +42,7 @@ static Vector2 ScreenToWorld_ForInput(double fbX, double fbY)
 	const float sx = 2.0f / kWorldW;
 	const float sy = 2.0f / kWorldH;
 	const glm::mat3 N(sx, 0, 0, 0, sy, 0, 0, 0, 1);
-	const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gCamera);
+	const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gEditorCamera);
 	const glm::mat3 invAll = glm::inverse(Cam * N);
 
 	//static int frameCount = 0;

@@ -45,14 +45,10 @@ namespace MyEditor
         }
     };
 
-    static bool s_isPlaying = false;
-    static bool s_hasEditorBaseline = false;
+    static bool s_playing = false;               
+    static bool s_hasEditorBaseline = false;       
     static std::vector<SavedEntityState> s_editorBaseline;
 
-    bool IsPlaying()
-    {
-        return s_isPlaying;
-    }
 
     void CaptureEditorBaseline()
     {
@@ -204,7 +200,7 @@ namespace MyEditor
         // ------------------------------------------------------------
         // Center: Play / Pause buttons
         // ------------------------------------------------------------
-        const char* playStopLabel = s_isPlaying ? "Stop" : "Play";
+        const char* playStopLabel = s_playing ? "Stop" : "Play";
         ImVec2 playStopTextSize = ImGui::CalcTextSize(playStopLabel);
 
         static bool isPaused = false;
@@ -226,11 +222,11 @@ namespace MyEditor
         // --- Play / Stop ---
         if (ImGui::Button(playStopLabel, playStopButtonSize))
         {
-            if (!s_isPlaying)
+            if (!s_playing)
             {
                 // START PLAYING
                 Engine->PlayGame();
-                s_isPlaying = true;
+                s_playing = true;
                 isPaused = false;
 
                 std::cout << "[Editor] Play Started\n";
@@ -239,7 +235,7 @@ namespace MyEditor
             {
                 // STOP PLAYING
                 Engine->StopGame();
-                s_isPlaying = false;
+                s_playing = false;
                 isPaused = false;
 
                 std::cout << "[Editor] Stopped - Scene Restored\n";
@@ -249,14 +245,14 @@ namespace MyEditor
         ImGui::SameLine();
 
         // --- Pause / Resume ---
-        if (!s_isPlaying)
+        if (!s_playing)
         {
             ImGui::BeginDisabled();
         }
 
         if (ImGui::Button(pauseLabel, pauseButtonSize))
         {
-            if (s_isPlaying)
+            if (s_playing)
             {
                 isPaused = !isPaused;
 
@@ -273,12 +269,12 @@ namespace MyEditor
             }
         }
 
-        if (!s_isPlaying)
+        if (!s_playing)
         {
             ImGui::EndDisabled();
         }
 
-        if (!s_isPlaying && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        if (!s_playing && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
         {
             ImGui::SetTooltip("Start playing to enable Pause");
         }
@@ -368,11 +364,11 @@ namespace MyEditor
         {
             // Editor "Load Scene" button should stop the game
             // (This is an editor action, not in-game navigation)
-            if (s_isPlaying)
+            if (s_playing)
             {
                 std::cout << "[Editor] Stopping game before loading scene (editor action)\n";
                 Engine->StopGame();
-                s_isPlaying = false;
+                s_playing = false;
                 isPaused = false;
             }
 

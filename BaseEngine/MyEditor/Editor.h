@@ -29,6 +29,7 @@
 #include "CoreEngine/ECS/System.h"   // For Entity type
 #include "Components/DisplayName.h"     // For display name in hierarchy list
 #include "Graphics/Transform.h"
+#include "Graphics/glapp.h"
 
 struct GLFWwindow;
 
@@ -40,7 +41,8 @@ namespace MyEditor {
     void Shutdown();
     void SetEnabled(bool enabled);
     bool IsEnabled();
-  
+    bool IsPlaying();
+    void SetPlaying(bool p);
 
     struct GameViewport { int x, y, w, h; };
     extern const Entity INVALID_ENTITY;
