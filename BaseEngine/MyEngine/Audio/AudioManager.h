@@ -17,6 +17,7 @@
 // #include "pch/pch.h"
 #include "pch/pch_temp.h"
 #include "CoreEngine/ECS/System.h"
+#include "CoreEngine/Core/ImportExport.h"
 
 // Forward-declare FMOD types to avoid heavy includes here
 namespace FMOD
@@ -30,7 +31,7 @@ struct AudioSource; //fwd
 class AssetRegistry; // fwd
 
 // Simple audio system for BGM playback using FMOD Core
-class AudioManager : public Systems
+class DLL_API AudioManager : public Systems
 {
 public:
     AudioManager() = default;

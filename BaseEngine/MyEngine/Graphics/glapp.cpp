@@ -58,82 +58,6 @@ GLApp::Camera2D GLApp::gCamera{};
 void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/)
 {
 	gBatch.Init(/*maxSprites*/ 10000);
-	//#ifdef ENABLE_EDITOR
-//	// --- Compute middle rectangle from window size using fixed ratios ---
-//	const float kLeftRatio = 0.20f;	  // 20% width
-//	const float kRightRatio = 0.25f;  // 25% width
-//	const float kBottomRatio = 0.25f; // 25% height
-//
-//	// GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth));
-//	// GLint h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
-//
-//	// Use your existing globals for window size
-//	const int fbW = static_cast<int>(WindowWidth);
-//	const int fbH = static_cast<int>(WindowHeight);
-//
-//	// Panels in framebuffer pixels
-//	const int assets_h = static_cast<int>(fbH * kBottomRatio);
-//	const int top_h = fbH - assets_h;
-//	const int left_w = static_cast<int>(fbW * kLeftRatio);
-//	const int right_w = static_cast<int>(fbW * kRightRatio);
-//	const int center_w = fbW - left_w - right_w;
-//
-//	// --- Fit a 16:9 viewport INSIDE the middle area and center it ---
-//	// Desired aspect = 16:9 ? width/height = 16/9
-//	const float targetAspect = 16.0f / 9.0f;
-//
-//	// Start with full middle area
-//	int vpW = center_w;
-//	int vpH = top_h;
-//
-//	// Adjust to preserve 16:9
-//	if (static_cast<float>(vpH) > static_cast<float>(vpW) / targetAspect)
-//	{
-//		// Too tall ? clamp height
-//		vpH = static_cast<int>(std::round(vpW / targetAspect));
-//	}
-//	else
-//	{
-//		// Too wide ? clamp width
-//		vpW = static_cast<int>(std::round(vpH * targetAspect));
-//	}
-//
-//	// Center the viewport within the middle rect
-//	const int vpX = left_w + (center_w - vpW) / 2;
-//	const int vpY = assets_h + (top_h - vpH) / 2;
-//
-//	// Apply to GL
-//	glViewport(vpX, vpY, vpW, vpH);
-//
-//	// Update GLHelper for anyone who needs these numbers
-//	GLHelper::GameWidth = vpW;
-//	GLHelper::GameHeight = vpH;
-//	GLHelper::GameOffsetX = vpX;
-//	GLHelper::GameOffsetY = vpY;
-//
-//	// (Optional) keep editor panel sizes if other code references them
-//	GLHelper::EditorWidth = left_w + right_w; // total UI width if you need it
-//	GLHelper::EditorHeight = assets_h;		  // bottom bar height if you need it
-//
-//	// Keep your existing init below
-//	GLApp::vps.push_back({300, 200, vpW, vpH});
-//#else
-	// ---------- GAME BUILD: NO EDITOR PANELS, NO BLUE BORDER ----------
-//	int fbW = 0, fbH = 0;
-//	glfwGetFramebufferSize(glfwGetCurrentContext(), &fbW, &fbH);
-//
-//	GLHelper::EditorWidth = 0;
-//	GLHelper::EditorHeight = 0;
-//
-//	GLHelper::GameOffsetX = 0;
-//	GLHelper::GameOffsetY = 0;
-//	GLHelper::GameWidth = fbW;
-//	GLHelper::GameHeight = fbH;
-//
-//	glViewport(0, 0, fbW, fbH);
-//
-//	GLApp::vps.push_back({ 0, 0, fbW, fbH });
-//#endif
 	
 	GLApp::VPSS shdr_strs{
 		std::make_pair(test_vs, test_fs),
@@ -234,75 +158,6 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 
 void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 
-	//#ifdef ENABLE_EDITOR
-//	GLFWwindow* window = glfwGetCurrentContext();
-//	if (MyEditor::IsEnabled())
-//	{
-//		// Editor ON - render in ImGui panel
-//		auto vp = MyEditor::ComputeMiddleGameViewportPixels(window, true);
-//		glViewport(vp.x, vp.y, vp.w, vp.h);
-//
-//		GLHelper::GameOffsetX = vp.x;
-//		GLHelper::GameOffsetY = vp.y;
-//		GLHelper::GameWidth = vp.w;
-//		GLHelper::GameHeight = vp.h;
-//		static double s_scrollY = 0.0;
-//		static bool s_scrollInit = false;
-//		if (!s_scrollInit)
-//		{
-//			glfwSetScrollCallback(window, [](GLFWwindow *, double, double yoff)
-//								  { s_scrollY += yoff; });
-//			s_scrollInit = true;
-//		}
-//
-//		static double lastX = 0.0, lastY = 0.0;
-//		double curX, curY;
-//		glfwGetCursorPos(window, &curX, &curY);
-//		static bool first = true;
-//		if (first)
-//		{
-//			lastX = curX;
-//			lastY = curY;
-//			first = false;
-//		}
-//
-//		const bool mmb = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
-//		if (mmb)
-//		{
-//			const double dx = curX - lastX;
-//			const double dy = curY - lastY;
-//			gCamera.center += glm::vec2(
-//				float(2.0 * dx / double(GLHelper::GameWidth)),
-//				float(-2.0 * dy / double(GLHelper::GameHeight)));
-//		}
-//		lastX = curX;
-//		lastY = curY;
-//
-//		float wheel = float(s_scrollY);
-//		s_scrollY = 0.0f;
-//		if (wheel != 0.0f)
-//		{
-//			const float oldZ = gCamera.zoom;
-//			const float step = 1.12f;
-//			float newZ = glm::clamp(oldZ * std::pow(step, wheel), gCamera.minZoom, gCamera.maxZoom);
-//
-//			glm::vec2 cNDC = ScreenToNDC(curX, curY);
-//			gCamera.center = cNDC - (newZ / oldZ) * (cNDC - gCamera.center);
-//			gCamera.zoom = newZ;
-//		}
-//	}
-//	else
-//	{
-//		// Editor OFF - use full screen with letterboxing
-//		int fbW = 0, fbH = 0;
-//		glfwGetFramebufferSize(window, &fbW, &fbH);
-//
-//		// Re-apply the correct fullscreen scaling immediately
-//		ComputeLetterbox(fbW, fbH);
-//		gCamera.zoom = 1.0f;
-//		gCamera.center = glm::vec2(0.0f);
-//	}
-//#endif
 	glm::mat3 PanZoom = BuildPanZoomNDC(gCamera);
 
 	// Timing
@@ -457,42 +312,6 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	gBatch.Flush(shdrpgms);
 	GLboolean depthWasOn = glIsEnabled(GL_DEPTH_TEST);
 	glDisable(GL_DEPTH_TEST);
-
-	// move to editor pls
-//#ifdef ENABLE_EDITOR
-//	if (MyEditor::IsEnabled())
-//	{
-//		DebugDraw::Begin(glm::mat4(1.0f));
-//
-//		for (auto e : entities)
-//		{
-//			if (!g_coordinator->HasComponent<Framework::Transform>(e))
-//				continue;
-//			if (!g_coordinator->HasComponent<Framework::Renderable>(e))
-//				continue;
-//			if (!g_coordinator->HasComponent<AABB>(e)) continue;
-//			auto &tr = g_coordinator->GetComponent<Framework::Transform>(e);
-//			auto &re = g_coordinator->GetComponent<Framework::Renderable>(e);
-//			auto& an = g_coordinator->GetComponent<Framework::Animation>(e);
-//			auto& bb = g_coordinator->GetComponent<AABB>(e);
-//
-//			glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
-//			glm::mat3 modelToNDC = PanZoom * M;
-//
-//			const bool isHero = re.spriteName.find("hero") != std::string::npos;
-//			glm::vec3 color = isHero ? glm::vec3(1, 0, 0) : glm::vec3(0, 1, 0);
-//			const int columns = std::max(1, an.columns);
-//			const int rows = std::max(1, an.rows);
-//			const int frameW = (re.texW > 0 ? re.texW / columns : 0);
-//			const int frameH = (re.texH > 0 ? re.texH / rows : 0);
-//			AABB aabbModel = PixelsToModelAABB(bb, frameW, frameH);
-//			DrawAABB_NDC(modelToNDC, aabbModel, color);
-//		}
-//
-//		glLineWidth(1.0f);
-//		DebugDraw::End();
-//	}
-//#endif
 
 	if (depthWasOn)
 		glEnable(GL_DEPTH_TEST);

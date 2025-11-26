@@ -770,12 +770,6 @@ void CoreEngine::GameLoop()
         float dt = (currenttime - LastTime) / 1000.0f;
         LastTime = currenttime;
 
-		// Prime ImGui with first frame BEFORE polling events
-		/*if (m_editorFrameCallback)
-		{
-			m_editorFrameCallback();
-		}*/
-
         glfwPollEvents();
 
         // --- Game update (ECS systems) ---

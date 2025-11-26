@@ -600,7 +600,6 @@ namespace MyEditor
         s_enabled = false;
 
         ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
     }
 

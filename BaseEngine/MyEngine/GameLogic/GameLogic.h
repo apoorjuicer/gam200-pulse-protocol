@@ -63,7 +63,7 @@ public:
 
 	// add clone function and = 0, so all kid will have to have it.
 	virtual Iscript* Clone() = 0;
-	
+	//virtual Iscript* Clone(); // i remove the = 0 for testing(past rae)
 };
 
 class PlayerScript : public Iscript
@@ -124,6 +124,8 @@ public:
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
 
+	ButtonScript* Clone() override;
+
 private:
 	// Store data per entity ID
 	std::unordered_map<Entity, ButtonData> buttonDataMap;
@@ -135,6 +137,8 @@ public:
 	void Init(Entity ID) override;
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
+
+	PulsingBorderScript* Clone() override;
 
 private:
 	float pulseTimer = 0.0f;

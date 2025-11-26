@@ -11,7 +11,8 @@
  */
  /******************************************************************************/
 
-#include "pch/pch.h"     // this already pulls in CoreEngine.h and Editor.h
+#include "pch/pch.h"     // this already pulls in CoreEngine.h and Editor.h (CHANGE THIS TO PCH_TEMP ISTFG)
+#include "../MyEditor/Editor.h"
 
 int main()
 {

@@ -978,6 +978,11 @@ void ButtonScript::Exit(Entity ID)
     buttonDataMap.erase(ID);
 }
 
+ButtonScript* ButtonScript::Clone()
+{
+    return new ButtonScript{};
+}
+
 // =====================================================================
 // PULSING BORDER SCRIPT
 // =====================================================================
@@ -1051,4 +1056,10 @@ void PulsingBorderScript::Update(Entity ID)
 void PulsingBorderScript::Exit(Entity ID)
 {
     std::cout << "[PulsingBorderScript] Shutdown for entity " << ID << std::endl;
+}
+
+
+PulsingBorderScript* PulsingBorderScript::Clone()
+{
+    return new PulsingBorderScript{};
 }
