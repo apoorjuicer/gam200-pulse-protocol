@@ -56,6 +56,8 @@
 #include <rapidjson/istreamwrapper.h>
 #pragma warning(pop)
 
+extern std::vector<Entity> g_entitiesToDelete;
+
 class SceneManager: public Systems
 {
 public:
