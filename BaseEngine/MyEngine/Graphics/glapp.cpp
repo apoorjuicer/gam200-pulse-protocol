@@ -53,11 +53,13 @@ double random()
 	return static_cast<double>((rand() % 10) / 10.0f);
 }
 
-GLApp::Camera2D GLApp::gCamera{};
+GLApp::Camera2D GLApp::gEditorCamera{};
+GLApp::Camera2D GLApp::gGameCamera{};
 
 void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/)
 {
 	gBatch.Init(/*maxSprites*/ 10000);
+
 #ifdef ENABLE_EDITOR
 	// --- Compute middle rectangle from window size using fixed ratios ---
 	const float kLeftRatio = 0.20f;	  // 20% width
@@ -231,12 +233,24 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 		modelNDC, u0, v0, u1, v1);
 }
 
-void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
+void GLApp::draw(std::set<Entity> entities, int includeMask) {
+#ifdef ENABLE_EDITOR
+	bool editorOn = MyEditor::IsEnabled();
+	bool playing = MyEditor::IsPlaying();
+
+	// Use editor camera only when editing (not playing).
+	GLApp::Camera2D& activeCam =
+		(editorOn && !playing) ? gEditorCamera : gGameCamera;
+#else
+	GLApp::Camera2D& activeCam = gGameCamera;
+#endif
+
 #ifdef ENABLE_EDITOR
 	GLFWwindow* window = glfwGetCurrentContext();
 	if (MyEditor::IsEnabled())
 	{
-		// Editor ON - render in ImGui panel
+		bool playing = MyEditor::IsPlaying();
+		// -------- Editor ON: render into middle ImGui game viewport --------
 		auto vp = MyEditor::ComputeMiddleGameViewportPixels(window, true);
 		glViewport(vp.x, vp.y, vp.w, vp.h);
 
@@ -245,30 +259,20 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		GLHelper::GameWidth = vp.w;
 		GLHelper::GameHeight = vp.h;
 
-		//// DEBUG PURPOSE
-		//static int frameCount = 0;
-		//frameCount++;
-		//if (frameCount % 60 == 0) {  // Print once per second
-		//	std::cout << "\n===== GLAPP DRAW DEBUG =====" << std::endl;
-		//	std::cout << "VIRTUAL_W: " << VIRTUAL_W << ", VIRTUAL_H: " << VIRTUAL_H << std::endl;
-		//	std::cout << "Editor viewport (vp): x=" << vp.x << ", y=" << vp.y
-		//		<< ", w=" << vp.w << ", h=" << vp.h << std::endl;
-		//	std::cout << "Set GameOffsetX=" << GLHelper::GameOffsetX
-		//		<< ", GameOffsetY=" << GLHelper::GameOffsetY << std::endl;
-		//	std::cout << "Set GameWidth=" << GLHelper::GameWidth
-		//		<< ", GameHeight=" << GLHelper::GameHeight << std::endl;
-		//	std::cout << "============================\n" << std::endl;
-		//}
-
+		// Shared scroll accumulator for zoom
 		static double s_scrollY = 0.0;
 		static bool s_scrollInit = false;
 		if (!s_scrollInit)
 		{
-			glfwSetScrollCallback(window, [](GLFWwindow*, double, double yoff)
-				{ s_scrollY += yoff; });
+			glfwSetScrollCallback(window,
+				[](GLFWwindow*, double, double yoff)
+				{
+					s_scrollY += yoff;
+				});
 			s_scrollInit = true;
 		}
 
+		// Mouse delta tracking for panning
 		static double lastX = 0.0, lastY = 0.0;
 		double curX, curY;
 		glfwGetCursorPos(window, &curX, &curY);
@@ -280,89 +284,116 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 			first = false;
 		}
 
-		// Decide when camera controls are allowed
-		bool allowCameraControl = false;
+		// ------------ Allow camera control ONLY inside game viewport --------
 
-		int winW, winH, fbW, fbH;
+
+		int winW = 0, winH = 0, fbW = 0, fbH = 0;
 		glfwGetWindowSize(window, &winW, &winH);
 		glfwGetFramebufferSize(window, &fbW, &fbH);
 
-		double fbX = 0.0, fbY = 0.0;
 		if (winW > 0 && winH > 0)
 		{
-			// X is the same
-			fbX = curX * static_cast<double>(fbW) / static_cast<double>(winW);
+			// Convert window coords (origin top-left) to framebuffer coords (origin bottom-left)
+			double fbX = curX * double(fbW) / double(winW);
 
-			// Y must be flipped: window origin is top-left, framebuffer origin is bottom-left
-			double normY = curY / static_cast<double>(winH);    // 0 at top, 1 at bottom
-			fbY = (1.0 - normY) * static_cast<double>(fbH);     // 0 at bottom, fbH at top
+			double normY = curY / double(winH);       // 0 at top, 1 at bottom
+			double fbY = (1.0 - normY) * double(fbH); // 0 at bottom, fbH at top
+
+			double gameX0 = GLHelper::GameOffsetX;
+			double gameY0 = GLHelper::GameOffsetY;
+			double gameX1 = gameX0 + GLHelper::GameWidth;
+			double gameY1 = gameY0 + GLHelper::GameHeight;
+			bool allowCameraControl = false;
+			if (!playing) { // <--- only allow in EDIT mode
+				// (convert mouse to framebuffer coords as you already do)
+				if (fbX >= gameX0 && fbX <= gameX1 &&
+					fbY >= gameY0 && fbY <= gameY1)
+				{
+					allowCameraControl = true;
+				}
+			}
+
+			// -------- Middle mouse pan (editor camera only, in game viewport) ---
+			const bool mmb =
+				glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+			if (!MyEditor::IsPlaying()) {
+				if (allowCameraControl && mmb)
+				{
+					const double dx = curX - lastX;
+					const double dy = curY - lastY;
+					activeCam.center += glm::vec2(
+						float(2.0 * dx / double(GLHelper::GameWidth)),
+						float(-2.0 * dy / double(GLHelper::GameHeight)));
+				}
+			}
+
+			lastX = curX;
+			lastY = curY;
+
+			// -------------------- Scroll wheel zoom (editor camera) -------------
+			float wheel = static_cast<float>(s_scrollY);
+			s_scrollY = 0.0;
+			if (!MyEditor::IsPlaying()) {
+				if (allowCameraControl && wheel != 0.0f)
+				{
+					const float oldZ = activeCam.zoom;
+					const float step = 1.12f;
+					float newZ = glm::clamp(oldZ * std::pow(step, wheel),
+						activeCam.minZoom,
+						activeCam.maxZoom);
+
+					glm::vec2 cNDC = ScreenToNDC(curX, curY);
+					activeCam.center = cNDC - (newZ / oldZ) * (cNDC - activeCam.center);
+					activeCam.zoom = newZ;
+				}
+			}
 		}
-
-		// mouse inside the game viewport rectangle ONLY (framebuffer coords)
-		double gameX0 = GLHelper::GameOffsetX;
-		double gameY0 = GLHelper::GameOffsetY;
-		double gameX1 = gameX0 + GLHelper::GameWidth;
-		double gameY1 = gameY0 + GLHelper::GameHeight;
-
-		if (fbX >= gameX0 && fbX <= gameX1 &&
-			fbY >= gameY0 && fbY <= gameY1)
+		else
 		{
-			allowCameraControl = true;
-		}
-
-		const bool mmb = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
-		if (allowCameraControl && mmb)
-		{
-			const double dx = curX - lastX;
-			const double dy = curY - lastY;
-			gCamera.center += glm::vec2(
-				float(2.0 * dx / double(GLHelper::GameWidth)),
-				float(-2.0 * dy / double(GLHelper::GameHeight)));
-		}
-		lastX = curX;
-		lastY = curY;
-
-		float wheel = float(s_scrollY);
-		s_scrollY = 0.0f;
-		if (allowCameraControl && wheel != 0.0f)
-		{
-			const float oldZ = gCamera.zoom;
-			const float step = 1.12f;
-			float newZ = glm::clamp(oldZ * std::pow(step, wheel), gCamera.minZoom, gCamera.maxZoom);
-
-			glm::vec2 cNDC = ScreenToNDC(curX, curY);
-			gCamera.center = cNDC - (newZ / oldZ) * (cNDC - gCamera.center);
-			gCamera.zoom = newZ;
+			// -------- Editor build but editor disabled: full-screen letterbox ---
+			int fbW = 0, fbH = 0;
+			glfwGetFramebufferSize(window, &fbW, &fbH);
+			ComputeLetterbox(fbW, fbH);
+			activeCam.zoom = 1.0f;
+			activeCam.center = glm::vec2(0.0f);
 		}
 	}
-	else
-	{
-		// Editor OFF - use full screen with letterboxing
-		int fbW = 0, fbH = 0;
-		glfwGetFramebufferSize(window, &fbW, &fbH);
+#else
+	// -------- Game build (no editor): use FULL framebuffer, no letterbox ----
+	GLFWwindow* window = glfwGetCurrentContext();
+	int fbW = 0, fbH = 0;
+	glfwGetFramebufferSize(window, &fbW, &fbH);
 
-		// Re-apply the correct fullscreen scaling immediately
-		ComputeLetterbox(fbW, fbH);
-		gCamera.zoom = 1.0f;
-		gCamera.center = glm::vec2(0.0f);
-	}
+	// Use the entire framebuffer as the game area
+	GLHelper::GameOffsetX = 0;
+	GLHelper::GameOffsetY = 0;
+	GLHelper::GameWidth = fbW;
+	GLHelper::GameHeight = fbH;
+
+	glViewport(0, 0, fbW, fbH);
+
+	// Identity camera (no extra zoom or pan)
+	activeCam.zoom = 0.6f;
+	activeCam.center = glm::vec2(0.0f);
 #endif
-	glm::mat3 PanZoom = BuildPanZoomNDC(gCamera);
 
-	// Timing
+	// Build final camera matrix from the active camera
+	glm::mat3 PanZoom = BuildPanZoomNDC(activeCam);
+
+	// ========================== REST OF YOUR DRAW ===========================
 	auto* g_coordinator = Coordinator::GetInstance();
 
 	static auto lastTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
-	float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+	float deltaTime =
+		std::chrono::duration<float>(currentTime - lastTime).count();
 	lastTime = currentTime;
 	gBatch.Begin();
 
 	std::vector<Entity> drawList;
 	drawList.reserve(entities.size());
 
-	// Draw entities
-// build drawList
+	// Build draw list by layer
 	for (auto it : entities) {
 		// BEFORE (ORIGINAL CODE):
 		//     auto& lt = g_coordinator->GetComponent<LayerTag>(it);
@@ -387,7 +418,6 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 
 		// ensure texture is ready BEFORE push
 		if (re.textureID == 0 && !re.spriteName.empty()) {
-			//re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
 			int w = 0, h = 0;
 			re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
 			re.texW = w;
@@ -395,10 +425,7 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 			re.loadedSpriteName = re.spriteName;
 		}
 
-		// if still 0 and you only want textured sprites, you can continue here,
-		// or push anyway if you also render colored quads
 		if (re.textureID == 0) continue;
-
 		drawList.push_back(it);
 	}
 
@@ -443,76 +470,65 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(e);
 		auto& re = g_coordinator->GetComponent<Framework::Renderable>(e);
 		auto& an = g_coordinator->GetComponent<Framework::Animation>(e);
-		// BEFORE drawing each entity
-		if (!re.spriteName.empty()) {
-			if (re.textureID == 0 || re.needsTextureReload ||
-				re.spriteName != re.loadedSpriteName) {
-				//re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
 
+		if (!re.spriteName.empty()) {
+			if (re.textureID == 0 ||
+				re.needsTextureReload ||
+				re.spriteName != re.loadedSpriteName)
+			{
 				re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
 				re.loadedSpriteName = re.spriteName;
 				re.needsTextureReload = false;
-			}
-			else
-			{
 			}
 		}
 
 		if (tr.isVisible && re.textureID != 0)
 		{
-			// ---- Single-image vs spritesheet guard -----------------------------------
-			// Treat as "single image" if rows*columns <= 1 OR totalFrames <= 1.
-			// This prevents animation from advancing when switching from a spritesheet
-			// to a static sprite.
 			const int rows = std::max(1, an.rows);
 			const int columns = std::max(1, an.columns);
-			const bool isSingle = (rows * columns <= 1) || (an.totalFrames <= 1);
+			const bool isSingle =
+				(rows * columns <= 1) || (an.totalFrames <= 1);
 
 			if (isSingle)
 			{
-				// Freeze animation on the first frame and normalize grid to 1x1
 				an.rows = 1;
 				an.columns = 1;
-				an.totalFrames = 1; // optional but keeps everyone honest
+				an.totalFrames = 1;
 				an.currentFrame = 0;
 				an.elapsedTime = 0.0f;
-				// (No updateAnimation call)
 			}
 			else
 			{
-				// Normal animated spritesheet
 				updateAnimation(an, deltaTime);
-				// Ensure sane values after update (defensive)
 				an.rows = std::max(1, an.rows);
 				an.columns = std::max(1, an.columns);
 				an.totalFrames = std::max(1, an.totalFrames);
 				if (an.currentFrame >= an.totalFrames)
 					an.currentFrame %= an.totalFrames;
 			}
-			// ---------------------------------------------------------------------------
-
-
 		}
+
 		glBindTexture(GL_TEXTURE_2D, re.textureID);
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &re.texW);
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &re.texH);
+
 		drawTrans(re, an, tr, PanZoom);
 	}
+
 	gBatch.Flush(shdrpgms);
 	GLboolean depthWasOn = glIsEnabled(GL_DEPTH_TEST);
 	glDisable(GL_DEPTH_TEST);
+
 #ifdef ENABLE_EDITOR
 	if (MyEditor::IsEnabled())
 	{
 		DebugDraw::Begin(glm::mat4(1.0f));
-
 		for (auto e : entities)
 		{
-			if (!g_coordinator->HasComponent<Framework::Transform>(e))
-				continue;
-			if (!g_coordinator->HasComponent<Framework::Renderable>(e))
-				continue;
-			if (!g_coordinator->HasComponent<AABB>(e)) continue;
+			if (!g_coordinator->HasComponent<Framework::Transform>(e)) continue;
+			if (!g_coordinator->HasComponent<Framework::Renderable>(e)) continue;
+			if (!g_coordinator->HasComponent<AABB>(e))                  continue;
+
 			auto& tr = g_coordinator->GetComponent<Framework::Transform>(e);
 			auto& re = g_coordinator->GetComponent<Framework::Renderable>(e);
 			auto& an = g_coordinator->GetComponent<Framework::Animation>(e);
@@ -521,12 +537,16 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 			glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
 			glm::mat3 modelToNDC = PanZoom * M;
 
-			const bool isHero = re.spriteName.find("hero") != std::string::npos;
-			glm::vec3 color = isHero ? glm::vec3(1, 0, 0) : glm::vec3(0, 1, 0);
+			const bool isHero =
+				re.spriteName.find("hero") != std::string::npos;
+			glm::vec3 color = isHero ? glm::vec3(1, 0, 0)
+				: glm::vec3(0, 1, 0);
+
 			const int columns = std::max(1, an.columns);
 			const int rows = std::max(1, an.rows);
 			const int frameW = (re.texW > 0 ? re.texW / columns : 0);
 			const int frameH = (re.texH > 0 ? re.texH / rows : 0);
+
 			AABB aabbModel = PixelsToModelAABB(bb, frameW, frameH);
 			DrawAABB_NDC(modelToNDC, aabbModel, color);
 		}
@@ -538,7 +558,7 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 
 	if (depthWasOn)
 		glEnable(GL_DEPTH_TEST);
-}
+	}
 
 void GLApp::cleanup()
 {
@@ -635,14 +655,14 @@ void GLApp::OnResize(int width, int height)
 }
 
 // Convert vec2 in model space to NDC using your existing 2D pipeline
-static inline glm::vec2 ToNDC(const glm::mat3& M, const glm::vec2& v)
+static inline glm::vec2 ToNDC(const glm::mat3 & M, const glm::vec2 & v)
 {
 	glm::vec3 h = M * glm::vec3(v, 1.0f);
 	return { h.x, h.y }; // already NDC
 }
 
 // Draw an AABB as 4 lines in NDC
-void GLApp::DrawAABB_NDC(const glm::mat3& modelToNDC, const AABB& box, const glm::vec3& color)
+void GLApp::DrawAABB_NDC(const glm::mat3 & modelToNDC, const AABB & box, const glm::vec3 & color)
 {
 	const glm::vec2 a{ box.min.x, box.min.y };
 	const glm::vec2 b{ box.max.x, box.min.y };

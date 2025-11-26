@@ -24,6 +24,7 @@
 #include "CoreEngine/Asset/AssetsManager.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "glhelper.h"
+#include "glapp.h"
 
 #ifndef FRAMEWORK_TRANSFORM_H
 #define FRAMEWORK_TRANSFORM_H

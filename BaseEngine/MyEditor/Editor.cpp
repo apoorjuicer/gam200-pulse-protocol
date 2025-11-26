@@ -1,4 +1,4 @@
-﻿/******************************************************************************/
+/******************************************************************************/
 /**
  * @file        Editor.cpp
  * @project     Pulse Protocol
@@ -35,6 +35,8 @@ namespace MyEditor
     static bool s_enabled = true;
     static bool s_restoreNextFrame = false;
     static bool s_frameStarted = false;
+    static bool s_playing = false;
+
 
     // --------------------------------------------------------------------
     // PANEL RATIOS
@@ -51,7 +53,18 @@ namespace MyEditor
     static constexpr float MAX_TOTAL_VERT = 0.85f;
 
 
+    bool MyEditor::IsPlaying() { return s_playing; }
+    void MyEditor::SetPlaying(bool p)
+    {
+        s_playing = p;
 
+        // When switching modes, tell GLApp to reset the cameras if needed.
+        if (p == true)
+        {
+            // Entering Play Mode
+            GLApp::gEditorCamera = GLApp::Camera2D{}; // freeze editor camera where it was
+        }
+    }
 
 
 #ifdef IMGUI_HAS_DOCKING

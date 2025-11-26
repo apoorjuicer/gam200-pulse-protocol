@@ -211,7 +211,7 @@ void GraphicsManager::Update()
     glfwPollEvents();
     GLHelper::update_time(1.0);
     glapp->update(Engine->GetWindow(), EntityMember);
-    glClearColor(0.0f, 0.5f, 0.8f, 1.0f);
+    glClearColor(0.3f, 0.36f, 0.32f, 1.0f);
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT);  // Don't clear depth
     glDisable(GL_DEPTH_TEST);      // Disable depth test for 2D

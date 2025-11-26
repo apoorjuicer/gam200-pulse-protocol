@@ -82,7 +82,7 @@ namespace MyEditor
 
     // Get camera zoom for scaling gizmo handles
     // Zoom > 0.5 = zoomed in, < 0.5 = zoomed out (based on your Camera2D)
-    static float GetCameraZoom() { return GLApp::gCamera.zoom; }
+    static float GetCameraZoom() { return GLApp::gEditorCamera.zoom; }
 
     // Calculate gizmo scale factor based on zoom
     // When zoomed out, gizmo should be larger; when zoomed in, smaller
@@ -229,7 +229,7 @@ namespace MyEditor
 
         const float sx = 2.0f / worldW, sy = 2.0f / worldH;
         const glm::mat3 N(sx, 0, 0, 0, sy, 0, 0, 0, 1);
-        const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gCamera);
+        const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gEditorCamera);
         const glm::vec3 ndc = Cam * (N * glm::vec3(wpos.x, wpos.y, 1.0f));
 
         float drawX, drawY, drawW, drawH, scale;
@@ -254,7 +254,7 @@ namespace MyEditor
 
         const float sx = 2.0f / worldW, sy = 2.0f / worldH;
         const glm::mat3 N(sx, 0, 0, 0, sy, 0, 0, 0, 1);
-        const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gCamera);
+        const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gEditorCamera);
         const glm::mat3 invAll = glm::inverse(Cam * N);
 
         const glm::vec3 w = invAll * ndc;
@@ -608,7 +608,8 @@ namespace MyEditor
         const float ndcY = 1.0f - ((mouseFB.y - drawY) / drawH) * 2.0f;
         const glm::vec3 mouseNDC(ndcX, ndcY, 1.0f);
 
-        const glm::mat3 PanZoom = GLApp::BuildPanZoomNDC(GLApp::gCamera);
+        // Camera pan/zoom used by the renderer
+        const glm::mat3 PanZoom = GLApp::BuildPanZoomNDC(GLApp::gEditorCamera);
 
         const float worldW = GetWorldWidth();
         const float worldH = GetWorldHeight();
