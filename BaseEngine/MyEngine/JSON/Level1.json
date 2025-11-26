@@ -4,18 +4,6 @@
         {
             "components": [
                 {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 1,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
                     "Typing": {
                         "Type": "Background"
                     }
@@ -120,8 +108,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.36804431676864626,
+                        "currentFrame": 0,
+                        "elapsedTime": 0.007029831409454346,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,

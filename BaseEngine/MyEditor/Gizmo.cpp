@@ -546,30 +546,26 @@ namespace MyEditor
         }
 
         // ---------------------------------------------------------------------
-        // SCENE CHANGE DETECTION (auto-deselect on scene change during play)
+        // SCENE CHANGE DETECTION (auto-deselect on ANY scene change)
         // ---------------------------------------------------------------------
-        bool isPlaying = IsPlaying();
-        if (isPlaying)
         {
+            static std::string s_lastKnownScene = "";
             auto sceneManager = coord->GetSystem<SceneManager>();
             std::string currentScene = sceneManager ? sceneManager->GrabCurrentScene() : "";
 
-            if (!g_gizmo.lastSceneDuringPlay.empty() && currentScene != g_gizmo.lastSceneDuringPlay)
+            if (!s_lastKnownScene.empty() && currentScene != s_lastKnownScene)
             {
+                // Scene changed - deselect everything
                 selectedEntity = INVALID_ENTITY;
                 g_gizmo.dragging = false;
                 g_gizmo.active = INVALID_ENTITY;
                 g_gizmo.activeHandle = GizmoHandle::None;
             }
-            g_gizmo.lastSceneDuringPlay = currentScene;
-        }
-        else
-        {
-            g_gizmo.lastSceneDuringPlay = "";
+            s_lastKnownScene = currentScene;
         }
 
         // Don't allow gizmo interaction during play mode
-        if (isPlaying)
+        if (IsPlaying())
         {
             return;
         }
