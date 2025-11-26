@@ -594,7 +594,7 @@ bool AudioManager::UnloadAudio(std::string const &id)
         return true;
     }
 
-    // Otherwise, check if it�s the currently loaded BGM
+    // Otherwise, check if it's the currently loaded BGM
     if (mCurrentBGM && id == "bgm")
     {
         if (mCurrentBGMCh)

@@ -29,6 +29,43 @@
 
 namespace MyEditor
 {
+    //Definition of singleton undomanager for editor;
+    //UNDO Manager
+    UndoManager mUndo;
+    static Framework::Transform beforeEdit;
+    static bool isEditing = false;
+    static void HandleTransformUndo(
+        Framework::Transform& tr,
+        UndoManager& undo,
+        Entity e,
+        Coordinator* g
+    )
+    {
+        // If the current ImGui widget became active (user clicked or started dragging)
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit = tr;   // snapshot the "before" state
+            isEditing = true;
+        }
+
+        // If editing has ended (mouse released or finalizing text input)
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing)
+        {
+            if (beforeEdit != tr)  // if something actually changed
+            {
+                undo.Push([e, oldData = beforeEdit, g]()
+                    {
+                        if (g->HasComponent<Framework::Transform>(e))
+                        {
+                            g->GetComponent<Framework::Transform>(e) = oldData;
+                        }
+                    });
+            }
+
+            isEditing = false;  // reset edit session
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Local helper: parse "<rows>x<cols>" from filename ("hero_4x3.png")
     // (copied from your old Editor.cpp; now lives with the inspector)
@@ -417,43 +454,7 @@ namespace MyEditor
         // ---------------------------------------------------------------------
         // Transform component
         // ---------------------------------------------------------------------
-        if (g->HasComponent<Framework::Transform>(selectedEntity))
-        {
-            auto& tr = g->GetComponent<Framework::Transform>(selectedEntity);
-
-            bool removeTransform = false;
-            bool transformOpen = ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
-            removeTransform = DrawInlineRemoveButton("Transform");
-
-            if (removeTransform)
-            {
-                g->RemoveComponent<Framework::Transform>(selectedEntity);
-            }
-            else if (transformOpen)
-            {
-                ImGui::Indent();
-
-                float pos[2] = { tr.Pos.x, tr.Pos.y };
-                if (ImGui::DragFloat2("Position", pos, 0.5f))
-                {
-                    tr.Pos.x = pos[0]; tr.Pos.y = pos[1];
-                }
-
-                float sc[2] = { tr.Scale.x, tr.Scale.y };
-                if (ImGui::DragFloat2("Scale", sc, 0.5f))
-                {
-                    tr.Scale.x = sc[0]; tr.Scale.y = sc[1];
-                }
-
-                ImGui::DragFloat("Rotation (deg)", &tr.Rotation.x, 1.0f, -360.f, 360.f);
-                ImGui::DragFloat("Rotation Speed", &tr.Rotation.y, 0.1f, -10.0f, 10.0f);
-                ImGui::Checkbox("Visible", &tr.isVisible);
-
-                ImGui::Unindent();
-            }
-
-            ImGui::Separator();
-        }
+        TransformComponent(g);
 
         // ---------------------------------------------------------------------
         // Renderable component
@@ -847,6 +848,62 @@ namespace MyEditor
 
      }//end of function
 
+
+     void TransformComponent(Coordinator* g) {
+         if (g->HasComponent<Framework::Transform>(selectedEntity))
+         {
+             auto& tr = g->GetComponent<Framework::Transform>(selectedEntity);
+
+             bool removeTransform = false;
+             bool transformOpen = ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
+             removeTransform = DrawInlineRemoveButton("Transform");
+
+             if (removeTransform)
+             {
+                 g->RemoveComponent<Framework::Transform>(selectedEntity);
+             }
+             else if (transformOpen)
+             {
+                 ImGui::Indent();
+
+                 //UNDO Manager
+                 // ====================================================
+                 // 1. Save transform data before performing any
+                 // editting, taking a "snapshot" or "backup-copy"
+                 // ====================================================
+                 static Framework::Transform beforeEdit;
+                 static bool isEditing = false;
+
+                 //Framework::Transform before = tr;
+                 //bool changedAndFinished = false;
+                 // ====================================================
+                 // 2. Display editable ImGUI widgets for Transform
+                 // ====================================================
+                 // --- Position ---
+                 float pos[2] = { tr.Pos.x, tr.Pos.y };
+                 ImGui::DragFloat2("Position", pos, 0.5f);
+                 tr.Pos.x = pos[0]; tr.Pos.y = pos[1];
+                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                 // --- Scale ---
+                 float sc[2] = { tr.Scale.x, tr.Scale.y };
+                 ImGui::DragFloat2("Scale", sc, 0.5f);
+                 tr.Scale.x = sc[0]; tr.Scale.y = sc[1];
+                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                 // --- Rotation (deg) ---
+                 ImGui::DragFloat("Rotation (deg)", &tr.Rotation.x, 1.0f, -360.f, 360.f);
+                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                 // --- Rotation Speed ---
+                ImGui::DragFloat("Rotation Speed", &tr.Rotation.y, 0.1f, -10.0f, 10.0f);
+                HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                 // --- Visible ---
+                ImGui::Checkbox("Visible", &tr.isVisible);
+                HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                 ImGui::Unindent();
+             }
+
+             ImGui::Separator();
+         }
+     }
      void AudioComponent(Coordinator* g) {
          if (g->HasComponent<AudioSource>(selectedEntity))
          {

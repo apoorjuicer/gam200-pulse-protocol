@@ -2,7 +2,6 @@
 
 // Need ImGuiID for the dock target
 #include "../../imgui/imgui.h"
-
 class Coordinator;
 
 namespace MyEditor
@@ -11,4 +10,7 @@ namespace MyEditor
     void DrawInspectorWindow(ImGuiID rightDockID);
 
     void AudioComponent(Coordinator* g);
+    void TransformComponent(Coordinator* g);
+
+
 }// end of namespace MyEditor

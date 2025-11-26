@@ -252,6 +252,19 @@ namespace MyEditor
         const float W = io.DisplaySize.x;
         const float H = io.DisplaySize.y;
 
+        //UNDO Manager
+        // ================================
+        // GLOBAL SHORTCUT (Undo)
+        // ================================
+        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z))
+        {
+            std::cout << "[Editor] CTRL+Z preesed editor\n";
+
+            if (mUndo.CanUndo()) {
+                std::cout << "[Editor] CanUndo? :" << mUndo.CanUndo() << "\n";
+                mUndo.Undo();
+            }        
+        }
         // --- Clamp layout ratios
         s_top_ratio = clamp_val(s_top_ratio, MIN_RATIO_H, MAX_TOTAL_VERT);
         s_bottom_ratio = clamp_val(s_bottom_ratio, MIN_RATIO_H, MAX_TOTAL_VERT);

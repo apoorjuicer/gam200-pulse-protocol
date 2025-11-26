@@ -30,6 +30,7 @@
 #include "Components/DisplayName.h"     // For display name in hierarchy list
 #include "Graphics/Transform.h"
 
+#include "UndoManager.h" //FOR UNDO
 struct GLFWwindow;
 
 namespace MyEditor {
@@ -73,6 +74,7 @@ namespace MyEditor {
         unsigned int texID = 0;
         bool triedLoad = false; // so we don't spam-load every frame
     };
+    //UNDO Manager
+    extern UndoManager mUndo;
 
-    
 }// end of namespace MyEditor

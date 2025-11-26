@@ -338,9 +338,7 @@ void CoreEngine::Init()
 
 	// Create systems AFTER GL is ready
 	mAssets.Initialize(); //loaded registry inside
-	//std::cout << mAssets.getRegistry().FindTexture("hero") << "\n";
 	// Singleton for Engine, but once game use EventBus/messaging system
-	std::cout << "path for bgm : " << mAssets.getRegistry().FindAudio("bgm")->path << "\n";
 	// PLEASE CALL THIS EVERY SINGLE U WANT 2 USE SINGLETON
 	auto g_coordinator = Coordinator::GetInstance();
 
@@ -918,7 +916,8 @@ void CoreEngine::StopGame()
 	// Stop all audio (BGM and AudioSource components)
 	if (auto audio = coord->GetSystem<AudioManager>())
 	{
-		audio->StopBGM(); // Stop any direct BGM calls
+		//audio->StopBGM(); // Stop any direct BGM calls
+		audio->StopPlayingAllAudio(); //Stop ALL audio
 
 		// Stop all AudioSource components
 		for (Entity entity = 0; entity < MaxEntity; ++entity)
