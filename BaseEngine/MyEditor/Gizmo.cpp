@@ -1,11 +1,18 @@
-// -----------------------------------------------------------------------------
-// Gizmo.cpp  -  World transform gizmo (translate/scale/rotate) for editor
-// -----------------------------------------------------------------------------
-// Unity-style gizmo with three modes:
-//   1 - Move/Translate (arrows)
-//   2 - Scale (boxes)  
-//   3 - Rotate (ring)
-// -----------------------------------------------------------------------------
+/******************************************************************************/
+/**
+ * @file        Gizmo.cpp
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 50%
+ * @author      Chloe Lau Rey En (secondary) - 50%
+ * @brief       Implements a Unity-style transform gizmo system with move, scale,
+ *              and rotate modes for entity manipulation in the editor viewport
+ *
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
+
 
 #include "pch/pch_temp.h"
 
