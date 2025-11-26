@@ -39,6 +39,8 @@
 #include "Graphics/Layer.h"
 //#include "../Components/AABB.h"
 
+extern bool g_countdownFinished;
+
 //Starting scene will be Main Menu
 SceneManager::SceneManager()
 {
@@ -408,6 +410,9 @@ void SceneManager::UnloadCurrentScene()
 
 void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE JSON FILE 
 {
+	// Reset countdown/beat state on scene load
+	g_countdownFinished = false;
+
 	UnloadCurrentScene();
 
 #ifdef _DEBUG

@@ -25,18 +25,21 @@
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
-#pragma once
 #include "GameLogic.h"
 #include "../MyEngine/CoreEngine/Factory/Factory.h"
 
 //bool EnemyScript::testAABBCollision = false;
 //bool EnemyScript::testOBBCollision = false;
 
+// ===== GLOBAL COUNTDOWN STATE =====
+bool g_countdownFinished = false;
+float g_countdownTimer = 0.0f;
+int g_beatCount = 0;
+
 // ===== GLOBAL STATIC TRACKING FOR ENEMY ORDER =====
 Entity g_firstEnemy = (Entity)-1;
 Entity g_secondEnemy = (Entity)-1;
 bool   g_lockDetection = false;
-
 
 LogicSystem::LogicSystem()
 {
@@ -58,6 +61,7 @@ void LogicSystem::Init()
     AddScript("EnemyScript", std::make_shared<EnemyScript>());
     AddScript("ButtonScript", std::make_shared<ButtonScript>());
     AddScript("PulsingBorderScript", std::make_shared<PulsingBorderScript>());
+    AddScript("CountdownScript", std::make_shared<CountdownScript>());
 
     //std::cout << "=== REGISTERED SCRIPTS ===" << std::endl;
     //for (const auto& [name, script] : map_of_scripts) {
@@ -1293,15 +1297,9 @@ void PulsingBorderScript::Init(Entity ID)
 {
     auto* g_coordinator = Coordinator::GetInstance();
 
-    auto rhythmInput = g_coordinator->GetSystem<RhythmGameplayInput>();
-    if (rhythmInput)
-    {
-        bpm = rhythmInput->songBPM;
-    }
-
     pulseTimer = 0.0f;
+    g_beatCount = 0;  // ADD THIS
 
-    // Hide border at start
     if (g_coordinator->HasComponent<Framework::Transform>(ID))
     {
         auto& transform = g_coordinator->GetComponent<Framework::Transform>(ID);
@@ -1313,24 +1311,39 @@ void PulsingBorderScript::Update(Entity ID)
 {
     auto* g_coordinator = Coordinator::GetInstance();
 
-    auto audioSystem = g_coordinator->GetSystem<AudioManager>();
-    if (!audioSystem)
-        return;
+    float dt = static_cast<float>(GLHelper::delta_time);
+    float beatInterval = g_countdownFinished ? 0.5f : 0.3f;
 
-    double musicPosition = audioSystem->GetBGMPositionSeconds();
+    // ALWAYS increment our timer
+    pulseTimer += dt;
 
-    if (musicPosition <= 0.0)
+    double timeSource = 0.0;
+
+    if (!g_countdownFinished)
     {
-        if (g_coordinator->HasComponent<Framework::Transform>(ID))
+        // Use our OWN timer during countdown
+        timeSource = pulseTimer;
+    }
+    else
+    {
+        auto audioSystem = g_coordinator->GetSystem<AudioManager>();
+        if (!audioSystem)
+            return;
+
+        timeSource = audioSystem->GetBGMPositionSeconds();
+
+        if (timeSource <= 0.0)
         {
-            auto& transform = g_coordinator->GetComponent<Framework::Transform>(ID);
-            transform.isVisible = false;
+            if (g_coordinator->HasComponent<Framework::Transform>(ID))
+            {
+                auto& transform = g_coordinator->GetComponent<Framework::Transform>(ID);
+                transform.isVisible = false;
+            }
+            return;
         }
-        return;
     }
 
-    float beatInterval = 0.5f;  // Every 1 second
-    float normalizedTime = fmodf((float)musicPosition, beatInterval) / beatInterval;
+    float normalizedTime = fmodf((float)timeSource, beatInterval) / beatInterval;
     float beatWindow = 0.15f;
 
     bool shouldBeVisible = (normalizedTime < beatWindow || normalizedTime >(1.0f - beatWindow));
@@ -1342,10 +1355,13 @@ void PulsingBorderScript::Update(Entity ID)
         bool wasVisible = transform.isVisible;
         if (shouldBeVisible && !wasVisible)
         {
+            g_beatCount++;
+
             if (g_coordinator->HasComponent<AudioSource>(ID))
             {
+                auto audioSystem = g_coordinator->GetSystem<AudioManager>();
                 auto& audioSrc = g_coordinator->GetComponent<AudioSource>(ID);
-                if (!audioSrc.audio_id.empty())
+                if (audioSystem && !audioSrc.audio_id.empty())
                 {
                     audioSystem->PlayFromAudioSource(audioSrc);
                 }
@@ -1358,5 +1374,87 @@ void PulsingBorderScript::Update(Entity ID)
 
 void PulsingBorderScript::Exit(Entity ID)
 {
-    std::cout << "[PulsingBorderScript] Shutdown for entity " << ID << std::endl;
+    (void)ID;
+    //std::cout << "[PulsingBorderScript] Shutdown for entity " << ID << std::endl;
+}
+
+// =====================================================================
+// COUNTDOWN SCRIPT (120 BPM synced)
+// =====================================================================
+void CountdownScript::Init(Entity ID)
+{
+    (void)ID;
+    countdownTimer = 0.0f;
+    g_countdownTimer = 0.0f;
+    g_countdownFinished = false;
+}
+
+void CountdownScript::Update(Entity ID)
+{
+    auto* coord = Coordinator::GetInstance();
+
+    if (!coord->HasComponent<TextComponent>(ID))
+        return;
+
+    if (g_countdownFinished)
+    {
+        if (coord->HasComponent<Framework::Transform>(ID))
+        {
+            auto& transform = coord->GetComponent<Framework::Transform>(ID);
+            transform.isVisible = false;
+        }
+        return;
+    }
+
+    auto& text = coord->GetComponent<TextComponent>(ID);
+
+    // Change text every 2 beats
+    if (g_beatCount < 2)
+    {
+        text.text = "Ready?";
+    }
+    else if (g_beatCount < 4)
+    {
+        text.text = "3";
+    }
+    else if (g_beatCount < 6)
+    {
+        text.text = "2";
+    }
+    else if (g_beatCount < 8)
+    {
+        text.text = "1";
+    }
+    else if (g_beatCount < 10)
+    {
+        text.text = "GO!";
+    }
+    else
+    {
+        g_countdownFinished = true;
+
+        // Play BGM
+        if (coord->HasComponent<AudioSource>(ID))
+        {
+            auto& audioSrc = coord->GetComponent<AudioSource>(ID);
+            auto audioManager = coord->GetSystem<AudioManager>();
+            if (audioManager && !audioSrc.audio_id.empty())
+            {
+                audioManager->PlayFromAudioSource(audioSrc);
+            }
+        }
+
+        // Hide text
+        if (coord->HasComponent<Framework::Transform>(ID))
+        {
+            auto& transform = coord->GetComponent<Framework::Transform>(ID);
+            transform.isVisible = false;
+        }
+    }
+}
+
+void CountdownScript::Exit(Entity ID)
+{
+    (void)ID;
+    g_countdownFinished = false;
 }

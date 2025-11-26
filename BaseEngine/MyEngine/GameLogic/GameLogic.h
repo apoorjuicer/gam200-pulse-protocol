@@ -41,6 +41,10 @@
 #include <rapidjson/stringbuffer.h> // for StringBuffer
 #pragma warning(pop)
 
+extern bool g_countdownFinished;
+extern float g_countdownTimer;
+extern int g_beatCount;
+
 // base class for scripts
 class Iscript
 {
@@ -128,6 +132,17 @@ private:
 	float bpm = 120.0f;
 	float minAlpha = 0.2f;
 	float maxAlpha = 1.0f;
+};
+
+class CountdownScript : public Iscript
+{
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
+
+private:
+	float countdownTimer = 0.0f;
 };
 
 class LogicSystem: public Systems

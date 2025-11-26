@@ -805,9 +805,31 @@ void GraphicsManager::Update2DTextComponent() {
             ? UI_FONT_KEY // "PatrickHand_font"
             : txt.font_id;
 
-        //offset pos based on transform
-        float screenX = tr.Pos.x  + txt.offset.x;
-        float screenY = tr.Pos.y  + txt.offset.y;
+        float screenX, screenY;
+
+        // Check if debug entity (name starts with "_")
+        bool isDebugEntity = false;
+        if (g_coordinator->HasComponent<Name>(entity))
+        {
+            auto& name = g_coordinator->GetComponent<Name>(entity);
+            if (!name.name.empty() && name.name[0] == '_')
+            {
+                isDebugEntity = true;
+            }
+        }
+
+        if (isDebugEntity)
+        {
+            // Debug entities use screen coords directly
+            screenX = tr.Pos.x + txt.offset.x;
+            screenY = tr.Pos.y + txt.offset.y;
+        }
+        else
+        {
+            // Normal entities convert world coords to screen coords
+            screenX = tr.Pos.x + (GLApp::VIRTUAL_W / 2.0f) + txt.offset.x;
+            screenY = (GLApp::VIRTUAL_H / 2.0f) - tr.Pos.y + txt.offset.y;
+        }
 
         DrawText2D(
             txt.text,
