@@ -18,6 +18,7 @@
 
 namespace MyEditor
 {
+
     // Draw the full Hierarchy ImGui window (toolbar + list).
     // dockID is the dockspace ID from Editor.cpp (LeftDockSpace).
     void DrawHierarchyWindow(ImGuiID dockID);

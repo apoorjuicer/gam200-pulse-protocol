@@ -144,7 +144,6 @@ CoreEngine::CoreEngine() : window(nullptr), DebugMode(false)
 {
 	LastTime = 0;
 	GameRunning = false;
-	// mAssets.Initialize();
 }
 
 CoreEngine::~CoreEngine()
@@ -194,13 +193,6 @@ void CoreEngine::Init()
 		spdlog::error("Failed to initialize GLFW");
 		return;
 	}
-
-	// loading metadata for audio,texture,font into
-	// ASset reg's container each respectively
-	// ar.LoadAudioManifest();
-	// ar.LoadTextureManifest();
-	// ar.LoadFontManifest();
-	// ar.LoadSceneManifest();
 
 	unsigned int version = 0;
 	FMOD::System* system = nullptr;

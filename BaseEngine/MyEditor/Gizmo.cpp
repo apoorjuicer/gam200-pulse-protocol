@@ -11,16 +11,22 @@
 #include "Gizmo.h"
 #include "LayerManagerPanel.h"  // for IsLayerVisible, IsLayerLocked
 #include "../CoreEngine/ECS/Coordinator.h"
-#include "../CoreEngine/ECS/Types.h"
-#include "../Graphics/Transform.h"
-#include "../Graphics/glapp.h"
-#include "../Graphics/Layer.h"
+//#include "../CoreEngine/ECS/Types.h"
+//#include "../Graphics/Transform.h"
+//#include "../Graphics/glapp.h"
+//#include "../Graphics/Layer.h"
+
+#include "SnapShot.h"
 
 // If you have a dedicated gizmo type, include it here
 // #include "GizmoState.h"
 
 namespace MyEditor
 {
+    // Gizmo-undo state (separate from Inspector)
+    static bool s_gizmoEditing = false;
+    static Framework::Transform s_gizmoBeforeEdit;
+    static Entity s_gizmoEntity = INVALID_ENTITY;
     // -------------------------------------------------------------------------
     // Internal state & constants
     // -------------------------------------------------------------------------
@@ -288,6 +294,11 @@ namespace MyEditor
                 g_gizmo.active = selectedEntity;
                 g_gizmo.dragStartWorld = mouseWorld;
                 g_gizmo.entityStartPos = tr.Pos;
+
+                // UNDO: snapshot transform at start of gizmo drag
+                s_gizmoEditing = true;
+                s_gizmoEntity = selectedEntity;
+                s_gizmoBeforeEdit = tr;
             }
             else {
                 selectedEntity = INVALID_ENTITY;
@@ -304,12 +315,44 @@ namespace MyEditor
                            mouseWorld.y - g_gizmo.dragStartWorld.y };
                 tr.Pos.x = g_gizmo.entityStartPos.x + d.x;
                 tr.Pos.y = g_gizmo.entityStartPos.y + d.y;
+
+
+
             }
         }
 
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
             g_gizmo.dragging = false;
             g_gizmo.active = INVALID_ENTITY;
+
+
+            if (s_gizmoEditing && s_gizmoEntity != INVALID_ENTITY)
+            {
+                auto* c = Coordinator::GetInstance();
+                if (c && c->HasComponent<Framework::Transform>(s_gizmoEntity))
+                {
+                    auto& currentTr = c->GetComponent<Framework::Transform>(s_gizmoEntity);
+
+                    // Only push undo if something actually changed
+                    if (currentTr != s_gizmoBeforeEdit)
+                    {
+                        Entity e = s_gizmoEntity;
+                        Framework::Transform before = s_gizmoBeforeEdit;
+
+                        mUndo.Push([e, before]()
+                            {
+                                auto* g = Coordinator::GetInstance();
+                                if (!g) return;
+                                if (!g->HasComponent<Framework::Transform>(e)) return;
+
+                                g->GetComponent<Framework::Transform>(e) = before;
+                            });
+                    }
+                }
+
+                s_gizmoEditing = false;
+                s_gizmoEntity = INVALID_ENTITY;
+            }
         }
 
         // Delete selected entity with Del key
@@ -322,11 +365,43 @@ namespace MyEditor
                 g_gizmo.active = INVALID_ENTITY;
             }
 
+            //UNDO
+            Entity toDelete = selectedEntity;
+            // Find its index in the hierarchy list (for undo reinsertion)
+            auto it = std::find(entityDisplayOrder.begin(),
+                entityDisplayOrder.end(),
+                toDelete);
+            int index = -1;
+            if (it != entityDisplayOrder.end())
+                index = static_cast<int>(it - entityDisplayOrder.begin());
+            // --- SNAPSHOT BEFORE DELETING ---
+            EntitySnapshot snap = MakeEntitySnapshot(toDelete);
+
             // Destroy the entity
             coord->DestroyEntity(selectedEntity);
 
             // Clear selection
             selectedEntity = INVALID_ENTITY;
+
+            // UNDO: recreate the entity from snapshot and reinsert into list
+            mUndo.Push([snap, index]()
+                {
+                    // Recreate the entity with all its components
+                    Entity restored = CreateEntityFromEntitySnapshot(snap);
+                    if (restored == INVALID_ENTITY) {
+                        return;
+                    }
+
+                    // Reinsert into hierarchy at original position
+                    int insertIndex = index;
+                    if (insertIndex < 0 || insertIndex > static_cast<int>(entityDisplayOrder.size()))
+                        insertIndex = static_cast<int>(entityDisplayOrder.size());
+
+                    entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex, restored);
+
+                    // Select the restored entity
+                    selectedEntity = restored;
+                });
         }
 
         dl->PopClipRect();

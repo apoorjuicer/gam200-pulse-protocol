@@ -17,8 +17,6 @@
 #include <functional>
 class UndoManager {
 public:
-	//keep track of history for undo
-	static constexpr size_t MAX_HISTORY = 20; 
 	//std::function -> general purpose polymorphic function wrapper.
 	//A better function ptor that can store ANY callable object
 	//To be called when we need to undo
@@ -30,8 +28,12 @@ public:
 	bool CanUndo() const;
 	void Clear(); //clear the stack when changing scenes
 	operator bool() const noexcept;
+	size_t Capacity() const noexcept;
 private:
+	//keep track of history for undo
+	static constexpr size_t MAX_HISTORY = 20;
 	// stack of undo commands (LIFO)
 	// Last-In-First-Out, store the previous step
 	std::vector<Command> undo_stack;
+
 };

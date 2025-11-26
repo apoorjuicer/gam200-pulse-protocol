@@ -11,7 +11,7 @@
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
-#include "pch/pch.h"
+#include "math.h"
 
 /************************************************* */
 /********************ctor/dtor******************** */

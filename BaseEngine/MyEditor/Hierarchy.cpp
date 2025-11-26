@@ -14,21 +14,22 @@
 // -----------------------------------------------------------------------------
 // Hierarchy.cpp  -  Scene hierarchy panel (entity list + toolbar)
 // -----------------------------------------------------------------------------
-
 #include "pch/pch_temp.h"
-
 #include "Hierarchy.h"
 #include "Editor.h"   // selectedEntity, INVALID_ENTITY, entityDisplayOrder, Game/ECS helpers
 #include "TopBarPanel.h"
 
 // ImGui
 #include "imgui.h"
+//
+#include "SnapShot.h"
 
 // Everything else (Factory, Name, GUIButton, Renderable, Transform, Animation)
 // is already included via Editor.h
 
 namespace MyEditor
 {
+    
     // -------------------------------------------------------------------------
     // CONFIGURATION CONSTANTS (Change these to customize behavior)
     // -------------------------------------------------------------------------
@@ -244,15 +245,44 @@ namespace MyEditor
         }
 
         // [+] Create Empty Entity at end
+        // Undo
         if (ImGui::Button("+"))
         {
+
+            // Remember what was selected BEFORE creating the new object
+            Entity prevSelected = selectedEntity;
+
             Factory factory;
             Entity newEntity = factory.DefaultObj();
 
             if (newEntity != INVALID_ENTITY)
             {
+                // add to hierarchy list
                 entityDisplayOrder.push_back(newEntity);
+                //select the new entity
                 selectedEntity = newEntity;
+                // ------------------------------------------------------------
+                // UNDO: delete the entity again and restore previous selection
+                // ------------------------------------------------------------
+                //c
+                mUndo.Push([newEntity, prevSelected]() {
+                    // Remove from display order if still present
+                    //find new entity in the container entityDisplayOrder
+                    auto it = std::find(entityDisplayOrder.begin(),
+                        entityDisplayOrder.end(),
+                        newEntity);
+
+                    //if found erase it
+                    if (it != entityDisplayOrder.end())
+                        entityDisplayOrder.erase(it);
+
+                    // Delete from ECS 
+                    Factory factory2; //did not capture factory
+                    factory2.DeleteEntity(newEntity);
+
+                    // Restore previous selection
+                    selectedEntity = prevSelected;
+                    });
             }
         }
         if (ImGui::IsItemHovered())
@@ -263,63 +293,94 @@ namespace MyEditor
         // Buttons that require selection
         ImGui::BeginDisabled(selectedEntity == INVALID_ENTITY);
 
-        // [^] Create Above Selected
-        if (ImGui::Button("^"))
-        {
-            Factory factory;
-            Entity newEntity = factory.DefaultObj();
+        //// [^] Create Above Selected
+        //if (ImGui::Button("^"))
+        //{
+        //    Factory factory;
+        //    Entity newEntity = factory.DefaultObj();
 
-            if (newEntity != INVALID_ENTITY)
-            {
-                auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
-                if (it != entityDisplayOrder.end())
-                    entityDisplayOrder.insert(it, newEntity);
-                else
-                    entityDisplayOrder.push_back(newEntity);
+        //    if (newEntity != INVALID_ENTITY)
+        //    {
+        //        auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+        //        if (it != entityDisplayOrder.end())
+        //            entityDisplayOrder.insert(it, newEntity);
+        //        else
+        //            entityDisplayOrder.push_back(newEntity);
 
-                selectedEntity = newEntity;
-            }
-        }
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Create Above Selected");
+        //        selectedEntity = newEntity;
+        //    }
+        //}
+        //if (ImGui::IsItemHovered())
+        //    ImGui::SetTooltip("Create Above Selected");
 
-        ImGui::SameLine();
+        //ImGui::SameLine();
 
-        // [v] Create Below Selected
-        if (ImGui::Button("v"))
-        {
-            Factory factory;
-            Entity newEntity = factory.DefaultObj();
+        //// [v] Create Below Selected
+        //if (ImGui::Button("v"))
+        //{
+        //    Factory factory;
+        //    Entity newEntity = factory.DefaultObj();
 
-            if (newEntity != INVALID_ENTITY)
-            {
-                auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
-                if (it != entityDisplayOrder.end())
-                    entityDisplayOrder.insert(it + 1, newEntity);
-                else
-                    entityDisplayOrder.push_back(newEntity);
+        //    if (newEntity != INVALID_ENTITY)
+        //    {
+        //        auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+        //        if (it != entityDisplayOrder.end())
+        //            entityDisplayOrder.insert(it + 1, newEntity);
+        //        else
+        //            entityDisplayOrder.push_back(newEntity);
 
-                selectedEntity = newEntity;
-            }
-        }
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Create Below Selected");
+        //        selectedEntity = newEntity;
+        //    }
+        //}
+        //if (ImGui::IsItemHovered())
+        //    ImGui::SetTooltip("Create Below Selected");
 
-        ImGui::SameLine();
+        //ImGui::SameLine();
 
         // [X] Delete Selected Entity
+        // Undo
         if (ImGui::Button("X"))
         {
             if (selectedEntity != INVALID_ENTITY)
             {
-                auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+                Entity toDelete = selectedEntity;
+
+                auto it = std::find(entityDisplayOrder.begin(),
+                    entityDisplayOrder.end(), 
+                    selectedEntity);
+
+                // --- SNAPSHOT BEFORE DELETING ---
+                EntitySnapshot snap = MakeEntitySnapshot(toDelete);
+                int index = -1;
+
+                //delete the entity
                 if (it != entityDisplayOrder.end())
                     entityDisplayOrder.erase(it);
 
                 Factory factory;
                 factory.DeleteEntity(selectedEntity);
 
-                selectedEntity = INVALID_ENTITY;
+                selectedEntity = INVALID_ENTITY; //clear entity
+
+                // --- UNDO COMMAND ---
+                mUndo.Push([snap, index]()
+                    {
+                        // Recreate the entity with all its components
+                        Entity restored = CreateEntityFromEntitySnapshot(snap);
+                        if (restored == INVALID_ENTITY) {
+                            return;
+                        }
+                           
+                        // Reinsert into hierarchy at original position
+                        int insertIndex = index;
+                        if (insertIndex < 0 || insertIndex > static_cast<int>(entityDisplayOrder.size()))
+                            insertIndex = static_cast<int>(entityDisplayOrder.size());
+
+                        entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex, restored);
+
+                        // Select the restored entity
+                        selectedEntity = restored;
+                    });
             }
         }
 
@@ -574,4 +635,5 @@ namespace MyEditor
         ImGui::End();
     }
 
-}
+
+}// end of namespace
