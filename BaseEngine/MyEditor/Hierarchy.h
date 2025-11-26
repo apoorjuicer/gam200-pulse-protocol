@@ -2,7 +2,8 @@
 /**
  * @file        Hierarchy.h
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Leu Jun Yong (primary) - 60%
+ * @author      Chloe Lau Rey En (secondary) - 40%
  * @brief       TBF
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
