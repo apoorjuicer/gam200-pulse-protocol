@@ -72,6 +72,11 @@ namespace MyEditor
     static bool s_showEngineManagedWarning = false;
     static std::string s_blockedEntityName = "";
 
+    // ── Audio import error popup state ───────────────────────────
+    static bool s_showAudioImportError = false;
+    static std::string s_invalidAudioFileName = "";
+    static std::string s_targetFolderName = "";
+
     // ── Init ────────────────────────────────────────────────────
     void InitProjectPanel()
     {
@@ -169,6 +174,28 @@ namespace MyEditor
         item.texID = mAssets.GetOrLoadTexture(item.fullPath);
     }
 
+    bool IsAudioExt(const std::string& path)
+    {
+        const auto dot = path.find_last_of('.');
+        if (dot == std::string::npos)
+            return false;
+
+        std::string ext = path.substr(dot + 1);
+        for (char& c : ext)
+            c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+
+        return (ext == "mp3" || ext == "wav");
+    }
+
+    bool IsAudioFolder(const std::string& folderName)
+    {
+        std::string lower = folderName;
+        for (char& c : lower)
+            c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+
+        return (lower == "sounds" || lower == "sound" ||
+            lower == "music" || lower == "audio");
+    }
 
     // Replace file on disk and hot-swap everywhere using AssetsManager API.
     static bool ReplaceTextureFileOnDisk_AndRefreshAll(const std::string& dstPath,
@@ -305,6 +332,10 @@ namespace MyEditor
                             ext == ".bmp" || ext == ".tga" || ext == ".dds";
                     };
 
+                // Check if current folder is an audio folder
+                std::string currentFolderName = dstDir.filename().string();
+                bool isAudioFolder = IsAudioFolder(currentFolderName);
+
                 int changed = 0;
                 for (const std::string& srcStr : s_pendingOSDrops)
                 {
@@ -312,11 +343,23 @@ namespace MyEditor
                     if (ec || src.empty() || !fs::exists(src, ec))
                         continue;
 
+                    // ═══════════════════════════════════════════════════════
+                    // AUDIO FOLDER VALIDATION
+                    // ═══════════════════════════════════════════════════════
+                    if (isAudioFolder && !IsAudioExt(src.string()))
+                    {
+                        // Invalid file type for audio folder - show error popup
+                        s_showAudioImportError = true;
+                        s_invalidAudioFileName = src.filename().string();
+                        s_targetFolderName = currentFolderName;
+                        continue;  // Skip this file, don't import it
+                    }
+
                     fs::path dst = dstDir / src.filename();
 
                     if (fs::exists(dst, ec))
                     {
-                        // same name → replace
+                        // if same name, replace
                         if (IsImageExtFs(dst))
                         {
                             if (ReplaceTextureFileOnDisk_AndRefreshAll(dst.string(), src.string()))
@@ -721,6 +764,50 @@ namespace MyEditor
             ImGui::Spacing();
             ImGui::TextWrapped("Entities with names starting with '_' are debug texts "
                 "(e.g., _FPS_Display, _TopSystem_Display) and cannot be saved as prefabs.");
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // Center the OK button
+            float buttonWidth = 120.0f;
+            float windowWidth = ImGui::GetWindowSize().x;
+            ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
+
+            if (ImGui::Button("OK", ImVec2(buttonWidth, 0)))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+
+            // Also close on Enter key
+            if (ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_Escape))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+
+        // =====================================================
+        // Error Popup for Invalid Audio File Import
+        // =====================================================
+        if (s_showAudioImportError)
+        {
+            ImGui::OpenPopup("Invalid Audio Format##AudioImportError");
+            s_showAudioImportError = false;
+        }
+
+        if (ImGui::BeginPopupModal("Invalid Audio Format##AudioImportError", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  Error  ");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::Text("Cannot import '%s' into %s folder.",
+                s_invalidAudioFileName.c_str(),
+                s_targetFolderName.c_str());
+            ImGui::Spacing();
+            ImGui::TextWrapped("Supported audio formats: .mp3, .wav");
 
             ImGui::Spacing();
             ImGui::Separator();
