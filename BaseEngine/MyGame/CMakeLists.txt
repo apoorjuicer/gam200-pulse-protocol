@@ -37,3 +37,22 @@ if (MSVC AND FMOD_API_DIR_FOUND)
             $<TARGET_FILE_DIR:${GAME_NAME}>
     )
 endif()
+# ---- COPY JSON FOLDER FOR RUNTIME (installer-friendly) ----
+add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/MyEngine/JSON"
+        "$<TARGET_FILE_DIR:${GAME_NAME}>/JSON"
+)
+
+# ---- COPY ANY OTHER ASSETS FOLDER (optional, recommended) ----
+add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/MyEngine/Assets"
+        "$<TARGET_FILE_DIR:${GAME_NAME}>/Assets"
+)
+
+add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/MyEngine/Audio"
+        "$<TARGET_FILE_DIR:${GAME_NAME}>/Audio"
+)
