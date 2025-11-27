@@ -236,11 +236,10 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 void GLApp::draw(std::set<Entity> entities, int includeMask) {
 #ifdef ENABLE_EDITOR
 	bool editorOn = MyEditor::IsEnabled();
-	bool playing = MyEditor::IsPlaying();
 
 	// Use editor camera only when editing (not playing).
 	GLApp::Camera2D& activeCam =
-		(editorOn && !playing) ? gEditorCamera : gGameCamera;
+		(editorOn) ? gEditorCamera : gGameCamera;
 #else
 	GLApp::Camera2D& activeCam = gGameCamera;
 #endif
@@ -249,16 +248,6 @@ void GLApp::draw(std::set<Entity> entities, int includeMask) {
 	GLFWwindow* window = glfwGetCurrentContext();
 	if (MyEditor::IsEnabled())
 	{
-		bool playing = MyEditor::IsPlaying();
-		// -------- Editor ON: render into middle ImGui game viewport --------
-		auto vp = MyEditor::ComputeMiddleGameViewportPixels(window, true);
-		glViewport(vp.x, vp.y, vp.w, vp.h);
-
-		GLHelper::GameOffsetX = vp.x;
-		GLHelper::GameOffsetY = vp.y;
-		GLHelper::GameWidth = vp.w;
-		GLHelper::GameHeight = vp.h;
-
 		// Shared scroll accumulator for zoom
 		static double s_scrollY = 0.0;
 		static bool s_scrollInit = false;
@@ -291,72 +280,23 @@ void GLApp::draw(std::set<Entity> entities, int includeMask) {
 		glfwGetWindowSize(window, &winW, &winH);
 		glfwGetFramebufferSize(window, &fbW, &fbH);
 
-		if (winW > 0 && winH > 0)
+		// If the window is minimized or has invalid size (e.g. fullscreen + Alt+Tab),
+		// skip this frame without touching the camera.
+		if (winW <= 0 || winH <= 0 || fbW <= 0 || fbH <= 0 ||
+			glfwGetWindowAttrib(window, GLFW_ICONIFIED) == GLFW_TRUE)
 		{
-			// Convert window coords (origin top-left) to framebuffer coords (origin bottom-left)
-			double fbX = curX * double(fbW) / double(winW);
-
-			double normY = curY / double(winH);       // 0 at top, 1 at bottom
-			double fbY = (1.0 - normY) * double(fbH); // 0 at bottom, fbH at top
-
-			double gameX0 = GLHelper::GameOffsetX;
-			double gameY0 = GLHelper::GameOffsetY;
-			double gameX1 = gameX0 + GLHelper::GameWidth;
-			double gameY1 = gameY0 + GLHelper::GameHeight;
-			bool allowCameraControl = false;
-			if (!playing) { // <--- only allow in EDIT mode
-				// (convert mouse to framebuffer coords as you already do)
-				if (fbX >= gameX0 && fbX <= gameX1 &&
-					fbY >= gameY0 && fbY <= gameY1)
-				{
-					allowCameraControl = true;
-				}
-			}
-
-			// -------- Middle mouse pan (editor camera only, in game viewport) ---
-			const bool mmb =
-				glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
-			if (!MyEditor::IsPlaying()) {
-				if (allowCameraControl && mmb)
-				{
-					const double dx = curX - lastX;
-					const double dy = curY - lastY;
-					activeCam.center += glm::vec2(
-						float(2.0 * dx / double(GLHelper::GameWidth)),
-						float(-2.0 * dy / double(GLHelper::GameHeight)));
-				}
-			}
-
-			lastX = curX;
-			lastY = curY;
-
-			// -------------------- Scroll wheel zoom (editor camera) -------------
-			float wheel = static_cast<float>(s_scrollY);
-			s_scrollY = 0.0;
-			if (!MyEditor::IsPlaying()) {
-				if (allowCameraControl && wheel != 0.0f)
-				{
-					const float oldZ = activeCam.zoom;
-					const float step = 1.12f;
-					float newZ = glm::clamp(oldZ * std::pow(step, wheel),
-						activeCam.minZoom,
-						activeCam.maxZoom);
-
-					glm::vec2 cNDC = ScreenToNDC(curX, curY);
-					activeCam.center = cNDC - (newZ / oldZ) * (cNDC - activeCam.center);
-					activeCam.zoom = newZ;
-				}
-			}
+			return;
 		}
-		else
-		{
-			// -------- Editor build but editor disabled: full-screen letterbox ---
-			int fbW = 0, fbH = 0;
-			glfwGetFramebufferSize(window, &fbW, &fbH);
-			ComputeLetterbox(fbW, fbH);
-			activeCam.zoom = 1.0f;
-			activeCam.center = glm::vec2(0.0f);
-		}
+
+		// -------- Editor ON: render into middle ImGui game viewport --------
+		auto vp = MyEditor::ComputeMiddleGameViewportPixels(window, true);
+		glViewport(vp.x, vp.y, vp.w, vp.h);
+
+		GLHelper::GameOffsetX = vp.x;
+		GLHelper::GameOffsetY = vp.y;
+		GLHelper::GameWidth = vp.w;
+		GLHelper::GameHeight = vp.h;
+
 	}
 #else
 	// -------- Game build (no editor): use FULL framebuffer, no letterbox ----
