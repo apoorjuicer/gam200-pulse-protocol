@@ -91,7 +91,6 @@ private:
 //PlayerScript playerScript;
 //playerScript.float_fields.emplace("Health", 100.0f);
 
-
 class EnemyScript : public Iscript
 {
 public:
@@ -145,6 +144,19 @@ private:
 	float bpm = 120.0f;
 	float minAlpha = 0.2f;
 	float maxAlpha = 1.0f;
+};
+
+class Csharptestscript : public Iscript
+{
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
+
+	Csharptestscript* Clone() override;
+private: 
+	void(*initFunc)(CoreEngine*) = nullptr;
+	bool(*addScript)(int, const char*) = nullptr;
 };
 
 class LogicSystem: public Systems

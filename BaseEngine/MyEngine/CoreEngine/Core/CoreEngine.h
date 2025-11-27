@@ -116,6 +116,7 @@ private:
 		return fPtr;
 	}
 
+public:
 	// Helper Functions (Since boilerplate is now up, grab pointers to manage function)
 	template<typename FunctionType>
 	FunctionType GetFunctionPtr(const std::string_view& assemblyName, const std::string_view& typeName, const std::string_view& functionName)
@@ -143,6 +144,7 @@ private:
 		return managedDelegate;
 	}
 	
+private:
 	//Function pointer for our script updates
 	void(*executeUpdateFunc)() = nullptr;
 };

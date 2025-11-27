@@ -27,7 +27,9 @@
  /******************************************************************************/
 #pragma once
 #include "GameLogic.h"
+#include "pch/pch_temp.h"
 #include "../MyEngine/CoreEngine/Factory/Factory.h"
+#include "../MyEngine/CoreEngine/Core/CoreEngine.h"
 
 bool EnemyScript::testAABBCollision = false;
 bool EnemyScript::testOBBCollision = false;
@@ -57,6 +59,8 @@ void LogicSystem::Init()
     AddScript("EnemyScript", std::make_shared<EnemyScript>());
     AddScript("ButtonScript", std::make_shared<ButtonScript>());
     AddScript("PulsingBorderScript", std::make_shared<PulsingBorderScript>());
+    AddScript("CsharpScript", std::make_shared<Csharptestscript>());
+    
 
     //std::cout << "=== REGISTERED SCRIPTS ===" << std::endl;
     //for (const auto& [name, script] : map_of_scripts) {
@@ -1063,3 +1067,23 @@ PulsingBorderScript* PulsingBorderScript::Clone()
 {
     return new PulsingBorderScript{};
 }
+
+void Csharptestscript::Init(Entity ID)
+{
+    auto addScript = Engine->GetFunctionPtr<bool(*)(int, const char*)>
+        (
+            "ScriptAPI",
+            "ScriptAPI.EngineInterface",
+            "AddScriptViaName"
+        );
+
+    //// Adding script to an entity[please work ;-; ]
+    addScript(ID, "TestScript");    // THE 0 IS ENTITY ID 0
+    addScript(ID, "TestScript2");	// show that u can run multiple codes and even multiple code for each entity :D
+}
+
+void Csharptestscript::Update(Entity ID){}
+
+void Csharptestscript::Exit(Entity ID) {}
+
+Csharptestscript* Csharptestscript::Clone() {return new Csharptestscript{};}

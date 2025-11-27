@@ -59,15 +59,9 @@ void SceneManager::Init()
 void SceneManager::Update(float dt)
 {
 	(void)dt;
-	/*if (dt == 0)
-	{
-		std::cout << dt << std::endl;
-	}*/
 
 	if (CurrentScene != PreviousScene)
 	{
-		//SaveCurrentScene(); // normally just for ImGui but can use here for testing
-
 		// Save the scene we're LEAVING for ESC navigation
 		LastScene = PreviousScene;
 
@@ -651,6 +645,8 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			}
 		}
 	}
+
+	PreviousScene = CurrentScene;
 
 #ifdef _DEBUG
 	std::cout << "\n===================================================" << std::endl;
