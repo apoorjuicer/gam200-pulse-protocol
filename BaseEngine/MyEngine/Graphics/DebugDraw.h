@@ -15,12 +15,8 @@
 #ifndef DEBUG_DRAW_H
 #define DEBUG_DRAW_H
 
-#include <GL/glew.h>
-#include <vector>
-#include <glm/glm.hpp>
-
 #include "glslshader.h"
-#include "pch/pch.h"
+#include "pch/pch_temp.h"
 
 class DebugDraw {
 public:

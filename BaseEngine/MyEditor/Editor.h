@@ -4,8 +4,8 @@
  * @project     Pulse Protocol
  * @author      Leu Jun Yong
  * @brief       Initializes, updates, renders, and manages the ImGui
-                editor interface with toggle support.
-
+ *              editor interface with toggle support.
+ *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
@@ -28,8 +28,12 @@
 #include "CoreEngine/Prefab/PrefabManager.h"
 #include "CoreEngine/ECS/System.h"   // For Entity type
 #include "Components/DisplayName.h"     // For display name in hierarchy list
-#include "Graphics/Transform.h"
+//#include "Graphics/Transform.h"
+#include "Graphics/glapp.h"
+#include "../MyEngine/Math/math.h"
 
+
+#include "UndoManager.h" //FOR UNDO
 struct GLFWwindow;
 
 
@@ -41,7 +45,8 @@ namespace MyEditor {
     void Shutdown();
     void SetEnabled(bool enabled);
     bool IsEnabled();
-  
+    bool IsPlaying();
+    void SetPlaying(bool p);
 
     struct GameViewport { int x, y, w, h; };
     extern const Entity INVALID_ENTITY;
@@ -75,6 +80,7 @@ namespace MyEditor {
         unsigned int texID = 0;
         bool triedLoad = false; // so we don't spam-load every frame
     };
+    //UNDO Manager
+    extern UndoManager mUndo;
 
-    
 }// end of namespace MyEditor

@@ -56,6 +56,10 @@ public:
 	void Normalize();	  // mutating, normalizes in place
 	//
 
+	//comparison operator
+	bool operator==(Vector2 const& other) const;
+	bool operator!=(Vector2 const& other) const;
+
 	// Serialize
 	void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
 	void Deserialize(rapidjson::Value const &in);

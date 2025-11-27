@@ -2,7 +2,8 @@
 /**
  * @file        Hierarchy.h
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Leu Jun Yong (primary) - 60%
+ * @author      Chloe Lau Rey En (secondary) - 40%
  * @brief       TBF
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
@@ -18,6 +19,7 @@
 
 namespace MyEditor
 {
+
     // Draw the full Hierarchy ImGui window (toolbar + list).
     // dockID is the dockspace ID from Editor.cpp (LeftDockSpace).
     void DrawHierarchyWindow(ImGuiID dockID);

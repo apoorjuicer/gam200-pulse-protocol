@@ -36,8 +36,6 @@
 #include "../MyEngine/Components/DisplayName.h"
 #include "../MyEngine/Components/EntityType.h"
 
-#include "../MyEngine/UI/GUIManager.h"
-
 #include "../MyEngine/Audio/AudioSource.h"
 #include "../MyEngine/Graphics/Text.h"
 #pragma comment(lib, "winmm.lib")
@@ -289,7 +287,6 @@ CoreEngine::CoreEngine() : window(nullptr), DebugMode(false)
 {
 	LastTime = 0;
 	GameRunning = false;
-	// mAssets.Initialize();
 }
 
 CoreEngine::~CoreEngine()
@@ -339,13 +336,6 @@ void CoreEngine::Init()
 		//spdlog::error("Failed to initialize GLFW");
 		return;
 	}
-
-	// loading metadata for audio,texture,font into
-	// ASset reg's container each respectively
-	// ar.LoadAudioManifest();
-	// ar.LoadTextureManifest();
-	// ar.LoadFontManifest();
-	// ar.LoadSceneManifest();
 
 	unsigned int version = 0;
 	FMOD::System* system = nullptr;
@@ -492,9 +482,7 @@ void CoreEngine::Init()
 
 	// Create systems AFTER GL is ready
 	mAssets.Initialize(); //loaded registry inside
-	//std::cout << mAssets.getRegistry().FindTexture("hero") << "\n";
 	// Singleton for Engine, but once game use EventBus/messaging system
-	/*std::cout << "path for bgm : " << mAssets.getRegistry().FindAudio("BGM_L1")->path << "\n";*/
 	// PLEASE CALL THIS EVERY SINGLE U WANT 2 USE SINGLETON
 	auto g_coordinator = Coordinator::GetInstance();
 
@@ -1063,7 +1051,8 @@ void CoreEngine::StopGame()
 	// Stop all audio (BGM and AudioSource components)
 	if (auto audio = coord->GetSystem<AudioManager>())
 	{
-		audio->StopBGM(); // Stop any direct BGM calls
+		//audio->StopBGM(); // Stop any direct BGM calls
+		audio->StopPlayingAllAudio(); //Stop ALL audio
 
 		// Stop all AudioSource components
 		for (Entity entity = 0; entity < MaxEntity; ++entity)

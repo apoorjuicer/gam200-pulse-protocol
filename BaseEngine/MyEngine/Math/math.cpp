@@ -11,7 +11,7 @@
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
-#include "pch/pch.h"
+#include "math.h"
 
 /************************************************* */
 /********************ctor/dtor******************** */
@@ -122,6 +122,13 @@ void Vector2::Normalize()
     }
 }
 
+bool Vector2::operator==(Vector2 const& other) const {
+    return x == other.x && y == other.y;
+}
+bool Vector2::operator!=(Vector2 const& other) const {
+    return !(*this == other);
+}
+//non-member functions
 float distance(Vector2 v0, Vector2 v1)
 {
     float dx = v1.x - v0.x;

@@ -40,7 +40,7 @@ public:
 	void init(/*float inputEditorWidth, float inputEditorHeight*/);
 	//void update(GLFWwindow* window);
 	void update(GLFWwindow* window, std::set<Entity>);
-	void draw(std::set<Entity> entities, LayerMask includeMask);
+	void draw(std::set<Entity> entities, int includeMask);
 	void cleanup();
 
 	GLuint vaoid; // handle to VAO
@@ -57,12 +57,6 @@ public:
 	static void ComputeLetterbox(int fbw, int fbh);
 	static void OnResize(int width, int height);
 	void DrawAABB_NDC(const glm::mat3& modelToNDC, const AABB& box, const glm::vec3& color);
-
-
-
-
-	glm::vec2  WorldToScreenPx(const Vector2& wpos);     // world -> framebuffer px
-	Vector2    ScreenPxToWorld(double sx, double sy);    // framebuffer px -> world
 
 	struct BatchRender {
 		struct Vtx { glm::vec2 pos; glm::vec2 uv; };
@@ -207,7 +201,8 @@ public:
 		float     minZoom{ 0.25f };
 		float     maxZoom{ 2.0f };
 	};
-	static Camera2D gCamera;
+	static Camera2D gEditorCamera;   // used only in editor
+	static Camera2D gGameCamera;     // used only during Play
 
 
 	static glm::vec2 ScreenToNDC(double x, double y);

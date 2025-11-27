@@ -41,6 +41,8 @@
 #include <rapidjson/stringbuffer.h> // for StringBuffer
 #pragma warning(pop)
 
+extern bool g_countdownFinished;
+
 // base class for scripts
 class Iscript
 {
@@ -107,6 +109,24 @@ public:
 	float enemyDmg;
 };
 
+//class EnemySpawnerScript : public Iscript
+//{
+//public:
+//	void Init(Entity ID) override;
+//	void Update(Entity ID) override;
+//	void Exit(Entity ID) override;
+//
+//	// Track the two enemies
+//	static Entity Enemy1ID;
+//	static Entity Enemy2ID;
+//
+//	// True when Enemy 1 has died
+//	static bool Enemy1Dead;
+//
+//	// Per-enemy hop timer (moved here)
+//	static std::unordered_map<Entity, float> HopTimer;
+//};
+
 // Per-button data structure
 struct ButtonData
 {
@@ -152,11 +172,35 @@ public:
 	void Init(Entity ID) override;
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
-
 	Csharptestscript* Clone() override;
+
 private: 
 	void(*initFunc)(CoreEngine*) = nullptr;
 	bool(*addScript)(int, const char*) = nullptr;
+}
+
+class CountdownScript : public Iscript
+{
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
+
+private:
+	float countdownTimer = 0.0f;
+};
+
+class FeedbackScript : public Iscript
+{
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
+
+private:
+	float displayTimer = 0.0f;
+	bool isShowing = false;
+	float startTime = 0.0f;
 };
 
 class LogicSystem: public Systems

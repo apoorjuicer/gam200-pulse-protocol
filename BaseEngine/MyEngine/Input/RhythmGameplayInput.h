@@ -22,7 +22,6 @@
 #include "pch/pch_temp.h"
 #include "../MyEngine/Input/InputManager.h"
 #include "../MyEngine/CoreEngine/ECS/Coordinator.h"
-#include "../MyEngine/UI/UIElement.h"
 
 struct InputEvent {
 	enum class Type {
