@@ -471,7 +471,7 @@ namespace MyEditor
         // ---------------------------------------------------------------------
         // Text component
         // ---------------------------------------------------------------------
-        TextComponentUI(g);
+        Inspector_TextComponentUI(g);
 
         // Re-enable if we disabled for play mode
         if (isPlaying)
@@ -1062,7 +1062,7 @@ namespace MyEditor
          }
      }
 
-     void TextComponentUI(Coordinator* g)
+     void Inspector_TextComponentUI(Coordinator* g)
      {
          if (!g->HasComponent<TextComponent>(selectedEntity))
              return;

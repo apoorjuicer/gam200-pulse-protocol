@@ -918,9 +918,9 @@ namespace MyEditor
                 g_gizmo.activeHandle = GizmoHandle::None;
             }
 
-            auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
-            if (it != entityDisplayOrder.end())
-                entityDisplayOrder.erase(it);
+            //auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
+            //if (it != entityDisplayOrder.end())
+            //    entityDisplayOrder.erase(it);
 
             Factory factory;
             factory.DeleteEntity(selectedEntity);
