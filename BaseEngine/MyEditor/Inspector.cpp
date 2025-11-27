@@ -32,6 +32,9 @@ namespace MyEditor
     UndoManager mUndo;
     static Framework::Transform beforeEdit;
     static bool isEditing = false;
+    // -------------------------------------------------------------------------
+    // Function to handle Transform undo
+    // -------------------------------------------------------------------------
     static void HandleTransformUndo(
         Framework::Transform& tr,
         UndoManager& undo,
@@ -42,7 +45,9 @@ namespace MyEditor
         // If the current ImGui widget became active (user clicked or started dragging)
         if (ImGui::IsItemActivated())
         {
-            beforeEdit = tr;   // snapshot the "before" state
+            // "snapshot" the "before" state
+            // "save the transform data before editting"
+            beforeEdit = tr;   
             isEditing = true;
         }
 
@@ -51,6 +56,7 @@ namespace MyEditor
         {
             if (beforeEdit != tr)  // if something actually changed
             {
+                //undo the changes....
                 undo.Push([e, oldData = beforeEdit, g]()
                     {
                         if (g->HasComponent<Framework::Transform>(e))
@@ -535,13 +541,9 @@ namespace MyEditor
                  // 1. Save transform data before performing any
                  // editting, taking a "snapshot" or "backup-copy"
                  // ====================================================
-                 //static Framework::Transform beforeEdit;
-                 //static bool isEditing = false;
-
-                 //Framework::Transform before = tr;
-                 //bool changedAndFinished = false;
                  // ====================================================
                  // 2. Display editable ImGUI widgets for Transform
+                 // and Undo the Changes if CTRL+Z key is pressed
                  // ====================================================
                  // --- Position ---
                  float pos[2] = { tr.Pos.x, tr.Pos.y };

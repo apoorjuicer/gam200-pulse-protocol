@@ -2,8 +2,8 @@
 /**
  * @file       EntityManager.h
  * @project     Pulse Protocol
- * @author      Chia Wei Xuan Rachael (primary) - 95%
- * @author		Ban Kai Wei Benjamin (secondary) - 5%
+ * @author      Chia Wei Xuan Rachael (primary) - 97%
+ * @author		Ban Kai Wei Benjamin (secondary) - 3%
  * @brief      Manages entity lifecycle and component signatures in the ECS
  *             architecture. Maintains a pool of reusable entity IDs using a
  *             queue-based allocation system, tracks live entity count, and
