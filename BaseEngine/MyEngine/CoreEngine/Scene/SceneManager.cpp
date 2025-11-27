@@ -387,9 +387,8 @@ void SceneManager::UnloadCurrentScene()
 		}
 	}
 
-	std::cout << "[SceneManager] Entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
-	std::cout << "[SceneManager] Total entities before unload: "
-		<< g_coordinator->GetAllEntities().size() << std::endl;
+	//std::cout << "[SceneManager] Entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
+	//std::cout << "[SceneManager] Total entities before unload: " << g_coordinator->GetAllEntities().size() << std::endl;
 
 	for (auto const& entity : SceneEntityList)
 	{

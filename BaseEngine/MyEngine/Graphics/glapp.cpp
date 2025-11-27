@@ -248,9 +248,9 @@ void GLApp::draw(std::set<Entity> entities, int includeMask) {
 	GLFWwindow* window = glfwGetCurrentContext();
 	if (MyEditor::IsEnabled())
 	{
-		// Shared scroll accumulator for zoom
+		// --------- Shared scroll accumulator for zoom ----------
 		static double s_scrollY = 0.0;
-		static bool s_scrollInit = false;
+		static bool   s_scrollInit = false;
 		if (!s_scrollInit)
 		{
 			glfwSetScrollCallback(window,
@@ -261,30 +261,24 @@ void GLApp::draw(std::set<Entity> entities, int includeMask) {
 			s_scrollInit = true;
 		}
 
-		// Mouse delta tracking for panning
+		// --------- Mouse delta tracking for panning ------------
 		static double lastX = 0.0, lastY = 0.0;
+		static bool   first = true;
+
 		double curX, curY;
 		glfwGetCursorPos(window, &curX, &curY);
-		static bool first = true;
-		if (first)
-		{
-			lastX = curX;
-			lastY = curY;
-			first = false;
-		}
-
-		// ------------ Allow camera control ONLY inside game viewport --------
-
 
 		int winW = 0, winH = 0, fbW = 0, fbH = 0;
 		glfwGetWindowSize(window, &winW, &winH);
 		glfwGetFramebufferSize(window, &fbW, &fbH);
 
 		// If the window is minimized or has invalid size (e.g. fullscreen + Alt+Tab),
-		// skip this frame without touching the camera.
+		// skip this frame WITHOUT touching the camera, and clear scroll state.
 		if (winW <= 0 || winH <= 0 || fbW <= 0 || fbH <= 0 ||
 			glfwGetWindowAttrib(window, GLFW_ICONIFIED) == GLFW_TRUE)
 		{
+			s_scrollY = 0.0;
+			first = true;
 			return;
 		}
 
@@ -297,6 +291,62 @@ void GLApp::draw(std::set<Entity> entities, int includeMask) {
 		GLHelper::GameWidth = vp.w;
 		GLHelper::GameHeight = vp.h;
 
+		// -------- Allow camera control ONLY inside game viewport -----------
+		double fbX = curX * double(fbW) / double(winW);
+
+		double normY = curY / double(winH);       // 0 at top, 1 at bottom
+		double fbY = (1.0 - normY) * double(fbH); // 0 at bottom, fbH at top
+
+		double gameX0 = GLHelper::GameOffsetX;
+		double gameY0 = GLHelper::GameOffsetY;
+		double gameX1 = gameX0 + GLHelper::GameWidth;
+		double gameY1 = gameY0 + GLHelper::GameHeight;
+
+		bool allowCameraControl =
+			(fbX >= gameX0 && fbX <= gameX1 &&
+				fbY >= gameY0 && fbY <= gameY1);
+
+		if (first)
+		{
+			lastX = curX;
+			lastY = curY;
+			first = false;
+		}
+
+		// -------- Middle mouse pan (editor camera only, in game viewport) ---
+		const bool mmb =
+			glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+
+		if (allowCameraControl && mmb)
+		{
+			const double dx = curX - lastX;
+			const double dy = curY - lastY;
+			activeCam.center += glm::vec2(
+				float(2.0 * dx / double(GLHelper::GameWidth)),
+				float(-2.0 * dy / double(GLHelper::GameHeight)));
+		}
+
+		lastX = curX;
+		lastY = curY;
+
+		// -------------------- Scroll wheel zoom (editor camera) -------------
+		float wheel = static_cast<float>(s_scrollY);
+		s_scrollY = 0.0f;
+
+		if (allowCameraControl && wheel != 0.0f)
+		{
+			const float oldZ = activeCam.zoom;
+			const float step = 1.12f;
+
+			float newZ = glm::clamp(oldZ * std::pow(step, wheel),
+				activeCam.minZoom,
+				activeCam.maxZoom);
+
+			// Zoom around mouse position
+			glm::vec2 cNDC = ScreenToNDC(curX, curY);
+			activeCam.center = cNDC - (newZ / oldZ) * (cNDC - activeCam.center);
+			activeCam.zoom = newZ;
+		}
 	}
 #else
 	// -------- Game build (no editor): use FULL framebuffer, no letterbox ----
