@@ -81,6 +81,23 @@ namespace Framework
 
 	void Transform::draw() const {}
 
+	/* Operator overloads */
+	//comparison function operator !=
+	bool Transform::operator==(Transform const& other) const
+	{
+		return
+			Pos == other.Pos &&
+			Scale == other.Scale &&
+			Rotation == other.Rotation &&
+			isVisible == other.isVisible &&
+			visibilityTimer == other.visibilityTimer &&
+			autoHide == other.autoHide;
+	}
+	bool Transform::operator!=(Transform const& other) const
+	{
+		return !(*this == other);
+	}
+
 	/*Serialization && Deserialization */
 	void Transform::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
 	{

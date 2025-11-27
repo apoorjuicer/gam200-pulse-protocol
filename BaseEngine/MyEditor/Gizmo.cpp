@@ -22,17 +22,25 @@
 #include "LayerManagerPanel.h"  // for IsLayerVisible, IsLayerLocked
 
 #include "../CoreEngine/ECS/Coordinator.h"
-#include "../CoreEngine/ECS/Types.h"
-#include "../Graphics/Transform.h"
-#include "../Graphics/glapp.h"
-#include "../Graphics/Layer.h"
-#include "../CoreEngine/Scene/SceneManager.h"  // For scene change detection
+//#include "../CoreEngine/ECS/Types.h"
+//#include "../Graphics/Transform.h"
+//#include "../Graphics/glapp.h"
+//#include "../Graphics/Layer.h"
+
+#include "SnapShot.h"
+
+// If you have a dedicated gizmo type, include it here
+// #include "GizmoState.h"
 
 namespace MyEditor
 {
-    // =========================================================================
-    // GIZMO CONFIGURATION
-    // =========================================================================
+    // Gizmo-undo state (separate from Inspector)
+    static bool s_gizmoEditing = false;
+    static Framework::Transform s_gizmoBeforeEdit;
+    static Entity s_gizmoEntity = INVALID_ENTITY;
+    // -------------------------------------------------------------------------
+    // Internal state & constants
+    // -------------------------------------------------------------------------
 
     namespace GizmoConfig
     {
@@ -766,14 +774,11 @@ namespace MyEditor
                 g_gizmo.dragStartScreen = mouseFB;
                 g_gizmo.dragStartWorld = ScreenToWorld_DrawRect(mouseFB);
                 g_gizmo.entityStartPos = tr.Pos;
-                g_gizmo.entityStartScale = tr.Scale;
-                g_gizmo.entityStartRotation = tr.Rotation.x;  // Rotation.x is the angle in degrees
 
-                if (hoveredHandle == GizmoHandle::Rotate)
-                {
-                    glm::vec2 centerScreen = WorldToScreen(tr.Pos, vp);
-                    g_gizmo.dragStartAngle = GetAngle(centerScreen, mouseFB);
-                }
+                // UNDO: snapshot transform at start of gizmo drag
+                s_gizmoEditing = true;
+                s_gizmoEntity = selectedEntity;
+                s_gizmoBeforeEdit = tr;
             }
             else if (hovered != INVALID_ENTITY)
             {
@@ -854,6 +859,13 @@ namespace MyEditor
                 default:
                     break;
                 }
+                Vector2 d{ mouseWorld.x - g_gizmo.dragStartWorld.x,
+                           mouseWorld.y - g_gizmo.dragStartWorld.y };
+                tr.Pos.x = g_gizmo.entityStartPos.x + d.x;
+                tr.Pos.y = g_gizmo.entityStartPos.y + d.y;
+
+
+
             }
         }
 
@@ -863,6 +875,35 @@ namespace MyEditor
             g_gizmo.dragging = false;
             g_gizmo.active = INVALID_ENTITY;
             g_gizmo.activeHandle = GizmoHandle::None;
+
+
+            if (s_gizmoEditing && s_gizmoEntity != INVALID_ENTITY)
+            {
+                auto* c = Coordinator::GetInstance();
+                if (c && c->HasComponent<Framework::Transform>(s_gizmoEntity))
+                {
+                    auto& currentTr = c->GetComponent<Framework::Transform>(s_gizmoEntity);
+
+                    // Only push undo if something actually changed
+                    if (currentTr != s_gizmoBeforeEdit)
+                    {
+                        Entity e = s_gizmoEntity;
+                        Framework::Transform before = s_gizmoBeforeEdit;
+
+                        mUndo.Push([e, before]()
+                            {
+                                auto* g = Coordinator::GetInstance();
+                                if (!g) return;
+                                if (!g->HasComponent<Framework::Transform>(e)) return;
+
+                                g->GetComponent<Framework::Transform>(e) = before;
+                            });
+                    }
+                }
+
+                s_gizmoEditing = false;
+                s_gizmoEntity = INVALID_ENTITY;
+            }
         }
 
         // ---------------------------------------------------------------------
@@ -883,8 +924,42 @@ namespace MyEditor
 
             Factory factory;
             factory.DeleteEntity(selectedEntity);
+            //UNDO
+            Entity toDelete = selectedEntity;
+            // Find its index in the hierarchy list (for undo reinsertion)
+            auto it = std::find(entityDisplayOrder.begin(),
+                entityDisplayOrder.end(),
+                toDelete);
+            int index = -1;
+            if (it != entityDisplayOrder.end())
+                index = static_cast<int>(it - entityDisplayOrder.begin());
+            // --- SNAPSHOT BEFORE DELETING ---
+            EntitySnapshot snap = MakeEntitySnapshot(toDelete);
+
+            // Destroy the entity
+            coord->DestroyEntity(selectedEntity);
 
             selectedEntity = INVALID_ENTITY;
+
+            // UNDO: recreate the entity from snapshot and reinsert into list
+            mUndo.Push([snap, index]()
+                {
+                    // Recreate the entity with all its components
+                    Entity restored = CreateEntityFromEntitySnapshot(snap);
+                    if (restored == INVALID_ENTITY) {
+                        return;
+                    }
+
+                    // Reinsert into hierarchy at original position
+                    int insertIndex = index;
+                    if (insertIndex < 0 || insertIndex > static_cast<int>(entityDisplayOrder.size()))
+                        insertIndex = static_cast<int>(entityDisplayOrder.size());
+
+                    entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex, restored);
+
+                    // Select the restored entity
+                    selectedEntity = restored;
+                });
         }
 
         dl->PopClipRect();
