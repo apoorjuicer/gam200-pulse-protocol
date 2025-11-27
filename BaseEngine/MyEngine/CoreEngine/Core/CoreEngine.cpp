@@ -36,6 +36,9 @@
 #include "../MyEngine/Components/EntityType.h"
 
 #include "../MyEngine/UI/GUIManager.h"
+
+#include "../MyEngine/Audio/AudioSource.h"
+#include "../MyEngine/Graphics/Text.h"
 #pragma comment(lib, "winmm.lib")
 
 #include <shlwapi.h>                // GetModuleFileNameA(), PathRemoveFileSpecA()
@@ -398,7 +401,6 @@ void CoreEngine::Init()
 	{
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-
 		glfwSetWindowMonitor(
 			window,
 			monitor,         // full screen monitor
@@ -488,7 +490,7 @@ void CoreEngine::Init()
 	mAssets.Initialize(); //loaded registry inside
 	//std::cout << mAssets.getRegistry().FindTexture("hero") << "\n";
 	// Singleton for Engine, but once game use EventBus/messaging system
-	std::cout << "path for bgm : " << mAssets.getRegistry().FindAudio("bgm")->path << "\n";
+	/*std::cout << "path for bgm : " << mAssets.getRegistry().FindAudio("BGM_L1")->path << "\n";*/
 	// PLEASE CALL THIS EVERY SINGLE U WANT 2 USE SINGLETON
 	auto g_coordinator = Coordinator::GetInstance();
 
@@ -589,15 +591,15 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<Health>();
 	g_coordinator->RegisterComponent<LogicComponent>();
 	g_coordinator->RegisterComponent<NamingComponent>();
-	g_coordinator->RegisterComponent<UIElement>();
 	g_coordinator->RegisterComponent<Name>();
 	g_coordinator->RegisterComponent<LayerTag>();
 	g_coordinator->RegisterComponent<PrefabInstance>();
+	g_coordinator->RegisterComponent<AudioSource>();
+	g_coordinator->RegisterComponent<TextComponent>();
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
 	g_coordinator->RegisterSystem<RhythmGameplayInput>();
-	//g_coordinator->RegisterSystem<GUIManager>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<CollisionManager>();
@@ -624,8 +626,10 @@ void CoreEngine::Setup()
 	g_coordinator->SetSystemSignature<RhythmGameplayInput>(rhythmSig);
 
 	//Signature UISig;
-	//UISig.set(g_coordinator->GetComponentType<UIElement>());
 	//UISig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	//UISig.set(g_coordinator->GetComponentType<Framework::Renderable>());
+	//UISig.set(g_coordinator->GetComponentType<Name>());
+	//UISig.set(g_coordinator->GetComponentType<LayerTag>());
 	//g_coordinator->SetSystemSignature<GUIManager>(UISig);
 
 	Signature graphicsSig;
@@ -707,6 +711,11 @@ void CoreEngine::Update(float dt)
 	g_coordinator->UpdateAllSystems(dt);
 	profiler->EndSystem("LogicSystem");
 
+	profiler->StartSystem("Graphics System");
+	if (g_graphicsSystem)
+		g_graphicsSystem->Update();
+	profiler->EndSystem("Graphics System");
+
 	profiler->StartSystem("Input System");
 	if (g_inputSystem)
 		g_inputSystem->Update(dt);
@@ -716,11 +725,6 @@ void CoreEngine::Update(float dt)
 	if (g_rhythmSystem)
 		g_rhythmSystem->Update(dt);
 	profiler->EndSystem("RhythmGameplayInput");
-
-	profiler->StartSystem("Graphics System");
-	if (g_graphicsSystem)
-		g_graphicsSystem->Update();
-	profiler->EndSystem("Graphics System");
 
 	profiler->StartSystem("Audio System");
 	if (g_audioSystem)
@@ -762,12 +766,6 @@ void CoreEngine::GameLoop()
         unsigned currenttime = timeGetTime();
         float dt = (currenttime - LastTime) / 1000.0f;
         LastTime = currenttime;
-
-		// Prime ImGui with first frame BEFORE polling events
-		/*if (m_editorFrameCallback)
-		{
-			m_editorFrameCallback();
-		}*/
 
         glfwPollEvents();
 
@@ -1069,10 +1067,6 @@ void CoreEngine::PlayGame()
 		std::cout << "[CoreEngine] Original scene path: " << m_originalScenePath << std::endl; // DEBUG
 	}
 
-	if (auto audio = coord->GetSystem<AudioManager>()) {
-		audio->RestartBGM();
-	}
-
 	// Call Init() on all scripts
 	if (auto logicSys = coord->GetSystem<LogicSystem>())
 	{
@@ -1094,27 +1088,25 @@ void CoreEngine::StopGame()
 
 	auto coord = Coordinator::GetInstance();
 
-	// pause the bg music
+	// Stop all audio (BGM and AudioSource components)
 	if (auto audio = coord->GetSystem<AudioManager>())
 	{
-		audio->StopBGM();
+		audio->StopBGM(); // Stop any direct BGM calls
+
+		// Stop all AudioSource components
+		for (Entity entity = 0; entity < MaxEntity; ++entity)
+		{
+			if (coord->HasComponent<AudioSource>(entity))
+			{
+				auto& audioSrc = coord->GetComponent<AudioSource>(entity);
+				if (audioSrc.channel)
+				{
+					audioSrc.channel->stop();
+					audioSrc.channel = nullptr;
+				}
+			}
+		}
 	}
-
-	//// reloads original scene to reset all entities to initial starting position
-	//if (auto sceneMgr = coord->GetSystem<SceneManager>())
-	//{
-	//	if (!m_originalScenePath.empty())
-	//	{
-	//		sceneMgr->LoadSceneFromJson(m_originalScenePath);
-
-	//		// Sync GUI tracking after scene reload
-	//		//if (auto guiMgr = coord->GetSystem<GUIManager>())
-	//		//{
-	//		//	guiMgr->SyncTrackingWithScene();
-	//		//	std::cout << "[CoreEngine] GUI tracking synced after Stop" << std::endl;
-	//		//}
-	//	}
-	//}
 }
 
 // this might have been causing the random crash cus its calling restartBGM() too

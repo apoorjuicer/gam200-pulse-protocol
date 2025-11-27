@@ -151,12 +151,17 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const& path)
 			layerTag.Deserialize(component["LayerTag"]);
 			g_coordinator->AddComponent<LayerTag>(entity, layerTag);
 		}
-		
-		if (component.HasMember("ui") && component["ui"].IsObject())
+		if (component.HasMember("audiosource") && component["audiosource"].IsObject())
 		{
-			UIElement ui;
-			ui.Deserialize(component["ui"]);
-			g_coordinator->AddComponent<UIElement>(entity, ui);
+			AudioSource as;
+			as.Deserialize(component["audiosource"]);
+			g_coordinator->AddComponent<AudioSource>(entity, as);
+		}
+		if (component.HasMember("TextComponent") && component["TextComponent"].IsObject())
+		{
+			TextComponent txt_component;
+			txt_component.Deserialize(component["TextComponent"]);
+			g_coordinator->AddComponent<TextComponent>(entity, txt_component);
 		}
 	}
 	// add entity to list of entity in the current scene
@@ -331,18 +336,29 @@ bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const& path)
 		componentsArray.PushBack(ComponentObj, alloc);
 	}
 
-	if (g_coordinator->HasComponent<UIElement>(entity))
+	if (g_coordinator->HasComponent<AudioSource>(entity))
 	{
 		Value ComponentObj(rapidjson::kObjectType);
-		Value UIVal;
+		Value AudioSourceVal;
 
-		auto& uiElement = g_coordinator->GetComponent<UIElement>(entity);
-		uiElement.Serialize(UIVal, alloc);
+		auto& audioSrc = g_coordinator->GetComponent<AudioSource>(entity);
+		audioSrc.Serialize(AudioSourceVal, alloc);
 
-		ComponentObj.AddMember("ui", UIVal, alloc);
+		ComponentObj.AddMember("audiosource", AudioSourceVal, alloc);
 		componentsArray.PushBack(ComponentObj, alloc);
 	}
 
+	if (g_coordinator->HasComponent<TextComponent>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value TextVal;
+
+		auto& textComp = g_coordinator->GetComponent<TextComponent>(entity);
+		textComp.Serialize(TextVal, alloc);
+
+		ComponentObj.AddMember("TextComponent", TextVal, alloc);
+		componentsArray.PushBack(ComponentObj, alloc);
+	}
 
 	// ADD AS ONE BIG ARRAY WITH ALL THE COMPONENTS AVAILABLE ABOVE! >:]
 	d.AddMember("components", componentsArray, alloc);

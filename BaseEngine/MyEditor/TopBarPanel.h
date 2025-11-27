@@ -10,4 +10,6 @@ namespace MyEditor
 
     // UI draw function
     void DrawTopBarPanel(float windowWidth, float top_y, float top_h);
+
+    bool IsPlaying();
 }

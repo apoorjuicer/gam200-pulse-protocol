@@ -28,6 +28,8 @@
 //for .NET
 #include "CoreEngine/Core/ImportExport.h" // for DLL_API
 
+#include "../MyEngine/Audio/AudioSource.h"
+#include "../MyEngine/Graphics/Text.h"
 //Serialize
 #pragma warning(push, 0)
 #include <rapidjson/document.h>     // for Document, Value, AllocatorType

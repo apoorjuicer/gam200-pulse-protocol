@@ -3,12 +3,12 @@
         {
             "transform": {
                 "position": {
-                    "x": -587.6921997070313,
-                    "y": -600.0
+                    "x": 1193.9228515625,
+                    "y": 387.69232177734377
                 },
                 "scale": {
-                    "x": 433.0,
-                    "y": 103.0
+                    "x": 200.0,
+                    "y": 200.0
                 },
                 "rotation": {
                     "x": 0.0,
@@ -22,9 +22,9 @@
         {
             "render": {
                 "mdl_ref": 0.0,
-                "shd_ref": 1.0,
+                "shd_ref": 0.0,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/UI/health bar.png",
+                "spriteName": "",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -45,14 +45,32 @@
         },
         {
             "name": {
-                "name": "health"
+                "name": "GameObject"
             }
         },
         {
             "LayerTag": {
-                "mask": 1,
+                "layerName": "World",
+                "mask": 2,
                 "orderInLayer": 0,
                 "z": 0.0
+            }
+        },
+        {
+            "TextComponent": {
+                "text": "asdasdadsadad\n]\n\n",
+                "font_id": "",
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "font_size": 51.0,
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "visible": true
             }
         }
     ]

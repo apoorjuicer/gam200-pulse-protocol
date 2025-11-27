@@ -17,7 +17,7 @@
 // #include "../ComponentJson/Component_System.h"
 // #include "../Math/Matrix_3x3.h"
 // #include "../Math/Vector_2D.h"
-#include "pch/pch.h" // FIRST
+#include "pch/pch_temp.h" // FIRST
 #include "CoreEngine/ECS/Coordinator.h"
 // #include "CoreEngine/Asset/AssetsManager.h"
 #include <glm/gtc/type_ptr.hpp>

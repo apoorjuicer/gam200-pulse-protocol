@@ -77,5 +77,24 @@ add_custom_command(TARGET ${GAME_NAME} POST_BUILD
 
 #Enables multi-processor parallel compilation in Visual Studio
 if(MSVC)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+    
+    # --- FMOD DLL copy for MyGame (Debug/Release aware) ---
+    if (FMOD_API_DIR_FOUND)
+
+    set(FMOD_CORE_DEBUG     "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmodL.dll")
+    set(FMOD_CORE_RELEASE   "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmod.dll")
+
+    set(FMOD_STUDIO_DEBUG   "${FMOD_API_DIR_FOUND}/api/studio/lib/x64/fmodstudioL.dll")
+    set(FMOD_STUDIO_RELEASE "${FMOD_API_DIR_FOUND}/api/studio/lib/x64/fmodstudio.dll")
+
+    add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<IF:$<CONFIG:Debug>,${FMOD_CORE_DEBUG},${FMOD_CORE_RELEASE}>"
+            $<TARGET_FILE_DIR:${GAME_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<IF:$<CONFIG:Debug>,${FMOD_STUDIO_DEBUG},${FMOD_STUDIO_RELEASE}>"
+            $<TARGET_FILE_DIR:${GAME_NAME}>
+    )
+    endif()
 endif()

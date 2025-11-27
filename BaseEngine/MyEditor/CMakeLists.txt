@@ -88,7 +88,7 @@ target_compile_definitions(${EDITOR_NAME} PUBLIC GLEW_STATIC)
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(${EDITOR_NAME} PRIVATE -Wall)
 elseif (MSVC)
-    target_compile_options(${EDITOR_NAME} PRIVATE /W4 /WX-)
+    target_compile_options(${EDITOR_NAME} PRIVATE /W4 /WX- /wd4251)
 endif()
 
 message(STATUS "[${EDITOR_NAME}] sources: ${EDITOR_SRC}")

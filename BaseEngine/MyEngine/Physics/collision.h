@@ -66,14 +66,7 @@ public:
     // --- Collision Detection ---
     bool CheckAABBCollision(const AABB& a, const AABB& b);
     bool CheckEdgeContactCollision(const AABB& playerBox, const AABB& enemyBox, float threshold);
-    bool CheckDistanceCollision(const Vector2& a, float aradius,
-        const Vector2& b, float bradius);
-
-    // --- Mouse and GUI Collisions ---
-    bool CheckMouseCollision(const Vector2& mousePos, const AABB& box);
-    bool CheckGUIButtonCollision(const glm::vec2& mouseVirtual,
-        const glm::vec2& buttonPos,
-        const glm::vec2& buttonSize);
+    bool CheckDistanceCollision(const Vector2& a, float aradius, const Vector2& b, float bradius);
 
     // --- Rotational (OBB) Collision Support ---
     OBB BuildOBBFromTransform(const Framework::Transform& transform, const AABB& baseBox);

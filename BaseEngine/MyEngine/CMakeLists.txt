@@ -25,12 +25,12 @@ endif()
 
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${ENGINE_SRC})
 
-# C++ standard / warnings
+# C++ standard lib and  C++/CLI warnings
 set_property(TARGET ${ENGINE_NAME} PROPERTY CXX_STANDARD 20)
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(${ENGINE_NAME} PRIVATE -Wall)
 elseif (MSVC)
-    target_compile_options(${ENGINE_NAME} PRIVATE /W4 /WX-)
+    target_compile_options(${ENGINE_NAME} PRIVATE /W4 /WX- /wd4251) # warning from DLL_API and STL container
 endif()
 
 # Define for static GLEW usage

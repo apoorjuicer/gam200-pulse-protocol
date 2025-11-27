@@ -71,10 +71,6 @@
 #include "../MyEngine/FMOD_API/api/core/inc/fmod_errors.h"
 #pragma warning(pop)
 
-// Editor Header
-#ifdef ENABLE_EDITOR
-#include "../MyEditor/Editor.h"
-#endif
 
 //Serialize
 #pragma warning(push, 0)

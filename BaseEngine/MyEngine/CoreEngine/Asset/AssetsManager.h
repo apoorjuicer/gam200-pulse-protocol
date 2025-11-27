@@ -60,6 +60,20 @@ public:
     bool PlaySFX(std::string const& id);
     bool PlayMusic(std::string const& id);
 
+    //get container
+    std::unordered_map<std::string, AudioResource> const& getAudioRegContainer()const;
+    std::unordered_map<std::string, TextureResource>const& getTexRegContainer()const;
+    std::unordered_map<std::string, FontResource> const& getFontRegContainer()const;
+    std::unordered_map<std::string, SceneResource> const& getSceneRegContainer()const;
+    std::unordered_map<std::string, AnimationResource> const& getAnimRegContainer()const;
+    //boolean check has XXX id in container
+    bool HasAudio(std::string const& id)const;
+    bool HasTexture(std::string const& id)const;
+    bool HasFont(std::string const& id)const;
+    bool HasScene(std::string const& id)const;
+    bool HasAnimation(std::string const& id)const;
+
+
 private:
     AssetRegistry mRegistry; // owned
     // AudioManager mAudio;

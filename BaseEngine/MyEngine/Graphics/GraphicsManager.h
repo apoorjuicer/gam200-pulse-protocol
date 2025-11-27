@@ -35,6 +35,8 @@
 #include "pch/pch_temp.h"
 
 #include "Layer.h"
+#include "Transform.h"
+#include "Text.h"
 #include "CoreEngine/ECS/System.h"
 #include "CoreEngine/Core/ImportExport.h"
 // #include "CoreEngine/ECS/SystemManager.h"
@@ -49,13 +51,9 @@
 class AssetRegistry; // fwd
 class GLApp;         // fwd
 
-// struct FontData; // already defined in AssetsManager.h, but forward-declare is fine in header
 /**************************************************************************
  * Font rendering data types
- * These are at namespace scope so systems like GraphicsManager can use
- * them without including the whole AssetsManager implementation details.
  **************************************************************************/
-
 // cache of all glyphs(characters) loaded in a font
 // for rendering FreeType + OpenGL, represents 1 letter(a single glyph)
 struct Character
@@ -100,7 +98,7 @@ public:
     GraphicsManager &operator=(GraphicsManager &&) noexcept = default;
 
     // Debug overlay toggle (hidden by default in Release, auto shown in Debug)
-    void ToggleDebugOverlay() { m_showDebugOverlay = !m_showDebugOverlay; }
+    void ToggleDebugOverlay();
     bool IsDebugOverlayEnabled() const { return m_showDebugOverlay; }
 
     // Texture
@@ -115,6 +113,18 @@ public:
     bool   EvictTexture(std::string const& idOrPath);
 
     void SetRegistry(AssetRegistry* registry);
+
+    //text component
+    // Draw Text component at a given position
+    void DrawText2D(
+        std::string const& text,
+        std::string const& fontId,
+        float x, float y,
+        float pixelHeight,
+        glm::vec3 const& color
+    );
+
+    void Update2DTextComponent();
 private:
     // Draw text (world overlay / debug text etc.)
     void RenderText(
@@ -147,6 +157,16 @@ private:
 
     void InitWhiteTexture();
 
+    // =========================================================================
+    // FPS/Debug text entities (proper text objects)
+    // These are normal entities that can be moved/edited in the editor
+    // =========================================================================
+    Entity m_fpsTextEntity = static_cast<Entity>(-1);
+    Entity m_topSystemTextEntity = static_cast<Entity>(-1);
+    Entity m_teamLabelEntity = static_cast<Entity>(-1);
+
+    void CreateDebugTextEntities();
+    void UpdateDebugTextEntities();
 private:
     // std::unique_ptr<GLApp> glapp;
     GLApp *glapp = nullptr; // owning raw pointer

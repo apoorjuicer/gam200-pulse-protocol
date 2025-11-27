@@ -58,84 +58,6 @@ GLApp::Camera2D GLApp::gCamera{};
 void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/)
 {
 	gBatch.Init(/*maxSprites*/ 10000);
-
-	// move to editor pls
-	//#ifdef ENABLE_EDITOR
-//	// --- Compute middle rectangle from window size using fixed ratios ---
-//	const float kLeftRatio = 0.20f;	  // 20% width
-//	const float kRightRatio = 0.25f;  // 25% width
-//	const float kBottomRatio = 0.25f; // 25% height
-//
-//	// GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth));
-//	// GLint h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
-//
-//	// Use your existing globals for window size
-//	const int fbW = static_cast<int>(WindowWidth);
-//	const int fbH = static_cast<int>(WindowHeight);
-//
-//	// Panels in framebuffer pixels
-//	const int assets_h = static_cast<int>(fbH * kBottomRatio);
-//	const int top_h = fbH - assets_h;
-//	const int left_w = static_cast<int>(fbW * kLeftRatio);
-//	const int right_w = static_cast<int>(fbW * kRightRatio);
-//	const int center_w = fbW - left_w - right_w;
-//
-//	// --- Fit a 16:9 viewport INSIDE the middle area and center it ---
-//	// Desired aspect = 16:9 ? width/height = 16/9
-//	const float targetAspect = 16.0f / 9.0f;
-//
-//	// Start with full middle area
-//	int vpW = center_w;
-//	int vpH = top_h;
-//
-//	// Adjust to preserve 16:9
-//	if (static_cast<float>(vpH) > static_cast<float>(vpW) / targetAspect)
-//	{
-//		// Too tall ? clamp height
-//		vpH = static_cast<int>(std::round(vpW / targetAspect));
-//	}
-//	else
-//	{
-//		// Too wide ? clamp width
-//		vpW = static_cast<int>(std::round(vpH * targetAspect));
-//	}
-//
-//	// Center the viewport within the middle rect
-//	const int vpX = left_w + (center_w - vpW) / 2;
-//	const int vpY = assets_h + (top_h - vpH) / 2;
-//
-//	// Apply to GL
-//	glViewport(vpX, vpY, vpW, vpH);
-//
-//	// Update GLHelper for anyone who needs these numbers
-//	GLHelper::GameWidth = vpW;
-//	GLHelper::GameHeight = vpH;
-//	GLHelper::GameOffsetX = vpX;
-//	GLHelper::GameOffsetY = vpY;
-//
-//	// (Optional) keep editor panel sizes if other code references them
-//	GLHelper::EditorWidth = left_w + right_w; // total UI width if you need it
-//	GLHelper::EditorHeight = assets_h;		  // bottom bar height if you need it
-//
-//	// Keep your existing init below
-//	GLApp::vps.push_back({300, 200, vpW, vpH});
-//#else
-	// ---------- GAME BUILD: NO EDITOR PANELS, NO BLUE BORDER ----------
-//	int fbW = 0, fbH = 0;
-//	glfwGetFramebufferSize(glfwGetCurrentContext(), &fbW, &fbH);
-//
-//	GLHelper::EditorWidth = 0;
-//	GLHelper::EditorHeight = 0;
-//
-//	GLHelper::GameOffsetX = 0;
-//	GLHelper::GameOffsetY = 0;
-//	GLHelper::GameWidth = fbW;
-//	GLHelper::GameHeight = fbH;
-//
-//	glViewport(0, 0, fbW, fbH);
-//
-//	GLApp::vps.push_back({ 0, 0, fbW, fbH });
-//#endif
 	
 	GLApp::VPSS shdr_strs{
 		std::make_pair(test_vs, test_fs),
@@ -251,10 +173,24 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	drawList.reserve(entities.size());
 
 	// Draw entities
-// build drawList
+    // build drawList
 	for (auto it : entities) {
-		auto& lt = g_coordinator->GetComponent<LayerTag>(it);
-		if ((lt.mask & includeMask) == 0) continue;
+		// BEFORE (ORIGINAL CODE):
+		//     auto& lt = g_coordinator->GetComponent<LayerTag>(it);
+		//     if ((lt.mask & includeMask) == 0) continue;
+		//
+
+		// AFTER:
+		// Check if entity has LayerTag component first
+		if (!g_coordinator->HasComponent<LayerTag>(it)) {
+			// No LayerTag - treat as LAYER_ALL (always visible)
+			// Skip to normal rendering checks below
+		}
+		else {
+			// Has LayerTag - check if it matches the filter
+			auto& lt = g_coordinator->GetComponent<LayerTag>(it);
+			if ((lt.mask & includeMask) == 0) continue;  // Layer filtered out
+		}
 
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
 		auto& re = g_coordinator->GetComponent<Framework::Renderable>(it);
@@ -277,11 +213,40 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		drawList.push_back(it);
 	}
 
+	// BEFORE (ORIGINAL CODE):
+	//     std::stable_sort(drawList.begin(), drawList.end(), [&](Entity a, Entity b) {
+	//         auto& A = g_coordinator->GetComponent<LayerTag>(a);
+	//         auto& B = g_coordinator->GetComponent<LayerTag>(b);
+	//         if (A.orderInLayer != B.orderInLayer) return A.orderInLayer < B.orderInLayer;
+	//         return A.z < B.z;
+	//     });
+
+	// AFTER:
 	std::stable_sort(drawList.begin(), drawList.end(), [&](Entity a, Entity b) {
-		auto& A = g_coordinator->GetComponent<LayerTag>(a);
-		auto& B = g_coordinator->GetComponent<LayerTag>(b);
-		if (A.orderInLayer != B.orderInLayer) return A.orderInLayer < B.orderInLayer;
-		return A.z < B.z;
+		LayerMask maskA = LAYER_WORLD, maskB = LAYER_WORLD;
+		int orderA = 0, orderB = 0;
+		float zA = 0.0f, zB = 0.0f;
+
+		if (g_coordinator->HasComponent<LayerTag>(a)) {
+			auto& A = g_coordinator->GetComponent<LayerTag>(a);
+			maskA = A.mask;
+			orderA = A.orderInLayer;
+			zA = A.z;
+		}
+
+		if (g_coordinator->HasComponent<LayerTag>(b)) {
+			auto& B = g_coordinator->GetComponent<LayerTag>(b);
+			maskB = B.mask;
+			orderB = B.orderInLayer;
+			zB = B.z;
+		}
+
+		// Sort by layer first (Background < World < UI)
+		if (maskA != maskB) return maskA < maskB;
+		// Then by orderInLayer within same layer
+		if (orderA != orderB) return orderA < orderB;
+		// Then by z depth
+		return zA < zB;
 		});
 
 	// Draw

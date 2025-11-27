@@ -18,6 +18,9 @@ int main()
 
     engine.Setup();             // register ECS components + systems
     engine.Init();              // window, GL, FMOD, assets, etc.
+
+    engine.PlayGame(); // this auto-starts the game
+
     engine.GameLoop();          // pure game loop – no MyEditor calls
     engine.Exit();              // shutdown systems, destroy window
 

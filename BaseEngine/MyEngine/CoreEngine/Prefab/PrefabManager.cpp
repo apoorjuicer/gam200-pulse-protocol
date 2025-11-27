@@ -4,13 +4,13 @@
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
  * @brief       Implements the PrefabManager system for entity template management.
- *              Provides functionality to save entities as JSON-based prefabs,
- *              instantiate prefabs into active scenes, and enumerate available
- *              prefabs from the asset directory.
+ *
+ *              UPDATED:
+ *              - Blocks saving entities with '_' prefix (engine-managed)
+ *              - Game text (TextComponent without '_' prefix) CAN be saved
+ *              - Added TextComponent and AudioSource to UpdateEntityFromPrefab
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
- *              Reproduction or disclosure of this file or its contents without the
- *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
 
@@ -19,18 +19,15 @@
 #include "../Factory/Factory.h"
 #include "../MyEngine/Components/DisplayName.h"
 
-// include component headers for UpdateEntityFromPrefab func
+// Component headers for UpdateEntityFromPrefab
 #include "../MyEngine/Graphics/Transform.h"
 #include "../MyEngine/Graphics/Renderable.h"
 #include "../MyEngine/Graphics/Animation.h"
+#include "../MyEngine/Graphics/Text.h"          
 #include "../MyEngine/GameLogic/GameLogic.h"
 #include "../MyEngine/Components/Health.h"
 #include "../MyEngine/Components/AABB.h"
-
-//#pragma warning(push, 0)
-//#include <rapidjson/document.h>
-//#include <rapidjson/istreamwrapper.h>
-//#pragma warning(pop)
+// Note: AudioSource should already be available via pch or other includes
 
 PrefabManager::PrefabManager()
 {
@@ -44,6 +41,21 @@ PrefabManager::~PrefabManager()
 
 bool PrefabManager::SaveEntityAsPrefab(Entity entity, std::string const& prefabName)
 {
+	auto* coord = Coordinator::GetInstance();
+
+	// =========================================================================
+	// Block entities with '_' prefix (engine-managed like _FPS_Display)
+	// Game text WITHOUT '_' prefix CAN be saved as prefab
+	// =========================================================================
+	if (coord->HasComponent<Name>(entity)) {
+		auto& name = coord->GetComponent<Name>(entity).name;
+		if (!name.empty() && name[0] == '_') {
+			std::cerr << "[PrefabManager] Cannot save engine-managed entity as prefab: "
+				<< name << std::endl;
+			return false;
+		}
+	}
+
 	namespace fs = std::filesystem;
 
 	fs::path prefabPath = prefabDirectory + prefabName + ".json";
@@ -56,7 +68,6 @@ bool PrefabManager::SaveEntityAsPrefab(Entity entity, std::string const& prefabN
 
 	if (success) {
 		// AUTO-LINK: If this entity doesn't have PrefabInstance component, add it
-		auto* coord = Coordinator::GetInstance();
 		if (!coord->HasComponent<PrefabInstance>(entity)) {
 			PrefabInstance prefabInstance;
 			prefabInstance.prefabName = prefabName;
@@ -71,9 +82,38 @@ bool PrefabManager::SaveEntityAsPrefab(Entity entity, std::string const& prefabN
 	return success;
 }
 
+bool PrefabManager::CanSaveAsPrefab(Entity entity) const
+{
+	auto* coord = Coordinator::GetInstance();
+
+	// Cannot save if entity name starts with '_' (engine-managed)
+	if (coord->HasComponent<Name>(entity)) {
+		auto& name = coord->GetComponent<Name>(entity).name;
+		if (!name.empty() && name[0] == '_') {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+std::string PrefabManager::GetBlockReason(Entity entity) const
+{
+	auto* coord = Coordinator::GetInstance();
+
+	if (coord->HasComponent<Name>(entity)) {
+		auto& name = coord->GetComponent<Name>(entity).name;
+		if (!name.empty() && name[0] == '_') {
+			return "Engine-managed entities (names starting with '_') cannot be saved as prefabs.";
+		}
+	}
+
+	return "";
+}
+
 std::optional<Entity> PrefabManager::InstantiatePrefab(std::string const& prefabName)
 {
-	// strip .json extension if prsent
+	// strip .json extension if present
 	std::string cleanName = prefabName;
 	if (cleanName.ends_with(".json")) {
 		cleanName = cleanName.substr(0, cleanName.length() - 5);
@@ -110,8 +150,6 @@ std::optional<Entity> PrefabManager::InstantiatePrefab(std::string const& prefab
 			nm.name = cleanName;
 			coord->AddComponent<Name>(entity, nm);
 		}
-
-		//std::cout << "[PrefabManager] Successfully instantiated: " << cleanName << " (Entity " << entity << ")" << std::endl;
 	}
 	else {
 		std::cerr << "[PrefabManager] Failed to create entity from: " << prefabPath << std::endl;
@@ -190,7 +228,6 @@ void PrefabManager::UpdateAllInstancesOfPrefab(std::string const& prefabName)
 	auto* coord = Coordinator::GetInstance();
 
 	// Collect all entities that have PrefabInstance component and match this prefab
-	// We iterate through all possible entities since we don't have GetEntitiesWithComponent
 	std::vector<Entity> prefabInstances;
 	for (Entity entity = 0; entity < MaxEntity; ++entity) {
 		if (coord->HasComponent<PrefabInstance>(entity)) {
@@ -244,7 +281,9 @@ bool PrefabManager::UpdateEntityFromPrefab(Entity entity, std::string const& pre
 
 	const auto& components = d["components"];
 
+	// =========================================================================
 	// Remove old components (except PrefabInstance, Name, LayerTag)
+	// =========================================================================
 	if (coord->HasComponent<Framework::Transform>(entity))
 		coord->RemoveComponent<Framework::Transform>(entity);
 	if (coord->HasComponent<Framework::Renderable>(entity))
@@ -257,10 +296,16 @@ bool PrefabManager::UpdateEntityFromPrefab(Entity entity, std::string const& pre
 		coord->RemoveComponent<Health>(entity);
 	if (coord->HasComponent<AABB>(entity))
 		coord->RemoveComponent<AABB>(entity);
-	if (coord->HasComponent<UIElement>(entity))
-		coord->RemoveComponent<UIElement>(entity);
 
+	// NEW: Remove TextComponent and AudioSource
+	if (coord->HasComponent<TextComponent>(entity))
+		coord->RemoveComponent<TextComponent>(entity);
+	if (coord->HasComponent<AudioSource>(entity))
+		coord->RemoveComponent<AudioSource>(entity);
+
+	// =========================================================================
 	// Add updated components from prefab
+	// =========================================================================
 	for (rapidjson::SizeType i = 0; i < components.Size(); ++i)
 	{
 		const auto& component = components[i];
@@ -301,10 +346,18 @@ bool PrefabManager::UpdateEntityFromPrefab(Entity entity, std::string const& pre
 			coord->AddComponent<AABB>(entity, aabb);
 		}
 
-		if (component.HasMember("ui") && component["ui"].IsObject()) {
-			UIElement ui;
-			ui.Deserialize(component["ui"]);
-			coord->AddComponent<UIElement>(entity, ui);
+		// NEW: TextComponent
+		if (component.HasMember("TextComponent") && component["TextComponent"].IsObject()) {
+			TextComponent txt;
+			txt.Deserialize(component["TextComponent"]);
+			coord->AddComponent<TextComponent>(entity, txt);
+		}
+
+		// NEW: AudioSource
+		if (component.HasMember("audiosource") && component["audiosource"].IsObject()) {
+			AudioSource audio;
+			audio.Deserialize(component["audiosource"]);
+			coord->AddComponent<AudioSource>(entity, audio);
 		}
 	}
 

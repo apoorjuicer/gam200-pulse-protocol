@@ -18,7 +18,7 @@
  */
  /******************************************************************************/
 #pragma once
-#include"pch/pch.h"
+#include"pch/pch_temp.h"
 using LayerMask = uint32_t;
 
 enum : LayerMask {
@@ -36,6 +36,18 @@ struct LayerTag {
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
 		using namespace rapidjson;
 		out.SetObject();
+
+		// name of layer, easier to see
+		const char* layerName = "Unknown";
+		if (mask == LAYER_BACKGROUND) layerName = "Background";
+		else if (mask == LAYER_WORLD) layerName = "World";
+		else if (mask == LAYER_UI) layerName = "UI";
+		else if (mask == LAYER_ALL) layerName = "All";
+
+		Value nameVal;
+		nameVal.SetString(layerName, alloc);
+		out.AddMember("layerName", nameVal, alloc);
+
 		out.AddMember("mask", mask, alloc);
 		out.AddMember("orderInLayer", orderInLayer, alloc);
 		out.AddMember("z", z, alloc);
@@ -43,7 +55,21 @@ struct LayerTag {
 
 	void Deserialize(const rapidjson::Value& in) {
 		if (!in.IsObject()) return;
-		if (in.HasMember("mask")) mask = in["mask"].GetUint();
+
+		// load from mask
+		if (in.HasMember("mask")) {
+			mask = in["mask"].GetUint();
+		}
+
+		// or name of layer
+		else if (in.HasMember("layerName") && in["layerName"].IsString()) {
+			std::string name = in["layerName"].GetString();
+			if (name == "Background") mask = LAYER_BACKGROUND;
+			else if (name == "World") mask = LAYER_WORLD;
+			else if (name == "UI") mask = LAYER_UI;
+			else if (name == "All") mask = LAYER_ALL;
+		}
+
 		if (in.HasMember("orderInLayer")) orderInLayer = in["orderInLayer"].GetInt();
 		if (in.HasMember("z")) z = in["z"].GetFloat();
 	}

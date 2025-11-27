@@ -13,20 +13,16 @@
  /******************************************************************************/
 
 #include "pch/pch_temp.h"
-#include "ProjectPanel.h"
 
+#include "ProjectPanel.h"
+#include "TopBarPanel.h"
+#include "imgui.h"
 
 #include "../CoreEngine/Asset/AssetsManager.h"
 #include "../CoreEngine/ECS/Coordinator.h"
 #include "../Graphics/Renderable.h"
 #include "../Graphics/Transform.h"
 #include "CoreEngine/Prefab/PrefabManager.h"
-
-#include <filesystem>
-#include <imgui.h>
-#include <algorithm>
-#include <cctype>
-#include <cstring>                         // for std::strncpy
 
 namespace MyEditor
 {
@@ -54,6 +50,9 @@ namespace MyEditor
         const std::string& srcPath);
     [[maybe_unused]] static bool ReplaceTextureFileOnDisk(const std::string& dstPath,
         const std::string& srcPath);
+
+    static bool s_showEngineManagedWarning = false;
+    static std::string s_blockedEntityName = "";
 
     // ── Init ────────────────────────────────────────────────────
     void InitProjectPanel()
@@ -237,6 +236,13 @@ namespace MyEditor
     // ── Main panel UI ──────────────────────────────────────────
     void ProjectPanel()
     {
+        // Disable all editing when playing
+        bool isPlaying = IsPlaying();
+        if (isPlaying)
+        {
+            ImGui::BeginDisabled();
+        }
+
         // Top bar ------------------------------------------------
         if (ImGui::Button("Refresh"))
         {
@@ -542,21 +548,31 @@ namespace MyEditor
                             coord->HasComponent<Framework::Renderable>(selectedEntity))
                         {
                             auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
-                            // Convert absolute path to relative path before storing
+                            // Convert to relative path with ../../MyEngine/Assets prefix
                             namespace fs = std::filesystem;
-                            std::error_code ec;
-                            fs::path relPath = fs::relative(item.fullPath, fs::current_path(), ec);
+                            std::string pathStr = item.fullPath;
+                            std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
 
-                            if (!ec && !relPath.empty()) {
-                                std::string pathStr = relPath.string();
-                                std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
+                            size_t myEnginePos = pathStr.find("MyEngine/Assets");
+                            if (myEnginePos != std::string::npos)
+                            {
+                                rend.spriteName = "../../" + pathStr.substr(myEnginePos);
+                            }
+                            else
+                            {
                                 rend.spriteName = pathStr;
                             }
-                            else {
-                                // Fallback to absolute if relative conversion fails
-                                rend.spriteName = item.fullPath;
-                            }
                             rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
+
+                            // Auto-detect spritesheet based on filename
+                            std::string filename = fs::path(rend.spriteName).filename().string();
+                            std::string lowerName = filename;
+                            for (auto& c : lowerName) c = (char)tolower(c);
+
+                            bool isSheet = (lowerName.find("sheet") != std::string::npos ||
+                                lowerName.find("atlas") != std::string::npos);
+
+                            rend.shd_ref = isSheet ? 2.0f : 1.0f;  // 2 for spritesheet, 1 for sprite
                         }
                     }
                 }
@@ -623,17 +639,30 @@ namespace MyEditor
                             prefabName = "Entity_" + std::to_string(static_cast<int>(droppedEntity));
                         }
 
-                        // Create prefab using PrefabManager::SaveEntityAsPrefab
+                        // =====================================================
+                        // Check if entity can be saved as prefab
+                        // =====================================================
                         PrefabManager prefabMgr;
 
-                        if (prefabMgr.SaveEntityAsPrefab(droppedEntity, prefabName))
+                        if (!prefabMgr.CanSaveAsPrefab(droppedEntity))
                         {
-                            std::cout << "[ProjectPanel] Successfully created prefab: " << prefabName << ".json" << std::endl;
-                            RefreshCurrentDir();  // Refresh to show the new prefab file
+                            // Entity is engine-managed - show warning popup
+                            s_showEngineManagedWarning = true;
+                            s_blockedEntityName = prefabName;
+                            //std::cout << "[ProjectPanel] Blocked: Cannot save engine-managed entity as prefab: " << prefabName << std::endl;
                         }
                         else
                         {
-                            std::cerr << "[ProjectPanel] Failed to create prefab: " << prefabName << ".json" << std::endl;
+                            // Safe to save
+                            if (prefabMgr.SaveEntityAsPrefab(droppedEntity, prefabName))
+                            {
+                                //std::cout << "[ProjectPanel] Successfully created prefab: " << prefabName << ".json" << std::endl;
+                                RefreshCurrentDir();  // Refresh to show the new prefab file
+                            }
+                            else
+                            {
+                                std::cerr << "[ProjectPanel] Failed to create prefab: " << prefabName << ".json" << std::endl;
+                            }
                         }
                     }
                 }
@@ -641,6 +670,55 @@ namespace MyEditor
             }
         }
 
+        // =====================================================
+        // Warning Popup for Engine-Managed Entities (Debug Text) 
+        // =====================================================
+        if (s_showEngineManagedWarning)
+        {
+            ImGui::OpenPopup("Cannot Save as Prefab##EngineManagedWarning");
+            s_showEngineManagedWarning = false;
+        }
+
+        if (ImGui::BeginPopupModal("Cannot Save as Prefab##EngineManagedWarning", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), "  Warning  ");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::Text("Cannot save '%s' as prefab.", s_blockedEntityName.c_str());
+            ImGui::Spacing();
+            ImGui::TextWrapped("Entities with names starting with '_' are engine-managed "
+                "(e.g., _FPS_Display, _TopSystem_Display) and cannot be saved as prefabs.");
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // Center the OK button
+            float buttonWidth = 120.0f;
+            float windowWidth = ImGui::GetWindowSize().x;
+            ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
+
+            if (ImGui::Button("OK", ImVec2(buttonWidth, 0)))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+
+            // Also close on Enter key
+            if (ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_Escape))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+
         ImGui::EndChild();
+
+        // Re-enable if we disabled for play mode
+        if (isPlaying)
+        {
+            ImGui::EndDisabled();
+        }
     }
 }
