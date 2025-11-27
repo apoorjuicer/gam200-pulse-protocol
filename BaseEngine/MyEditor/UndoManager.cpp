@@ -21,6 +21,7 @@ void UndoManager::Push(Command action) {
 	// drop the oldest "step" if full
 	if (undo_stack.size() == MAX_HISTORY) {
 		//erase the first element in the container
+		std::cout << "removing oldest element\n";
 		undo_stack.erase(undo_stack.begin());
 	}
 	//add most recent "action" or "step"
