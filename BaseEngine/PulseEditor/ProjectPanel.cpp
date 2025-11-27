@@ -36,10 +36,10 @@
 #include "TopBarPanel.h"
 #include "imgui.h"
 
-#include "../CoreEngine/Asset/AssetsManager.h"
-#include "../CoreEngine/ECS/Coordinator.h"
-#include "../Graphics/Renderable.h"
-#include "../Graphics/Transform.h"
+#include "CoreEngine/Asset/AssetsManager.h"
+#include "CoreEngine/ECS/Coordinator.h"
+#include "Graphics/Renderable.h"
+#include "Graphics/Transform.h"
 #include "CoreEngine/Prefab/PrefabManager.h"
 
 namespace MyEditor

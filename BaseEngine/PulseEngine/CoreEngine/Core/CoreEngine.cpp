@@ -21,21 +21,21 @@
 #include "graphics/stb_image.h"
 #include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
-#include "../MyEngine/CoreEngine/Prefab/PrefabInstance.h"
+#include "CoreEngine/Prefab/PrefabInstance.h"
 #ifdef ENABLE_EDITOR
-#include "../MyEditor/Editor.h"
+#include "../PulseEditor/Editor.h"
 #endif
-#include "../MyEngine/TestCases/TestCase.h"
+#include "TestCases/TestCase.h"
 // #include "glapp.h"
-#include "../MyEngine/Resources/AssetRegistry.h"
-#include "../MyEngine/CoreEngine/Asset/AssetsManager.h"
-#include "../MyEngine/Serialization/Serialization.h"
+#include "Resources/AssetRegistry.h"
+#include "CoreEngine/Asset/AssetsManager.h"
+#include "Serialization/Serialization.h"
 
-#include "../MyEngine/Components/DisplayName.h"
-#include "../MyEngine/Components/EntityType.h"
+#include "Components/DisplayName.h"
+#include "Components/EntityType.h"
 
-#include "../MyEngine/Audio/AudioSource.h"
-#include "../MyEngine/Graphics/Text.h"
+#include "Audio/AudioSource.h"
+#include "Graphics/Text.h"
 #pragma comment(lib, "winmm.lib")
 
 // Game window dimensions and title

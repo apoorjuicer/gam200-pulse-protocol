@@ -22,7 +22,7 @@
 #include "Editor.h"   // selectedEntity, INVALID_ENTITY, entityDisplayOrder, Game/ECS helpers
 #include "TopBarPanel.h"
 
-#include "../CoreEngine/Prefab/PrefabInstance.h"
+#include "CoreEngine/Prefab/PrefabInstance.h"
 
 // ImGui
 #include "imgui.h"

@@ -15,7 +15,7 @@
 #pragma once
 
 #include "Editor.h"
-#include "../CoreEngine/ECS/Types.h"
+#include "CoreEngine/ECS/Types.h"
 
 #include <string>
 #include <vector>

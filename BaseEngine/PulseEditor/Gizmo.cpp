@@ -21,12 +21,12 @@
 #include "Gizmo.h"
 #include "LayerManagerPanel.h"  // for IsLayerVisible, IsLayerLocked
 
-#include "../CoreEngine/ECS/Coordinator.h"
-#include "../CoreEngine/ECS/Types.h"
-#include "../Graphics/Transform.h"
-#include "../Graphics/glapp.h"
-#include "../Graphics/Layer.h"
-#include "../CoreEngine/Scene/SceneManager.h"  // For scene change detection
+#include "CoreEngine/ECS/Coordinator.h"
+#include "CoreEngine/ECS/Types.h"
+#include "Graphics/Transform.h"
+#include "Graphics/glapp.h"
+#include "Graphics/Layer.h"
+#include "CoreEngine/Scene/SceneManager.h"  // For scene change detection
 
 namespace MyEditor
 {

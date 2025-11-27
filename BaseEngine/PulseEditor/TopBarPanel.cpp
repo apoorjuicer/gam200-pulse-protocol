@@ -17,7 +17,7 @@
 #include "Editor.h"
 #include "LayerManagerPanel.h"  // For syncing layer visibility
 #include <imgui.h>
-#include "../CoreEngine/ECS/Coordinator.h"
+#include "CoreEngine/ECS/Coordinator.h"
 
 
 namespace MyEditor

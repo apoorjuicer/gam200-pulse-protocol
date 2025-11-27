@@ -13,7 +13,7 @@
  */
  /******************************************************************************/
 #include "ProfilingTab.h"
-#include "../MyEngine/Profiling/Profiling.h"
+#include "Profiling/Profiling.h"
 #include "Graphics/glhelper.h"
 #include <vector>
 #include <algorithm>

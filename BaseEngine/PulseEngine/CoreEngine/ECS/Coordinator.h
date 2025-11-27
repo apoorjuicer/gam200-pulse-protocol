@@ -24,7 +24,7 @@
 #include "EntityManager.h"
 #include "ComponentArray.h"
 #include "ComponentManager.h"
-#include "../MyEngine/CoreEngine/ECS/Singleton.h"
+#include "CoreEngine/ECS/Singleton.h"
 
 //  Acts as a mediator that allows us to have a single instance of the coordinator to use for all 3 manager :D
 class Coordinator : public Singleton<Coordinator>

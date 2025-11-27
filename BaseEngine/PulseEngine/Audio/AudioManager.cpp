@@ -13,13 +13,14 @@
 /******************************************************************************/
 
 #include "AudioManager.h"
-#include "../Resources/AssetRegistry.h"
+#include "Resources/AssetRegistry.h"
 #include "AudioSource.h"
-#include "../CoreEngine/ECS/Coordinator.h"
-#include "../CoreEngine/ECS/Types.h"
+#include "CoreEngine/ECS/Coordinator.h"
+#include "CoreEngine/ECS/Types.h"
+#include "CoreEngine/Core/CoreEngine.h"
 #pragma warning(push, 0)
-#include "../MyEngine/FMOD_API/api/core/inc/fmod.hpp"
-#include "../MyEngine/FMOD_API/api/core/inc/fmod_errors.h"
+#include "FMOD_API/api/core/inc/fmod.hpp"
+#include "FMOD_API/api/core/inc/fmod_errors.h"
 
 #pragma warning(pop)
 

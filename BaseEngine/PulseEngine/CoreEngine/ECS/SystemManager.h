@@ -18,7 +18,7 @@
 #include "System.h"
 #include "pch/pch_temp.h"
 #include "EntityManager.h"
-#include "../MyEngine/Profiling/Profiling.h"
+#include "Profiling/Profiling.h"
 
 class SystemManager
 {

@@ -18,8 +18,8 @@
 // #include "../MyEngine/Serialization/Serialization.h"
 // #include "../MyEngine/Resources/AssetRegistry.h"
 // #include "../Asset/AssetsManager.h"
-#include "../MyEngine/Components/Health.h"
-#include "../MyEngine/Components/EntityType.h"
+#include "Components/Health.h"
+#include "Components/EntityType.h"
 
 class Config;
 class AssetManager;
