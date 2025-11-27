@@ -103,12 +103,12 @@ namespace MyEditor
         if (!g)
             return INVALID_ENTITY;
 
-        Factory factory;
+        //Factory factory;
         // Uses your existing default setup:
         //  - CreateEntity()
         //  - default Transform/Renderable/Animation/Name/LayerTag
         //  - SceneManager::IncrementEntityArray
-        Entity e = factory.DefaultObj();
+        Entity e = g->CreateEntity();
         if (e == INVALID_ENTITY)
             return INVALID_ENTITY;
 
