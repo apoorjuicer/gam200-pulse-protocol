@@ -1,9 +1,23 @@
-Project Guide - CMake Setup and Visual Studio 2022
-==================================================
+================================================================================
 
-═══════════════════════════════════════════════════════════════════════════════
-1. PREREQUISITES
-═══════════════════════════════════════════════════════════════════════════════
+              ____  _   _ _     ____  _____ 
+             |  _ \| | | | |   / ___|| ____|
+             | |_) | | | | |   \___ \|  _|  
+             |  __/| |_| | |___ ___) | |___ 
+             |_|    \___/|_____|____/|_____|
+                                                   
+          ____  ____   ___ _____ ___   ____ ___  _     
+         |  _ \|  _ \ / _ \_   _/ _ \ / ___/ _ \| |    
+         | |_) | |_) | | | || || | | | |  | | | | |    
+         |  __/|  _ <| |_| || || |_| | |__| |_| | |___ 
+         |_|   |_| \_\\___/ |_| \___/ \____\___/|_____|
+
+                    ~ Project Guide ~
+
+================================================================================
+
+
+[ 1. PREREQUISITES ]
 
 Visual Studio 2022:
 - Download: https://visualstudio.microsoft.com/downloads/
@@ -14,9 +28,8 @@ CMake (Version 3.15 or higher):
 - Use the Windows x64 installer (.msi)
 - Check "Add CMake to system PATH" during installation
 
-═══════════════════════════════════════════════════════════════════════════════
-2. BUILD MODES (DEBUG VS RELEASE)
-═══════════════════════════════════════════════════════════════════════════════
+
+[ 2. PROJECT SETTINGS (DEBUG VS RELEASE) ]
 
 Debug Mode (Default):
 - Includes debugging symbols, slower performance
@@ -30,11 +43,10 @@ Release Mode:
 To Switch in Visual Studio:
 1. Click dropdown near top toolbar (shows "Debug" by default)
 2. Select "Release"
-3. Rebuild (Build → Rebuild Solution)
+3. Rebuild (Build -> Rebuild Solution)
 
-═══════════════════════════════════════════════════════════════════════════════
-3. EDITOR MODE VS GAME-ONLY MODE
-═══════════════════════════════════════════════════════════════════════════════
+
+[ 3. EDITOR MODE VS GAME-ONLY MODE ]
 
 Editor Mode (run_editor.bat):
 - Full level editor with ImGui interface
@@ -44,15 +56,14 @@ Game-Only Mode (run_game.bat):
 - Game without editor UI
 - Use for: Testing gameplay, demos
 
-IMPORTANT - Switching Between Modes:
+Switching Between Modes:
 1. Close Visual Studio
 2. Run clean.bat
 3. Run run_editor.bat OR run_game.bat
 4. Reopen build/MyEngine.sln
 
-═══════════════════════════════════════════════════════════════════════════════
-4. HOW TO BUILD
-═══════════════════════════════════════════════════════════════════════════════
+
+[ 4. HOW TO BUILD ]
 
 First Time Setup:
 1. Extract BaseEngine.zip
@@ -67,12 +78,12 @@ Regenerating Solution:
 3. Run run_editor.bat or run_game.bat
 4. Reopen build/MyEngine.sln
 
-═══════════════════════════════════════════════════════════════════════════════
-5. BATCH FILE REFERENCE
-═══════════════════════════════════════════════════════════════════════════════
 
-run_editor.bat - Generates solution WITH editor
-run_game.bat   - Generates solution WITHOUT editor (game only)
-clean.bat      - Removes build folder (run before switching modes)
+[ 5. BATCH FILE REFERENCE ]
 
-═══════════════════════════════════════════════════════════════════════════════
+run_editor.bat  -  Generates solution WITH editor
+run_game.bat    -  Generates solution WITHOUT editor (game only)
+clean.bat       -  Removes build folder (run before switching modes)
+
+
+================================================================================
