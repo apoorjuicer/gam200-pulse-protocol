@@ -21,7 +21,7 @@ namespace MyEditor
 {
     // Draw the right-side Inspector window, docked into rightDockID
     void DrawInspectorWindow(ImGuiID rightDockID);
-
+    //inspector components
     void Inspector_NameComponent(Coordinator* g);
     void Inspector_TransformComponent(Coordinator* g);
     void Inspector_RenderableComponent(Coordinator* g);
@@ -29,6 +29,4 @@ namespace MyEditor
     void Inspector_LogicComponent(Coordinator* g);
     void Inspector_AudioComponent(Coordinator* g);
     void Inspector_TextComponentUI(Coordinator* g);
-
-
 }// end of namespace MyEditor

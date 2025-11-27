@@ -44,6 +44,11 @@ public:
 		return CoordEnitiyManager -> CreateEntity();	
 	}
 
+	Entity CreateEntityWithID(Entity id)
+	{
+		return CoordEnitiyManager->CreateEntityWithID(id);
+	}
+
 	void DestroyEntity(Entity entity)
 	{
 		CoordEnitiyManager->RemoveEntity(entity);

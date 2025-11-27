@@ -3,8 +3,8 @@
  * @file        SnapShot.h
  * @project     Pulse Protocol
  * @author      Ban Kai Wei Benjamin
- * @brief       contains EntitySnapshot to "snapshot" entity before deleting
- *
+ * @brief       Saves an Entity before deleting it. Will be used to retrieve
+ *              Entity's components
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
@@ -25,7 +25,7 @@
 #include "../MyEngine/GameLogic/GameLogic.h" //LogicComponent
 #include "../MyEngine/Audio/AudioSource.h" //AudioSource
 #include "../MyEngine/Graphics/Text.h" //TextComponent
-
+#include "../MyEngine/CoreEngine/Prefab/PrefabInstance.h" //prefab instance
 
 namespace MyEditor
 {
@@ -45,13 +45,12 @@ namespace MyEditor
         bool hasLayerTag = false;
         bool hasAudioSource = false;
         bool hasTextComponent = false;
+        bool hasPrefabInstance = false;
 
-
-        // Actual component data (deep copy)
+        // Actual component data 
         Framework::Transform transform_snap{};
         Framework::Renderable           renderable_snap{};
         Framework::Animation            animation_snap{};
-
         NPC npc_snap{};
         AABB aabb_snap{};
         Health health_snap{};
@@ -60,13 +59,11 @@ namespace MyEditor
         NamingComponent namingcomponent_snap{};
         LogicComponent logiccomponent_snap{};
         AudioSource audiosource_snap{};
-        TextComponent text_snap;
-
+        TextComponent text_snap{};
+        PrefabInstance prefabinstance_snap{};
     };
     //make a "snapshot" or "copy" of entity
     EntitySnapshot MakeEntitySnapshot(Entity e);
     Entity CreateEntityFromEntitySnapshot(EntitySnapshot const& snap);
-
-    void printsnapshot(EntitySnapshot snap);
-   
+    //void printsnapshot(EntitySnapshot snap);
 }

@@ -24,7 +24,7 @@
 #include "../CoreEngine/ECS/System.h"
 #include "../CoreEngine/ECS/Coordinator.h"
 //#include "../MyEngine/Components/ScriptName.h"
-#include "../MyEngine/Serialization/Serialization.h"
+//#include "../MyEngine/Serialization/Serialization.h"
 #include "../Input/RhythmGameplayInput.h"
 
 //components:

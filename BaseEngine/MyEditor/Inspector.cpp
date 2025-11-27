@@ -2,8 +2,9 @@
 /**
  * @file        Inspector.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 50%
- *              Chloe Lau Rey En (secondary) - 50%
+ * @author      Leu Jun Yong (primary) - 45%
+ *              Chloe Lau Rey En (secondary) - 45%
+ *              BAN Kai Wei Benjamin (secondary) - 10%
  * @brief       TBF
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
@@ -15,19 +16,15 @@
 // -----------------------------------------------------------------------------
 // Inspector.cpp  -  Entity inspector (components UI, prefab save, etc.)
 // -----------------------------------------------------------------------------
-
 #include "pch/pch_temp.h"
-
 #include "Inspector.h"
 #include "Editor.h"                       // selectedEntity, INVALID_ENTITY, PrefabManager, etc.
 #include "TopBarPanel.h" 
-
 #include "Graphics/glapp.h"           // GLApp::shdrpgms
 #include "Graphics/Layer.h"           // GLApp::shdrpgms
 #include "Graphics/Text.h"
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "CoreEngine/Prefab/PrefabInstance.h"
-
 namespace MyEditor
 {
     //Definition of singleton undomanager for editor;
@@ -484,7 +481,9 @@ namespace MyEditor
      }//end of function
 
 
-
+    // -------------------------------------------------------------------------
+    // Inspector Components
+    // -------------------------------------------------------------------------
      void Inspector_NameComponent(Coordinator* g) {
          if (g->HasComponent<Name>(selectedEntity))
          {

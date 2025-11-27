@@ -2,8 +2,10 @@
 /**
  * @file        Gizmo.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 50%
- * @author      Chloe Lau Rey En (secondary) - 50%
+ * @author      Leu Jun Yong (primary) - 46%
+ * @author      Chloe Lau Rey En (secondary) - 46%
+ * @author      Ban Kai Wei Benjamin (secondary) - 8%
+ * 
  * @brief       Implements a Unity-style transform gizmo system with move, scale,
  *              and rotate modes for entity manipulation in the editor viewport
  *
@@ -888,7 +890,8 @@ namespace MyEditor
 
                         mUndo.Push([e, before]()
                             {
-                                auto* g = Coordinator::GetInstance();
+                                //reacquire, incase something changes
+                                auto* g = Coordinator::GetInstance();                                
                                 if (!g) return;
                                 if (!g->HasComponent<Framework::Transform>(e)) return;
 
@@ -907,51 +910,58 @@ namespace MyEditor
         // ---------------------------------------------------------------------
         if (selectedEntity != INVALID_ENTITY && ImGui::IsKeyPressed(ImGuiKey_Delete))
         {
-            if (g_gizmo.dragging && g_gizmo.active == selectedEntity)
+           
+            Entity toDelete = selectedEntity;
+            Coordinator* coord = Coordinator::GetInstance();
+            if (!coord) return;
+
+            // If gizmo was dragging this entity, stop it
+            if (g_gizmo.dragging && g_gizmo.active == toDelete)
             {
                 g_gizmo.dragging = false;
                 g_gizmo.active = INVALID_ENTITY;
                 g_gizmo.activeHandle = GizmoHandle::None;
             }
 
-            //auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
-            //if (it != entityDisplayOrder.end())
-            //    entityDisplayOrder.erase(it);
-
-            Factory factory;
-            factory.DeleteEntity(selectedEntity);
-            //UNDO
-            Entity toDelete = selectedEntity;
-            // Find its index in the hierarchy list (for undo reinsertion)
+            // Find position in hierarchy BEFORE removing
             auto it = std::find(entityDisplayOrder.begin(),
                 entityDisplayOrder.end(),
                 toDelete);
             int index = -1;
             if (it != entityDisplayOrder.end())
+            {
                 index = static_cast<int>(it - entityDisplayOrder.begin());
-            // --- SNAPSHOT BEFORE DELETING ---
+                // Remove from the list now
+                entityDisplayOrder.erase(it);
+            }
+
+            // --- SNAPSHOT WHILE ENTITY IS STILL VALID ---
             EntitySnapshot snap = MakeEntitySnapshot(toDelete);
 
-            // Destroy the entity
-            coord->DestroyEntity(selectedEntity);
+            // --- DESTROY ENTITY ONCE ---
+            Factory factory;
+            factory.DeleteEntity(toDelete);      // or coord->DestroyEntity(toDelete), but NOT both
 
             selectedEntity = INVALID_ENTITY;
 
-            // UNDO: recreate the entity from snapshot and reinsert into list
+            // --- UNDO: recreate entity from snapshot and reinsert ---
             mUndo.Push([snap, index]()
                 {
                     // Recreate the entity with all its components
                     Entity restored = CreateEntityFromEntitySnapshot(snap);
-                    if (restored == INVALID_ENTITY) {
+                    if (restored == INVALID_ENTITY)
                         return;
-                    }
 
                     // Reinsert into hierarchy at original position
                     int insertIndex = index;
-                    if (insertIndex < 0 || insertIndex > static_cast<int>(entityDisplayOrder.size()))
+                    if (insertIndex < 0 ||
+                        insertIndex > static_cast<int>(entityDisplayOrder.size()))
+                    {
                         insertIndex = static_cast<int>(entityDisplayOrder.size());
+                    }
 
-                    entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex, restored);
+                    entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex,
+                        restored);
 
                     // Select the restored entity
                     selectedEntity = restored;

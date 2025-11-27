@@ -106,7 +106,7 @@
 #include "../MyEngine/Graphics/Renderable.h"
 #include "../MyEngine/Physics/collision.h"
 #include "../MyEngine/Resources/AssetRegistry.h"
-#include "../MyEngine/Serialization/Serialization.h"
+//#include "../MyEngine/Serialization/Serialization.h"
 
 // Core Engine
 #include "../CoreEngine/Core/CoreEngine.h"
