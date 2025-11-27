@@ -774,6 +774,9 @@ namespace MyEditor
                 g_gizmo.dragStartScreen = mouseFB;
                 g_gizmo.dragStartWorld = ScreenToWorld_DrawRect(mouseFB);
                 g_gizmo.entityStartPos = tr.Pos;
+                g_gizmo.entityStartScale = tr.Scale;
+                g_gizmo.entityStartRotation = tr.Rotation.x;
+                g_gizmo.dragStartAngle = GetAngle(WorldToScreen(tr.Pos, vp), mouseFB);  // <-- And this!
 
                 // UNDO: snapshot transform at start of gizmo drag
                 s_gizmoEditing = true;
@@ -852,20 +855,13 @@ namespace MyEditor
                     float currentAngle = GetAngle(centerScreen, mouseFB);
                     float deltaAngle = currentAngle - g_gizmo.dragStartAngle;
                     float deltaDegrees = deltaAngle * (180.0f / 3.14159265f);
-                    tr.Rotation.x = g_gizmo.entityStartRotation - deltaDegrees;  // Rotation.x is angle in degrees
+                    tr.Rotation.x = g_gizmo.entityStartRotation - deltaDegrees;
                     break;
                 }
 
                 default:
                     break;
                 }
-                Vector2 d{ mouseWorld.x - g_gizmo.dragStartWorld.x,
-                           mouseWorld.y - g_gizmo.dragStartWorld.y };
-                tr.Pos.x = g_gizmo.entityStartPos.x + d.x;
-                tr.Pos.y = g_gizmo.entityStartPos.y + d.y;
-
-
-
             }
         }
 

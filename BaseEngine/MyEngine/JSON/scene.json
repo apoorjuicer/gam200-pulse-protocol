@@ -7,6 +7,14 @@
         {
             "id": "level1_scene",
             "path": "../../MyEngine/JSON/Level1.json"
+        },
+        {
+            "id": "gamewin_scene",
+            "path": "../../MyEngine/JSON/GameWin.json"
+        },
+        {
+            "id": "gamelose_scene",
+            "path": "../../MyEngine/JSON/GameLose.json"
         }
     ]
 }
