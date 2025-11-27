@@ -2,7 +2,7 @@
 /**
  * @file        Renderable.h
  * @project     Pulse Protocol
- * @author      Goh Pin Kai - 100%
+ * @author      Goh Pin Kai
  * @brief       Declares the Renderable component used by the ECS framework.
  *              This component stores references to the model, shader, and
  *              texture used during rendering, along with sprite name for

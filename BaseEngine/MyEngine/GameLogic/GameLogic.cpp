@@ -4,8 +4,9 @@
  * @project     Pulse Protocol
  * @author		Chia Wei Xuan Rachael (primary) - 60%
  * @author		Reginald Lew Yee Ren (secondary) - 20%
- * @author		Chloe Lau Rey En (secondary) - 20%
- *
+ * @author		Chloe Lau Rey En (secondary) - 15%
+ * @author		Goh Pin Kai (secondary) - 5%
+ * 
  * @brief		Core Components:
  *              - LogicSystem: Manages script registration, lifecycle (Init/Update/Exit),
  *                and execution for all entities with LogicComponent. Only updates during

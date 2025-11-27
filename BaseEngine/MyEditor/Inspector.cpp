@@ -2,19 +2,16 @@
 /**
  * @file        Inspector.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 50%
- *              Chloe Lau Rey En (secondary) - 50%
- * @brief       TBF
+ * @author      Leu Jun Yong (primary) - 60%
+ *              Chloe Lau Rey En (secondary) - 20%
+ *              Ban Kai Wei Benjamin (secondary) - 20%
+ * @brief       Entity inspector panel with component editors and undo support.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
-
-// -----------------------------------------------------------------------------
-// Inspector.cpp  -  Entity inspector (components UI, prefab save, etc.)
-// -----------------------------------------------------------------------------
 
 #include "pch/pch_temp.h"
 

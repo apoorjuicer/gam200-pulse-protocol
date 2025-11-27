@@ -2,7 +2,7 @@
 /**
  * @file       SceneManager.h
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael - 100%
+ * @author     Chia Wei Xuan Rachael
  * @brief      Scene management system that inherits from Systems base class.
  *             Provides interface for scene lifecycle operations, entity tracking,
  *             and JSON serialization of game scenes.
