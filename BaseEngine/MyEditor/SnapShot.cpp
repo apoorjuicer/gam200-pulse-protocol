@@ -114,6 +114,8 @@ namespace MyEditor
 
         // Now overwrite / add components using the snapshot
 
+ 
+
         if (snap.hasTransform)
         {
             if (g->HasComponent<Framework::Transform>(e))
@@ -212,5 +214,14 @@ namespace MyEditor
 
         return e;
     }
+    
+    void printsnapshot(EntitySnapshot snap) {
+        std::cout << "snap hasTransform?" << snap.hasTransform << "\n";
+        std::cout << "snap hasRenderable?" << snap.hasRenderable << "\n";
+        std::cout << "snap hasAnimation?" << snap.hasAnimation << "\n";
+        std::cout << "snap hasNPC?" << snap.hasNPC << "\n";
+        std::cout << "snap hasAABB?" << snap.hasAABB << "\n";
+    }
+
 }
 

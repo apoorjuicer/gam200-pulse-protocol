@@ -66,5 +66,7 @@ namespace MyEditor
     //make a "snapshot" or "copy" of entity
     EntitySnapshot MakeEntitySnapshot(Entity e);
     Entity CreateEntityFromEntitySnapshot(EntitySnapshot const& snap);
+
+    void printsnapshot(EntitySnapshot snap);
    
 }
