@@ -1,4 +1,5 @@
 /******************************************************************************/
+/******************************************************************************/
 /**
  * @file        CoreEngine.cpp
  * @project     Pulse Protocol
@@ -563,19 +564,21 @@ void CoreEngine::Init()
 
 	// Step 2: Initialize it with  pointer to CoreEngine as param
 	initFunc(this); 
-	
+
 	// Step 3: Adding script to an entity[please work ;-; ]
 	addScript(0, "TestScript"); // THE 0 IS ENTITY ID 0
-	
+	addScript(4, "TestScript");		// show that u can run multiple codes and even multiple code for each entity :D
+	addScript(4, "TestScript2");
+	addScript(3, "TestScript2");
 	
 	//this is for testing
-	HelloWorldFunctionPtr hwFunc = GetFunctionPtr<HelloWorldFunctionPtr>
-		(
-			"ScriptAPI",                 // Name of the Assembly
-			"ScriptAPI.EngineInterface", // Full name of the class
-			"HelloWorld"                 // Name of the function
-		);
-	hwFunc();
+	//HelloWorldFunctionPtr hwFunc = GetFunctionPtr<HelloWorldFunctionPtr>
+	//	(
+	//		"ScriptAPI",                 // Name of the Assembly
+	//		"ScriptAPI.EngineInterface", // Full name of the class
+	//		"HelloWorld"                 // Name of the function
+	//	);
+	//hwFunc();
 }
 
 void CoreEngine::Setup()

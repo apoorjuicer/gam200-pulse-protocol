@@ -24,6 +24,11 @@ endif()
 
 add_executable(${EDITOR_NAME} ${EDITOR_SRC})
 
+# ensures POST_BUILD copy commands run when DLLs change
+set_target_properties(${EDITOR_NAME} PROPERTIES 
+    VS_GLOBAL_DisableFastUpToDateCheck true
+)
+
 target_compile_definitions(MyEditor PUBLIC ENABLE_EDITOR)
 
 target_link_libraries(${EDITOR_NAME}
