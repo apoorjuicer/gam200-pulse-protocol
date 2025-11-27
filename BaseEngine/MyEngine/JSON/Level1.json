@@ -108,8 +108,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.007029831409454346,
+                        "currentFrame": 1,
+                        "elapsedTime": 0.2759386897087097,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -269,7 +269,7 @@
                 {
                     "audiosource": {
                         "audio_id": "SFX_Invalid_Key",
-                        "volume": 1.0,
+                        "volume": 0.17000000178813935,
                         "loop": false,
                         "playOnAwake": false
                     }

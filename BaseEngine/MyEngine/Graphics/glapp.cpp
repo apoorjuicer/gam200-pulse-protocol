@@ -510,7 +510,8 @@ void GLApp::draw(std::set<Entity> entities, int includeMask) {
 	glDisable(GL_DEPTH_TEST);
 
 #ifdef ENABLE_EDITOR
-	if (MyEditor::IsEnabled())
+	// Only draw AABB debug boxes when editor is enabled AND game is NOT playing
+	if (MyEditor::IsEnabled() && !MyEditor::IsPlaying())
 	{
 		DebugDraw::Begin(glm::mat4(1.0f));
 		for (auto e : entities)
