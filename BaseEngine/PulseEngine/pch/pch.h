@@ -66,13 +66,13 @@
 
 // FMOD Headers
 #pragma warning(push, 0)
-#include "../MyEngine/FMOD_API/api/core/inc/fmod.hpp"
-#include "../MyEngine/FMOD_API/api/core/inc/fmod_errors.h"
+#include "FMOD_API/api/core/inc/fmod.hpp"
+#include "FMOD_API/api/core/inc/fmod_errors.h"
 #pragma warning(pop)
 
 // Editor Header
 #ifdef ENABLE_EDITOR
-#include "../MyEditor/Editor.h"
+#include "PulseEditor/Editor.h"
 #endif
 
 //Serialize
@@ -94,37 +94,37 @@
 #include "Graphics/glhelper.h"
 #include "Graphics/glslshader.h"
 
-#include "../MyEngine/Profiling/Profiling.h"
-#include "../MyEngine/Math/math.h"
-#include "../MyEngine/Input/InputManager.h"
-#include "../MyEngine/Input/RhythmGameplayInput.h"
-#include "../MyEngine/Audio/AudioManager.h"
-#include "../MyEngine/Graphics/GraphicsManager.h"
-#include "../MyEngine/Graphics/DebugDraw.h"
-#include "../MyEngine/Graphics/Transform.h"
-#include "../MyEngine/Graphics/Animation.h"
-#include "../MyEngine/Graphics/Renderable.h"
-#include "../MyEngine/Physics/collision.h"
-#include "../MyEngine/Resources/AssetRegistry.h"
-#include "../MyEngine/Serialization/Serialization.h"
+#include "Profiling/Profiling.h"
+#include "Math/math.h"
+#include "Input/InputManager.h"
+#include "Input/RhythmGameplayInput.h"
+#include "Audio/AudioManager.h"
+#include "Graphics/GraphicsManager.h"
+#include "Graphics/DebugDraw.h"
+#include "Graphics/Transform.h"
+#include "Graphics/Animation.h"
+#include "Graphics/Renderable.h"
+#include "Physics/collision.h"
+#include "Resources/AssetRegistry.h"
+#include "Serialization/Serialization.h"
 
 // Core Engine
-#include "../CoreEngine/Core/CoreEngine.h"
+#include "CoreEngine/Core/CoreEngine.h"
 
 // ECS
-#include "../MyEngine/CoreEngine/ECS/Types.h"
-#include "../MyEngine/CoreEngine/ECS/System.h"
-#include "../MyEngine/CoreEngine/ECS/Singleton.h"
-#include "../MyEngine/CoreEngine/ECS/Coordinator.h"
-#include "../MyEngine/CoreEngine/ECS/SystemManager.h"
-#include "../MyEngine/CoreEngine/ECS/EntityManager.h"
-#include "../MyEngine/CoreEngine/ECS/ComponentArray.h"
-#include "../MyEngine/CoreEngine/ECS/ComponentManager.h"
+#include "CoreEngine/ECS/Types.h"
+#include "CoreEngine/ECS/System.h"
+#include "CoreEngine/ECS/Singleton.h"
+#include "CoreEngine/ECS/Coordinator.h"
+#include "CoreEngine/ECS/SystemManager.h"
+#include "CoreEngine/ECS/EntityManager.h"
+#include "CoreEngine/ECS/ComponentArray.h"
+#include "CoreEngine/ECS/ComponentManager.h"
 
 // Systems
-#include "../MyEngine/GameLogic/GameLogic.h"
-#include "../MyEngine/CoreEngine/Window.h"
-#include "../MyEngine/CoreEngine/Assets.h"
-#include "../MyEngine/CoreEngine/Scene/SceneManager.h"
-#include "../MyEngine/CoreEngine/Asset/AssetsManager.h"
-#include "../MyEngine/CoreEngine/Message/MessageManager.h"
+#include "GameLogic/GameLogic.h"
+#include "CoreEngine/Window.h"
+#include "CoreEngine/Assets.h"
+#include "CoreEngine/Scene/SceneManager.h"
+#include "CoreEngine/Asset/AssetsManager.h"
+#include "CoreEngine/Message/MessageManager.h"

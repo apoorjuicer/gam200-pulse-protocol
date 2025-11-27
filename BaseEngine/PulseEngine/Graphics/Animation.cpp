@@ -13,7 +13,7 @@
  */
  /******************************************************************************/
 #include "Animation.h"
-#include <../MyEngine/Math/math.h>
+#include "Math/math.h"
 
 namespace Framework
 {

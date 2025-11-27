@@ -14,9 +14,9 @@
  */
 /******************************************************************************/
 
-#include "../MyEngine/Input/RhythmGameplayInput.h"
-#include "../MyEngine/CoreEngine/Core/CoreEngine.h"
-#include "../MyEngine/Components/DisplayName.h"
+#include "Input/RhythmGameplayInput.h"
+#include "CoreEngine/Core/CoreEngine.h"
+#include "Components/DisplayName.h"
 
 static std::string keyToString(int key)
 {

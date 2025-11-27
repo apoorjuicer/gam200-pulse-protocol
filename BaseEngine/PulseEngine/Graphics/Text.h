@@ -15,7 +15,7 @@
 #include <glm/vec3.hpp>
 #include <rapidjson/document.h>
 #include <iostream>
-#include "../Math/math.h"
+#include "Math/math.h"
 
 struct TextComponent
 {

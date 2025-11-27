@@ -17,9 +17,9 @@
 #include "pch/pch_temp.h"
 
 #include "graphics/stb_image.h"
-#include "../MyEngine/Input/InputManager.h"
-#include "../MyEngine/CoreEngine/ECS/Coordinator.h"
-#include "../MyEngine/Graphics/GraphicsManager.h"
+#include "Input/InputManager.h"
+#include "CoreEngine/ECS/Coordinator.h"
+#include "Graphics/GraphicsManager.h"
 
 static Vector2 ScreenToWorld_ForInput(double fbX, double fbY)
 {

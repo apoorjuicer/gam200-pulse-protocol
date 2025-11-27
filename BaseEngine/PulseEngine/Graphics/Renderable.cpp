@@ -13,8 +13,8 @@
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
 /******************************************************************************/
-#include "../MyEngine/Graphics/Renderable.h"
-#include "../MyEngine/Math/math.h"
+#include "Graphics/Renderable.h"
+#include "Math/math.h"
 
 namespace Framework
 {

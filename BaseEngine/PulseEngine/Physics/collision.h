@@ -19,7 +19,7 @@
 #ifndef COLLISION_H
 #define COLLISION_H
 
-#include "../CoreEngine/Assets.h"
+#include "CoreEngine/Assets.h"
 #include "Graphics/Transform.h"
 
  // Forward declare

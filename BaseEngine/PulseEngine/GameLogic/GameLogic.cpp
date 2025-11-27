@@ -26,7 +26,7 @@
  */
  /******************************************************************************/
 #include "GameLogic.h"
-#include "../MyEngine/CoreEngine/Factory/Factory.h"
+#include "CoreEngine/Factory/Factory.h"
 
 //bool EnemyScript::testAABBCollision = false;
 //bool EnemyScript::testOBBCollision = false;

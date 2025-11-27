@@ -15,9 +15,9 @@
 
 #pragma once
 #include "pch/pch_temp.h"
-#include "../MyEngine/CoreEngine/ECS/System.h"
-#include "../MyEngine/CoreEngine/Message/MessageManager.h"
-#include "Graphics\glhelper.h"
+#include "CoreEngine/ECS/System.h"
+#include "CoreEngine/Message/MessageManager.h"
+#include "Graphics/glhelper.h"
 
 class InputManager : public Systems {
 public:

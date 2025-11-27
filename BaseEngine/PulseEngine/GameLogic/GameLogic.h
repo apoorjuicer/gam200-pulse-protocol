@@ -20,17 +20,17 @@
 #pragma once
 #include "pch/pch_temp.h"
 #include <GLFW/glfw3.h>
-#include "../CoreEngine/ECS/Types.h"
-#include "../CoreEngine/ECS/System.h"
-#include "../CoreEngine/ECS/Coordinator.h"
+#include "CoreEngine/ECS/Types.h"
+#include "CoreEngine/ECS/System.h"
+#include "CoreEngine/ECS/Coordinator.h"
 //#include "../MyEngine/Components/ScriptName.h"
-#include "../MyEngine/Serialization/Serialization.h"
-#include "../Input/RhythmGameplayInput.h"
+#include "Serialization/Serialization.h"
+#include "Input/RhythmGameplayInput.h"
 
 //components:
-#include "../Graphics/Transform.h"
-#include "./Components/DisplayName.h"
-#include "../Graphics/Renderable.h"
+#include "Graphics/Transform.h"
+#include "Components/DisplayName.h"
+#include "Graphics/Renderable.h"
 
 
 //Serialize

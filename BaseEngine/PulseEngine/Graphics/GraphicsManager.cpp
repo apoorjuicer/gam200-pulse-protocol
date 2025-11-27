@@ -20,15 +20,15 @@
 /******************************************************************************/
 
 #include "GraphicsManager.h"
-#include "../Resources/AssetRegistry.h"
+#include "Resources/AssetRegistry.h"
 #include "glapp.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "../Graphics/stb_image.h"
+#include "Graphics/stb_image.h"
 
 //ECS
-#include "../CoreEngine/ECS/Coordinator.h"
-#include "../CoreEngine/ECS/Types.h"
+#include "CoreEngine/ECS/Coordinator.h"
+#include "CoreEngine/ECS/Types.h"
 
 // These are the asset keys we expect to exist after AssetsManager::LoadAllFonts()
 // namespace {

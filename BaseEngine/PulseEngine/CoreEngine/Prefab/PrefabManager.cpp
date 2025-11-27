@@ -16,17 +16,17 @@
 
 #include "PrefabManager.h"
 #include "PrefabInstance.h"
-#include "../Factory/Factory.h"
-#include "../MyEngine/Components/DisplayName.h"
+#include "Factory/Factory.h"
+#include "Components/DisplayName.h"
 
 // Component headers for UpdateEntityFromPrefab
-#include "../MyEngine/Graphics/Transform.h"
-#include "../MyEngine/Graphics/Renderable.h"
-#include "../MyEngine/Graphics/Animation.h"
-#include "../MyEngine/Graphics/Text.h"          
-#include "../MyEngine/GameLogic/GameLogic.h"
-#include "../MyEngine/Components/Health.h"
-#include "../MyEngine/Components/AABB.h"
+#include "Graphics/Transform.h"
+#include "Graphics/Renderable.h"
+#include "Graphics/Animation.h"
+#include "Graphics/Text.h"          
+#include "GameLogic/GameLogic.h"
+#include "Components/Health.h"
+#include "Components/AABB.h"
 // Note: AudioSource should already be available via pch or other includes
 
 PrefabManager::PrefabManager()

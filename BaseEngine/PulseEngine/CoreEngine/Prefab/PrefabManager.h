@@ -16,7 +16,7 @@
 
 #pragma once
 #include "pch/pch_temp.h"
-#include "../ECS/Types.h"
+#include "CoreEngine/ECS/Types.h"
 
 class Factory;
 

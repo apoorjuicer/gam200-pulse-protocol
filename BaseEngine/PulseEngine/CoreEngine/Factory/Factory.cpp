@@ -47,8 +47,8 @@
  /******************************************************************************/
 #pragma once
 #include "Factory.h"
-#include "../MyEngine/CoreEngine/Assets.h"
-#include "../MyEngine/Components/DisplayName.h"
+#include "CoreEngine/Assets.h"
+#include "Components/DisplayName.h"
 
 
 using namespace rapidjson;
