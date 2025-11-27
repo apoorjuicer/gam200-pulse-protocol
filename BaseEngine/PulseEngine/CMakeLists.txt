@@ -1,4 +1,4 @@
-set(ENGINE_NAME MyEngine)
+set(ENGINE_NAME PulseEngine)
 
 # Auto-collect sources (keeps Solution Explorer in sync)
 file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS
@@ -10,7 +10,7 @@ file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS
 
 add_library(${ENGINE_NAME} STATIC ${ENGINE_SRC})
 if (ENABLE_EDITOR)
-    target_compile_definitions(MyEngine PUBLIC ENABLE_EDITOR)
+    target_compile_definitions(PulseEngine PUBLIC ENABLE_EDITOR)
 endif()
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${ENGINE_SRC})
 
@@ -35,7 +35,7 @@ if (NOT DEFINED FMOD_API_DIR_FOUND)
   set(_FMOD_CANDIDATES
       "${FMOD_API_DIR}"                                   # user-provided -DFMOD_API_DIR=...
       "${CMAKE_CURRENT_LIST_DIR}/../FMOD_API"             # project root / FMOD_API
-      "${CMAKE_CURRENT_LIST_DIR}/FMOD_API"                # MyEngine/FMOD_API
+      "${CMAKE_CURRENT_LIST_DIR}/FMOD_API"                # PulseEngine/FMOD_API
       "${CMAKE_SOURCE_DIR}/FMOD_API"                      # top-level / FMOD_API
       "${CMAKE_SOURCE_DIR}/ThirdParty/FMOD_API"           # typical thirdparty layout
   )
@@ -57,7 +57,7 @@ target_include_directories(${ENGINE_NAME} PUBLIC
     "${FMOD_API_DIR_FOUND}/api/studio/inc"
 )
 
-# Core deps (PUBLIC so MyEditor inherits them via MyEngine link)
+# Core deps (PUBLIC so MyEditor inherits them via PulseEngine link)
 target_link_libraries(${ENGINE_NAME} PUBLIC
     glfw
     libglew_static
@@ -89,14 +89,14 @@ add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
 add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/JSON
-    ${CMAKE_BINARY_DIR}/MyEngine/JSON
+    ${CMAKE_BINARY_DIR}/PulseEngine/JSON
     COMMENT "Copying JSON config files to build directory"
 )
 
 add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/Assets
-    ${CMAKE_BINARY_DIR}/MyEngine/Assets
+    ${CMAKE_BINARY_DIR}/PulseEngine/Assets
     COMMENT "Copying Assets to build directory"
 )
 

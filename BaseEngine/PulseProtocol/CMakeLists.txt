@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(GAME_NAME MyGame)
+set(GAME_NAME PulseProtocol)
 set(GAME_ROOT ${CMAKE_CURRENT_LIST_DIR})
 
 # Grab all cpp/h in this folder
@@ -12,14 +12,14 @@ file(GLOB_RECURSE GAME_SRC CONFIGURE_DEPENDS
 add_executable(${GAME_NAME} ${GAME_SRC})
 
 # Use the engine library
-target_link_libraries(${GAME_NAME} PRIVATE MyEngine)
+target_link_libraries(${GAME_NAME} PRIVATE PulseEngine)
 
 # So we can do #include "pch/pch.h" and other engine headers
 target_include_directories(${GAME_NAME} PRIVATE
-    ${CMAKE_SOURCE_DIR}/MyEngine
+    ${CMAKE_SOURCE_DIR}/PulseEngine
 )
 
-# --- FMOD DLL copy for MyGame (Debug/Release aware) ---
+# --- FMOD DLL copy for PulseProtocol (Debug/Release aware) ---
 if (MSVC AND FMOD_API_DIR_FOUND)
 
     set(FMOD_CORE_DEBUG     "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmodL.dll")

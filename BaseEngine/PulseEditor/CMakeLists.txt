@@ -1,4 +1,4 @@
-set(EDITOR_NAME MyEditor)
+set(EDITOR_NAME PulseEditor)
 set(EDITOR_ROOT ${CMAKE_CURRENT_LIST_DIR})
 
 message(STATUS "Configuring ${EDITOR_NAME} from: ${EDITOR_ROOT}")
@@ -18,13 +18,13 @@ file(GLOB_RECURSE EDITOR_SRC CONFIGURE_DEPENDS
 # Always create the target (even if empty) so it shows in Solution Explorer
 if (NOT EDITOR_SRC)
     message(WARNING "[${EDITOR_NAME}] No source files found. Creating __dummy_editor.cpp so the target shows up.")
-    file(WRITE "${EDITOR_ROOT}/__dummy_editor.cpp" "// generated dummy file to satisfy CMake\nint __myeditor_dummy__ = 0;")
+    file(WRITE "${EDITOR_ROOT}/__dummy_editor.cpp" "// generated dummy file to satisfy CMake\nint __pulseeditor_dummy__ = 0;")
     list(APPEND EDITOR_SRC "${EDITOR_ROOT}/__dummy_editor.cpp")
 endif()
 
 add_executable(${EDITOR_NAME} ${EDITOR_SRC})
 
-target_compile_definitions(MyEditor PUBLIC ENABLE_EDITOR)
+target_compile_definitions(PulseEditor PUBLIC ENABLE_EDITOR)
 
 target_link_libraries(${EDITOR_NAME}
     PRIVATE
@@ -89,15 +89,15 @@ endif()
 
 message(STATUS "[${EDITOR_NAME}] sources: ${EDITOR_SRC}")
 # Debug DLL
-add_custom_command(TARGET MyEditor POST_BUILD
+add_custom_command(TARGET PulseEditor POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmodL.dll"
-    $<TARGET_FILE_DIR:MyEditor>
+    $<TARGET_FILE_DIR:PulseEditor>
 )
 
 # Release DLL
-add_custom_command(TARGET MyEditor POST_BUILD
+add_custom_command(TARGET PulseEditor POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmod.dll"
-    $<TARGET_FILE_DIR:MyEditor>
+    $<TARGET_FILE_DIR:PulseEditor>
 )

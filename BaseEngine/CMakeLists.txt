@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required(VERSION 3.20)
-project(MyEngine VERSION 0.1 LANGUAGES C CXX)
+project(PulseEngine VERSION 0.1 LANGUAGES C CXX)
 set(JSON_BuildTests OFF CACHE BOOL "Disable nlohmann_json tests" FORCE)
 set(RAPIDJSON_BUILD_TESTS    OFF CACHE BOOL "Disable RapidJSON tests"    FORCE)
 set(RAPIDJSON_BUILD_EXAMPLES OFF CACHE BOOL "Disable RapidJSON examples" FORCE)
@@ -65,36 +65,36 @@ target_link_libraries(imgui_backend PRIVATE imgui glfw)
 set_property(TARGET imgui_backend PROPERTY FOLDER "3rdparty/ImGui")
 
 # --- Projects ---
-add_subdirectory(MyEngine)
+add_subdirectory(PulseEngine)
 
 option(ENABLE_EDITOR "Build the Editor executable" ON)
 message(STATUS "ENABLE_EDITOR = ${ENABLE_EDITOR}")
 
 if (ENABLE_EDITOR)
-    add_subdirectory(MyEditor)
-    target_link_libraries(MyEditor PRIVATE MyEngine)
-    target_compile_definitions(MyEngine PUBLIC ENABLE_EDITOR)
-    target_compile_definitions(MyEditor PUBLIC ENABLE_EDITOR)
+    add_subdirectory(PulseEditor)
+    target_link_libraries(PulseEditor PRIVATE PulseEngine)
+    target_compile_definitions(PulseEngine PUBLIC ENABLE_EDITOR)
+    target_compile_definitions(PulseEditor PUBLIC ENABLE_EDITOR)
 else()
     # Build game only
-    add_subdirectory(MyGame)
+    add_subdirectory(PulseProtocol)
 endif()
 # Keep app targets OUTSIDE any folder
-if(TARGET MyEngine)
-    set_property(TARGET MyEngine PROPERTY FOLDER "")
+if(TARGET PulseEngine)
+    set_property(TARGET PulseEngine PROPERTY FOLDER "")
 endif()
-if(TARGET MyEditor)
-    set_property(TARGET MyEditor PROPERTY FOLDER "")
+if(TARGET PulseEditor)
+    set_property(TARGET PulseEditor PROPERTY FOLDER "")
 endif()
-if(TARGET MyGame)
-    set_property(TARGET MyGame PROPERTY FOLDER "")
+if(TARGET PulseProtocol)
+    set_property(TARGET PulseProtocol PROPERTY FOLDER "")
 endif()
 
 # -------------------------------
 # Visual Studio startup project
 # -------------------------------
 if (ENABLE_EDITOR)
-    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MyEditor)
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT PulseEditor)
 else()
-    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MyGame)
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT PulseProtocol)
 endif()
