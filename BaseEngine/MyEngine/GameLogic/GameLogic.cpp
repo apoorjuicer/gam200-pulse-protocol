@@ -36,7 +36,7 @@ bool g_countdownFinished = false;
 
 // ===== GLOBAL STATIC TRACKING FOR ENEMY ORDER =====
 Entity g_firstEnemy = (Entity)-1;
-Entity g_secondEnemy = (Entity)-1;
+Entity g_secondEnemy = (Entity)-1;  
 bool   g_lockDetection = false;
 
 LogicSystem::LogicSystem()
