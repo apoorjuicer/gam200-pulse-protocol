@@ -75,6 +75,7 @@ private:
     double lastBeatTime = 0.0;
     bool inputReceivedOnThisBeat = false;
     int currentCyclePosition = 1;
+    double lastInputTime = 0.0;
 
     std::unordered_map<std::string, InputCallback> inputListeners;
 
