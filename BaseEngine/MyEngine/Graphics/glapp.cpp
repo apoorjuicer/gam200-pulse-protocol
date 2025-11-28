@@ -394,6 +394,11 @@ void GLApp::ComputeLetterbox(int fbw, int fbh)
 	GLApp::GameWidth = vw;
 	GLApp::GameHeight = vh;
 
+	GLHelper::GameOffsetX = GLApp::GameOffsetX;
+	GLHelper::GameOffsetY = GLApp::GameOffsetY;
+	GLHelper::GameWidth = GLApp::GameWidth;
+	GLHelper::GameHeight = GLApp::GameHeight;
+
 	glViewport(GLApp::GameOffsetX, GLApp::GameOffsetY, GLApp::GameWidth, GLApp::GameHeight);
 }
 
