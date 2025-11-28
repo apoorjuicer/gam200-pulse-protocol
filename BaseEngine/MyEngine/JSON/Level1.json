@@ -109,7 +109,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.2759386897087097,
+                        "elapsedTime": 0.46324622631073,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -281,8 +281,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1380.9234619140626,
-                            "y": 694.1539306640625
+                            "x": 1347.077392578125,
+                            "y": 632.615478515625
                         },
                         "scale": {
                             "x": 100.0,
@@ -483,7 +483,7 @@
                             "y": 601.6539306640625
                         },
                         "scale": {
-                            "x": 308.0627746582031,
+                            "x": 322.6033630371094,
                             "y": 42.99285125732422
                         },
                         "rotation": {
@@ -645,7 +645,7 @@
                     "transform": {
                         "position": {
                             "x": -44.30799865722656,
-                            "y": 0.0
+                            "y": -98.46154022216797
                         },
                         "scale": {
                             "x": 200.0,
@@ -718,7 +718,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "font_size": 48.0,
+                        "font_size": 97.0,
                         "color": [
                             1.0,
                             1.0,
@@ -794,7 +794,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -179.69252014160157,
+                            "x": -373.5386047363281,
                             "y": 450.46160888671877
                         },
                         "scale": {
@@ -840,6 +840,12 @@
                     }
                 },
                 {
+                    "prefabInstance": {
+                        "prefabName": "W",
+                        "isLinked": true
+                    }
+                },
+                {
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
@@ -854,7 +860,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 285.5381774902344,
+                            "x": -49.84672546386719,
                             "y": 450.4620056152344
                         },
                         "scale": {
@@ -897,6 +903,12 @@
                 {
                     "name": {
                         "name": "A"
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "A",
+                        "isLinked": true
                     }
                 },
                 {
@@ -962,6 +974,138 @@
                 {
                     "name": {
                         "name": "Feedback"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 235.69207763671876,
+                            "y": 450.46160888671877
+                        },
+                        "scale": {
+                            "x": 95.0,
+                            "y": 95.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/W.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "W"
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "W",
+                        "isLinked": true
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 547.0765991210938,
+                            "y": 450.4620056152344
+                        },
+                        "scale": {
+                            "x": 96.0,
+                            "y": 96.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../MyEngine/Assets/Textures/UI/A.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "A"
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "A",
+                        "isLinked": true
                     }
                 },
                 {
