@@ -2,7 +2,8 @@
 /**
  * @file        Transform.cpp
  * @project     Pulse Protocol
- * @author      Goh Pin Kai
+ * @author      Goh Pin Kai (primary) - 90%
+ * @author 		Ban Kai Wei Benjamin (secondary) - 10%
  * @brief       Implements the Transform component, providing position,
  *              scale, rotation, animation, and sprite management. Includes
  *              update logic for entity transforms, matrix composition,

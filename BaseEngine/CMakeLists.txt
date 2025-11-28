@@ -98,3 +98,19 @@ if (ENABLE_EDITOR)
 else()
     set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MyGame)
 endif()
+
+# -------------------------------
+# Hide console window in Release for MyGame
+# Show console in Debug
+# -------------------------------
+if (WIN32)
+
+    if (TARGET MyGame)
+        target_link_options(MyGame PRIVATE 
+            "$<$<CONFIG:Debug>:/SUBSYSTEM:CONSOLE>"
+            "$<$<CONFIG:Release>:/SUBSYSTEM:WINDOWS>"
+        )
+    endif()
+
+endif()
+
