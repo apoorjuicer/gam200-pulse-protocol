@@ -394,7 +394,14 @@ namespace MyEditor
         // ================================
         // GLOBAL SHORTCUT (Undo)
         // ================================
-        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z))
+        bool ctrlDown =
+            glfwGetKey(s_Window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
+            glfwGetKey(s_Window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
+
+        static bool prevZ = false;
+        bool currZ = (glfwGetKey(s_Window, GLFW_KEY_Z) == GLFW_PRESS);
+
+        if (ctrlDown && currZ && !prevZ)
         {
            // std::cout << "[Editor] CTRL+Z pressed in editor\n";
 
@@ -403,6 +410,8 @@ namespace MyEditor
                 mUndo.Undo();
             }        
         }
+        prevZ = currZ;
+
         // --- Clamp layout ratios
         s_top_ratio = clamp_val(s_top_ratio, MIN_RATIO_H, MAX_TOTAL_VERT);
         s_bottom_ratio = clamp_val(s_bottom_ratio, MIN_RATIO_H, MAX_TOTAL_VERT);

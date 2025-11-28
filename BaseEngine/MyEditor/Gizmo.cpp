@@ -40,6 +40,7 @@ namespace MyEditor
     static bool s_gizmoEditing = false;
     static Framework::Transform s_gizmoBeforeEdit;
     static Entity s_gizmoEntity = INVALID_ENTITY;
+    GLFWwindow* window;
     // -------------------------------------------------------------------------
     // Internal state & constants
     // -------------------------------------------------------------------------
@@ -533,7 +534,7 @@ namespace MyEditor
        // CAMERA PAN 
        // -----------------------------------------------------------------------------
         {
-            GLFWwindow* window = glfwGetCurrentContext();
+            window = glfwGetCurrentContext();
             ImGuiIO& io = ImGui::GetIO();
 
             //-----------------------------------------
@@ -993,7 +994,7 @@ namespace MyEditor
         // ---------------------------------------------------------------------
         // DELETE KEY
         // ---------------------------------------------------------------------
-        if (selectedEntity != INVALID_ENTITY && ImGui::IsKeyPressed(ImGuiKey_Delete))
+        if (selectedEntity != INVALID_ENTITY && glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS)
         {
 
             Entity toDelete = selectedEntity;
