@@ -22,12 +22,11 @@
 #//include <pch/pch.h>
 //#include "../MyEngine/CoreEngine/ECS/Types.h" // ensures Entity/Signature are known  <-- (from Types.h)
 #include <rapidjson/ostreamwrapper.h>
-#include <rapidjson/document.h>     // for Document, Value, AllocatorType
+//#include <rapidjson/document.h>     // for Document, Value, AllocatorType in pch tmp
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h> // for StringBuffer
-#include <string>
-#include <filesystem>
+#include "pch/pch_temp.h"
 
 
 class Config
@@ -36,25 +35,13 @@ private:
 	int WindowWidth = 0;
 	int WindowHeight = 0;
 	std::string ConfigPath = "../../MyEngine/JSON/config.json";
-
 public:
-	int GetWindowWidth() const
-	{
-		return WindowWidth;
-	}
-	int GetWindowHeight() const
-	{
-		return WindowHeight;
-	}
-	std::string GetConfigPath() const
-	{
-		return ConfigPath;
-	}
-
-	void SetWindowWidth(int w) { WindowWidth = w; }
-	void SetWindowHeight(int h) { WindowHeight = h; }
-	void SetConfigPath(std::string path) { ConfigPath = std::move(path); }
-
+	int GetWindowWidth() const;
+	int GetWindowHeight() const;
+	std::string GetConfigPath() const;
+	void SetWindowWidth(int w);
+	void SetWindowHeight(int h);
+	void SetConfigPath(std::string path);
 	void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
 	void Deserialize(const rapidjson::Value &in);
 };

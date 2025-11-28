@@ -4,13 +4,13 @@
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
  * @brief       Declares the PrefabManager class for managing reusable entity templates.
- *
- *              UPDATED:
  *              - Added CanSaveAsPrefab() - checks if entity can be saved
  *              - Added GetBlockReason() - returns reason why entity cannot be saved
  *              - Blocks '_' prefix entities (engine-managed), allows game text
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
 

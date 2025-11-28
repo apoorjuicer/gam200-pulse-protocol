@@ -2,9 +2,10 @@
 /**
  * @file        GameLogic.cpp
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael (primary) - 60%
+ * @author		Chia Wei Xuan Rachael (primary) - 50%
  * @author		Reginald Lew Yee Ren (secondary) - 20%
  * @author		Chloe Lau Rey En (secondary) - 20%
+ * @author		Goh Pin Kai (secondary) - 10%
  *
  * @brief		Core Components:
  *              - LogicSystem: Manages script registration, lifecycle (Init/Update/Exit),
@@ -36,7 +37,7 @@ bool g_countdownFinished = false;
 
 // ===== GLOBAL STATIC TRACKING FOR ENEMY ORDER =====
 Entity g_firstEnemy = (Entity)-1;
-Entity g_secondEnemy = (Entity)-1;
+Entity g_secondEnemy = (Entity)-1;  
 bool   g_lockDetection = false;
 
 LogicSystem::LogicSystem()
@@ -274,12 +275,66 @@ void PlayerScript::Init(Entity ID)
             anim.totalFrames = 3;
             anim.columns = 3;
             anim.rows = 1;
-            anim.animationSpeed = 240.0f;
+            anim.animationSpeed = 8.0f;
             anim.currentFrame = 0;
             anim.elapsedTime = 0.0f;
 
             isAttacking = true;
             attackTimer = 0.5f;
+
+            // === KILL THE ACTIVE ENEMY ===
+            extern Entity g_firstEnemy;
+            extern Entity g_secondEnemy;
+
+            Entity targetEnemy = (Entity)-1;
+
+            // Kill first enemy if alive, otherwise kill second
+            if (g_firstEnemy != (Entity)-1 && c->HasComponent<Health>(g_firstEnemy))
+            {
+                auto& hp = c->GetComponent<Health>(g_firstEnemy);
+                if (hp.isAlive)
+                {
+                    targetEnemy = g_firstEnemy;
+                }
+            }
+
+            if (targetEnemy == (Entity)-1 && g_secondEnemy != (Entity)-1 && c->HasComponent<Health>(g_secondEnemy))
+            {
+                auto& hp = c->GetComponent<Health>(g_secondEnemy);
+                if (hp.isAlive)
+                {
+                    targetEnemy = g_secondEnemy;
+                }
+            }
+
+            // Delete the enemy
+            if (targetEnemy != (Entity)-1)
+            {
+                if (c->HasComponent<Health>(targetEnemy))
+                {
+                    c->GetComponent<Health>(targetEnemy).isAlive = false;
+                }
+
+                Factory factory;
+                factory.DeleteEntity(targetEnemy);
+
+                // Check if ALL enemies are now dead -> GameWin
+                bool firstDead = (g_firstEnemy == (Entity)-1) ||
+                    !c->HasComponent<Health>(g_firstEnemy) ||
+                    !c->GetComponent<Health>(g_firstEnemy).isAlive;
+                bool secondDead = (g_secondEnemy == (Entity)-1) ||
+                    !c->HasComponent<Health>(g_secondEnemy) ||
+                    !c->GetComponent<Health>(g_secondEnemy).isAlive;
+
+                if (firstDead && secondDead)
+                {
+                    auto sceneMgr = c->GetSystem<SceneManager>();
+                    if (sceneMgr)
+                    {
+                        sceneMgr->CurrentScene = "GameWin";
+                    }
+                }
+            }
         });
 }
 
@@ -313,7 +368,7 @@ void PlayerScript::Update(Entity ID)
                 anim.totalFrames = 2;
                 anim.columns = 2;
                 anim.rows = 1;
-                anim.animationSpeed = 60.0f;
+                anim.animationSpeed = 2.0f;
                 anim.currentFrame = 0;
                 anim.elapsedTime = 0.0f;
             }
@@ -591,6 +646,14 @@ void EnemyScript::Update(Entity ID)
 
             Factory factory;
             factory.DeleteEntity(ID);
+
+            // Enemy hit player change to GameLose
+            auto sceneMgr = g->GetSystem<SceneManager>();
+            if (sceneMgr)
+            {
+                sceneMgr->CurrentScene = "GameLose";
+            }
+
             return;
         }
     }
@@ -1240,6 +1303,9 @@ void ButtonScript::Update(Entity ID)
             std::cout << "[ButtonScript] Settings not implemented yet" << std::endl;
         }
         else if (data.buttonName == "BackBtn") {
+            sceneMgr->CurrentScene = "MainMenu";
+        }
+        else if (data.buttonName == "RestartBtn") {
             sceneMgr->CurrentScene = "MainMenu";
         }
         else if (data.buttonName == "QuitBtn") {

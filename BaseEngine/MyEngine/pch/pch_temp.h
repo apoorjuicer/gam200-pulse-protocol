@@ -2,7 +2,7 @@
 /**
  * @file        pch_temp.h
  * @project     Pulse Protocol
- * @author      Chia Wei Xuan Rachael - 100%
+ * @author      Chia Wei Xuan Rachael
  * @brief       This is a precompiled header file that centralizes all and only standard library,
  *				and external library, for optimized
  *				compilation. We do this to make code clean and organization. :]

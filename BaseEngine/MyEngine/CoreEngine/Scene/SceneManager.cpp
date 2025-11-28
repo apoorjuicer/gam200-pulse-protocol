@@ -2,7 +2,7 @@
 /**
  * @file       SceneManager.cpp
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael - 95%
+ * @author     Chia Wei Xuan Rachael (primary) - 95%
  * @author     Goh Pin Kai (secondary) - 5%
  * @brief      Manages scene lifecycle, serialization, and entity ownership across
  *             game scenes (MainMene and level1 for now) .
@@ -387,9 +387,8 @@ void SceneManager::UnloadCurrentScene()
 		}
 	}
 
-	std::cout << "[SceneManager] Entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
-	std::cout << "[SceneManager] Total entities before unload: "
-		<< g_coordinator->GetAllEntities().size() << std::endl;
+	//std::cout << "[SceneManager] Entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
+	//std::cout << "[SceneManager] Total entities before unload: " << g_coordinator->GetAllEntities().size() << std::endl;
 
 	for (auto const& entity : SceneEntityList)
 	{

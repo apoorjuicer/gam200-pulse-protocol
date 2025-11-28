@@ -2,7 +2,8 @@
 /**
  * @file        InputManager.cpp
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En - 80%
+ * @author      Goh Pin Kai - 20%
  * @brief       Implements the InputManager system, handling GLFW-based
  *              keyboard input for rhythm gameplay. Provides real-time input
  *              state tracking, combo detection, rhythm timing feedback,

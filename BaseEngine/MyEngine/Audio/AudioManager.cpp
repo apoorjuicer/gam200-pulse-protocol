@@ -189,7 +189,7 @@ void AudioManager::Initialize()
     }
 
     std::string tf = IsBGMPlaying() ? "true" : "false";
-    std::cout << "[AudioManager] Playing bgm? " << tf << "\n";
+    //std::cout << "[AudioManager] Playing bgm? " << tf << "\n";
     // PlaySound("beat_placeholder");
     std::cout << "[AudioManager] AudioManager initialization completed with mixers.\n";
 
@@ -594,7 +594,7 @@ bool AudioManager::UnloadAudio(std::string const &id)
         return true;
     }
 
-    // Otherwise, check if it�s the currently loaded BGM
+    // Otherwise, check if it's the currently loaded BGM
     if (mCurrentBGM && id == "bgm")
     {
         if (mCurrentBGMCh)
