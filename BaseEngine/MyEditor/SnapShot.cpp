@@ -3,8 +3,8 @@
  * @file        SnapShot.cpp
  * @project     Pulse Protocol
  * @author      Ban Kai Wei Benjamin
- * @brief       contains function to "snapshot" entity before deleting
- *
+ * @brief       contains function to "snapshot" save an entity before deleting
+ *              so we can restore the entity when we undo
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
@@ -22,9 +22,9 @@ namespace MyEditor
         auto* g = Coordinator::GetInstance();
         if (!g || e == INVALID_ENTITY)
             return snap;
-
         if (g->HasComponent<Framework::Transform>(e))
         {
+            
             snap.hasTransform = true;
             snap.transform_snap = g->GetComponent<Framework::Transform>(e);
         }
@@ -95,6 +95,12 @@ namespace MyEditor
             snap.text_snap = g->GetComponent<TextComponent>(e);
         }
 
+        if (g->HasComponent<PrefabInstance>(e))
+        {
+            snap.hasPrefabInstance = true;
+            snap.prefabinstance_snap = g->GetComponent<PrefabInstance>(e);
+        }
+
         return snap;
     }
     Entity CreateEntityFromEntitySnapshot(EntitySnapshot const& snap)
@@ -103,17 +109,14 @@ namespace MyEditor
         if (!g)
             return INVALID_ENTITY;
 
-        Factory factory;
-        // Uses your existing default setup:
-        //  - CreateEntity()
-        //  - default Transform/Renderable/Animation/Name/LayerTag
-        //  - SceneManager::IncrementEntityArray
-        Entity e = factory.DefaultObj();
-        if (e == INVALID_ENTITY)
-            return INVALID_ENTITY;
+        // Restore using ORIGINAL ID
+        Entity e = g->CreateEntityWithID(snap.originalEntity);
+
+        // If the ID cannot be revived, bail out
+        if (e >= MaxEntity)      // ECS-side "invalid"
+            return INVALID_ENTITY; // editor-side "invalid"
 
         // Now overwrite / add components using the snapshot
-
         if (snap.hasTransform)
         {
             if (g->HasComponent<Framework::Transform>(e))
@@ -210,7 +213,24 @@ namespace MyEditor
                 g->AddComponent<TextComponent>(e, snap.text_snap);
         }
 
+        if (snap.hasPrefabInstance)
+        {
+            if (g->HasComponent<PrefabInstance>(e))
+                g->GetComponent<PrefabInstance>(e) = snap.prefabinstance_snap;
+            else
+                g->AddComponent<PrefabInstance>(e, snap.prefabinstance_snap);
+        }
+
+
         return e;
     }
+
+    //void printsnapshot(EntitySnapshot snap) {
+    //    std::cout << "snap hasTransform?" << snap.hasTransform << "\n";
+    //    std::cout << "snap hasRenderable?" << snap.hasRenderable << "\n";
+    //    std::cout << "snap hasAnimation?" << snap.hasAnimation << "\n";
+    //    std::cout << "snap hasNPC?" << snap.hasNPC << "\n";
+    //    std::cout << "snap hasAABB?" << snap.hasAABB << "\n";
+    //}
 }
 

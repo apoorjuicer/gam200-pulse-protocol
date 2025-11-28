@@ -284,7 +284,7 @@ namespace MyEditor
         {
 
             // Remember what was selected BEFORE creating the new object
-            Entity prevSelected = selectedEntity;
+           Entity prevSelected = selectedEntity;
 
             Factory factory;
             Entity newEntity = factory.DefaultObj();
@@ -299,20 +299,22 @@ namespace MyEditor
                 // UNDO: delete the entity again and restore previous selection
                 // ------------------------------------------------------------
                 //c
-                mUndo.Push([newEntity, prevSelected]() {
+                mUndo.Push([newEntity,prevSelected]() {
                     // Remove from display order if still present
                     //find new entity in the container entityDisplayOrder
-                    auto it = std::find(entityDisplayOrder.begin(),
-                        entityDisplayOrder.end(),
-                        newEntity);
+                    Coordinator* coord = Coordinator::GetInstance();
+                    if (!coord)
+                        return;
 
-                    //if found erase it
-                    if (it != entityDisplayOrder.end())
-                        entityDisplayOrder.erase(it);
+                    // Remove ALL occurrences of this entity from the hierarchy list
+                    entityDisplayOrder.erase(
+                        std::remove(entityDisplayOrder.begin(),
+                            entityDisplayOrder.end(),
+                            newEntity),
+                        entityDisplayOrder.end());
 
-                    // Delete from ECS 
-                    Factory factory2; //did not capture factory
-                    factory2.DeleteEntity(newEntity);
+                    // Destroy the entity for real (no factory)
+                    coord->DestroyEntity(newEntity);
 
                     // Restore previous selection
                     selectedEntity = prevSelected;
@@ -327,50 +329,6 @@ namespace MyEditor
         // Buttons that require selection
         ImGui::BeginDisabled(selectedEntity == INVALID_ENTITY);
 
-        //// [^] Create Above Selected
-        //if (ImGui::Button("^"))
-        //{
-        //    Factory factory;
-        //    Entity newEntity = factory.DefaultObj();
-
-        //    if (newEntity != INVALID_ENTITY)
-        //    {
-        //        auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
-        //        if (it != entityDisplayOrder.end())
-        //            entityDisplayOrder.insert(it, newEntity);
-        //        else
-        //            entityDisplayOrder.push_back(newEntity);
-
-        //        selectedEntity = newEntity;
-        //    }
-        //}
-        //if (ImGui::IsItemHovered())
-        //    ImGui::SetTooltip("Create Above Selected");
-
-        //ImGui::SameLine();
-
-        //// [v] Create Below Selected
-        //if (ImGui::Button("v"))
-        //{
-        //    Factory factory;
-        //    Entity newEntity = factory.DefaultObj();
-
-        //    if (newEntity != INVALID_ENTITY)
-        //    {
-        //        auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
-        //        if (it != entityDisplayOrder.end())
-        //            entityDisplayOrder.insert(it + 1, newEntity);
-        //        else
-        //            entityDisplayOrder.push_back(newEntity);
-
-        //        selectedEntity = newEntity;
-        //    }
-        //}
-        //if (ImGui::IsItemHovered())
-        //    ImGui::SetTooltip("Create Below Selected");
-
-        //ImGui::SameLine();
-
         // [X] Delete Selected Entity
         // Undo
         if (ImGui::Button("X"))
@@ -379,13 +337,12 @@ namespace MyEditor
             {
                 Entity toDelete = selectedEntity;
 
+                EntitySnapshot snap = MakeEntitySnapshot(toDelete);
+                int index = -1;
+
                 auto it = std::find(entityDisplayOrder.begin(),
                     entityDisplayOrder.end(), 
                     selectedEntity);
-
-                // --- SNAPSHOT BEFORE DELETING ---
-                EntitySnapshot snap = MakeEntitySnapshot(toDelete);
-                int index = -1;
 
                 //delete the entity
                 if (it != entityDisplayOrder.end())
