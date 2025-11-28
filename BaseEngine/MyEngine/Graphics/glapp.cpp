@@ -26,12 +26,15 @@ namespace fs = std::filesystem;
 
 static std::string LoadFile(const char* relativeToGraphicsShader)
 {
-	fs::path here = fs::path(__FILE__).parent_path(); // ...\MyEngine\Graphics
-	fs::path full = here / "shader" / relativeToGraphicsShader;
+	//fs::path here = fs::path(__FILE__).parent_path(); // ...\MyEngine\Graphics
+	fs::path here = fs::current_path(); // the folder where MyGame.exe is
+	std::cout << here.string();
+	//fs::path full = here / "shader" / relativeToGraphicsShader;
+	fs::path full = here.parent_path().parent_path() / "MyEngine/Graphics/shader" / relativeToGraphicsShader;
 	std::ifstream f(full, std::ios::binary);
 	if (!f)
 	{
-		std::cerr << "[Shader] Open failed: " << full << "\n";
+		std::cerr << "[Shader] Ope n failed: " << full << "\n";
 		return {};
 	}
 	std::ostringstream ss;
