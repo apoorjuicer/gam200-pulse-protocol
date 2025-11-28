@@ -363,13 +363,6 @@ namespace MyEditor
         s_frameStarted = true;
     }
 
-
-    
-
-
-
-
-
     void Draw() {
 
         int display_w, display_h;

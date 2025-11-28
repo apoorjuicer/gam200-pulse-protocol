@@ -202,7 +202,6 @@ public:
 		float     maxZoom{ 2.0f };
 	};
 
-	static Camera2D gCamera;
 	static Camera2D gEditorCamera;   // used only in editor
 	static Camera2D gGameCamera;     // used only during Play
 

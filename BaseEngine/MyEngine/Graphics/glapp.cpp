@@ -53,7 +53,6 @@ double random()
 	return static_cast<double>((rand() % 10) / 10.0f);
 }
 
-GLApp::Camera2D GLApp::gCamera{};
 GLApp::Camera2D GLApp::gEditorCamera{};
 GLApp::Camera2D GLApp::gGameCamera{};
 
@@ -160,7 +159,7 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 
 void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 
-	glm::mat3 PanZoom = BuildPanZoomNDC(gCamera);
+	glm::mat3 PanZoom = BuildPanZoomNDC(gEditorCamera);
 
 	// Build final camera matrix from the active camera
 	//glm::mat3 PanZoom = BuildPanZoomNDC(activeCam);

@@ -588,8 +588,6 @@ namespace MyEditor
                     double dx = curX - lastX;
                     double dy = curY - lastY;
 
-                    GLApp::gCamera.center.x += float(2.0 * dx / double(vp.w));
-                    GLApp::gCamera.center.y -= float(2.0 * dy / double(vp.h));
                     GLApp::gEditorCamera.center.x += float(2.0 * dx / double(vp.w));
                     GLApp::gEditorCamera.center.y -= float(2.0 * dy / double(vp.h));
 
@@ -600,25 +598,24 @@ namespace MyEditor
             lastY = curY;
 
             // -------------------- Scroll wheel zoom (editor camera) -------------
-            //float wheel = static_cast<float>(g_scrollY);
-            //g_scrollY = 0.0f;
-            //auto& activeCam = GLApp::gEditorCamera;
+            float wheel = ImGui::GetIO().MouseWheel;
+            auto& activeCam = GLApp::gEditorCamera;
 
+            // Only zoom in editor mode, and only if mouse is over the game viewport
+            if (!MyEditor::IsPlaying() && allowCamera && wheel != 0.0f)
+            {
+                const float oldZ = activeCam.zoom;
+                const float step = 1.12f;
 
-            //if (allowCamera && wheel != 0.0f)
-            //{
-            //    const float oldZ = activeCam.zoom;
-            //    const float step = 1.12f;
+                float newZ = glm::clamp(
+                    oldZ * std::pow(step, wheel),
+                    activeCam.minZoom,
+                    activeCam.maxZoom
+                );
 
-            //    float newZ = glm::clamp(oldZ * std::pow(step, wheel),
-            //        activeCam.minZoom,
-            //        activeCam.maxZoom);
-
-            //    // Zoom around mouse position
-            //    glm::vec2 cNDC = GLApp::ScreenToNDC(curX, curY);
-            //    activeCam.center = cNDC - (newZ / oldZ) * (cNDC - activeCam.center);
-            //    activeCam.zoom = newZ;
-            //}
+                // Simple zoom around the current camera center
+                activeCam.zoom = newZ;
+            }
 
 
         }
