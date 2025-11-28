@@ -223,6 +223,11 @@ namespace MyEditor
                 g->AddComponent<PrefabInstance>(e, snap.prefabinstance_snap);
         }
 
+        // At end of CreateEntityFromEntitySnapshot(), before return e;
+        auto sceneManager = g->GetSystem<SceneManager>();
+        if (sceneManager) {
+            sceneManager->IncrementEntityArray(e);
+        }
 
         return e;
     }
