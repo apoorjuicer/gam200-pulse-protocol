@@ -927,7 +927,6 @@ namespace MyEditor
         {
 
             Entity toDelete = selectedEntity;
-            Coordinator *coord = Coordinator::GetInstance();
             if (!coord)
                 return;
 

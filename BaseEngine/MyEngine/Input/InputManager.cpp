@@ -232,9 +232,9 @@ void InputManager::processDebugToggles() {
 		}
 	}
 
-	if (isKeyTriggered(GLFW_KEY_F7)) {
-		stressToggleRequested = true;
-	}
+	//if (isKeyTriggered(GLFW_KEY_F7)) {
+	//	stressToggleRequested = true;
+	//}
 
 	// F8: Toggle debug overlay (FPS counter, performance stats)
 	if (isKeyTriggered(GLFW_KEY_F8)) {

@@ -59,11 +59,11 @@ public:
 	bool isDebugCirclesFilledEnabled() const { return debugCirclesFilledEnabled; }
 	bool isDebugPointsEnabled() const { return debugPointsEnabled; }
 	bool isDebugGridEnabled() const { return debugGridEnabled; }
-	bool ConsumeStressToggleRequest() {
-		bool out = stressToggleRequested;
-		stressToggleRequested = false;
-		return out;
-	}
+	//bool ConsumeStressToggleRequest() {
+	//	bool out = stressToggleRequested;
+	//	stressToggleRequested = false;
+	//	return out;
+	//}
 
 	std::set<Entity> DebugEntities;
 

@@ -737,120 +737,120 @@ void CoreEngine::RenderDebugDraw()
 		}
 	}
 
-	// ---------------------------------------------------------------------
-	// F7: spawn/delete 1,000 moving sprites (hero)
-	// ---------------------------------------------------------------------
-	static std::vector<Entity>                   s_stressEntities;
-	static std::unordered_map<Entity, glm::vec2> s_velocity;
-	static double s_lastTick = glfwGetTime();
+	//// ---------------------------------------------------------------------
+	//// F7: spawn/delete 1,000 moving sprites (hero)
+	//// ---------------------------------------------------------------------
+	//static std::vector<Entity>                   s_stressEntities;
+	//static std::unordered_map<Entity, glm::vec2> s_velocity;
+	//static double s_lastTick = glfwGetTime();
 
-	// to fix warnings, previously using same variables 2 times
-	float stressWorldH = 900.0f;
-	float stressAspect = (WindowHeight > 0) ? float(WindowWidth) / float(WindowHeight) : (16.0f / 9.0f);
-	float stressWorldW = stressWorldH * stressAspect;
+	//// to fix warnings, previously using same variables 2 times
+	//float stressWorldH = 900.0f;
+	//float stressAspect = (WindowHeight > 0) ? float(WindowWidth) / float(WindowHeight) : (16.0f / 9.0f);
+	//float stressWorldW = stressWorldH * stressAspect;
 
-	if (g_inputSystem->ConsumeStressToggleRequest())
-	{
-		if (!s_stressEntities.empty())
-		{
-			Factory factory;
-			for (Entity e : s_stressEntities) factory.DeleteEntity(e);
-			s_stressEntities.clear();
-			s_velocity.clear();
-			std::cout << "[StressTest] Deleted spawned entities (F7)\n";
-		}
-		else
-		{
-			// Resolve the real path for the 'hero' texture via the registry
-			const std::string heroPath = mAssets.GetTexturePath("hero");  // e.g. ".../Textures/Characters/hero.png"
-			const GLuint sharedTex = mAssets.GetOrLoadTexture(heroPath);  // goes through GraphicsManager cache
-			if (!sharedTex) {
-				std::cerr << "[StressTest] Failed to load texture: " << heroPath << "\n";
-			}
+	//if (g_inputsystem->consumestresstogglerequest())
+	//{
+	//	if (!s_stressentities.empty())
+	//	{
+	//		factory factory;
+	//		for (entity e : s_stressentities) factory.deleteentity(e);
+	//		s_stressentities.clear();
+	//		s_velocity.clear();
+	//		std::cout << "[stresstest] deleted spawned entities (f7)\n";
+	//	}
+	//	else
+	//	{
+	//		// resolve the real path for the 'hero' texture via the registry
+	//		const std::string heropath = massets.gettexturepath("hero");  // e.g. ".../textures/characters/hero.png"
+	//		const gluint sharedtex = massets.getorloadtexture(heropath);  // goes through graphicsmanager cache
+	//		if (!sharedtex) {
+	//			std::cerr << "[stresstest] failed to load texture: " << heropath << "\n";
+	//		}
 
-			//const float worldH = 900.0f;
-			//const float aspect = (WindowHeight > 0)
-			//	? float(WindowWidth) / float(WindowHeight)
-			//	: (16.0f / 9.0f);
-			//const float worldW = worldH * aspect;
+	//		//const float worldh = 900.0f;
+	//		//const float aspect = (windowheight > 0)
+	//		//	? float(windowwidth) / float(windowheight)
+	//		//	: (16.0f / 9.0f);
+	//		//const float worldw = worldh * aspect;
 
-			std::mt19937 rng{ std::random_device{}() };
-			std::uniform_real_distribution<float> posX(-stressWorldW, stressWorldW);
-			std::uniform_real_distribution<float> posY(-stressWorldH, stressWorldH);
-			std::uniform_real_distribution<float> vel(-220.0f, 220.0f);
-			std::uniform_real_distribution<float> size(28.0f, 64.0f);
+	//		std::mt19937 rng{ std::random_device{}() };
+	//		std::uniform_real_distribution<float> posx(-stressworldw, stressworldw);
+	//		std::uniform_real_distribution<float> posy(-stressworldh, stressworldh);
+	//		std::uniform_real_distribution<float> vel(-220.0f, 220.0f);
+	//		std::uniform_real_distribution<float> size(28.0f, 64.0f);
 
-			s_stressEntities.reserve(1000);
-			for (int i = 0; i < 1000; ++i)
-			{
-				Entity e = Factory{}.DefaultObj();
-				s_stressEntities.push_back(e);
+	//		s_stressentities.reserve(1000);
+	//		for (int i = 0; i < 1000; ++i)
+	//		{
+	//			entity e = factory{}.defaultobj();
+	//			s_stressentities.push_back(e);
 
-				// Transform
-				auto& t = g_coordinator->GetComponent<Framework::Transform>(e);
-				t.Pos = { posX(rng), posY(rng) };
-				float s = size(rng);
-				t.Scale = { s, s };
-				t.Rotation = { 0.0f, 0.0f };
+	//			// transform
+	//			auto& t = g_coordinator->getcomponent<framework::transform>(e);
+	//			t.pos = { posx(rng), posy(rng) };
+	//			float s = size(rng);
+	//			t.scale = { s, s };
+	//			t.rotation = { 0.0f, 0.0f };
 
-				// Renderable  USE SPRITE PIPELINE + TEXTURE
-				auto& r = g_coordinator->GetComponent<Framework::Renderable>(e);
-				r.useTexture = (sharedTex != 0);
-				r.textureID = sharedTex;          // GL handle already cached by GM
-				r.spriteName = heroPath;           // use the SAME key string you loaded with
-				r.mdl_ref = 1.0f;               // ? sprite quad model (not background/other model)
-				r.shd_ref = 2.0f;               // ? sprite shader that samples the texture
-				// r.tintColor stays white by default
+	//			// renderable  use sprite pipeline + texture
+	//			auto& r = g_coordinator->getcomponent<framework::renderable>(e);
+	//			r.usetexture = (sharedtex != 0);
+	//			r.textureid = sharedtex;          // gl handle already cached by gm
+	//			r.spritename = heropath;           // use the same key string you loaded with
+	//			r.mdl_ref = 1.0f;               // ? sprite quad model (not background/other model)
+	//			r.shd_ref = 2.0f;               // ? sprite shader that samples the texture
+	//			// r.tintcolor stays white by default
 
-				// Motion
-				s_velocity[e] = { vel(rng), vel(rng) };
-			}
+	//			// motion
+	//			s_velocity[e] = { vel(rng), vel(rng) };
+	//		}
 
-			std::cout << "[StressTest] Spawned 1000 entities with texture: " << heroPath << " (F7)\n";
-		}
-	}
+	//		std::cout << "[stresstest] spawned 1000 entities with texture: " << heropath << " (f7)\n";
+	//	}
+	//}
 
-	if (!s_stressEntities.empty())
-	{
-		const double now = glfwGetTime();
-		const float dt = float(now - s_lastTick);
-		s_lastTick = now;
+	//if (!s_stressentities.empty())
+	//{
+	//	const double now = glfwgettime();
+	//	const float dt = float(now - s_lasttick);
+	//	s_lasttick = now;
 
-		//const float worldH = 900.0f;
-		//const float aspect = (WindowHeight > 0)
-		//	? float(WindowWidth) / float(WindowHeight)
-		//	: (16.0f / 9.0f);
-		//const float worldW = worldH * aspect;
+	//	//const float worldh = 900.0f;
+	//	//const float aspect = (windowheight > 0)
+	//	//	? float(windowwidth) / float(windowheight)
+	//	//	: (16.0f / 9.0f);
+	//	//const float worldw = worldh * aspect;
 
-		const float left = -stressWorldW;
-		const float right = stressWorldW;
-		const float bottom = -stressWorldH;
-		const float top = stressWorldH;
+	//	const float left = -stressworldw;
+	//	const float right = stressworldw;
+	//	const float bottom = -stressworldh;
+	//	const float top = stressworldh;
 
-		for (Entity e : s_stressEntities)
-		{
-			if (!g_coordinator->HasComponent<Framework::Transform>(e)) continue;
+	//	for (entity e : s_stressentities)
+	//	{
+	//		if (!g_coordinator->hascomponent<framework::transform>(e)) continue;
 
-			auto& t = g_coordinator->GetComponent<Framework::Transform>(e);
-			auto& v = s_velocity[e];
+	//		auto& t = g_coordinator->getcomponent<framework::transform>(e);
+	//		auto& v = s_velocity[e];
 
-			t.Pos.x += v.x * dt;
-			t.Pos.y += v.y * dt;
+	//		t.pos.x += v.x * dt;
+	//		t.pos.y += v.y * dt;
 
-			const float halfW = t.Scale.x * 0.5f;
-			const float halfH = t.Scale.y * 0.5f;
+	//		const float halfw = t.scale.x * 0.5f;
+	//		const float halfh = t.scale.y * 0.5f;
 
-			if (t.Pos.x - halfW < left) { t.Pos.x = left + halfW; v.x = -v.x; }
-			if (t.Pos.x + halfW > right) { t.Pos.x = right - halfW; v.x = -v.x; }
-			if (t.Pos.y - halfH < bottom) { t.Pos.y = bottom + halfH; v.y = -v.y; }
-			if (t.Pos.y + halfH > top) { t.Pos.y = top - halfH; v.y = -v.y; }
-		}
-	}
-	// ---------------------------------------------------------------------
+	//		if (t.pos.x - halfw < left) { t.pos.x = left + halfw; v.x = -v.x; }
+	//		if (t.pos.x + halfw > right) { t.pos.x = right - halfw; v.x = -v.x; }
+	//		if (t.pos.y - halfh < bottom) { t.pos.y = bottom + halfh; v.y = -v.y; }
+	//		if (t.pos.y + halfh > top) { t.pos.y = top - halfh; v.y = -v.y; }
+	//	}
+	//}
+	//// ---------------------------------------------------------------------
 
 
 
-	DebugDraw::End();
+	//debugdraw::end();
 }
 
  void CoreEngine::SetPaused(bool paused)
