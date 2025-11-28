@@ -261,7 +261,7 @@ std::string RhythmGameplayInput::getTimingFeedback()
 
     if (distance <= 0.05)
         return "PERFECT";
-    if (distance <= 0.15)
+    if (distance <= 0.20)
         return "GOOD";
     return "MISS";
 }
