@@ -11,6 +11,10 @@ file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS
 # Make SHARED to be DLL instead of lib
 add_library(${ENGINE_NAME} SHARED ${ENGINE_SRC})
 
+set_target_properties(${ENGINE_NAME} PROPERTIES 
+    VS_GLOBAL_DisableFastUpToDateCheck true
+)
+
 # CRITICAL: Export all symbols automatically
 #set_target_properties(${ENGINE_NAME} PROPERTIES
 #    WINDOWS_EXPORT_ALL_SYMBOLS ON
