@@ -40,7 +40,7 @@ public:
 	void init(/*float inputEditorWidth, float inputEditorHeight*/);
 	//void update(GLFWwindow* window);
 	void update(GLFWwindow* window, std::set<Entity>);
-	void draw(std::set<Entity> entities, int includeMask);
+	void draw(std::set<Entity> entities, LayerMask includeMask);
 	void cleanup();
 
 	GLuint vaoid; // handle to VAO
@@ -201,6 +201,8 @@ public:
 		float     minZoom{ 0.25f };
 		float     maxZoom{ 2.0f };
 	};
+
+	static Camera2D gCamera;
 	static Camera2D gEditorCamera;   // used only in editor
 	static Camera2D gGameCamera;     // used only during Play
 

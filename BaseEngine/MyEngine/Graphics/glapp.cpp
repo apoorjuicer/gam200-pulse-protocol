@@ -53,6 +53,7 @@ double random()
 	return static_cast<double>((rand() % 10) / 10.0f);
 }
 
+GLApp::Camera2D GLApp::gCamera{};
 GLApp::Camera2D GLApp::gEditorCamera{};
 GLApp::Camera2D GLApp::gGameCamera{};
 
@@ -162,7 +163,7 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	glm::mat3 PanZoom = BuildPanZoomNDC(gCamera);
 
 	// Build final camera matrix from the active camera
-	glm::mat3 PanZoom = BuildPanZoomNDC(activeCam);
+	//glm::mat3 PanZoom = BuildPanZoomNDC(activeCam);
 
 	// ========================== REST OF YOUR DRAW ===========================
 	auto* g_coordinator = Coordinator::GetInstance();

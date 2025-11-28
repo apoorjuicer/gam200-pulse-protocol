@@ -12,6 +12,8 @@
  */
  /******************************************************************************/
 #include "SnapShot.h"
+#include "CoreEngine/Factory/Factory.h"
+
 namespace MyEditor
 {
     EntitySnapshot MakeEntitySnapshot(Entity e)

@@ -40,8 +40,8 @@
 #include "CoreEngine/ECS/System.h"
 #include "CoreEngine/Core/ImportExport.h"
 // #include "CoreEngine/ECS/SystemManager.h"
-#include "UI/GUIManager.h"
-#include "UI/UIElement.h"
+//#include "UI/GUIManager.h"
+//#include "UI/UIElement.h"
 
 #include "glapp.h"
 #include <ft2build.h>

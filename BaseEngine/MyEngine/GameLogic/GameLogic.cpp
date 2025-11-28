@@ -1439,9 +1439,9 @@ void Csharptestscript::Init(Entity ID)
     addScript(ID, "TestScript2");	// show that u can run multiple codes and even multiple code for each entity :D
 }
 
-void Csharptestscript::Update(Entity ID){}
+void Csharptestscript::Update(Entity ID){ (void)ID; }
 
-void Csharptestscript::Exit(Entity ID) {}
+void Csharptestscript::Exit(Entity ID) { (void)ID; }
 
 Csharptestscript* Csharptestscript::Clone() {return new Csharptestscript{};}
 
@@ -1515,6 +1515,8 @@ void CountdownScript::Exit(Entity ID)
     (void)ID;
     g_countdownFinished = false;
 }
+
+CountdownScript* CountdownScript::Clone() { return new CountdownScript{}; }
 
 // =====================================================================
 // FEEDBACK SCRIPT (PERFECT/GOOD/MISS images)
@@ -1595,3 +1597,5 @@ void FeedbackScript::Exit(Entity ID)
 {
     (void)ID;
 }
+
+FeedbackScript* FeedbackScript::Clone() { return new FeedbackScript{}; }

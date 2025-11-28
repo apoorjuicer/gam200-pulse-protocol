@@ -174,10 +174,10 @@ public:
 	void Exit(Entity ID) override;
 	Csharptestscript* Clone() override;
 
-private: 
+private:
 	void(*initFunc)(CoreEngine*) = nullptr;
 	bool(*addScript)(int, const char*) = nullptr;
-}
+};
 
 class CountdownScript : public Iscript
 {
@@ -185,6 +185,7 @@ public:
 	void Init(Entity ID) override;
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
+	CountdownScript* Clone() override;
 
 private:
 	float countdownTimer = 0.0f;
@@ -196,6 +197,7 @@ public:
 	void Init(Entity ID) override;
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
+	FeedbackScript* Clone() override;
 
 private:
 	float displayTimer = 0.0f;

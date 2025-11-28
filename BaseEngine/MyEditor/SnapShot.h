@@ -25,7 +25,7 @@
 #include "../MyEngine/GameLogic/GameLogic.h" //LogicComponent
 #include "../MyEngine/Audio/AudioSource.h" //AudioSource
 #include "../MyEngine/Graphics/Text.h" //TextComponent
-
+#include "Editor.h"
 
 namespace MyEditor
 {
