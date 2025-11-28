@@ -3,7 +3,7 @@
  * @file        Inspector.h
  * @project     Pulse Protocol
  * @author      Leu Jun Yong
- * @brief       TBF
+ * @brief       Entity inspector panel for viewing and editing component properties.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

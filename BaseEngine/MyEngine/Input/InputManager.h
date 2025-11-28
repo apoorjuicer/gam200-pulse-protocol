@@ -2,7 +2,8 @@
 /**
  * @file        InputManager.h
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En - 95%
+ * @author      Goh Pin Kai - 5%
  * @brief       Raw input system which handles just the tracking of
 				keyboard and mouse state tracking.
  *              Separated from game logic - just reads input states.

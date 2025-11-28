@@ -2,10 +2,13 @@
 /**
  * @file        Gizmo.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 50%
- * @author      Chloe Lau Rey En (secondary) - 50%
+ * @author      Leu Jun Yong (primary) - 60%
+ * @author      Chloe Lau Rey En (secondary) - 20%
+ * @author      Ban Kai Wei Benjamin (secondary) - 20%
  * @brief       Implements a Unity-style transform gizmo system with move, scale,
  *              and rotate modes for entity manipulation in the editor viewport
+ *              - Undo feature for ImGui::IsKeyPressed(ImGuiKey_Delete) key for entities and 
+ *              - Undo for Gizmo dragging
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

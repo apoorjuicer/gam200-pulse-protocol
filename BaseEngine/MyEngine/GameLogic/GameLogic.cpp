@@ -2,9 +2,10 @@
 /**
  * @file        GameLogic.cpp
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael (primary) - 60%
+ * @author		Chia Wei Xuan Rachael (primary) - 50%
  * @author		Reginald Lew Yee Ren (secondary) - 20%
  * @author		Chloe Lau Rey En (secondary) - 20%
+ * @author		Goh Pin Kai (secondary) - 10%
  *
  * @brief		Core Components:
  *              - LogicSystem: Manages script registration, lifecycle (Init/Update/Exit),
@@ -278,7 +279,7 @@ void PlayerScript::Init(Entity ID)
             anim.totalFrames = 3;
             anim.columns = 3;
             anim.rows = 1;
-            anim.animationSpeed = 240.0f;
+            anim.animationSpeed = 8.0f;
             anim.currentFrame = 0;
             anim.elapsedTime = 0.0f;
 
@@ -371,7 +372,7 @@ void PlayerScript::Update(Entity ID)
                 anim.totalFrames = 2;
                 anim.columns = 2;
                 anim.rows = 1;
-                anim.animationSpeed = 60.0f;
+                anim.animationSpeed = 2.0f;
                 anim.currentFrame = 0;
                 anim.elapsedTime = 0.0f;
             }

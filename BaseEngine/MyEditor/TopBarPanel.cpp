@@ -1,6 +1,16 @@
-// -----------------------------------------------------------------------------
-// TopBarPanel.cpp  -  Editor top toolbar (Play, Pause, Save/Load scene)
-// -----------------------------------------------------------------------------
+/******************************************************************************/
+/**
+ * @file        ProjectPanel.h
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong
+ * @brief       Implements the Top Panel for the editor.
+ *
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
+
 
 #include "pch/pch_temp.h"   // must stay first (PCH)
 
