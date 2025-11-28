@@ -4,7 +4,9 @@
 /**
  * @file        Coordinator.h
  * @project     Pulse Protocol
- * @author      Chia Wei Xuan Rachael
+ * @author      Chia Wei Xuan Rachael (primary) - 97%
+ * @author		Ban Kai Wei Benjamin (secondary) - 3%
+ * 
  * @brief      Central coordinator class implementing the Singleton pattern that
  *             acts as a unified interface for the ECS architecture. Manages
  *             entity creation/destruction, component registration/access, and
@@ -44,6 +46,11 @@ public:
 	Entity CreateEntity()
 	{
 		return CoordEnitiyManager -> CreateEntity();	
+	}
+
+	Entity CreateEntityWithID(Entity id)
+	{
+		return CoordEnitiyManager->CreateEntityWithID(id);
 	}
 
 	void DestroyEntity(Entity entity)

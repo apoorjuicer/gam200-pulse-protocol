@@ -2,7 +2,8 @@
 /**
  * @file       EntityManager.h
  * @project     Pulse Protocol
- * @author      Chia Wei Xuan Rachael
+ * @author      Chia Wei Xuan Rachael (primary) - 97%
+ * @author		Ban Kai Wei Benjamin (secondary) - 3%
  * @brief      Manages entity lifecycle and component signatures in the ECS
  *             architecture. Maintains a pool of reusable entity IDs using a
  *             queue-based allocation system, tracks live entity count, and
@@ -45,6 +46,24 @@ public:
 		++LiveEntityCount;
 
 		return ID;
+	}
+
+	Entity CreateEntityWithID(Entity id)
+	{
+		assert(id < MaxEntity && "Entity out of range.");
+		// Make sure this ID is currently free (i.e., in the queue)
+		auto it = std::find(EntityList.begin(), EntityList.end(), id);
+		if (it == EntityList.end())
+		{
+			//ID not in free list->already alive
+				return static_cast<Entity>(-1);
+		}
+		 //Take this ID out of the free list
+		EntityList.erase(it);
+		++LiveEntityCount;
+		 //Reset signature (should already be reset by RemoveEntity, but this is safe)
+		SignatureID[id].reset();
+		return id;
 	}
 
 	void RemoveEntity(Entity entity)
