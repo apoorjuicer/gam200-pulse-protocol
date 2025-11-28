@@ -26,7 +26,7 @@
 #include "../MyEngine/Audio/AudioSource.h"                //AudioSource
 #include "../MyEngine/Graphics/Text.h"                    //TextComponent
 #include "../MyEngine/CoreEngine/Prefab/PrefabInstance.h" //prefab instance
-
+#include "Editor.h"
 namespace MyEditor
 {
     // struct
