@@ -1020,7 +1020,6 @@ namespace MyEditor
         {
 
             Entity toDelete = selectedEntity;
-            auto *coord = Coordinator::GetInstance();
             if (!coord)
                 return;
 

@@ -47,14 +47,6 @@ static Vector2 ScreenToWorld_ForInput(double fbX, double fbY)
 
 	// --- SAME camera logic as GLApp::draw ---
 	GLApp::Camera2D cam;
-//#ifdef ENABLE_EDITOR
-//	if (MyEditor::IsEnabled() && !MyEditor::IsPlaying())
-//		cam = GLApp::gEditorCamera;
-//	else
-//		cam = GLApp::gGameCamera;
-//#else
-//	cam = GLApp::gGameCamera;
-//#endif
 
 	glm::mat3 camMat = GLApp::BuildPanZoomNDC(cam);
 
