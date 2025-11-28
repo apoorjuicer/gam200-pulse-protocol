@@ -197,7 +197,7 @@ public:
 
 	struct Camera2D {
 		glm::vec2 center{ 0.0f, 0.0f };
-		float zoom = 0.5f; // 0.5f = normal, >0.5 = zoom in, <0.5 = zoom out
+		float zoom = 0.6f; // 0.5f = normal, >0.5 = zoom in, <0.5 = zoom out
 		float     minZoom{ 0.25f };
 		float     maxZoom{ 2.0f };
 	};

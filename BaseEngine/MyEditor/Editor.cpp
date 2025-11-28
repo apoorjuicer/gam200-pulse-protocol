@@ -635,6 +635,10 @@ namespace MyEditor
     {
         // --- Apply viewport ---
         auto glvp = ComputeMiddleGameViewportPixels(s_Window, true);
+        GLHelper::GameOffsetX = glvp.x;
+        GLHelper::GameOffsetY = glvp.y;
+        GLHelper::GameWidth = glvp.w;
+        GLHelper::GameHeight = glvp.h;
         glViewport(glvp.x, glvp.y, glvp.w, glvp.h);
 
         // --- Render ImGui ---

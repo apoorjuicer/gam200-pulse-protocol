@@ -466,6 +466,7 @@ void CoreEngine::Init()
 
 	glewInit();
 
+	GLApp::ComputeLetterbox(fbw, fbh);
 
 	int flags;
 	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
