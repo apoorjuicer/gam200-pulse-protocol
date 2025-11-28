@@ -22,7 +22,7 @@
 #include "Editor.h" // for GameViewport, GizmoState, selectedEntity, INVALID_ENTITY
 #include "Gizmo.h"
 #include "LayerManagerPanel.h" // for IsLayerVisible, IsLayerLocked
-
+#include "Graphics/glapp.h"
 #include "../CoreEngine/ECS/Coordinator.h"
 // #include "../CoreEngine/ECS/Types.h"
 // #include "../Graphics/Transform.h"
@@ -547,53 +547,78 @@ namespace MyEditor
             double curX = io.MousePos.x;
             double curY = io.MousePos.y;
 
-            // Convert UI → framebuffer
             double fbX = 0.0, fbY = 0.0;
             if (winW > 0 && winH > 0)
             {
                 fbX = curX * (double)fbW / (double)winW;
 
-                double normY = curY / (double)winH;  // 0=top,1=bottom
-                fbY = (1.0 - normY) * (double)fbH;   // 0=bottom, fbH=top
+                // ImGui Y=0 at top → framebuffer Y=0 at bottom
+                double normY = curY / (double)winH;
+                fbY = (1.0 - normY) * (double)fbH;
             }
 
             //-----------------------------------------
-            // Allow control ONLY within viewport rect
+            // Convert viewport rect → framebuffer coords
+            // (Y must be flipped because vp.y is from TOP)
             //-----------------------------------------
-            bool allowCamera = false;
+            double vpFbX0 = vp.x * (double)fbW / (double)winW;
+            double vpFbX1 = (vp.x + vp.w) * (double)fbW / (double)winW;
 
-            double gameX0 = vp.x;
-            double gameY0 = vp.y;
-            double gameX1 = vp.x + vp.w;
-            double gameY1 = vp.y + vp.h;
+            // Flip Y:
+            double vpFbY1 = (double)fbH - (vp.y * (double)fbH / (double)winH);
+            double vpFbY0 = (double)fbH - ((vp.y + vp.h) * (double)fbH / (double)winH);
 
-            if (fbX >= gameX0 && fbX <= gameX1 &&
-                fbY >= gameY0 && fbY <= gameY1)
-            {
-                allowCamera = true;
-            }
+            //-----------------------------------------
+            // Final hit test (framebuffer space)
+            //-----------------------------------------
+            bool allowCamera =
+                (fbX >= vpFbX0 && fbX <= vpFbX1 &&
+                    fbY >= vpFbY0 && fbY <= vpFbY1);
+
 
             //-----------------------------------------
             // Middle mouse dragging → pan camera
             //-----------------------------------------
             static double lastX = curX, lastY = curY;
 
-            if (allowCamera && ImGui::IsMouseDown(ImGuiMouseButton_Middle))
+            if (!MyEditor::IsPlaying())                     
             {
-                double dx = curX - lastX;
-                double dy = curY - lastY;
+                if (allowCamera && ImGui::IsMouseDown(ImGuiMouseButton_Middle))
+                {
+                    double dx = curX - lastX;
+                    double dy = curY - lastY;
 
-                GLApp::gCamera.center.x += float(2.0 * dx / double(vp.w));
-                GLApp::gCamera.center.y -= float(2.0 * dy / double(vp.h));
+                    GLApp::gCamera.center.x += float(2.0 * dx / double(vp.w));
+                    GLApp::gCamera.center.y -= float(2.0 * dy / double(vp.h));
+                    GLApp::gEditorCamera.center.x += float(2.0 * dx / double(vp.w));
+                    GLApp::gEditorCamera.center.y -= float(2.0 * dy / double(vp.h));
+
+                }
             }
 
             lastX = curX;
             lastY = curY;
 
-            // ------------------------------------------------------------
-            // Zoom????
-            // ------------------------------------------------------------
+            // -------------------- Scroll wheel zoom (editor camera) -------------
+            //float wheel = static_cast<float>(g_scrollY);
+            //g_scrollY = 0.0f;
+            //auto& activeCam = GLApp::gEditorCamera;
 
+
+            //if (allowCamera && wheel != 0.0f)
+            //{
+            //    const float oldZ = activeCam.zoom;
+            //    const float step = 1.12f;
+
+            //    float newZ = glm::clamp(oldZ * std::pow(step, wheel),
+            //        activeCam.minZoom,
+            //        activeCam.maxZoom);
+
+            //    // Zoom around mouse position
+            //    glm::vec2 cNDC = GLApp::ScreenToNDC(curX, curY);
+            //    activeCam.center = cNDC - (newZ / oldZ) * (cNDC - activeCam.center);
+            //    activeCam.zoom = newZ;
+            //}
 
 
         }
