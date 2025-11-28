@@ -12,6 +12,7 @@
  */
  /******************************************************************************/
 #include "SnapShot.h"
+#include "../MyEngine/CoreEngine/Scene/SceneManager.h"
 namespace MyEditor
 {
     EntitySnapshot MakeEntitySnapshot(Entity e)
@@ -221,6 +222,11 @@ namespace MyEditor
                 g->AddComponent<PrefabInstance>(e, snap.prefabinstance_snap);
         }
 
+        // Register with SceneManager so it gets cleaned up on scene change
+        auto sceneManager = g->GetSystem<SceneManager>();
+        if (sceneManager) {
+            sceneManager->IncrementEntityArray(e);
+        }
 
         return e;
     }
