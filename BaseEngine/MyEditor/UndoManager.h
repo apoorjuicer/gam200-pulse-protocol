@@ -31,7 +31,7 @@ public:
 	size_t Capacity() const noexcept;
 private:
 	//keep track of history for undo
-	static constexpr size_t MAX_HISTORY = 20;
+	static constexpr size_t MAX_HISTORY = 40;
 	// stack of undo commands (LIFO)
 	// Last-In-First-Out, store the previous step
 	std::vector<Command> undo_stack;

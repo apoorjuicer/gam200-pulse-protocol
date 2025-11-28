@@ -370,10 +370,10 @@ namespace MyEditor
         // ================================
         if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z))
         {
-            std::cout << "[Editor] CTRL+Z preesed editor\n";
+           // std::cout << "[Editor] CTRL+Z pressed in editor\n";
 
             if (mUndo.CanUndo()) {
-                std::cout << "[Editor] CanUndo? :" << mUndo.CanUndo() << "\n";
+              //  std::cout << "[Editor] CanUndo? :" << mUndo.CanUndo() << "\n";
                 mUndo.Undo();
             }        
         }

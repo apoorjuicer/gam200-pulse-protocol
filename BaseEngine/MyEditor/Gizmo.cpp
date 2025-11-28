@@ -7,28 +7,27 @@
  * @author      Ban Kai Wei Benjamin (secondary) - 20%
  * @brief       Implements a Unity-style transform gizmo system with move, scale,
  *              and rotate modes for entity manipulation in the editor viewport
- *              - Undo feature for ImGui::IsKeyPressed(ImGuiKey_Delete) key for entities and 
+ *              - Undo feature for ImGui::IsKeyPressed(ImGuiKey_Delete) key for entities and
  *              - Undo for Gizmo dragging
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
- /******************************************************************************/
-
+/******************************************************************************/
 
 #include "pch/pch_temp.h"
 
 // Core editor / engine headers
-#include "Editor.h"   // for GameViewport, GizmoState, selectedEntity, INVALID_ENTITY
+#include "Editor.h" // for GameViewport, GizmoState, selectedEntity, INVALID_ENTITY
 #include "Gizmo.h"
-#include "LayerManagerPanel.h"  // for IsLayerVisible, IsLayerLocked
+#include "LayerManagerPanel.h" // for IsLayerVisible, IsLayerLocked
 
 #include "../CoreEngine/ECS/Coordinator.h"
-//#include "../CoreEngine/ECS/Types.h"
-//#include "../Graphics/Transform.h"
-//#include "../Graphics/glapp.h"
-//#include "../Graphics/Layer.h"
+// #include "../CoreEngine/ECS/Types.h"
+// #include "../Graphics/Transform.h"
+// #include "../Graphics/glapp.h"
+// #include "../Graphics/Layer.h"
 
 #include "SnapShot.h"
 
@@ -53,20 +52,20 @@ namespace MyEditor
         // =====================================================================
 
         // Move tool
-        constexpr float ARROW_LENGTH_BASE = 80.0f;   // Length of move arrows
-        constexpr float ARROW_HEAD_SIZE_BASE = 12.0f;   // Size of arrow heads
-        constexpr float ARROW_THICKNESS = 3.0f;    // Line thickness
+        constexpr float ARROW_LENGTH_BASE = 80.0f;    // Length of move arrows
+        constexpr float ARROW_HEAD_SIZE_BASE = 12.0f; // Size of arrow heads
+        constexpr float ARROW_THICKNESS = 3.0f;       // Line thickness
 
-        // Scale tool  
-        constexpr float SCALE_BOX_SIZE_BASE = 10.0f;   // Scale handle boxes
+        // Scale tool
+        constexpr float SCALE_BOX_SIZE_BASE = 10.0f; // Scale handle boxes
 
         // Rotate tool
-        constexpr float ROTATE_RADIUS_BASE = 70.0f;   // Rotation ring radius
+        constexpr float ROTATE_RADIUS_BASE = 70.0f; // Rotation ring radius
         constexpr float ROTATE_THICKNESS = 4.0f;    // Ring thickness
 
         // Shared
-        constexpr float CENTER_BOX_SIZE_BASE = 12.0f;   // Center square
-        constexpr float HIT_PADDING = 8.0f;    // Extra hit detection padding
+        constexpr float CENTER_BOX_SIZE_BASE = 12.0f; // Center square
+        constexpr float HIT_PADDING = 8.0f;           // Extra hit detection padding
 
         // Size limits (prevents gizmo from becoming too small/large)
         constexpr float MIN_SCALE_FACTOR = 0.5f;
@@ -75,12 +74,12 @@ namespace MyEditor
         // =====================================================================
         // COLORS (Unity-style)
         // =====================================================================
-        constexpr ImU32 COLOR_X = IM_COL32(230, 75, 75, 255);    // Red - X axis
-        constexpr ImU32 COLOR_Y = IM_COL32(130, 200, 80, 255);   // Green - Y axis  
-        constexpr ImU32 COLOR_CENTER = IM_COL32(255, 220, 80, 255);   // Yellow - center/uniform
-        constexpr ImU32 COLOR_ROTATE = IM_COL32(80, 180, 255, 255);   // Blue - rotation
-        constexpr ImU32 COLOR_HOVER = IM_COL32(255, 255, 100, 255);  // Bright yellow - hovered
-        constexpr ImU32 COLOR_BOUNDS = IM_COL32(255, 150, 50, 120);   // Orange - selection bounds
+        constexpr ImU32 COLOR_X = IM_COL32(230, 75, 75, 255);       // Red - X axis
+        constexpr ImU32 COLOR_Y = IM_COL32(130, 200, 80, 255);      // Green - Y axis
+        constexpr ImU32 COLOR_CENTER = IM_COL32(255, 220, 80, 255); // Yellow - center/uniform
+        constexpr ImU32 COLOR_ROTATE = IM_COL32(80, 180, 255, 255); // Blue - rotation
+        constexpr ImU32 COLOR_HOVER = IM_COL32(255, 255, 100, 255); // Bright yellow - hovered
+        constexpr ImU32 COLOR_BOUNDS = IM_COL32(255, 150, 50, 120); // Orange - selection bounds
     }
 
     // =========================================================================
@@ -117,9 +116,9 @@ namespace MyEditor
 
     enum class GizmoMode
     {
-        Move,    // 1 key - Translate
-        Scale,   // 2 key - Scale
-        Rotate   // 3 key - Rotate
+        Move,  // 1 key - Translate
+        Scale, // 2 key - Scale
+        Rotate // 3 key - Rotate
     };
 
     enum class GizmoHandle
@@ -152,10 +151,10 @@ namespace MyEditor
         GizmoHandle activeHandle = GizmoHandle::None;
 
         // Starting values when drag began
-        glm::vec2 dragStartScreen{ 0, 0 };
-        Vector2 dragStartWorld{ 0, 0 };
-        Vector2 entityStartPos{ 0, 0 };
-        Vector2 entityStartScale{ 0, 0 };
+        glm::vec2 dragStartScreen{0, 0};
+        Vector2 dragStartWorld{0, 0};
+        Vector2 entityStartPos{0, 0};
+        Vector2 entityStartScale{0, 0};
         float entityStartRotation = 0.0f;
         float dragStartAngle = 0.0f;
 
@@ -169,12 +168,12 @@ namespace MyEditor
     // HELPER FUNCTIONS
     // =========================================================================
 
-    static inline glm::vec2 ToGlm(const Vector2& v) { return { v.x, v.y }; }
-    static inline Vector2 ToV2(const glm::vec2& v) { return { v.x, v.y }; }
+    static inline glm::vec2 ToGlm(const Vector2 &v) { return {v.x, v.y}; }
+    static inline Vector2 ToV2(const glm::vec2 &v) { return {v.x, v.y}; }
 
     // Compute letterboxed game draw rectangle (uses GLApp values)
-    static void ComputeGameDrawRect(const GameViewport& vp, float& drawX, float& drawY,
-        float& drawW, float& drawH, float& scale)
+    static void ComputeGameDrawRect(const GameViewport &vp, float &drawX, float &drawY,
+                                    float &drawW, float &drawH, float &scale)
     {
         const float worldW = GetWorldWidth();
         const float worldH = GetWorldHeight();
@@ -189,32 +188,33 @@ namespace MyEditor
     }
 
     // Point in rectangle check
-    static bool PointInRect(const glm::vec2& pt, const glm::vec2& min, const glm::vec2& max)
+    static bool PointInRect(const glm::vec2 &pt, const glm::vec2 &min, const glm::vec2 &max)
     {
         return pt.x >= min.x && pt.x <= max.x && pt.y >= min.y && pt.y <= max.y;
     }
 
     // Point near line segment check
-    static bool PointNearLine(const glm::vec2& pt, const glm::vec2& a, const glm::vec2& b, float threshold)
+    static bool PointNearLine(const glm::vec2 &pt, const glm::vec2 &a, const glm::vec2 &b, float threshold)
     {
         glm::vec2 ab = b - a;
         glm::vec2 ap = pt - a;
         float len2 = glm::dot(ab, ab);
-        if (len2 < 0.0001f) return glm::length(pt - a) <= threshold;
+        if (len2 < 0.0001f)
+            return glm::length(pt - a) <= threshold;
         float t = glm::clamp(glm::dot(ap, ab) / len2, 0.0f, 1.0f);
         glm::vec2 closest = a + t * ab;
         return glm::length(pt - closest) <= threshold;
     }
 
     // Point near circle check
-    static bool PointNearCircle(const glm::vec2& pt, const glm::vec2& center, float radius, float thickness)
+    static bool PointNearCircle(const glm::vec2 &pt, const glm::vec2 &center, float radius, float thickness)
     {
         float dist = glm::length(pt - center);
         return dist >= (radius - thickness) && dist <= (radius + thickness);
     }
 
     // Get angle from center to point
-    static float GetAngle(const glm::vec2& center, const glm::vec2& pt)
+    static float GetAngle(const glm::vec2 &center, const glm::vec2 &pt)
     {
         return std::atan2(pt.y - center.y, pt.x - center.x);
     }
@@ -233,7 +233,7 @@ namespace MyEditor
     // WORLD <-> SCREEN CONVERSION
     // =========================================================================
 
-    glm::vec2 WorldToScreen(const Vector2& wpos, const GameViewport& vp)
+    glm::vec2 WorldToScreen(const Vector2 &wpos, const GameViewport &vp)
     {
         const float worldW = GetWorldWidth();
         const float worldH = GetWorldHeight();
@@ -248,10 +248,10 @@ namespace MyEditor
 
         const float x = drawX + (ndc.x * 0.5f + 0.5f) * drawW;
         const float y = drawY + (1.0f - (ndc.y * 0.5f + 0.5f)) * drawH;
-        return { x, y };
+        return {x, y};
     }
 
-    Vector2 ScreenToWorld(glm::vec2 screen, const GameViewport& vp)
+    Vector2 ScreenToWorld(glm::vec2 screen, const GameViewport &vp)
     {
         const float worldW = GetWorldWidth();
         const float worldH = GetWorldHeight();
@@ -269,7 +269,7 @@ namespace MyEditor
         const glm::mat3 invAll = glm::inverse(Cam * N);
 
         const glm::vec3 w = invAll * ndc;
-        return Vector2{ w.x, w.y };
+        return Vector2{w.x, w.y};
     }
 
     // =========================================================================
@@ -277,8 +277,8 @@ namespace MyEditor
     // =========================================================================
 
     // Draw arrow (for move gizmo)
-    static void DrawArrow(ImDrawList* dl, const glm::vec2& from, const glm::vec2& to,
-        ImU32 color, float thickness, float headSize, float uiScale)
+    static void DrawArrow(ImDrawList *dl, const glm::vec2 &from, const glm::vec2 &to,
+                          ImU32 color, float thickness, float headSize, float uiScale)
     {
         ImVec2 f(from.x / uiScale, from.y / uiScale);
         ImVec2 t(to.x / uiScale, to.y / uiScale);
@@ -297,13 +297,12 @@ namespace MyEditor
             t,
             ImVec2(h1.x / uiScale, h1.y / uiScale),
             ImVec2(h2.x / uiScale, h2.y / uiScale),
-            color
-        );
+            color);
     }
 
     // Draw move gizmo (Unity-style arrows)
-    static GizmoHandle DrawMoveGizmo(ImDrawList* dl, const glm::vec2& center,
-        const glm::vec2& mouse, float uiScale)
+    static GizmoHandle DrawMoveGizmo(ImDrawList *dl, const glm::vec2 &center,
+                                     const glm::vec2 &mouse, float uiScale)
     {
         using namespace GizmoConfig;
         GizmoHandle hovered = GizmoHandle::None;
@@ -315,7 +314,7 @@ namespace MyEditor
 
         // Arrow endpoints
         glm::vec2 xEnd = center + glm::vec2(arrowLength, 0);
-        glm::vec2 yEnd = center + glm::vec2(0, -arrowLength);  // Up in screen space
+        glm::vec2 yEnd = center + glm::vec2(0, -arrowLength); // Up in screen space
 
         // Check hover states
         bool hoverX = PointNearLine(mouse, center, xEnd, HIT_PADDING + ARROW_THICKNESS);
@@ -326,9 +325,12 @@ namespace MyEditor
         bool hoverCenter = PointInRect(mouse, centerMin, centerMax);
 
         // Determine which handle is hovered (priority: center > Y > X)
-        if (hoverCenter) hovered = GizmoHandle::MoveCenter;
-        else if (hoverY) hovered = GizmoHandle::MoveY;
-        else if (hoverX) hovered = GizmoHandle::MoveX;
+        if (hoverCenter)
+            hovered = GizmoHandle::MoveCenter;
+        else if (hoverY)
+            hovered = GizmoHandle::MoveY;
+        else if (hoverX)
+            hovered = GizmoHandle::MoveX;
 
         // Draw X arrow (red)
         ImU32 colorX = (hovered == GizmoHandle::MoveX) ? COLOR_HOVER : COLOR_X;
@@ -343,15 +345,14 @@ namespace MyEditor
         dl->AddRectFilled(
             ImVec2(centerMin.x / uiScale, centerMin.y / uiScale),
             ImVec2(centerMax.x / uiScale, centerMax.y / uiScale),
-            colorCenter
-        );
+            colorCenter);
 
         return hovered;
     }
 
     // Draw scale gizmo (Unity-style boxes)
-    static GizmoHandle DrawScaleGizmo(ImDrawList* dl, const glm::vec2& center,
-        const glm::vec2& mouse, float uiScale)
+    static GizmoHandle DrawScaleGizmo(ImDrawList *dl, const glm::vec2 &center,
+                                      const glm::vec2 &mouse, float uiScale)
     {
         using namespace GizmoConfig;
         GizmoHandle hovered = GizmoHandle::None;
@@ -375,55 +376,53 @@ namespace MyEditor
 
         // Check hover
         bool hoverX = PointInRect(mouse, xBoxMin, xBoxMax) ||
-            PointNearLine(mouse, center, xEnd, HIT_PADDING);
+                      PointNearLine(mouse, center, xEnd, HIT_PADDING);
         bool hoverY = PointInRect(mouse, yBoxMin, yBoxMax) ||
-            PointNearLine(mouse, center, yEnd, HIT_PADDING);
+                      PointNearLine(mouse, center, yEnd, HIT_PADDING);
         bool hoverCenter = PointInRect(mouse, centerMin, centerMax);
 
-        if (hoverCenter) hovered = GizmoHandle::ScaleUniform;
-        else if (hoverY) hovered = GizmoHandle::ScaleY;
-        else if (hoverX) hovered = GizmoHandle::ScaleX;
+        if (hoverCenter)
+            hovered = GizmoHandle::ScaleUniform;
+        else if (hoverY)
+            hovered = GizmoHandle::ScaleY;
+        else if (hoverX)
+            hovered = GizmoHandle::ScaleX;
 
         // Draw X line and box
         ImU32 colorX = (hovered == GizmoHandle::ScaleX) ? COLOR_HOVER : COLOR_X;
         dl->AddLine(
             ImVec2(center.x / uiScale, center.y / uiScale),
             ImVec2(xEnd.x / uiScale, xEnd.y / uiScale),
-            colorX, ARROW_THICKNESS
-        );
+            colorX, ARROW_THICKNESS);
         dl->AddRectFilled(
             ImVec2(xBoxMin.x / uiScale, xBoxMin.y / uiScale),
             ImVec2(xBoxMax.x / uiScale, xBoxMax.y / uiScale),
-            colorX
-        );
+            colorX);
 
         // Draw Y line and box
         ImU32 colorY = (hovered == GizmoHandle::ScaleY) ? COLOR_HOVER : COLOR_Y;
         dl->AddLine(
             ImVec2(center.x / uiScale, center.y / uiScale),
             ImVec2(yEnd.x / uiScale, yEnd.y / uiScale),
-            colorY, ARROW_THICKNESS
-        );
+            colorY, ARROW_THICKNESS);
         dl->AddRectFilled(
             ImVec2(yBoxMin.x / uiScale, yBoxMin.y / uiScale),
             ImVec2(yBoxMax.x / uiScale, yBoxMax.y / uiScale),
-            colorY
-        );
+            colorY);
 
         // Draw center box (uniform scale)
         ImU32 colorCenter = (hovered == GizmoHandle::ScaleUniform) ? COLOR_HOVER : COLOR_CENTER;
         dl->AddRectFilled(
             ImVec2(centerMin.x / uiScale, centerMin.y / uiScale),
             ImVec2(centerMax.x / uiScale, centerMax.y / uiScale),
-            colorCenter
-        );
+            colorCenter);
 
         return hovered;
     }
 
     // Draw rotate gizmo (Unity-style ring)
-    static GizmoHandle DrawRotateGizmo(ImDrawList* dl, const glm::vec2& center,
-        const glm::vec2& mouse, float uiScale)
+    static GizmoHandle DrawRotateGizmo(ImDrawList *dl, const glm::vec2 &center,
+                                       const glm::vec2 &mouse, float uiScale)
     {
         using namespace GizmoConfig;
         GizmoHandle hovered = GizmoHandle::None;
@@ -445,16 +444,14 @@ namespace MyEditor
             rotateRadius / uiScale,
             color,
             48,
-            ROTATE_THICKNESS
-        );
+            ROTATE_THICKNESS);
 
         // Draw small handle at top of ring
         glm::vec2 handlePos = center + glm::vec2(0, -rotateRadius);
         dl->AddCircleFilled(
             ImVec2(handlePos.x / uiScale, handlePos.y / uiScale),
             6.0f,
-            color
-        );
+            color);
 
         return hovered;
     }
@@ -466,22 +463,23 @@ namespace MyEditor
         ImGui::SetNextWindowBgAlpha(0.75f);
 
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration |
-            ImGuiWindowFlags_AlwaysAutoResize |
-            ImGuiWindowFlags_NoSavedSettings |
-            ImGuiWindowFlags_NoFocusOnAppearing |
-            ImGuiWindowFlags_NoNav |
-            ImGuiWindowFlags_NoMove;
+                                 ImGuiWindowFlags_AlwaysAutoResize |
+                                 ImGuiWindowFlags_NoSavedSettings |
+                                 ImGuiWindowFlags_NoFocusOnAppearing |
+                                 ImGuiWindowFlags_NoNav |
+                                 ImGuiWindowFlags_NoMove;
 
         if (ImGui::Begin("##GizmoModeIndicator", nullptr, flags))
         {
             // Mode buttons (Unity-style toolbar)
-            const char* icons[] = { "1", "2", "3" };
-            const char* tooltips[] = { "Move Tool (1)", "Scale Tool (2)", "Rotate Tool (3)" };
-            GizmoMode modes[] = { GizmoMode::Move, GizmoMode::Scale, GizmoMode::Rotate };
+            const char *icons[] = {"1", "2", "3"};
+            const char *tooltips[] = {"Move Tool (1)", "Scale Tool (2)", "Rotate Tool (3)"};
+            GizmoMode modes[] = {GizmoMode::Move, GizmoMode::Scale, GizmoMode::Rotate};
 
             for (int i = 0; i < 3; ++i)
             {
-                if (i > 0) ImGui::SameLine();
+                if (i > 0)
+                    ImGui::SameLine();
 
                 bool isActive = (g_gizmo.mode == modes[i]);
                 if (isActive)
@@ -507,11 +505,11 @@ namespace MyEditor
 
             // Current mode text
             ImGui::Separator();
-            const char* modeNames[] = { "Move", "Scale", "Rotate" };
+            const char *modeNames[] = {"Move", "Scale", "Rotate"};
             ImVec4 modeColors[] = {
-                ImVec4(1.0f, 0.85f, 0.3f, 1.0f),   // Yellow
-                ImVec4(0.5f, 0.8f, 1.0f, 1.0f),    // Light blue
-                ImVec4(0.3f, 0.7f, 1.0f, 1.0f)     // Blue
+                ImVec4(1.0f, 0.85f, 0.3f, 1.0f), // Yellow
+                ImVec4(0.5f, 0.8f, 1.0f, 1.0f),  // Light blue
+                ImVec4(0.3f, 0.7f, 1.0f, 1.0f)   // Blue
             };
             int modeIdx = static_cast<int>(g_gizmo.mode);
             ImGui::TextColored(modeColors[modeIdx], "%s", modeNames[modeIdx]);
@@ -523,21 +521,25 @@ namespace MyEditor
     // MAIN GIZMO FUNCTION
     // =========================================================================
 
-    void Gizmo_DrawAndHandle(const GameViewport& vp)
+    void Gizmo_DrawAndHandle(const GameViewport &vp)
     {
         using namespace GizmoConfig;
 
-        auto* coord = Coordinator::GetInstance();
-        if (!coord) return;
+        auto *coord = Coordinator::GetInstance();
+        if (!coord)
+            return;
 
         // ---------------------------------------------------------------------
         // KEYBOARD SHORTCUTS (1/2/3 for mode switching)
         // ---------------------------------------------------------------------
         if (!ImGui::GetIO().WantTextInput)
         {
-            if (ImGui::IsKeyPressed(ImGuiKey_1)) g_gizmo.mode = GizmoMode::Move;
-            if (ImGui::IsKeyPressed(ImGuiKey_2)) g_gizmo.mode = GizmoMode::Scale;
-            if (ImGui::IsKeyPressed(ImGuiKey_3)) g_gizmo.mode = GizmoMode::Rotate;
+            if (ImGui::IsKeyPressed(ImGuiKey_1))
+                g_gizmo.mode = GizmoMode::Move;
+            if (ImGui::IsKeyPressed(ImGuiKey_2))
+                g_gizmo.mode = GizmoMode::Scale;
+            if (ImGui::IsKeyPressed(ImGuiKey_3))
+                g_gizmo.mode = GizmoMode::Rotate;
         }
 
         // Draw mode indicator UI
@@ -588,7 +590,7 @@ namespace MyEditor
         {
             if (coord->HasComponent<LayerTag>(selectedEntity))
             {
-                auto& tag = coord->GetComponent<LayerTag>(selectedEntity);
+                auto &tag = coord->GetComponent<LayerTag>(selectedEntity);
                 if (!IsLayerVisible(tag.mask) || IsLayerLocked(tag.mask))
                 {
                     selectedEntity = INVALID_ENTITY;
@@ -602,7 +604,7 @@ namespace MyEditor
         // ---------------------------------------------------------------------
         // SETUP COORDINATE TRANSFORMS
         // ---------------------------------------------------------------------
-        ImGuiIO& io = ImGui::GetIO();
+        ImGuiIO &io = ImGui::GetIO();
         const float sx_ui = io.DisplayFramebufferScale.x > 0.f ? io.DisplayFramebufferScale.x : 1.f;
         const float sy_ui = io.DisplayFramebufferScale.y > 0.f ? io.DisplayFramebufferScale.y : 1.f;
 
@@ -624,43 +626,46 @@ namespace MyEditor
         const glm::mat3 N(nsx, 0, 0, 0, nsy, 0, 0, 0, 1);
         const glm::mat3 invAll = glm::inverse(PanZoom * N);
 
-        auto ScreenToWorld_DrawRect = [&](glm::vec2 fb) -> Vector2 {
+        auto ScreenToWorld_DrawRect = [&](glm::vec2 fb) -> Vector2
+        {
             const float x = ((fb.x - drawX) / drawW) * 2.0f - 1.0f;
             const float y = 1.0f - ((fb.y - drawY) / drawH) * 2.0f;
             glm::vec3 w = invAll * glm::vec3(x, y, 1.0f);
-            return Vector2{ w.x, w.y };
-            };
+            return Vector2{w.x, w.y};
+        };
 
         // ---------------------------------------------------------------------
         // COLLECT ENTITIES FOR HIT-TESTING
         // ---------------------------------------------------------------------
         Entity hovered = INVALID_ENTITY;
 
-        ImDrawList* dl = ImGui::GetForegroundDrawList();
+        ImDrawList *dl = ImGui::GetForegroundDrawList();
         dl->PushClipRect(
             ImVec2(drawX / sx_ui, drawY / sy_ui),
             ImVec2((drawX + drawW) / sx_ui, (drawY + drawH) / sy_ui),
-            true
-        );
+            true);
 
         const bool inGameRect =
             (mouseFB.x >= drawX && mouseFB.x <= drawX + drawW &&
-                mouseFB.y >= drawY && mouseFB.y <= drawY + drawH);
+             mouseFB.y >= drawY && mouseFB.y <= drawY + drawH);
 
         std::vector<std::pair<Entity, int>> entitiesWithOrder;
 
         for (Entity e : coord->GetAllEntities())
         {
             if (!coord->HasComponent<Framework::Transform>(e) ||
-                !coord->HasComponent<Framework::Renderable>(e)) continue;
+                !coord->HasComponent<Framework::Renderable>(e))
+                continue;
 
-            auto& tr = coord->GetComponent<Framework::Transform>(e);
-            if (!tr.isVisible) continue;
+            auto &tr = coord->GetComponent<Framework::Transform>(e);
+            if (!tr.isVisible)
+                continue;
 
             if (coord->HasComponent<LayerTag>(e))
             {
-                auto& tag = coord->GetComponent<LayerTag>(e);
-                if (!IsLayerVisible(tag.mask)) continue;
+                auto &tag = coord->GetComponent<LayerTag>(e);
+                if (!IsLayerVisible(tag.mask))
+                    continue;
             }
 
             int order = 0;
@@ -669,11 +674,12 @@ namespace MyEditor
                 order = coord->GetComponent<LayerTag>(e).orderInLayer;
             }
 
-            entitiesWithOrder.push_back({ e, order });
+            entitiesWithOrder.push_back({e, order});
         }
 
         std::sort(entitiesWithOrder.begin(), entitiesWithOrder.end(),
-            [](const auto& a, const auto& b) { return a.second < b.second; });
+                  [](const auto &a, const auto &b)
+                  { return a.second < b.second; });
 
         // ---------------------------------------------------------------------
         // HIT-TEST AND DRAW
@@ -683,16 +689,24 @@ namespace MyEditor
         for (auto it = entitiesWithOrder.rbegin(); it != entitiesWithOrder.rend(); ++it)
         {
             Entity e = it->first;
-            auto& tr = coord->GetComponent<Framework::Transform>(e);
-            auto& re = coord->GetComponent<Framework::Renderable>(e);
+            auto &tr = coord->GetComponent<Framework::Transform>(e);
+            auto &re = coord->GetComponent<Framework::Renderable>(e);
 
             glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
             glm::mat3 modelToNDC = PanZoom * M;
             glm::mat3 invModelToNDC = glm::inverse(modelToNDC);
 
             glm::vec2 qmin, qmax;
-            if (re.mdl_ref == 0) { qmin = { -1.f, -1.f }; qmax = { 1.f, 1.f }; }
-            else { qmin = { -0.5f, -0.5f }; qmax = { 0.5f, 0.5f }; }
+            if (re.mdl_ref == 0)
+            {
+                qmin = {-1.f, -1.f};
+                qmax = {1.f, 1.f};
+            }
+            else
+            {
+                qmin = {-0.5f, -0.5f};
+                qmax = {0.5f, 0.5f};
+            }
 
             // Hit test for entity selection (only if not dragging gizmo)
             if (inGameRect && hovered == INVALID_ENTITY && !g_gizmo.dragging)
@@ -700,7 +714,7 @@ namespace MyEditor
                 bool isLocked = false;
                 if (coord->HasComponent<LayerTag>(e))
                 {
-                    auto& tag = coord->GetComponent<LayerTag>(e);
+                    auto &tag = coord->GetComponent<LayerTag>(e);
                     isLocked = IsLayerLocked(tag.mask);
                 }
 
@@ -717,25 +731,27 @@ namespace MyEditor
             // Draw gizmo for selected entity
             if (e == selectedEntity)
             {
-                auto toUI = [&](glm::vec2 modelP) -> ImVec2 {
+                auto toUI = [&](glm::vec2 modelP) -> ImVec2
+                {
                     glm::vec3 n = modelToNDC * glm::vec3(modelP, 1.0f);
                     const float x = drawX + (n.x * 0.5f + 0.5f) * drawW;
                     const float y = drawY + (1.0f - (n.y * 0.5f + 0.5f)) * drawH;
                     return ImVec2(x / sx_ui, y / sy_ui);
-                    };
+                };
 
-                auto toFB = [&](glm::vec2 modelP) -> glm::vec2 {
+                auto toFB = [&](glm::vec2 modelP) -> glm::vec2
+                {
                     glm::vec3 n = modelToNDC * glm::vec3(modelP, 1.0f);
                     const float x = drawX + (n.x * 0.5f + 0.5f) * drawW;
                     const float y = drawY + (1.0f - (n.y * 0.5f + 0.5f)) * drawH;
-                    return { x, y };
-                    };
+                    return {x, y};
+                };
 
                 // Draw selection bounds
-                ImVec2 a = toUI({ qmin.x, qmin.y });
-                ImVec2 b = toUI({ qmax.x, qmin.y });
-                ImVec2 c = toUI({ qmax.x, qmax.y });
-                ImVec2 d = toUI({ qmin.x, qmax.y });
+                ImVec2 a = toUI({qmin.x, qmin.y});
+                ImVec2 b = toUI({qmax.x, qmin.y});
+                ImVec2 c = toUI({qmax.x, qmax.y});
+                ImVec2 d = toUI({qmin.x, qmax.y});
 
                 dl->AddLine(a, b, COLOR_BOUNDS, 2.0f);
                 dl->AddLine(b, c, COLOR_BOUNDS, 2.0f);
@@ -743,7 +759,7 @@ namespace MyEditor
                 dl->AddLine(d, a, COLOR_BOUNDS, 2.0f);
 
                 // Get center in screen space
-                glm::vec2 centerFB = toFB({ 0, 0 });
+                glm::vec2 centerFB = toFB({0, 0});
 
                 // Draw appropriate gizmo based on current mode
                 switch (g_gizmo.mode)
@@ -769,7 +785,7 @@ namespace MyEditor
             // Priority: Gizmo handle > Entity selection
             if (selectedEntity != INVALID_ENTITY && hoveredHandle != GizmoHandle::None)
             {
-                auto& tr = coord->GetComponent<Framework::Transform>(selectedEntity);
+                auto &tr = coord->GetComponent<Framework::Transform>(selectedEntity);
 
                 g_gizmo.dragging = true;
                 g_gizmo.active = selectedEntity;
@@ -779,7 +795,7 @@ namespace MyEditor
                 g_gizmo.entityStartPos = tr.Pos;
                 g_gizmo.entityStartScale = tr.Scale;
                 g_gizmo.entityStartRotation = tr.Rotation.x;
-                g_gizmo.dragStartAngle = GetAngle(WorldToScreen(tr.Pos, vp), mouseFB);  // <-- And this!
+                g_gizmo.dragStartAngle = GetAngle(WorldToScreen(tr.Pos, vp), mouseFB); // <-- And this!
 
                 // UNDO: snapshot transform at start of gizmo drag
                 s_gizmoEditing = true;
@@ -801,7 +817,7 @@ namespace MyEditor
         {
             if (coord->HasComponent<Framework::Transform>(g_gizmo.active))
             {
-                auto& tr = coord->GetComponent<Framework::Transform>(g_gizmo.active);
+                auto &tr = coord->GetComponent<Framework::Transform>(g_gizmo.active);
                 Vector2 mouseWorld = ScreenToWorld_DrawRect(mouseFB);
                 glm::vec2 delta = mouseFB - g_gizmo.dragStartScreen;
 
@@ -831,7 +847,7 @@ namespace MyEditor
 
                 case GizmoHandle::ScaleY:
                 {
-                    float scaleFactor = 1.0f - delta.y * 0.01f;  // Inverted Y
+                    float scaleFactor = 1.0f - delta.y * 0.01f; // Inverted Y
                     tr.Scale.y = std::max(10.0f, g_gizmo.entityStartScale.y * scaleFactor);
                     break;
                 }
@@ -875,13 +891,12 @@ namespace MyEditor
             g_gizmo.active = INVALID_ENTITY;
             g_gizmo.activeHandle = GizmoHandle::None;
 
-
             if (s_gizmoEditing && s_gizmoEntity != INVALID_ENTITY)
             {
-                auto* c = Coordinator::GetInstance();
+                auto *c = Coordinator::GetInstance();
                 if (c && c->HasComponent<Framework::Transform>(s_gizmoEntity))
                 {
-                    auto& currentTr = c->GetComponent<Framework::Transform>(s_gizmoEntity);
+                    auto &currentTr = c->GetComponent<Framework::Transform>(s_gizmoEntity);
 
                     // Only push undo if something actually changed
                     if (currentTr != s_gizmoBeforeEdit)
@@ -890,13 +905,13 @@ namespace MyEditor
                         Framework::Transform before = s_gizmoBeforeEdit;
 
                         mUndo.Push([e, before]()
-                            {
-                                auto* g = Coordinator::GetInstance();
+                                   {
+                                //reacquire, incase something changes
+                                auto* g = Coordinator::GetInstance();                                
                                 if (!g) return;
                                 if (!g->HasComponent<Framework::Transform>(e)) return;
 
-                                g->GetComponent<Framework::Transform>(e) = before;
-                            });
+                                g->GetComponent<Framework::Transform>(e) = before; });
                     }
                 }
 
@@ -910,55 +925,62 @@ namespace MyEditor
         // ---------------------------------------------------------------------
         if (selectedEntity != INVALID_ENTITY && ImGui::IsKeyPressed(ImGuiKey_Delete))
         {
-            if (g_gizmo.dragging && g_gizmo.active == selectedEntity)
+
+            Entity toDelete = selectedEntity;
+            Coordinator *coord = Coordinator::GetInstance();
+            if (!coord)
+                return;
+
+            // If gizmo was dragging this entity, stop it
+            if (g_gizmo.dragging && g_gizmo.active == toDelete)
             {
                 g_gizmo.dragging = false;
                 g_gizmo.active = INVALID_ENTITY;
                 g_gizmo.activeHandle = GizmoHandle::None;
             }
 
-            //auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), selectedEntity);
-            //if (it != entityDisplayOrder.end())
-            //    entityDisplayOrder.erase(it);
-
-            Factory factory;
-            factory.DeleteEntity(selectedEntity);
-            //UNDO
-            Entity toDelete = selectedEntity;
-            // Find its index in the hierarchy list (for undo reinsertion)
+            // Find position in hierarchy BEFORE removing
             auto it = std::find(entityDisplayOrder.begin(),
-                entityDisplayOrder.end(),
-                toDelete);
+                                entityDisplayOrder.end(),
+                                toDelete);
             int index = -1;
             if (it != entityDisplayOrder.end())
+            {
                 index = static_cast<int>(it - entityDisplayOrder.begin());
-            // --- SNAPSHOT BEFORE DELETING ---
+                // Remove from the list now
+                entityDisplayOrder.erase(it);
+            }
+
+            // --- SNAPSHOT WHILE ENTITY IS STILL VALID ---
             EntitySnapshot snap = MakeEntitySnapshot(toDelete);
 
-            // Destroy the entity
-            coord->DestroyEntity(selectedEntity);
+            // --- DESTROY ENTITY ONCE ---
+            Factory factory;
+            factory.DeleteEntity(toDelete); // or coord->DestroyEntity(toDelete), but NOT both
 
             selectedEntity = INVALID_ENTITY;
 
-            // UNDO: recreate the entity from snapshot and reinsert into list
+            // --- UNDO: recreate entity from snapshot and reinsert ---
             mUndo.Push([snap, index]()
-                {
+                       {
                     // Recreate the entity with all its components
                     Entity restored = CreateEntityFromEntitySnapshot(snap);
-                    if (restored == INVALID_ENTITY) {
+                    if (restored == INVALID_ENTITY)
                         return;
-                    }
 
                     // Reinsert into hierarchy at original position
                     int insertIndex = index;
-                    if (insertIndex < 0 || insertIndex > static_cast<int>(entityDisplayOrder.size()))
+                    if (insertIndex < 0 ||
+                        insertIndex > static_cast<int>(entityDisplayOrder.size()))
+                    {
                         insertIndex = static_cast<int>(entityDisplayOrder.size());
+                    }
 
-                    entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex, restored);
+                    entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex,
+                        restored);
 
                     // Select the restored entity
-                    selectedEntity = restored;
-                });
+                    selectedEntity = restored; });
         }
 
         dl->PopClipRect();
