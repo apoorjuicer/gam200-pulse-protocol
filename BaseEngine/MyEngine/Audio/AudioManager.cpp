@@ -189,7 +189,7 @@ void AudioManager::Initialize()
     }
 
     std::string tf = IsBGMPlaying() ? "true" : "false";
-    std::cout << "[AudioManager] Playing bgm? " << tf << "\n";
+    //std::cout << "[AudioManager] Playing bgm? " << tf << "\n";
     // PlaySound("beat_placeholder");
     std::cout << "[AudioManager] AudioManager initialization completed with mixers.\n";
 
