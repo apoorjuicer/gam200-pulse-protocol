@@ -24,6 +24,7 @@
 #include "CoreEngine/Asset/AssetsManager.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "glhelper.h"
+#include "glapp.h"
 
 //for .NET
 #include "CoreEngine/Core/ImportExport.h" // for DLL_API
@@ -63,6 +64,11 @@ namespace Framework
 		bool isVisible = true;		  // Used for input detect purpose
 		float visibilityTimer = 0.0f; // Used for input detect purpose
 		bool autoHide = false;		  // Used for input detect purpose
+
+		//operator overloads
+		//for Undo comparison function
+		bool operator==(Transform const& other) const;
+		bool operator!=(Transform const& other) const;
 
 		// Register these components in your initialization code:
 		// void Serialize(Value& data, Document::AllocatorType& alloc) override;

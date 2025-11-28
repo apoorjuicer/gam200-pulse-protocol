@@ -2,7 +2,8 @@
 /**
  * @file        Transform.cpp
  * @project     Pulse Protocol
- * @author      Goh Pin Kai
+ * @author      Goh Pin Kai (primary) - 90%
+ * @author 		Ban Kai Wei Benjamin (secondary) - 10%
  * @brief       Implements the Transform component, providing position,
  *              scale, rotation, animation, and sprite management. Includes
  *              update logic for entity transforms, matrix composition,
@@ -18,8 +19,8 @@
 
 namespace Framework
 {
-	constexpr float VIRTUAL_W = 1600.0f;
-	constexpr float VIRTUAL_H = 900.0f;
+	//constexpr float VIRTUAL_W = 1600.0f;
+	//constexpr float VIRTUAL_H = 900.0f;
 	Transform::Transform()
 	{
 		mdl_to_ndc_xform.SetToIdentity();
@@ -68,9 +69,9 @@ namespace Framework
 
 			// M = T * R * S
 			Matrix3x3 ScreenToNDC(
-				2.0f / VIRTUAL_W, 0, 0,
-				0, 2.0f / VIRTUAL_H, 0,
-				0.0f, 0.0f, 1);
+				2.0f / static_cast<float>(GLApp::VIRTUAL_W), 0.0f, 0.0f,
+				0.0f, 2.0f / static_cast<float>(GLApp::VIRTUAL_H), 0.0f,
+				0.0f, 0.0f, 1.0f);
 
 			x.mdl_to_ndc_xform = ScreenToNDC * (Translating * Rotating * Scaling);
 
@@ -80,6 +81,23 @@ namespace Framework
 	}
 
 	void Transform::draw() const {}
+
+	/* Operator overloads */
+	//comparison function operator !=
+	bool Transform::operator==(Transform const& other) const
+	{
+		return
+			Pos == other.Pos &&
+			Scale == other.Scale &&
+			Rotation == other.Rotation &&
+			isVisible == other.isVisible &&
+			visibilityTimer == other.visibilityTimer &&
+			autoHide == other.autoHide;
+	}
+	bool Transform::operator!=(Transform const& other) const
+	{
+		return !(*this == other);
+	}
 
 	/*Serialization && Deserialization */
 	void Transform::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const

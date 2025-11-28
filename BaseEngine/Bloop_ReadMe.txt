@@ -1,106 +1,71 @@
-═══════════════════════════════════════════════════════════════════════════════
-1. GAME CONCEPT
-═══════════════════════════════════════════════════════════════════════════════
+================================================================================
 
-Pulse Protocol is a rhythm-based combat game and it takes place in a cyberworld.
+              ____  _   _ _     ____  _____ 
+             |  _ \| | | | |   / ___|| ____|
+             | |_) | | | | |   \___ \|  _|  
+             |  __/| |_| | |___ ___) | |___ 
+             |_|    \___/|_____|____/|_____|
+                                                   
+          ____  ____   ___ _____ ___   ____ ___  _     
+         |  _ \|  _ \ / _ \_   _/ _ \ / ___/ _ \| |    
+         | |_) | |_) | | | || || | | | |  | | | | |    
+         |  __/|  _ <| |_| || || |_| | |__| |_| | |___ 
+         |_|   |_| \_\\___/ |_| \___/ \____\___/|_____|
 
-Players execute attacks and combos by pressing keys in time with the beat.
+                 ~ Rhythm-Action Combat ~
+
+================================================================================
+
+
+[ 1. GAME CONCEPT ]
+
+Pulse Protocol is a rhythm-action combat game set in a cyberworld.
+
+Players execute attacks by pressing keys in time with the beat. A visual border
+pulses on screen every 0.5 seconds (120 BPM), accompanied by a sound effect,
+to help players stay on rhythm.
+
 The system evaluates timing accuracy and provides feedback:
+- PERFECT : Within 0.05s of the beat
+- GOOD    : Within 0.15s of the beat
+- MISS    : More than 0.15s off the beat
 
-- PERFECT : On-beat input
-- GOOD    : Slightly off-beat
-- MISS    : Out of sync
 
-The focus of the demo is to showcase:
-- Our custom ECS-based engine
-- Rhythm-timing input system
-- Collision system with monster and hero
-- Scene loading and saving
-- Working GUI system
-- Factory system for creating entities
-- Graphics rendering system with sprite support
-- Audio system with FMOD integration
-- Prefab system for entity templates
-- Play/Pause/Stop game state controls
-
-═══════════════════════════════════════════════════════════════════════════════
-2. CUSTOM DEMO INPUT & USAGE
-═══════════════════════════════════════════════════════════════════════════════
-
-Gameplay Controls:
-------------------
-W, A, S, D - Attack keys (must be pressed in rhythm with the beat)
-
-Player Movement:
-T - Move Up
-F - Move Down
-G - Move Left
-H - Move Right
-
-Enemy Control:
-↑ (Up Arrow)    - Move enemy up
-↓ (Down Arrow)  - Move enemy down
-← (Left Arrow)  - Move enemy left
-→ (Right Arrow) - Move enemy right
-
-Timing System:
---------------
-- Listen for the background music beat
-- Press directional keys synchronized with the beat
-- Watch for on-screen feedback showing timing accuracy
-- Successful hits build combo meter
-- Missed timing breaks combo chain
-
-Developer Controls:
--------------------
-F1-F6 - Debug Tools
-F7  - Stress test (spawn 1000 entities)
-
-Play/Pause/Stop System:
-------------------------
-The engine includes runtime game state controls:
-- Play: Starts/resumes game systems and gameplay
-- Pause: Freezes gameplay while maintaining editor access
-- Stop: Resets the scene to its original state
-- All entities and components can be edited in real-time
-- Scene changes persist when saved to JSON files
-
-═══════════════════════════════════════════════════════════════════════════════
-3. HOW TO RUN
-═══════════════════════════════════════════════════════════════════════════════
-
-Running with Level Editor:
---------------------------
-1. Extract BaseEngine.zip
-2. Double-click run_editor.bat
-3. Open build/MyEngine.sln in Visual Studio 2022
-4. Set MyEngine as startup project
-5. Press F5 to build and run
-
-Running Game Only (No Editor):
-------------------------------
-1. Extract BaseEngine.zip
-2. Double-click run_game.bat
-3. Open build/MyEngine.sln in Visual Studio 2022
-4. Set MyEngine as startup project
-5. Press F5 to build and run
-
-Switching Between Modes:
-------------------------
-1. Close Visual Studio
-2. Run clean.bat
-3. Run run_editor.bat OR run_game.bat
-4. Reopen build/MyEngine.sln
+[ 2. CUSTOM DEMO INPUT & USAGE ]
 
 Gameplay:
 ---------
-- Control player with TFGH keys in rhythm with the music
-- Control enemy with Arrow keys (for testing)
-- Use M and N keys to toggle collision and rotation visualizations
+- A countdown sequence plays: "Ready" → "3" → "2" → "1" → "GO!"
+- Once the countdown finishes, the enemy automatically begins
+- Press W then A in rhythm with the pulsing border to attack
+- Watch for on-screen feedback showing timing accuracy (PERFECT/GOOD/MISS)
 
-═══════════════════════════════════════════════════════════════════════════════
-4. TEAM ROSTER: NAME - ROLE | CHAMPIONING
-═══════════════════════════════════════════════════════════════════════════════
+Attack Combo:
+W → A (press in rhythm with the beat)
+
+Editor Controls:
+----------------
+- Play Button    : Starts the game and switches to Game Camera
+- Stop Button    : Stops the game and switches back to Editor Camera
+- Pause Button   : Pauses the game while in Game Camera
+- Project Panel  : Displays all project assets
+- Inspector      : Shows all components of selected entity
+- Layer Panel    : Located beside the Inspector tab, allows locking/hiding layers
+
+Developer Controls:
+-------------------
+F1    - Toggle Debug Rectangles
+F2    - Toggle Debug Lines
+F3    - Toggle Debug Circles
+F4    - Toggle Debug Circles Filled
+F5    - Toggle Debug Points
+F6    - Toggle Debug Grid
+F7    - Stress test (spawn 1000 entities)
+F8    - Toggle Debug Overlay (FPS counter, performance stats)
+F11   - Toggle Fullscreen
+Space - Queue delayed combo message (test feature)
+
+[ 3. TEAM ROSTER ]
 
 Chloe Lau Rey En (IMGD)
 - Role: Product Manager
@@ -134,4 +99,4 @@ Chong Sze Ting Fenny (BFA)
 - Role: Art Lead
 - Champion: Art
 
-═══════════════════════════════════════════════════════════════════════════════
+================================================================================

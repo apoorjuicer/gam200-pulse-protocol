@@ -11,7 +11,7 @@
  */
  /******************************************************************************/
 
-#include "pch/pch.h"
+#include "MessageManager.h"
 
 // ============================================================================
 // SINGLETON IMPLEMENTATION - Only one MessageManager exists in the whole engine

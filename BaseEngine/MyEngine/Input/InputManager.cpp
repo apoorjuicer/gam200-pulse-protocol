@@ -2,7 +2,8 @@
 /**
  * @file        InputManager.cpp
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En - 80%
+ * @author      Goh Pin Kai - 20%
  * @brief       Implements the InputManager system, handling GLFW-based
  *              keyboard input for rhythm gameplay. Provides real-time input
  *              state tracking, combo detection, rhythm timing feedback,
@@ -23,39 +24,55 @@
 
 static Vector2 ScreenToWorld_ForInput(double fbX, double fbY)
 {
-	// World size - MUST match Transform.cpp VIRTUAL_W/H (1600x900)
-	static constexpr float kWorldW = 1600.0f;
-	static constexpr float kWorldH = 900.0f;
+	// letterboxed / game viewport in framebuffer pixels
+	const double drawX = double(GLHelper::GameOffsetX);
+	const double drawY = double(GLHelper::GameOffsetY);
+	const double drawW = double(GLHelper::GameWidth);
+	const double drawH = double(GLHelper::GameHeight);
 
-	// Get the game viewport (letterbox-aware)
-	float drawX = static_cast<float>(GLHelper::GameOffsetX);
-	float drawY = static_cast<float>(GLHelper::GameOffsetY);
-	float drawW = static_cast<float>(GLHelper::GameWidth);
-	float drawH = static_cast<float>(GLHelper::GameHeight);
+	// outside the game viewport? just return something harmless
+	if (fbX < drawX || fbX > drawX + drawW ||
+		fbY < drawY || fbY > drawY + drawH)
+	{
+		return Vector2{ 0.0f, 0.0f };
+	}
 
-	// Convert framebuffer pixels to NDC
-	const float ndcX = ((fbX - drawX) / drawW) * 2.0f - 1.0f;
-	const float ndcY = 1.0f - ((fbY - drawY) / drawH) * 2.0f;
+	// --- framebuffer (bottom-left) -> NDC inside the game viewport ---
+	const double nx = (fbX - drawX) / drawW;   // 0 at left, 1 at right
+	const double ny = (fbY - drawY) / drawH;   // 0 at bottom, 1 at top
+
+	const float ndcX = float(nx * 2.0 - 1.0);  // -1 .. 1
+	const float ndcY = float(ny * 2.0 - 1.0);  // -1 .. 1
 	const glm::vec3 ndc(ndcX, ndcY, 1.0f);
 
-	// Convert NDC to world using camera and normalization matrix
-	const float sx = 2.0f / kWorldW;
-	const float sy = 2.0f / kWorldH;
-	const glm::mat3 N(sx, 0, 0, 0, sy, 0, 0, 0, 1);
-	const glm::mat3 Cam = GLApp::BuildPanZoomNDC(GLApp::gCamera);
-	const glm::mat3 invAll = glm::inverse(Cam * N);
+	// --- SAME camera logic as GLApp::draw ---
+	GLApp::Camera2D cam;
+//#ifdef ENABLE_EDITOR
+//	if (MyEditor::IsEnabled() && !MyEditor::IsPlaying())
+//		cam = GLApp::gEditorCamera;
+//	else
+//		cam = GLApp::gGameCamera;
+//#else
+//	cam = GLApp::gGameCamera;
+//#endif
 
-	//static int frameCount = 0;
-	//frameCount++;
-	//if (frameCount % 60 == 0) {
-	//	std::cout << "Camera center: (" << GLApp::gCamera.center.x << ", " << GLApp::gCamera.center.y << ")" << std::endl;
-	//	std::cout << "Camera zoom: " << GLApp::gCamera.zoom << std::endl;
-	//}
+	glm::mat3 camMat = GLApp::BuildPanZoomNDC(cam);
 
-	const glm::vec3 w = invAll * ndc;
+	// --- world (1920x1080) -> NDC normalization (same as Transform) ---
+	const float sx = 2.0f / float(GLApp::VIRTUAL_W); // 1920
+	const float sy = 2.0f / float(GLApp::VIRTUAL_H); // 1080
+	const glm::mat3 N(
+		sx, 0.0f, 0.0f,
+		0.0f, sy, 0.0f,
+		0.0f, 0.0f, 1.0f
+	);
 
-	// Shift Y UP to align buttons
-	return Vector2{ w.x, w.y - 760.0f };  // Add 660 to Y (shift UP)
+	// total forward: ndc = camMat * N * world
+	// so inverse is world = (camMat * N)^-1 * ndc
+	glm::mat3 invAll = glm::inverse(camMat * N);
+	glm::vec3 w = invAll * ndc;
+
+	return Vector2{ w.x, w.y };   // no magic -760 any more
 }
 
 InputManager::InputManager() : window(nullptr) {
@@ -182,12 +199,18 @@ void InputManager::updateInputStates() {
 	// Guard against divide-by-zero
 	double fbX = 0.0, fbY = 0.0;
 	if (winW > 0 && winH > 0) {
-		fbX = xw * static_cast<double>(fbW) / static_cast<double>(winW);
-		fbY = yw * static_cast<double>(fbH) / static_cast<double>(winH);
+		// first go to framebuffer in TOP-LEFT
+		double fbX_tl = xw * static_cast<double>(fbW) / static_cast<double>(winW);
+		double fbY_tl = yw * static_cast<double>(fbH) / static_cast<double>(winH);
+
+		// then convert to BOTTOM-LEFT origin to match glViewport / GameOffsetY
+		fbX = fbX_tl;
+		fbY = static_cast<double>(fbH) - fbY_tl;
 	}
 
 	Vector2 worldPos = ScreenToWorld_ForInput(fbX, fbY);
-	mousePositionVirtual = glm::vec2(worldPos.x, worldPos.y);
+	mousePositionWorld = glm::vec2(worldPos.x, worldPos.y);
+	mousePositionVirtual = mousePositionWorld;
 
 	// Check if mouse is in the game viewport
 	double localX = fbX - GLHelper::GameOffsetX;

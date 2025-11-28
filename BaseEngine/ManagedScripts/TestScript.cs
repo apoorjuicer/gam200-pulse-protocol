@@ -8,16 +8,24 @@ public class TestScript : Script
     }
     public override void Update()
     {
-        Console.WriteLine("[Testing CSHARP]: Hello from ManagedScripts! \n ");
+        //Console.WriteLine("[Testing CSHARP]: Hello from ManagedScripts! \n ");
 
         TransformComponent TFC = GetTransform();
 
-        TFC.ScaleX += 0.01f;
-        TFC.ScaleY += 0.01f;
-
-        TFC.RotX += 1.0f;
+        TFC.RotX += 0.5f;
      
         TFC.X += 1.0f;
         TFC.Y += 1.0f;
+    }
+}
+
+public class TestScript2 : Script
+{
+    public override void Update()
+    {
+        TransformComponent TFC = GetTransform();
+
+        TFC.ScaleX += 2.5f;
+        TFC.ScaleY += 2.5f;
     }
 }

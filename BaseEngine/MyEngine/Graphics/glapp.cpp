@@ -54,6 +54,8 @@ double random()
 }
 
 GLApp::Camera2D GLApp::gCamera{};
+GLApp::Camera2D GLApp::gEditorCamera{};
+GLApp::Camera2D GLApp::gGameCamera{};
 
 void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/)
 {
@@ -160,20 +162,23 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 
 	glm::mat3 PanZoom = BuildPanZoomNDC(gCamera);
 
-	// Timing
+	// Build final camera matrix from the active camera
+	//glm::mat3 PanZoom = BuildPanZoomNDC(activeCam);
+
+	// ========================== REST OF YOUR DRAW ===========================
 	auto* g_coordinator = Coordinator::GetInstance();
 
 	static auto lastTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
-	float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+	float deltaTime =
+		std::chrono::duration<float>(currentTime - lastTime).count();
 	lastTime = currentTime;
 	gBatch.Begin();
 
 	std::vector<Entity> drawList;
 	drawList.reserve(entities.size());
 
-	// Draw entities
-    // build drawList
+	// Build draw list by layer
 	for (auto it : entities) {
 		// BEFORE (ORIGINAL CODE):
 		//     auto& lt = g_coordinator->GetComponent<LayerTag>(it);
@@ -198,7 +203,6 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 
 		// ensure texture is ready BEFORE push
 		if (re.textureID == 0 && !re.spriteName.empty()) {
-			//re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
 			int w = 0, h = 0;
 			re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
 			re.texW = w;
@@ -206,10 +210,7 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 			re.loadedSpriteName = re.spriteName;
 		}
 
-		// if still 0 and you only want textured sprites, you can continue here,
-		// or push anyway if you also render colored quads
 		if (re.textureID == 0) continue;
-
 		drawList.push_back(it);
 	}
 
@@ -254,61 +255,51 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(e);
 		auto& re = g_coordinator->GetComponent<Framework::Renderable>(e);
 		auto& an = g_coordinator->GetComponent<Framework::Animation>(e);
-		// BEFORE drawing each entity
-		if (!re.spriteName.empty()) {
-			if (re.textureID == 0 || re.needsTextureReload ||
-				re.spriteName != re.loadedSpriteName) {
-				//re.textureID = Framework::AssetsManager::GetOrLoad(re.spriteName);
 
+		if (!re.spriteName.empty()) {
+			if (re.textureID == 0 ||
+				re.needsTextureReload ||
+				re.spriteName != re.loadedSpriteName)
+			{
 				re.textureID = mAssets.GetOrLoadTexture(re.spriteName);
 				re.loadedSpriteName = re.spriteName;
 				re.needsTextureReload = false;
-			}
-			else
-			{
 			}
 		}
 
 		if (tr.isVisible && re.textureID != 0)
 		{
-			// ---- Single-image vs spritesheet guard -----------------------------------
-			// Treat as "single image" if rows*columns <= 1 OR totalFrames <= 1.
-			// This prevents animation from advancing when switching from a spritesheet
-			// to a static sprite.
 			const int rows = std::max(1, an.rows);
 			const int columns = std::max(1, an.columns);
-			const bool isSingle = (rows * columns <= 1) || (an.totalFrames <= 1);
+			const bool isSingle =
+				(rows * columns <= 1) || (an.totalFrames <= 1);
 
 			if (isSingle)
 			{
-				// Freeze animation on the first frame and normalize grid to 1x1
 				an.rows = 1;
 				an.columns = 1;
-				an.totalFrames = 1; // optional but keeps everyone honest
+				an.totalFrames = 1;
 				an.currentFrame = 0;
 				an.elapsedTime = 0.0f;
-				// (No updateAnimation call)
 			}
 			else
 			{
-				// Normal animated spritesheet
 				updateAnimation(an, deltaTime);
-				// Ensure sane values after update (defensive)
 				an.rows = std::max(1, an.rows);
 				an.columns = std::max(1, an.columns);
 				an.totalFrames = std::max(1, an.totalFrames);
 				if (an.currentFrame >= an.totalFrames)
 					an.currentFrame %= an.totalFrames;
 			}
-			// ---------------------------------------------------------------------------
-
-
 		}
+
 		glBindTexture(GL_TEXTURE_2D, re.textureID);
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &re.texW);
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &re.texH);
+
 		drawTrans(re, an, tr, PanZoom);
 	}
+
 	gBatch.Flush(shdrpgms);
 	GLboolean depthWasOn = glIsEnabled(GL_DEPTH_TEST);
 	glDisable(GL_DEPTH_TEST);
@@ -413,14 +404,14 @@ void GLApp::OnResize(int width, int height)
 }
 
 // Convert vec2 in model space to NDC using your existing 2D pipeline
-static inline glm::vec2 ToNDC(const glm::mat3& M, const glm::vec2& v)
+static inline glm::vec2 ToNDC(const glm::mat3 & M, const glm::vec2 & v)
 {
 	glm::vec3 h = M * glm::vec3(v, 1.0f);
 	return { h.x, h.y }; // already NDC
 }
 
 // Draw an AABB as 4 lines in NDC
-void GLApp::DrawAABB_NDC(const glm::mat3& modelToNDC, const AABB& box, const glm::vec3& color)
+void GLApp::DrawAABB_NDC(const glm::mat3 & modelToNDC, const AABB & box, const glm::vec3 & color)
 {
 	const glm::vec2 a{ box.min.x, box.min.y };
 	const glm::vec2 b{ box.max.x, box.min.y };

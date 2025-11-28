@@ -2,7 +2,7 @@
 /**
  * @file       SceneManager.h
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael - 100%
+ * @author     Chia Wei Xuan Rachael
  * @brief      Scene management system that inherits from Systems base class.
  *             Provides interface for scene lifecycle operations, entity tracking,
  *             and JSON serialization of game scenes.
@@ -39,7 +39,6 @@
 //#include "../MyEngine/Components/DisplayName.h"
 #include "../MyEngine/CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
-#include "../MyEngine/UI/GUIManager.h"
 
 //for .NET
 #include "CoreEngine/Core/ImportExport.h" // for DLL_API
@@ -56,6 +55,8 @@
 // stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
 #pragma warning(push)
 #pragma warning(disable: 4251)
+
+extern std::vector<Entity> g_entitiesToDelete;
 
 class DLL_API SceneManager: public Systems
 {

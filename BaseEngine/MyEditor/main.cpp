@@ -1,6 +1,6 @@
 ﻿/******************************************************************************/
 /**
- * @file        Editor.h
+ * @file        main.cpp
  * @project     Pulse Protocol
  * @author      Goh Pin Kai
  * @brief       Main

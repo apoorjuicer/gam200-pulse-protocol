@@ -12,6 +12,7 @@
  /******************************************************************************/
 #include "glhelper.h"
 #include <iostream>
+#include "CoreEngine/ECS/Coordinator.h"
 
 /*                                                   objects with file scope
 ----------------------------------------------------------------------------- */

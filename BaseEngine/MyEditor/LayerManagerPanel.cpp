@@ -108,6 +108,12 @@ namespace MyEditor
             return;
         }
 
+        bool isPlaying = IsPlaying();
+        if (isPlaying)
+        {
+            ImGui::BeginDisabled();
+        }
+
         ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Scene Layers");
         ImGui::Separator();
         ImGui::Spacing();
@@ -255,6 +261,11 @@ namespace MyEditor
         {
             s_layerVisible[0] = s_layerVisible[1] = s_layerVisible[2] = false;
             UpdateGraphicsFilter();  // Update renderer
+        }
+
+        if (isPlaying)
+        {
+            ImGui::EndDisabled();
         }
 
         ImGui::End();

@@ -2,7 +2,7 @@
 /**
  * @file       SceneManager.cpp
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael - 95%
+ * @author     Chia Wei Xuan Rachael (primary) - 95%
  * @author     Goh Pin Kai (secondary) - 5%
  * @brief      Manages scene lifecycle, serialization, and entity ownership across
  *             game scenes (MainMene and level1 for now) .
@@ -39,6 +39,8 @@
 #include "Graphics/Layer.h"
 //#include "../Components/AABB.h"
 
+extern bool g_countdownFinished;
+
 //Starting scene will be Main Menu
 SceneManager::SceneManager()
 {
@@ -59,15 +61,9 @@ void SceneManager::Init()
 void SceneManager::Update(float dt)
 {
 	(void)dt;
-	/*if (dt == 0)
-	{
-		std::cout << dt << std::endl;
-	}*/
 
 	if (CurrentScene != PreviousScene)
 	{
-		//SaveCurrentScene(); // normally just for ImGui but can use here for testing
-
 		// Save the scene we're LEAVING for ESC navigation
 		LastScene = PreviousScene;
 
@@ -385,9 +381,8 @@ void SceneManager::UnloadCurrentScene()
 		}
 	}
 
-	std::cout << "[SceneManager] Entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
-	std::cout << "[SceneManager] Total entities before unload: "
-		<< g_coordinator->GetAllEntities().size() << std::endl;
+	//std::cout << "[SceneManager] Entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
+	//std::cout << "[SceneManager] Total entities before unload: " << g_coordinator->GetAllEntities().size() << std::endl;
 
 	for (auto const& entity : SceneEntityList)
 	{
@@ -408,6 +403,9 @@ void SceneManager::UnloadCurrentScene()
 
 void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE JSON FILE 
 {
+	// Reset countdown/beat state on scene load
+	g_countdownFinished = false;
+
 	UnloadCurrentScene();
 
 #ifdef _DEBUG
@@ -651,6 +649,8 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			}
 		}
 	}
+
+	PreviousScene = CurrentScene;
 
 #ifdef _DEBUG
 	std::cout << "\n===================================================" << std::endl;

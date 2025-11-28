@@ -1,4 +1,5 @@
 /******************************************************************************/
+/******************************************************************************/
 /**
  * @file        CoreEngine.cpp
  * @project     Pulse Protocol
@@ -34,8 +35,6 @@
 
 #include "../MyEngine/Components/DisplayName.h"
 #include "../MyEngine/Components/EntityType.h"
-
-#include "../MyEngine/UI/GUIManager.h"
 
 #include "../MyEngine/Audio/AudioSource.h"
 #include "../MyEngine/Graphics/Text.h"
@@ -289,7 +288,6 @@ CoreEngine::CoreEngine() : window(nullptr), DebugMode(false)
 {
 	LastTime = 0;
 	GameRunning = false;
-	// mAssets.Initialize();
 }
 
 CoreEngine::~CoreEngine()
@@ -339,13 +337,6 @@ void CoreEngine::Init()
 		//spdlog::error("Failed to initialize GLFW");
 		return;
 	}
-
-	// loading metadata for audio,texture,font into
-	// ASset reg's container each respectively
-	// ar.LoadAudioManifest();
-	// ar.LoadTextureManifest();
-	// ar.LoadFontManifest();
-	// ar.LoadSceneManifest();
 
 	unsigned int version = 0;
 	FMOD::System* system = nullptr;
@@ -488,9 +479,7 @@ void CoreEngine::Init()
 
 	// Create systems AFTER GL is ready
 	mAssets.Initialize(); //loaded registry inside
-	//std::cout << mAssets.getRegistry().FindTexture("hero") << "\n";
 	// Singleton for Engine, but once game use EventBus/messaging system
-	/*std::cout << "path for bgm : " << mAssets.getRegistry().FindAudio("BGM_L1")->path << "\n";*/
 	// PLEASE CALL THIS EVERY SINGLE U WANT 2 USE SINGLETON
 	auto g_coordinator = Coordinator::GetInstance();
 
@@ -544,35 +533,30 @@ void CoreEngine::Init()
 			"Init"                 // Name of the function
 		);
 
-	auto addScript = GetFunctionPtr<bool(*)(int, const char*)>
-		(
-			"ScriptAPI",
-			"ScriptAPI.EngineInterface",
-			"AddScriptViaName"
-		);
-
-	/*auto executeUpdate = GetFunctionPtr<void(*)(void)>
-		(
-			"ScriptAPI",
-			"ScriptAPI.EngineInterface",
-			"ExecuteUpdate"
-		);*/
+	//auto addScript = GetFunctionPtr<bool(*)(int, const char*)>
+	//	(
+	//		"ScriptAPI",
+	//		"ScriptAPI.EngineInterface",
+	//		"AddScriptViaName"
+	//	);
 
 	// Step 2: Initialize it with  pointer to CoreEngine as param
 	initFunc(this); 
-	
-	// Step 3: Adding script to an entity[please work ;-; ]
-	addScript(0, "TestScript"); // THE 0 IS ENTITY ID 0
-	
-	
+
+	//// Step 3: Adding script to an entity[please work ;-; ]
+	//addScript(0, "TestScript"); // THE 0 IS ENTITY ID 0
+	//addScript(1, "TestScript");		// show that u can run multiple codes and even multiple code for each entity :D
+	//addScript(1, "TestScript2");
+	//addScript(2, "TestScript2");
+	//
 	//this is for testing
-	HelloWorldFunctionPtr hwFunc = GetFunctionPtr<HelloWorldFunctionPtr>
-		(
-			"ScriptAPI",                 // Name of the Assembly
-			"ScriptAPI.EngineInterface", // Full name of the class
-			"HelloWorld"                 // Name of the function
-		);
-	hwFunc();
+	//HelloWorldFunctionPtr hwFunc = GetFunctionPtr<HelloWorldFunctionPtr>
+	//	(
+	//		"ScriptAPI",                 // Name of the Assembly
+	//		"ScriptAPI.EngineInterface", // Full name of the class
+	//		"HelloWorld"                 // Name of the function
+	//	);
+	//hwFunc();
 }
 
 void CoreEngine::Setup()
@@ -664,6 +648,18 @@ void CoreEngine::Update(float dt)
 	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
 	auto profiler = ProfilingManager::GetInstance();
 
+	// Always process engine / message stuff
+	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
+
+	//profiler->StartSystem("Scene System");
+	//if (g_sceneSystem)
+	//	g_sceneSystem->Update(dt);
+	//profiler->EndSystem("Scene System");
+
+	profiler->StartSystem("LogicSystem");
+	g_coordinator->UpdateAllSystems(dt);
+	profiler->EndSystem("LogicSystem");
+	
 	auto executeUpdate = GetFunctionPtr<void(*)(void)>
 		(
 			"ScriptAPI",
@@ -671,45 +667,6 @@ void CoreEngine::Update(float dt)
 			"ExecuteUpdate"
 		);
 	executeUpdate();
-
-	// Update loop for our scripts
-	/*if (executeUpdateFunc)
-	{
-		executeUpdateFunc();
-	}*/
-
-	// ACCEPTED BOTH VERSION BUT COMMENT OUT JUST TO SEE IF MERGE WORKS FOR NOW 
-	// if (!m_paused)
-	// {
-	// 	profiler->StartSystem("Scene System");
-	// 	if (g_sceneSystem) g_sceneSystem->Update(dt);
-	// 	profiler->EndSystem("Scene System");
-
-	// 	profiler->StartSystem("LogicSystem");
-	// 	g_coordinator->UpdateAllSystems(dt);
-	// 	profiler->EndSystem("LogicSystem");
-
-	// 	profiler->StartSystem("Input System");
-	// 	if (g_inputSystem) g_inputSystem->Update(dt);
-	// 	profiler->EndSystem("Input System");
-
-	// 	profiler->StartSystem("RhythmGameplayInput");
-	// 	if (g_rhythmSystem) g_rhythmSystem->Update(dt);
-	// 	profiler->EndSystem("RhythmGameplayInput");
-
-	// 	profiler->StartSystem("Audio System");
-	// 	if (g_audioSystem) g_audioSystem->Update();
-	// 	profiler->EndSystem("Audio System");
-	// }
-
-	profiler->StartSystem("Scene System");
-	if (g_sceneSystem)
-		g_sceneSystem->Update(dt);
-	profiler->EndSystem("Scene System");
-
-	profiler->StartSystem("LogicSystem");
-	g_coordinator->UpdateAllSystems(dt);
-	profiler->EndSystem("LogicSystem");
 
 	profiler->StartSystem("Graphics System");
 	if (g_graphicsSystem)
@@ -735,9 +692,6 @@ void CoreEngine::Update(float dt)
 	// If collision is in UpdateAllSystems, remove this
 	profiler->EndSystem("Collision System");
 	// Test.Update(dt);
-
-	// Always process engine / message stuff
-	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
 
 	// Always draw/update graphics once per frame
 	if (g_graphicsSystem)
@@ -785,7 +739,7 @@ void CoreEngine::GameLoop()
 
         // --- Present frame ---
         glfwSwapBuffers(window);
-
+		
         profiler->Reset();
     }
 }
@@ -804,10 +758,13 @@ void CoreEngine::Exit()
 
 	if (g_inputSystem)
 		g_inputSystem->Shutdown();
+
 	if (g_rhythmSystem)
 		g_rhythmSystem->Shutdown();
+
 	if (g_audioSystem)
 		g_audioSystem->Shutdown();
+
 	if (g_graphicsSystem)
 		g_graphicsSystem->Shutdown();
 
@@ -1091,7 +1048,8 @@ void CoreEngine::StopGame()
 	// Stop all audio (BGM and AudioSource components)
 	if (auto audio = coord->GetSystem<AudioManager>())
 	{
-		audio->StopBGM(); // Stop any direct BGM calls
+		//audio->StopBGM(); // Stop any direct BGM calls
+		audio->StopPlayingAllAudio(); //Stop ALL audio
 
 		// Stop all AudioSource components
 		for (Entity entity = 0; entity < MaxEntity; ++entity)

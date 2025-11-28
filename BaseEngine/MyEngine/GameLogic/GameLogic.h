@@ -2,8 +2,9 @@
 /**
  * @file        GameLogic.h
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael (primary) - 90%
+ * @author		Chia Wei Xuan Rachael (primary) - 85%
  * @author		Reginald Lew Yee Ren (secondary) - 10%
+ * @author		Goh Pin Kai (secondary) - 5%
  * 
  * @brief       Defines the scripting system for game entities.
  *              Provides the interface `Iscript` and derived `PlayerScript` and
@@ -40,6 +41,8 @@
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h> // for StringBuffer
 #pragma warning(pop)
+
+extern bool g_countdownFinished;
 
 // base class for scripts
 class Iscript
@@ -91,7 +94,6 @@ private:
 //PlayerScript playerScript;
 //playerScript.float_fields.emplace("Health", 100.0f);
 
-
 class EnemyScript : public Iscript
 {
 public:
@@ -107,6 +109,24 @@ public:
 
 	float enemyDmg;
 };
+
+//class EnemySpawnerScript : public Iscript
+//{
+//public:
+//	void Init(Entity ID) override;
+//	void Update(Entity ID) override;
+//	void Exit(Entity ID) override;
+//
+//	// Track the two enemies
+//	static Entity Enemy1ID;
+//	static Entity Enemy2ID;
+//
+//	// True when Enemy 1 has died
+//	static bool Enemy1Dead;
+//
+//	// Per-enemy hop timer (moved here)
+//	static std::unordered_map<Entity, float> HopTimer;
+//};
 
 // Per-button data structure
 struct ButtonData
@@ -145,6 +165,45 @@ private:
 	float bpm = 120.0f;
 	float minAlpha = 0.2f;
 	float maxAlpha = 1.0f;
+};
+
+class Csharptestscript : public Iscript
+{
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
+	Csharptestscript* Clone() override;
+
+private:
+	void(*initFunc)(CoreEngine*) = nullptr;
+	bool(*addScript)(int, const char*) = nullptr;
+};
+
+class CountdownScript : public Iscript
+{
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
+	CountdownScript* Clone() override;
+
+private:
+	float countdownTimer = 0.0f;
+};
+
+class FeedbackScript : public Iscript
+{
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
+	FeedbackScript* Clone() override;
+
+private:
+	float displayTimer = 0.0f;
+	bool isShowing = false;
+	float startTime = 0.0f;
 };
 
 class LogicSystem: public Systems

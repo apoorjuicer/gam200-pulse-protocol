@@ -32,10 +32,10 @@ AABB CollisionManager::BuildAABBFromTransform(const Framework::Transform& transf
     box.min.y = transform.Pos.y - (box.height * 0.5f);
     box.max.y = transform.Pos.y + (box.height * 0.5f);
 
-    std::cout << std::fixed << std::setprecision(2)
-        << "[DEBUG] BuildAABBFromTransform -> Pos(" << transform.Pos.x << "," << transform.Pos.y << ") "
-        << "Width=" << box.width << " Height=" << box.height << "\n"
-        << "AABB Min(" << box.min.x << "," << box.min.y << ") Max(" << box.max.x << "," << box.max.y << ")\n";
+    //std::cout << std::fixed << std::setprecision(2)
+    //    << "[DEBUG] BuildAABBFromTransform -> Pos(" << transform.Pos.x << "," << transform.Pos.y << ") "
+    //    << "Width=" << box.width << " Height=" << box.height << "\n"
+    //    << "AABB Min(" << box.min.x << "," << box.min.y << ") Max(" << box.max.x << "," << box.max.y << ")\n";
 
     return box;
 }

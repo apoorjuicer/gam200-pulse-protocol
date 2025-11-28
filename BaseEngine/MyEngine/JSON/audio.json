@@ -18,14 +18,14 @@
             "id": "SFX_W_Key",
             "path": "../../MyEngine/Assets/Sound/Keys/SFX_W_Key.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.5,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_A_Key",
             "path": "../../MyEngine/Assets/Sound/Keys/SFX_A_Key.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.5,
             "audiotype": "SFX"
         },
         {
