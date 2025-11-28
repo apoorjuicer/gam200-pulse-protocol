@@ -11,10 +11,14 @@ file(GLOB_RECURSE GAME_SRC CONFIGURE_DEPENDS
 
 add_executable(${GAME_NAME} ${GAME_SRC})
 
+# Ensures POST_BUILD copy commands run
+set_target_properties(${GAME_NAME} PROPERTIES 
+    VS_GLOBAL_DisableFastUpToDateCheck true
+)
+
 # Use the engine library
 target_link_libraries(${GAME_NAME} PRIVATE 
     MyEngine 
-    ScriptAPI
 )
 
 # So we can do #include "pch/pch.h" and other engine headers
@@ -22,7 +26,7 @@ target_include_directories(${GAME_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/MyEngine
 )
 
-add_dependencies(MyGame ScriptAPI)
+add_dependencies(MyGame ScriptAPI ManagedScripts)
 
 # Copy MyEngine.dll to MyGame output
 add_custom_command(TARGET ${GAME_NAME} POST_BUILD
@@ -30,6 +34,22 @@ add_custom_command(TARGET ${GAME_NAME} POST_BUILD
         "$<TARGET_FILE:MyEngine>"
         "$<TARGET_FILE_DIR:${GAME_NAME}>"
     COMMENT "Copying MyEngine.dll to MyGame output directory"
+)
+
+# Copy ScriptAPI.dll to MyGame output
+add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_BINARY_DIR}/MyEngine/$<CONFIG>/ScriptAPI.dll"
+        "$<TARGET_FILE_DIR:${GAME_NAME}>/ScriptAPI.dll"
+    COMMENT "Copying ScriptAPI.dll to MyGame"
+)
+
+# Copy ManagedScripts.dll to MyGame output
+add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_BINARY_DIR}/MyEngine/$<CONFIG>/ManagedScripts.dll"
+        "$<TARGET_FILE_DIR:${GAME_NAME}>/ManagedScripts.dll"
+    COMMENT "Copying ManagedScripts.dll to MyGame"
 )
 
 # Copy .NET Runtime DLLs for C# scripting
@@ -40,7 +60,7 @@ add_custom_command(TARGET ${GAME_NAME} POST_BUILD
     COMMENT "Copying .NET Runtime DLLs to MyGame output directory"
 )
 
-# Copy Assets and JSON
+# Copy JSON
 add_custom_command(TARGET ${GAME_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/MyEngine/JSON
@@ -48,14 +68,13 @@ add_custom_command(TARGET ${GAME_NAME} POST_BUILD
     COMMENT "Copying JSON files to MyGame"
 )
 
-
-# Copy MyEngine.dll and all its output to MyGame
-# add_custom_command(TARGET MyGame POST_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E copy_directory
-#         "${CMAKE_BINARY_DIR}/MyEngine/$<CONFIG>"
-#         "$<TARGET_FILE_DIR:MyGame>"
-#     COMMENT "Copying MyEngine.dll, ScriptAPI.dll, ManagedScripts.dll to MyGame"
-# )
+# Copy Assets
+add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/MyEngine/Assets
+        $<TARGET_FILE_DIR:${GAME_NAME}>/Assets
+    COMMENT "Copying Assets to MyGame"
+)
 
 # Automatically copies all third-party runtime DLLs(GLFW) that MyGame depends on to the executable directory
 add_custom_command(TARGET ${GAME_NAME} POST_BUILD
@@ -66,14 +85,6 @@ add_custom_command(TARGET ${GAME_NAME} POST_BUILD
     COMMENT "Copying DLL Dependencies like glfw3.dll to editor executable directory."
     VERBATIM
 )
-
-# build these two first, and include them in the project dependencies
-# if(TARGET ScriptAPI)
-#     add_dependencies(${GAME_NAME} ScriptAPI)
-# endif()
-# if(TARGET ManagedScripts)
-#     add_dependencies(${GAME_NAME} ManagedScripts)
-# endif()
 
 #Enables multi-processor parallel compilation in Visual Studio
 if(MSVC)

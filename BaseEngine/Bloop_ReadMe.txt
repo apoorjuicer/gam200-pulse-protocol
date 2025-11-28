@@ -98,5 +98,4 @@ Carrie Lam Tze Ying (UXGD)
 Chong Sze Ting Fenny (BFA)
 - Role: Art Lead
 - Champion: Art
-
 ================================================================================

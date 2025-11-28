@@ -1,4 +1,17 @@
-﻿#include "EngineInterface.h"
+﻿/******************************************************************************/
+/**
+* @file        EngineInterface.cpp
+* @project     Pulse Protocol
+* @author      Chia Wei Xuan Rachael - 100%
+* @brief       Manages the lifecycle and execution of C# scripts within the native C++ engine by providing script discovery, 
+               instantiation, attachment, and update orchestration through the C++/CLI bridge.
+*
+* @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+*              Reproduction or disclosure of this file or its contents without the
+*              prior written consent of DigiPen Institute of Technology is prohibited.
+*
+/******************************************************************************/
+#include "EngineInterface.h"
 #include "CoreEngine/Core/ScriptingBridge.h"
 #pragma comment(lib, "MyEngine.lib")
 

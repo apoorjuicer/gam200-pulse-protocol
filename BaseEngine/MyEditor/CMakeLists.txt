@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.20)
+
 set(EDITOR_NAME MyEditor)
 set(EDITOR_ROOT ${CMAKE_CURRENT_LIST_DIR})
 

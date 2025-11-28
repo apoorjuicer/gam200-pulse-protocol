@@ -1,4 +1,17 @@
-﻿#pragma once
+﻿/******************************************************************************/
+/**
+* @file        EngineInterface.h
+* @project     Pulse Protocol
+* @author      Chia Wei Xuan Rachael - 100%
+* @brief       Declares the C++/CLI bridge class that serves as the static interface between the native C++ engine 
+               and the managed C# scripting system, exposing script lifecycle management functions to native code.
+*
+* @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+*              Reproduction or disclosure of this file or its contents without the
+*              prior written consent of DigiPen Institute of Technology is prohibited.
+*
+/******************************************************************************/
+#pragma once
 #include "ScriptAPIClass.h"
 
 class CoreEngine;
