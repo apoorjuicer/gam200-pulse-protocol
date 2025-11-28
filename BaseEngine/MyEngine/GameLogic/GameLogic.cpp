@@ -1428,16 +1428,16 @@ PulsingBorderScript* PulsingBorderScript::Clone()
 
 void Csharptestscript::Init(Entity ID)
 {
-    auto addScript = Engine->GetFunctionPtr<bool(*)(int, const char*)>
+    auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>
         (
             "ScriptAPI",
             "ScriptAPI.EngineInterface",
             "AddScriptViaName"
         );
 
-    //// Adding script to an entity[please work ;-; ]
-    addScript(ID, "TestScript");    // THE 0 IS ENTITY ID 0
-    addScript(ID, "TestScript2");	// show that u can run multiple codes and even multiple code for each entity :D
+    // Adding script to an entity[please work ;-; ]
+    addScriptFunc(ID, "TestScript");    // THE 0 IS ENTITY ID 0
+    addScriptFunc(ID, "TestScript2");	// show that u can run multiple codes and even multiple code for each entity :D
 }
 
 void Csharptestscript::Update(Entity ID){ (void)ID; }

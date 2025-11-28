@@ -9,6 +9,9 @@
     <OutputPath>$(MSBuildProjectDirectory)\..\build\MyEngine\$(Configuration)\</OutputPath>
     
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+
+    <!-- Suppress architecture mismatch warning until parminder finds a solution for it-->
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
   
   <!-- Explicit configurations for CMake solution compatibility -->
