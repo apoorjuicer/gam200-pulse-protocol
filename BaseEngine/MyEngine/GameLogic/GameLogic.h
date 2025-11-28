@@ -2,8 +2,9 @@
 /**
  * @file        GameLogic.h
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael (primary) - 90%
+ * @author		Chia Wei Xuan Rachael (primary) - 85%
  * @author		Reginald Lew Yee Ren (secondary) - 10%
+ * @author		Goh Pin Kai (secondary) - 5%
  * 
  * @brief       Defines the scripting system for game entities.
  *              Provides the interface `Iscript` and derived `PlayerScript` and
