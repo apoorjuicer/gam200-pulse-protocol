@@ -8,7 +8,7 @@
 ; !!NOTE!!: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click "Tools" | "Create GUID" inside the Visual Studio IDE.)
-AppId={{9B7F5209-C752-4AD9-B7D8-F8C6AC285581}\
+AppId={{1EB0AD60-B7AB-44F0-BBAD-C32DE39E6A13}\
 
 ; Standard app data stuff
 ; !!NOTE!!: Replace all instances of "PulseProtocol" with your game name.
