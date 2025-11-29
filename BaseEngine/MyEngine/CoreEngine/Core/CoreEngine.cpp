@@ -21,7 +21,7 @@
 #define NOMINMAX 
 #include <windows.h>			   // for OutputDebugString, etc.
 #include <mmsystem.h>			   // for timeGetTime()
-#pragma comment(lib, "winmm.lib")  //shortcut instead of doing in CMake cos fuck me cmake is hard
+#pragma comment(lib, "winmm.lib")  //shortcut instead of doing in CMake
 
 #include "pch/pch.h"
 #include "graphics/stb_image.h"
