@@ -2,8 +2,9 @@
 /**
  * @file        collision.h
  * @project     Pulse Protocol
- * @author      Reginald Lew Yee Ren (primary) - 98%
+ * @author      Reginald Lew Yee Ren (primary) - 96%
  * @author      Goh Pin Kai (secondary) - 2%
+ * @author      Ban Kai Wei Benjamin (secondary) - 2%
  * @brief       Collision management utilities handling AABB, OBB, and distance-based
  *              collision detection. Provides reusable helpers for mouse/GUI hit testing
  *              and Transform-to-bounding-box conversions. Used throughout gameplay logic

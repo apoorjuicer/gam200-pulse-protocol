@@ -2,9 +2,11 @@
 /**
  * @file        glapp.cpp
  * @project     Pulse Protocol
- * @author      Goh Pin Kai
+ * @author      Goh Pin Kai (primary) - 90%
+ *			    Reginald Lew Yee Ren (secondary) - 10%
  * @brief		Implements OpenGL application utilities for initializing
-				shaders, models, viewports, and rendering textured entities.
+ *				shaders, models, viewports, and rendering textured entities.
+ * 
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.

@@ -2,7 +2,8 @@
 /**
  * @file        Editor.h
  * @project     Pulse Protocol
- * @author      Leu Jun Yong
+ * @author      Leu Jun Yong (primary) - 98%
+ * @author      Goh Pin Kai (secondary) - 2%
  * @brief       Initializes, updates, renders, and manages the ImGui
  *              editor interface with toggle support.
  *

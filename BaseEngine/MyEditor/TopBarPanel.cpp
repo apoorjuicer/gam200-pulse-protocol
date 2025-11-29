@@ -1,6 +1,6 @@
 /******************************************************************************/
 /**
- * @file        ProjectPanel.h
+ * @file        TopBarPanel.cpp
  * @project     Pulse Protocol
  * @author      Leu Jun Yong
  * @brief       Implements the Top Panel for the editor.

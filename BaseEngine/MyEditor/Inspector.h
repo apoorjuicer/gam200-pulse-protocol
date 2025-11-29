@@ -2,7 +2,8 @@
 /**
  * @file        Inspector.h
  * @project     Pulse Protocol
- * @author      Leu Jun Yong
+ * @author      Leu Jun Yong (primary) - 90%
+ *              Ban Kai Wei Benjamin (secondary) - 10%
  * @brief       Entity inspector panel for viewing and editing component properties.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
