@@ -465,6 +465,7 @@ void CoreEngine::Init()
 	WindowHeight = fbh;
 
 	glewInit();
+	DebugDraw::Init();
 
 	GLApp::ComputeLetterbox(fbw, fbh);
 

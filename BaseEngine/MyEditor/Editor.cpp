@@ -2,8 +2,8 @@
 /**
  * @file        Editor.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 78%
- * @author      Goh Pin Kai (secondary) - 7%
+ * @author      Leu Jun Yong (primary) - 70%
+ * @author      Goh Pin Kai (secondary) - 15%
  *              Chloe Lau Rey En (secondary) - 15%
  * @brief       Manages the full ImGui-based editor interface, including initialization, frame updates, rendering, and runtime toggling of editor features.
  *
