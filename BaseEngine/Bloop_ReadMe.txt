@@ -60,12 +60,52 @@ F3    - Toggle Debug Circles
 F4    - Toggle Debug Circles Filled
 F5    - Toggle Debug Points
 F6    - Toggle Debug Grid
-F7    - Stress test (spawn 1000 entities)
 F8    - Toggle Debug Overlay (FPS counter, performance stats)
 F11   - Toggle Fullscreen
 Space - Queue delayed combo message (test feature)
 
-[ 3. TEAM ROSTER ]
+
+[ 3. HOW TO PLAY ] 
+
+As a cyborg with the power to harness music and utilise it as a weapon against enemies, you can use the designated keys to create different combos to attack and defeat enemies.
+
+Using a combination of the four designated keys, 'W, A, S, D', you will face again waves of enemies you must defeat to reach your goal as humanity's last hope.
+
+You will see a slip with the enemy type and weakness on briefly, make sure to memorise it before it fades! 
+
+Once the enemy appears, make sure to watch closely before acting, pressing the keys before you know the enemy's movement pattern means you are one step closer to getting hurt!
+
+Match each enemy’s rhythm and perform their weapon combo at the right beats to defeat them.
+
+
+[ 4. ALL CONTROLS (Keys) ]
+ 
+- 'W' Key : SFX_W_Key.mp3
+- 'A' Key : SFX_A_Key.mp3
+- 'S' Key : SFX_S_Key.mp3 (Not Implemented)
+- 'D' Key : SFX_D_Key.mp3 (Not Implemented)
+
+
+[ 5. FEATURES ]
+
+ALL CURRENT PLAYABLE/FUNCTIONING FEATURES:
+
+Combo System: You are able to activate 1 type of weapons with the following combos:
+1. 'WAWA' (Spear) 
+
+Enemy Combat: You are able to input the combo of the enemy's weakness and defeat the enemy successfully
+
+
+INCOMPLETE FEATURES: 
+
+Slip System: Fading in and out of the slips is not fully functional at the moment, hence all slips are fully display throughout for now, will be functional by M3. 
+
+Full Level Progression: Currently you are only able to defeat one enemy before you win the game. 
+
+HP Progression: If you fail to input the combo successfully before the enemy reaches you, you die instantly at the moment.
+
+
+[ 6. TEAM ROSTER ]
 
 Chloe Lau Rey En (IMGD)
 - Role: Product Manager
