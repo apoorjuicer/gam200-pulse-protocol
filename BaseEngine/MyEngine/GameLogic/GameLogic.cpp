@@ -34,6 +34,14 @@
 //bool EnemyScript::testAABBCollision = false;
 //bool EnemyScript::testOBBCollision = false;
 
+// ===== Global enemy order variables (declared in GameLogic.cpp) =====
+extern Entity g_firstEnemy;
+extern Entity g_secondEnemy;
+extern bool   g_lockDetection;
+
+// ===== Global countdown freeze flag =====
+extern bool g_countdownFinished;
+
 // ===== GLOBAL COUNTDOWN STATE =====
 bool g_countdownFinished = false;
 
@@ -483,31 +491,40 @@ void EnemyScript::Init(Entity ID)
 {
     std::cout << "[EnemyScript] Init() called for entity " << ID << "\n";
 
-    // --- Reset detection when scene reloads ---
-    static bool firstRun = true;
-    if (firstRun)
+    // =========================================================================
+    // IMPORTANT FIX #1:
+    // Always reset enemy order detection upon scene reload.
+    // Previously, this was guarded by static 'firstRun' which only ran once.
+    // This caused enemies to share stale data between gameplay sessions.
+    // =========================================================================
+    g_firstEnemy = (Entity)-1;
+    g_secondEnemy = (Entity)-1;
+    g_lockDetection = false;
+
+    // =========================================================================
+    // IMPORTANT FIX #2:
+    // Clear beat-tracking state for ALL enemies.
+    // Static maps store data across scenes if not cleared.
+    // =========================================================================
     {
-        std::cout << "[EnemyScript] Resetting enemy detection\n";
-        firstRun = false;
-
-        // Reset the static tracking variables inside Update()
-        extern Entity g_firstEnemy;
-        extern Entity g_secondEnemy;
-        extern bool   g_lockDetection;
-
-        g_firstEnemy = (Entity)-1;
-        g_secondEnemy = (Entity)-1;
-        g_lockDetection = false;
+        static std::unordered_map<Entity, bool> wasOnBeat;
+        wasOnBeat.clear();
     }
+
+    std::cout << "[EnemyScript] Enemy state fully reset.\n";
 }
 
 void EnemyScript::Update(Entity ID)
 {
-    // FREEZE DURING COUNTDOWN
+    // =========================================================================
+    // FREEZE UNTIL COUNTDOWN COMPLETES
+    // =========================================================================
     if (!g_countdownFinished)
         return;
 
     auto g = Coordinator::GetInstance();
+
+    // Validate all required components
     if (!g->HasComponent<Framework::Transform>(ID) ||
         !g->HasComponent<AABB>(ID) ||
         !g->HasComponent<Health>(ID))
@@ -522,25 +539,29 @@ void EnemyScript::Update(Entity ID)
     if (!enemy_health.isAlive)
         return;
 
-    // ============================================================
-    // AUTO-DETECT FIRST & SECOND ENEMY ONLY ONCE
-    // ============================================================
+    // =========================================================================
+    // DETERMINE FIRST & SECOND ENEMY
+    // This is done ONCE per gameplay session.
+    // Second enemy must remain frozen until the first dies.
+    // =========================================================================
     if (!g_lockDetection)
     {
         if (g_firstEnemy == (Entity)-1)
         {
             g_firstEnemy = ID;
+            // std::cout << "[EnemyScript] REG: First enemy = " << ID << "\n";
         }
         else if (g_secondEnemy == (Entity)-1 && ID != g_firstEnemy)
         {
             g_secondEnemy = ID;
             g_lockDetection = true;
+            // std::cout << "[EnemyScript] REG: Second enemy = " << ID << "\n";
         }
     }
 
-    // ============================================================
-    // FREEZE SECOND ENEMY UNTIL FIRST ENEMY DIES
-    // ============================================================
+    // =========================================================================
+    // FREEZE SECOND ENEMY UNTIL FIRST ENEMY IS DEAD
+    // =========================================================================
     if (ID == g_secondEnemy)
     {
         if (g_firstEnemy != (Entity)-1 &&
@@ -548,27 +569,15 @@ void EnemyScript::Update(Entity ID)
         {
             auto& hp = g->GetComponent<Health>(g_firstEnemy);
 
+            // First enemy still alive? -> freeze second enemy completely.
             if (hp.isAlive)
-                return;     // ❗ freeze completely
+                return;
         }
     }
 
-    // ============================================================
-    // HOPPER MOVEMENT (NOW BEAT-SYNCED) 
-    // ============================================================
-    //static std::unordered_map<Entity, float> hopTimer;
-    //hopTimer[ID] += dt;
-
-    //const float hopInterval = 0.50f;   // seconds between hops
-    //const float hopDistance = 100.0f;  // teleport left
-
-    //if (hopTimer[ID] >= hopInterval)
-    //{
-    //    enemy_transform.Pos.x -= hopDistance;
-    //    hopTimer[ID] = 0.0f;
-    //}
-
-    // chloe -> ur previous one was not moving according to the beat
+    // =========================================================================
+    // BEAT-SYNCED HOP MOVEMENT
+    // =========================================================================
     static std::unordered_map<Entity, bool> wasOnBeat;
 
     auto audioSystem = g->GetSystem<AudioManager>();
@@ -579,22 +588,26 @@ void EnemyScript::Update(Entity ID)
     if (musicPos <= 0.0)
         return;
 
-    float beatInterval = 0.5f;
+    float beatInterval = 0.5f;    // how long per beat
+    float beatWindow = 0.15f;   // beat detection window
+
     float normalizedTime = fmodf((float)musicPos, beatInterval) / beatInterval;
-    float beatWindow = 0.15f;
 
-    bool onBeat = (normalizedTime < beatWindow || normalizedTime >(1.0f - beatWindow));
+    bool onBeat =
+        (normalizedTime < beatWindow ||
+            normalizedTime >(1.0f - beatWindow));
 
+    // Enemy hops EXACTLY when entering the beat window
     if (onBeat && !wasOnBeat[ID])
     {
-        enemy_transform.Pos.x -= 100.0f;
+        enemy_transform.Pos.x -= 100.0f;   // hop left
     }
 
     wasOnBeat[ID] = onBeat;
 
-    // ============================================================
-    // MANUAL DEBUG MOVEMENT (unchanged)
-    // ============================================================
+    // =========================================================================
+    // MANUAL DEBUG MOVEMENT — unchanged (arrow keys)
+    // =========================================================================
     float move = 300.0f;
 
     if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_UP) == GLFW_PRESS)
@@ -609,24 +622,24 @@ void EnemyScript::Update(Entity ID)
     if (glfwGetKey(Engine->GetWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS)
         enemy_transform.Pos.x += move * dt;
 
-    // ============================================================
-    // COLLISION (unchanged)
-    // ============================================================
+    // =========================================================================
+    // COLLISION WITH PLAYER
+    // =========================================================================
     std::vector<Entity> players;
     auto logicSys = g->GetSystem<LogicSystem>();
 
     for (auto const& e : logicSys->EntityMember)
     {
         if (!g->HasComponent<LogicComponent>(e)) continue;
-
-        auto& logic = g->GetComponent<LogicComponent>(e);
-        if (logic.ScriptName == "PlayerScript")
+        if (g->GetComponent<LogicComponent>(e).ScriptName == "PlayerScript")
             players.push_back(e);
     }
 
-    if (players.empty()) return;
+    if (players.empty())
+        return;
 
     CollisionManager collision;
+
     AABB enemyAABB = collision.BuildAABBFromTransform(enemy_transform, enemy_box);
 
     for (Entity p : players)
@@ -644,23 +657,26 @@ void EnemyScript::Update(Entity ID)
 
         if (collision.CheckAABBCollision(enemyAABB, playerAABB))
         {
-            // Play sound from enemy's AudioSource component
-            if (g->HasComponent<AudioSource>(ID)) {
+            // Play enemy SFX
+            if (g->HasComponent<AudioSource>(ID))
+            {
                 auto& audioSrc = g->GetComponent<AudioSource>(ID);
-                if (!audioSrc.audio_id.empty()) {
-                    if (auto audioManager = g->GetSystem<AudioManager>()) {
+                if (!audioSrc.audio_id.empty())
+                {
+                    if (auto audioManager = g->GetSystem<AudioManager>())
                         audioManager->PlayFromAudioSource(audioSrc);
-                    }
                 }
             }
 
+            // Apply damage
             enemy_health.isAlive = false;
             ph.hp -= enemy_health.damage;
 
+            // Destroy enemy
             Factory factory;
             factory.DeleteEntity(ID);
 
-            // Enemy hit player change to GameLose
+            // Game Over
             auto sceneMgr = g->GetSystem<SceneManager>();
             if (sceneMgr)
             {
