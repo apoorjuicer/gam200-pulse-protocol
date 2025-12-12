@@ -42,7 +42,7 @@
 //    bgAnimation.totalFrames = 1;
 //    bgAnimation.columns = 1;
 //    bgAnimation.rows = 1;
-//    bgRenderable.spriteName = "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg";
+//    bgRenderable.spriteName = "../../PulseEngine/Assets/Textures/Backgrounds/Background1.jpg";
 //    g_coordinator->AddComponent(Background, bgTransform);
 //    g_coordinator->AddComponent(Background, bgRenderable);
 //    g_coordinator->AddComponent(Background, bgAnimation);
@@ -60,7 +60,7 @@
 //    heroAnimation.totalFrames = 3;
 //    heroAnimation.columns = 3;
 //    heroAnimation.rows = 1;
-//    heroRenderable.spriteName = "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png";
+//    heroRenderable.spriteName = "../../PulseEngine/Assets/Textures/Characters/hero_spritesheet.png";
 //    g_coordinator->AddComponent(Hero, heroTransform);
 //    g_coordinator->AddComponent(Hero, heroRenderable);
 //    g_coordinator->AddComponent(Hero, heroAnimation);
@@ -94,7 +94,7 @@
 //        MonsterAnimation.totalFrames = 1;
 //        MonsterAnimation.columns = 1;
 //        MonsterAnimation.rows = 1;
-//        MonsterRenderable.spriteName = "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png";
+//        MonsterRenderable.spriteName = "../../PulseEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png";
 //        g_coordinator->AddComponent(Monster, MonsterTransform);
 //        g_coordinator->AddComponent(Monster, MonsterRenderable);
 //        g_coordinator->AddComponent(Monster, MonsterAnimation);
@@ -125,7 +125,7 @@
 //    inputR.mdl_ref = 1.0f;
 //    inputR.shd_ref = 2.0f;
 //    inputObj.isVisible = false;
-//    inputR.spriteName = "../../MyEngine/Assets/Textures/UI/bar.png";
+//    inputR.spriteName = "../../PulseEngine/Assets/Textures/UI/bar.png";
 //    g_coordinator->AddComponent(inputEntity, inputObj);
 //    g_coordinator->AddComponent(inputEntity, inputR);
 //    g_coordinator->AddComponent(inputEntity, inputA);
@@ -313,10 +313,10 @@
 //    auto* g_coordinator = Coordinator::GetInstance();
 //    auto inputMgr = g_coordinator->GetSystem<InputManager>();
 //
-//    std::ifstream ifs("../../MyEngine/JSON/GUIButtons.json");
+//    std::ifstream ifs("../../PulseEngine/JSON/GUIButtons.json");
 //    if (!ifs.is_open()) {
 //        std::cerr << "[TestCase] Cannot open GUIButtons.json - trying alternate path\n";
-//        ifs.open("../../MyEngine/JSON/GuiButtons.json");
+//        ifs.open("../../PulseEngine/JSON/GuiButtons.json");
 //        if (!ifs.is_open()) {
 //            std::cerr << "[TestCase] Failed to open GUI buttons JSON file\n";
 //            return;

@@ -13,7 +13,7 @@
 
 #pragma once
 
-namespace MyEditor
+namespace PulseEditor
 {
     std::string OpenJsonFileDialog();
 

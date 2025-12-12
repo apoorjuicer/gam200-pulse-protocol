@@ -42,13 +42,13 @@
 #include "Graphics/Transform.h"
 #include "CoreEngine/Prefab/PrefabManager.h"
 
-namespace MyEditor
+namespace PulseEditor
 {
     // Externs from elsewhere
     extern std::vector<Entity> entityDisplayOrder;   // defined in Editor / Hierarchy panel
 
     // ── Asset browser state ─────────────────────────────────────
-    static std::string s_assetRoot = "../../MyEngine/Assets";
+    static std::string s_assetRoot = "../../PulseEngine/Assets";
     static std::string s_currentDir = s_assetRoot;
     static std::vector<AssetItem> s_dirEntries;
 
@@ -623,12 +623,12 @@ namespace MyEditor
                             coord->HasComponent<Framework::Renderable>(selectedEntity))
                         {
                             auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
-                            // Convert to relative path with ../../MyEngine/Assets prefix
+                            // Convert to relative path with ../../PulseEngine/Assets prefix
                             namespace fs = std::filesystem;
                             std::string pathStr = item.fullPath;
                             std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
 
-                            size_t myEnginePos = pathStr.find("MyEngine/Assets");
+                            size_t myEnginePos = pathStr.find("PulseEngine/Assets");
                             if (myEnginePos != std::string::npos)
                             {
                                 rend.spriteName = "../../" + pathStr.substr(myEnginePos);

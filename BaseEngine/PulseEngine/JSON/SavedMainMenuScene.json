@@ -30,7 +30,7 @@
                         "shd_ref": 1.0,
                         "textureID": 258,
                         "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/Background1.jpg",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -80,7 +80,7 @@
                         "shd_ref": 2.0,
                         "textureID": 262,
                         "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/UI/bar.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/bar.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -130,7 +130,7 @@
                         "shd_ref": 2.0,
                         "textureID": 263,
                         "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/UI/perfect.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/perfect.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,

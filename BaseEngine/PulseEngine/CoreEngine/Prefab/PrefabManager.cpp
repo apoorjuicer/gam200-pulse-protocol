@@ -16,7 +16,7 @@
 
 #include "PrefabManager.h"
 #include "PrefabInstance.h"
-#include "Factory/Factory.h"
+#include "CoreEngine/Factory/Factory.h"
 #include "Components/DisplayName.h"
 
 // Component headers for UpdateEntityFromPrefab

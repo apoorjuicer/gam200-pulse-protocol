@@ -13,7 +13,7 @@
 
 #pragma once
 
-namespace MyEditor
+namespace PulseEditor
 {
     // Forward declaration; full definition is in Editor.h
     struct GameViewport;

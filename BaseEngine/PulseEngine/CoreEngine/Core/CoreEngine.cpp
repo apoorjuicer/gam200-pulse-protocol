@@ -25,6 +25,7 @@
 #include "pch/pch.h"
 #include "graphics/stb_image.h"
 #include "CoreEngine/Factory/Factory.h"
+#include "Serialization/Serialization.h"
 #include "CoreEngine/Prefab/PrefabInstance.h"
 #ifdef ENABLE_EDITOR
 #include "../PulseEditor/Editor.h"
@@ -72,11 +73,11 @@ void CoreEngine::startScriptEngine()
 	// Steppppppppppp 1, we get the current executable directory so that we can find the coreclr.dll to load
 	std::string runtimePath(MAX_PATH, '\0');
 
-	// Get the path to MyEngine.dll instead of the .exe
-	HMODULE hEngine = GetModuleHandleA("MyEngine.dll");
+	// Get the path to PulseEngine.dll instead of the .exe
+	HMODULE hEngine = GetModuleHandleA("PulseEngine.dll");
 	if (!hEngine)
 	{
-		throw std::runtime_error("Failed to get MyEngine.dll module handle");
+		throw std::runtime_error("Failed to get PulseEngine.dll module handle");
 	}
 
 	GetModuleFileNameA(hEngine, runtimePath.data(), MAX_PATH);
@@ -319,7 +320,7 @@ void CoreEngine::Init()
 	std::cout << "WindowHeight is: " << WindowHeight << "\n";
 
 	///*saving config data*/ //tested saving works
-	// std::string newConfigPath = "../../MyEngine/JSON/config2.json";
+	// std::string newConfigPath = "../../PulseEngine/JSON/config2.json";
 	// config.SetWindowWidth(800);
 	// config.SetWindowHeight(600);
 	// std::cout << "set WindowWidth is: " << config.GetWindowWidth() << "\n";
@@ -517,7 +518,7 @@ void CoreEngine::Init()
 	ProfilingManager::GetInstance()->SetResetInterval(60.0);
 	ProfilingManager::GetInstance()->SetDisplayUpdateInterval(1.0);
 
-	// GLuint barTexture = LoadTexture("../../MyEngine/Assets/Sprites/perfect.png");
+	// GLuint barTexture = LoadTexture("../../PulseEngine/Assets/Sprites/perfect.png");
 	// if (barTexture > 0) {
 	//	Entity box2 = g_inputSystem->GetFeedbackEntity2();  // Use getter
 	//	auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(box2);
@@ -1022,7 +1023,7 @@ void CoreEngine::PlayGame()
 		}
 
 		// ALWAYS update this path, even if already set
-		m_originalScenePath = "../../MyEngine/JSON/" + sceneName + ".json";
+		m_originalScenePath = "../../PulseEngine/JSON/" + sceneName + ".json";
 
 		std::cout << "[CoreEngine] Original scene path: " << m_originalScenePath << std::endl; // DEBUG
 	}

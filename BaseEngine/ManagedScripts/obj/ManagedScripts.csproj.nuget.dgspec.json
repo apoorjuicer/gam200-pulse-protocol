@@ -1,0 +1,240 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj": {}
+  },
+  "projects": {
+    "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui.vcxproj": {
+      "restore": {
+        "projectUniqueName": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui.vcxproj",
+        "projectName": "imgui",
+        "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui.vcxproj",
+        "UsingMicrosoftNETSdk": false,
+        "frameworks": {
+          "native": {
+            "projectReferences": {}
+          }
+        }
+      },
+      "frameworks": {
+        "native": {}
+      }
+    },
+    "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui_backend.vcxproj": {
+      "restore": {
+        "projectUniqueName": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui_backend.vcxproj",
+        "projectName": "imgui_backend",
+        "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui_backend.vcxproj",
+        "UsingMicrosoftNETSdk": false,
+        "frameworks": {
+          "native": {
+            "projectReferences": {
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui.vcxproj"
+              },
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glfw-build\\src\\glfw.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glfw-build\\src\\glfw.vcxproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "native": {}
+      }
+    },
+    "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\PulseEngine\\PulseEngine.vcxproj": {
+      "restore": {
+        "projectUniqueName": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\PulseEngine\\PulseEngine.vcxproj",
+        "projectName": "PulseEngine",
+        "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\PulseEngine\\PulseEngine.vcxproj",
+        "UsingMicrosoftNETSdk": false,
+        "frameworks": {
+          "native": {
+            "projectReferences": {
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui.vcxproj"
+              },
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui_backend.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui_backend.vcxproj"
+              },
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\freetype_src-build\\freetype.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\freetype_src-build\\freetype.vcxproj"
+              },
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glew-build\\libglew_static.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glew-build\\libglew_static.vcxproj"
+              },
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glfw-build\\src\\glfw.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glfw-build\\src\\glfw.vcxproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "native": {}
+      }
+    },
+    "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\ScriptAPI\\ScriptAPI.vcxproj": {
+      "restore": {
+        "projectUniqueName": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\ScriptAPI\\ScriptAPI.vcxproj",
+        "projectName": "ScriptAPI",
+        "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\ScriptAPI\\ScriptAPI.vcxproj",
+        "UsingMicrosoftNETSdk": false,
+        "frameworks": {
+          "native": {
+            "projectReferences": {
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui.vcxproj"
+              },
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui_backend.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\imgui_backend.vcxproj"
+              },
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\PulseEngine\\PulseEngine.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\PulseEngine\\PulseEngine.vcxproj"
+              },
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\freetype_src-build\\freetype.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\freetype_src-build\\freetype.vcxproj"
+              },
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glew-build\\libglew_static.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glew-build\\libglew_static.vcxproj"
+              },
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glfw-build\\src\\glfw.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glfw-build\\src\\glfw.vcxproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "native": {}
+      }
+    },
+    "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\freetype_src-build\\freetype.vcxproj": {
+      "restore": {
+        "projectUniqueName": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\freetype_src-build\\freetype.vcxproj",
+        "projectName": "freetype",
+        "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\freetype_src-build\\freetype.vcxproj",
+        "UsingMicrosoftNETSdk": false,
+        "frameworks": {
+          "native": {
+            "projectReferences": {}
+          }
+        }
+      },
+      "frameworks": {
+        "native": {}
+      }
+    },
+    "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glew-build\\libglew_static.vcxproj": {
+      "restore": {
+        "projectUniqueName": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glew-build\\libglew_static.vcxproj",
+        "projectName": "libglew_static",
+        "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glew-build\\libglew_static.vcxproj",
+        "UsingMicrosoftNETSdk": false,
+        "frameworks": {
+          "native": {
+            "projectReferences": {}
+          }
+        }
+      },
+      "frameworks": {
+        "native": {}
+      }
+    },
+    "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glfw-build\\src\\glfw.vcxproj": {
+      "restore": {
+        "projectUniqueName": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glfw-build\\src\\glfw.vcxproj",
+        "projectName": "glfw",
+        "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\_deps\\glfw-build\\src\\glfw.vcxproj",
+        "UsingMicrosoftNETSdk": false,
+        "frameworks": {
+          "native": {
+            "projectReferences": {}
+          }
+        }
+      },
+      "frameworks": {
+        "native": {}
+      }
+    },
+    "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+        "projectName": "ManagedScripts",
+        "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
+        "outputPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0-windows10.0.17763.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0-windows10.0.17763": {
+            "targetAlias": "net8.0-windows10.0.17763.0",
+            "projectReferences": {
+              "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\ScriptAPI\\ScriptAPI.vcxproj": {
+                "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\ScriptAPI\\ScriptAPI.vcxproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net8.0-windows10.0.17763": {
+          "targetAlias": "net8.0-windows10.0.17763.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.Windows.SDK.NET.Ref",
+              "version": "[10.0.17763.57, 10.0.17763.57]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.Windows.SDK.NET.Ref.Windows": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.308/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

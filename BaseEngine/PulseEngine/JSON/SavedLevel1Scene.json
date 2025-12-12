@@ -33,7 +33,7 @@
                         "shd_ref": 1.0,
                         "textureID": 266,
                         "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/Background1.jpg",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -86,7 +86,7 @@
                         "shd_ref": 2.0,
                         "textureID": 267,
                         "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/hero_spritesheet.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -170,7 +170,7 @@
                         "shd_ref": 2.0,
                         "textureID": 260,
                         "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -334,7 +334,7 @@
                             "a": 1.0
                         },
                         "actionType": "CreateEntity",
-                        "entityJsonPath": "../../MyEngine/JSON/HeroPrefab.json",
+                        "entityJsonPath": "../../PulseEngine/JSON/HeroPrefab.json",
                         "isEnabled": true
                     }
                 }
@@ -431,7 +431,7 @@
                         "shd_ref": 2.0,
                         "textureID": 267,
                         "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/hero_spritesheet.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,

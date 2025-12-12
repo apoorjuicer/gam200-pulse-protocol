@@ -153,7 +153,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/UI/restart.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/restart.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -218,7 +218,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/UI/quit.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/quit.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,

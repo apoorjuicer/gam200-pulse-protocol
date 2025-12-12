@@ -195,7 +195,7 @@ bool SaveScriptName(LogicComponent const& t, std::string const& path)
 
     // MUST HAVE TO RETURN BACK TO MYENGINE INSTEAD OF BUILD(AKA GETS DELETE WHEN CLEANED)
     namespace fs = std::filesystem;
-    fs::create_directories("../../MyEngine/JSON");
+    fs::create_directories("../../PulseEngine/JSON");
 
     std::ofstream ofs(path);
     if (!ofs.is_open()) {
@@ -281,7 +281,7 @@ void PlayerScript::Init(Entity ID)
             }
 
             // SWITCH TO ATTACK SPRITE
-            rend.spriteName = "../../MyEngine/Assets/Textures/Characters/hero_spritesheet.png";
+            rend.spriteName = "../../PulseEngine/Assets/Textures/Characters/hero_spritesheet.png";
             rend.needsTextureReload = true;
 
             anim.totalFrames = 3;
@@ -374,7 +374,7 @@ void PlayerScript::Update(Entity ID)
                 auto& anim = g_coordinator->GetComponent<Framework::Animation>(ID);
 
                 // idle sheet (your 2-frame image)
-                rend.spriteName = "../../MyEngine/Assets/Textures/Characters/hero_idle.png";
+                rend.spriteName = "../../PulseEngine/Assets/Textures/Characters/hero_idle.png";
                 rend.needsTextureReload = true;
 
                 anim.totalFrames = 2;
@@ -1571,15 +1571,15 @@ void FeedbackScript::Init(Entity ID)
             // Change texture based on feedback
             if (evt.feedback == "PERFECT")
             {
-                rend.spriteName = "../../MyEngine/Assets/Textures/UI/perfect.png";
+                rend.spriteName = "../../PulseEngine/Assets/Textures/UI/perfect.png";
             }
             else if (evt.feedback == "GOOD")
             {
-                rend.spriteName = "../../MyEngine/Assets/Textures/UI/great.png";
+                rend.spriteName = "../../PulseEngine/Assets/Textures/UI/great.png";
             }
             else // MISS
             {
-                rend.spriteName = "../../MyEngine/Assets/Textures/UI/miss.png";
+                rend.spriteName = "../../PulseEngine/Assets/Textures/UI/miss.png";
             }
 
             rend.needsTextureReload = true;

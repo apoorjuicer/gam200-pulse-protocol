@@ -144,14 +144,6 @@ add_custom_command(TARGET PulseEditor POST_BUILD
     COMMENT "Copying .NET Runtime DLLs to PulseEditor output directory"
 )
 
-# Explicitly copy ManagedScripts.dll (sometimes the directory copy misses it)
-add_custom_command(TARGET PulseEditor POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_BINARY_DIR}/PulseEngine/$<CONFIG>/ManagedScripts.dll"
-        "$<TARGET_FILE_DIR:PulseEditor>/ManagedScripts.dll"
-    COMMENT "Explicitly copying ManagedScripts.dll to PulseEditor"
-)
-
 # Enables multi-processor parallel compilation in Visual Studio
 if(MSVC)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")

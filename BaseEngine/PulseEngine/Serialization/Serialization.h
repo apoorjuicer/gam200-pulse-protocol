@@ -20,7 +20,7 @@
 
 #pragma once
 #//include <pch/pch.h>
-//#include "../MyEngine/CoreEngine/ECS/Types.h" // ensures Entity/Signature are known  <-- (from Types.h)
+//#include "../PulseEngine/CoreEngine/ECS/Types.h" // ensures Entity/Signature are known  <-- (from Types.h)
 #include <rapidjson/ostreamwrapper.h>
 //#include <rapidjson/document.h>     // for Document, Value, AllocatorType in pch tmp
 #include <rapidjson/prettywriter.h>
@@ -34,7 +34,7 @@ class Config
 private:
 	int WindowWidth = 0;
 	int WindowHeight = 0;
-	std::string ConfigPath = "../../MyEngine/JSON/config.json";
+	std::string ConfigPath = "../../PulseEngine/JSON/config.json";
 public:
 	int GetWindowWidth() const;
 	int GetWindowHeight() const;

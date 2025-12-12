@@ -18,7 +18,7 @@
 #include "../../imgui/imgui.h"
 class Coordinator;
 
-namespace MyEditor
+namespace PulseEditor
 {
     // Draw the right-side Inspector window, docked into rightDockID
     void DrawInspectorWindow(ImGuiID rightDockID);
@@ -30,4 +30,4 @@ namespace MyEditor
     void Inspector_LogicComponent(Coordinator* g);
     void Inspector_AudioComponent(Coordinator* g);
     void Inspector_TextComponentUI(Coordinator* g);
-}// end of namespace MyEditor
+}// end of namespace PulseEditor

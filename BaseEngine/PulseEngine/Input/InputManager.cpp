@@ -155,8 +155,8 @@ void InputManager::Update(float) {
 
 	// Editor toggle
 	//if (isKeyTriggered(GLFW_KEY_O)) {
-	//	bool now = !MyEditor::IsEnabled();
-	//	MyEditor::SetEnabled(now);
+	//	bool now = !PulseEditor::IsEnabled();
+	//	PulseEditor::SetEnabled(now);
 	//	std::cout << "[Editor] ImGui " << (now ? "ON" : "OFF") << std::endl;
 	//}
 }

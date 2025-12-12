@@ -37,8 +37,8 @@ add_custom_command(TARGET ${GAME_NAME} POST_BUILD
 # Copy ScriptAPI.dll to PulseProtocol output
 add_custom_command(TARGET ${GAME_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_BINARY_DIR}/PulseEngine/$<CONFIG>/ScriptAPI.dll"
-        "$<TARGET_FILE_DIR:${GAME_NAME}>/ScriptAPI.dll"
+        "$<TARGET_FILE:ScriptAPI>"
+        "$<TARGET_FILE_DIR:${GAME_NAME}>"
     COMMENT "Copying ScriptAPI.dll to PulseProtocol"
 )
 

@@ -130,8 +130,8 @@ namespace JSONUtils {
     bool WriteJSONToFile(Document const& d, std::filesystem::path const& path, bool pretty) {
         namespace fs = std::filesystem;
         std::error_code ec;
-        //fs::create_directories("../../MyEngine/JSON", ec);
-        //path.parent_path() gets ../../MyEngine/JSON
+        //fs::create_directories("../../PulseEngine/JSON", ec);
+        //path.parent_path() gets ../../PulseEngine/JSON
         //error code so dont throw exception
         fs::create_directories(path.parent_path(), ec);
 

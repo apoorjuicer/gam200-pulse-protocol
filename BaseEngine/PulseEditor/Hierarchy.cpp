@@ -31,7 +31,7 @@
 // Everything else (Factory, Name, GUIButton, Renderable, Transform, Animation)
 // is already included via Editor.h
 
-namespace MyEditor
+namespace PulseEditor
 {
     
     // -------------------------------------------------------------------------
@@ -225,8 +225,8 @@ namespace MyEditor
 
         //static std::vector<EntityPrefab> entityPrefabs = {
         //    { "Empty Entity",  nullptr,                                   true, 200.0f, 200.0f },
-        //    { "Hero",          "../../MyEngine/JSON/HeroPrefab.json",     false, 0.0f,  0.0f   },
-        //    { "Monster",       "../../MyEngine/JSON/MonsterPrefab.json",  false, 0.0f,  0.0f   },
+        //    { "Hero",          "../../PulseEngine/JSON/HeroPrefab.json",     false, 0.0f,  0.0f   },
+        //    { "Monster",       "../../PulseEngine/JSON/MonsterPrefab.json",  false, 0.0f,  0.0f   },
         //    { "Background",    nullptr,                                   true, 800.0f, 600.0f }
         //};
 

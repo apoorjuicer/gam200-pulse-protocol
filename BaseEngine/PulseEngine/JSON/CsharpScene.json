@@ -32,7 +32,7 @@
                         "mdl_ref": 1.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../MyEngine/Assets/Textures/Characters/hero_idle.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/hero_idle.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,

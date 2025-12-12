@@ -12,7 +12,7 @@
  /******************************************************************************/
 
 #include "pch/pch.h"     // this already pulls in CoreEngine.h and Editor.h (CHANGE THIS TO PCH_TEMP ISTFG)
-#include "../MyEditor/Editor.h"
+#include "Editor.h"
 
 int main()
 {
@@ -22,13 +22,13 @@ int main()
 
     GLFWwindow* win = Engine->GetWindow(); 
 
-    MyEditor::Init(win);           
+    PulseEditor::Init(win);           
 
 
-    Engine->SetEditorFrameCallback(MyEditor::Editor_FrameCallback);
+    Engine->SetEditorFrameCallback(PulseEditor::Editor_FrameCallback);
     Engine->GameLoop();
 
-    MyEditor::Shutdown();
+    PulseEditor::Shutdown();
     Engine->Exit();
     delete Engine;
     return 0;

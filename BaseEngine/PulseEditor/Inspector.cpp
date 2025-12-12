@@ -22,7 +22,7 @@
 #include "Graphics/Text.h"
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "CoreEngine/Prefab/PrefabInstance.h"
-namespace MyEditor
+namespace PulseEditor
 {
     // Definition of singleton undomanager for editor;
     // UNDO Manager
@@ -729,7 +729,7 @@ namespace MyEditor
                     if (reloadClicked)
                     {
                         namespace fs = std::filesystem;
-                        const std::string kTexturesRoot = "../../MyEngine/Assets/Textures";
+                        const std::string kTexturesRoot = "../../PulseEngine/Assets/Textures";
 
                         constexpr int SPRITE_SHADER_INDEX = 1;
                         constexpr int SPRITESHEET_SHADER_INDEX = 2;
@@ -750,7 +750,7 @@ namespace MyEditor
 
                                 const fs::path roots[] = {
                                     fs::path(kTexturesRoot),
-                                    fs::path("../../MyEngine/Assets")};
+                                    fs::path("../../PulseEngine/Assets")};
 
                                 std::string resolved;
                                 for (const fs::path &root : roots)
@@ -778,7 +778,7 @@ namespace MyEditor
                                     std::string pathStr = resolved;
                                     std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
 
-                                    size_t myEnginePos = pathStr.find("MyEngine/Assets");
+                                    size_t myEnginePos = pathStr.find("PulseEngine/Assets");
                                     if (myEnginePos != std::string::npos)
                                     {
                                         r.spriteName = "../../" + pathStr.substr(myEnginePos);
@@ -1240,4 +1240,4 @@ namespace MyEditor
         ImGui::Separator();
     }
 
-} // namespace MyEditor
+} // namespace PulseEditor

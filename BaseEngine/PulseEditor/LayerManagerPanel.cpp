@@ -19,7 +19,7 @@
 #include "CoreEngine/ECS/Coordinator.h"
 #include "Graphics/GraphicsManager.h"  // For SetEditorLayerFilter
 
-namespace MyEditor
+namespace PulseEditor
 {
     // -------------------------------------------------------------------------
     // Layer visibility state (persists across frames)
@@ -271,4 +271,4 @@ namespace MyEditor
         ImGui::End();
     }
 
-} // namespace MyEditor
+} // namespace PulseEditor

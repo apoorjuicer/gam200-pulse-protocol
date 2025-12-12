@@ -31,14 +31,14 @@
 #include "Components/DisplayName.h"     // For display name in hierarchy list
 //#include "Graphics/Transform.h"
 #include "Graphics/glapp.h"
-#include "../MyEngine/Math/math.h"
+#include "Math/math.h"
 
 
 #include "UndoManager.h" //FOR UNDO
 struct GLFWwindow;
 
 
-namespace MyEditor {
+namespace PulseEditor {
     void Init(GLFWwindow* window);
     void NewFrame();
     void Draw();
@@ -77,7 +77,7 @@ namespace MyEditor {
     struct AssetItem
     {
         std::string name;        // just the file/folder name
-        std::string fullPath;    // absolute-ish path (../../MyEngine/Assets/...)
+        std::string fullPath;    // absolute-ish path (../../PulseEngine/Assets/...)
         bool isDir = false;
 
         // thumbnail stuff (for files)
@@ -87,4 +87,4 @@ namespace MyEditor {
     //UNDO Manager
     extern UndoManager mUndo;
 
-}// end of namespace MyEditor
+}// end of namespace PulseEditor

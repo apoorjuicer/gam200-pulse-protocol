@@ -6,7 +6,7 @@
     <!-- Explicitly define platforms to allow solution configuration mapping -->
     <Platforms>x64</Platforms>
     
-    <OutputPath>$(MSBuildProjectDirectory)\..\build\MyEngine\$(Configuration)\</OutputPath>
+    <OutputPath>$(MSBuildProjectDirectory)\..\build\PulseEngine\$(Configuration)\</OutputPath>
     
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 

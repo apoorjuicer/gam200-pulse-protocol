@@ -14,7 +14,7 @@
 #include "SnapShot.h"
 #include "CoreEngine/Factory/Factory.h"
 
-namespace MyEditor
+namespace PulseEditor
 {
     EntitySnapshot MakeEntitySnapshot(Entity e)
     {

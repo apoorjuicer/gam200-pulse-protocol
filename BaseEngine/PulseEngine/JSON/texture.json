@@ -2,7 +2,7 @@
     "textureFilePaths": [
         {
             "id": "background",
-            "path": "../../MyEngine/Assets/Textures/Backgrounds/Background1.jpg",
+            "path": "../../PulseEngine/Assets/Textures/Backgrounds/Background1.jpg",
             "vert_shader_path": "shader/bg_vs.vert",
             "frag_shader_path": "shader/bg_fs.frag",
             "mdl_ref": 0,
@@ -10,7 +10,7 @@
         },
         {
             "id": "hero",
-            "path": "../../MyEngine/Assets/Textures/Characters/hero.png",
+            "path": "../../PulseEngine/Assets/Textures/Characters/hero.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
@@ -18,7 +18,7 @@
         },
         {
             "id": "BlueGorillaEnemy",
-            "path": "../../MyEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
+            "path": "../../PulseEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
@@ -26,7 +26,7 @@
         },
         {
             "id": "RedGorillaEnemy",
-            "path": "../../MyEngine/Assets/Textures/Enemies/RedGorillaEnemy.png",
+            "path": "../../PulseEngine/Assets/Textures/Enemies/RedGorillaEnemy.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
@@ -34,7 +34,7 @@
         },
         {
             "id": "bar_ui",
-            "path": "../../MyEngine/Assets/Textures/UI/bar.png",
+            "path": "../../PulseEngine/Assets/Textures/UI/bar.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
@@ -42,7 +42,7 @@
         },
         {
             "id": "perfect_ui",
-            "path": "../../MyEngine/Assets/Textures/UI/perfect.png",
+            "path": "../../PulseEngine/Assets/Textures/UI/perfect.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,

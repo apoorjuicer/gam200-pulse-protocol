@@ -14,7 +14,7 @@
  *             - LoadSceneFromJson(path): Parses JSON scene file, creates entities with
  *               components, auto-stops game during transition, registers GUI buttons
  *             - SaveCurrentScene(): Serializes current scene state to JSON file in
- *               ../../MyEngine/JSON/[SceneName].json format
+ *               ../../PulseEngine/JSON/[SceneName].json format
  *             - UnloadCurrentScene(): Destroys all entities in SceneEntityList, clears
  *               tracking container
  * 
@@ -36,7 +36,7 @@
 #pragma once
 #include "pch/pch_temp.h"
 
-//#include "../MyEngine/Components/DisplayName.h"
+//#include "../PulseEngine/Components/DisplayName.h"
 #include "CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
 
@@ -92,8 +92,8 @@ private:
 	std::string LastScene;			// For ESC navigation - the scene we came FROM
 	std::vector<Entity> SceneEntityList;
 
-	std::string StartingScene = "../../MyEngine/JSON/MainMenu.json"; 
-	//std::string StartingScene = "../../MyEngine/JSON/Level1.json"; // level 1 for reg to test scripts 
+	std::string StartingScene = "../../PulseEngine/JSON/MainMenu.json"; 
+	//std::string StartingScene = "../../PulseEngine/JSON/Level1.json"; // level 1 for reg to test scripts 
 
 	void Deserialize(const rapidjson::Value& in);
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;

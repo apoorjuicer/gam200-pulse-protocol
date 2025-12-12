@@ -84,11 +84,11 @@
 		std::unordered_map<std::string, AnimationResource> animationResources;
 
 		//file paths
-		std::string audiojsonfilepath = "../../MyEngine/JSON/audio.json";
-		std::string texturejsonfilepath = "../../MyEngine/JSON/texture.json";
-		std::string fontjsonfilepath = "../../MyEngine/JSON/font.json";
-		std::string scenejsonfilepath = "../../MyEngine/JSON/scene.json";
-		std::string animationjsonfilepath = "../../MyEngine/JSON/animation.json";
+		std::string audiojsonfilepath = "../../PulseEngine/JSON/audio.json";
+		std::string texturejsonfilepath = "../../PulseEngine/JSON/texture.json";
+		std::string fontjsonfilepath = "../../PulseEngine/JSON/font.json";
+		std::string scenejsonfilepath = "../../PulseEngine/JSON/scene.json";
+		std::string animationjsonfilepath = "../../PulseEngine/JSON/animation.json";
 
 	public:
 		//AssetRegistry(); for debugging shouldn't use. due to Rule of Zero

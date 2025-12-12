@@ -13,7 +13,7 @@
 /******************************************************************************/
 #include "EngineInterface.h"
 #include "CoreEngine/Core/ScriptingBridge.h"
-#pragma comment(lib, "MyEngine.lib")
+#pragma comment(lib, "PulseEngine.lib")
 
 namespace ScriptAPI
 {

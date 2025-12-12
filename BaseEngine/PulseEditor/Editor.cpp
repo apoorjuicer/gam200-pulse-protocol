@@ -22,7 +22,7 @@
 // ==========================================================================
 
 
-namespace MyEditor
+namespace PulseEditor
 {
     // --------------------------------------------------------------------
     // CONSTANTS & BASIC STATE
@@ -58,8 +58,8 @@ namespace MyEditor
     static constexpr float MAX_TOTAL_VERT = 0.85f;
 
 
-    bool MyEditor::IsPlaying() { return s_playing; }
-    void MyEditor::SetPlaying(bool p)
+    bool PulseEditor::IsPlaying() { return s_playing; }
+    void PulseEditor::SetPlaying(bool p)
     {
         s_playing = p;
 
@@ -128,7 +128,7 @@ namespace MyEditor
         ImGui::Begin("DockSpaceHost", nullptr, flags);
         ImGui::PopStyleVar(2);
 
-        g_DockspaceID = ImGui::GetID("MyEditorDockSpace");
+        g_DockspaceID = ImGui::GetID("PulseEditorDockSpace");
         ImGui::DockSpace(g_DockspaceID, ImVec2(0, 0), ImGuiDockNodeFlags_None);
 
         ImGui::End();
@@ -541,14 +541,14 @@ namespace MyEditor
         ImGui::End();
 
         // ===== In-scene picking/dragging (gizmo) on the middle viewport =====
-        MyEditor::GameViewport vp;
+        PulseEditor::GameViewport vp;
         vp.x = (int)left_w;
         vp.y = (int)middle_y;
         vp.w = (int)safe_mid_w;
         vp.h = (int)safe_middle_h;
 
 
-        MyEditor::Gizmo_DrawAndHandle(vp);
+        PulseEditor::Gizmo_DrawAndHandle(vp);
 
 
 
@@ -822,11 +822,11 @@ namespace MyEditor
     {
 
         // 1. Start a new ImGui frame
-        MyEditor::NewFrame();
+        PulseEditor::NewFrame();
 
         // 3. Draw the editor
-        MyEditor::Draw();
-        MyEditor::Render();
+        PulseEditor::Draw();
+        PulseEditor::Render();
     }
    
 }

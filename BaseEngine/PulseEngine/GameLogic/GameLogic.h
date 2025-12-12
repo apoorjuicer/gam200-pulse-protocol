@@ -24,7 +24,7 @@
 #include "CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/System.h"
 #include "CoreEngine/ECS/Coordinator.h"
-//#include "../MyEngine/Components/ScriptName.h"
+//#include "../PulseEngine/Components/ScriptName.h"
 // #include "Serialization/Serialization.h"
 #include "Input/RhythmGameplayInput.h"
 

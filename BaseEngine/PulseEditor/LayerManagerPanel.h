@@ -15,7 +15,7 @@
 
 #include "../../imgui/imgui.h"
 
-namespace MyEditor
+namespace PulseEditor
 {
     // Draw the Layer Manager window
     void DrawLayerManagerWindow();

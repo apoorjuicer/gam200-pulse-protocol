@@ -12,22 +12,22 @@
  */
 /******************************************************************************/
 #pragma once
-#include "../MyEngine/Graphics/Transform.h"
-#include "../MyEngine/Graphics/Renderable.h"
-#include "../MyEngine/Graphics/Animation.h"
+#include "Graphics/Transform.h"
+#include "Graphics/Renderable.h"
+#include "Graphics/Animation.h"
 
-#include "../MyEngine/CoreEngine/Assets.h"                //NPC
-#include "../MyEngine/Components/AABB.h"                  //AABB
-#include "../MyEngine/Components/Health.h"                //Health
-#include "../MyEngine/Components/DisplayName.h"           //Name
-#include "../MyEngine/Graphics/Layer.h"                   //LayerTag
-#include "../MyEngine/Components/EntityType.h"            //NamingComponent
-#include "../MyEngine/GameLogic/GameLogic.h"              //LogicComponent
-#include "../MyEngine/Audio/AudioSource.h"                //AudioSource
-#include "../MyEngine/Graphics/Text.h"                    //TextComponent
-#include "../MyEngine/CoreEngine/Prefab/PrefabInstance.h" //prefab instance
+#include "CoreEngine/Assets.h"                //NPC
+#include "Components/AABB.h"                  //AABB
+#include "Components/Health.h"                //Health
+#include "Components/DisplayName.h"           //Name
+#include "Graphics/Layer.h"                   //LayerTag
+#include "Components/EntityType.h"            //NamingComponent
+#include "GameLogic/GameLogic.h"              //LogicComponent
+#include "Audio/AudioSource.h"                //AudioSource
+#include "Graphics/Text.h"                    //TextComponent
+#include "CoreEngine/Prefab/PrefabInstance.h" //prefab instance
 #include "Editor.h"
-namespace MyEditor
+namespace PulseEditor
 {
     // struct
     struct EntitySnapshot

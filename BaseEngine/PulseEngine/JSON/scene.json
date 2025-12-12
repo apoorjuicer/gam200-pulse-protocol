@@ -2,19 +2,19 @@
     "sceneFilePaths": [
         {
             "id": "mainmenu_scene",
-            "path": "../../MyEngine/JSON/MainMenu.json"
+            "path": "../../PulseEngine/JSON/MainMenu.json"
         },
         {
             "id": "level1_scene",
-            "path": "../../MyEngine/JSON/Level1.json"
+            "path": "../../PulseEngine/JSON/Level1.json"
         },
         {
             "id": "gamewin_scene",
-            "path": "../../MyEngine/JSON/GameWin.json"
+            "path": "../../PulseEngine/JSON/GameWin.json"
         },
         {
             "id": "gamelose_scene",
-            "path": "../../MyEngine/JSON/GameLose.json"
+            "path": "../../PulseEngine/JSON/GameLose.json"
         }
     ]
 }

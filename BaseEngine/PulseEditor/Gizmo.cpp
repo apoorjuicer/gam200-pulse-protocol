@@ -40,7 +40,7 @@
 // If you have a dedicated gizmo type, include it here
 // #include "GizmoState.h"
 
-namespace MyEditor
+namespace PulseEditor
 {
     // Gizmo-undo state (separate from Inspector)
     static bool s_gizmoEditing = false;
@@ -587,7 +587,7 @@ namespace MyEditor
             //-----------------------------------------
             static double lastX = curX, lastY = curY;
 
-            if (!MyEditor::IsPlaying())                     
+            if (!PulseEditor::IsPlaying())                     
             {
                 if (allowCamera && ImGui::IsMouseDown(ImGuiMouseButton_Middle))
                 {
@@ -608,7 +608,7 @@ namespace MyEditor
             auto& activeCam = GLApp::gEditorCamera;
 
             // Only zoom in editor mode, and only if mouse is over the game viewport
-            if (!MyEditor::IsPlaying() && allowCamera && wheel != 0.0f)
+            if (!PulseEditor::IsPlaying() && allowCamera && wheel != 0.0f)
             {
                 const float oldZ = activeCam.zoom;
                 const float step = 1.12f;
@@ -1084,4 +1084,4 @@ namespace MyEditor
         dl->PopClipRect();
     }
 
-} // namespace MyEditor
+} // namespace PulseEditor

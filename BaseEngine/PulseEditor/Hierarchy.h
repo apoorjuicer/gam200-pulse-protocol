@@ -16,7 +16,7 @@
 #include "../../imgui/imgui.h"     // for ImGuiID
 #include "CoreEngine/ECS/System.h" // for Entity (same type you use in Editor)
 
-namespace MyEditor
+namespace PulseEditor
 {
 
     // Draw the full Hierarchy ImGui window (toolbar + list).

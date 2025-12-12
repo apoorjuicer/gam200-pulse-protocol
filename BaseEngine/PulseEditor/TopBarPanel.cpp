@@ -30,7 +30,7 @@
 #include "CoreEngine/ECS/Coordinator.h"
 
 
-namespace MyEditor
+namespace PulseEditor
 {
 
     struct SavedEntityState
@@ -131,7 +131,7 @@ namespace MyEditor
         std::cout << "[Editor] Restored baseline.\n";
     }
 
-    std::string MyEditor::OpenJsonFileDialog()
+    std::string PulseEditor::OpenJsonFileDialog()
     {
         char fileBuf[MAX_PATH] = { 0 };
 
@@ -145,7 +145,7 @@ namespace MyEditor
         ofn.lpstrTitle = "Select scene JSON";
 
         namespace fs = std::filesystem;
-        std::string dir = (fs::current_path() / "../../MyEngine/JSON").lexically_normal().string();
+        std::string dir = (fs::current_path() / "../../PulseEngine/JSON").lexically_normal().string();
         ofn.lpstrInitialDir = dir.c_str();
 
 
@@ -393,4 +393,4 @@ namespace MyEditor
         }
     }
 
-} // namespace MyEditor
+} // namespace PulseEditor

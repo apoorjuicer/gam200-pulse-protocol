@@ -2,6 +2,6 @@
     "config": {
         "WindowWidth": 1600,
         "WindowHeight": 900,
-        "ConfigPath": "../../MyEngine/JSON/config.json"
+        "ConfigPath": "../../PulseEngine/JSON/config.json"
     }
 }

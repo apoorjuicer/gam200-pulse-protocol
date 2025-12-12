@@ -28,7 +28,7 @@ namespace fs = std::filesystem;
 
 static std::string LoadFile(const char* relativeToGraphicsShader)
 {
-	fs::path here = fs::path(__FILE__).parent_path(); // ...\MyEngine\Graphics
+	fs::path here = fs::path(__FILE__).parent_path(); // ...\PulseEngine\Graphics
 	fs::path full = here / "shader" / relativeToGraphicsShader;
 	std::ifstream f(full, std::ios::binary);
 	if (!f)

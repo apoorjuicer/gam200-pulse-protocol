@@ -13,10 +13,10 @@
 #pragma once
 #define generic generic_workaround
 #include "TransformComponent.h"
-#include "../MyEngine/Graphics/Transform.h"
-#include "../MyEngine/CoreEngine/Core/ScriptingBridge.h"
-//#include "../MyEngine/CoreEngine/Core/CoreEngine.h"
-//#include "../MyEngine/CoreEngine/ECS/Coordinator.h"
+#include "Graphics/Transform.h"
+#include "CoreEngine/Core/ScriptingBridge.h"
+//#include "CoreEngine/Core/CoreEngine.h"
+//#include "CoreEngine/ECS/Coordinator.h"
 #undef generic
 
 namespace Framework { class Transform; } // forward delare

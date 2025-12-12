@@ -13,8 +13,8 @@
  */
 /******************************************************************************/
 #pragma once
-// #include "../MyEngine/Serialization/Serialization.h"
-// #include "../MyEngine/Resources/AssetRegistry.h"
+// #include "../PulseEngine/Serialization/Serialization.h"
+// #include "../PulseEngine/Resources/AssetRegistry.h"
 // #include "../Asset/AssetsManager.h"
 //#include "pch/pch.h"
 #include "pch/pch_temp.h"

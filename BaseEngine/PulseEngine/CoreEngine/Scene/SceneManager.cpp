@@ -67,7 +67,7 @@ void SceneManager::Update(float dt)
 		// Save the scene we're LEAVING for ESC navigation
 		LastScene = PreviousScene;
 
-		std::string NewScenePath = "../../MyEngine/JSON/" + CurrentScene + ".json";
+		std::string NewScenePath = "../../PulseEngine/JSON/" + CurrentScene + ".json";
 		LoadSceneFromJson(NewScenePath);
 
 		// Update PreviousScene for change detection next frame
@@ -93,9 +93,9 @@ void SceneManager::SaveCurrentScene()
 	auto& alloc = d.GetAllocator();
 
 	// grab scene name for the json file name
-	//std::filesystem::path path = static_cast<std::filesystem::path>("../../MyEngine/JSON/Saved" + PreviousScene + "Scene.json"); 
-	std::filesystem::path path = "../../MyEngine/JSON/" + PreviousScene + ".json"; // file we want to save data into
-	//std::string path = "../../MyEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
+	//std::filesystem::path path = static_cast<std::filesystem::path>("../../PulseEngine/JSON/Saved" + PreviousScene + "Scene.json"); 
+	std::filesystem::path path = "../../PulseEngine/JSON/" + PreviousScene + ".json"; // file we want to save data into
+	//std::string path = "../../PulseEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
 
 	// Save scene name first
 	Value SceneName;
@@ -297,7 +297,7 @@ void SceneManager::SaveCurrentScene()
 	d.Accept(writer);
 
 	namespace fs = std::filesystem;
-	//fs::create_directories("../../MyEngine/JSON");  // store in folder Json
+	//fs::create_directories("../../PulseEngine/JSON");  // store in folder Json
 	fs::create_directories(path.parent_path());  // store in folder 
 
 	// check if can open, if can then put data into Json file

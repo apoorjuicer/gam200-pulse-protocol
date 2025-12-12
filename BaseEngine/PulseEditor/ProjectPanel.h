@@ -20,9 +20,9 @@
 #include <string>
 #include <vector>
 
-namespace MyEditor
+namespace PulseEditor
 {
-    // One-time setup (called from MyEditor::Init)
+    // One-time setup (called from PulseEditor::Init)
     void InitProjectPanel();
 
     // Draw the assets browser
