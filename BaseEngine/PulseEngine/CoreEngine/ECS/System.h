@@ -16,13 +16,21 @@
 
 #include "pch/pch_temp.h"
 #include "Types.h"
+
+//for .NET
+#include "CoreEngine/Core/ImportExport.h" // for DLL_API
+
+// stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
+#pragma warning(push)
+#pragma warning(disable: 4251)
+
 // Each system can inherit from this class which allows the System Manager
 // to keep a list of pointers to systems.
 // exp: auto const& entity : EntityMember
 // auto& rigidBody = GetComponent<RigidBody>(entity);
 
 // Will be our base class. Exp: Graphics, Physics...
-class Systems
+class DLL_API Systems
 {
 public:
 	// functions that all of the system will have.
@@ -37,3 +45,5 @@ public:
 	virtual void Update(float) {};
 	virtual void Exit() {};
 };
+
+#pragma warning(pop)

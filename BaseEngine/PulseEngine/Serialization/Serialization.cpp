@@ -14,12 +14,27 @@
  /******************************************************************************/
 
 #include "Serialization.h"
-#include <fstream>
-#include <iostream>
+#include "pch/pch_temp.h"
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
-#include <filesystem>
+
+int Config::GetWindowWidth() const
+{
+    return WindowWidth;
+}
+int Config::GetWindowHeight() const
+{
+    return WindowHeight;
+}
+std::string Config::GetConfigPath() const
+{
+    return ConfigPath;
+}
+
+void Config::SetWindowWidth(int w) { WindowWidth = w; }
+void Config::SetWindowHeight(int h) { WindowHeight = h; }
+void Config::SetConfigPath(std::string path) { ConfigPath = std::move(path); }
 
 void Config::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
 {

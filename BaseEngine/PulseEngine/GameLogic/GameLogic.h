@@ -2,8 +2,9 @@
 /**
  * @file        GameLogic.h
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael (primary) - 90%
+ * @author		Chia Wei Xuan Rachael (primary) - 85%
  * @author		Reginald Lew Yee Ren (secondary) - 10%
+ * @author		Goh Pin Kai (secondary) - 5%
  * 
  * @brief       Defines the scripting system for game entities.
  *              Provides the interface `Iscript` and derived `PlayerScript` and
@@ -24,7 +25,7 @@
 #include "CoreEngine/ECS/System.h"
 #include "CoreEngine/ECS/Coordinator.h"
 //#include "../MyEngine/Components/ScriptName.h"
-#include "Serialization/Serialization.h"
+// #include "Serialization/Serialization.h"
 #include "Input/RhythmGameplayInput.h"
 
 //components:
@@ -52,20 +53,46 @@ public:
 	virtual void Init(Entity ID) = 0;
 	virtual void Update(Entity ID) = 0;
 	virtual void Exit(Entity ID) = 0;
+
+	// if needed, for collision msg
+	//virtual void OnCollisionEnter(Entity ID) {};
+	//virtual void OnCollisionUpdate(Entity ID) {};
+	//virtual void OnCollisionExit(Entity ID) {};
+
+
+	//ser
+	virtual void Serialize() {};
+
+
+	// add clone function and = 0, so all kid will have to have it.
+	virtual Iscript* Clone() = 0;
+	//virtual Iscript* Clone(); // i remove the = 0 for testing(past rae)
 };
 
 class PlayerScript : public Iscript
 {
+
 public:
 	void Init(Entity ID) override;
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
+
+	void Serialize() override;
+
+	//std::map<std::string, std::any(bool,float,int,std::string)>;
+	// add in game variables here.
+	int health = 0;
+
+	PlayerScript* Clone() override;
 
 private:
 	bool  isAttacking = false;
 	float attackTimer = 0.0f;
 	/*float autoMoveTimer = 2.0f;*/ // FOR TESTING THE STOP BUTTON FUNCTIONALITY PURPOSE
 };
+
+//PlayerScript playerScript;
+//playerScript.float_fields.emplace("Health", 100.0f);
 
 class EnemyScript : public Iscript
 {
@@ -74,9 +101,13 @@ public:
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
 
+	EnemyScript* Clone() override;
+
 	// --- Toggles for testing modes ---
 	static bool testAABBCollision;
 	static bool testOBBCollision;
+
+	float enemyDmg;
 };
 
 //class EnemySpawnerScript : public Iscript
@@ -113,6 +144,8 @@ public:
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
 
+	ButtonScript* Clone() override;
+
 private:
 	// Store data per entity ID
 	std::unordered_map<Entity, ButtonData> buttonDataMap;
@@ -125,11 +158,26 @@ public:
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
 
+	PulsingBorderScript* Clone() override;
+
 private:
 	float pulseTimer = 0.0f;
 	float bpm = 120.0f;
 	float minAlpha = 0.2f;
 	float maxAlpha = 1.0f;
+};
+
+class Csharptestscript : public Iscript
+{
+public:
+	void Init(Entity ID) override;
+	void Update(Entity ID) override;
+	void Exit(Entity ID) override;
+	Csharptestscript* Clone() override;
+
+private:
+	void(*initFunc)(CoreEngine*) = nullptr;
+	bool(*addScript)(int, const char*) = nullptr;
 };
 
 class CountdownScript : public Iscript
@@ -138,6 +186,7 @@ public:
 	void Init(Entity ID) override;
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
+	CountdownScript* Clone() override;
 
 private:
 	float countdownTimer = 0.0f;
@@ -149,6 +198,7 @@ public:
 	void Init(Entity ID) override;
 	void Update(Entity ID) override;
 	void Exit(Entity ID) override;
+	FeedbackScript* Clone() override;
 
 private:
 	float displayTimer = 0.0f;
@@ -174,14 +224,19 @@ public:
 
 private:
 	// key is the name of script which is a component, then reward is the class parent but can also grab kid functions and data
-	std::unordered_map<std::string, std::shared_ptr<Iscript>> map_of_scripts;
+	std::unordered_map<std::string, std::shared_ptr<Iscript>> map_of_scripts; // template
+	std::unordered_map<Entity, std::unordered_map<std::string, std::shared_ptr<Iscript>>> map_of_scriptInstances; // copying from template (wrap raw ptr into smart ptr(shared) to prevent mem leak ltr )
 };
 
 struct LogicComponent
 {
     std::string ScriptName;
 
-    void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const ;
+
+	// Find out how to make it a script instance.
+	//std::unordered_map<std::string, std::unique_ptr<Iscript>> scriptInstances;
+
+	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const ;
 
 	void Deserialize(const rapidjson::Value& in);
 };

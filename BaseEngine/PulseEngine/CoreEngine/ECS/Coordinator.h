@@ -1,10 +1,10 @@
 /******************************************************************************/
 /**
-/******************************************************************************/
-/**
  * @file        Coordinator.h
  * @project     Pulse Protocol
- * @author      Chia Wei Xuan Rachael
+ * @author      Chia Wei Xuan Rachael (primary) - 97%
+ * @author		Ban Kai Wei Benjamin (secondary) - 3%
+ * 
  * @brief      Central coordinator class implementing the Singleton pattern that
  *             acts as a unified interface for the ECS architecture. Manages
  *             entity creation/destruction, component registration/access, and
@@ -25,11 +25,13 @@
 #include "ComponentArray.h"
 #include "ComponentManager.h"
 #include "CoreEngine/ECS/Singleton.h"
+#include "CoreEngine/Core/ImportExport.h"
 
 //  Acts as a mediator that allows us to have a single instance of the coordinator to use for all 3 manager :D
-class Coordinator : public Singleton<Coordinator>
+class DLL_API Coordinator : public Singleton<Coordinator>
 {
 public:	
+	//static Coordinator* GetInstance();
 	void init()
 	{
 		// Create pointers to each manager
@@ -42,6 +44,11 @@ public:
 	Entity CreateEntity()
 	{
 		return CoordEnitiyManager -> CreateEntity();	
+	}
+
+	Entity CreateEntityWithID(Entity id)
+	{
+		return CoordEnitiyManager->CreateEntityWithID(id);
 	}
 
 	void DestroyEntity(Entity entity)

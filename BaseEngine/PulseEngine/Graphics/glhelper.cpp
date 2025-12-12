@@ -12,8 +12,7 @@
  /******************************************************************************/
 #include "glhelper.h"
 #include <iostream>
-//#include "../Log/Log.h"
-//#include <spdlog/spdlog.h>
+#include "CoreEngine/ECS/Coordinator.h"
 
 /*                                                   objects with file scope
 ----------------------------------------------------------------------------- */
@@ -40,9 +39,6 @@ GLboolean GLHelper::keyPause = GL_FALSE;
 
 GLint  GLHelper::GameWidth;
 GLint  GLHelper::GameHeight;
-
-GLint  GLHelper::EditorWidth;
-GLint  GLHelper::EditorHeight;
 
 GLint  GLHelper::GameOffsetX;
 GLint  GLHelper::GameOffsetY;
@@ -145,6 +141,7 @@ bool GLHelper::init(GLint awidth, GLint aheight, std::string atitle) {
 }
 
 void GLHelper::setup_event_callbacks() {
+
 	glfwSetFramebufferSizeCallback(GLHelper::ptr_window, GLHelper::fbsize_cb);
 	glfwSetKeyCallback(GLHelper::ptr_window, GLHelper::key_cb);
 	glfwSetMouseButtonCallback(GLHelper::ptr_window, GLHelper::mousebutton_cb);
@@ -259,7 +256,7 @@ void GLHelper::key_cb(GLFWwindow* pwin, int key, int scancode, int action, int m
 		keyLeft = GL_FALSE;
 		keyRight = GL_FALSE;
 
-		keyState[key] = false;
+		keyState[key] = true;
 #ifdef _DEBUG
 		std::cout << "Key repeatedly pressed" << std::endl;
 #endif
@@ -477,21 +474,21 @@ void GLHelper::fbsize_cb(GLFWwindow* ptr_win, int fbwidth, int fbheight) {
 	GLHelper::width = fbwidth;
 	GLHelper::height = fbheight;
 
-	GLint w = GLHelper::width - GLHelper::EditorWidth, h = GLHelper::height - GLHelper::EditorHeight;
-	float a = (9.0f / 16.0f) * w; // a has a 9:16 ratio with w
-	float b = (16.0f / 9.0f) * h; // b has a 16:9 ratio with h
+	/*GLint w = GLHelper::width - GLHelper::EditorWidth, h = GLHelper::height - GLHelper::EditorHeight;*/
+	//float a = (9.0f / 16.0f) * w; // a has a 9:16 ratio with w
+	//float b = (16.0f / 9.0f) * h; // b has a 16:9 ratio with h
 
-	if (h > a) {
-		h = static_cast<GLint>(a);
-	}
-	else if (w > b) {
-		w = static_cast<GLint>(b);
-	}
+	//if (h > a) {
+	//	h = static_cast<GLint>(a);
+	//}
+	//else if (w > b) {
+	//	w = static_cast<GLint>(b);
+	//}
 
-	GLHelper::GameWidth = w;
-	GLHelper::GameHeight = h;
+	//GLHelper::GameWidth = w;
+	//GLHelper::GameHeight = h;
 
-	glViewport(GameOffsetX, GameOffsetY, w, h);
+	/*glViewport(GameOffsetX, GameOffsetY, w, h);*/
 }
 
 void GLHelper::focus_cb(GLFWwindow* window, int focused) {

@@ -15,7 +15,10 @@
 #include "pch/pch_temp.h"
 #include "CoreEngine/ECS/system.h"
 
-class Vector2 : public Systems
+//for .NET
+#include "CoreEngine/Core/ImportExport.h" // for DLL_API, so that functions using vector2 in the editor will be exported and can be used
+
+class DLL_API Vector2 : public Systems
 {
 public:
 	// ctr and dtr
@@ -53,6 +56,10 @@ public:
 	void Normalize();	  // mutating, normalizes in place
 	//
 
+	//comparison operator
+	bool operator==(Vector2 const& other) const;
+	bool operator!=(Vector2 const& other) const;
+
 	// Serialize
 	void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
 	void Deserialize(rapidjson::Value const &in);
@@ -78,7 +85,7 @@ Vector2 operator*(float s, Vector2 v); // scalar * vector
 Vector2 operator/(Vector2 v, float s); // vector / scalar
 std::ostream &operator<<(std::ostream &os, Vector2 const &vec);
 
-class Matrix3x3
+class DLL_API Matrix3x3
 {
 private:
 	float m[9]; // column-major flat array

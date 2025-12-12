@@ -2,9 +2,8 @@
 /**
  * @file        Hierarchy.h
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 60%
- * @author      Chloe Lau Rey En (secondary) - 40%
- * @brief       TBF
+ * @author      Leu Jun Yong
+ * @brief       Scene hierarchy panel interface for entity list and management.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
@@ -19,6 +18,7 @@
 
 namespace MyEditor
 {
+
     // Draw the full Hierarchy ImGui window (toolbar + list).
     // dockID is the dockspace ID from Editor.cpp (LeftDockSpace).
     void DrawHierarchyWindow(ImGuiID dockID);

@@ -2,9 +2,11 @@
 /**
  * @file        glapp.cpp
  * @project     Pulse Protocol
- * @author      Goh Pin Kai
+ * @author      Goh Pin Kai (primary) - 90%
+ *			    Reginald Lew Yee Ren (secondary) - 10%
  * @brief		Implements OpenGL application utilities for initializing
-				shaders, models, viewports, and rendering textured entities.
+ *				shaders, models, viewports, and rendering textured entities.
+ * 
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
@@ -59,83 +61,7 @@ GLApp::Camera2D GLApp::gGameCamera{};
 void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/)
 {
 	gBatch.Init(/*maxSprites*/ 10000);
-
-#ifdef ENABLE_EDITOR
-	// --- Compute middle rectangle from window size using fixed ratios ---
-	const float kLeftRatio = 0.20f;	  // 20% width
-	const float kRightRatio = 0.25f;  // 25% width
-	const float kBottomRatio = 0.25f; // 25% height
-
-	// GLint w = static_cast<GLint>(WindowWidth - static_cast<GLint>(inputEditorWidth));
-	// GLint h = static_cast<GLint>(WindowHeight - static_cast<GLint>(inputEditorHeight));
-
-	// Use your existing globals for window size
-	const int fbW = static_cast<int>(WindowWidth);
-	const int fbH = static_cast<int>(WindowHeight);
-
-	// Panels in framebuffer pixels
-	const int assets_h = static_cast<int>(fbH * kBottomRatio);
-	const int top_h = fbH - assets_h;
-	const int left_w = static_cast<int>(fbW * kLeftRatio);
-	const int right_w = static_cast<int>(fbW * kRightRatio);
-	const int center_w = fbW - left_w - right_w;
-
-	// --- Fit a 16:9 viewport INSIDE the middle area and center it ---
-	// Desired aspect = 16:9 ? width/height = 16/9
-	const float targetAspect = 16.0f / 9.0f;
-
-	// Start with full middle area
-	int vpW = center_w;
-	int vpH = top_h;
-
-	// Adjust to preserve 16:9
-	if (static_cast<float>(vpH) > static_cast<float>(vpW) / targetAspect)
-	{
-		// Too tall ? clamp height
-		vpH = static_cast<int>(std::round(vpW / targetAspect));
-	}
-	else
-	{
-		// Too wide ? clamp width
-		vpW = static_cast<int>(std::round(vpH * targetAspect));
-	}
-
-	// Center the viewport within the middle rect
-	const int vpX = left_w + (center_w - vpW) / 2;
-	const int vpY = assets_h + (top_h - vpH) / 2;
-
-	// Apply to GL
-	glViewport(vpX, vpY, vpW, vpH);
-
-	// Update GLHelper for anyone who needs these numbers
-	GLHelper::GameWidth = vpW;
-	GLHelper::GameHeight = vpH;
-	GLHelper::GameOffsetX = vpX;
-	GLHelper::GameOffsetY = vpY;
-
-	// (Optional) keep editor panel sizes if other code references them
-	GLHelper::EditorWidth = left_w + right_w; // total UI width if you need it
-	GLHelper::EditorHeight = assets_h;		  // bottom bar height if you need it
-
-	// Keep your existing init below
-	GLApp::vps.push_back({ 300, 200, vpW, vpH });
-#else
-	// ---------- GAME BUILD: NO EDITOR PANELS, NO BLUE BORDER ----------
-	int fbW = 0, fbH = 0;
-	glfwGetFramebufferSize(glfwGetCurrentContext(), &fbW, &fbH);
-
-	GLHelper::EditorWidth = 0;
-	GLHelper::EditorHeight = 0;
-
-	GLHelper::GameOffsetX = 0;
-	GLHelper::GameOffsetY = 0;
-	GLHelper::GameWidth = fbW;
-	GLHelper::GameHeight = fbH;
-
-	glViewport(0, 0, fbW, fbH);
-
-	GLApp::vps.push_back({ 0, 0, fbW, fbH });
-#endif
+	
 	GLApp::VPSS shdr_strs{
 		std::make_pair(test_vs, test_fs),
 		std::make_pair(bg_vs, bg_fs),
@@ -233,152 +159,12 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 		modelNDC, u0, v0, u1, v1);
 }
 
-void GLApp::draw(std::set<Entity> entities, int includeMask) {
-#ifdef ENABLE_EDITOR
-	bool editorOn = MyEditor::IsEnabled();
-	bool playing = MyEditor::IsPlaying();
+void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 
-	// Use editor camera only when editing (not playing).
-	GLApp::Camera2D& activeCam =
-		(editorOn && !playing) ? gEditorCamera : gGameCamera;
-#else
-	GLApp::Camera2D& activeCam = gGameCamera;
-#endif
-
-#ifdef ENABLE_EDITOR
-	GLFWwindow* window = glfwGetCurrentContext();
-	if (MyEditor::IsEnabled())
-	{
-		bool playing = MyEditor::IsPlaying();
-		// -------- Editor ON: render into middle ImGui game viewport --------
-		auto vp = MyEditor::ComputeMiddleGameViewportPixels(window, true);
-		glViewport(vp.x, vp.y, vp.w, vp.h);
-
-		GLHelper::GameOffsetX = vp.x;
-		GLHelper::GameOffsetY = vp.y;
-		GLHelper::GameWidth = vp.w;
-		GLHelper::GameHeight = vp.h;
-
-		// Shared scroll accumulator for zoom
-		static double s_scrollY = 0.0;
-		static bool s_scrollInit = false;
-		if (!s_scrollInit)
-		{
-			glfwSetScrollCallback(window,
-				[](GLFWwindow*, double, double yoff)
-				{
-					s_scrollY += yoff;
-				});
-			s_scrollInit = true;
-		}
-
-		// Mouse delta tracking for panning
-		static double lastX = 0.0, lastY = 0.0;
-		double curX, curY;
-		glfwGetCursorPos(window, &curX, &curY);
-		static bool first = true;
-		if (first)
-		{
-			lastX = curX;
-			lastY = curY;
-			first = false;
-		}
-
-		// ------------ Allow camera control ONLY inside game viewport --------
-
-
-		int winW = 0, winH = 0, fbW = 0, fbH = 0;
-		glfwGetWindowSize(window, &winW, &winH);
-		glfwGetFramebufferSize(window, &fbW, &fbH);
-
-		if (winW > 0 && winH > 0)
-		{
-			// Convert window coords (origin top-left) to framebuffer coords (origin bottom-left)
-			double fbX = curX * double(fbW) / double(winW);
-
-			double normY = curY / double(winH);       // 0 at top, 1 at bottom
-			double fbY = (1.0 - normY) * double(fbH); // 0 at bottom, fbH at top
-
-			double gameX0 = GLHelper::GameOffsetX;
-			double gameY0 = GLHelper::GameOffsetY;
-			double gameX1 = gameX0 + GLHelper::GameWidth;
-			double gameY1 = gameY0 + GLHelper::GameHeight;
-			bool allowCameraControl = false;
-			if (!playing) { // <--- only allow in EDIT mode
-				// (convert mouse to framebuffer coords as you already do)
-				if (fbX >= gameX0 && fbX <= gameX1 &&
-					fbY >= gameY0 && fbY <= gameY1)
-				{
-					allowCameraControl = true;
-				}
-			}
-
-			// -------- Middle mouse pan (editor camera only, in game viewport) ---
-			const bool mmb =
-				glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
-			if (!MyEditor::IsPlaying()) {
-				if (allowCameraControl && mmb)
-				{
-					const double dx = curX - lastX;
-					const double dy = curY - lastY;
-					activeCam.center += glm::vec2(
-						float(2.0 * dx / double(GLHelper::GameWidth)),
-						float(-2.0 * dy / double(GLHelper::GameHeight)));
-				}
-			}
-
-			lastX = curX;
-			lastY = curY;
-
-			// -------------------- Scroll wheel zoom (editor camera) -------------
-			float wheel = static_cast<float>(s_scrollY);
-			s_scrollY = 0.0;
-			if (!MyEditor::IsPlaying()) {
-				if (allowCameraControl && wheel != 0.0f)
-				{
-					const float oldZ = activeCam.zoom;
-					const float step = 1.12f;
-					float newZ = glm::clamp(oldZ * std::pow(step, wheel),
-						activeCam.minZoom,
-						activeCam.maxZoom);
-
-					glm::vec2 cNDC = ScreenToNDC(curX, curY);
-					activeCam.center = cNDC - (newZ / oldZ) * (cNDC - activeCam.center);
-					activeCam.zoom = newZ;
-				}
-			}
-		}
-		else
-		{
-			// -------- Editor build but editor disabled: full-screen letterbox ---
-			int fbW = 0, fbH = 0;
-			glfwGetFramebufferSize(window, &fbW, &fbH);
-			ComputeLetterbox(fbW, fbH);
-			activeCam.zoom = 1.0f;
-			activeCam.center = glm::vec2(0.0f);
-		}
-	}
-#else
-	// -------- Game build (no editor): use FULL framebuffer, no letterbox ----
-	GLFWwindow* window = glfwGetCurrentContext();
-	int fbW = 0, fbH = 0;
-	glfwGetFramebufferSize(window, &fbW, &fbH);
-
-	// Use the entire framebuffer as the game area
-	GLHelper::GameOffsetX = 0;
-	GLHelper::GameOffsetY = 0;
-	GLHelper::GameWidth = fbW;
-	GLHelper::GameHeight = fbH;
-
-	glViewport(0, 0, fbW, fbH);
-
-	// Identity camera (no extra zoom or pan)
-	activeCam.zoom = 0.6f;
-	activeCam.center = glm::vec2(0.0f);
-#endif
+	glm::mat3 PanZoom = BuildPanZoomNDC(gEditorCamera);
 
 	// Build final camera matrix from the active camera
-	glm::mat3 PanZoom = BuildPanZoomNDC(activeCam);
+	//glm::mat3 PanZoom = BuildPanZoomNDC(activeCam);
 
 	// ========================== REST OF YOUR DRAW ===========================
 	auto* g_coordinator = Coordinator::GetInstance();
@@ -519,46 +305,10 @@ void GLApp::draw(std::set<Entity> entities, int includeMask) {
 	GLboolean depthWasOn = glIsEnabled(GL_DEPTH_TEST);
 	glDisable(GL_DEPTH_TEST);
 
-#ifdef ENABLE_EDITOR
-	if (MyEditor::IsEnabled())
-	{
-		DebugDraw::Begin(glm::mat4(1.0f));
-		for (auto e : entities)
-		{
-			if (!g_coordinator->HasComponent<Framework::Transform>(e)) continue;
-			if (!g_coordinator->HasComponent<Framework::Renderable>(e)) continue;
-			if (!g_coordinator->HasComponent<AABB>(e))                  continue;
-
-			auto& tr = g_coordinator->GetComponent<Framework::Transform>(e);
-			auto& re = g_coordinator->GetComponent<Framework::Renderable>(e);
-			auto& an = g_coordinator->GetComponent<Framework::Animation>(e);
-			auto& bb = g_coordinator->GetComponent<AABB>(e);
-
-			glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
-			glm::mat3 modelToNDC = PanZoom * M;
-
-			const bool isHero =
-				re.spriteName.find("hero") != std::string::npos;
-			glm::vec3 color = isHero ? glm::vec3(1, 0, 0)
-				: glm::vec3(0, 1, 0);
-
-			const int columns = std::max(1, an.columns);
-			const int rows = std::max(1, an.rows);
-			const int frameW = (re.texW > 0 ? re.texW / columns : 0);
-			const int frameH = (re.texH > 0 ? re.texH / rows : 0);
-
-			AABB aabbModel = PixelsToModelAABB(bb, frameW, frameH);
-			DrawAABB_NDC(modelToNDC, aabbModel, color);
-		}
-
-		glLineWidth(1.0f);
-		DebugDraw::End();
-	}
-#endif
-
 	if (depthWasOn)
 		glEnable(GL_DEPTH_TEST);
-	}
+
+}
 
 void GLApp::cleanup()
 {
@@ -645,6 +395,11 @@ void GLApp::ComputeLetterbox(int fbw, int fbh)
 	GLApp::GameOffsetY = (fbh - vh) / 2;
 	GLApp::GameWidth = vw;
 	GLApp::GameHeight = vh;
+
+	GLHelper::GameOffsetX = GLApp::GameOffsetX;
+	GLHelper::GameOffsetY = GLApp::GameOffsetY;
+	GLHelper::GameWidth = GLApp::GameWidth;
+	GLHelper::GameHeight = GLApp::GameHeight;
 
 	glViewport(GLApp::GameOffsetX, GLApp::GameOffsetY, GLApp::GameWidth, GLApp::GameHeight);
 }

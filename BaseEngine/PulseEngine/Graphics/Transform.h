@@ -26,6 +26,11 @@
 #include "glhelper.h"
 #include "glapp.h"
 
+//for .NET
+#include "CoreEngine/Core/ImportExport.h" // for DLL_API
+#pragma warning(push)
+#pragma warning(disable: 4251) // stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
+
 #ifndef FRAMEWORK_TRANSFORM_H
 #define FRAMEWORK_TRANSFORM_H
 
@@ -37,7 +42,7 @@ namespace Framework
 		Vector2 Scale;
 	};
 
-	class Transform
+	class DLL_API  Transform
 	{
 	public:
 		// ComponentTypeID typeID = Com_Trans;
@@ -60,6 +65,11 @@ namespace Framework
 		float visibilityTimer = 0.0f; // Used for input detect purpose
 		bool autoHide = false;		  // Used for input detect purpose
 
+		//operator overloads
+		//for Undo comparison function
+		bool operator==(Transform const& other) const;
+		bool operator!=(Transform const& other) const;
+
 		// Register these components in your initialization code:
 		// void Serialize(Value& data, Document::AllocatorType& alloc) override;
 		// void Deserialize(Value& data);
@@ -70,4 +80,5 @@ namespace Framework
 	bool SaveTransform(Transform const& t, std::string const& path);
 	bool LoadTransform(Transform& t, std::string const& path);
 }
+#pragma warning(pop)
 #endif // FRAMEWORK_TRANSFORM_H

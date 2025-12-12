@@ -2,8 +2,8 @@
 /**
  * @file        Editor.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 78%
- * @author      Goh Pin Kai (secondary) - 7%
+ * @author      Leu Jun Yong (primary) - 70%
+ * @author      Goh Pin Kai (secondary) - 15%
  *              Chloe Lau Rey En (secondary) - 15%
  * @brief       Manages the full ImGui-based editor interface, including initialization, frame updates, rendering, and runtime toggling of editor features.
  *
@@ -16,8 +16,11 @@
 #include "Editor.h"
 #include "Graphics/glhelper.h"
 #include "CoreEngine/Asset/AssetsManager.h"
+#include "Input/InputManager.h"
+
 
 // ==========================================================================
+
 
 namespace MyEditor
 {
@@ -30,10 +33,12 @@ namespace MyEditor
 
     // this vector maintains the order entities appear in the hierarchy
     std::vector<Entity> entityDisplayOrder;
+    std::vector<std::string> s_pendingOSDrops;
 
     static GLFWwindow* s_Window = nullptr;
-    static bool s_enabled = true;
     static bool s_restoreNextFrame = false;
+    static bool s_prevKeys[GLFW_KEY_LAST + 1] = { false };
+
     static bool s_frameStarted = false;
     static bool s_playing = false;
 
@@ -184,40 +189,76 @@ namespace MyEditor
     }
 #endif
 
+    static ImGuiKey TranslateGLFWKeyToImGuiKey(int key)
+    {
+        if (key >= GLFW_KEY_A && key <= GLFW_KEY_Z)
+            return (ImGuiKey)(ImGuiKey_A + (key - GLFW_KEY_A));
 
-    void Init(GLFWwindow* w) {
-        s_Window = w;
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
+        if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9)
+            return (ImGuiKey)(ImGuiKey_0 + (key - GLFW_KEY_0));
 
-        ImGuiIO& io = ImGui::GetIO();
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // optional
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       //  docking ON
-        // IMPORTANT: keep viewports OFF so nothing pops outside the GLFW window
-        // (turn this on later only if you want multi-window OS-level popouts)
-        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   //  leave disabled
+        switch (key)
+        {
+        case GLFW_KEY_SPACE:        return ImGuiKey_Space;
+        case GLFW_KEY_ESCAPE:       return ImGuiKey_Escape;
+        case GLFW_KEY_ENTER:        return ImGuiKey_Enter;
+        case GLFW_KEY_TAB:          return ImGuiKey_Tab;
+        case GLFW_KEY_BACKSPACE:    return ImGuiKey_Backspace;
 
-        ImGui::StyleColorsDark();
+        case GLFW_KEY_LEFT:         return ImGuiKey_LeftArrow;
+        case GLFW_KEY_RIGHT:        return ImGuiKey_RightArrow;
+        case GLFW_KEY_UP:           return ImGuiKey_UpArrow;
+        case GLFW_KEY_DOWN:         return ImGuiKey_DownArrow;
 
-        ImGui_ImplGlfw_InitForOpenGL(w, true);
-        ImGui_ImplOpenGL3_Init("#version 130");
+        case GLFW_KEY_LEFT_CONTROL:
+        case GLFW_KEY_RIGHT_CONTROL:
+            return ImGuiKey_LeftCtrl;  
 
-        // INIT PROJECT PANEL
-        InitProjectPanel();
+        case GLFW_KEY_LEFT_SHIFT:
+        case GLFW_KEY_RIGHT_SHIFT:
+            return ImGuiKey_LeftShift;
 
-        s_enabled = true;
+        case GLFW_KEY_LEFT_ALT:
+        case GLFW_KEY_RIGHT_ALT:
+            return ImGuiKey_LeftAlt;
 
-        // Tiny runtime check (prints once)
-        std::cout << "[ImGui] Docking: "
-            << ((io.ConfigFlags & ImGuiConfigFlags_DockingEnable) ? "ON" : "OFF")
-            << ", Viewports: "
-            << ((io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) ? "ON" : "OFF")
-            << "\n";
+        case GLFW_KEY_LEFT_SUPER:
+        case GLFW_KEY_RIGHT_SUPER:
+            return ImGuiKey_LeftSuper;
+
+
+        default:
+            return ImGuiKey_None;
+        }
     }
 
 
-    void SetEnabled(bool enabled) { s_enabled = enabled; }
-    bool IsEnabled() { return s_enabled; }
+
+
+    void Init(GLFWwindow* w)
+    {
+        s_Window = w;
+
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+
+        Engine->m_editorFrameCallback = Editor_FrameCallback;
+
+        ImGuiIO& io = ImGui::GetIO();
+        io.IniFilename = nullptr;
+
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+        ImGui::StyleColorsDark();
+
+        ImGui_ImplOpenGL3_Init("#version 130");
+
+        InitProjectPanel();
+
+
+    }
+
 
     void NewFrame() {
         // IMPORTANT! If previous frame was started but not completed, force complete it
@@ -229,7 +270,6 @@ namespace MyEditor
         }
 
         s_frameStarted = false;
-        if (!s_enabled) return;
 
         // Skip if window is minimized
         int display_w, display_h;
@@ -237,15 +277,93 @@ namespace MyEditor
         if (display_w <= 0 || display_h <= 0)
             return;
 
+        // --- Backend: OpenGL only ---
         ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
+
+        ImGuiIO& io = ImGui::GetIO();
+
+        // ============================================================
+        // 1. Proper DeltaTime (fix cursor blink, animation speed, etc)
+        // ============================================================
+        {
+            static double lastTime = glfwGetTime();
+            double now = glfwGetTime();
+            io.DeltaTime = (float)(now - lastTime);
+
+            // fallback (avoid zero or negative values)
+            if (io.DeltaTime <= 0.0f)
+                io.DeltaTime = 1.0f / 60.0f;
+
+            lastTime = now;
+        }
+
+        // ============================================================
+        // 2. Display size
+        // ============================================================
+        float w = (float)WindowWidth;
+        float h = (float)WindowHeight;
+        if (w <= 0) w = 1;
+        if (h <= 0) h = 1;
+
+        io.DisplaySize = ImVec2(w, h);
+        io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
+
+        // ============================================================
+        // 3. Manual input injection (NO glfw backend)
+        // ============================================================
+        auto g_coordinator = Coordinator::GetInstance();
+        if (auto input = g_coordinator->GetSystem<InputManager>())
+        {
+            // --- Mouse position ---
+            glm::vec2 mp = input->getMousePosition();
+            io.AddMousePosEvent(mp.x, mp.y);
+
+            // --- Mouse buttons ---
+            for (int i = 0; i < 3; i++)
+            {
+                io.AddMouseButtonEvent(i, input->isMouseButtonPressed(i));
+            }
+
+            // --- Mouse scroll (your engine probably uses scrollY) ---
+            io.AddMouseWheelEvent(0.0f, (float)g_scrollY);
+            g_scrollY = 0.0;
+
+            // --- Keyboard events (ONLY on state change!!!) ---
+            for (int key = 32; key <= GLFW_KEY_LAST; key++)
+            {
+                bool down = input->isKeyPressed(key);
+
+                // Only send a key event when state changes
+                if (down != s_prevKeys[key])
+                {
+                    ImGuiKey imKey = TranslateGLFWKeyToImGuiKey(key);
+                    if (imKey != ImGuiKey_None)
+                    {
+                        io.AddKeyEvent(imKey, down);
+                    }
+
+                    s_prevKeys[key] = down;
+                }
+            }
+
+            // --- Text input (typing real characters) ---
+            unsigned int c = input->getLastCharTyped();
+            if (c != 0 && c != '\b')
+            {
+                io.AddInputCharacter(c);
+            }
+            input->clearLastChar();
+        }
+
+        // ============================================================
+        // 4. ImGui internal start
+        // ============================================================
         ImGui::NewFrame();
 
         s_frameStarted = true;
     }
 
     void Draw() {
-        if (!s_enabled) return;
 
         int display_w, display_h;
         glfwGetFramebufferSize(s_Window, &display_w, &display_h);
@@ -264,6 +382,28 @@ namespace MyEditor
         ImGuiIO& io = ImGui::GetIO();
         const float W = io.DisplaySize.x;
         const float H = io.DisplaySize.y;
+
+        //UNDO Manager
+        // ================================
+        // GLOBAL SHORTCUT (Undo)
+        // ================================
+        bool ctrlDown =
+            glfwGetKey(s_Window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
+            glfwGetKey(s_Window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
+
+        static bool prevZ = false;
+        bool currZ = (glfwGetKey(s_Window, GLFW_KEY_Z) == GLFW_PRESS);
+
+        if (ctrlDown && currZ && !prevZ)
+        {
+           // std::cout << "[Editor] CTRL+Z pressed in editor\n";
+
+            if (mUndo.CanUndo()) {
+              //  std::cout << "[Editor] CanUndo? :" << mUndo.CanUndo() << "\n";
+                mUndo.Undo();
+            }        
+        }
+        prevZ = currZ;
 
         // --- Clamp layout ratios
         s_top_ratio = clamp_val(s_top_ratio, MIN_RATIO_H, MAX_TOTAL_VERT);
@@ -486,12 +626,22 @@ namespace MyEditor
         }
 
         ImGui::End(); // LayoutOverlay
+        UpdateImGuiCursor(s_Window);
 
     }
 
-    void Render() {
-        if (!s_enabled) return;
 
+    void Render()
+    {
+        // --- Apply viewport ---
+        auto glvp = ComputeMiddleGameViewportPixels(s_Window, true);
+        GLHelper::GameOffsetX = glvp.x;
+        GLHelper::GameOffsetY = glvp.y;
+        GLHelper::GameWidth = glvp.w;
+        GLHelper::GameHeight = glvp.h;
+        glViewport(glvp.x, glvp.y, glvp.w, glvp.h);
+
+        // --- Render ImGui ---
         // Don't render if NewFrame() wasn't called
         if (!s_frameStarted)
             return;
@@ -506,13 +656,14 @@ namespace MyEditor
     }
 
 
-    void Shutdown() {
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
-        s_Window = nullptr;
 
+    void Shutdown()
+    {
+
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui::DestroyContext();
     }
+
 
     extern float s_left_ratio;
     extern float s_right_ratio;
@@ -620,5 +771,63 @@ namespace MyEditor
         return { vx, vy, vw, vh };
     }
 
+    static void UpdateImGuiCursor(GLFWwindow* window)
+    {
+        ImGuiIO& io = ImGui::GetIO();
 
+        // If ImGui draws its own cursor (software cursor), hide OS cursor
+        if (io.MouseDrawCursor)
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+            return;
+        }
+
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+        // Ask ImGui what cursor it wants
+        ImGuiMouseCursor cursor = ImGui::GetMouseCursor();
+        GLFWcursor* glfwCursor = nullptr;
+
+        switch (cursor)
+        {
+        case ImGuiMouseCursor_ResizeNS:
+            glfwCursor = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+            break;
+
+        case ImGuiMouseCursor_ResizeEW:
+            glfwCursor = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+            break;
+
+        case ImGuiMouseCursor_Hand:
+            glfwCursor = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+            break;
+
+            // GLFW does NOT support diagonal resize → use arrow instead
+        case ImGuiMouseCursor_ResizeNWSE:
+        case ImGuiMouseCursor_ResizeNESW:
+            glfwCursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            break;
+
+        default:
+            glfwCursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            break;
+        }
+
+        if (glfwCursor)
+            glfwSetCursor(window, glfwCursor);
+    }
+
+
+    void Editor_FrameCallback()
+    {
+
+        // 1. Start a new ImGui frame
+        MyEditor::NewFrame();
+
+        // 3. Draw the editor
+        MyEditor::Draw();
+        MyEditor::Render();
+    }
+   
 }
+

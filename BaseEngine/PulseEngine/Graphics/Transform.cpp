@@ -2,7 +2,8 @@
 /**
  * @file        Transform.cpp
  * @project     Pulse Protocol
- * @author      Goh Pin Kai
+ * @author      Goh Pin Kai (primary) - 90%
+ * @author 		Ban Kai Wei Benjamin (secondary) - 10%
  * @brief       Implements the Transform component, providing position,
  *              scale, rotation, animation, and sprite management. Includes
  *              update logic for entity transforms, matrix composition,
@@ -80,6 +81,23 @@ namespace Framework
 	}
 
 	void Transform::draw() const {}
+
+	/* Operator overloads */
+	//comparison function operator !=
+	bool Transform::operator==(Transform const& other) const
+	{
+		return
+			Pos == other.Pos &&
+			Scale == other.Scale &&
+			Rotation == other.Rotation &&
+			isVisible == other.isVisible &&
+			visibilityTimer == other.visibilityTimer &&
+			autoHide == other.autoHide;
+	}
+	bool Transform::operator!=(Transform const& other) const
+	{
+		return !(*this == other);
+	}
 
 	/*Serialization && Deserialization */
 	void Transform::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const

@@ -20,6 +20,9 @@ cmake .. ^
 REM Build Debug editor (you can add --target MyEditor if you only want that)
 cmake --build . --config Debug
 
+echo Building Release configuration...
+cmake --build . --config Release
+
 popd
 
 echo.

@@ -2,7 +2,7 @@
 /**
  * @file       SceneManager.h
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael - 100%
+ * @author     Chia Wei Xuan Rachael
  * @brief      Scene management system that inherits from Systems base class.
  *             Provides interface for scene lifecycle operations, entity tracking,
  *             and JSON serialization of game scenes.
@@ -35,18 +35,13 @@
 /******************************************************************************/
 #pragma once
 #include "pch/pch_temp.h"
-//#include "../GameLogic/GameLogic.h"
-//#include "../Graphics/Transform.h"
-//#include "../Graphics/Animation.h"
-//#include "../Graphics/Renderable.h"
-////#include "../Components/AABB.h"
-//#include "../CoreEngine/Assets.h"
-//#include "../Components/Health.h"
-//#include "../Components/EntityType.h"
-//
+
 //#include "../MyEngine/Components/DisplayName.h"
 #include "CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
+
+//for .NET
+#include "CoreEngine/Core/ImportExport.h" // for DLL_API
 
 
 #pragma warning(push, 0)
@@ -56,9 +51,14 @@
 #include <rapidjson/istreamwrapper.h>
 #pragma warning(pop)
 
+// .NET stuff
+// stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
+#pragma warning(push)
+#pragma warning(disable: 4251)
+
 extern std::vector<Entity> g_entitiesToDelete;
 
-class SceneManager: public Systems
+class DLL_API SceneManager: public Systems
 {
 public:
 	SceneManager();
@@ -99,3 +99,5 @@ private:
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
 };
 //ALL ENTITY IN THE ARRAY MUST BE EXACTLY LIKE A PREFAB. But it is not a prefab, just all its component. (for scene json)
+
+#pragma warning(pop)

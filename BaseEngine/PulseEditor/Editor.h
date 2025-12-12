@@ -2,7 +2,8 @@
 /**
  * @file        Editor.h
  * @project     Pulse Protocol
- * @author      Leu Jun Yong
+ * @author      Leu Jun Yong (primary) - 98%
+ * @author      Goh Pin Kai (secondary) - 2%
  * @brief       Initializes, updates, renders, and manages the ImGui
  *              editor interface with toggle support.
  *
@@ -28,10 +29,14 @@
 #include "CoreEngine/Prefab/PrefabManager.h"
 #include "CoreEngine/ECS/System.h"   // For Entity type
 #include "Components/DisplayName.h"     // For display name in hierarchy list
-#include "Graphics/Transform.h"
+//#include "Graphics/Transform.h"
 #include "Graphics/glapp.h"
+#include "../MyEngine/Math/math.h"
 
+
+#include "UndoManager.h" //FOR UNDO
 struct GLFWwindow;
+
 
 namespace MyEditor {
     void Init(GLFWwindow* window);
@@ -48,13 +53,17 @@ namespace MyEditor {
     extern const Entity INVALID_ENTITY;
     extern Entity selectedEntity;
     extern std::vector<Entity> entityDisplayOrder;
-    static std::vector<std::string> s_pendingOSDrops;
+    extern std::vector<std::string> s_pendingOSDrops;
 
     void EnqueueExternalDrop(const std::vector<std::string>& paths);
     void PushOSDropPath(const char* path);
+    void Editor_FrameCallback();
     
     // Returns the middle "game" rectangle in FRAMEBUFFER PIXELS, computed from current panel sizes
     GameViewport ComputeMiddleGameViewportPixels(GLFWwindow* window, bool keep_16x9 = true);
+    // update cursor
+    static void UpdateImGuiCursor(GLFWwindow* window);
+
 
     // Simple editor-gizmo state
     struct GizmoState {
@@ -75,6 +84,7 @@ namespace MyEditor {
         unsigned int texID = 0;
         bool triedLoad = false; // so we don't spam-load every frame
     };
+    //UNDO Manager
+    extern UndoManager mUndo;
 
-    
 }// end of namespace MyEditor

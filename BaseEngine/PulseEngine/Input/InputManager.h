@@ -2,7 +2,8 @@
 /**
  * @file        InputManager.h
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En - 95%
+ * @author      Goh Pin Kai - 5%
  * @brief       Raw input system which handles just the tracking of
 				keyboard and mouse state tracking.
  *              Separated from game logic - just reads input states.
@@ -15,11 +16,14 @@
 
 #pragma once
 #include "pch/pch_temp.h"
+
+#include "Graphics/glhelper.h"
+#include "CoreEngine/Core/ImportExport.h"
 #include "CoreEngine/ECS/System.h"
 #include "CoreEngine/Message/MessageManager.h"
-#include "Graphics/glhelper.h"
+#include "Graphics\glhelper.h"
 
-class InputManager : public Systems {
+class DLL_API InputManager : public Systems {
 public:
 	InputManager();
 	~InputManager();
@@ -49,6 +53,11 @@ public:
 
 	bool isMouseInGameViewport() const { return mouseInGameViewport; }
 
+
+	unsigned int getLastCharTyped() const { return lastCharTyped; }
+	void pushChar(unsigned int c) { lastCharTyped = c; }
+	void clearLastChar() { lastCharTyped = 0; }
+
 	// -------------------------------------------------
 	// Debug toggles
 	// -------------------------------------------------
@@ -63,15 +72,19 @@ public:
 		stressToggleRequested = false;
 		return out;
 	}
-
+	void SetWindow(GLFWwindow* w) { window = w; }
 	std::set<Entity> DebugEntities;
 
 private:
 	GLFWwindow* window = nullptr;
+	unsigned int lastCharTyped = 0;
 
 	// Keyboard state
 	bool currentKeys[GLFW_KEY_LAST + 1];
 	bool previousKeys[GLFW_KEY_LAST + 1];
+	bool keyRepeat[GLFW_KEY_LAST + 1] = { false };
+	bool isKeyRepeating(int key) const { return keyRepeat[key]; }
+
 
 	// Mouse state
 	bool currentMouseButtons[8];

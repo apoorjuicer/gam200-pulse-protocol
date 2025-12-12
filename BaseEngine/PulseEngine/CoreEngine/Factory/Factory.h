@@ -24,6 +24,10 @@
 #include "GameLogic/GameLogic.h"
 #include "CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
+
+//for .NET
+#include "CoreEngine/Core/ImportExport.h" // for DLL_API
+
 #include "Audio/AudioSource.h"
 #include "Graphics/Text.h"
 //Serialize
@@ -34,8 +38,11 @@
 #include <rapidjson/stringbuffer.h> // for StringBuffer
 #pragma warning(pop)
 
+// stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
+#pragma warning(push)
+#pragma warning(disable: 4251)
 
-class Factory
+class DLL_API Factory
 {
 public: 
 
@@ -58,11 +65,9 @@ private:
 	// calls onto prefab json file only, it will just load what the param PrefabName is.
 	//bool LoadPrefab(Entity entity, std::string const& PrefabName);
 	std::string PrefabPathway = "../../MyEngine/JSON/PrefabList.json";
-
-
-	// name of prefab, reward is the container inside of this prefab. DO WE NEED THIS? 
-	std::unordered_map<std::string, rapidjson::Document> map_of_prefabs;
 };
+
+#pragma warning(pop)
 
 // Prefab: something u want reuse for runtime(enemy, bullet), OH U SHOT A GUN, BULLET APPEARS, NOT PREFAB THEN modify
 // default obj: all entity has SRT and render. anything else u add urself

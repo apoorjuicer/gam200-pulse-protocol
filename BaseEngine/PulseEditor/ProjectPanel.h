@@ -34,7 +34,8 @@ namespace MyEditor
     void EnqueueExternalDrop(const std::vector<std::string>& paths);
     void PushOSDropPath(const char* path);
 
-    // ?? Audio validation helpers ?????????????????????????????????
+    // Behaves as the same way as IsImageExt in ProjectPanel.cpp just that this is for audio; 
+    // IsAudioFolder is just to identify folders that should contain audio files, so the editor can handle them differently (like showing audio-specific options or validation)
     bool IsAudioExt(const std::string& path);
     bool IsAudioFolder(const std::string& folderName);
 }

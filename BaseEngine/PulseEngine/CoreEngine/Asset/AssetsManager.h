@@ -19,10 +19,16 @@
 // #include "../Graphics/GraphicsManager.h"
 // #include "../Audio/AudioManager.h"
 
+// for .net
+#include "CoreEngine/Core/ImportExport.h"
+#pragma warning(push)
+#pragma warning(disable: 4251) // stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
+
+
 class GraphicsManager; // fwd
 class AudioManager;    // fwd
 // class AssetRegistry; //cant fwd because take by value
-class AssetsManager
+class DLL_API AssetsManager
 {
 public:
     AssetsManager() = default;
@@ -40,19 +46,21 @@ public:
     GraphicsManager &getGraphics();
     GraphicsManager const &getGraphics() const;
 
+    //for editor
     unsigned int GetOrLoadTexture(const std::string &name);
-
     bool   EvictTexture(std::string const& idOrPath);
 
+    //get path from registry
     std::string GetAudioPath(std::string const& id)  const;
     std::string GetTexturePath(std::string const& id) const;
     std::string GetFontPath(std::string const& id)   const;
     std::string GetScenePath(std::string const& id)   const;
     std::string GetAnimationPath(std::string const& id)   const;
 
-
+    //Set Audio and GraphicsManager
     void SetAudioManager(AudioManager* audio);
     void SetGraphicsManager(GraphicsManager* graphics);
+    //Call AudioManager Function
     bool PlaySFX(std::string const& id);
     bool PlayMusic(std::string const& id);
 
@@ -83,3 +91,4 @@ private:
     AudioManager* mAudio = nullptr;    // non-owning
     GraphicsManager* mGraphics = nullptr;   // non-owning
 };
+#pragma warning(pop)

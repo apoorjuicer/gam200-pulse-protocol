@@ -25,17 +25,22 @@
 #include "DebugDraw.h"
 #include "Layer.h"
 
+// for .net
+#include "CoreEngine/Core/ImportExport.h"
+#pragma warning(push)
+#pragma warning(disable: 4251) // stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
+
 // External transforms list (used elsewhere)   
 namespace Framework { class Transform; class Animation; class Renderable; }
 
-class GLApp {
+class DLL_API GLApp {
 public:
 	static inline int VIRTUAL_W = 1920;
 	static inline int VIRTUAL_H = 1080;
 	void init(/*float inputEditorWidth, float inputEditorHeight*/);
 	//void update(GLFWwindow* window);
 	void update(GLFWwindow* window, std::set<Entity>);
-	void draw(std::set<Entity> entities, int includeMask);
+	void draw(std::set<Entity> entities, LayerMask includeMask);
 	void cleanup();
 
 	GLuint vaoid; // handle to VAO
@@ -192,10 +197,11 @@ public:
 
 	struct Camera2D {
 		glm::vec2 center{ 0.0f, 0.0f };
-		float zoom = 0.5f; // 0.5f = normal, >0.5 = zoom in, <0.5 = zoom out
+		float zoom = 0.6f; // 0.5f = normal, >0.5 = zoom in, <0.5 = zoom out
 		float     minZoom{ 0.25f };
 		float     maxZoom{ 2.0f };
 	};
+
 	static Camera2D gEditorCamera;   // used only in editor
 	static Camera2D gGameCamera;     // used only during Play
 
@@ -214,5 +220,5 @@ public:
 	};
 	static std::vector<GLViewport> vps; // container for viewports
 };
-
+#pragma warning(pop)
 #endif /* GLAPP_H */

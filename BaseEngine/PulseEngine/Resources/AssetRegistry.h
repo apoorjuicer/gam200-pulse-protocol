@@ -14,10 +14,7 @@
  *              is prohibited.
  */
  /******************************************************************************/
-
-
 #pragma once
-
 //#include <string>
 //#include <unordered_map> 
 //#include <fstream>
@@ -25,6 +22,7 @@
 #include "pch/pch_temp.h"
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
+#include "CoreEngine/Core/ImportExport.h"
 
 //enum class AudioType { SFX, BGM };
 
@@ -76,7 +74,7 @@
 		void Deserialize(rapidjson::Value const& in);
 	};
 
-	class AssetRegistry {
+	class DLL_API AssetRegistry {
 	private:
 		//[key,value]
 		std::unordered_map<std::string, AudioResource> audioResources;

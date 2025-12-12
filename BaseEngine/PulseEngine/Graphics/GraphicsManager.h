@@ -38,10 +38,14 @@
 #include "Transform.h"
 #include "Text.h"
 #include "CoreEngine/ECS/System.h"
+#include "CoreEngine/Core/ImportExport.h"
+// #include "CoreEngine/ECS/SystemManager.h"
+//#include "UI/GUIManager.h"
+//#include "UI/UIElement.h"
 
 #include "glapp.h"
 #include <ft2build.h>
-#include <memory>
+#include <memory> // redundant, alr in pch_temp
 #include FT_FREETYPE_H
 
 class AssetRegistry; // fwd
@@ -67,7 +71,15 @@ struct FontData
     unsigned int pixelHeight = 0;     // baked pixel height (e.g. 48)
 };
 
-class GraphicsManager : public Systems
+// struct TextureData {
+//     GLuint textureID = 0;
+//     int width = 0, height = 0, nrChannels = 0;
+//     // (Optional) debug info only:
+//     std::string textureName;
+//     std::string filePath;
+// };
+
+class DLL_API GraphicsManager : public Systems
 {
 public:
     GraphicsManager() = default;

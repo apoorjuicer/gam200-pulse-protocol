@@ -2,7 +2,7 @@
 /**
  * @file        Renderable.cpp
  * @project     Pulse Protocol
- * @author      Goh Pin Kai - 100%
+ * @author      Goh Pin Kai
  * @brief       Implements the Renderable component defined in Renderable.h.
  *              Provides texture assignment from asset paths and handles
  *              serialization and deserialization of Renderable data for

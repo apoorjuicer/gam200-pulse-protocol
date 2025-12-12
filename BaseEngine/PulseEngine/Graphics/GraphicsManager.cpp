@@ -224,7 +224,6 @@ void GraphicsManager::Update()
 
     // Render ALL TextComponent entities (including FPS text objects)
     Update2DTextComponent();
-    //------------------------
 }
 
 void GraphicsManager::Shutdown()
@@ -691,7 +690,7 @@ void GraphicsManager::PrintFontMap()
         std::cout << "  Pixel Height: " << fontData.pixelHeight << "\n";
         std::cout << "  Glyph Count:  " << fontData.glyphs.size() << "\n";
 
-        // Print each glyph info (optional � can be large)
+        // Print each glyph info (optional   can be large)
         for (const auto &[ch, glyph] : fontData.glyphs)
         {
             std::cout << "    '" << ch << "'"

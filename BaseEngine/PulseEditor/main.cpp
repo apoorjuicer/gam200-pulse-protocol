@@ -1,6 +1,6 @@
 ﻿/******************************************************************************/
 /**
- * @file        Editor.h
+ * @file        main.cpp
  * @project     Pulse Protocol
  * @author      Goh Pin Kai
  * @brief       Main
@@ -11,31 +11,25 @@
  */
  /******************************************************************************/
 
-#include "pch/pch.h"     // this already pulls in CoreEngine.h and Editor.h
+#include "pch/pch.h"     // this already pulls in CoreEngine.h and Editor.h (CHANGE THIS TO PCH_TEMP ISTFG)
+#include "../MyEditor/Editor.h"
 
 int main()
 {
-    // Create engine
     Engine = new CoreEngine();
-
-    // Register components/systems
     Engine->Setup();
+    Engine->Init();                     
 
-    // Init window, OpenGL, FMOD, systems, etc.
-    Engine->Init();
+    GLFWwindow* win = Engine->GetWindow(); 
 
-    // Hook ImGui editor to the GLFW window
-    MyEditor::Init(Engine->GetWindow());
+    MyEditor::Init(win);           
 
-    // Main loop
+
+    Engine->SetEditorFrameCallback(MyEditor::Editor_FrameCallback);
     Engine->GameLoop();
 
-    // Shutdown editor + engine
     MyEditor::Shutdown();
     Engine->Exit();
-
     delete Engine;
-    Engine = nullptr;
-
     return 0;
 }

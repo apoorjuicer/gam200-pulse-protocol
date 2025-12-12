@@ -16,10 +16,14 @@
  */
  /******************************************************************************/
 
-#include <windows.h> // for OutputDebugString, etc.
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX 
+#include <windows.h>			   // for OutputDebugString, etc.
+#include <mmsystem.h>			   // for timeGetTime()
+#pragma comment(lib, "winmm.lib")  //shortcut instead of doing in CMake
+
 #include "pch/pch.h"
 #include "graphics/stb_image.h"
-#include "CoreEngine/Log/Log.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "CoreEngine/Prefab/PrefabInstance.h"
 #ifdef ENABLE_EDITOR
@@ -29,7 +33,6 @@
 // #include "glapp.h"
 #include "Resources/AssetRegistry.h"
 #include "CoreEngine/Asset/AssetsManager.h"
-#include "Serialization/Serialization.h"
 
 #include "Components/DisplayName.h"
 #include "Components/EntityType.h"
@@ -38,6 +41,9 @@
 #include "Graphics/Text.h"
 #pragma comment(lib, "winmm.lib")
 
+#include <shlwapi.h>                // GetModuleFileNameA(), PathRemoveFileSpecA()
+#pragma comment(lib, "shlwapi.lib") // Needed for <shlwapi.h>
+
 // Game window dimensions and title
 const char WindowTitle[] = "Game Window";
 Config config;
@@ -45,8 +51,149 @@ AssetsManager mAssets;
 
 int WindowWidth;
 int WindowHeight;
+double g_scrollY;
+
+
 CoreEngine* Engine = nullptr;
-// TestCase Test;
+
+using HelloWorldFunctionPtr = void(*)(void);
+using InitFunctionPtr = void(*)(CoreEngine*);
+
+Framework::Transform* CoreEngine::GetTransformComponent(int ID)
+{
+	auto g_coordinator = Coordinator::GetInstance();
+	return &g_coordinator->GetComponent <Framework::Transform>(ID);
+}
+
+// Load coreclr.dll from our application so that we are able to use the functions 
+// contained within it to interface with the .NET runtime
+void CoreEngine::startScriptEngine()
+{
+	// Steppppppppppp 1, we get the current executable directory so that we can find the coreclr.dll to load
+	std::string runtimePath(MAX_PATH, '\0');
+
+	// Get the path to MyEngine.dll instead of the .exe
+	HMODULE hEngine = GetModuleHandleA("MyEngine.dll");
+	if (!hEngine)
+	{
+		throw std::runtime_error("Failed to get MyEngine.dll module handle");
+	}
+
+	GetModuleFileNameA(hEngine, runtimePath.data(), MAX_PATH);
+	PathRemoveFileSpecA(runtimePath.data());
+
+	// Since PathRemoveFileSpecA() removes from data(), the size is not updated, so we must manually update it
+	runtimePath.resize(std::strlen(runtimePath.data()));
+
+	//std::cout << "[CoreEngine] Runtime path: \n\n\n\n\n\n\n\n" << runtimePath << std::endl;
+	
+	// Also, while we're at it, set the current working directory to the current executable directory
+	std::filesystem::current_path(runtimePath);
+
+
+	// Construct the CoreCLR path
+	std::string coreClrPath(runtimePath); // Works
+	coreClrPath += "\\coreclr.dll";
+	
+	//std::cout << "[CoreEngine] Looking for:  \n\n\n\n\n\n\n\n" << coreClrPath << std::endl;
+
+	// Load the CoreCLR DLL
+	coreClr = LoadLibraryExA(coreClrPath.c_str(), nullptr, 0);
+	if (!coreClr)
+	{
+		DWORD error = GetLastError();  
+		std::cout << error << std::endl;
+
+		std::ostringstream oss;
+		oss << "Failed to load CoreCLR from: " << coreClrPath
+			<< "\nWindows Error Code: " << error;
+
+		throw std::runtime_error("Failed to load CoreCLR.");
+	}
+
+	// Step 2, we get CoreCLR hosting functions
+	initializeCoreClr = getCoreClrFuncPtr<coreclr_initialize_ptr>("coreclr_initialize");
+	createManagedDelegate = getCoreClrFuncPtr<coreclr_create_delegate_ptr>("coreclr_create_delegate");
+	shutdownCoreClr = getCoreClrFuncPtr<coreclr_shutdown_ptr>("coreclr_shutdown");
+
+	// Step 3, we then construct AppDomain properties used when starting the runtime
+	std::string tpaList = buildTpaList(runtimePath);
+	// Define CoreCLR properties
+	std::array propertyKeys =
+	{
+		"TRUSTED_PLATFORM_ASSEMBLIES",      // Trusted assemblies (like the GAC)
+		"APP_PATHS",                        // Directories to probe for application assemblies
+	};
+	std::array propertyValues =
+	{
+		tpaList.c_str(),
+		runtimePath.c_str()
+	};
+
+	//Step 4, kms.. jk, start the CoreCLR runtime (linking part)
+	int result = initializeCoreClr
+	(
+		runtimePath.c_str(),     // AppDomain base path
+		"SampleHost",            // AppDomain friendly name, this can be anything you want really
+		static_cast<int>(propertyKeys.size()),     // Property count
+		propertyKeys.data(),     // Property names
+		propertyValues.data(),   // Property values
+		&hostHandle,             // Host handle
+		&domainId                // AppDomain ID
+	);
+
+	// Check if intiialization of CoreCLR failed
+	if (result < 0)
+	{
+		std::ostringstream oss;
+		oss << std::hex << std::setfill('0') << std::setw(8)
+			<< "Failed to initialize CoreCLR. Error 0x" << result << "\n";
+		throw std::runtime_error(oss.str());
+	}
+
+
+}
+
+// Unload the .NET runtime 
+void CoreEngine::stopScriptEngine()
+{
+    // Shutdown CoreCLR
+    const int RESULT = shutdownCoreClr(hostHandle, domainId);
+    if (RESULT < 0)
+    {
+        std::stringstream oss;
+        oss << std::hex << std::setfill('0') << std::setw(8)
+            << "Failed to shut down CoreCLR. Error 0x" << RESULT << "\n";
+        throw std::runtime_error(oss.str());
+    }
+}
+
+// Construct a list of DLLs that tells the CLR which are the DLLs it can load at runtime and 
+// where to find them. Any DLLs not a part of this list will not be able to be loaded. SO RMB TO ADD
+std::string CoreEngine::buildTpaList(const std::string& directory)
+{
+	// Constants
+	static const std::string SEARCH_PATH = directory + "\\*.dll";
+	static constexpr char PATH_DELIMITER = ';';
+
+	// Create a osstream object to compile the string
+	std::ostringstream tpaList;
+	
+	// Search the current directory for the TPAs (.DLLs)
+	WIN32_FIND_DATAA findData;
+	HANDLE fileHandle = FindFirstFileA(SEARCH_PATH.c_str(), &findData);
+	if (fileHandle != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			// Append the assembly to the list
+			tpaList << directory << '\\' << findData.cFileName << PATH_DELIMITER;
+		} while (FindNextFileA(fileHandle, &findData));
+		FindClose(fileHandle);
+	}
+	return tpaList.str();
+}
+
 
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
@@ -142,7 +289,6 @@ CoreEngine::CoreEngine() : window(nullptr), DebugMode(false)
 {
 	LastTime = 0;
 	GameRunning = false;
-	// mAssets.Initialize();
 }
 
 CoreEngine::~CoreEngine()
@@ -189,16 +335,9 @@ void CoreEngine::Init()
 
 	if (!glfwInit())
 	{
-		spdlog::error("Failed to initialize GLFW");
+		//spdlog::error("Failed to initialize GLFW");
 		return;
 	}
-
-	// loading metadata for audio,texture,font into
-	// ASset reg's container each respectively
-	// ar.LoadAudioManifest();
-	// ar.LoadTextureManifest();
-	// ar.LoadFontManifest();
-	// ar.LoadSceneManifest();
 
 	unsigned int version = 0;
 	FMOD::System* system = nullptr;
@@ -249,6 +388,7 @@ void CoreEngine::Init()
 
 	glfwMakeContextCurrent(window);
 
+
 	// === FORCE FULLSCREEN AT STARTUP ===
 	{
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -263,22 +403,20 @@ void CoreEngine::Init()
 		);
 	}
 
-//	// === FORCE FULLSCREEN AT STARTUP ===
-//#ifdef NDEBUG  // Only fullscreen in Release mode
-//	{
-//		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-//		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-//
-//		glfwSetWindowMonitor(
-//			window,
-//			monitor,
-//			0, 0,
-//			mode->width,
-//			mode->height,
-//			mode->refreshRate
-//		);
-//	}
-//#endif
+	// --- Scroll wheel callback (for Editor + ImGui) ---
+	glfwSetScrollCallback(window,
+		[](GLFWwindow*, double /*x*/, double y)
+		{
+			g_scrollY += y;
+		});
+
+
+	glfwSetCharCallback(window, [](GLFWwindow*, unsigned int c)
+		{
+			auto input = Coordinator::GetInstance()->GetSystem<InputManager>();
+			if (input)
+				input->pushChar(c);
+	});
 
 	// Pause/resume on focus change (covers ALT+TAB and returning from Ctrl+Alt+Del)
 	glfwSetWindowFocusCallback(window,
@@ -303,16 +441,6 @@ void CoreEngine::Init()
 			// When restored, focus callback will unpause if the window regains focus
 		});
 
-#ifdef ENABLE_EDITOR
-	glfwSetDropCallback(window, [](GLFWwindow*, int count, const char** paths)
-		{
-			for (int i = 0; i < count; ++i)
-				MyEditor::PushOSDropPath(paths[i]);
-		});
-#else
-	// In game build we don't care about editor file drops
-	glfwSetDropCallback(window, nullptr);
-#endif
 
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwSetFramebufferSizeCallback(window,
@@ -332,13 +460,15 @@ void CoreEngine::Init()
 		});
 
 	int fbw = 0, fbh = 0;
+	glfwGetFramebufferSize(window, &fbw, &fbh);
 
 	WindowWidth = fbw;
 	WindowHeight = fbh;
-	glewInit();
 
-	// Initialize DebugDraw AFTER glewInit()
+	glewInit();
 	DebugDraw::Init();
+
+	GLApp::ComputeLetterbox(fbw, fbh);
 
 	int flags;
 	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
@@ -352,9 +482,7 @@ void CoreEngine::Init()
 
 	// Create systems AFTER GL is ready
 	mAssets.Initialize(); //loaded registry inside
-	//std::cout << mAssets.getRegistry().FindTexture("hero") << "\n";
 	// Singleton for Engine, but once game use EventBus/messaging system
-	/*std::cout << "path for bgm : " << mAssets.getRegistry().FindAudio("BGM_L1")->path << "\n";*/
 	// PLEASE CALL THIS EVERY SINGLE U WANT 2 USE SINGLETON
 	auto g_coordinator = Coordinator::GetInstance();
 
@@ -389,25 +517,49 @@ void CoreEngine::Init()
 	ProfilingManager::GetInstance()->SetResetInterval(60.0);
 	ProfilingManager::GetInstance()->SetDisplayUpdateInterval(1.0);
 
-	GameRunning = true;
+	// GLuint barTexture = LoadTexture("../../MyEngine/Assets/Sprites/perfect.png");
+	// if (barTexture > 0) {
+	//	Entity box2 = g_inputSystem->GetFeedbackEntity2();  // Use getter
+	//	auto& transform2 = g_coordinator->GetComponent<Framework::Transform>(box2);
+	//	transform2.textureID = barTexture;
+	//	std::cout << "Texture loaded and assigned to box 2: " << barTexture << std::endl;
+	// }
 
-	// std::string filePath = "../../MyEngine/JSON/test.json";//AssetManager.mPrefabMap[path];
-	// Factory factory;
-	// SceneManager SM;
-	// factory.CreateEntityFromJson(filePath);
+	GameRunning = true;	 // 3.. 2.. 1.. GAME START
+	startScriptEngine(); // 3.. 2.. 1.. DLL SCRIPT! START ROLLINGGGGGGGGGGGGGGGGGG
 
-	// std::string filePath2 = "../../MyEngine/JSON/test2.json";
-	// Entity entity = factory.DefaultObj();
-	// LogicComponent l;
-	// l.ScriptName = "IT WORKS!!!!";
-	// g_coordinator->AddComponent(entity, l);
-	// factory.SaveEntityToJson(entity, filePath2);
+	// Step 1. Get the function ptrs
+	InitFunctionPtr initFunc = GetFunctionPtr<InitFunctionPtr>
+		(
+			"ScriptAPI",                 // Name of the Assembly
+			"ScriptAPI.EngineInterface", // Full name of the class
+			"Init"                 // Name of the function
+		);
 
-	// std::string filePath3 = "../../MyEngine/JSON/MainMenu.json";
-	// SM.LoadSceneFromJson(filePath3);
-	// SM.SaveCurrentScene();
+	//auto addScript = GetFunctionPtr<bool(*)(int, const char*)>
+	//	(
+	//		"ScriptAPI",
+	//		"ScriptAPI.EngineInterface",
+	//		"AddScriptViaName"
+	//	);
 
-	// Test.Init();
+	// Step 2: Initialize it with  pointer to CoreEngine as param
+	initFunc(this); 
+
+	//// Step 3: Adding script to an entity[please work ;-; ]
+	//addScript(0, "TestScript"); // THE 0 IS ENTITY ID 0
+	//addScript(1, "TestScript");		// show that u can run multiple codes and even multiple code for each entity :D
+	//addScript(1, "TestScript2");
+	//addScript(2, "TestScript2");
+	//
+	//this is for testing
+	//HelloWorldFunctionPtr hwFunc = GetFunctionPtr<HelloWorldFunctionPtr>
+	//	(
+	//		"ScriptAPI",                 // Name of the Assembly
+	//		"ScriptAPI.EngineInterface", // Full name of the class
+	//		"HelloWorld"                 // Name of the function
+	//	);
+	//hwFunc();
 }
 
 void CoreEngine::Setup()
@@ -499,43 +651,25 @@ void CoreEngine::Update(float dt)
 	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
 	auto profiler = ProfilingManager::GetInstance();
 
-	if (!m_paused)
-	{
-		profiler->StartSystem("Scene System");
-		if (g_sceneSystem) g_sceneSystem->Update(dt);
-		profiler->EndSystem("Scene System");
+	// Always process engine / message stuff
+	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
 
-		profiler->StartSystem("LogicSystem");
-		g_coordinator->UpdateAllSystems(dt);
-		profiler->EndSystem("LogicSystem");
-
-		profiler->StartSystem("Graphics System");
-		if (g_graphicsSystem)
-			g_graphicsSystem->Update();
-		profiler->EndSystem("Graphics System");
-
-		profiler->StartSystem("Input System");
-		if (g_inputSystem)
-			g_inputSystem->Update(dt);
-		profiler->EndSystem("Input System");
-
-		profiler->StartSystem("RhythmGameplayInput");
-		if (g_rhythmSystem) g_rhythmSystem->Update(dt);
-		profiler->EndSystem("RhythmGameplayInput");
-
-		profiler->StartSystem("Audio System");
-		if (g_audioSystem) g_audioSystem->Update();
-		profiler->EndSystem("Audio System");
-	}
-
-	profiler->StartSystem("Scene System");
-	if (g_sceneSystem)
-		g_sceneSystem->Update(dt);
-	profiler->EndSystem("Scene System");
+	//profiler->StartSystem("Scene System");
+	//if (g_sceneSystem)
+	//	g_sceneSystem->Update(dt);
+	//profiler->EndSystem("Scene System");
 
 	profiler->StartSystem("LogicSystem");
 	g_coordinator->UpdateAllSystems(dt);
 	profiler->EndSystem("LogicSystem");
+	
+	auto executeUpdate = GetFunctionPtr<void(*)(void)>
+		(
+			"ScriptAPI",
+			"ScriptAPI.EngineInterface",
+			"ExecuteUpdate"
+		);
+	executeUpdate();
 
 	profiler->StartSystem("Graphics System");
 	if (g_graphicsSystem)
@@ -562,9 +696,6 @@ void CoreEngine::Update(float dt)
 	profiler->EndSystem("Collision System");
 	// Test.Update(dt);
 
-	// Always process engine / message stuff
-	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
-
 	// Always draw/update graphics once per frame
 	if (g_graphicsSystem)
 		g_graphicsSystem->Update();
@@ -578,64 +709,49 @@ void CoreEngine::Update(float dt)
 	// 3) Normal running path
 	if (g_inputSystem)    g_inputSystem->Update(dt);
 	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);
+
 }
 
 void CoreEngine::GameLoop()
 {
-	LastTime = timeGetTime();
-	auto profiler = ProfilingManager::GetInstance();
+    LastTime = timeGetTime();
+    auto profiler = ProfilingManager::GetInstance();
 
-	// application loop
-	static bool keystateP = false;
-	static bool PKeyWasPressed = false;
-	while (!glfwWindowShouldClose(window) && GameRunning)
-	{
-		// Get the current time in milliseconds
-		unsigned currenttime = timeGetTime();
+    while (!glfwWindowShouldClose(window) && GameRunning)
+    {
+        // --- dt calculation ---
+        unsigned currenttime = timeGetTime();
+        float dt = (currenttime - LastTime) / 1000.0f;
+        LastTime = currenttime;
 
-		// Convert it to the time passed since the last frame (in seconds)
-		float dt = (currenttime - LastTime) / 1000.0f;
+        glfwPollEvents();
 
-		// Update the when the last update started
-		LastTime = currenttime;
+        // --- Game update (ECS systems) ---
+        profiler->StartFrame();
+        Update(dt);
+        profiler->EndFrame();
 
-		// Don't start frame here
-		glfwPollEvents();
+        // --- Game rendering ---
+        RenderDebugDraw();      // your OpenGL game draw
 
-		// Start profiling ONLY for ECS systems
-		profiler->StartFrame();
-		Update(dt); // This contains all your ECS system profiling
-		profiler->EndFrame();
+        // --- Editor (ImGui) on top of game ---
+        if (m_editorFrameCallback)
+        {
+            m_editorFrameCallback();   // calls NewFrame + Draw + Render
+        }
 
-#ifdef ENABLE_EDITOR
-		MyEditor::NewFrame();
-#endif
-
-		//  4. game update(NOT A WHILE LOOP) gsm
-
-		//  5. game rendering
-		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
-
-		profiler->EndFrame();
-
-		//  6. ImGui rendering
-#ifdef ENABLE_EDITOR
-		MyEditor::Draw();
-		MyEditor::Render();
-#endif
-
-		RenderDebugDraw();
-
-		// 7. Swap Buffer(like two window)
-		glfwSwapBuffers(window);
-
-		profiler->Reset();
-	}
+        // --- Present frame ---
+        glfwSwapBuffers(window);
+		
+        profiler->Reset();
+    }
 }
+
 
 void CoreEngine::Exit()
 {
+	stopScriptEngine(); // stop the Csharp Scripts from using "bridge". iykyk
+
 	auto g_coordinator = Coordinator::GetInstance();
 
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
@@ -645,10 +761,13 @@ void CoreEngine::Exit()
 
 	if (g_inputSystem)
 		g_inputSystem->Shutdown();
+
 	if (g_rhythmSystem)
 		g_rhythmSystem->Shutdown();
+
 	if (g_audioSystem)
 		g_audioSystem->Shutdown();
+
 	if (g_graphicsSystem)
 		g_graphicsSystem->Shutdown();
 
@@ -932,7 +1051,8 @@ void CoreEngine::StopGame()
 	// Stop all audio (BGM and AudioSource components)
 	if (auto audio = coord->GetSystem<AudioManager>())
 	{
-		audio->StopBGM(); // Stop any direct BGM calls
+		//audio->StopBGM(); // Stop any direct BGM calls
+		audio->StopPlayingAllAudio(); //Stop ALL audio
 
 		// Stop all AudioSource components
 		for (Entity entity = 0; entity < MaxEntity; ++entity)
@@ -987,6 +1107,11 @@ void CoreEngine::ResumeGame()
 	if (auto audio = coord->GetSystem<AudioManager>()) {
 		audio->ResumeBGM();
 	}
+}
+
+void CoreEngine::SetEditorFrameCallback(const std::function<void()>& cb)
+{
+	m_editorFrameCallback = cb;
 }
 
 void CoreEngine::ToggleFullscreen()

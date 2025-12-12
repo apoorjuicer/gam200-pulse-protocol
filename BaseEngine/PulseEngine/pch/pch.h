@@ -56,6 +56,7 @@
 #include <list>
 #include <filesystem>
 #include <cstdlib> 
+#include <stdexcept>      
 
 // Graphics Library Headers
 #include <GL/glew.h>
@@ -70,10 +71,6 @@
 #include "FMOD_API/api/core/inc/fmod_errors.h"
 #pragma warning(pop)
 
-// Editor Header
-#ifdef ENABLE_EDITOR
-#include "PulseEditor/Editor.h"
-#endif
 
 //Serialize
 #pragma warning(push, 0)
@@ -82,13 +79,6 @@
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h> // for StringBuffer
 #pragma warning(pop)
-
-//Logging library
-#pragma warning(push, 0)  // Disable all warnings
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/rotating_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#pragma warning(pop)  // Restore warnings
 
 // System Library Headers
 #include "Graphics/glhelper.h"
@@ -106,7 +96,7 @@
 #include "Graphics/Renderable.h"
 #include "Physics/collision.h"
 #include "Resources/AssetRegistry.h"
-#include "Serialization/Serialization.h"
+//#include "../MyEngine/Serialization/Serialization.h"
 
 // Core Engine
 #include "CoreEngine/Core/CoreEngine.h"
