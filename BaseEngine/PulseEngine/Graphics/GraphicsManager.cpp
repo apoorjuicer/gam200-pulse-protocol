@@ -16,6 +16,10 @@
  *              - We DO NOT create glyphs here.
  *              - We pull them from AssetsManager::GetFont() which returns
  *                const Framework::FontData*.
+ * 
+ * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
  */
 /******************************************************************************/
 
@@ -725,7 +729,7 @@ bool GraphicsManager::EvictTexture(std::string const &idOrPath)
     if (auto it2 = texHandle_id.find(oldId); it2 != texHandle_id.end())
         texHandle_id.erase(it2);
 
-    std::cout << "[Graphics] Evicted texture: " << idOrPath << "\n";
+    //std::cout << "[Graphics] Evicted texture: " << idOrPath << "\n";
     return true;
 }
 

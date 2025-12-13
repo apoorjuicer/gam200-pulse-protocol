@@ -6,7 +6,8 @@
  * @author     Leu Jun Yong (secondary) - 25%
  * 
  * @brief      Manages FMOD audio system for BGM and SFX.
- * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+ * 
+ * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
  *             Reproduction or disclosure of this file or its contents without the
  *             prior written consent of DigiPen Institute of Technology is prohibited.
  */
@@ -438,7 +439,7 @@ void AudioManager::SetPaused(bool paused)
         FMOD_RESULT result = mMasterGroup->setPaused(paused);
         FMOD_CHECK(result, paused ? "mMasterGroup->setPaused(true)" : "mMasterGroup->setPaused(false)");
     }
-    std::cout << "[AudioManager] " << (paused ? "Paused all audio." : "Resumed audio.") << "\n";
+    //std::cout << "[AudioManager] " << (paused ? "Paused all audio." : "Resumed audio.") << "\n";
 }
 bool AudioManager::IsPaused() const { return mPaused; }
 

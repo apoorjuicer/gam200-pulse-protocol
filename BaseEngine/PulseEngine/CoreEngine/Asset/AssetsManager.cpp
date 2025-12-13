@@ -4,10 +4,11 @@
  * @project     Pulse Protocol
  * @author      Ban Kai Wei Benjamin (primary) - 90%
  * @author      Leu Jun Yong (secondary) - 10%
+ * 
  * @brief       Handles loading, retrieving, and unloading of audio (FMOD)
  *              and texture (OpenGL) assets.
  *
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */

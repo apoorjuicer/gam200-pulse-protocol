@@ -6,7 +6,7 @@
  * @brief       Initializes, updates, renders, and manages the ImGui
  *              editor interface with toggle support.
  *
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
@@ -33,6 +33,8 @@ namespace PulseEditor
     // OS drag-and-drop from the platform layer
     void EnqueueExternalDrop(const std::vector<std::string>& paths);
     void PushOSDropPath(const char* path);
+
+    void SetupDropCallback(GLFWwindow* window);
 
     // Behaves as the same way as IsImageExt in ProjectPanel.cpp just that this is for audio; 
     // IsAudioFolder is just to identify folders that should contain audio files, so the editor can handle them differently (like showing audio-specific options or validation)

@@ -5,9 +5,10 @@
  * @author      Leu Jun Yong (primary) - 60%
  *              Chloe Lau Rey En (secondary) - 20%
  *              Ban Kai Wei Benjamin (secondary) - 20%
+ * 
  * @brief       Entity inspector panel with component editors and undo support.
  *
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */

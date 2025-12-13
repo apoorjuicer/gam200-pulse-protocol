@@ -4,6 +4,7 @@
  * @project     Pulse Protocol
  * @author      Leu Jun Yong (primary) - 80%
  *              Chloe Lau Rey En (secondary) - 20%
+ * 
  * @brief       Implements the Project Panel (asset browser) for the editor.
  *
  *              Features:
@@ -14,8 +15,10 @@
  *              - OS file import via external drag-and-drop
  *              - Texture hot-swapping: drop image onto another to replace
  *              - Prefab instantiation on click, deletion via context menu
+ *              - Right-click delete for all files and folders
  *              - Auto-detection of spritesheets based on filename keywords
  *              - Editing disabled during play mode
+ *              - Folder-type validation for imports (Audio, Texture, Font, Prefab)
  *
  *              Prefab Drop Zones:
  *              - Dropping onto Prefab folder button (from parent directory)
@@ -24,7 +27,7 @@
  *              and display a warning popup for engine-managed entities
  *              (names starting with '_', e.g., _FPS_Display).
  *
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
@@ -34,13 +37,14 @@
 
 #include "ProjectPanel.h"
 #include "TopBarPanel.h"
+#include "FolderValidation.h"
 #include "imgui.h"
 
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "CoreEngine/ECS/Coordinator.h"
+#include "CoreEngine/Prefab/PrefabManager.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Transform.h"
-#include "CoreEngine/Prefab/PrefabManager.h"
 
 namespace PulseEditor
 {
@@ -48,7 +52,7 @@ namespace PulseEditor
     extern std::vector<Entity> entityDisplayOrder;   // defined in Editor / Hierarchy panel
 
     // ── Asset browser state ─────────────────────────────────────
-    static std::string s_assetRoot = "../../PulseEngine/Assets";
+    static std::string s_assetRoot = "../../../PulseEngine/Assets";
     static std::string s_currentDir = s_assetRoot;
     static std::vector<AssetItem> s_dirEntries;
 
@@ -58,6 +62,8 @@ namespace PulseEditor
     static bool        s_showReplaceModal = false;
     static std::string s_replaceDstPath;
     static std::string s_replaceSrcPath;
+
+    static std::vector<std::string> s_pendingOSDrops;
 
 
     // ── Helper declarations ─────────────────────────────────────
@@ -72,10 +78,12 @@ namespace PulseEditor
     static bool s_showEngineManagedWarning = false;
     static std::string s_blockedEntityName = "";
 
-    // ── Audio import error popup state ───────────────────────────
-    static bool s_showAudioImportError = false;
-    static std::string s_invalidAudioFileName = "";
+
+    // ── Import error popup state (generic for all folder types) ───
+    static bool s_showImportError = false;
+    static std::string s_invalidFileName = "";
     static std::string s_targetFolderName = "";
+    static FolderType s_targetFolderType = FolderType::Generic;
 
     // ── Init ────────────────────────────────────────────────────
     void InitProjectPanel()
@@ -101,6 +109,18 @@ namespace PulseEditor
     {
         if (path && *path)
             s_pendingOSDrops.emplace_back(path);
+    }
+
+    void SetupDropCallback(GLFWwindow* window)
+    {
+        glfwSetDropCallback(window,
+            [](GLFWwindow*, int count, const char** paths)
+            {
+                for (int i = 0; i < count; ++i)
+                {
+                    PushOSDropPath(paths[i]);
+                }
+            });
     }
 
     // ── Directory scan / thumbnails ────────────────────────────
@@ -157,8 +177,7 @@ namespace PulseEditor
         for (char& c : ext)
             c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
 
-        return (ext == "png" || ext == "jpg" || ext == "jpeg" ||
-            ext == "bmp" || ext == "tga" || ext == "dds");
+        return (ext == "png" || ext == "jpg" || ext == "jpeg");
     }
 
     static void EnsureThumbnailLoaded(AssetItem& item)
@@ -172,29 +191,6 @@ namespace PulseEditor
 
         // this assumes your AssetsManager returns a GLuint / unsigned int
         item.texID = mAssets.GetOrLoadTexture(item.fullPath);
-    }
-
-    bool IsAudioExt(const std::string& path)
-    {
-        const auto dot = path.find_last_of('.');
-        if (dot == std::string::npos)
-            return false;
-
-        std::string ext = path.substr(dot + 1);
-        for (char& c : ext)
-            c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-
-        return (ext == "mp3" || ext == "wav");
-    }
-
-    bool IsAudioFolder(const std::string& folderName)
-    {
-        std::string lower = folderName;
-        for (char& c : lower)
-            c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-
-        return (lower == "sounds" || lower == "sound" ||
-            lower == "music" || lower == "audio");
     }
 
     // Replace file on disk and hot-swap everywhere using AssetsManager API.
@@ -213,8 +209,7 @@ namespace PulseEditor
             {
                 std::string ext = p.extension().string();
                 std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-                return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
-                    ext == ".bmp" || ext == ".tga" || ext == ".dds";
+                return ext == ".png" || ext == ".jpg" || ext == ".jpeg";
             };
 
         if (!IsImage(srcPath))
@@ -296,8 +291,12 @@ namespace PulseEditor
             {
                 if (!it.isDir)
                 {
-                    mAssets.EvictTexture(it.fullPath);
-                    it.texID = mAssets.GetOrLoadTexture(it.fullPath);
+                    // Only try to load textures for image files
+                    if (IsImageExt(it.fullPath))
+                    {
+                        mAssets.EvictTexture(it.fullPath);
+                        it.texID = mAssets.GetOrLoadTexture(it.fullPath);
+                    }
                     it.triedLoad = true;
                 }
             }
@@ -328,34 +327,43 @@ namespace PulseEditor
                     {
                         std::string ext = p.extension().string();
                         std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-                        return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
-                            ext == ".bmp" || ext == ".tga" || ext == ".dds";
+                        return ext == ".png" || ext == ".jpg" || ext == ".jpeg";
                     };
 
-                // Check if current folder is an audio folder
+                // Get folder type for validation
                 std::string currentFolderName = dstDir.filename().string();
-                bool isAudioFolder = IsAudioFolder(currentFolderName);
+                FolderType folderType = GetFolderType(dstDir.string());
 
                 int changed = 0;
+                bool hadInvalidFile = false;
+                std::string firstInvalidFile = "";
+
                 for (const std::string& srcStr : s_pendingOSDrops)
                 {
                     fs::path src = fs::weakly_canonical(fs::path(srcStr), ec);
                     if (ec || src.empty() || !fs::exists(src, ec))
-                        continue;
-
-                    // ═══════════════════════════════════════════════════════
-                    // AUDIO FOLDER VALIDATION
-                    // ═══════════════════════════════════════════════════════
-                    if (isAudioFolder && !IsAudioExt(src.string()))
                     {
-                        // Invalid file type for audio folder - show error popup
-                        s_showAudioImportError = true;
-                        s_invalidAudioFileName = src.filename().string();
-                        s_targetFolderName = currentFolderName;
-                        continue;  // Skip this file, don't import it
+                        //std::cout << "[DEBUG] Source file invalid or doesn't exist: " << srcStr << std::endl;
+                        continue;
+                    }
+
+                    // VALIDATE FILE TYPE FOR THIS FOLDER
+                    if (!IsValidExtensionForFolder(folderType, src.string()))
+                    {
+                        //std::cout << "[DEBUG] Invalid extension for folder: " << src.filename().string() << std::endl;
+                        if (!hadInvalidFile)
+                        {
+                            hadInvalidFile = true;
+                            firstInvalidFile = src.filename().string();
+                        }
+                        continue;
                     }
 
                     fs::path dst = dstDir / src.filename();
+
+                    //std::cout << "[DEBUG] Copying: " << src.string() << std::endl;
+                    //std::cout << "[DEBUG] To: " << dst.string() << std::endl;
+                    //std::cout << "[DEBUG] Dst exists: " << fs::exists(dstDir, ec) << std::endl;
 
                     if (fs::exists(dst, ec))
                     {
@@ -370,10 +378,15 @@ namespace PulseEditor
                             fs::copy_file(src, dst, fs::copy_options::overwrite_existing, ec);
                             if (!ec) ++changed;
                         }
+
+                        //if (ec)
+                        //    std::cout << "[DEBUG] Copy FAILED (overwrite): " << ec.message() << std::endl;
+                        //else
+                        //    std::cout << "[DEBUG] Copy SUCCESS (overwrite)" << std::endl;
                     }
                     else
                     {
-                        // new file → import
+                        // if new file, import
                         fs::copy_file(src, dst, fs::copy_options::none, ec);
                         if (!ec)
                         {
@@ -384,7 +397,21 @@ namespace PulseEditor
                                 mAssets.GetOrLoadTexture(dst.lexically_normal().string());
                             }
                         }
+
+                        //if (ec)
+                        //    std::cout << "[DEBUG] Copy FAILED (new): " << ec.message() << std::endl;
+                        //else
+                        //    std::cout << "[DEBUG] Copy SUCCESS (new)" << std::endl;
                     }
+                }
+
+                // show popup if any files were invalid
+                if (hadInvalidFile)
+                {
+                    s_showImportError = true;
+                    s_invalidFileName = firstInvalidFile;
+                    s_targetFolderName = currentFolderName;
+                    s_targetFolderType = folderType;
                 }
 
                 if (changed > 0)
@@ -427,6 +454,36 @@ namespace PulseEditor
                     ImGui::EndChild();
                     return;
                 }
+
+                // ═══════════════════════════════════════════════════════════════
+                // RIGHT-CLICK CONTEXT MENU FOR FOLDERS
+                // ═══════════════════════════════════════════════════════════════
+                if (item.name != ".." && ImGui::BeginPopupContextItem(""))
+                {
+                    ImGui::TextDisabled("%s", item.name.c_str());
+                    ImGui::Separator();
+
+                    if (ImGui::MenuItem("Delete Folder"))
+                    {
+                        namespace fs = std::filesystem;
+                        std::error_code ec;
+
+                        // WARNING: This deletes the folder AND all contents!
+                        if (fs::remove_all(item.fullPath, ec) > 0)
+                        {
+                            std::cout << "[ProjectPanel] Deleted folder: " << item.name << std::endl;
+                            RefreshCurrentDir();
+                        }
+                        else
+                        {
+                            std::cerr << "[ProjectPanel] Failed to delete folder: " << item.name
+                                << " (" << ec.message() << ")" << std::endl;
+                        }
+                    }
+
+                    ImGui::EndPopup();
+                }
+
                 // Add drop target ONLY for Prefab/Prefabs folder
                 bool isPrefabFolder = (item.name == "Prefab" || item.name == "Prefabs" || item.name == "prefab" || item.name == "prefabs");
 
@@ -509,19 +566,32 @@ namespace PulseEditor
                 {
                     if (ImGui::Button(item.name.c_str(), thumbSize))
                         clicked = true;
+                }
 
-                    if (item.fullPath.ends_with(".json"))
+                // ═══════════════════════════════════════════════════════════════
+                // RIGHT-CLICK CONTEXT MENU FOR ALL FILES
+                // ═══════════════════════════════════════════════════════════════
+                if (ImGui::BeginPopupContextItem(""))
+                {
+                    std::string displayName = item.name;
+
+                    // Remove .json extension for prefabs in display
+                    if (displayName.ends_with(".json"))
+                        displayName.resize(displayName.size() - 5);
+
+                    ImGui::TextDisabled("%s", displayName.c_str());
+                    ImGui::Separator();
+
+                    // Delete option for all files
+                    if (ImGui::MenuItem("Delete"))
                     {
-                        if (ImGui::BeginPopupContextItem(""))
+                        namespace fs = std::filesystem;
+                        std::error_code ec;
+
+                        if (fs::exists(item.fullPath, ec))
                         {
-                            std::string displayName = item.name;
-                            if (displayName.ends_with(".json"))
-                                displayName.resize(displayName.size() - 5);
-
-                            ImGui::TextDisabled("%s", displayName.c_str());
-                            ImGui::Separator();
-
-                            if (ImGui::MenuItem("Delete Prefab"))
+                            // If it's a prefab, use PrefabManager
+                            if (item.fullPath.ends_with(".json"))
                             {
                                 PrefabManager prefabMgr;
                                 std::string prefabName = item.name;
@@ -530,18 +600,38 @@ namespace PulseEditor
 
                                 if (prefabMgr.DeletePrefab(prefabName))
                                 {
-                                    std::cout << "[ProjectPanel] Successfully deleted prefab: " << prefabName << std::endl;
-                                    RefreshCurrentDir();
+                                    std::cout << "[ProjectPanel] Deleted prefab: " << prefabName << std::endl;
                                 }
                                 else
                                 {
                                     std::cerr << "[ProjectPanel] Failed to delete prefab: " << prefabName << std::endl;
                                 }
                             }
+                            else
+                            {
+                                // Regular file deletion
+                                // If it's a texture, evict from cache first
+                                if (IsImageExt(item.fullPath))
+                                {
+                                    mAssets.EvictTexture(item.fullPath);
+                                }
 
-                            ImGui::EndPopup();
+                                if (fs::remove(item.fullPath, ec))
+                                {
+                                    std::cout << "[ProjectPanel] Deleted file: " << item.name << std::endl;
+                                }
+                                else
+                                {
+                                    std::cerr << "[ProjectPanel] Failed to delete: " << item.name
+                                        << " (" << ec.message() << ")" << std::endl;
+                                }
+                            }
+
+                            RefreshCurrentDir();
                         }
                     }
+
+                    ImGui::EndPopup();
                 }
 
                 // Drag source (image files only)
@@ -555,8 +645,7 @@ namespace PulseEditor
                         for (char& c : ext)
                             c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
 
-                        return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
-                            ext == ".bmp" || ext == ".tga" || ext == ".dds";
+                        return ext == ".png" || ext == ".jpg" || ext == ".jpeg";
                     };
 
                 if (IsImageExtStr(item.fullPath))
@@ -789,25 +878,27 @@ namespace PulseEditor
         }
 
         // =====================================================
-        // Error Popup for Invalid Audio File Import
+        // IMPORT ERROR POPUP (works for all folder types)
         // =====================================================
-        if (s_showAudioImportError)
+        if (s_showImportError)
         {
-            ImGui::OpenPopup("Invalid Audio Format##AudioImportError");
-            s_showAudioImportError = false;
+            ImGui::OpenPopup("Invalid File Type##ImportError");
+            s_showImportError = false;
         }
 
-        if (ImGui::BeginPopupModal("Invalid Audio Format##AudioImportError", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        if (ImGui::BeginPopupModal("Invalid File Type##ImportError", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
-            ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  Error  ");
+            ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  Import Error  ");
             ImGui::Separator();
             ImGui::Spacing();
 
-            ImGui::Text("Cannot import '%s' into %s folder.",
-                s_invalidAudioFileName.c_str(),
+            ImGui::Text("Cannot import '%s' into '%s' folder.",
+                s_invalidFileName.c_str(),
                 s_targetFolderName.c_str());
+
             ImGui::Spacing();
-            ImGui::TextWrapped("Supported audio formats: .mp3, .wav");
+            ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "Allowed file types: %s",
+                GetAllowedExtensions(s_targetFolderType));
 
             ImGui::Spacing();
             ImGui::Separator();
@@ -823,7 +914,7 @@ namespace PulseEditor
                 ImGui::CloseCurrentPopup();
             }
 
-            // Also close on Enter key
+            // Also close on Enter/Escape key
             if (ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_Escape))
             {
                 ImGui::CloseCurrentPopup();

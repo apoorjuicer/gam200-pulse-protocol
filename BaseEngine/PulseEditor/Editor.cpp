@@ -7,13 +7,14 @@
  *              Chloe Lau Rey En (secondary) - 15%
  * @brief       Manages the full ImGui-based editor interface, including initialization, frame updates, rendering, and runtime toggling of editor features.
  *
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
 
 #include "Editor.h"
+#include "ProjectPanel.h"
 #include "Graphics/glhelper.h"
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "Input/InputManager.h"
@@ -33,7 +34,6 @@ namespace PulseEditor
 
     // this vector maintains the order entities appear in the hierarchy
     std::vector<Entity> entityDisplayOrder;
-    std::vector<std::string> s_pendingOSDrops;
 
     static GLFWwindow* s_Window = nullptr;
     static bool s_restoreNextFrame = false;
@@ -256,7 +256,7 @@ namespace PulseEditor
 
         InitProjectPanel();
 
-
+        SetupDropCallback(w);
     }
 
 
