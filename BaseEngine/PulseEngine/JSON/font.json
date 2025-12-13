@@ -1,0 +1,14 @@
+{
+    "fontFilePaths": [
+        {
+            "id": "liberation_font",
+            "path": "../../PulseEngine/Assets/Font/liberation-mono.ttf",
+            "pixelHeight": 48
+        },
+        {
+            "id": "PatrickHand_font",
+            "path": "../../PulseEngine/Assets/Font/PatrickHand-Regular.ttf",
+            "pixelHeight": 48
+        }
+    ]
+}

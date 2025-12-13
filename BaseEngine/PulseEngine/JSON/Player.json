@@ -1,0 +1,64 @@
+{
+    "components": [
+            {
+                "transform": {
+                        "position": {
+                            "x": -800.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 500.0,
+                            "y": 500.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "angle_disp": 0.0,
+                        "angle_speed": 0.0,
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false,
+                        "mdl_to_ndc_xform": [
+                            1.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                        ]
+                    }
+            },
+
+            {
+                "render": 
+                {
+                    "mdl_ref": 1.0,
+                    "shd_ref": 2.0,
+                    "textureID": 0,
+                    "spriteName": "../../PulseEngine/Assets/Textures/Characters/hero_spritesheet.png"
+                }
+            },
+
+            {
+                "animation": {
+                    "totalFrames": 3,
+                    "columns": 3,
+                    "rows": 1
+                }
+            },
+            {
+                "ScriptName": "PlayerScript"
+            },
+
+            { 
+                "health": {
+                    "hp": 5,
+                    "IsAlive": true
+                } 
+            }
+    ]
+}

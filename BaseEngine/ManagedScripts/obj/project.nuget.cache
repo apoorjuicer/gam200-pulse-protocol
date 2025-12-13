@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "gTXy+Pfq6v8=",
+  "success": true,
+  "projectFilePath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.17763.57\\microsoft.windows.sdk.net.ref.10.0.17763.57.nupkg.sha512"
+  ],
+  "logs": []
+}
