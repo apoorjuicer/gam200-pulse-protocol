@@ -37,6 +37,7 @@
 #include "Components/DisplayName.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "Graphics/Layer.h"
+#include "CoreEngine/Core/CoreEngine.h"  // For GetFunctionPtr
 //#include "../Components/AABB.h"
 
 extern bool g_countdownFinished;
@@ -381,9 +382,21 @@ void SceneManager::UnloadCurrentScene()
 		}
 	}
 
-	//std::cout << "[SceneManager] Entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
-	//std::cout << "[SceneManager] Total entities before unload: " << g_coordinator->GetAllEntities().size() << std::endl;
 
+	// Clear the Csharp script when scene change
+	std::cout << "[SceneManager::UnloadCurrentScene] Clearing C# scripts..." << std::endl;
+	if (m_coreEngine && m_coreEngine->clearScriptsFunc)
+	{
+		m_coreEngine->clearScriptsFunc();
+	}
+
+
+	else
+	{
+		std::cout << "[SceneManager::UnloadCurrentScene] WARNING: CoreEngine pointer not set!" << std::endl;
+	}
+
+	// Delete all the entity from SceneEntity Container
 	for (auto const& entity : SceneEntityList)
 	{
 		g_coordinator->DestroyEntity(entity);

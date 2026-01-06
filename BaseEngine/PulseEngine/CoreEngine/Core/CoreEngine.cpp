@@ -195,6 +195,53 @@ std::string CoreEngine::buildTpaList(const std::string& directory)
 	return tpaList.str();
 }
 
+void CoreEngine::CompileScriptAssembly()
+{
+	const char* PROJ_PATH =	"..\\..\\ManagedScripts\\ManagedScripts.csproj";
+
+	std::wstring buildCmd = L" build \"" + std::filesystem::absolute(PROJ_PATH).wstring() +
+			                L"\" -c Debug --no-self-contained " + L"-o \"./tmp_build/\" -r \"win-x64\"";
+
+	// Define the struct to config the compiler process call
+	STARTUPINFOW startInfo;
+	PROCESS_INFORMATION pi;
+	ZeroMemory(&startInfo, sizeof(startInfo));
+	ZeroMemory(&pi, sizeof(pi));
+	startInfo.cb = sizeof(startInfo);
+
+	// Start compiler process
+	const auto Launch = CreateProcessW(L"C:\\Program Files\\dotnet\\dotnet.exe", 
+		                              buildCmd.data(),nullptr, nullptr, true, NULL, nullptr, nullptr,
+		                              &startInfo, &pi);
+
+	// Check that we launched the process
+	if (!Launch)
+	{	
+		auto err = GetLastError();
+		std::cerr << "[CoreEngine] ERROR: Failed to launch dotnet.exe. Error: 0x" << std::hex << err << std::endl;
+		return;
+	}
+
+	// Wait for process to end
+	DWORD exitCode{};
+	while (true)
+	{
+		const auto EXEC_SUCCESS = GetExitCodeProcess(pi.hProcess, &exitCode);
+		
+		if (!EXEC_SUCCESS)
+		{
+			auto err = GetLastError();
+			std::cerr << "[CoreEngine] ERROR: Failed to query build process. Error: 0x" << std::hex << err << std::endl;
+			return;
+		}
+
+		if (exitCode != STILL_ACTIVE)
+		{
+			break;
+		}
+	}
+
+}
 
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
@@ -529,6 +576,8 @@ void CoreEngine::Init()
 	GameRunning = true;	 // 3.. 2.. 1.. GAME START
 	startScriptEngine(); // 3.. 2.. 1.. DLL SCRIPT! START ROLLINGGGGGGGGGGGGGGGGGG
 
+	CompileScriptAssembly();
+
 	// Step 1. Get the function ptrs
 	InitFunctionPtr initFunc = GetFunctionPtr<InitFunctionPtr>
 		(
@@ -543,24 +592,17 @@ void CoreEngine::Init()
 	//		"ScriptAPI.EngineInterface",
 	//		"AddScriptViaName"
 	//	);
+	clearScriptsFunc = GetFunctionPtr<void(*)(void)>
+		(
+			"ScriptAPI",
+			"ScriptAPI.EngineInterface",
+			"ClearAllScripts"
+		);
 
 	// Step 2: Initialize it with  pointer to CoreEngine as param
 	initFunc(this); 
 
-	//// Step 3: Adding script to an entity[please work ;-; ]
-	//addScript(0, "TestScript"); // THE 0 IS ENTITY ID 0
-	//addScript(1, "TestScript");		// show that u can run multiple codes and even multiple code for each entity :D
-	//addScript(1, "TestScript2");
-	//addScript(2, "TestScript2");
-	//
-	//this is for testing
-	//HelloWorldFunctionPtr hwFunc = GetFunctionPtr<HelloWorldFunctionPtr>
-	//	(
-	//		"ScriptAPI",                 // Name of the Assembly
-	//		"ScriptAPI.EngineInterface", // Full name of the class
-	//		"HelloWorld"                 // Name of the function
-	//	);
-	//hwFunc();
+	
 }
 
 void CoreEngine::Setup()
@@ -593,6 +635,10 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterSystem<CollisionManager>();
 	g_coordinator->RegisterSystem<SceneManager>();
 	g_coordinator->RegisterSystem<LogicSystem>();
+
+	// for clearing script when scene change. pass an instance of scenemanager
+	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
+	sceneManager->SetCoreEngine(this);
 
 	// Set signature for component and system
 	Signature collisionSig;
@@ -664,6 +710,36 @@ void CoreEngine::Update(float dt)
 	g_coordinator->UpdateAllSystems(dt);
 	profiler->EndSystem("LogicSystem");
 	
+
+	//--- Start of script/hot reload ---//
+	// Press R to reload the script changes 
+	static bool wasRPressed = false;
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+	{
+		if (!wasRPressed)
+		{
+			std::cout << "[Hot Reload] Recompiling scripts...\n";
+			CompileScriptAssembly();
+
+			auto reloadScripts = GetFunctionPtr<void(*)(void)>
+				(
+					"ScriptAPI",
+					"ScriptAPI.EngineInterface",
+					"Reload"
+				);
+
+			//reloadScripts(); 
+
+		}
+		wasRPressed = true;
+	}
+
+	else
+	{
+		std::cout << "back to normal\n";
+		wasRPressed = false;
+	}
+
 	auto executeUpdate = GetFunctionPtr<void(*)(void)>
 		(
 			"ScriptAPI",
@@ -671,6 +747,8 @@ void CoreEngine::Update(float dt)
 			"ExecuteUpdate"
 		);
 	executeUpdate();
+
+	//--- End of script/hot reload ---//
 
 	profiler->StartSystem("Graphics System");
 	if (g_graphicsSystem)

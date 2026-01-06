@@ -28,11 +28,14 @@ namespace ScriptAPI
         // ^ = A "handle" to something the garbage collector owns and will clean up for you
 
         static void ExecuteUpdate();
+        static void ClearAllScripts();
+
+        static void Reload();  // For hot reloading scripts
     
     private:
         using ScriptList = System::Collections::Generic::List<Script^>;
-        static System::Collections::Generic::List<ScriptList^>^ scripts;                // stores all scripts for all entities in your scene.
-        static System::Collections::Generic::IEnumerable<System::Type^>^ scriptTypeList;// stores all available script types that you can attach to entities.
+        static System::Collections::Generic::List<ScriptList^>^ scripts;                 // stores all scripts for all entities in your scene.
+        static System::Collections::Generic::IEnumerable<System::Type^>^ scriptTypeList; // stores all available script types that you can attach to entities.
 
         // chatgpt easy examplination if u cant picture it (i am dumb thats why):
         // scriptTypeList →[PlayerScript, EnemyScript, CameraScript, ...]  // All available types
@@ -42,6 +45,9 @@ namespace ScriptAPI
         //    scripts[2] →[PlayerScript instance]                             // Entity 2's scripts
 
         static void updateScriptTypeList();
+
+        // For hot reloading 
+        static System::Runtime::Loader::AssemblyLoadContext^ loadContext;
 
     internal:
         static CoreEngine* coreEngine = nullptr;

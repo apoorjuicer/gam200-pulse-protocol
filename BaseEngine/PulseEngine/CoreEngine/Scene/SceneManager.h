@@ -87,6 +87,9 @@ public:
 		}
 	}
 
+	// to get a hold of coreengine instance for clearing scripts
+	void SetCoreEngine(CoreEngine* engine) { m_coreEngine = engine; }
+
 private:
 	std::string PreviousScene;		// For change detection in Update()
 	std::string LastScene;			// For ESC navigation - the scene we came FROM
@@ -97,6 +100,8 @@ private:
 
 	void Deserialize(const rapidjson::Value& in);
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
+
+	CoreEngine* m_coreEngine = nullptr;
 };
 //ALL ENTITY IN THE ARRAY MUST BE EXACTLY LIKE A PREFAB. But it is not a prefab, just all its component. (for scene json)
 

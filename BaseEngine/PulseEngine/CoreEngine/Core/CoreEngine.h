@@ -73,6 +73,7 @@ public:
 	void ResumeGame();	// resume btn functionality
 	void StopGame();	// stop button functionality
 	void RestartRuntimeForPlay();
+	void CompileScriptAssembly(); // for hot reload 
 
 	void SetEditorFrameCallback(const std::function<void()>& cb);
 
@@ -150,6 +151,8 @@ public:
 private:
 	//Function pointer for our script updates
 	void(*executeUpdateFunc)() = nullptr;
+public:
+	void(*clearScriptsFunc)() = nullptr;
 };
 
 // A global pointer to the instance of the core

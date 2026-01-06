@@ -34,7 +34,7 @@ set_target_properties(ScriptAPI PROPERTIES
 target_include_directories(ScriptAPI PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/extern/dotnet/include
-    ${CMAKE_SOURCE_DIR}/PulseEngine  # ← Can access PulseEngine headers
+    ${CMAKE_SOURCE_DIR}/PulseEngine  
     ${CMAKE_SOURCE_DIR}/PulseEngine/include
     ${GLEW_SOURCE_DIR}/include
     $<$<BOOL:${FMOD_API_DIR_FOUND}>:${FMOD_API_DIR_FOUND}/api/core/inc>

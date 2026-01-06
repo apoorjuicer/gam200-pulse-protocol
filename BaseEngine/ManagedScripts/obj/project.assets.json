@@ -1,7 +1,7 @@
 {
   "version": 3,
   "targets": {
-    "net8.0-windows10.0.17763": {
+    "net8.0": {
       "freetype/1.0.0": {
         "type": "project",
         "compile": {
@@ -89,13 +89,13 @@
   "libraries": {
     "freetype/1.0.0": {
       "type": "project",
-      "path": "../build/_deps/freetype_src-build/freetype.vcxproj",
-      "msbuildProject": "../build/_deps/freetype_src-build/freetype.vcxproj"
+      "path": "../build/libraries/freetype_src-build/freetype.vcxproj",
+      "msbuildProject": "../build/libraries/freetype_src-build/freetype.vcxproj"
     },
     "glfw/1.0.0": {
       "type": "project",
-      "path": "../build/_deps/glfw-build/src/glfw.vcxproj",
-      "msbuildProject": "../build/_deps/glfw-build/src/glfw.vcxproj"
+      "path": "../build/libraries/glfw-build/src/glfw.vcxproj",
+      "msbuildProject": "../build/libraries/glfw-build/src/glfw.vcxproj"
     },
     "imgui/1.0.0": {
       "type": "project",
@@ -109,8 +109,8 @@
     },
     "libglew_static/1.0.0": {
       "type": "project",
-      "path": "../build/_deps/glew-build/libglew_static.vcxproj",
-      "msbuildProject": "../build/_deps/glew-build/libglew_static.vcxproj"
+      "path": "../build/libraries/glew-build/libglew_static.vcxproj",
+      "msbuildProject": "../build/libraries/glew-build/libglew_static.vcxproj"
     },
     "PulseEngine/1.0.0": {
       "type": "project",
@@ -124,44 +124,39 @@
     }
   },
   "projectFileDependencyGroups": {
-    "net8.0-windows10.0.17763": [
+    "net8.0": [
       "ScriptAPI >= 1.0.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\user\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\racha\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+      "projectUniqueName": "C:\\Users\\racha\\School\\Yr2_Tri1\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
       "projectName": "ManagedScripts",
-      "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
-      "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-      "outputPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\obj\\",
+      "projectPath": "C:\\Users\\racha\\School\\Yr2_Tri1\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+      "packagesPath": "C:\\Users\\racha\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\racha\\School\\Yr2_Tri1\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\racha\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
-        "net8.0-windows10.0.17763.0"
+        "net8.0"
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net8.0-windows10.0.17763": {
-          "targetAlias": "net8.0-windows10.0.17763.0",
+        "net8.0": {
+          "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\ScriptAPI\\ScriptAPI.vcxproj": {
-              "projectPath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\ScriptAPI\\ScriptAPI.vcxproj"
+            "C:\\Users\\racha\\School\\Yr2_Tri1\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\ScriptAPI\\ScriptAPI.vcxproj": {
+              "projectPath": "C:\\Users\\racha\\School\\Yr2_Tri1\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\ScriptAPI\\ScriptAPI.vcxproj"
             }
           }
         }
@@ -179,8 +174,8 @@
       "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
-      "net8.0-windows10.0.17763": {
-        "targetAlias": "net8.0-windows10.0.17763.0",
+      "net8.0": {
+        "targetAlias": "net8.0",
         "imports": [
           "net461",
           "net462",
@@ -192,17 +187,8 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.Windows.SDK.NET.Ref",
-            "version": "[10.0.17763.57, 10.0.17763.57]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
-            "privateAssets": "all"
-          },
-          "Microsoft.Windows.SDK.NET.Ref.Windows": {
             "privateAssets": "all"
           }
         },

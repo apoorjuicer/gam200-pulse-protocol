@@ -11,6 +11,11 @@
 *              prior written consent of DigiPen Institute of Technology is prohibited.
 *
 /******************************************************************************/
+#using "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.22\\System.Private.CoreLib.dll"
+#using "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.22\\System.Runtime.dll"
+#using "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.22\\System.Runtime.Loader.dll"
+#pragma warning(disable: 4945)  // Suppress assembly conflict warnings for dotnet System.Runtime.CoreLib and Loader :p
+
 #include "EngineInterface.h"
 #include "CoreEngine/Core/ScriptingBridge.h"
 #pragma comment(lib, "PulseEngine.lib")
@@ -19,13 +24,25 @@ namespace ScriptAPI
 {
     void EngineInterface::Init(CoreEngine* p_coreEngine)
     {
+        using namespace System::IO;
+
         coreEngine = p_coreEngine;
 
 
-        // Load assembly
+        // Load assembly (old method) 
         System::Reflection::Assembly::LoadFrom("ManagedScripts.dll");
         
-        updateScriptTypeList();
+        // Create unloadable assembly context
+        //loadContext = gcnew System::Runtime::Loader::AssemblyLoadContext(nullptr, true);
+
+        // Load assembly via FileStream (for hot reload)
+        FileStream^ managedLibFile = File::Open("ManagedScripts.dll",
+            FileMode::Open,
+            FileAccess::Read,
+            FileShare::Read);
+
+        //loadContext->LoadFromStream(managedLibFile);
+        managedLibFile->Close();
 
         // Create the main container that will hold scripts for ALL entities
         scripts = gcnew System::Collections::Generic::List<ScriptList^>();
@@ -37,6 +54,31 @@ namespace ScriptAPI
         {
             scripts->Add(gcnew ScriptList()); // List<Script^> += ScriptList 
         }
+        
+        // Update list of scripts 
+        updateScriptTypeList();
+    }
+    
+    void EngineInterface::Reload()
+    {
+        System::Console::WriteLine("Reloading scripts!");
+
+        // Clear ALL references to types from the old assembly
+        scripts->Clear();
+        scriptTypeList = nullptr;
+
+        // Unload the assembly context
+        //loadContext->Unload();
+        //loadContext = nullptr;
+
+        //// Force garbage collection to complete unloading
+        System::GC::Collect();
+        System::GC::WaitForPendingFinalizers();
+
+        // Reload everything (new assembly)
+        Init(coreEngine);
+
+        System::Console::WriteLine("Scripts reloaded successfully!");
     }
     
     // Update script type list to help LINQ find all Script classes via .NET reflection
@@ -143,9 +185,25 @@ namespace ScriptAPI
         // make is so ECS ID and script ID is the same
         script->SetEntityID(entityId);
 
-        // Add the script
+        // Add the script into this entities script container
         scripts[entityId]->Add(script);
         return true;
+    }
+
+    void EngineInterface::ClearAllScripts()
+    {
+        System::Console::WriteLine("Removing all scripts!\n");
+
+        for each (ScriptList ^ entityScripts in scripts)
+        {
+            if (entityScripts != nullptr && entityScripts->Count > 0)
+            {
+                // Clear all the script for this entity
+                entityScripts->Clear();
+
+                System::Console::WriteLine("1 Script cleared!\n");
+            }
+        }
     }
 
     // iterate thru all of our scripts that has been created and execute our scripts.
