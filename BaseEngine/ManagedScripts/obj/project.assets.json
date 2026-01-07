@@ -1,132 +1,11 @@
 {
   "version": 3,
   "targets": {
-    "net8.0": {
-      "freetype/1.0.0": {
-        "type": "project",
-        "compile": {
-          "bin/placeholder/freetype.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/freetype.dll": {}
-        }
-      },
-      "glfw/1.0.0": {
-        "type": "project",
-        "compile": {
-          "bin/placeholder/glfw.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/glfw.dll": {}
-        }
-      },
-      "imgui/1.0.0": {
-        "type": "project",
-        "compile": {
-          "bin/placeholder/imgui.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/imgui.dll": {}
-        }
-      },
-      "imgui_backend/1.0.0": {
-        "type": "project",
-        "dependencies": {
-          "glfw": "1.0.0",
-          "imgui": "1.0.0"
-        },
-        "compile": {
-          "bin/placeholder/imgui_backend.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/imgui_backend.dll": {}
-        }
-      },
-      "libglew_static/1.0.0": {
-        "type": "project",
-        "compile": {
-          "bin/placeholder/libglew_static.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/libglew_static.dll": {}
-        }
-      },
-      "PulseEngine/1.0.0": {
-        "type": "project",
-        "dependencies": {
-          "freetype": "1.0.0",
-          "glfw": "1.0.0",
-          "imgui": "1.0.0",
-          "imgui_backend": "1.0.0",
-          "libglew_static": "1.0.0"
-        },
-        "compile": {
-          "bin/placeholder/PulseEngine.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/PulseEngine.dll": {}
-        }
-      },
-      "ScriptAPI/1.0.0": {
-        "type": "project",
-        "dependencies": {
-          "PulseEngine": "1.0.0",
-          "freetype": "1.0.0",
-          "glfw": "1.0.0",
-          "imgui": "1.0.0",
-          "imgui_backend": "1.0.0",
-          "libglew_static": "1.0.0"
-        },
-        "compile": {
-          "bin/placeholder/ScriptAPI.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/ScriptAPI.dll": {}
-        }
-      }
-    }
+    "net8.0": {}
   },
-  "libraries": {
-    "freetype/1.0.0": {
-      "type": "project",
-      "path": "../build/libraries/freetype_src-build/freetype.vcxproj",
-      "msbuildProject": "../build/libraries/freetype_src-build/freetype.vcxproj"
-    },
-    "glfw/1.0.0": {
-      "type": "project",
-      "path": "../build/libraries/glfw-build/src/glfw.vcxproj",
-      "msbuildProject": "../build/libraries/glfw-build/src/glfw.vcxproj"
-    },
-    "imgui/1.0.0": {
-      "type": "project",
-      "path": "../build/imgui.vcxproj",
-      "msbuildProject": "../build/imgui.vcxproj"
-    },
-    "imgui_backend/1.0.0": {
-      "type": "project",
-      "path": "../build/imgui_backend.vcxproj",
-      "msbuildProject": "../build/imgui_backend.vcxproj"
-    },
-    "libglew_static/1.0.0": {
-      "type": "project",
-      "path": "../build/libraries/glew-build/libglew_static.vcxproj",
-      "msbuildProject": "../build/libraries/glew-build/libglew_static.vcxproj"
-    },
-    "PulseEngine/1.0.0": {
-      "type": "project",
-      "path": "../build/PulseEngine/PulseEngine.vcxproj",
-      "msbuildProject": "../build/PulseEngine/PulseEngine.vcxproj"
-    },
-    "ScriptAPI/1.0.0": {
-      "type": "project",
-      "path": "../build/ScriptAPI/ScriptAPI.vcxproj",
-      "msbuildProject": "../build/ScriptAPI/ScriptAPI.vcxproj"
-    }
-  },
+  "libraries": {},
   "projectFileDependencyGroups": {
-    "net8.0": [
-      "ScriptAPI >= 1.0.0"
-    ]
+    "net8.0": []
   },
   "packageFolders": {
     "C:\\Users\\racha\\.nuget\\packages\\": {}
@@ -154,11 +33,7 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "projectReferences": {
-            "C:\\Users\\racha\\School\\Yr2_Tri1\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\ScriptAPI\\ScriptAPI.vcxproj": {
-              "projectPath": "C:\\Users\\racha\\School\\Yr2_Tri1\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\build\\ScriptAPI\\ScriptAPI.vcxproj"
-            }
-          }
+          "projectReferences": {}
         }
       },
       "warningProperties": {

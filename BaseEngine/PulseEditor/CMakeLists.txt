@@ -128,12 +128,12 @@ add_custom_command(TARGET PulseEditor POST_BUILD
 )
 
 
-# Copy PulseEngine.dll and all its output to PulseEditor
+# Copy ScriptAPI.dll  from .bin to PulseEditor
 add_custom_command(TARGET PulseEditor POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_BINARY_DIR}/PulseEngine/$<CONFIG>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_BINARY_DIR}/.bin/$<CONFIG>-x64/ScriptAPI.dll"
         "$<TARGET_FILE_DIR:PulseEditor>"
-    COMMENT "Copying PulseEngine.dll, ScriptAPI.dll, ManagedScripts.dll to PulseEditor"
+    COMMENT "Copying ScriptAPI.dll to PulseEditor"
 )
 
 # Copy .NET Runtime DLLs for C# scripting

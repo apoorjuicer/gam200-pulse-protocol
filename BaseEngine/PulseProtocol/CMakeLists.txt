@@ -24,7 +24,9 @@ target_include_directories(${GAME_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/PulseEngine
 )
 
-add_dependencies(PulseProtocol ScriptAPI ManagedScripts)
+#add_dependencies(PulseProtocol ScriptAPI ManagedScripts)
+add_dependencies(PulseProtocol ScriptAPI)
+
 
 # Copy PulseEngine.dll to PulseProtocol output
 add_custom_command(TARGET ${GAME_NAME} POST_BUILD

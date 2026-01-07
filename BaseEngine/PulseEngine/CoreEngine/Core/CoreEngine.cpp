@@ -197,10 +197,14 @@ std::string CoreEngine::buildTpaList(const std::string& directory)
 
 void CoreEngine::CompileScriptAssembly()
 {
-	const char* PROJ_PATH =	"..\\..\\ManagedScripts\\ManagedScripts.csproj";
+	const char* PROJ_PATH = "..\\..\\..\\ManagedScripts\\ManagedScripts.csproj";
+
 
 	std::wstring buildCmd = L" build \"" + std::filesystem::absolute(PROJ_PATH).wstring() +
-			                L"\" -c Debug --no-self-contained " + L"-o \"./tmp_build/\" -r \"win-x64\"";
+		L"\" -c Debug -p:Platform=x64";
+
+	//std::wstring buildCmd = L" build \"" + std::filesystem::absolute(PROJ_PATH).wstring() +
+		//	                L"\" -c Debug --no-self-contained " + L"-o \"./tmp_build/\" -r \"win-x64\"";
 
 	// Define the struct to config the compiler process call
 	STARTUPINFOW startInfo;
@@ -241,6 +245,21 @@ void CoreEngine::CompileScriptAssembly()
 		}
 	}
 
+	if (exitCode == 0)
+	{
+		std::cout << "[CoreEngine] Scripts compiled successfully!\n";
+
+		std::filesystem::path dllSource = "../../.bin/Debug-x64/ManagedScripts.dll";
+		std::filesystem::path dllDest = "ManagedScripts.dll";
+		std::filesystem::copy_file(dllSource, dllDest, std::filesystem::copy_options::overwrite_existing);
+
+		std::cout << "[CoreEngine] ManagedScripts.dll copied!\n";
+	}
+
+	else
+	{
+		std::cerr << "[CoreEngine] Build failed! Exit code: " << exitCode << "\n";
+	}
 }
 
 void APIENTRY glDebugOutput(GLenum source,
@@ -736,7 +755,7 @@ void CoreEngine::Update(float dt)
 
 	else
 	{
-		std::cout << "back to normal\n";
+		//std::cout << "back to normal\n";
 		wasRPressed = false;
 	}
 

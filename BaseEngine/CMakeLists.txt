@@ -68,7 +68,7 @@ set_property(TARGET imgui_backend PROPERTY FOLDER "3rdparty/ImGui")
 
 # --------------- C# Scripting Support ---------------
 add_subdirectory(ScriptAPI)
-add_subdirectory(ManagedScripts)
+#add_subdirectory(ManagedScripts)
 
 
 add_subdirectory(PulseEngine)
@@ -92,7 +92,7 @@ if (ENABLE_EDITOR)
     target_compile_definitions(PulseEngine PUBLIC ENABLE_EDITOR)
     target_compile_definitions(PulseEditor PUBLIC ENABLE_EDITOR)
 
-    add_dependencies(PulseEditor ScriptAPI ManagedScripts)
+    add_dependencies(PulseEditor ScriptAPI)
 
 #endif()
 # Add the game executable (no editor)

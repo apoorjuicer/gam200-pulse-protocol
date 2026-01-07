@@ -42,10 +42,17 @@ target_include_directories(ScriptAPI PUBLIC
 )
 
 # Output to same directory as PulseEngine
+#set_target_properties(ScriptAPI PROPERTIES
+#    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/PulseEngine/$<CONFIG>"  # for DLL
+#    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/PulseEngine/$<CONFIG>"  # for others i think? 
+#    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/PulseEngine/$<CONFIG>"  # for .lib
+#)
+
+# Output to .bin directory to match guide
 set_target_properties(ScriptAPI PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/PulseEngine/$<CONFIG>"  # for DLL
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/PulseEngine/$<CONFIG>"  # for others i think? 
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/PulseEngine/$<CONFIG>"  # for .lib
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/.bin/$<CONFIG>-x64"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/.bin/$<CONFIG>-x64"
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/.bin/$<CONFIG>-x64"
 )
     
 # Set folder organization for Visual Studio
