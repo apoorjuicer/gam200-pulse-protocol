@@ -29,6 +29,7 @@ namespace PulseEditor
 
     // OS drag-and-drop from the platform layer
     void EnqueueExternalDrop(const std::vector<std::string>& paths);
+
     void PushOSDropPath(const char* path);
 
     void SetupDropCallback(GLFWwindow* window);

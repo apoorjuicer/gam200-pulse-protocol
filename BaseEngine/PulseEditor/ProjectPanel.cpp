@@ -6,6 +6,7 @@
  *              Chloe Lau Rey En (secondary) - 20%
  * 
  * @brief       Implements the Project Panel (asset browser) for the editor.
+ *              Helper functions moved to ProjectPanelHelpers.cpp for readability.
  *
  *              Features:
  *              - Directory browsing with navigation and thumbnail previews
@@ -19,6 +20,7 @@
  *              - Auto-detection of spritesheets based on filename keywords
  *              - Editing disabled during play mode
  *              - Folder-type validation for imports (Audio, Texture, Font, Prefab)
+ *              - Invalid file highlighting (red text + tooltip)
  *
  *              Prefab Drop Zones:
  *              - Dropping onto Prefab folder button (from parent directory)
@@ -33,16 +35,12 @@
  */
  /******************************************************************************/
 
-#include "pch/pch_temp.h"
-
 #include "ProjectPanel.h"
-#include "TopBarPanel.h"
+#include "ProjectPanelHelper.h"
 #include "FolderValidation.h"
-#include "imgui.h"
 
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "CoreEngine/ECS/Coordinator.h"
-#include "CoreEngine/Prefab/PrefabManager.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Transform.h"
 
@@ -59,31 +57,26 @@ namespace PulseEditor
     static float s_thumbSize = 72.0f;
     static float s_thumbPadding = 10.0f;
 
-    static bool        s_showReplaceModal = false;
-    static std::string s_replaceDstPath;
-    static std::string s_replaceSrcPath;
-
     static std::vector<std::string> s_pendingOSDrops;
 
-
-    // ── Helper declarations ─────────────────────────────────────
-    static bool IsImageExt(const std::string& path);
-    static void EnsureThumbnailLoaded(AssetItem& item);
-    static void RefreshCurrentDir();
-    static bool ReplaceTextureFileOnDisk_AndRefreshAll(const std::string& dstPath,
-        const std::string& srcPath);
-    [[maybe_unused]] static bool ReplaceTextureFileOnDisk(const std::string& dstPath,
-        const std::string& srcPath);
-
+    // Popup states
     static bool s_showEngineManagedWarning = false;
     static std::string s_blockedEntityName = "";
-
-
-    // ── Import error popup state (generic for all folder types) ───
     static bool s_showImportError = false;
     static std::string s_invalidFileName = "";
     static std::string s_targetFolderName = "";
     static FolderType s_targetFolderType = FolderType::Generic;
+
+    // ══════════════════════════════════════════════════════════════
+    // LOCAL HELPER - Refresh wrapper
+    // Calls RefreshDirectory() and ValidateFolderContents() from 
+    // ProjectPanelHelpers.cpp
+    // ══════════════════════════════════════════════════════════════
+    static void RefreshCurrentDir()
+    {
+        RefreshDirectory(s_assetRoot, s_currentDir, s_dirEntries);
+        ValidateFolderContents(s_currentDir, s_dirEntries);
+    }
 
     // ── Init ────────────────────────────────────────────────────
     void InitProjectPanel()
@@ -123,313 +116,60 @@ namespace PulseEditor
             });
     }
 
-    // ── Directory scan / thumbnails ────────────────────────────
-    static void RefreshCurrentDir()
-    {
-        s_dirEntries.clear();
-
-        namespace fs = std::filesystem;
-        std::error_code ec;
-
-        fs::path cur = fs::weakly_canonical(fs::absolute(s_currentDir), ec);
-        if (ec || cur.empty() || !fs::exists(cur, ec))
-            return;
-
-        fs::path root = fs::weakly_canonical(fs::absolute(s_assetRoot), ec);
-
-        // Add ".." (only if not at the asset root)
-        if (!ec && cur != root)
-        {
-            AssetItem up;
-            up.name = "..";
-            up.fullPath = fs::weakly_canonical(cur.parent_path(), ec).string();
-            up.isDir = true;
-            s_dirEntries.push_back(up);
-        }
-
-        // List the directory (non-recursive)
-        for (auto const& entry : fs::directory_iterator(cur, ec))
-        {
-            AssetItem it;
-            it.fullPath = fs::weakly_canonical(entry.path(), ec).string();
-            it.name = entry.path().filename().string();
-            it.isDir = entry.is_directory();
-            s_dirEntries.push_back(std::move(it));
-        }
-
-        // Sort: folders first, then alpha
-        std::sort(s_dirEntries.begin(), s_dirEntries.end(),
-            [](const AssetItem& a, const AssetItem& b)
-            {
-                if (a.isDir != b.isDir)
-                    return a.isDir > b.isDir;
-                return a.name < b.name;
-            });
-    }
-
-    static bool IsImageExt(const std::string& path)
-    {
-        const auto dot = path.find_last_of('.');
-        if (dot == std::string::npos)
-            return false;
-
-        std::string ext = path.substr(dot + 1);
-        for (char& c : ext)
-            c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-
-        return (ext == "png" || ext == "jpg" || ext == "jpeg");
-    }
-
-    static void EnsureThumbnailLoaded(AssetItem& item)
-    {
-        if (item.triedLoad) return;     // already tried
-        item.triedLoad = true;
-
-        if (item.isDir) return;         // no thumb for folder
-
-        if (!IsImageExt(item.fullPath)) return;
-
-        // this assumes your AssetsManager returns a GLuint / unsigned int
-        item.texID = mAssets.GetOrLoadTexture(item.fullPath);
-    }
-
-    // Replace file on disk and hot-swap everywhere using AssetsManager API.
-    static bool ReplaceTextureFileOnDisk_AndRefreshAll(const std::string& dstPath,
-        const std::string& srcPath)
-    {
-        namespace fs = std::filesystem;
-        std::error_code ec;
-
-        if (dstPath.empty() || srcPath.empty())
-            return false;
-        if (!fs::exists(srcPath, ec))
-            return false;
-
-        auto IsImage = [](const fs::path& p)
-            {
-                std::string ext = p.extension().string();
-                std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-                return ext == ".png" || ext == ".jpg" || ext == ".jpeg";
-            };
-
-        if (!IsImage(srcPath))
-            return false;
-
-        // 1) Overwrite target file
-        fs::copy_file(srcPath, dstPath, fs::copy_options::overwrite_existing, ec);
-        if (ec)
-        {
-            std::cerr << "[Project] Replace failed: " << srcPath << " -> "
-                << dstPath << " (" << ec.message() << ")\n";
-            return false;
-        }
-
-        // 2) Force a fresh GL texture id and cache entry
-        mAssets.EvictTexture(dstPath);
-        GLuint newTex = mAssets.GetOrLoadTexture(dstPath);
-        if (!newTex)
-        {
-            std::cerr << "[Project] Reload failed for: " << dstPath << "\n";
-            return false;
-        }
-
-        // 3) Update Project thumbnails
-        for (auto& it : s_dirEntries)
-        {
-            if (!it.isDir && it.fullPath == dstPath)
-            {
-                it.texID = newTex;
-                it.triedLoad = true;
-            }
-        }
-
-        // 4) Update all live scene users (match by exact path OR same filename)
-        if (auto* coord = Coordinator::GetInstance())
-        {
-            for (Entity e : coord->GetAllEntities())
-            {
-                if (!coord->HasComponent<Framework::Renderable>(e))
-                    continue;
-
-                auto& r = coord->GetComponent<Framework::Renderable>(e);
-
-                std::string rBase = std::filesystem::path(r.spriteName).filename().string();
-                std::string dBase = std::filesystem::path(dstPath).filename().string();
-
-                if (!r.spriteName.empty() &&
-                    (r.spriteName == dstPath || rBase == dBase))
-                {
-                    r.spriteName = dstPath;
-                    r.textureID = newTex;
-                }
-            }
-        }
-
-        // 5) Refresh directory view (labels/order)
-        RefreshCurrentDir();
-
-        std::cout << "[Project] Replaced & hot-swapped: " << dstPath
-            << "  <=  " << srcPath << "\n";
-        return true;
-    }
-
     // ── Main panel UI ──────────────────────────────────────────
     void ProjectPanel()
     {
         // Disable all editing when playing
         bool isPlaying = IsPlaying();
+
+        // ──────────────────────────────────────────────────────────
+        // HEADER: Refresh button and path display
+        // ──────────────────────────────────────────────────────────
+        ImGui::Text("Project");
+        ImGui::SameLine();
+
+        if (ImGui::Button("Refresh"))
+            RefreshCurrentDir();
+
+        ImGui::SameLine();
+        ImGui::Text("%s", s_currentDir.c_str());
+
+        ImGui::Separator();
+
+        // Thumbnail size slider
+        ImGui::Text("Size");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(100.0f);
+        ImGui::SliderFloat("##ThumbSize", &s_thumbSize, 48.0f, 128.0f, "%.0f");
+
         if (isPlaying)
         {
             ImGui::BeginDisabled();
         }
 
-        // Top bar ------------------------------------------------
-        if (ImGui::Button("Refresh"))
+        // ──────────────────────────────────────────────────────────
+        // HANDLE OS FILE DROPS
+        // Uses HandleOSFileDrop() from ProjectPanelHelpers.cpp
+        // ──────────────────────────────────────────────────────────
+        if (!s_pendingOSDrops.empty())
         {
-            // Rebuild thumbnails from current disk contents
-            for (auto& it : s_dirEntries)
-            {
-                if (!it.isDir)
-                {
-                    // Only try to load textures for image files
-                    if (IsImageExt(it.fullPath))
-                    {
-                        mAssets.EvictTexture(it.fullPath);
-                        it.texID = mAssets.GetOrLoadTexture(it.fullPath);
-                    }
-                    it.triedLoad = true;
-                }
-            }
+            HandleOSFileDrop(s_pendingOSDrops, s_currentDir,
+                s_showImportError, s_invalidFileName,
+                s_targetFolderName, s_targetFolderType);
+            s_pendingOSDrops.clear();
             RefreshCurrentDir();
         }
 
-        ImGui::SameLine();
-        ImGui::TextUnformatted(s_currentDir.c_str());
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(120.0f);
-        ImGui::SliderFloat("Size", &s_thumbSize, 40.0f, 160.0f, "%.0f");
-
-        ImGui::Separator();
-
-        // OS drag-and-drop into project panel --------------------
-        if (!s_pendingOSDrops.empty())
-        {
-            namespace fs = std::filesystem;
-            std::error_code ec;
-
-            fs::path dstDir = fs::weakly_canonical(fs::absolute(s_currentDir), ec);
-            if (!ec && !dstDir.empty())
-            {
-                if (!fs::exists(dstDir, ec))
-                    fs::create_directories(dstDir, ec);
-
-                auto IsImageExtFs = [](const fs::path& p)
-                    {
-                        std::string ext = p.extension().string();
-                        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-                        return ext == ".png" || ext == ".jpg" || ext == ".jpeg";
-                    };
-
-                // Get folder type for validation
-                std::string currentFolderName = dstDir.filename().string();
-                FolderType folderType = GetFolderType(dstDir.string());
-
-                int changed = 0;
-                bool hadInvalidFile = false;
-                std::string firstInvalidFile = "";
-
-                for (const std::string& srcStr : s_pendingOSDrops)
-                {
-                    fs::path src = fs::weakly_canonical(fs::path(srcStr), ec);
-                    if (ec || src.empty() || !fs::exists(src, ec))
-                    {
-                        //std::cout << "[DEBUG] Source file invalid or doesn't exist: " << srcStr << std::endl;
-                        continue;
-                    }
-
-                    // VALIDATE FILE TYPE FOR THIS FOLDER
-                    if (!IsValidExtensionForFolder(folderType, src.string()))
-                    {
-                        //std::cout << "[DEBUG] Invalid extension for folder: " << src.filename().string() << std::endl;
-                        if (!hadInvalidFile)
-                        {
-                            hadInvalidFile = true;
-                            firstInvalidFile = src.filename().string();
-                        }
-                        continue;
-                    }
-
-                    fs::path dst = dstDir / src.filename();
-
-                    //std::cout << "[DEBUG] Copying: " << src.string() << std::endl;
-                    //std::cout << "[DEBUG] To: " << dst.string() << std::endl;
-                    //std::cout << "[DEBUG] Dst exists: " << fs::exists(dstDir, ec) << std::endl;
-
-                    if (fs::exists(dst, ec))
-                    {
-                        // if same name, replace
-                        if (IsImageExtFs(dst))
-                        {
-                            if (ReplaceTextureFileOnDisk_AndRefreshAll(dst.string(), src.string()))
-                                ++changed;
-                        }
-                        else
-                        {
-                            fs::copy_file(src, dst, fs::copy_options::overwrite_existing, ec);
-                            if (!ec) ++changed;
-                        }
-
-                        //if (ec)
-                        //    std::cout << "[DEBUG] Copy FAILED (overwrite): " << ec.message() << std::endl;
-                        //else
-                        //    std::cout << "[DEBUG] Copy SUCCESS (overwrite)" << std::endl;
-                    }
-                    else
-                    {
-                        // if new file, import
-                        fs::copy_file(src, dst, fs::copy_options::none, ec);
-                        if (!ec)
-                        {
-                            ++changed;
-                            if (IsImageExtFs(dst))
-                            {
-                                mAssets.EvictTexture(dst.string());
-                                mAssets.GetOrLoadTexture(dst.lexically_normal().string());
-                            }
-                        }
-
-                        //if (ec)
-                        //    std::cout << "[DEBUG] Copy FAILED (new): " << ec.message() << std::endl;
-                        //else
-                        //    std::cout << "[DEBUG] Copy SUCCESS (new)" << std::endl;
-                    }
-                }
-
-                // show popup if any files were invalid
-                if (hadInvalidFile)
-                {
-                    s_showImportError = true;
-                    s_invalidFileName = firstInvalidFile;
-                    s_targetFolderName = currentFolderName;
-                    s_targetFolderType = folderType;
-                }
-
-                if (changed > 0)
-                    RefreshCurrentDir();
-            }
-
-            s_pendingOSDrops.clear();
-        }
-
-        // Asset grid ---------------------------------------------
+        // ──────────────────────────────────────────────────────────
+        // ASSET GRID
+        // ──────────────────────────────────────────────────────────
         ImGui::BeginChild("AssetsGrid", ImVec2(0, 0), false,
             ImGuiWindowFlags_HorizontalScrollbar);
 
         float availX = ImGui::GetContentRegionAvail().x;
         float cellSize = s_thumbSize + s_thumbPadding;
-        int   cols = static_cast<int>(availX / cellSize);
-        if (cols < 1)
-            cols = 1;
+        int cols = static_cast<int>(availX / cellSize);
+        if (cols < 1) cols = 1;
 
         int itemIndex = 0;
         for (auto& item : s_dirEntries)
@@ -441,10 +181,13 @@ namespace PulseEditor
             ImGui::PushID(itemIndex);
 
             ImVec2 thumbSize(s_thumbSize, s_thumbSize);
-            bool   clicked = false;
+            bool clicked = false;
 
             if (item.isDir)
             {
+                // ══════════════════════════════════════════════════
+                // FOLDER ITEM
+                // ══════════════════════════════════════════════════
                 if (ImGui::Button(item.name.c_str(), thumbSize))
                 {
                     s_currentDir = item.fullPath;
@@ -452,12 +195,11 @@ namespace PulseEditor
                     ImGui::PopID();
                     ImGui::EndGroup();
                     ImGui::EndChild();
+                    if (isPlaying) ImGui::EndDisabled();
                     return;
                 }
 
-                // ═══════════════════════════════════════════════════════════════
-                // RIGHT-CLICK CONTEXT MENU FOR FOLDERS
-                // ═══════════════════════════════════════════════════════════════
+                // Folder context menu (delete)
                 if (item.name != ".." && ImGui::BeginPopupContextItem(""))
                 {
                     ImGui::TextDisabled("%s", item.name.c_str());
@@ -467,8 +209,6 @@ namespace PulseEditor
                     {
                         namespace fs = std::filesystem;
                         std::error_code ec;
-
-                        // WARNING: This deletes the folder AND all contents!
                         if (fs::remove_all(item.fullPath, ec) > 0)
                         {
                             std::cout << "[ProjectPanel] Deleted folder: " << item.name << std::endl;
@@ -480,80 +220,36 @@ namespace PulseEditor
                                 << " (" << ec.message() << ")" << std::endl;
                         }
                     }
-
                     ImGui::EndPopup();
                 }
 
-                // Add drop target ONLY for Prefab/Prefabs folder
-                bool isPrefabFolder = (item.name == "Prefab" || item.name == "Prefabs" || item.name == "prefab" || item.name == "prefabs");
-
-                if (isPrefabFolder && ImGui::BeginDragDropTarget())
+                // ══════════════════════════════════════════════════
+                // PREFAB FOLDER DROP TARGET
+                // Uses IsPrefabFolder() and HandleEntityDropToPrefab() 
+                // from ProjectPanelHelpers.cpp
+                // ══════════════════════════════════════════════════
+                if (IsPrefabFolder(item.name) && ImGui::BeginDragDropTarget())
                 {
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_ENTITY_REORDER", ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
                     {
-                        // Extract entity from the payload
-                        struct HierarchyDragData {
-                            int index;
-                            Entity entity;
-                        };
+                        struct HierarchyDragData { int index; Entity entity; };
+                        const HierarchyDragData* data = (const HierarchyDragData*)payload->Data;
 
-                        const HierarchyDragData* dragData = (const HierarchyDragData*)payload->Data;
-                        Entity droppedEntity = dragData->entity;
-
-                        //std::cout << "[ProjectPanel] Entity " << droppedEntity << " dropped into Prefabs folder: " << item.fullPath << std::endl;
-
-                        // Get entity name for prefab
-                        auto* coord = Coordinator::GetInstance();
-                        if (coord && droppedEntity != INVALID_ENTITY)
-                        {
-                            std::string prefabName = "Prefab";
-
-                            // Try to get the entity's name
-                            if (coord->HasComponent<Name>(droppedEntity))
-                            {
-                                prefabName = coord->GetComponent<Name>(droppedEntity).name;
-                            }
-                            else
-                            {
-                                prefabName = "Entity_" + std::to_string(static_cast<int>(droppedEntity));
-                            }
-
-                            // Create prefab using PrefabManager
-                            PrefabManager prefabMgr;
-
-                            // =====================================================
-                            // Check if entity can be saved as prefab
-                            // =====================================================
-                            if (!prefabMgr.CanSaveAsPrefab(droppedEntity))
-                            {
-                                // Entity is engine-managed - show warning popup
-                                s_showEngineManagedWarning = true;
-                                s_blockedEntityName = prefabName;
-                            }
-                            else
-                            {
-                                // Safe to save
-                                if (prefabMgr.SaveEntityAsPrefab(droppedEntity, prefabName))
-                                {
-                                    std::cout << "[ProjectPanel] Successfully created prefab: "
-                                        << prefabName << ".json" << std::endl;
-                                    RefreshCurrentDir();  // Refresh to show the new prefab file
-                                }
-                                else
-                                {
-                                    std::cerr << "[ProjectPanel] Failed to create prefab: "
-                                        << prefabName << ".json" << std::endl;
-                                }
-                            }
-                        }
+                        HandleEntityDropToPrefab(data->entity, s_showEngineManagedWarning, s_blockedEntityName);
+                        RefreshCurrentDir();
                     }
                     ImGui::EndDragDropTarget();
                 }
             }
             else
             {
-                EnsureThumbnailLoaded(item);
+                // ══════════════════════════════════════════════════
+                // FILE ITEM
+                // Uses EnsureThumbnailLoaded() from ProjectPanelHelpers.cpp
+                // ══════════════════════════════════════════════════
+                EnsureThumbnailLoaded(item, s_currentDir);
 
+                // Draw thumbnail or button
                 if (item.texID != 0)
                 {
                     std::string btnId = "##assetTex_" + item.fullPath;
@@ -568,123 +264,133 @@ namespace PulseEditor
                         clicked = true;
                 }
 
-                // ═══════════════════════════════════════════════════════════════
-                // RIGHT-CLICK CONTEXT MENU FOR ALL FILES
-                // ═══════════════════════════════════════════════════════════════
+                // ══════════════════════════════════════════════════════════════
+                // THUMBNAIL TOOLTIP FOR INVALID FILES
+                // ══════════════════════════════════════════════════════════════
+                if (!item.isDir && ImGui::IsItemHovered())
+                {
+                    FolderType folderType = GetFolderType(s_currentDir);
+                    if (!IsValidExtensionForFolder(folderType, item.fullPath))
+                    {
+                        ImGui::BeginTooltip();
+                        ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "Invalid file type!");
+                        ImGui::Text("This file doesn't belong in %s folder.", GetFolderTypeName(folderType));
+                        ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "Expected: %s", GetAllowedExtensions(folderType));
+                        ImGui::EndTooltip();
+                    }
+                }
+
+                // ══════════════════════════════════════════════════
+                // FILE CONTEXT MENU (DELETE)
+                // ══════════════════════════════════════════════════
                 if (ImGui::BeginPopupContextItem(""))
                 {
                     std::string displayName = item.name;
-
-                    // Remove .json extension for prefabs in display
                     if (displayName.ends_with(".json"))
                         displayName.resize(displayName.size() - 5);
 
                     ImGui::TextDisabled("%s", displayName.c_str());
                     ImGui::Separator();
 
-                    // Delete option for all files
                     if (ImGui::MenuItem("Delete"))
                     {
                         namespace fs = std::filesystem;
                         std::error_code ec;
 
-                        if (fs::exists(item.fullPath, ec))
-                        {
-                            // If it's a prefab, use PrefabManager
-                            if (item.fullPath.ends_with(".json"))
-                            {
-                                PrefabManager prefabMgr;
-                                std::string prefabName = item.name;
-                                if (prefabName.ends_with(".json"))
-                                    prefabName.resize(prefabName.size() - 5);
+                        // Only treat as prefab if it's a .json file IN a Prefab folder
+                        FolderType currentFolderType = GetFolderType(s_currentDir);
+                        bool isPrefabFile = item.fullPath.ends_with(".json") &&
+                            currentFolderType == FolderType::Prefab;
 
-                                if (prefabMgr.DeletePrefab(prefabName))
-                                {
-                                    std::cout << "[ProjectPanel] Deleted prefab: " << prefabName << std::endl;
-                                }
-                                else
-                                {
-                                    std::cerr << "[ProjectPanel] Failed to delete prefab: " << prefabName << std::endl;
-                                }
+                        if (isPrefabFile)
+                        {
+                            // Delete prefab via PrefabManager
+                            PrefabManager prefabMgr;
+                            std::string prefabName = item.name;
+                            if (prefabName.ends_with(".json"))
+                                prefabName.resize(prefabName.size() - 5);
+
+                            if (prefabMgr.DeletePrefab(prefabName))
+                            {
+                                std::cout << "[ProjectPanel] Deleted prefab: " << prefabName << std::endl;
+                            }
+                        }
+                        else
+                        {
+                            // Delete regular file
+                            if (IsImageExt(item.fullPath))
+                                mAssets.EvictTexture(item.fullPath);
+
+                            if (fs::remove(item.fullPath, ec))
+                            {
+                                std::cout << "[ProjectPanel] Deleted file: " << item.name << std::endl;
                             }
                             else
                             {
-                                // Regular file deletion
-                                // If it's a texture, evict from cache first
-                                if (IsImageExt(item.fullPath))
-                                {
-                                    mAssets.EvictTexture(item.fullPath);
-                                }
-
-                                if (fs::remove(item.fullPath, ec))
-                                {
-                                    std::cout << "[ProjectPanel] Deleted file: " << item.name << std::endl;
-                                }
-                                else
-                                {
-                                    std::cerr << "[ProjectPanel] Failed to delete: " << item.name
-                                        << " (" << ec.message() << ")" << std::endl;
-                                }
+                                std::cerr << "[ProjectPanel] Failed to delete: " << item.name
+                                    << " (" << ec.message() << ")" << std::endl;
                             }
-
-                            RefreshCurrentDir();
                         }
+                        RefreshCurrentDir();
                     }
-
                     ImGui::EndPopup();
                 }
 
-                // Drag source (image files only)
-                auto IsImageExtStr = [](const std::string& s)
-                    {
-                        std::string ext;
-                        auto dot = s.find_last_of('.');
-                        if (dot != std::string::npos)
-                            ext = s.substr(dot);
-
-                        for (char& c : ext)
-                            c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-
-                        return ext == ".png" || ext == ".jpg" || ext == ".jpeg";
-                    };
-
-                if (IsImageExtStr(item.fullPath))
+                // ══════════════════════════════════════════════════
+                // IMAGE DRAG SOURCE (for texture assignment)
+                // Uses IsImageExt() from ProjectPanelHelpers.cpp
+                // ══════════════════════════════════════════════════
+                if (IsImageExt(item.fullPath) && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
-                    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-                    {
-                        const char* path = item.fullPath.c_str();
-                        ImGui::SetDragDropPayload("ASSET_TEXTURE",
-                            path,
-                            static_cast<int>(std::strlen(path)) + 1);
-                        ImGui::TextUnformatted(("Texture: " + item.name).c_str());
-                        ImGui::EndDragDropSource();
-                    }
-
-                    // Drag target: drop one image onto another to replace
-                    if (ImGui::BeginDragDropTarget())
-                    {
-                        if (const ImGuiPayload* p = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
-                        {
-                            const char* src = static_cast<const char*>(p->Data);
-                            if (src && *src)
-                            {
-                                std::string srcPath = src;
-                                std::string dstPath = item.fullPath;
-                                if (srcPath != dstPath)
-                                    ReplaceTextureFileOnDisk_AndRefreshAll(dstPath, srcPath);
-                            }
-                        }
-                        ImGui::EndDragDropTarget();
-                    }
+                    const char* path = item.fullPath.c_str();
+                    ImGui::SetDragDropPayload("ASSET_TEXTURE", path, static_cast<int>(strlen(path)) + 1);
+                    ImGui::TextUnformatted(("Texture: " + item.name).c_str());
+                    ImGui::EndDragDropSource();
                 }
 
-                // Left-click: prefab instantiate OR assign texture to selected entity
+                // ══════════════════════════════════════════════════
+                // IMAGE DRAG TARGET (for texture hot-swap replacement)
+                // Uses IsImageExt() and ReplaceTextureFile() from 
+                // ProjectPanelHelpers.cpp
+                // Note: ReplaceTextureFile now takes s_dirEntries to update thumbnails
+                // ══════════════════════════════════════════════════
+                if (IsImageExt(item.fullPath) && ImGui::BeginDragDropTarget())
+                {
+                    if (const ImGuiPayload* p = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
+                    {
+                        const char* src = static_cast<const char*>(p->Data);
+                        if (src && *src)
+                        {
+                            std::string srcPath = src;
+                            if (srcPath != item.fullPath)
+                            {
+                                // Full hot-swap: updates file, cache, thumbnails, and live scene entities
+                                ReplaceTextureFile(item.fullPath, srcPath, s_dirEntries);
+                                RefreshCurrentDir();
+                            }
+                        }
+                    }
+                    ImGui::EndDragDropTarget();
+                }
+
+                // ══════════════════════════════════════════════════
+                // CLICK HANDLING
+                // ══════════════════════════════════════════════════
                 if (clicked)
                 {
-                    if (item.fullPath.ends_with(".json"))
+                    FolderType currentFolderType = GetFolderType(s_currentDir);
+
+                    // DEBUG - Remove later
+                    std::cout << "[DEBUG] Clicked: " << item.name
+                        << " | Folder: " << s_currentDir
+                        << " | FolderType: " << static_cast<int>(currentFolderType)
+                        << " | IsValid: " << IsValidExtensionForFolder(currentFolderType, item.fullPath)
+                        << std::endl;
+
+                    // ── PREFAB: Only instantiate if in Prefab folder ──
+                    if (item.fullPath.ends_with(".json") && currentFolderType == FolderType::Prefab)
                     {
                         PrefabManager prefabMgr;
-
                         std::string prefabName = item.name;
                         if (prefabName.ends_with(".json"))
                             prefabName.resize(prefabName.size() - 5);
@@ -695,275 +401,110 @@ namespace PulseEditor
                             Entity newEntity = result.value();
                             entityDisplayOrder.push_back(newEntity);
                             selectedEntity = newEntity;
-
-                            std::cout << "[Editor] Instantiated prefab: " << prefabName
-                                << " (Entity " << newEntity << ")\n";
+                            std::cout << "[ProjectPanel] Instantiated prefab: " << prefabName
+                                << " (Entity " << newEntity << ")" << std::endl;
                         }
                         else
                         {
-                            std::cerr << "[Editor] Failed to instantiate prefab: "
-                                << prefabName << "\n";
+                            std::cerr << "[ProjectPanel] Failed to instantiate prefab: " << prefabName << std::endl;
                         }
                     }
-                    else if (selectedEntity != INVALID_ENTITY)
+                    // ── TEXTURE: Only assign if valid image in correct folder ──
+                    else if (selectedEntity != INVALID_ENTITY &&
+                        IsImageExt(item.fullPath) &&
+                        IsValidExtensionForFolder(currentFolderType, item.fullPath))
                     {
+                        // ── TEXTURE: Assign to selected entity ──
                         auto* coord = Coordinator::GetInstance();
-                        if (coord &&
-                            coord->HasComponent<Framework::Renderable>(selectedEntity))
+                        if (coord && coord->HasComponent<Framework::Renderable>(selectedEntity))
                         {
                             auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
-                            // Convert to relative path with ../../PulseEngine/Assets prefix
+
                             namespace fs = std::filesystem;
                             std::string pathStr = item.fullPath;
                             std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
 
-                            size_t myEnginePos = pathStr.find("PulseEngine/Assets");
-                            if (myEnginePos != std::string::npos)
-                            {
-                                rend.spriteName = "../../" + pathStr.substr(myEnginePos);
-                            }
+                            // Convert to relative path
+                            size_t pos = pathStr.find("PulseEngine/Assets");
+                            if (pos != std::string::npos)
+                                rend.spriteName = "../../" + pathStr.substr(pos);
                             else
-                            {
                                 rend.spriteName = pathStr;
-                            }
+
                             rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
 
                             // Auto-detect spritesheet based on filename
                             std::string filename = fs::path(rend.spriteName).filename().string();
                             std::string lowerName = filename;
-                            for (auto& c : lowerName) c = (char)tolower(c);
+                            for (auto& c : lowerName) c = static_cast<char>(tolower(c));
 
                             bool isSheet = (lowerName.find("sheet") != std::string::npos ||
                                 lowerName.find("atlas") != std::string::npos);
+                            rend.shd_ref = isSheet ? 2.0f : 1.0f;
 
-                            rend.shd_ref = isSheet ? 2.0f : 1.0f;  // 2 for spritesheet, 1 for sprite
+                            std::cout << "[ProjectPanel] Assigned texture to entity " << selectedEntity << std::endl;
                         }
                     }
                 }
             }
 
-            // Label under thumbnail
-            ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + s_thumbSize);
-            std::string displayName = item.name;
-            if (displayName.ends_with(".json")) displayName.resize(displayName.size() - 5);
-
-            // =====================================================================
-            // VALIDATE FILE TYPE FOR CURRENT FOLDER
-            // Show invalid files in RED with tooltip warning
-            // =====================================================================
-            bool isInvalidFile = false;
-            FolderType currentFolderType = FolderType::Generic;
-
-            if (!item.isDir)
-            {
-                currentFolderType = GetFolderType(s_currentDir);
-                isInvalidFile = !IsValidExtensionForFolder(currentFolderType, item.fullPath);
-            }
-
-            if (isInvalidFile)
-            {
-                // Red text for invalid files
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
-            }
-
-            ImGui::TextUnformatted(displayName.c_str());
-
-            if (isInvalidFile)
-            {
-                ImGui::PopStyleColor();
-
-                // Show tooltip on hover explaining the issue
-                if (ImGui::IsItemHovered())
-                {
-                    ImGui::BeginTooltip();
-                    ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "Invalid file type!");
-                    ImGui::Text("This file doesn't belong in %s folder.", GetFolderTypeName(currentFolderType));
-                    ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "Expected: %s", GetAllowedExtensions(currentFolderType));
-                    ImGui::EndTooltip();
-                }
-            }
-
-            ImGui::PopTextWrapPos();
+            // ══════════════════════════════════════════════════════
+            // DRAW LABEL UNDER THUMBNAIL
+            // Uses DrawFileLabel() from ProjectPanelHelpers.cpp
+            // Shows RED text for invalid files + tooltip on hover
+            // ══════════════════════════════════════════════════════
+            DrawFileLabel(item, s_thumbSize, s_currentDir);
 
             ImGui::PopID();
             ImGui::EndGroup();
             ++itemIndex;
         }
 
-        // =====================================================================
-        // DROP ZONE: Accept entity drops in empty space when INSIDE Prefab folder
-        // =====================================================================
-
-        // Check if current directory is the Prefab folder
+        // ──────────────────────────────────────────────────────────
+        // PREFAB DROP ZONE (empty space inside Prefab folder)
+        // Uses IsPrefabFolder() and HandleEntityDropToPrefab() from
+        // ProjectPanelHelpers.cpp
+        // ──────────────────────────────────────────────────────────
         namespace fs = std::filesystem;
         std::string currentFolderName = fs::path(s_currentDir).filename().string();
-        bool isInPrefabFolder = (currentFolderName == "Prefab" || currentFolderName == "Prefabs" ||
-            currentFolderName == "prefab" || currentFolderName == "prefabs");
 
-        if (isInPrefabFolder)
+        if (IsPrefabFolder(currentFolderName))
         {
-            // Create an invisible button covering the empty space
             ImVec2 availSpace = ImGui::GetContentRegionAvail();
-            ImGui::InvisibleButton("##prefab_dropzone", availSpace);
-
-            // Add drop target to this empty space
-            if (ImGui::BeginDragDropTarget())
+            if (availSpace.x > 0 && availSpace.y > 0)
             {
-                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_ENTITY_REORDER", ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+                ImGui::InvisibleButton("##prefab_dropzone", availSpace);
+
+                if (ImGui::BeginDragDropTarget())
                 {
-                    // Extract entity from the payload
-                    struct HierarchyDragData {
-                        int index;
-                        Entity entity;
-                    };
-
-                    const HierarchyDragData* dragData = (const HierarchyDragData*)payload->Data;
-                    Entity droppedEntity = dragData->entity;
-
-                    std::cout << "[ProjectPanel] Entity " << droppedEntity << " dropped into Prefabs folder (empty space)\n";
-
-                    // Get entity name for prefab
-                    auto* coord = Coordinator::GetInstance();
-                    if (coord && droppedEntity != INVALID_ENTITY)
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_ENTITY_REORDER", ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
                     {
-                        std::string prefabName = "Prefab";
+                        struct HierarchyDragData { int index; Entity entity; };
+                        const HierarchyDragData* data = (const HierarchyDragData*)payload->Data;
 
-                        // Try to get the entity's name
-                        if (coord->HasComponent<Name>(droppedEntity))
-                        {
-                            prefabName = coord->GetComponent<Name>(droppedEntity).name;
-                        }
-                        else
-                        {
-                            prefabName = "Entity_" + std::to_string(static_cast<int>(droppedEntity));
-                        }
+                        std::cout << "[ProjectPanel] Entity " << data->entity
+                            << " dropped into Prefabs folder (empty space)" << std::endl;
 
-                        // =====================================================
-                        // Check if entity can be saved as prefab
-                        // =====================================================
-                        PrefabManager prefabMgr;
-
-                        if (!prefabMgr.CanSaveAsPrefab(droppedEntity))
-                        {
-                            // Entity is engine-managed - show warning popup
-                            s_showEngineManagedWarning = true;
-                            s_blockedEntityName = prefabName;
-                            //std::cout << "[ProjectPanel] Blocked: Cannot save engine-managed entity as prefab: " << prefabName << std::endl;
-                        }
-                        else
-                        {
-                            // Safe to save
-                            if (prefabMgr.SaveEntityAsPrefab(droppedEntity, prefabName))
-                            {
-                                //std::cout << "[ProjectPanel] Successfully created prefab: " << prefabName << ".json" << std::endl;
-                                RefreshCurrentDir();  // Refresh to show the new prefab file
-                            }
-                            else
-                            {
-                                std::cerr << "[ProjectPanel] Failed to create prefab: " << prefabName << ".json" << std::endl;
-                            }
-                        }
+                        HandleEntityDropToPrefab(data->entity, s_showEngineManagedWarning, s_blockedEntityName);
+                        RefreshCurrentDir();
                     }
+                    ImGui::EndDragDropTarget();
                 }
-                ImGui::EndDragDropTarget();
             }
-        }
-
-        // =====================================================
-        // Warning Popup for Engine-Managed Entities (Debug Text) 
-        // =====================================================
-        if (s_showEngineManagedWarning)
-        {
-            ImGui::OpenPopup("Cannot Save as Prefab##EngineManagedWarning");
-            s_showEngineManagedWarning = false;
-        }
-
-        if (ImGui::BeginPopupModal("Cannot Save as Prefab##EngineManagedWarning", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), "  Warning  ");
-            ImGui::Separator();
-            ImGui::Spacing();
-
-            ImGui::Text("Cannot save '%s' as prefab.", s_blockedEntityName.c_str());
-            ImGui::Spacing();
-            ImGui::TextWrapped("Entities with names starting with '_' are debug texts "
-                "(e.g., _FPS_Display, _TopSystem_Display) and cannot be saved as prefabs.");
-
-            ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::Spacing();
-
-            // Center the OK button
-            float buttonWidth = 120.0f;
-            float windowWidth = ImGui::GetWindowSize().x;
-            ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
-
-            if (ImGui::Button("OK", ImVec2(buttonWidth, 0)))
-            {
-                ImGui::CloseCurrentPopup();
-            }
-
-            // Also close on Enter key
-            if (ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_Escape))
-            {
-                ImGui::CloseCurrentPopup();
-            }
-
-            ImGui::EndPopup();
-        }
-
-        // =====================================================
-        // IMPORT ERROR POPUP (works for all folder types)
-        // =====================================================
-        if (s_showImportError)
-        {
-            ImGui::OpenPopup("Invalid File Type##ImportError");
-            s_showImportError = false;
-        }
-
-        if (ImGui::BeginPopupModal("Invalid File Type##ImportError", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  Import Error  ");
-            ImGui::Separator();
-            ImGui::Spacing();
-
-            ImGui::Text("Cannot import '%s' into '%s' folder.",
-                s_invalidFileName.c_str(),
-                s_targetFolderName.c_str());
-
-            ImGui::Spacing();
-            ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "Allowed file types: %s",
-                GetAllowedExtensions(s_targetFolderType));
-
-            ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::Spacing();
-
-            // Center the OK button
-            float buttonWidth = 120.0f;
-            float windowWidth = ImGui::GetWindowSize().x;
-            ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
-
-            if (ImGui::Button("OK", ImVec2(buttonWidth, 0)))
-            {
-                ImGui::CloseCurrentPopup();
-            }
-
-            // Also close on Enter/Escape key
-            if (ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_Escape))
-            {
-                ImGui::CloseCurrentPopup();
-            }
-
-            ImGui::EndPopup();
         }
 
         ImGui::EndChild();
 
-        // Re-enable if we disabled for play mode
+        // ──────────────────────────────────────────────────────────
+        // POPUP MODALS
+        // Uses DrawEngineManagedWarningPopup() and DrawImportErrorPopup()
+        // from ProjectPanelHelpers.cpp
+        // ──────────────────────────────────────────────────────────
+        DrawEngineManagedWarningPopup(s_showEngineManagedWarning, s_blockedEntityName);
+        DrawImportErrorPopup(s_showImportError, s_invalidFileName, s_targetFolderName, s_targetFolderType);
+
         if (isPlaying)
-        {
             ImGui::EndDisabled();
-        }
     }
-}
+
+}  // namespace PulseEditor
