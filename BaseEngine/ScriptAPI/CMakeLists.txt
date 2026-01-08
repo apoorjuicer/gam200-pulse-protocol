@@ -24,11 +24,18 @@ target_link_libraries(ScriptAPI
 # Enable C++/CLI (Common Language Runtime)
 set_target_properties(ScriptAPI PROPERTIES
     COMMON_LANGUAGE_RUNTIME ""
-    VS_GLOBAL_CLRSupport "true"
+    #VS_GLOBAL_CLRSupport "true"
+    VS_GLOBAL_CLRSupport "NetCore"
+    VS_GLOBAL_TargetFramework "net8.0"
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED ON
-    VS_DOTNET_REFERENCES "System;System.Core"
+    #VS_DOTNET_REFERENCES "System;System.Core"
 )
+
+# Force /clr:netcore compiler flag
+if(MSVC)
+    target_compile_options(ScriptAPI PRIVATE "/clr:netcore")
+endif()
 
 # Include directories
 target_include_directories(ScriptAPI PUBLIC

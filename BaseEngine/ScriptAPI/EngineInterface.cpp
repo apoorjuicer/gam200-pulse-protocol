@@ -30,10 +30,10 @@ namespace ScriptAPI
 
 
         // Load assembly (old method) 
-        System::Reflection::Assembly::LoadFrom("ManagedScripts.dll");
+        //System::Reflection::Assembly::LoadFrom("ManagedScripts.dll");
         
         // Create unloadable assembly context
-        //loadContext = gcnew System::Runtime::Loader::AssemblyLoadContext(nullptr, true);
+        loadContext = gcnew System::Runtime::Loader::AssemblyLoadContext(nullptr, true);
 
         // Load assembly via FileStream (for hot reload)
         FileStream^ managedLibFile = File::Open("ManagedScripts.dll",
@@ -41,7 +41,7 @@ namespace ScriptAPI
             FileAccess::Read,
             FileShare::Read);
 
-        //loadContext->LoadFromStream(managedLibFile);
+        loadContext->LoadFromStream(managedLibFile);
         managedLibFile->Close();
 
         // Create the main container that will hold scripts for ALL entities
@@ -68,8 +68,8 @@ namespace ScriptAPI
         scriptTypeList = nullptr;
 
         // Unload the assembly context
-        //loadContext->Unload();
-        //loadContext = nullptr;
+        loadContext->Unload();
+        loadContext = nullptr;
 
         //// Force garbage collection to complete unloading
         System::GC::Collect();

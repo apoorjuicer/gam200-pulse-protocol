@@ -747,7 +747,7 @@ void CoreEngine::Update(float dt)
 					"Reload"
 				);
 
-			//reloadScripts(); 
+			reloadScripts(); 
 
 		}
 		wasRPressed = true;
