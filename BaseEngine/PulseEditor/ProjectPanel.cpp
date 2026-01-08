@@ -745,9 +745,44 @@ namespace PulseEditor
             // Label under thumbnail
             ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + s_thumbSize);
             std::string displayName = item.name;
-            if (displayName.ends_with(".json"))
-                displayName.resize(displayName.size() - 5);
+            if (displayName.ends_with(".json")) displayName.resize(displayName.size() - 5);
+
+            // =====================================================================
+            // VALIDATE FILE TYPE FOR CURRENT FOLDER
+            // Show invalid files in RED with tooltip warning
+            // =====================================================================
+            bool isInvalidFile = false;
+            FolderType currentFolderType = FolderType::Generic;
+
+            if (!item.isDir)
+            {
+                currentFolderType = GetFolderType(s_currentDir);
+                isInvalidFile = !IsValidExtensionForFolder(currentFolderType, item.fullPath);
+            }
+
+            if (isInvalidFile)
+            {
+                // Red text for invalid files
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
+            }
+
             ImGui::TextUnformatted(displayName.c_str());
+
+            if (isInvalidFile)
+            {
+                ImGui::PopStyleColor();
+
+                // Show tooltip on hover explaining the issue
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::BeginTooltip();
+                    ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "Invalid file type!");
+                    ImGui::Text("This file doesn't belong in %s folder.", GetFolderTypeName(currentFolderType));
+                    ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "Expected: %s", GetAllowedExtensions(currentFolderType));
+                    ImGui::EndTooltip();
+                }
+            }
+
             ImGui::PopTextWrapPos();
 
             ImGui::PopID();
