@@ -434,13 +434,24 @@ namespace PulseEditor
                 display = "Entity " + std::to_string(static_cast<int>(entity));
             }
 
-            // Check if prefab instance
-            bool isPrefabInstance = g_coordinator->HasComponent<PrefabInstance>(entity);
+            // Check if prefab instance AND if it's linked
+            bool isPrefabInstance = false;
+            bool isPrefabLinked = false;
 
-            // Add prefix for prefab instances
+            if (g_coordinator->HasComponent<PrefabInstance>(entity)) {
+                isPrefabInstance = true;
+                isPrefabLinked = g_coordinator->GetComponent<PrefabInstance>(entity).isLinked;
+            }
+
+            // Add prefix for prefab instances (different prefix based on linked status)
             if (isPrefabInstance)
             {
-                display = "[P] " + display;
+                if (isPrefabLinked) {
+                    display = "[P] " + display;  // Linked - will receive updates
+                }
+                else {
+                    display = "[P-] " + display; // Unlinked - independent
+                }
             }
 
             bool isSelected = (selectedEntity == entity);
@@ -487,10 +498,16 @@ namespace PulseEditor
             }
             else
             {
-                // Blue color for prefab instances
-                if (isPrefabInstance)
+                // Color coding for prefab instances based on linked status
+                if (isPrefabInstance && isPrefabLinked)
                 {
+                    // Blue for LINKED prefab instances - will receive updates
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
+                }
+                else if (isPrefabInstance && !isPrefabLinked)
+                {
+                    // Gray for UNLINKED prefab instances - independent
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.7f, 1.0f));
                 }
 
                 if (ImGui::Selectable(uniqueLabel.c_str(), isSelected))
@@ -499,7 +516,7 @@ namespace PulseEditor
                     anySelectableClicked = true;
                 }
 
-                if (isPrefabInstance)
+                if (isPrefabInstance)  // Pop color if we pushed one
                 {
                     ImGui::PopStyleColor();
                 }

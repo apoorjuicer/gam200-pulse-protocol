@@ -3,12 +3,12 @@
         {
             "transform": {
                 "position": {
-                    "x": 0.0,
-                    "y": -521.84619140625
+                    "x": 999.0,
+                    "y": 999.0
                 },
                 "scale": {
-                    "x": 150.0,
-                    "y": 150.0
+                    "x": 200.0,
+                    "y": 200.0
                 },
                 "rotation": {
                     "x": 0.0,
@@ -24,7 +24,7 @@
                 "mdl_ref": 0.0,
                 "shd_ref": 1.0,
                 "useTexture": true,
-                "spriteName": "../../MyEngine/Assets/Textures/UI/restart.png",
+                "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat.png",
                 "tintColor": {
                     "r": 1.0,
                     "g": 1.0,
@@ -44,21 +44,16 @@
             }
         },
         {
-            "script": {
-                "ScriptName": "ButtonScript"
-            }
-        },
-        {
             "name": {
-                "name": "RestartBtn"
+                "name": "TestPrefab"
             }
         },
         {
             "LayerTag": {
-                "layerName": "UI",
-                "mask": 4,
+                "layerName": "World",
+                "mask": 2,
                 "orderInLayer": 0,
-                "z": 100.0
+                "z": 0.0
             }
         }
     ]

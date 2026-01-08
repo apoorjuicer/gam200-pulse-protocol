@@ -58,11 +58,14 @@ public:
     // get prefab path by name
     std::string GetPrefabPath(std::string const& prefabName);
 
-    // updates all entities that were instantiated from this prefab
+    // updates all entities in CURRENT SCENE that were instantiated from this prefab
     void UpdateAllInstancesOfPrefab(std::string const& prefabName);
 
+    // updates all entities in ALL SCENE FILES (on disk) that were instantiated from this prefab
+    void UpdatePrefabInAllScenes(std::string const& prefabName);
+
 private:
-    std::string prefabDirectory = "../../PulseEngine/Assets/Prefabs/";
+    std::string prefabDirectory = "../../../PulseEngine/Assets/Prefabs/";
 
     // updates a single entity from a prefab file (private helper)
     bool UpdateEntityFromPrefab(Entity entity, std::string const& prefabPath);

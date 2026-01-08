@@ -316,19 +316,23 @@ namespace PulseEditor
                     if (prefabMgr.SaveEntityAsPrefab(selectedEntity, prefabInstance.prefabName))
                     {
                         std::cout << "[Inspector] Saved entity " << selectedEntity
-                                  << " as prefab '" << prefabInstance.prefabName << "'" << std::endl;
+                            << " as prefab '" << prefabInstance.prefabName << "'" << std::endl;
 
-                        // Update all other instances
+                        // Update all instances in CURRENT scene (in memory)
                         prefabMgr.UpdateAllInstancesOfPrefab(prefabInstance.prefabName);
 
+                        // Update all instances in OTHER scene files (on disk)
+                        prefabMgr.UpdatePrefabInAllScenes(prefabInstance.prefabName);
+
                         std::cout << "[Inspector] Updated all instances of prefab '"
-                                  << prefabInstance.prefabName << "'" << std::endl;
+                            << prefabInstance.prefabName << "' across all scenes" << std::endl;
                     }
                 }
                 if (ImGui::IsItemHovered())
                 {
                     ImGui::SetTooltip("Save this entity's current properties as the new prefab definition.\n"
-                                      "All other instances of this prefab will update to match.");
+                                      "All other instances of this prefab will update to match.\n"
+                                      "Transform (position/rotation/scale) is preserved per-instance.");
                 }
 
                 ImGui::Unindent();
