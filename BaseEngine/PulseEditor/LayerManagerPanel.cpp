@@ -3,7 +3,8 @@
  * @file        LayerManagerPanel.cpp
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
- * @brief       Layer management window implementation
+ * 
+ * @brief       Layer management window using LayerRegistry for editable names
  *
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
@@ -11,43 +12,28 @@
  */
  /******************************************************************************/
 
-#include "pch/pch_temp.h"
-#include "LayerManagerPanel.h"
+#include "pch/pch_temp.h"       // PCH must be FIRST
+#include "LayerManagerPanel.h"  // Own header second
+
+// editor headers
 #include "Editor.h"
 
+// engine headers
+#include "Graphics/LayerRegistry.h"
 #include "Graphics/Layer.h"
 #include "CoreEngine/ECS/Coordinator.h"
-#include "Graphics/GraphicsManager.h"  // For SetEditorLayerFilter
+#include "Graphics/GraphicsManager.h"
 
 namespace PulseEditor
 {
+    // Track which layer is being edited (for inline text input)
+    static int s_editingLayerIndex = -1;
+    static char s_editBuffer[64] = "";
+
     // -------------------------------------------------------------------------
-    // Layer visibility state (persists across frames)
+    // Update graphics filter when visibility changes
     // -------------------------------------------------------------------------
-    static bool s_layerVisible[3] = { true, true, true };  // Background, World, UI
-    static bool s_layerLocked[3] = { false, false, false }; // Lock layers from selection
-
-    // Helper to convert LayerMask to index
-    static int LayerMaskToIndex(unsigned int mask)
-    {
-        if (mask == LAYER_BACKGROUND) return 0;
-        if (mask == LAYER_WORLD) return 1;
-        if (mask == LAYER_UI) return 2;
-        return 1; // default to World
-    }
-
-    // Helper to compute combined visible layer mask
-    static unsigned int ComputeVisibleLayerMask()
-    {
-        unsigned int mask = 0;
-        if (s_layerVisible[0]) mask |= LAYER_BACKGROUND;
-        if (s_layerVisible[1]) mask |= LAYER_WORLD;
-        if (s_layerVisible[2]) mask |= LAYER_UI;
-        return mask;
-    }
-
-    // Update the graphics manager filter whenever visibility changes
-    static void UpdateGraphicsFilter()
+    void UpdateGraphicsLayerFilter()
     {
         auto* coord = Coordinator::GetInstance();
         if (!coord) return;
@@ -55,44 +41,8 @@ namespace PulseEditor
         auto gfxMgr = coord->GetSystem<GraphicsManager>();
         if (!gfxMgr) return;
 
-        unsigned int visibleMask = ComputeVisibleLayerMask();
+        LayerMask visibleMask = LayerRegistry::Get().ComputeVisibleLayerMask();
         gfxMgr->SetEditorLayerFilter(visibleMask);
-    }
-
-    // -------------------------------------------------------------------------
-    // Public API
-    // -------------------------------------------------------------------------
-    bool IsLayerVisible(unsigned int layer)
-    {
-        return s_layerVisible[LayerMaskToIndex(layer)];
-    }
-
-    bool IsLayerLocked(unsigned int layer)
-    {
-        return s_layerLocked[LayerMaskToIndex(layer)];
-    }
-
-    // Set visibility for a specific layer (for external controls like TopBar)
-    void SetLayerVisibility(unsigned int layer, bool visible)
-    {
-        int index = LayerMaskToIndex(layer);
-        if (s_layerVisible[index] != visible) {
-            s_layerVisible[index] = visible;
-            UpdateGraphicsFilter();
-        }
-    }
-
-    // Set visibility for all layers at once (for quick filters)
-    void SetAllLayersVisibility(bool bg, bool world, bool ui)
-    {
-        bool changed = false;
-        if (s_layerVisible[0] != bg) { s_layerVisible[0] = bg; changed = true; }
-        if (s_layerVisible[1] != world) { s_layerVisible[1] = world; changed = true; }
-        if (s_layerVisible[2] != ui) { s_layerVisible[2] = ui; changed = true; }
-
-        if (changed) {
-            UpdateGraphicsFilter();
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -100,7 +50,9 @@ namespace PulseEditor
     // -------------------------------------------------------------------------
     void DrawLayerManagerWindow()
     {
-        ImGui::SetNextWindowSize(ImVec2(300, 250), ImGuiCond_FirstUseEver);
+        // LayerRegistry auto-initializes on first access (loads from layers.json if exists)
+
+        ImGui::SetNextWindowSize(ImVec2(350, 400), ImGuiCond_FirstUseEver);
 
         if (!ImGui::Begin("Layer Manager", nullptr))
         {
@@ -122,115 +74,147 @@ namespace PulseEditor
         if (!coord)
         {
             ImGui::TextColored(ImVec4(1, 0, 0, 1), "Coordinator not found!");
+            if (isPlaying) ImGui::EndDisabled();
             ImGui::End();
             return;
         }
 
+        auto& registry = LayerRegistry::Get();
+        auto& layers = registry.GetAllLayersMutable();
+
         // Count objects per layer
-        int layerCounts[3] = { 0, 0, 0 }; // Background, World, UI
+        std::vector<int> layerCounts(layers.size(), 0);
 
         for (Entity e : coord->GetAllEntities())
         {
             if (coord->HasComponent<LayerTag>(e))
             {
                 auto& tag = coord->GetComponent<LayerTag>(e);
-                layerCounts[LayerMaskToIndex(tag.mask)]++;
+                int idx = registry.GetLayerIndex(tag.mask);
+                if (idx >= 0 && idx < static_cast<int>(layerCounts.size()))
+                    layerCounts[idx]++;
             }
         }
 
         // =====================================================================
-        // Background Layer
+        // Draw each layer
         // =====================================================================
-        ImGui::PushID("Background");
+        bool needsFilterUpdate = false;
 
-        // Visibility toggle
-        if (ImGui::Checkbox("Visible##BG", &s_layerVisible[0]))
+        for (size_t i = 0; i < layers.size(); ++i)
         {
-            UpdateGraphicsFilter();  // Update renderer when visibility changes
-        }
+            auto& layer = layers[i];
+            ImGui::PushID(static_cast<int>(i));
 
-        ImGui::SameLine();
+            // Visibility toggle
+            bool visible = layer.visible;
+            if (ImGui::Checkbox("##Visible", &visible))
+            {
+                layer.visible = visible;
+                needsFilterUpdate = true;
+            }
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Toggle visibility");
 
-        // Lock toggle
-        if (ImGui::Checkbox("Locked##BG", &s_layerLocked[0]))
-        {
-            // Layer lock changed
-        }
-
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.8f, 0.6f, 1.0f), "Background");
-        ImGui::SameLine();
-        ImGui::TextDisabled("(%d objects)", layerCounts[0]);
-
-        if (!s_layerVisible[0])
-        {
             ImGui::SameLine();
-            ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "[HIDDEN]");
-        }
 
-        ImGui::PopID();
-        ImGui::Spacing();
+            // Lock toggle
+            ImGui::Checkbox("##Locked", &layer.locked);
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Lock layer (prevent selection)");
 
-        // =====================================================================
-        // World Layer
-        // =====================================================================
-        ImGui::PushID("World");
-
-        if (ImGui::Checkbox("Visible##World", &s_layerVisible[1]))
-        {
-            UpdateGraphicsFilter();  // Update renderer when visibility changes
-        }
-
-        ImGui::SameLine();
-
-        if (ImGui::Checkbox("Locked##World", &s_layerLocked[1]))
-        {
-            // Layer lock changed
-        }
-
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.8f, 0.8f, 1.0f, 1.0f), "World");
-        ImGui::SameLine();
-        ImGui::TextDisabled("(%d objects)", layerCounts[1]);
-
-        if (!s_layerVisible[1])
-        {
             ImGui::SameLine();
-            ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "[HIDDEN]");
-        }
 
-        ImGui::PopID();
-        ImGui::Spacing();
+            // Layer name (editable via double-click)
+            if (s_editingLayerIndex == static_cast<int>(i))
+            {
+                // Editing mode - show input field
+                ImGui::SetNextItemWidth(120.0f);
+                if (ImGui::InputText("##EditName", s_editBuffer, sizeof(s_editBuffer),
+                    ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
+                {
+                    // Enter pressed - save the name using SetLayerName (triggers auto-save)
+                    if (strlen(s_editBuffer) > 0)
+                    {
+                        registry.SetLayerName(layer.mask, s_editBuffer);
+                    }
+                    s_editingLayerIndex = -1;
+                }
 
-        // =====================================================================
-        // UI Layer
-        // =====================================================================
-        ImGui::PushID("UI");
+                // Cancel on escape
+                if (ImGui::IsKeyPressed(ImGuiKey_Escape))
+                {
+                    s_editingLayerIndex = -1;
+                }
 
-        if (ImGui::Checkbox("Visible##UI", &s_layerVisible[2]))
-        {
-            UpdateGraphicsFilter();  // Update renderer when visibility changes
-        }
+                // Set focus on first frame
+                if (ImGui::IsItemVisible() && !ImGui::IsItemActive())
+                {
+                    ImGui::SetKeyboardFocusHere(-1);
+                }
+            }
+            else
+            {
+                // Display mode - show colored text
+                ImVec4 color(layer.colorR, layer.colorG, layer.colorB, layer.colorA);
+                ImGui::TextColored(color, "%s", layer.name.c_str());
 
-        ImGui::SameLine();
+                // Double-click to edit
+                if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+                {
+                    s_editingLayerIndex = static_cast<int>(i);
+                    strncpy(s_editBuffer, layer.name.c_str(), sizeof(s_editBuffer) - 1);
+                    s_editBuffer[sizeof(s_editBuffer) - 1] = '\0';
+                }
 
-        if (ImGui::Checkbox("Locked##UI", &s_layerLocked[2]))
-        {
-            // Layer lock changed
-        }
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("Double-click to rename");
+            }
 
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.6f, 1.0f), "UI");
-        ImGui::SameLine();
-        ImGui::TextDisabled("(%d objects)", layerCounts[2]);
-
-        if (!s_layerVisible[2])
-        {
             ImGui::SameLine();
-            ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "[HIDDEN]");
+            ImGui::TextDisabled("(%d)", layerCounts[i]);
+
+            // Status indicators
+            if (!layer.visible)
+            {
+                ImGui::SameLine();
+                ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "[HIDDEN]");
+            }
+
+            if (layer.locked)
+            {
+                ImGui::SameLine();
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.5f, 1.0f), "[LOCKED]");
+            }
+
+            // Remove button for custom layers only
+            if (!layer.isDefault)
+            {
+                ImGui::SameLine();
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 0.15f, 0.15f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.7f, 0.2f, 0.2f, 1.0f));
+                if (ImGui::SmallButton("X"))
+                {
+                    registry.RemoveCustomLayer(layer.mask);  // Auto-saves internally
+                    needsFilterUpdate = true;
+                    ImGui::PopStyleColor(2);
+                    ImGui::PopID();
+                    break; // Exit loop since we modified the vector
+                }
+                ImGui::PopStyleColor(2);
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("Remove this custom layer");
+            }
+
+            ImGui::PopID();
+            ImGui::Spacing();
         }
 
-        ImGui::PopID();
+        // Update renderer if visibility changed
+        if (needsFilterUpdate)
+        {
+            UpdateGraphicsLayerFilter();
+        }
 
         // =====================================================================
         // Summary Section
@@ -238,30 +222,70 @@ namespace PulseEditor
         ImGui::Separator();
         ImGui::Spacing();
 
-        ImGui::Text("Total Objects: %d", layerCounts[0] + layerCounts[1] + layerCounts[2]);
+        int totalObjects = 0;
+        for (int count : layerCounts)
+            totalObjects += count;
+        ImGui::Text("Total Objects: %d", totalObjects);
+        ImGui::Text("Layer Count: %zu", layers.size());
 
         ImGui::Spacing();
-        ImGui::TextDisabled("Toggle visibility and lock layers");
+        ImGui::TextDisabled("Double-click layer name to rename");
+        ImGui::TextDisabled("Changes auto-save to Assets/Config/layers.json");
 
         // =====================================================================
         // Quick Actions
         // =====================================================================
         ImGui::Spacing();
         ImGui::Separator();
+        ImGui::Spacing();
 
-        if (ImGui::Button("Show All Layers"))
+        if (ImGui::Button("Show All"))
         {
-            s_layerVisible[0] = s_layerVisible[1] = s_layerVisible[2] = true;
-            UpdateGraphicsFilter();  // Update renderer
+            registry.ShowAllLayers();
+            UpdateGraphicsLayerFilter();
         }
 
         ImGui::SameLine();
 
-        if (ImGui::Button("Hide All Layers"))
+        if (ImGui::Button("Hide All"))
         {
-            s_layerVisible[0] = s_layerVisible[1] = s_layerVisible[2] = false;
-            UpdateGraphicsFilter();  // Update renderer
+            registry.HideAllLayers();
+            UpdateGraphicsLayerFilter();
         }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Unlock All"))
+        {
+            registry.UnlockAllLayers();
+        }
+
+        // =====================================================================
+        // Add Custom Layer
+        // =====================================================================
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        static char newLayerName[64] = "";
+        ImGui::SetNextItemWidth(150.0f);
+        ImGui::InputTextWithHint("##NewLayerName", "New layer name...", newLayerName, sizeof(newLayerName));
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Add Layer"))
+        {
+            if (strlen(newLayerName) > 0)
+            {
+                LayerMask newMask = registry.AddCustomLayer(newLayerName);  // Auto-saves internally
+                if (newMask != 0)
+                {
+                    newLayerName[0] = '\0'; // Clear input on success
+                }
+            }
+        }
+
+        // No more Save/Load buttons - everything auto-saves!
 
         if (isPlaying)
         {
@@ -271,4 +295,4 @@ namespace PulseEditor
         ImGui::End();
     }
 
-} // namespace PulseEditor
+}

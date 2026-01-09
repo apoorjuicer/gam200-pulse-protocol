@@ -15,11 +15,16 @@
 /******************************************************************************/
 
 #include "pch/pch_temp.h"
+
+// editor files
 #include "Inspector.h"
-#include "Editor.h" // selectedEntity, INVALID_ENTITY, PrefabManager, etc.
+#include "Editor.h"                 // selectedEntity, INVALID_ENTITY, PrefabManager, etc.
 #include "TopBarPanel.h"
-#include "Graphics/glapp.h" // GLApp::shdrpgms
-#include "Graphics/Layer.h" // GLApp::shdrpgms
+
+// engine files
+#include "Graphics/glapp.h"         // GLApp::shdrpgms
+#include "Graphics/Layer.h"         // GLApp::shdrpgms
+#include "Graphics/LayerRegistry.h" // for dynamic layer names
 #include "Graphics/Text.h"
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "CoreEngine/Prefab/PrefabInstance.h"
@@ -68,7 +73,6 @@ namespace PulseEditor
 
     // -------------------------------------------------------------------------
     // Local helper: parse "<rows>x<cols>" from filename ("hero_4x3.png")
-    // (copied from your old Editor.cpp; now lives with the inspector)
     // -------------------------------------------------------------------------
     static bool ParseGridFromFilename(const std::string &full, int &outRows, int &outCols)
     {
@@ -214,36 +218,43 @@ namespace PulseEditor
 
         ImGui::SameLine();
 
-        // Layer dropdown
-        const char *layerNames[] = {"Background", "World", "UI"};
-        int currentLayerIndex = 1; // Default to World
+        // Layer dropdown - with dynamic names from LayerRegistry
+        auto& registry = LayerRegistry::Get();
+        const auto& allLayers = registry.GetAllLayers();
 
-        // Convert LayerMask to dropdown index
-        if (layer.mask == LAYER_BACKGROUND)
-            currentLayerIndex = 0;
-        else if (layer.mask == LAYER_WORLD)
-            currentLayerIndex = 1;
-        else if (layer.mask == LAYER_UI)
-            currentLayerIndex = 2;
+        static std::vector<std::string> s_layerNameStrings;
+        static std::vector<const char*> s_layerNamePtrs;
 
-        ImGui::SetNextItemWidth(100.0f);
-        if (ImGui::Combo("##LayerDropdown", &currentLayerIndex, layerNames, 3))
+        s_layerNameStrings.clear();
+        s_layerNamePtrs.clear();
+
+        for (const auto& layerInfo : allLayers)
         {
-            // Convert dropdown index back to LayerMask
-            switch (currentLayerIndex)
+            s_layerNameStrings.push_back(layerInfo.name);
+        }
+        for (const auto& name : s_layerNameStrings)
+        {
+            s_layerNamePtrs.push_back(name.c_str());
+        }
+
+        int currentLayerIndex = registry.GetLayerIndex(layer.mask);
+        if (currentLayerIndex < 0 || currentLayerIndex >= static_cast<int>(allLayers.size()))
+        {
+            currentLayerIndex = 1;
+        }
+
+        ImGui::SetNextItemWidth(130.0f);
+        if (ImGui::Combo("##LayerDropdown", &currentLayerIndex, s_layerNamePtrs.data(), static_cast<int>(s_layerNamePtrs.size())))
+        {
+            if (currentLayerIndex >= 0 && currentLayerIndex < static_cast<int>(allLayers.size()))
             {
-            case 0:
-                layer.mask = LAYER_BACKGROUND;
-                layer.z = 0.0f;
-                break;
-            case 1:
-                layer.mask = LAYER_WORLD;
-                layer.z = 0.0f;
-                break;
-            case 2:
-                layer.mask = LAYER_UI;
-                layer.z = 100.0f;
-                break;
+                LayerMask newMask = allLayers[currentLayerIndex].mask;
+                layer.mask = newMask;
+
+                if (newMask == LAYER_UI)
+                    layer.z = 100.0f;
+                else
+                    layer.z = 0.0f;
             }
         }
 

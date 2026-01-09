@@ -3,8 +3,10 @@
  * @file        LayerManagerPanel.h
  * @project     Pulse Protocol
  * @author      Chloe Lau Rey En
+ * 
  * @brief       Layer management window for controlling layer visibility,
  *              locking, and filtering in the editor.
+ *              Uses LayerRegistry for editable layer names.
  *
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
@@ -13,22 +15,44 @@
  /******************************************************************************/
 #pragma once
 
-#include "../../imgui/imgui.h"
+#include "Graphics/LayerRegistry.h"  // For LayerMask type and LayerRegistry
 
 namespace PulseEditor
 {
     // Draw the Layer Manager window
     void DrawLayerManagerWindow();
 
+    // Notify renderer of layer visibility changes
+    void UpdateGraphicsLayerFilter();
+
+    // -------------------------------------------------------------------------
+    // Convenience wrappers (forward to LayerRegistry)
+    // These maintain API compatibility with existing code
+    // -------------------------------------------------------------------------
+
     // Check if a layer is currently visible
-    bool IsLayerVisible(unsigned int layer);
+    inline bool IsLayerVisible(LayerMask layer) {
+        return LayerRegistry::Get().IsLayerVisible(layer);
+    }
 
     // Check if a layer is currently locked (for editor selection)
-    bool IsLayerLocked(unsigned int layer);
+    inline bool IsLayerLocked(LayerMask layer) {
+        return LayerRegistry::Get().IsLayerLocked(layer);
+    }
 
-    // Set visibility for a specific layer (updates filter automatically)
-    void SetLayerVisibility(unsigned int layer, bool visible);
+    // Set visibility for a specific layer
+    inline void SetLayerVisibility(LayerMask layer, bool visible) {
+        LayerRegistry::Get().SetLayerVisibility(layer, visible);
+        UpdateGraphicsLayerFilter();
+    }
 
     // Set visibility for all layers at once (for quick filters like TopBar)
-    void SetAllLayersVisibility(bool bg, bool world, bool ui);
+    inline void SetAllLayersVisibility(bool bg, bool world, bool ui) {
+        auto& reg = LayerRegistry::Get();
+        reg.SetLayerVisibility(LAYER_BACKGROUND, bg);
+        reg.SetLayerVisibility(LAYER_WORLD, world);
+        reg.SetLayerVisibility(LAYER_UI, ui);
+        UpdateGraphicsLayerFilter();
+    }
+
 }

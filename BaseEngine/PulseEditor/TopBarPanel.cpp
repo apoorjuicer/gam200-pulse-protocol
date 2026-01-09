@@ -5,12 +5,11 @@
  * @author      Leu Jun Yong
  * @brief       Implements the Top Panel for the editor.
  *
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
  /******************************************************************************/
-
 
 #include "pch/pch_temp.h"   // must stay first (PCH)
 
@@ -18,15 +17,13 @@
 #include <Windows.h>
 #include <commdlg.h>
 
-// STL
-#include <filesystem>
-#include <string>
-
-// Editor / engine
+// editor headers
 #include "TopBarPanel.h"
 #include "Editor.h"
 #include "LayerManagerPanel.h"  // For syncing layer visibility
 #include <imgui.h>
+
+// engine headers
 #include "CoreEngine/ECS/Coordinator.h"
 
 
@@ -90,18 +87,12 @@ namespace PulseEditor
                 st.name = coord->GetComponent<Name>(e);
             }
 
-            //if (coord->HasComponent<GUIButton>(e))
-            //{
-            //    st.hasGuiButton = true;
-            //    st.guiButton = coord->GetComponent<GUIButton>(e);
-            //}
-
             s_editorBaseline.push_back(std::move(st));
         }
 
         s_hasEditorBaseline = true;
-        std::cout << "[Editor] Captured baseline with "
-            << s_editorBaseline.size() << " entities.\n";
+        //std::cout << "[Editor] Captured baseline with "
+        //    << s_editorBaseline.size() << " entities.\n";
     }
 
     void RestoreEditorBaseline()
@@ -123,12 +114,9 @@ namespace PulseEditor
 
             if (coord->HasComponent<Name>(st.id) && st.hasName)
                 coord->GetComponent<Name>(st.id) = st.name;
-
-            //if (coord->HasComponent<GUIButton>(st.id) && st.hasGuiButton)
-            //    coord->GetComponent<GUIButton>(st.id) = st.guiButton;
         }
 
-        std::cout << "[Editor] Restored baseline.\n";
+        //std::cout << "[Editor] Restored baseline.\n";
     }
 
     std::string PulseEditor::OpenJsonFileDialog()
@@ -238,7 +226,7 @@ namespace PulseEditor
                 SetPlaying(true);
                 isPaused = false;
 
-                std::cout << "[Editor] Play Started\n";
+                //std::cout << "[Editor] Play Started\n";
             }
             else
             {
@@ -247,7 +235,7 @@ namespace PulseEditor
                 SetPlaying(false);
                 isPaused = false;
 
-                std::cout << "[Editor] Stopped - Scene Restored\n";
+                //std::cout << "[Editor] Stopped - Scene Restored\n";
             }
         }
 
@@ -268,12 +256,12 @@ namespace PulseEditor
                 if (isPaused)
                 {
                     Engine->PauseGame();
-                    std::cout << "[Editor] Game Paused\n";
+                    //std::cout << "[Editor] Game Paused\n";
                 }
                 else
                 {
                     Engine->ResumeGame();
-                    std::cout << "[Editor] Game Resumed\n";
+                    //std::cout << "[Editor] Game Resumed\n";
                 }
             }
         }
@@ -294,74 +282,100 @@ namespace PulseEditor
         // Both systems stay in sync
         // ============================================================
 
-        // Read current visibility state from Layer Manager
-        bool bgVisible = IsLayerVisible(LAYER_BACKGROUND);
-        bool worldVisible = IsLayerVisible(LAYER_WORLD);
-        bool uiVisible = IsLayerVisible(LAYER_UI);
+        auto& registry = LayerRegistry::Get();
+        const auto& allLayers = registry.GetAllLayers();
 
-        // Determine current selection
-        static int s_layerFilter = 4; // Start with "All"
-
-        // Update display to match Layer Manager state
-        if (bgVisible && worldVisible && uiVisible) {
-            s_layerFilter = 4; // All
-        }
-        else if (bgVisible && !worldVisible && !uiVisible) {
-            s_layerFilter = 0; // Background only
-        }
-        else if (!bgVisible && worldVisible && !uiVisible) {
-            s_layerFilter = 1; // World only
-        }
-        else if (!bgVisible && !worldVisible && uiVisible) {
-            s_layerFilter = 2; // UI only
-        }
-        else {
-            s_layerFilter = 3; // Custom combination
+        // Count how many layers are visible
+        int visibleCount = 0;
+        int singleVisibleIndex = -1;
+        for (size_t i = 0; i < allLayers.size(); ++i)
+        {
+            if (allLayers[i].visible)
+            {
+                visibleCount++;
+                singleVisibleIndex = static_cast<int>(i);
+            }
         }
 
-        const char* layerOptions[] = { "Background", "World", "UI", "Custom", "All" };
+        // Determine current selection for dropdown
+        // Options: [Layer0, Layer1, Layer2, ..., LayerN, "Custom", "All"]
+        static int s_layerFilter = -1; // -1 means "All"
+
+        if (visibleCount == static_cast<int>(allLayers.size()))
+        {
+            s_layerFilter = static_cast<int>(allLayers.size()) + 1; // "All" index
+        }
+        else if (visibleCount == 1)
+        {
+            s_layerFilter = singleVisibleIndex; // Single layer visible
+        }
+        else
+        {
+            s_layerFilter = static_cast<int>(allLayers.size()); // "Custom" index
+        }
+
+        // Build options: [Layer names..., "Custom", "All"]
+        static std::vector<std::string> s_layerNames;
+        static std::vector<const char*> s_layerOptions;
+
+        s_layerNames.clear();
+        s_layerOptions.clear();
+
+        for (const auto& layer : allLayers)
+        {
+            s_layerNames.push_back(layer.name);
+        }
+        s_layerNames.push_back("Custom");
+        s_layerNames.push_back("All");
+
+        for (const auto& name : s_layerNames)
+        {
+            s_layerOptions.push_back(name.c_str());
+        }
 
         // Calculate positions for right-aligned placement
         ImVec2 layerTextSize = ImGui::CalcTextSize("Layers:");
-        float comboWidth = 100.0f;
+        float comboWidth = 130.0f;
         float totalLayerWidth = layerTextSize.x + itemSpacing + comboWidth;
 
-        // Position at right side of window with some padding
         float rightPadding = 20.0f;
         float layerX = windowWidth - totalLayerWidth - rightPadding;
 
-        // Move cursor to right side
         ImGui::SameLine(layerX);
 
         ImGui::Text("Layers:");
         ImGui::SameLine();
-        ImGui::SetNextItemWidth(100.0f);
+        ImGui::SetNextItemWidth(comboWidth);
 
         int previousFilter = s_layerFilter;
-        if (ImGui::Combo("##LayerFilter", &s_layerFilter, layerOptions, 5)) {
-            // User changed the dropdown - update Layer Manager's internal state
-            // Layer Manager will automatically call UpdateGraphicsFilter()
+        int customIndex = static_cast<int>(allLayers.size());
+        int allIndex = static_cast<int>(allLayers.size()) + 1;
 
-            switch (s_layerFilter) {
-            case 0: // Background only
-                SetAllLayersVisibility(true, false, false);
-                break;
-            case 1: // World only
-                SetAllLayersVisibility(false, true, false);
-                break;
-            case 2: // UI only
-                SetAllLayersVisibility(false, false, true);
-                break;
-            case 3: // Custom - don't change anything
-                s_layerFilter = previousFilter; // Revert
-                break;
-            case 4: // All
-                SetAllLayersVisibility(true, true, true);
-                break;
+        if (ImGui::Combo("##LayerFilter", &s_layerFilter, s_layerOptions.data(), static_cast<int>(s_layerOptions.size())))
+        {
+            if (s_layerFilter == customIndex)
+            {
+                // Can't select "Custom" directly - revert
+                s_layerFilter = previousFilter;
+            }
+            else if (s_layerFilter == allIndex)
+            {
+                // Show all layers
+                registry.ShowAllLayers();
+                UpdateGraphicsLayerFilter();
+            }
+            else if (s_layerFilter >= 0 && s_layerFilter < static_cast<int>(allLayers.size()))
+            {
+                // Show only selected layer
+                for (size_t i = 0; i < allLayers.size(); ++i)
+                {
+                    registry.SetLayerVisibility(allLayers[i].mask, (i == static_cast<size_t>(s_layerFilter)));
+                }
+                UpdateGraphicsLayerFilter();
             }
         }
 
-        if (s_layerFilter == 3 && ImGui::IsItemHovered()) {
+        if (s_layerFilter == customIndex && ImGui::IsItemHovered()) {
             ImGui::SetTooltip("Multiple layers visible - use Layer Manager to adjust");
         }
         // ============================================================
@@ -375,7 +389,7 @@ namespace PulseEditor
             // (This is an editor action, not in-game navigation)
             if (IsPlaying())
             {
-                std::cout << "[Editor] Stopping game before loading scene (editor action)\n";
+                //std::cout << "[Editor] Stopping game before loading scene (editor action)\n";
                 Engine->StopGame();
                 SetPlaying(false);
                 isPaused = false;
@@ -384,7 +398,7 @@ namespace PulseEditor
             if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>())
             {
                 sceneMgr->LoadSceneFromJson(s_pendingScenePath);
-                std::cout << "[Editor] Loaded scene: " << s_pendingScenePath << "\n";
+                //std::cout << "[Editor] Loaded scene: " << s_pendingScenePath << "\n";
                 s_hasEditorBaseline = false;
                 selectedEntity = INVALID_ENTITY;
             }
