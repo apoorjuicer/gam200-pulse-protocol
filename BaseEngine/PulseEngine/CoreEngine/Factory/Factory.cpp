@@ -167,10 +167,33 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path)
 	// add entity to list of entity in the current scene
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
 	sceneManager->IncrementEntityArray(entity);
+	
+	
 	if (!g_coordinator->HasComponent<LayerTag>(entity))
 	{
 		g_coordinator->AddComponent(entity, LayerTag{LAYER_WORLD, 0, 0.0f});
 	}
+	
+
+	/*
+	// Add them to C# script container 
+	if (g_coordinator->HasComponent<LogicComponent>(entity))
+	{
+		auto addScriptFunc = m_coreEngine->GetFunctionPtr<bool(*)(int, const char*)>(
+			"ScriptAPI",
+			"ScriptAPI.EngineInterface",
+			"AddScriptViaName"
+		);
+
+		auto& logic = g_coordinator->GetComponent<LogicComponent>(entity);
+
+		if (!logic.ScriptName.empty())
+		{
+			addScriptFunc(entity, logic.ScriptName.c_str());
+		}
+	}
+	*/
+	
 	return entity;
 }
 
@@ -209,6 +232,16 @@ void Factory::DeleteEntity(Entity entity)
 {
 	auto *g_coordinator = Coordinator::GetInstance();
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
+
+	// Remove entities script before being delted
+	auto clearEntityScriptFunc = Engine->GetFunctionPtr<void(*)(int)>(
+		"ScriptAPI",
+		"ScriptAPI.EngineInterface",
+		"ClearEntityScript"
+	);
+	clearEntityScriptFunc(entity);
+
+
 	sceneManager->DecrementEntityArray(entity); // KILL THE ENTITY FROM SCENE ENTITY CONTAINER >:D
 
 	g_coordinator->DestroyEntity(entity);

@@ -635,6 +635,27 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 	ChangeCurrentScene(d["scene"].GetString());
 
+
+	// Add them to C# script container 
+	/*auto addScriptFunc = m_coreEngine->GetFunctionPtr<bool(*)(int, const char*)>(
+		"ScriptAPI",
+		"ScriptAPI.EngineInterface",
+		"AddScriptViaName"
+	);
+
+	for (Entity entity : SceneEntityList)
+	{
+		if (g_coordinator->HasComponent<LogicComponent>(entity))
+		{
+			auto& logic = g_coordinator->GetComponent<LogicComponent>(entity);
+
+			if (!logic.ScriptName.empty())
+			{
+				addScriptFunc(entity, logic.ScriptName.c_str());
+			}
+		}
+	}*/
+
 	// Initialize all scripts for entities with LogicComponent
 	auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
 	if (logicSystem) {

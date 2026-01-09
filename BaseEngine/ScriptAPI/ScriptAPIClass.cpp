@@ -13,6 +13,8 @@
 /******************************************************************************/
 #include "ScriptAPIClass.h"
 #include "TransformComponent.h"
+#include "Health.h"
+#include "ScriptName.h"
 
 namespace ScriptAPI
 {
@@ -20,5 +22,15 @@ namespace ScriptAPI
     {
         // Gib the Transform Component our entity ID so ECS and script are using same Entiy ID
         return TransformComponent(EntityID);
+    }
+
+    HealthComponent Script::GetHealth()
+    {
+        return HealthComponent(EntityID);
+    }
+
+    LogicComponent Script::GetScriptName()
+    {
+        return LogicComponent(EntityID);
     }
 }

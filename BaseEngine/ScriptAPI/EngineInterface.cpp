@@ -206,6 +206,18 @@ namespace ScriptAPI
         }
     }
 
+    void EngineInterface::ClearEntityScript(int EntityID)
+    {
+        ScriptList^ entityScripts = scripts[EntityID];
+        if (entityScripts != nullptr && entityScripts->Count > 0)
+        {
+            // Clear all the script for this entity
+            entityScripts->Clear();
+
+            System::Console::WriteLine("Entity Script is all deleted!\n");
+        }
+    }
+
     // iterate thru all of our scripts that has been created and execute our scripts.
     void EngineInterface::ExecuteUpdate()
     {

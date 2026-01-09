@@ -15,11 +15,16 @@
 #pragma once
 #include <pch/pch_temp.h>
 
+ //for .NET
+#include "CoreEngine/Core/ImportExport.h" // for DLL_API
+#pragma warning(push)
+#pragma warning(disable: 4251)
+
  /**
   * @struct Health
   * @brief  Defines hit points, damage potential, and alive state of an entity.
   */
-struct Health
+struct DLL_API Health
 {
     int hp;        ///< Current hit points of the entity
     int damage;    ///< Amount of damage this entity can deal to others

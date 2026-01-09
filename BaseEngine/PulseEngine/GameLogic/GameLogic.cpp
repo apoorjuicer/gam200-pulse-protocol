@@ -62,6 +62,19 @@ LogicSystem::~LogicSystem()
 
 void LogicSystem::Init()
 {
+    //auto* coord = Coordinator::GetInstance();
+
+    ////function pointer to C++/CLI function AddScriptViaName
+    //auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>
+    //    (
+    //        "ScriptAPI",
+    //        "ScriptAPI.EngineInterface",
+    //        "AddScriptViaName"
+    //    );
+
+
+
+
     //register scripts here. I think it it will be the Csharp / Lua game code here. Ask Eli if i did it right 
     // AddScript("PlayerScript", std::function<void(Entity)> function);
 
@@ -90,6 +103,14 @@ void LogicSystem::Update(float dt)
     if (!Engine->IsPlaying()) {
         return;
     }
+
+    /*auto executeFunc = Engine->GetFunctionPtr<void(*)()>(
+        "ScriptAPI",
+        "ScriptAPI.EngineInterface",
+        "ExecuteUpdate"
+    );
+    executeFunc();*/
+
 
     auto* g_coordinator = Coordinator::GetInstance();
 
@@ -122,6 +143,15 @@ void LogicSystem::Update(float dt)
 void LogicSystem::Exit()
 {
     auto* g_coordinator = Coordinator::GetInstance();
+
+    //// clear all scripts 
+    //auto clearFunc = Engine->GetFunctionPtr<void(*)()>(
+    //    "ScriptAPI",
+    //    "ScriptAPI.EngineInterface",
+    //    "ClearAllScripts"
+    //);
+    //clearFunc();
+
 
     for (auto const& entity : EntityMember)
     {

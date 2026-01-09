@@ -21,10 +21,12 @@ target_link_libraries(ScriptAPI
         PulseEngine
 )
 
+
+
 # Enable C++/CLI (Common Language Runtime)
 set_target_properties(ScriptAPI PROPERTIES
-    COMMON_LANGUAGE_RUNTIME ""
-    #VS_GLOBAL_CLRSupport "true"
+    # COMMON_LANGUAGE_RUNTIME ""
+    # VS_GLOBAL_CLRSupport "true"
     VS_GLOBAL_CLRSupport "NetCore"
     VS_GLOBAL_TargetFramework "net8.0"
     CXX_STANDARD 20
@@ -36,6 +38,7 @@ set_target_properties(ScriptAPI PROPERTIES
 if(MSVC)
     target_compile_options(ScriptAPI PRIVATE "/clr:netcore")
 endif()
+
 
 # Include directories
 target_include_directories(ScriptAPI PUBLIC

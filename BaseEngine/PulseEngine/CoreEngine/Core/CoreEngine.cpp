@@ -759,6 +759,7 @@ void CoreEngine::Update(float dt)
 		wasRPressed = false;
 	}
 
+	//move it to gamelogic.cpp
 	auto executeUpdate = GetFunctionPtr<void(*)(void)>
 		(
 			"ScriptAPI",

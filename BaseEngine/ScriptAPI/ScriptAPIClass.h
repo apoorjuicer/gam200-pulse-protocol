@@ -13,11 +13,14 @@
 /******************************************************************************/
 #pragma once
 #include "TransformComponent.h"
+#include "Health.h"
 
 namespace ScriptAPI
 {
     //forward delcaration
     value struct TransformComponent;
+    value struct HealthComponent;
+    value struct LogicComponent;
 
     public ref class Script abstract
     {
@@ -25,6 +28,8 @@ namespace ScriptAPI
         void virtual Update() {};
 
         TransformComponent GetTransform();
+        HealthComponent GetHealth();
+        LogicComponent GetScriptName();
 
     internal:
         // Store which entity this script is attached too

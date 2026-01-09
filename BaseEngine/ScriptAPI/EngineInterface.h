@@ -29,6 +29,7 @@ namespace ScriptAPI
 
         static void ExecuteUpdate();
         static void ClearAllScripts();
+        static void ClearEntityScript(int EntityID);
 
         static void Reload();  // For hot reloading scripts
     

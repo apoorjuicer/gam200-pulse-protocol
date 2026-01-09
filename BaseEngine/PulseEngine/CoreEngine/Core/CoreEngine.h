@@ -153,6 +153,7 @@ private:
 	void(*executeUpdateFunc)() = nullptr;
 public:
 	void(*clearScriptsFunc)() = nullptr;
+
 };
 
 // A global pointer to the instance of the core

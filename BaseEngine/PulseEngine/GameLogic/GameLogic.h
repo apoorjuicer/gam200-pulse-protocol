@@ -42,6 +42,11 @@
 #include <rapidjson/stringbuffer.h> // for StringBuffer
 #pragma warning(pop)
 
+ //for .NET
+#include "CoreEngine/Core/ImportExport.h" // for DLL_API
+#pragma warning(push)
+#pragma warning(disable: 4251)
+
 extern bool g_countdownFinished;
 
 // base class for scripts
@@ -228,7 +233,7 @@ private:
 	std::unordered_map<Entity, std::unordered_map<std::string, std::shared_ptr<Iscript>>> map_of_scriptInstances; // copying from template (wrap raw ptr into smart ptr(shared) to prevent mem leak ltr )
 };
 
-struct LogicComponent
+struct DLL_API LogicComponent
 {
     std::string ScriptName;
 
