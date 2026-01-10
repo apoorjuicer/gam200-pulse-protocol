@@ -14,10 +14,6 @@ using System;
 using ScriptAPI;
 public class TestScript : Script
 {
-    public static void SayHello()
-    {
-        Console.WriteLine("[C#] Hello from ManagedScripts!");
-    }
     public override void Update()
     {
         Console.Write("Script 1\n");
