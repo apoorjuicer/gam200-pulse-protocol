@@ -3,14 +3,9 @@
  * @file        Layer.h
  * @project     Pulse Protocol
  * @author      Goh Pin Kai
+ * 
  * @brief       Defines the rendering layer system used to control draw order.
- *              Objects can be assigned one or more layers (e.g., background,
- *              world, UI) through a bitmask. Rendering passes filter by these
- *              layers to determine which objects to draw in each stage.
- *              The LayerTag component stores the object's assigned layer(s)
- *              as well as ordering information used to ensure predictable
- *              and stable sorting within a layer (e.g., foreground before
- *              background, UI always drawn last, etc.).
+ *              Updated to use LayerRegistry for editable layer names.
  * 
  * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
@@ -19,58 +14,50 @@
  /******************************************************************************/
 #pragma once
 #include"pch/pch_temp.h"
-using LayerMask = uint32_t;
-
-enum : LayerMask {
-	LAYER_BACKGROUND = 1u << 0,	// Elements drawn first (e.g., static backgrounds)
-	LAYER_WORLD = 1u << 1,	 // Game world objects (e.g., characters, props)
-	LAYER_UI = 1u << 2,	// User interface elements rendered on top
-	LAYER_ALL = 0xFFFFFFFFu	// All Layers
-};
+#include "LayerRegistry.h"  // For GetLayerName/GetLayerMask functions
 
 struct LayerTag {
-	LayerMask mask;
-	int   orderInLayer;	//Higher = draws later = appears in front
-	float z = 0.f;	// depth offset for fine-grained ordering (screen-space depth) <this is for 3D>
+    LayerMask mask;
+    int   orderInLayer;  // Higher = draws later = appears in front
+    float z = 0.f;       // Depth offset for fine-grained ordering
 
-	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
-		using namespace rapidjson;
-		out.SetObject();
+    void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
+        using namespace rapidjson;
+        out.SetObject();
 
-		// name of layer, easier to see
-		const char* layerName = "Unknown";
-		if (mask == LAYER_BACKGROUND) layerName = "Background";
-		else if (mask == LAYER_WORLD) layerName = "World";
-		else if (mask == LAYER_UI) layerName = "UI";
-		else if (mask == LAYER_ALL) layerName = "All";
+        // Get layer name from registry (supports custom/renamed layers)
+        std::string layerName = LayerRegistry::Get().GetLayerName(mask);
 
-		Value nameVal;
-		nameVal.SetString(layerName, alloc);
-		out.AddMember("layerName", nameVal, alloc);
+        Value nameVal;
+        nameVal.SetString(layerName.c_str(), static_cast<SizeType>(layerName.length()), alloc);
+        out.AddMember("layerName", nameVal, alloc);
 
-		out.AddMember("mask", mask, alloc);
-		out.AddMember("orderInLayer", orderInLayer, alloc);
-		out.AddMember("z", z, alloc);
-	}
+        out.AddMember("mask", mask, alloc);
+        out.AddMember("orderInLayer", orderInLayer, alloc);
+        out.AddMember("z", z, alloc);
+    }
 
-	void Deserialize(const rapidjson::Value& in) {
-		if (!in.IsObject()) return;
+    void Deserialize(const rapidjson::Value& in) {
+        if (!in.IsObject()) return;
 
-		// load from mask
-		if (in.HasMember("mask")) {
-			mask = in["mask"].GetUint();
-		}
+        // First try to load by mask (most reliable)
+        if (in.HasMember("mask") && in["mask"].IsUint()) {
+            mask = in["mask"].GetUint();
+        }
+        // Fall back to name lookup (for human-edited files)
+        else if (in.HasMember("layerName") && in["layerName"].IsString()) {
+            std::string name = in["layerName"].GetString();
+            mask = LayerRegistry::Get().GetLayerMask(name);
+        }
+        else {
+            // Default to World layer if nothing specified
+            mask = LAYER_WORLD;
+        }
 
-		// or name of layer
-		else if (in.HasMember("layerName") && in["layerName"].IsString()) {
-			std::string name = in["layerName"].GetString();
-			if (name == "Background") mask = LAYER_BACKGROUND;
-			else if (name == "World") mask = LAYER_WORLD;
-			else if (name == "UI") mask = LAYER_UI;
-			else if (name == "All") mask = LAYER_ALL;
-		}
+        if (in.HasMember("orderInLayer") && in["orderInLayer"].IsInt())
+            orderInLayer = in["orderInLayer"].GetInt();
 
-		if (in.HasMember("orderInLayer")) orderInLayer = in["orderInLayer"].GetInt();
-		if (in.HasMember("z")) z = in["z"].GetFloat();
-	}
+        if (in.HasMember("z") && in["z"].IsNumber())
+            z = in["z"].GetFloat();
+    }
 };

@@ -13,6 +13,7 @@
  */
  /******************************************************************************/
 #pragma once
+
 #include "../../imgui/imgui.h"
 #include "../../imgui/backends/imgui_impl_glfw.h"
 #include "../../imgui/backends/imgui_impl_opengl3.h"
@@ -25,11 +26,11 @@
 #include "DebugConsole.h"
 #include "ProfilingTab.h"
 #include "LayerManagerPanel.h"
+
 #include "CoreEngine/Factory/Factory.h" // for creating/deleting entities
 #include "CoreEngine/Prefab/PrefabManager.h"
 #include "CoreEngine/ECS/System.h"   // For Entity type
 #include "Components/DisplayName.h"     // For display name in hierarchy list
-//#include "Graphics/Transform.h"
 #include "Graphics/glapp.h"
 #include "Math/math.h"
 
