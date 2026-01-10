@@ -16,7 +16,7 @@ public class TestScript : Script
 {
     public override void Update()
     {
-        Console.Write("Script 1\n");
+        Console.Write("Script 2\n");
         //Console.WriteLine("[Testing CSHARP]: Hello from ManagedScripts! \n ");
         
         TransformComponent TFC = GetTransform();

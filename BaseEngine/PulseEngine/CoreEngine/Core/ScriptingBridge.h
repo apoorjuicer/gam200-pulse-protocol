@@ -26,6 +26,6 @@ public:
 	//static InputManager* GetInputKeys(int ID);
 	//static LogicComponent* GetLogicComponent(int ID);
 	static Framework::Transform* GetTransformComponent(int ID);
-	
+	 
 	//void CallHelloWorld(CoreEngine* engine);
 };

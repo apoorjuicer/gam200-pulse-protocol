@@ -114,11 +114,11 @@ void LogicSystem::Update(float dt)
     if (ExecuteUpdate)
     {
         
-            std::cout << "[LogicSystem] ExecuteUpdate function found, calling...\n";
+            //std::cout << "[LogicSystem] ExecuteUpdate function found, calling...\n";
 
         ExecuteUpdate();
 
-            std::cout << "[LogicSystem] ExecuteUpdate finished\n";
+           // std::cout << "[LogicSystem] ExecuteUpdate finished\n";
     }
     else
     {
