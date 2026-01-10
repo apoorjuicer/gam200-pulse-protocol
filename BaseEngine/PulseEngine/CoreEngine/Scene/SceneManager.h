@@ -90,6 +90,9 @@ public:
 	// to get a hold of coreengine instance for clearing scripts
 	void SetCoreEngine(CoreEngine* engine) { m_coreEngine = engine; }
 
+	// Grab SceneEentity container (for CoreEngine, Hot Reload, fill in the script again)
+	const std::vector<Entity>& GetSceneEntities() const { return SceneEntityList; }
+
 private:
 	std::string PreviousScene;		// For change detection in Update()
 	std::string LastScene;			// For ESC navigation - the scene we came FROM

@@ -412,7 +412,7 @@ namespace PulseEditor
                 if (ImGui::MenuItem("Script"))
                 {
                     LogicComponent script{};
-                    script.ScriptName = "PlayerScript"; // Default
+                    script.ScriptName = { "PlayerScript" }; ; // Default
                     coord->AddComponent<LogicComponent>(selectedEntity, script);
                 }
             }
@@ -960,7 +960,7 @@ namespace PulseEditor
             }
             else if (scriptOpen)
             {
-                ImGui::Indent();
+                /*ImGui::Indent();
 
                 const char *scriptOptions[] = {
                     "PlayerScript",
@@ -993,7 +993,7 @@ namespace PulseEditor
                 ImGui::Spacing();
                 ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Active: %s", script.ScriptName.c_str());
 
-                ImGui::Unindent();
+                ImGui::Unindent();*/
             }
 
             ImGui::Separator();

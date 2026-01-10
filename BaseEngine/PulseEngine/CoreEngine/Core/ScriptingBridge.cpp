@@ -31,8 +31,8 @@ Health* ScriptBridge::GetHealthComponent(int ID)
 	return &g_coordinator->GetComponent<Health>(ID);
 }
 
-LogicComponent* ScriptBridge::GetLogicComponent(int ID)
-{
-	auto g_coordinator = Coordinator::GetInstance();
-	return &g_coordinator->GetComponent<LogicComponent>(ID);
-}
+//LogicComponent* ScriptBridge::GetLogicComponent(int ID)
+//{
+//	auto g_coordinator = Coordinator::GetInstance();
+//	return &g_coordinator->GetComponent<LogicComponent>(ID);
+//}

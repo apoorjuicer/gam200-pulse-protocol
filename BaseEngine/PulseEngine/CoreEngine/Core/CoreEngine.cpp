@@ -1,4 +1,4 @@
-/******************************************************************************/
+﻿/******************************************************************************/
 /**
  * @file        CoreEngine.cpp
  * @project     Pulse Protocol
@@ -576,7 +576,7 @@ void CoreEngine::Init()
 	g_rhythmSystem->Initialize();
 	g_graphicsSystem->Initialize();
 	g_audioSystem->Initialize();
-	g_coordinator->InitializeAllSystems();
+	//g_coordinator->InitializeAllSystems();
 
 	g_graphicsSystem->GM_FindFont("PatrickHand_font");
 	g_graphicsSystem->GM_FindFont("liberation_font");
@@ -621,7 +621,8 @@ void CoreEngine::Init()
 	// Step 2: Initialize it with  pointer to CoreEngine as param
 	initFunc(this); 
 
-	
+
+	g_coordinator->InitializeAllSystems();
 }
 
 void CoreEngine::Setup()
@@ -720,15 +721,9 @@ void CoreEngine::Update(float dt)
 	// Always process engine / message stuff
 	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
 
-	//profiler->StartSystem("Scene System");
-	//if (g_sceneSystem)
-	//	g_sceneSystem->Update(dt);
-	//profiler->EndSystem("Scene System");
-
 	profiler->StartSystem("LogicSystem");
 	g_coordinator->UpdateAllSystems(dt);
 	profiler->EndSystem("LogicSystem");
-	
 
 	//--- Start of script/hot reload ---//
 	// Press R to reload the script changes 
@@ -750,6 +745,27 @@ void CoreEngine::Update(float dt)
 			reloadScripts(); 
 
 		}
+
+		// Add scene Component to 
+		auto SceneSystem = g_coordinator->GetSystem<SceneManager>();
+		auto addScriptFunc = GetFunctionPtr<bool(*)(int, const char*)>(
+			"ScriptAPI",
+			"ScriptAPI.EngineInterface",
+			"AddScriptViaName"
+		);
+
+		for (Entity entity : SceneSystem->GetSceneEntities())
+		{
+			if (g_coordinator->HasComponent<LogicComponent>(entity))
+			{
+				auto const& logic = g_coordinator->GetComponent<LogicComponent>(entity);
+				for (auto const& script : logic.ScriptName)
+				{
+					addScriptFunc(entity, script.c_str());
+				}
+			}
+		}
+
 		wasRPressed = true;
 	}
 
@@ -760,14 +776,13 @@ void CoreEngine::Update(float dt)
 	}
 
 	//move it to gamelogic.cpp
-	auto executeUpdate = GetFunctionPtr<void(*)(void)>
+	/*auto executeUpdate = GetFunctionPtr<void(*)(void)>
 		(
 			"ScriptAPI",
 			"ScriptAPI.EngineInterface",
 			"ExecuteUpdate"
 		);
-	executeUpdate();
-
+	executeUpdate();*/
 	//--- End of script/hot reload ---//
 
 	profiler->StartSystem("Graphics System");
@@ -1127,7 +1142,7 @@ void CoreEngine::PlayGame()
 	}
 
 	// Call Init() on all scripts
-	if (auto logicSys = coord->GetSystem<LogicSystem>())
+	/*if (auto logicSys = coord->GetSystem<LogicSystem>())
 	{
 		for (auto const& entity : logicSys->EntityMember)
 		{
@@ -1138,7 +1153,7 @@ void CoreEngine::PlayGame()
 				script->Init(entity);
 			}
 		}
-	}
+	}*/
 }
 
 void CoreEngine::StopGame()

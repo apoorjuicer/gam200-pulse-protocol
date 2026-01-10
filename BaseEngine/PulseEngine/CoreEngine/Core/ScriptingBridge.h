@@ -15,17 +15,17 @@
 
 class CoreEngine;
 class Health;
-class InputManager;
-class LogicComponent;
+//class InputManager;
+//class LogicComponent;
 namespace Framework { class Transform; }
 
 class DLL_API ScriptBridge
 {
 public:
 	static Health* GetHealthComponent(int ID);
-	static InputManager* GetInputKeys(int ID);
-	static LogicComponent* GetLogicComponent(int ID);
+	//static InputManager* GetInputKeys(int ID);
+	//static LogicComponent* GetLogicComponent(int ID);
 	static Framework::Transform* GetTransformComponent(int ID);
 	
-	void CallHelloWorld(CoreEngine* engine);
+	//void CallHelloWorld(CoreEngine* engine);
 };

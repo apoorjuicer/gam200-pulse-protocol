@@ -29,8 +29,8 @@ namespace ScriptAPI
         return HealthComponent(EntityID);
     }
 
-    LogicComponent Script::GetScriptName()
+    /*LogicComponent Script::GetScriptName()
     {
         return LogicComponent(EntityID);
-    }
+    }*/
 }

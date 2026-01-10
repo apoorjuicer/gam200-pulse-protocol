@@ -235,7 +235,8 @@ private:
 
 struct DLL_API LogicComponent
 {
-    std::string ScriptName;
+//    std::string ScriptName;
+	std::vector<std::string> ScriptName;
 
 
 	// Find out how to make it a script instance.

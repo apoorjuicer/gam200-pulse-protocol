@@ -339,7 +339,7 @@ void SceneManager::UnloadCurrentScene()
 	auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
 	std::cout << "[SceneManager::UnloadCurrentScene] Got LogicSystem: " << (logicSystem ? "YES" : "NO") << std::endl;
 
-	if (logicSystem) {
+	/*if (logicSystem) {
 		std::cout << "[SceneManager::UnloadCurrentScene] Calling Exit() on scripts..." << std::endl;
 		int exitCount = 0;
 		for (auto const& entity : SceneEntityList) {
@@ -365,7 +365,7 @@ void SceneManager::UnloadCurrentScene()
 	}
 	else {
 		std::cout << "[SceneManager::UnloadCurrentScene] WARNING: LogicSystem not found!" << std::endl;
-	}
+	}*/
 
 	// Stop AudioSource channels before destroying entities
 	auto* g_coord = Coordinator::GetInstance();
@@ -390,11 +390,11 @@ void SceneManager::UnloadCurrentScene()
 		m_coreEngine->clearScriptsFunc();
 	}
 
-
 	else
 	{
 		std::cout << "[SceneManager::UnloadCurrentScene] WARNING: CoreEngine pointer not set!" << std::endl;
 	}
+
 
 	// Delete all the entity from SceneEntity Container
 	for (auto const& entity : SceneEntityList)
@@ -402,9 +402,7 @@ void SceneManager::UnloadCurrentScene()
 		g_coordinator->DestroyEntity(entity);
 	}
 
-	std::cout << "[SceneManager] Total entities after unload: "
-		<< g_coordinator->GetAllEntities().size() << std::endl;
-
+	
 	//This class owns entity container is cleared
 	SceneEntityList.clear();
 #ifdef _DEBUG
@@ -637,52 +635,119 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 
 	// Add them to C# script container 
-	/*auto addScriptFunc = m_coreEngine->GetFunctionPtr<bool(*)(int, const char*)>(
+	auto addScriptFunc = m_coreEngine->GetFunctionPtr<bool(*)(int, const char*)>(
 		"ScriptAPI",
 		"ScriptAPI.EngineInterface",
 		"AddScriptViaName"
 	);
 
-	for (Entity entity : SceneEntityList)
+	std::cout << "[SceneManager] addScriptFunc = " << (addScriptFunc ? "FOUND" : "NULL") << "\n";
+	std::cout << "[SceneManager] SceneEntityList.size() = " << SceneEntityList.size() << "\n";
+
+
+	/*for (Entity entity : SceneEntityList)
 	{
 		if (g_coordinator->HasComponent<LogicComponent>(entity))
 		{
 			auto& logic = g_coordinator->GetComponent<LogicComponent>(entity);
 
-			if (!logic.ScriptName.empty())
+			for (const auto& scriptName : logic.ScriptName)
 			{
-				addScriptFunc(entity, logic.ScriptName.c_str());
+				if (!scriptName.empty())
+				{
+					addScriptFunc(entity, scriptName.c_str());
+				}
 			}
 		}
 	}*/
 
-	// Initialize all scripts for entities with LogicComponent
-	auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
-	if (logicSystem) {
-		//std::cout << "[SceneManager] Initializing scripts for loaded entities..." << std::endl;
-		//std::cout << "[SceneManager] Total entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
+	if (!addScriptFunc)
+	{
+		std::cerr << "[SceneManager] CRITICAL ERROR: AddScriptViaName not found!\n";
+		std::cerr << "  Script engine may not be initialized!\n";
+	}
+	else
+	{
+		int totalAttached = 0;
 
-		// DEBUG: Show ALL entities in list
-		for (Entity entity : SceneEntityList) {
-			std::string name = "Unnamed";
-			if (g_coordinator->HasComponent<Name>(entity)) {
-				name = g_coordinator->GetComponent<Name>(entity).name;
-			}
-			/*bool hasScript = g_coordinator->HasComponent<LogicComponent>(entity);*/
-		}
+		for (Entity entity : SceneEntityList)
+		{
+			std::cout << "[SceneManager] Checking entity " << entity << "\n";
 
-		int scriptCount = 0;
-		for (Entity entity : SceneEntityList) {
-			if (g_coordinator->HasComponent<LogicComponent>(entity)) {
+			if (g_coordinator->HasComponent<LogicComponent>(entity))
+			{
 				auto& logic = g_coordinator->GetComponent<LogicComponent>(entity);
-				auto script = logicSystem->GrabScript(logic.ScriptName);
-				if (script) {
-					script->Init(entity);
-					scriptCount++;
+				std::cout << "  -> Has LogicComponent\n";
+				std::cout << "  -> ScriptName.size() = " << logic.ScriptName.size() << "\n";
+
+				for (size_t i = 0; i < logic.ScriptName.size(); ++i)
+				{
+					const auto& scriptName = logic.ScriptName[i];
+					std::cout << "  -> ScriptName[" << i << "] = '" << scriptName << "'\n";
+
+					if (!scriptName.empty())
+					{
+						std::cout << "  -> Calling AddScriptViaName(" << entity << ", '" << scriptName << "')\n";
+
+						bool success = addScriptFunc(entity, scriptName.c_str());
+
+						std::cout << "  -> Result: " << (success ? "SUCCESS" : "FAILED") << "\n";
+
+						if (success)
+						{
+							totalAttached++;
+						}
+						else
+						{
+							std::cerr << "  -> ERROR: Failed to attach '" << scriptName << "' to entity " << entity << "\n";
+						}
+					}
+					else
+					{
+						std::cout << "  -> Skipped (empty name)\n";
+					}
 				}
 			}
+			else
+			{
+				std::cout << "  -> No LogicComponent\n";
+			}
 		}
+
+		std::cout << "\n[SceneManager] ========== SUMMARY ==========\n";
+		std::cout << "[SceneManager] Total entities checked: " << SceneEntityList.size() << "\n";
+		std::cout << "[SceneManager] Total scripts attached: " << totalAttached << "\n";
+		std::cout << "[SceneManager] ============================\n";
 	}
+
+
+	// Initialize all scripts for entities with LogicComponent
+	//auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
+	//if (logicSystem) {
+	//	//std::cout << "[SceneManager] Initializing scripts for loaded entities..." << std::endl;
+	//	//std::cout << "[SceneManager] Total entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
+
+	//	// DEBUG: Show ALL entities in list
+	//	for (Entity entity : SceneEntityList) {
+	//		std::string name = "Unnamed";
+	//		if (g_coordinator->HasComponent<Name>(entity)) {
+	//			name = g_coordinator->GetComponent<Name>(entity).name;
+	//		}
+	//		/*bool hasScript = g_coordinator->HasComponent<LogicComponent>(entity);*/
+	//	}
+
+	//	int scriptCount = 0;
+	//	for (Entity entity : SceneEntityList) {
+	//		if (g_coordinator->HasComponent<LogicComponent>(entity)) {
+	//			auto& logic = g_coordinator->GetComponent<LogicComponent>(entity);
+	//			auto script = logicSystem->GrabScript(logic.ScriptName);
+	//			if (script) {
+	//				script->Init(entity);
+	//				scriptCount++;
+	//			}
+	//		}
+	//	}
+	//}
 
 	PreviousScene = CurrentScene;
 

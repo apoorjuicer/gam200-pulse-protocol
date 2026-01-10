@@ -104,40 +104,51 @@ void LogicSystem::Update(float dt)
         return;
     }
 
-    /*auto executeFunc = Engine->GetFunctionPtr<void(*)()>(
+    // run thru all the c# scripts (Inside ScriptAPI) 
+    auto ExecuteUpdate = Engine->GetFunctionPtr<void(*)()>(
         "ScriptAPI",
         "ScriptAPI.EngineInterface",
         "ExecuteUpdate"
     );
-    executeFunc();*/
 
+    if (ExecuteUpdate)
+    {
+        
+            std::cout << "[LogicSystem] ExecuteUpdate function found, calling...\n";
 
-    auto* g_coordinator = Coordinator::GetInstance();
+        ExecuteUpdate();
+
+            std::cout << "[LogicSystem] ExecuteUpdate finished\n";
+    }
+    else
+    {
+        std::cerr << "[LogicSystem] ERROR: ExecuteUpdate is NULL!\n";
+    }
 
     // make copy first
-    auto entities = EntityMember;
+    //auto entities = EntityMember;
 
-    // only update all entity that has scripts
-    for (auto const& entity : entities)
-    {
-        // get script name from each entity and feed them to its respective scripts
-        auto& scriptname = g_coordinator->GetComponent<LogicComponent>(entity);
+    // only update all entity that has c++ scripts
+    //for (auto const& entity : entities)
+    //{
+    //    // get script name from each entity and feed them to its respective scripts
+    //    auto& scriptname = g_coordinator->GetComponent<LogicComponent>(entity);
 
-        // find reward (script update function) using script name
-        auto func = map_of_scripts.find(scriptname.ScriptName);
+    //    // find reward (script update function) using script name
+    //    auto func = map_of_scripts.find(scriptname.ScriptName);
 
-        // if we can find it then good, we did it right XD. and now we call said function
-        if (func != map_of_scripts.end())
-        {
-            func->second->Update(entity);
-        }
+    //    // if we can find it then good, we did it right XD. and now we call said function
+    //    if (func != map_of_scripts.end())
+    //    {
+    //        func->second->Update(entity);
+    //    }
 
-        else
-        {
-            // THIS IS WHERE U LEFT OFF DUMBASS: CheeseBuger
-            //std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
-        }
-    }
+    //    else
+    //    {
+    //        // THIS IS WHERE U LEFT OFF DUMBASS: CheeseBuger
+    //        //std::cerr << "CAN'T FIND SCRIPTS UPDATE FUNCTION!" << std::endl;
+    //    }
+    //}
 }
 
 void LogicSystem::Exit()
@@ -153,7 +164,7 @@ void LogicSystem::Exit()
     //clearFunc();
 
 
-    for (auto const& entity : EntityMember)
+   /* for (auto const& entity : EntityMember)
     {
         auto& scriptname = g_coordinator->GetComponent<LogicComponent>(entity);
         auto func = map_of_scripts.find(scriptname.ScriptName);
@@ -162,7 +173,7 @@ void LogicSystem::Exit()
         {
             func->second->Exit(entity);
         }
-    }
+    }*/
 
     // Clear the script map
     map_of_scripts.clear();
@@ -196,17 +207,40 @@ void LogicComponent::Serialize(rapidjson::Value& out, rapidjson::Document::Alloc
 {
     //using namespace rapidjson;
     out.SetObject();
-    //out["ScriptName"] = ScriptName;
-    out.AddMember("ScriptName", rapidjson::Value(ScriptName.c_str(), alloc), alloc);
-    //out.AddMember("scriptname", ScriptName, alloc);
+
+    rapidjson::Value scriptsArray(rapidjson::kArrayType);
+
+    for (const auto& scriptName : ScriptName)
+    {
+        rapidjson::Value nameVal(scriptName.c_str(), alloc);
+        scriptsArray.PushBack(nameVal, alloc);
+    }
+
+    out.AddMember("ScriptName", scriptsArray, alloc);
+
+    //out.AddMember("ScriptName", rapidjson::Value(ScriptName.c_str(), alloc), alloc);
 }
 
 void LogicComponent::Deserialize(const rapidjson::Value& in)
 {
     if (!in.IsObject()) throw std::runtime_error("Invalid JSON for LogicComponent");
-    if (in.HasMember("ScriptName")) ScriptName = in["ScriptName"].GetString(); // already assigns it
 
-    //return *this;
+    ScriptName.clear();
+
+    if (in.HasMember("ScriptName") && in["ScriptName"].IsArray()) 
+    {
+        const auto& arr = in["ScriptName"];
+        for (rapidjson::SizeType i = 0; i < arr.Size(); ++i)
+        {
+            if (arr[i].IsString())
+            {
+                ScriptName.push_back(arr[i].GetString());
+            }
+        }
+    }
+    
+    //if (in.HasMember("ScriptName")) ScriptName = in["ScriptName"].GetString(); 
+
 }
 
 bool SaveScriptName(LogicComponent const& t, std::string const& path)
@@ -661,8 +695,8 @@ void EnemyScript::Update(Entity ID)
     for (auto const& e : logicSys->EntityMember)
     {
         if (!g->HasComponent<LogicComponent>(e)) continue;
-        if (g->GetComponent<LogicComponent>(e).ScriptName == "PlayerScript")
-            players.push_back(e);
+        //if (g->GetComponent<LogicComponent>(e).ScriptName == "PlayerScript")
+          //  players.push_back(e);
     }
 
     if (players.empty())

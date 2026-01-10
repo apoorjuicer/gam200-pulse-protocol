@@ -175,7 +175,7 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path)
 	}
 	
 
-	/*
+	
 	// Add them to C# script container 
 	if (g_coordinator->HasComponent<LogicComponent>(entity))
 	{
@@ -187,12 +187,15 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path)
 
 		auto& logic = g_coordinator->GetComponent<LogicComponent>(entity);
 
-		if (!logic.ScriptName.empty())
+		for (const auto& scriptName : logic.ScriptName)
 		{
-			addScriptFunc(entity, logic.ScriptName.c_str());
+			if (!scriptName.empty())
+			{
+				addScriptFunc(entity, scriptName.c_str());
+			}
 		}
 	}
-	*/
+	
 	
 	return entity;
 }

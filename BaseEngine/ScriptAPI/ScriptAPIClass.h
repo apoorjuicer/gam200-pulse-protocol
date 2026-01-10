@@ -20,7 +20,7 @@ namespace ScriptAPI
     //forward delcaration
     value struct TransformComponent;
     value struct HealthComponent;
-    value struct LogicComponent;
+    //value struct LogicComponent;
 
     public ref class Script abstract
     {
@@ -29,7 +29,7 @@ namespace ScriptAPI
 
         TransformComponent GetTransform();
         HealthComponent GetHealth();
-        LogicComponent GetScriptName();
+        //LogicComponent GetScriptName();
 
     internal:
         // Store which entity this script is attached too

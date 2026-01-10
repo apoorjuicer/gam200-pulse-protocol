@@ -108,7 +108,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "ButtonScript"
+                        "ScriptName": ["ButtonScript"]
                     }
                 },
                 {
@@ -179,7 +179,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "ButtonScript"
+                        "ScriptName": ["ButtonScript"]
                     }
                 },
                 {
@@ -250,7 +250,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "ButtonScript"
+                        "ScriptName": ["ButtonScript"]
                     }
                 },
                 {
@@ -321,7 +321,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "ButtonScript"
+                        "ScriptName": ["ButtonScript"]
                     }
                 },
                 {
