@@ -1,4 +1,8 @@
-set(ENGINE_NAME PulseEngine)
+message(STATUS "PulseEngine: FREETYPE_INCLUDE_DIRS='${FREETYPE_INCLUDE_DIRS}'")
+message(STATUS "PulseEngine: FREETYPE_INCLUDE_DIR='${FREETYPE_INCLUDE_DIR}'")
+# -------------------------------
+# PulseEngine (build 2 variants)
+# -------------------------------
 
 # Auto-collect sources (keeps Solution Explorer in sync)
 file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS
@@ -8,59 +12,21 @@ file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_LIST_DIR}/**/*.hpp"
 )
 
-# Make SHARED to be DLL instead of lib
-add_library(${ENGINE_NAME} SHARED ${ENGINE_SRC})
-
-set_target_properties(${ENGINE_NAME} PROPERTIES 
-    VS_GLOBAL_DisableFastUpToDateCheck true
-)
-
-# CRITICAL: Export all symbols automatically
-#set_target_properties(${ENGINE_NAME} PROPERTIES
-#    WINDOWS_EXPORT_ALL_SYMBOLS ON
-#)
-
-# Define DLL export macro
-target_compile_definitions(${ENGINE_NAME} PRIVATE DLL_API_EXPORT)
-
-if (ENABLE_EDITOR)
-    target_compile_definitions(PulseEngine PUBLIC ENABLE_EDITOR)
-endif()
-
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${ENGINE_SRC})
-
-# C++ standard lib and  C++/CLI warnings
-set_property(TARGET ${ENGINE_NAME} PROPERTY CXX_STANDARD 20)
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(${ENGINE_NAME} PRIVATE -Wall)
-elseif (MSVC)
-    target_compile_options(${ENGINE_NAME} PRIVATE /W4 /WX- /wd4251) # warning from DLL_API and STL container
-endif()
-
-# Define for static GLEW usage
-target_compile_definitions(${ENGINE_NAME} PUBLIC GLEW_STATIC)
-
-# Includes owned by this target (3rd-party includes are carried by their targets)
-target_include_directories(${ENGINE_NAME} PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}   # Engine headers
-    "${CMAKE_SOURCE_DIR}/extern/dotnet/include"  # .NET Core hosting headers
-)
 
 # ---- Robust FMOD discovery (once) ----
 if (NOT DEFINED FMOD_API_DIR_FOUND)
   set(_FMOD_CANDIDATES
       "${FMOD_API_DIR}"                                   # user-provided -DFMOD_API_DIR=...
-      #"${CMAKE_CURRENT_LIST_DIR}/../FMOD_API"             # project root / FMOD_API
-      "${CMAKE_CURRENT_LIST_DIR}/FMOD_API"             # project root / FMOD_API
-      "${CMAKE_CURRENT_LIST_DIR}/FMOD_API"                # PulseEngine/FMOD_API
-      "${CMAKE_SOURCE_DIR}/FMOD_API"                      # top-level / FMOD_API
-      "${CMAKE_SOURCE_DIR}/ThirdParty/FMOD_API"           # typical thirdparty layout
+      "${CMAKE_CURRENT_LIST_DIR}/FMOD_API"                 # PulseEngine/FMOD_API
+      "${CMAKE_SOURCE_DIR}/FMOD_API"                       # top-level / FMOD_API
+      "${CMAKE_SOURCE_DIR}/ThirdParty/FMOD_API"            # typical thirdparty layout
   )
   foreach(_cand IN LISTS _FMOD_CANDIDATES)
     if(_cand AND EXISTS "${_cand}/api/core/lib/x64")
       set(FMOD_API_DIR_FOUND "${_cand}" CACHE PATH "FMOD API root" FORCE)
       break()
-    endIF()
+    endif()
   endforeach()
   if(NOT FMOD_API_DIR_FOUND)
     message(FATAL_ERROR "FMOD_API folder not found. Set -DFMOD_API_DIR=PATH (must contain api/core/lib/x64).")
@@ -68,95 +34,159 @@ if (NOT DEFINED FMOD_API_DIR_FOUND)
 endif()
 message(STATUS "Using FMOD at: ${FMOD_API_DIR_FOUND}")
 
-# FMOD includes
-target_include_directories(${ENGINE_NAME} PUBLIC
-    "${FMOD_API_DIR_FOUND}/api/core/inc"
-    "${FMOD_API_DIR_FOUND}/api/studio/inc"
+# Helper: create one engine variant
+function(add_pulse_engine_variant TARGET_NAME IS_EDITOR)
+    # Make SHARED to be DLL instead of lib
+    add_library(${TARGET_NAME} SHARED ${ENGINE_SRC})
+if(TARGET Freetype::Freetype)
+  target_link_libraries(${TARGET_NAME} PUBLIC Freetype::Freetype)
+endif()
+# --- Fix FreeType include path (ft2build.h) ---
+# Make sure the engine target can actually see ft2build.h, even if the package
+# only exposes include/freetype2 or otherwise has odd layout.
+if(TARGET Freetype::Freetype)
+    get_target_property(_ft_inc_dirs Freetype::Freetype INTERFACE_INCLUDE_DIRECTORIES)
+
+    if(_ft_inc_dirs)
+        foreach(_dir IN LISTS _ft_inc_dirs)
+            # Case 1: dir itself contains ft2build.h
+            if(EXISTS "${_dir}/ft2build.h")
+                target_include_directories(${TARGET_NAME} PUBLIC "${_dir}")
+            endif()
+
+            # Case 2: package gives .../include/freetype2 but ft2build.h is in .../include
+            if(_dir MATCHES "freetype2$" AND EXISTS "${_dir}/../ft2build.h")
+                get_filename_component(_parent "${_dir}" DIRECTORY)
+                target_include_directories(${TARGET_NAME} PUBLIC "${_parent}")
+            endif()
+        endforeach()
+    endif()
+endif()
+    get_target_property(_FT_INC Freetype::Freetype INTERFACE_INCLUDE_DIRECTORIES)
+    if(_FT_INC)
+        target_include_directories(${TARGET_NAME} PRIVATE ${_FT_INC})
+    endif()
+
+    set_target_properties(${TARGET_NAME} PROPERTIES
+        VS_GLOBAL_DisableFastUpToDateCheck true
+    )
+
+    # Define DLL export macro
+    target_compile_definitions(${TARGET_NAME} PRIVATE DLL_API_EXPORT)
+
+    # IMPORTANT: keep your old behavior:
+    # - Editor build: ENABLE_EDITOR is defined
+    # - Game build:  ENABLE_EDITOR is NOT defined
+    if(${IS_EDITOR})
+        target_compile_definitions(${TARGET_NAME} PUBLIC ENABLE_EDITOR)
+    endif()
+
+    # C++ standard lib and warnings
+    set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD 20)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(${TARGET_NAME} PRIVATE -Wall)
+    elseif (MSVC)
+        target_compile_options(${TARGET_NAME} PRIVATE /W4 /WX- /wd4251)
+    endif()
+
+    # Includes owned by this target
+    target_include_directories(${TARGET_NAME} PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}                 # Engine headers
+        "${CMAKE_SOURCE_DIR}/extern/dotnet/include" # .NET Core hosting headers
+        "${FMOD_API_DIR_FOUND}/api/core/inc"
+    )
+    # ---- FreeType headers (ft2build.h) ----
+    # Some FreeType packages don't populate FREETYPE_INCLUDE_DIR(S) variables (CONFIG mode) but *do* provide a target.
+    # Use the target's include dirs when available, and fall back to common FetchContent layouts.
+    if (TARGET Freetype::Freetype)
+        target_include_directories(${TARGET_NAME} PUBLIC
+            "$<TARGET_PROPERTY:Freetype::Freetype,INTERFACE_INCLUDE_DIRECTORIES>"
+        )
+    endif()
+
+    set(_FT_FALLBACK_INC "")
+    foreach(_p
+        "${CMAKE_BINARY_DIR}/_deps/freetype_src-src/include"
+        "${CMAKE_BINARY_DIR}/_deps/freetype-src/include"
+        "${CMAKE_BINARY_DIR}/_deps/freetype-build/include"
+    )
+        if (EXISTS "${_p}/ft2build.h")
+            list(APPEND _FT_FALLBACK_INC "${_p}")
+        endif()
+    endforeach()
+
+    if (_FT_FALLBACK_INC)
+        target_include_directories(${TARGET_NAME} PUBLIC ${_FT_FALLBACK_INC})
+    elseif (FREETYPE_INCLUDE_DIRS)
+        target_include_directories(${TARGET_NAME} PUBLIC ${FREETYPE_INCLUDE_DIRS})
+    elseif (FREETYPE_INCLUDE_DIR)
+        target_include_directories(${TARGET_NAME} PUBLIC ${FREETYPE_INCLUDE_DIR})
+    endif()
+
+
+    # Core deps (PUBLIC so apps inherit them via engine link)
+    target_link_libraries(${TARGET_NAME} PUBLIC
+        glfw
+        libglew_static
+        imgui
+        imgui_backend
+        Freetype::Freetype
+    )
+    # FMOD libraries (multi-config safe for MSVC)
+    target_link_libraries(${TARGET_NAME} PUBLIC
+        debug     "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmodL_vc.lib"
+        optimized "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmod_vc.lib"
+        debug     "${FMOD_API_DIR_FOUND}/api/studio/lib/x64/fmodstudioL_vc.lib"
+        optimized "${FMOD_API_DIR_FOUND}/api/studio/lib/x64/fmodstudio_vc.lib"
+    )
+
+    # Copy the correct FMOD DLLs next to the ENGINE DLL
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${FMOD_API_DIR_FOUND}/api/core/lib/x64/$<IF:$<CONFIG:Debug>,fmodL.dll,fmod.dll>"
+        $<TARGET_FILE_DIR:${TARGET_NAME}>
+    )
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${FMOD_API_DIR_FOUND}/api/studio/lib/x64/$<IF:$<CONFIG:Debug>,fmodstudioL.dll,fmodstudio.dll>"
+        $<TARGET_FILE_DIR:${TARGET_NAME}>
+    )
+
+    # Copy JSON config files to build directory (kept same location as your original)
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/JSON
+        ${CMAKE_BINARY_DIR}/PulseEngine/JSON
+        COMMENT "Copying JSON config files to build directory"
+    )
+
+    # Copy Assets to build directory (kept same location as your original)
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/Assets
+        ${CMAKE_BINARY_DIR}/PulseEngine/Assets
+        COMMENT "Copying Assets to build directory"
+    )
+
+    # Copy .NET Runtime DLLs into the engine output directory (fixed: no hardcoded PulseEngine target)
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/extern/dotnet/bin"
+            "$<TARGET_FILE_DIR:${TARGET_NAME}>"
+        COMMENT "Copying .NET Runtime DLLs to engine output directory"
+    )
+endfunction()
+
+# Build single engine (shared by game + editor)
+add_pulse_engine_variant(PulseEngine ON)
+
+target_link_libraries(PulseEngine PRIVATE
+  GLEW::glew
+  Freetype::Freetype
 )
 
-# Core deps (PUBLIC so PulseEditor inherits them via PulseEngine link)
-target_link_libraries(${ENGINE_NAME} PUBLIC
-    glfw
-    libglew_static
-    imgui
-    imgui_backend
-    Freetype::Freetype
-)
-
-# FMOD libraries (multi-config safe for MSVC)
-target_link_libraries(${ENGINE_NAME} PUBLIC
-    debug     "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmodL_vc.lib"
-    optimized "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmod_vc.lib"
-    debug     "${FMOD_API_DIR_FOUND}/api/studio/lib/x64/fmodstudioL_vc.lib"
-    optimized "${FMOD_API_DIR_FOUND}/api/studio/lib/x64/fmodstudio_vc.lib"
-)
-
-# Copy the correct FMOD DLLs next to the EXE
-add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${FMOD_API_DIR_FOUND}/api/core/lib/x64/$<IF:$<CONFIG:Debug>,fmodL.dll,fmod.dll>"
-    $<TARGET_FILE_DIR:${ENGINE_NAME}>
-  )
-add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${FMOD_API_DIR_FOUND}/api/studio/lib/x64/$<IF:$<CONFIG:Debug>,fmodstudioL.dll,fmodstudio.dll>"
-    $<TARGET_FILE_DIR:${ENGINE_NAME}>
-  )
-
-  # Copy JSON config files to build directory
-add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIR}/JSON
-    ${CMAKE_BINARY_DIR}/PulseEngine/JSON
-    COMMENT "Copying JSON config files to build directory"
-)
-
-# Copy Assets to build directory
-add_custom_command(TARGET ${ENGINE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIR}/Assets
-    ${CMAKE_BINARY_DIR}/PulseEngine/Assets
-    COMMENT "Copying Assets to build directory"
-)
-
-# Copy .NET Runtime DLLs (post-build event that copies these DLLs into the output directory.)
-add_custom_command(TARGET PulseEngine POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/extern/dotnet/bin"
-        "$<TARGET_FILE_DIR:PulseEngine>"
-    COMMENT "Copying .NET Runtime DLLs to PulseEngine output directory"
-)
-
-# PulseEngine wait for ManagedScripts to build first and include it in the build dependencies
-#if(TARGET ManagedScripts)
-# add_dependencies(PulseEngine ManagedScripts)
-#endif()
-
-#if(TARGET ScriptAPI)
-#    add_dependencies(PulseEngine ScriptAPI)
-#endif()
-
-
-# (THESE ARE ONLY FOR EXE)
-# Automatically copies all third-party runtime DLLs(GLFW) that PulseEditor depends on to the executable directory 
-# add_custom_command(TARGET PulseEngine POST_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#         "$<TARGET_RUNTIME_DLLS:PulseEngine>"
-#         "$<TARGET_FILE_DIR:PulseEngine>"
-#     COMMAND_EXPAND_LISTS
-#     COMMENT "Copying DLL Dependencies like ManagedScript.dll to editor executable directory."
-#     VERBATIM
-# )
-
-# # Copy ScriptAPI.dll to PulseEngine output
-# add_custom_command(TARGET PulseEngine POST_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#         "$<TARGET_FILE:ScriptAPI>"
-#         "$<TARGET_FILE_DIR:PulseEngine>"
-#     COMMENT "Copying ScriptAPI.dll to PulseEngine output directory"
-# )
 
 # Enables multi-processor parallel compilation in Visual Studio
 if(MSVC)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif()

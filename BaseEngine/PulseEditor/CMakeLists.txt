@@ -31,19 +31,7 @@ set_target_properties(${EDITOR_NAME} PROPERTIES
     VS_GLOBAL_DisableFastUpToDateCheck true
 )
 
-target_compile_definitions(PulseEditor PUBLIC ENABLE_EDITOR)
-
-target_link_libraries(${EDITOR_NAME}
-    PRIVATE
-        PulseEngine          # depends on the engine
-    PUBLIC
-        imgui
-        imgui_backend
-        glfw
-        libglew_static
-        Freetype::Freetype
-        #ScriptAPI
-)
+target_link_libraries(${EDITOR_NAME} PRIVATE PulseEngine)
 
 # Nice Solution Explorer layout
 source_group(TREE "${EDITOR_ROOT}" FILES ${EDITOR_SRC})
@@ -71,25 +59,17 @@ endif()
 target_include_directories(${EDITOR_NAME} PUBLIC
     ${CMAKE_SOURCE_DIR}/PulseEngine
     ${CMAKE_SOURCE_DIR}/PulseEngine/include
-    ${GLEW_SOURCE_DIR}/include
     $<$<BOOL:${FMOD_API_DIR_FOUND}>:${FMOD_API_DIR_FOUND}/api/core/inc>
     $<$<BOOL:${FMOD_API_DIR_FOUND}>:${FMOD_API_DIR_FOUND}/api/studio/inc>
 )
 
-# Link what the editor needs (inherits more via the Engine when linked into it)
 target_link_libraries(${EDITOR_NAME} PUBLIC
     imgui
     imgui_backend
     glfw
-    libglew_static
+    GLEW::glew
     Freetype::Freetype
-    #ScriptAPI
 )
-
-add_dependencies(PulseEditor ScriptAPI)
-
-# Keep GLEW usage consistent
-target_compile_definitions(${EDITOR_NAME} PUBLIC GLEW_STATIC)
 
 # Warnings
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
@@ -109,39 +89,26 @@ add_custom_command(TARGET PulseEditor POST_BUILD
 )
 
 
-# Copy PulseEngine.dll to PulseEditor's output directory after building
-add_custom_command(TARGET PulseEditor POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<TARGET_FILE:PulseEngine>"
-        "$<TARGET_FILE_DIR:PulseEditor>"
-    COMMENT "Copying PulseEngine.dll to PulseEditor output directory"
-)
+# Make sure PulseEditor waits for ManagedScripts to build
+add_dependencies(PulseEditor ManagedScripts)
 
-# Automatically copies all third-party runtime DLLs(GLFW) that PulseEditor depends on to the executable directory
-add_custom_command(TARGET PulseEditor POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<TARGET_RUNTIME_DLLS:PulseEditor>"
-        "$<TARGET_FILE_DIR:PulseEditor>"
-    COMMAND_EXPAND_LISTS
-    COMMENT "Copying DLL Dependencies like glfw3.dll to editor executable directory."
-    VERBATIM
-)
+# ManagedScripts.dll is produced into the PulseEngine output folder (per your build log)
+set(MANAGED_SCRIPTS_DLL "${CMAKE_BINARY_DIR}/PulseEngine/$<CONFIG>/ManagedScripts.dll")
 
-
-# Copy PulseEngine.dll and all its output to PulseEditor
 add_custom_command(TARGET PulseEditor POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_BINARY_DIR}/PulseEngine/$<CONFIG>"
-        "$<TARGET_FILE_DIR:PulseEditor>"
-    COMMENT "Copying PulseEngine.dll, ScriptAPI.dll, ManagedScripts.dll to PulseEditor"
-)
-
-# Copy .NET Runtime DLLs for C# scripting
-add_custom_command(TARGET PulseEditor POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/extern/dotnet/bin"
-        "$<TARGET_FILE_DIR:PulseEditor>"
-    COMMENT "Copying .NET Runtime DLLs to PulseEditor output directory"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "$<TARGET_FILE:PulseEngine>" "$<TARGET_FILE_DIR:PulseEditor>"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "$<TARGET_FILE:ScriptAPI>" "$<TARGET_FILE_DIR:PulseEditor>"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${MANAGED_SCRIPTS_DLL}" "$<TARGET_FILE_DIR:PulseEditor>"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_SOURCE_DIR}/extern/dotnet/bin" "$<TARGET_FILE_DIR:PulseEditor>"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_RUNTIME_DLLS:PulseEditor> "$<TARGET_FILE_DIR:PulseEditor>"
+  COMMAND_EXPAND_LISTS
+  VERBATIM
+  COMMENT "Copying PulseEngine/ScriptAPI/ManagedScripts + .NET runtime to PulseEditor output"
 )
 
 # Enables multi-processor parallel compilation in Visual Studio

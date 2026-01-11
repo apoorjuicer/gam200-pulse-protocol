@@ -26,23 +26,31 @@ endmacro()
 
 # --- GLEW ---
 macro(import_glew)
-    if(NOT TARGET GLEW::glew AND NOT TARGET glew)
-    #currently not in use due to broken GLEW master branch on github
-        #FetchContent_Declare(
-        #    glew
-        #    GIT_REPOSITORY https://github.com/Perlmint/glew-cmake
-        #    GIT_TAG master
-        #)
+  if(NOT TARGET GLEW::glew AND NOT TARGET libglew_static AND NOT TARGET libglew_shared)
+    FetchContent_Declare(
+      glew
+      GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
+      GIT_TAG d06782b910213d675925e6e51a69ad0fd1fe1f23
+    )
+    FetchContent_MakeAvailable(glew)
 
-       FetchContent_Declare(
-            glew
-            GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
-            GIT_TAG d06782b910213d675925e6e51a69ad0fd1fe1f23
-        )
-        FetchContent_MakeAvailable(glew)
-        # no include_directories()
-        # Link with: target_link_libraries(<tgt> PRIVATE GLEW::glew)  (or 'glew'/'glew_s' if that's what the repo defines)
+    # Fix CMake "prefixed in the build directory" by using BUILD/INSTALL interface include dirs
+    if(TARGET libglew_static)
+      set_property(TARGET libglew_static PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES
+          "$<BUILD_INTERFACE:${glew_SOURCE_DIR}/include>;$<INSTALL_INTERFACE:include>"
+      )
+      target_compile_definitions(libglew_static INTERFACE GLEW_STATIC)
+      add_library(GLEW::glew ALIAS libglew_static)
+
+    elseif(TARGET libglew_shared)
+      set_property(TARGET libglew_shared PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES
+          "$<BUILD_INTERFACE:${glew_SOURCE_DIR}/include>;$<INSTALL_INTERFACE:include>"
+      )
+      add_library(GLEW::glew ALIAS libglew_shared)
     endif()
+  endif()
 endmacro()
 
 # Macro to import glm
@@ -72,51 +80,60 @@ macro(import_json)
     endif()
 endmacro()
 
-# Import FreeType once and expose target Freetype::Freetype
 macro(import_freetype)
   if(NOT TARGET Freetype::Freetype)
-    # Prefer a preinstalled package (vcpkg, brew, system)
-    find_package(Freetype QUIET CONFIG)
-    if(NOT Freetype_FOUND)
-      # Some environments only have FindFreetype.cmake
-      find_package(Freetype QUIET)
-    endif()
-
-    if(NOT Freetype_FOUND AND NOT TARGET Freetype::Freetype)
-      include(FetchContent)
-      # Fetch FreeType source
-      FetchContent_Declare(
-        freetype_src
-        GIT_REPOSITORY https://github.com/freetype/freetype.git
-        GIT_TAG        VER-2-13-3
-        GIT_SHALLOW    TRUE
+    message(STATUS "FreeType not found, fetching from source...")
+    
+    include(FetchContent)
+    
+    FetchContent_Declare(
+      freetype
+      GIT_REPOSITORY https://github.com/freetype/freetype.git
+      GIT_TAG        VER-2-13-3
+      GIT_SHALLOW    TRUE
+    )
+    
+    # Disable extra dependencies
+    set(FT_DISABLE_BZIP2     ON  CACHE BOOL "" FORCE)
+    set(FT_DISABLE_HARFBUZZ  ON  CACHE BOOL "" FORCE)
+    set(FT_DISABLE_ZLIB      ON  CACHE BOOL "" FORCE)
+    set(FT_DISABLE_PNG       ON  CACHE BOOL "" FORCE)
+    set(FT_DISABLE_BROTLI    ON  CACHE BOOL "" FORCE)
+    
+    FetchContent_MakeAvailable(freetype)
+    
+    # Debug output
+    message(STATUS "FreeType fetched to: ${freetype_SOURCE_DIR}")
+    
+    # Fix the include directories using generator expressions
+    if(TARGET freetype)
+      set(_ft_inc "${freetype_SOURCE_DIR}/include")
+      
+      # Clear any existing interface include directories that might cause issues
+      set_property(TARGET freetype PROPERTY INTERFACE_INCLUDE_DIRECTORIES "")
+      
+      # Set using BUILD_INTERFACE generator expression
+      target_include_directories(freetype PUBLIC
+        "$<BUILD_INTERFACE:${_ft_inc}>"
+        "$<INSTALL_INTERFACE:include>"
       )
-
-      # Trim features to avoid extra dependencies (zlib/png/brotli/bzip2)
-      set(FT_DISABLE_BZIP2     ON  CACHE BOOL "" FORCE)
-      set(FT_DISABLE_HARFBUZZ  ON  CACHE BOOL "" FORCE)
-      set(FT_REQUIRE_ZLIB      OFF CACHE BOOL "" FORCE)
-      set(FT_REQUIRE_BZIP2     OFF CACHE BOOL "" FORCE)
-      set(FT_REQUIRE_PNG       OFF CACHE BOOL "" FORCE)
-      set(FT_REQUIRE_BROTLI    OFF CACHE BOOL "" FORCE)
-      set(FT_WITH_ZLIB         OFF CACHE BOOL "" FORCE)
-      set(FT_WITH_BZIP2        OFF CACHE BOOL "" FORCE)
-      set(FT_WITH_PNG          OFF CACHE BOOL "" FORCE)
-      set(FT_WITH_BROTLI       OFF CACHE BOOL "" FORCE)
-      set(BUILD_TESTING        OFF CACHE BOOL "" FORCE)
-      set(FT_DISABLE_DOCS      ON  CACHE BOOL "" FORCE)
-
-      FetchContent_MakeAvailable(freetype_src)
-
-      # Upstream defines the target 'freetype'. Create a consistent alias.
-      if(TARGET freetype AND NOT TARGET Freetype::Freetype)
+      
+      # Create the alias
+      if(NOT TARGET Freetype::Freetype)
         add_library(Freetype::Freetype ALIAS freetype)
       endif()
+      
+      message(STATUS "FreeType include directory: ${_ft_inc}")
+      
+      # Verify ft2build.h exists
+      if(EXISTS "${_ft_inc}/ft2build.h")
+        message(STATUS "✓ Found ft2build.h at ${_ft_inc}/ft2build.h")
+      else()
+        message(WARNING "✗ ft2build.h NOT found at ${_ft_inc}/ft2build.h")
+      endif()
     endif()
-
-    if(NOT TARGET Freetype::Freetype)
-      message(FATAL_ERROR "FreeType not found and fallback did not create target Freetype::Freetype")
-    endif()
+  else()
+    message(STATUS "FreeType target already exists")
   endif()
 endmacro()
 
