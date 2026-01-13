@@ -81,13 +81,14 @@ endif()
 message(STATUS "[${EDITOR_NAME}] sources: ${EDITOR_SRC}")
 
 
-# Debug DLL
+# Copy FMOD runtime
 add_custom_command(TARGET PulseEditor POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmodL.dll"
-    $<TARGET_FILE_DIR:PulseEditor>
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "$<$<CONFIG:Debug>:${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmodL.dll>"
+    "$<$<NOT:$<CONFIG:Debug>>:${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmod.dll>"
+    "$<TARGET_FILE_DIR:PulseEditor>"
+  COMMAND_EXPAND_LISTS
 )
-
 
 # Make sure PulseEditor waits for ManagedScripts to build
 add_dependencies(PulseEditor ManagedScripts)
