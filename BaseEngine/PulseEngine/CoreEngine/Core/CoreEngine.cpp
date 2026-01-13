@@ -389,19 +389,27 @@ void CoreEngine::Init()
 
 	glfwMakeContextCurrent(window);
 
+	m_windowedX = 100; m_windowedY = 100;
+	m_windowedW = WindowWidth; m_windowedH = WindowHeight;
 
-	// === FORCE FULLSCREEN AT STARTUP ===
+	if (m_startupFullscreen)
 	{
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 		glfwSetWindowMonitor(
 			window,
-			monitor,         // full screen monitor
-			0, 0,            // position
-			mode->width,     // resolution
+			monitor,
+			0, 0,
+			mode->width,
 			mode->height,
 			mode->refreshRate
 		);
+		m_isFullscreen = true;
+	}
+	else
+	{
+		glfwSetWindowPos(window, m_windowedX, m_windowedY);
+		m_isFullscreen = false;
 	}
 
 	// --- Scroll wheel callback (for Editor + ImGui) ---
@@ -1002,7 +1010,6 @@ void CoreEngine::RenderDebugDraw()
 void CoreEngine::PlayGame()
 {
 	m_isPlaying = true;
-
 	auto coord = Coordinator::GetInstance();
 
 	// ALWAYS update the original scene path when Play is pressed
@@ -1046,7 +1053,6 @@ void CoreEngine::PlayGame()
 void CoreEngine::StopGame()
 {
 	m_isPlaying = false;
-
 	auto coord = Coordinator::GetInstance();
 
 	// Stop all audio (BGM and AudioSource components)
@@ -1115,37 +1121,52 @@ void CoreEngine::SetEditorFrameCallback(const std::function<void()>& cb)
 	m_editorFrameCallback = cb;
 }
 
-void CoreEngine::ToggleFullscreen()
+void CoreEngine::SetFullscreen(bool fullscreen)
 {
-	static bool isFullscreen = true;	
+	if (!window) return;
+	if (m_isFullscreen == fullscreen) return;
 
 	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
-	if (!isFullscreen)
+	if (fullscreen)
 	{
-		// SWITCH TO FULLSCREEN
-		glfwSetWindowMonitor(
-			window,
-			monitor,
-			0, 0,
-			mode->width,
-			mode->height,
-			mode->refreshRate
-		);
+		glfwGetWindowPos(window, &m_windowedX, &m_windowedY);
+		glfwGetWindowSize(window, &m_windowedW, &m_windowedH);
+
+		glfwSetWindowMonitor(window, monitor, 0, 0,
+			mode->width, mode->height, mode->refreshRate);
+		m_isFullscreen = true;
 	}
 	else
 	{
-		// SWITCH TO WINDOWED MODE (use config size)
-		glfwSetWindowMonitor(
-			window,
-			nullptr,
-			100, 100,                    // position
-			config.GetWindowWidth(),
-			config.GetWindowHeight(),
-			GLFW_DONT_CARE
-		);
+		const int restoreW = (m_windowedW > 0) ? m_windowedW : config.GetWindowWidth();
+		const int restoreH = (m_windowedH > 0) ? m_windowedH : config.GetWindowHeight();
+
+		glfwSetWindowMonitor(window, nullptr,
+			m_windowedX, m_windowedY,
+			restoreW, restoreH,
+			GLFW_DONT_CARE);
+		m_isFullscreen = false;
 	}
 
-	isFullscreen = !isFullscreen;
+	// Refresh framebuffer sizes + inform render systems
+	int fbw = 0, fbh = 0;
+	glfwGetFramebufferSize(window, &fbw, &fbh);
+	if (fbw > 0 && fbh > 0)
+	{
+		WindowWidth = fbw;
+		WindowHeight = fbh;
+
+		GLApp::ComputeLetterbox(fbw, fbh);
+
+		if (auto g = Coordinator::GetInstance()->GetSystem<GraphicsManager>())
+			g->OnResize(fbw, fbh);
+	}
+}
+
+
+void CoreEngine::ToggleFullscreen()
+{
+	SetFullscreen(!m_isFullscreen);
 }

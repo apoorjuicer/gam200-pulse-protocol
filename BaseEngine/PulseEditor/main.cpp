@@ -17,6 +17,7 @@
 int main()
 {
     Engine = new CoreEngine();
+    Engine->SetStartupFullscreen(false);
     Engine->Setup();
     Engine->Init();                     
 

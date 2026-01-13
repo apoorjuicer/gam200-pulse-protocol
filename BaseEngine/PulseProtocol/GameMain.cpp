@@ -17,6 +17,7 @@ int main()
                                 // defined once in CoreEngine.cpp
 
     engine.Setup();             // register ECS components + systems
+    engine.SetStartupFullscreen(true);
     engine.Init();              // window, GL, FMOD, assets, etc.
 
     engine.PlayGame(); // this auto-starts the game
