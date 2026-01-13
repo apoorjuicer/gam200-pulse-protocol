@@ -59,7 +59,7 @@ macro(import_glm)
         FetchContent_Declare(
             glm
             GIT_REPOSITORY https://github.com/g-truc/glm.git
-            GIT_TAG 0.9.9.8
+            GIT_TAG 1.0.1
         )
         FetchContent_MakeAvailable(glm)
  
@@ -67,16 +67,20 @@ macro(import_glm)
     endif()
 endmacro()
 
+# Macro to import RapidJSON (header-only, no build needed)
 macro(import_json)
     if(NOT TARGET json)  # Guard to prevent multiple inclusion
+        # RapidJSON is header-only, so we fetch without building its CMakeLists.txt
         FetchContent_Declare(
             json
             GIT_REPOSITORY "https://github.com/Tencent/rapidjson.git"
-            GIT_TAG v1.1.0
+            GIT_TAG master
         )
-        FetchContent_MakeAvailable(json)
- 
-        include_directories(${json_SOURCE_DIR}/include)
+        FetchContent_GetProperties(json)
+        if(NOT json_POPULATED)
+            FetchContent_Populate(json)
+            include_directories(${json_SOURCE_DIR}/include)
+        endif()
     endif()
 endmacro()
 

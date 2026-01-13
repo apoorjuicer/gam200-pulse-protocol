@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.20)
+
 # ScriptAPI - C++/CLI bridge between C++ and C#
 project(ScriptAPI LANGUAGES CXX)
 

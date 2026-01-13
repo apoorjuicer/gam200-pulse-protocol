@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.20)
+
 message(STATUS "PulseEngine: FREETYPE_INCLUDE_DIRS='${FREETYPE_INCLUDE_DIRS}'")
 message(STATUS "PulseEngine: FREETYPE_INCLUDE_DIR='${FREETYPE_INCLUDE_DIR}'")
 # -------------------------------
