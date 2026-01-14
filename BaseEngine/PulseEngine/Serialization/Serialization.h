@@ -26,6 +26,7 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h> // for StringBuffer
+#include <rapidjson/error/en.h> // GetParseError_En
 #include "pch/pch_temp.h"
 
 
@@ -96,6 +97,70 @@ namespace JSONUtils {
     //PrettyWriter takes more file space but more readable
     //Writer makes everything one liner
     bool WriteJSONToFile(Document const& d, std::filesystem::path const& path, bool pretty);
+
+    //load
+    inline bool ReadJSONFromFile(Document& outDoc,
+        std::filesystem::path const& path)
+    {
+        std::ifstream ifs(path, std::ios::binary);
+        if (!ifs)
+        {
+            std::cerr << "Error: Cannot open file for reading: " << path << "\n";
+            return false;
+        }
+
+        IStreamWrapper isw(ifs);
+        outDoc.ParseStream(isw);
+
+        if (outDoc.HasParseError())
+        {
+            std::cerr << "Error: JSON parse error in " << path
+                << " : " << GetParseError_En(outDoc.GetParseError())
+                << " (offset " << outDoc.GetErrorOffset() << ")\n";
+            return false;
+        }
+        return true;
+    }
+
+
+    // ---------------------------
+    // optimised SAVE / LOAD
+    // ---------------------------
+    template <typename T>
+    bool SaveObject(T const& obj,
+        std::filesystem::path const& path,
+        std::string const& rootName,
+        bool pretty = true)
+    {
+        Document d = MakeObjDocument(obj, rootName);
+        return WriteJSONToFile(d, path, pretty);
+    }
+
+    template <typename T>
+    bool LoadObject(T& obj,
+        std::filesystem::path const& path,
+        std::string const& rootName)
+    {
+        Document d;
+        if (!ReadJSONFromFile(d, path))
+            return false;
+        if (!d.IsObject())
+        {
+            std::cerr << "Error: Top-level JSON is not an object: " << path << "\n";
+            return false;
+        }
+
+        auto it = d.FindMember(rootName.c_str());
+        if (it == d.MemberEnd())
+        {
+            std::cerr << "Error: Missing root '" << rootName
+                << "' in file: " << path << "\n";
+            return false;
+        }
+
+        obj.Deserialize(d[rootName.c_str()]);
+        return true;
+    }
 
 
 }//end of namespace JSONUtils
