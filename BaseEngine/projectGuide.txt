@@ -30,14 +30,21 @@ CMake (Version 3.15 or higher):
 - Use the Windows x64 installer (.msi)
 - Check "Add CMake to system PATH" during installation
 
-.NET 8.0 Runtime (Required for C# Scripting):
+.NET 8.0 SDK (Required for Building):
 - Go to: https://dotnet.microsoft.com/en-us/download/dotnet/8.0
-- Scroll to ".NET Runtime 8.0.416" section 
-- Under Window Binaries column, click "x64"
+- Download and install "Microsoft .NET SDK 8.0.416" (or latest 8.0.x version)
+- Run the installer and complete the installation
+- This will install to C:\Program Files\dotnet
+
+.NET 8.0 Runtime DLLs (Required for C# Scripting):
+- Go to: https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+- Scroll to ".NET Runtime 8.0.416" section
+- Under "Windows Binaries" column, click "x64"
 - Extract the downloaded .zip file
-- Go into shared\Microsoft.NETCore.App\8.0.22
-- Copy the 184 .dll files and paste them into : BaseEngine/extern/dotnet/bin/
-- Important: Do NOT download SDK or Installer - you need "Binaries"!
+- Navigate to: shared\Microsoft.NETCore.App\8.0.22
+- Copy all 184 .dll files
+- Paste them into your project folder: BaseEngine/extern/dotnet/bin/
+Important: Do NOT download SDK or Installer - you need "Binaries" only!
 
 
 [ 2. PROJECT SETTINGS (DEBUG VS RELEASE) ]
