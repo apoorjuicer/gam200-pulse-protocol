@@ -11,6 +11,7 @@
 *              prior written consent of DigiPen Institute of Technology is prohibited.
 *
 /******************************************************************************/
+//#include "..//ScriptAPI/ScriptAPIClass.h"
 #include "ScriptAPIClass.h"
 #include "TransformComponent.h"
 #include "Health.h"
@@ -32,5 +33,10 @@ namespace ScriptAPI
     /*LogicComponent Script::GetScriptName()
     {
         return LogicComponent(EntityID);
+    }*/
+
+   /* DeltaTime Script::GetDeltaTime()
+    {
+        return DeltaTime(dt);
     }*/
 }

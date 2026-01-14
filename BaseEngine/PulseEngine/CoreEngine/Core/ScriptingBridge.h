@@ -26,6 +26,7 @@ public:
 	//static InputManager* GetInputKeys(int ID);
 	//static LogicComponent* GetLogicComponent(int ID);
 	static Framework::Transform* GetTransformComponent(int ID);
-	 
+	//static float GetDeltaTime(float dt);
+
 	//void CallHelloWorld(CoreEngine* engine);
 };

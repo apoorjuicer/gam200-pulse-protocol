@@ -15,6 +15,7 @@
 #include "Health.h"
 #include "CoreEngine/Core/ScriptingBridge.h"
 #include "Components/Health.h"
+#include "../CoreEngine/ECS/Coordinator.h"
 #undef generic
 
 namespace ScriptAPI
@@ -25,37 +26,43 @@ namespace ScriptAPI
 
 	int HealthComponent::hp::get()
 	{
-		auto* health = ScriptBridge::GetHealthComponent(entityID);
-		return health->hp;
+		auto g_coordinator = Coordinator::GetInstance();
+		auto& health = g_coordinator->GetComponent<Health>(entityID);
+		return health.hp;
 	}
 
 	void HealthComponent::hp::set(int value)
 	{
-		auto* health = ScriptBridge::GetHealthComponent(entityID);
-		health->hp = value;
+		auto g_coordinator = Coordinator::GetInstance();
+		auto& health = g_coordinator->GetComponent<Health>(entityID);
+		health.hp = value;
 	}
 
 	int HealthComponent::damage::get()
 	{
-		auto* health = ScriptBridge::GetHealthComponent(entityID);
-		return health->damage;
+		auto g_coordinator = Coordinator::GetInstance();
+		auto& health = g_coordinator->GetComponent<Health>(entityID);
+		return health.damage;
 	}
 
 	void HealthComponent::damage::set(int value)
 	{
-		auto* health = ScriptBridge::GetHealthComponent(entityID);
-		health->damage = value;
+		auto g_coordinator = Coordinator::GetInstance();
+		auto& health = g_coordinator->GetComponent<Health>(entityID);
+		health.damage = value;
 	}
 
 	bool HealthComponent::isAlive::get()
 	{
-		auto* health = ScriptBridge::GetHealthComponent(entityID);
-		return health->isAlive;
+		auto g_coordinator = Coordinator::GetInstance();
+		auto& health = g_coordinator->GetComponent<Health>(entityID);
+		return health.isAlive;
 	}
 
 	void HealthComponent::isAlive::set(bool value)
 	{
-		auto* health = ScriptBridge::GetHealthComponent(entityID);
-		health->isAlive = value;
+		auto g_coordinator = Coordinator::GetInstance();
+		auto& health = g_coordinator->GetComponent<Health>(entityID);
+		health.isAlive = value;
 	}
 }

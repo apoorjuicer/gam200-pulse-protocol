@@ -14,12 +14,14 @@
 #pragma once
 #include "TransformComponent.h"
 #include "Health.h"
+#include "DeltaTime.h"
 
 namespace ScriptAPI
 {
     //forward delcaration
     value struct TransformComponent;
     value struct HealthComponent;
+   // value struct DeltaTime 
     //value struct LogicComponent;
 
     public ref class Script abstract
@@ -29,6 +31,7 @@ namespace ScriptAPI
 
         TransformComponent GetTransform();
         HealthComponent GetHealth();
+        //DeltaTime GetDeltaTime();
         //LogicComponent GetScriptName();
 
     internal:
@@ -49,5 +52,6 @@ namespace ScriptAPI
 
     private:
         int EntityID;
+        //int dt;
     };
 }

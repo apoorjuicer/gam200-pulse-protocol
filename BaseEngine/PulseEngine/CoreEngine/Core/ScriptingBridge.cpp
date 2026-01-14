@@ -18,7 +18,6 @@
 #include "GameLogic/GameLogic.h"
 #include "CoreEngine/ECS/Coordinator.h"
 
-// ONLY FOR GRAPHICS SINCE HEADER FILE HAS FUNCTIONS AND COMP. 
 Framework::Transform* ScriptBridge::GetTransformComponent(int ID)
 {
 	auto g_coordinator = Coordinator::GetInstance();
@@ -31,8 +30,15 @@ Health* ScriptBridge::GetHealthComponent(int ID)
 	return &g_coordinator->GetComponent<Health>(ID);
 }
 
+
+
 //LogicComponent* ScriptBridge::GetLogicComponent(int ID)
 //{
 //	auto g_coordinator = Coordinator::GetInstance();
 //	return &g_coordinator->GetComponent<LogicComponent>(ID);
+//}
+//
+//float ScriptBridge::GetDeltaTime(float dt)
+//{
+//	return dt;
 //}
