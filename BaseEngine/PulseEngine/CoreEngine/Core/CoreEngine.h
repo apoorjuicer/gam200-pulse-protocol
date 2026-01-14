@@ -81,6 +81,8 @@ public:
 	std::function<void()> m_editorFrameCallback;
 
 	void ToggleFullscreen();
+	void SetStartupFullscreen(bool fullscreen) { m_startupFullscreen = fullscreen; }
+	bool IsFullscreen() const { return m_isFullscreen; }
 	// AssetsManager& getAssetsManager() { return mAssets; }
 private:
 	bool GameRunning;
@@ -91,6 +93,14 @@ private:
 	std::string m_originalScenePath = "";
 	void RenderDebugDraw();
 	GLFWwindow *window;
+
+	// --- Window mode state  ---
+	bool m_startupFullscreen = true;
+	bool m_isFullscreen = false;
+	int  m_windowedX = 100, m_windowedY = 100;
+	int  m_windowedW = 0, m_windowedH = 0;
+	void SetFullscreen(bool fullscreen);
+
 
 	// ----------------- .net from here onwards  --------------------------//
 	
