@@ -16,14 +16,14 @@ public class TestScript : Script
 {
     public override void Update()
     {
-        Console.Write("Script 2\n");
+        Console.Write("Script 1\n");
         //Console.WriteLine("[Testing CSHARP]: Hello from ManagedScripts! \n ");
         
         TransformComponent TFC = GetTransform();
         HealthComponent HC = GetHealth();
         //LogicComponent LC = GetScriptName();
 
-        //Console.WriteLine($"HP: {HC.hp}, Damage: {HC.damage}, Alive: {HC.isAlive}");
+        Console.WriteLine($"HP: {HC.hp}, Damage: {HC.damage}, Alive: {HC.isAlive}");
         //Console.WriteLine($"Script being used: {LC.ScriptName}");
 
         // Test modifying health
@@ -34,7 +34,7 @@ public class TestScript : Script
         if (HC.hp <= 0)
         {
             HC.isAlive = false;
-            //Console.WriteLine("ENTITY IS DEAD!");
+            Console.WriteLine("ENTITY IS DEAD!");
         }
 
         TFC.RotX += 0.5f;
@@ -50,7 +50,7 @@ public class TestScript2 : Script
     {
         TransformComponent TFC = GetTransform();
 
-        TFC.ScaleX += 2.5f;
-        TFC.ScaleY += 2.5f;
+        TFC.ScaleX -= 2.5f;
+        TFC.ScaleY -= 2.5f;
     }
 }
