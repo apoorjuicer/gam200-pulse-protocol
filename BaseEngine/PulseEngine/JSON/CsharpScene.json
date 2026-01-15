@@ -53,7 +53,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": ["TestScript", "TestScript2"]
+                        "ScriptName": ["TestScript"]
                     }
                 },
                 {
