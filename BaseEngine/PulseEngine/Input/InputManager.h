@@ -21,7 +21,6 @@
 #include "CoreEngine/Core/ImportExport.h"
 #include "CoreEngine/ECS/System.h"
 #include "CoreEngine/Message/MessageManager.h"
-#include "Graphics\glhelper.h"
 
 class DLL_API InputManager : public Systems {
 public:
@@ -74,6 +73,13 @@ public:
 	}
 	void SetWindow(GLFWwindow* w) { window = w; }
 	std::set<Entity> DebugEntities;
+
+	//======================= FOR C# ACCESS ================================
+	float GetMousePositionX() const { return mousePosition.x; }
+	float GetMousePositionY() const { return mousePosition.y; }
+	float GetMouseWorldPositionX() const { return mousePositionWorld.x; }
+	float GetMouseWorldPositionY() const { return mousePositionWorld.y; }
+	bool GetMouseInGameViewport() const { return mouseInGameViewport; }
 
 private:
 	GLFWwindow* window = nullptr;
