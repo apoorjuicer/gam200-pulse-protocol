@@ -50,6 +50,7 @@ namespace ScriptAPI
         // For hot reloading 
         static System::Runtime::Loader::AssemblyLoadContext^ loadContext;
 
+        // To ensure that cleared scripts are not being updated when change scene
         static bool allScriptsCleared = false;
 
     internal:
