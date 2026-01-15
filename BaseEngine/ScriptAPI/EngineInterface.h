@@ -31,6 +31,9 @@ namespace ScriptAPI
         static void ClearAllScripts();
         static void ClearEntityScript(int EntityID);
 
+        static void RemoveScriptFromEntity(int entityID, System::String^ scriptName);
+        static const char* GetAvailableScripts();
+
         static void Reload();  // For hot reloading scripts
     
     private:

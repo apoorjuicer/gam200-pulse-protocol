@@ -15,6 +15,7 @@
 #include "TransformComponent.h"
 #include "Health.h"
 #include "DeltaTime.h"
+#include "InputAPI.h"
 
 namespace ScriptAPI
 {
@@ -31,6 +32,7 @@ namespace ScriptAPI
 
         TransformComponent GetTransform();
         HealthComponent GetHealth();
+        InputComponent GetInput();
         //DeltaTime GetDeltaTime();
         //LogicComponent GetScriptName();
 

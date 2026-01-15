@@ -36,6 +36,11 @@ namespace ScriptAPI
     //{
     //    Factory::CreateEntityFromJson(ScriptName);
     //}
+    
+    InputComponent Script::GetInput()
+    {
+        return InputComponent(EntityID);
+    }
 
     /*LogicComponent Script::GetScriptName()
     {
