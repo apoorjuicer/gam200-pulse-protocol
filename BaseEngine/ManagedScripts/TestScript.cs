@@ -46,11 +46,16 @@ public class TestScript : Script
             enemy = Factory.Instantiate("TestPrefab");
         }
 
-        if (HC.hp < -50 && enemy > 0)
+        if (HC.hp < -100 && enemy > 0)
         {
             Factory.Destroy(enemy);
             enemy = -1;
             Console.WriteLine("ENTITY IS DELETED!\n\n\n\n\n\n\n");
+
+            Console.WriteLine("Before load scene!\n\n\n\n\n\n\n");
+            Scene.LoadScene("GameLose");
+            Console.WriteLine("Crashed after load scene!\n\n\n\n\n\n\n");
+            return;
         }
 
         TFC.RotX += 0.5f;

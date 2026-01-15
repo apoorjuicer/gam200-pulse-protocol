@@ -204,6 +204,8 @@ namespace ScriptAPI
                 System::Console::WriteLine("1 Script cleared!\n");
             }
         }
+
+        allScriptsCleared = true;
     }
 
     void EngineInterface::ClearEntityScript(int EntityID)
@@ -221,12 +223,20 @@ namespace ScriptAPI
     // iterate thru all of our scripts that has been created and execute our scripts.
     void EngineInterface::ExecuteUpdate()
     {
-        for each (ScriptList ^ entityScriptList in scripts)
+        allScriptsCleared = false;
+     
+        for each (ScriptList^ entityscriptlist in scripts)
         {
-            // Update each script available
-            for each (Script ^ script in entityScriptList)
+            // update each script available
+            for each (Script^ script in entityscriptlist)
             {
-                script->Update();
+                script->Update(); 
+     
+                if (allScriptsCleared)
+                  {
+                      System::Console::WriteLine("[executeupdate] all scripts cleared - stopping");
+                      return;
+                  }
             }
         }
     }

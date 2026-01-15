@@ -50,6 +50,8 @@ namespace ScriptAPI
         // For hot reloading 
         static System::Runtime::Loader::AssemblyLoadContext^ loadContext;
 
+        static bool allScriptsCleared = false;
+
     internal:
         static CoreEngine* coreEngine = nullptr;
     };

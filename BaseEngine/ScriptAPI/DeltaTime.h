@@ -14,15 +14,13 @@
 //
 //namespace ScriptAPI
 //{
-//	public value struct DeltaTime
+//	// abstract sealed make it global I think? 
+//	public ref class DeltaTime abstract sealed
 //	{
 //	public:
-//		
-//
-//		property int deltatime
+//		property float deltaTime
 //		{
-//			int get();
+//			float get();
 //		}
-//
 //	};
 //}
