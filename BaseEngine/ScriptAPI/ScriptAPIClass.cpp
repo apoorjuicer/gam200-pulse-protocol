@@ -30,6 +30,11 @@ namespace ScriptAPI
         return HealthComponent(EntityID);
     }
 
+    InputComponent Script::GetInput()
+    {
+        return InputComponent(EntityID);
+    }
+
     /*LogicComponent Script::GetScriptName()
     {
         return LogicComponent(EntityID);

@@ -15,6 +15,7 @@
 #include "InputAPI.h"
 #include "CoreEngine/Core/ScriptingBridge.h"
 #include "Input/InputManager.h"
+#include "Graphics/Transform.h"
 #include "../CoreEngine/ECS/Coordinator.h"
 #undef generic
 
