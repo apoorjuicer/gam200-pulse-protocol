@@ -1,7 +1,7 @@
 using System;
 using ScriptAPI;
 
-public class ButtonScript : Script
+public class SimpleClickDetectScript : Script
 {
     public override void Update()
     {

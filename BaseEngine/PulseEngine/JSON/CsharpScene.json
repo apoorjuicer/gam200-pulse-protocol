@@ -16,7 +16,7 @@
                         },
                         "scale": {
                             "x": 700.0,
-                            "y": 700.0
+                            "y": 2380.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -44,7 +44,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.0667542964220047,
+                        "elapsedTime": 0.09793142974376678,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -54,7 +54,8 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "TestScript"
+                            "TestScript",
+                            "SimpleMovementScript"
                         ]
                     }
                 },
