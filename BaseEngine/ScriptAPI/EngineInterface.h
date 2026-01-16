@@ -31,6 +31,9 @@ namespace ScriptAPI
         static void ClearAllScripts();
         static void ClearEntityScript(int EntityID);
 
+        static void RemoveScriptFromEntity(int entityID, System::String^ scriptName);
+        static const char* GetAvailableScripts();
+
         static void Reload();  // For hot reloading scripts
     
     private:
@@ -49,6 +52,9 @@ namespace ScriptAPI
 
         // For hot reloading 
         static System::Runtime::Loader::AssemblyLoadContext^ loadContext;
+
+        // To ensure that cleared scripts are not being updated when change scene
+        static bool allScriptsCleared = false;
 
     internal:
         static CoreEngine* coreEngine = nullptr;

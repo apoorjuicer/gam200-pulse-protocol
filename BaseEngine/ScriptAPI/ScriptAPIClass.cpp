@@ -12,6 +12,7 @@
 *
 /******************************************************************************/
 //#include "..//ScriptAPI/ScriptAPIClass.h"
+
 #include "ScriptAPIClass.h"
 #include "TransformComponent.h"
 #include "Health.h"
@@ -28,6 +29,17 @@ namespace ScriptAPI
     HealthComponent Script::GetHealth()
     {
         return HealthComponent(EntityID);
+    }
+
+
+    //std::optional<int> Script::Instantiate(System::String^ ScriptName)
+    //{
+    //    Factory::CreateEntityFromJson(ScriptName);
+    //}
+    
+    InputComponent Script::GetInput()
+    {
+        return InputComponent(EntityID);
     }
 
     /*LogicComponent Script::GetScriptName()

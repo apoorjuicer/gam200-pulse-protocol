@@ -29,7 +29,6 @@
 #include "Graphics/Animation.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Text.h"
-#include "Graphics/Text.h"
 #include "CoreEngine/Assets.h"
 #include "CoreEngine/Prefab/PrefabInstance.h"
 #include "Components/Health.h"
@@ -93,21 +92,30 @@ void SceneManager::SaveCurrentScene()
 	d.SetObject();
 	auto& alloc = d.GetAllocator();
 
-	// grab scene name for the json file name
-	//std::filesystem::path path = static_cast<std::filesystem::path>("../../PulseEngine/JSON/Saved" + PreviousScene + "Scene.json"); 
-	std::filesystem::path path = "../../PulseEngine/JSON/" + PreviousScene + ".json"; // file we want to save data into
-	//std::string path = "../../PulseEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
+	// Use the stored path from when we loaded the scene
+	std::filesystem::path path = LoadedScenePath;
+
+	// Fallback if path is empty (shouldn't happen, but just in case)
+	if (path.empty())
+	{
+		path = "../../../PulseEngine/JSON/" + CurrentScene + ".json";
+		std::cerr << "[SceneManager] Warning: Using fallback path!\n";
+	}
+
+#ifdef _DEBUG
+	std::cout << "[SceneManager] Saving to: " << path << std::endl;
+#endif
 
 	// Save scene name first
 	Value SceneName;
-	SceneName.SetString(PreviousScene.c_str(), static_cast<SizeType>(PreviousScene.length()), alloc);
+	SceneName.SetString(CurrentScene.c_str(), static_cast<SizeType>(CurrentScene.length()), alloc);
 	d.AddMember("scene", SceneName, alloc);
 
 	// First we make a container for entity
 	Value JsonEntityArray(kArrayType);
 
 	// save one entity one at a time into 1 Json file
-	for (auto const& entity : g_coordinator->GetAllEntities())
+	for (auto const& entity : SceneEntityList)
 	{
 		// Skip engine-managed entities (names starting with underscore)
 		if (g_coordinator->HasComponent<Name>(entity)) {
@@ -318,7 +326,7 @@ void SceneManager::SaveCurrentScene()
 
 #ifdef _DEBUG
 	std::cout << "\n================================================" << std::endl;
-	std::cout << "  [SceneManager]: " << PreviousScene << " has been saved!" << std::endl;
+	std::cout << "  [SceneManager]: " << CurrentScene << " has been saved!" << std::endl;
 	std::cout << "================================================" << std::endl;
 #endif
 }
@@ -419,6 +427,13 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 	UnloadCurrentScene();
 
+	// Extract just the filename (e.g., "MainMenu.json", "Level1.json", etc.)
+	std::filesystem::path inputPath = path;
+	std::string filename = inputPath.filename().string();
+
+	// Build correct absolute path to source folder
+	LoadedScenePath = std::filesystem::absolute("../../../PulseEngine/JSON") / filename;
+
 #ifdef _DEBUG
 	std::cout << "\n================================================" << std::endl;
 	std::cout << "       [SceneManager] Loading in progress!" << std::endl;
@@ -430,7 +445,8 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	using namespace rapidjson;
 	Factory factory;
 
-	std::ifstream ifs(path);
+	// USE LoadedScenePath instead of path for reading the file
+	std::ifstream ifs(LoadedScenePath);
 	if (!ifs.is_open())
 	{
 		std::cerr << "Error: Cannot open file for reading: " << path << "\n";

@@ -14,6 +14,7 @@ using System;
 using ScriptAPI;
 public class TestScript : Script
 {
+    int enemy;
     public override void Update()
     {
         Console.Write("Script 1\n");
@@ -22,6 +23,7 @@ public class TestScript : Script
         TransformComponent TFC = GetTransform();
         HealthComponent HC = GetHealth();
         //LogicComponent LC = GetScriptName();
+        
 
         Console.WriteLine($"HP: {HC.hp}, Damage: {HC.damage}, Alive: {HC.isAlive}");
         //Console.WriteLine($"Script being used: {LC.ScriptName}");
@@ -35,6 +37,25 @@ public class TestScript : Script
         {
             HC.isAlive = false;
             Console.WriteLine("ENTITY IS DEAD!");
+        }
+
+
+        // dumb way i tested if it works :>
+        if (HC.hp == 0)
+        {
+            enemy = Factory.Instantiate("TestPrefab");
+        }
+
+        if (HC.hp < -100 && enemy > 0)
+        {
+            Factory.Destroy(enemy);
+            enemy = -1;
+            Console.WriteLine("ENTITY IS DELETED!\n\n\n\n\n\n\n");
+
+            Console.WriteLine("Before load scene!\n\n\n\n\n\n\n");
+            Scene.LoadScene("GameLose");
+            Console.WriteLine("Crashed after load scene!\n\n\n\n\n\n\n");
+            return;
         }
 
         TFC.RotX += 0.5f;

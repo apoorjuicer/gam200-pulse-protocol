@@ -16,7 +16,7 @@
                         },
                         "scale": {
                             "x": 700.0,
-                            "y": 700.0
+                            "y": 2380.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -44,7 +44,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.6310111284255981,
+                        "elapsedTime": 0.09793142974376678,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -53,7 +53,10 @@
                 },
                 {
                     "script": {
-                        "ScriptName": ["TestScript", "TestScript2"]
+                        "ScriptName": [
+                            "TestScript",
+                            "SimpleMovementScript"
+                        ]
                     }
                 },
                 {
@@ -108,7 +111,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1918.79296875,
+                            "x": 565.7930297851563,
                             "y": -348.4979553222656
                         },
                         "scale": {
@@ -150,7 +153,9 @@
                 },
                 {
                     "script": {
-                        "ScriptName": ["TestScript2"]
+                        "ScriptName": [
+                            "TestScript2"
+                        ]
                     }
                 },
                 {

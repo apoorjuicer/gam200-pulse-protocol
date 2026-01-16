@@ -959,11 +959,11 @@ namespace PulseEditor
             ImGui::Separator();
         }
     }
-    void Inspector_LogicComponent(Coordinator *g)
+    void Inspector_LogicComponent(Coordinator* g)
     {
         if (g->HasComponent<LogicComponent>(selectedEntity))
         {
-            auto &script = g->GetComponent<LogicComponent>(selectedEntity);
+            auto& script = g->GetComponent<LogicComponent>(selectedEntity);
 
             bool removeScript = false;
             bool scriptOpen = ImGui::CollapsingHeader("Script", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
@@ -975,45 +975,199 @@ namespace PulseEditor
             }
             else if (scriptOpen)
             {
-                /*ImGui::Indent();
+                ImGui::Indent();
 
-                const char *scriptOptions[] = {
-                    "PlayerScript",
-                    "EnemyScript",
-                    "ButtonScript",
-                    "PulsingBorderScript",
-                    "CountdownScript",
-                    "FeedbackScript"};
-                const int numScripts = 6;
+                // ===== GET AVAILABLE SCRIPTS FROM SCRIPTAPI (FACTORY STYLE, NO HARDCODING!) =====
+                static std::vector<std::string> scriptOptions;
+                static bool scriptsLoaded = false;
 
-                int currentScriptIndex = 0;
-                for (int i = 0; i < numScripts; i++)
+                if (!scriptsLoaded)
                 {
-                    if (script.ScriptName == scriptOptions[i])
+                    auto getScriptsFunc = Engine->GetFunctionPtr<const char* (*)(void)>(
+                        "ScriptAPI",
+                        "ScriptAPI.EngineInterface",
+                        "GetAvailableScripts"
+                    );
+
+                    if (getScriptsFunc)
                     {
-                        currentScriptIndex = i;
-                        break;
+                        const char* result = getScriptsFunc();  // Simple C++ const char*, no System namespace!
+
+                        if (result != nullptr && strlen(result) > 0)
+                        {
+                            // Parse comma-separated list
+                            std::stringstream ss(result);
+                            std::string item;
+                            while (std::getline(ss, item, ','))
+                            {
+                                if (!item.empty())
+                                {
+                                    item.erase(0, item.find_first_not_of(" \t\r\n"));
+                                    item.erase(item.find_last_not_of(" \t\r\n") + 1);
+                                    scriptOptions.push_back(item);
+                                }
+                            }
+
+                            scriptsLoaded = true;
+                            std::cout << "[Inspector] Loaded " << scriptOptions.size()
+                                << " available scripts from ScriptAPI\n";
+                        }
                     }
                 }
 
-                ImGui::Text("Script:");
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(200.0f);
-                if (ImGui::Combo("##ScriptDropdown", &currentScriptIndex, scriptOptions, numScripts))
+                // Convert to C-style array for ImGui
+                std::vector<const char*> scriptNames;
+                for (auto& s : scriptOptions)
                 {
-                    script.ScriptName = scriptOptions[currentScriptIndex];
-                    std::cout << "[Inspector] Changed script to: " << script.ScriptName << std::endl;
+                    scriptNames.push_back(s.c_str());
+                }
+                int numScripts = (int)scriptNames.size();
+
+                // =========================================================================
+                // Display ALL scripts attached to this entity
+                // =========================================================================
+                ImGui::Text("Scripts Attached: %zu", script.ScriptName.size());
+                ImGui::Spacing();
+
+                for (size_t i = 0; i < script.ScriptName.size(); ++i)
+                {
+                    ImGui::PushID((int)i);
+
+                    ImGui::Text("%zu.", i + 1);
+                    ImGui::SameLine();
+                    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "%s", script.ScriptName[i].c_str());
+                    ImGui::SameLine();
+
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.2f, 0.2f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.3f, 0.3f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 0.2f, 0.2f, 1.0f));
+
+                    if (ImGui::SmallButton("Remove##Script"))
+                    {
+                        const char* scriptToRemove = script.ScriptName[i].c_str();
+
+                        // Remove from C++ array
+                        script.ScriptName.erase(script.ScriptName.begin() + i);
+
+                        // Remove from C# side
+                        auto removeScriptFunc = Engine->GetFunctionPtr<void(*)(int, const char*)>(
+                            "ScriptAPI",
+                            "ScriptAPI.EngineInterface",
+                            "RemoveScriptFromEntity"
+                        );
+                        if (removeScriptFunc)
+                        {
+                            removeScriptFunc(selectedEntity, scriptToRemove);
+                        }
+
+                        ImGui::PopStyleColor(3);
+                        ImGui::PopID();
+                        continue;
+                    }
+
+                    ImGui::PopStyleColor(3);
+                    ImGui::PopID();
+                    ImGui::Spacing();
+                }
+
+                // =========================================================================
+                // Add New Script Section
+                // =========================================================================
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                ImGui::Text("Add Script:");
+                ImGui::SameLine();
+
+                static int selectedScriptIndex = 0;
+                ImGui::SetNextItemWidth(250.0f);
+
+                if (numScripts > 0)
+                {
+                    if (ImGui::Combo("##ScriptDropdown", &selectedScriptIndex, scriptNames.data(), numScripts))
+                    {
+                        std::cout << "[Inspector] Selected script: " << scriptNames[selectedScriptIndex] << std::endl;
+                    }
+
+                    ImGui::SameLine();
+
+                    if (ImGui::SmallButton("Add"))
+                    {
+                        const char* selectedScript = scriptNames[selectedScriptIndex];
+
+                        // Check if already attached
+                        bool alreadyExists = false;
+                        for (const auto& s : script.ScriptName)
+                        {
+                            if (s == selectedScript)
+                            {
+                                alreadyExists = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyExists)
+                        {
+                            // Add to C++ array
+                            script.ScriptName.push_back(selectedScript);
+
+                            // Add to C# side
+                            auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>(
+                                "ScriptAPI",
+                                "ScriptAPI.EngineInterface",
+                                "AddScriptViaName"
+                            );
+                            if (addScriptFunc)
+                            {
+                                bool success = addScriptFunc(selectedEntity, selectedScript);
+                                std::cout << "[Inspector] Added script: " << selectedScript
+                                    << " (Success: " << success << ")" << std::endl;
+                            }
+
+                            selectedScriptIndex = 0;
+                        }
+                        else
+                        {
+                            std::cout << "[Inspector] Script already attached: " << selectedScript << std::endl;
+                            ImGui::OpenPopup("ScriptAlreadyExists");
+                        }
+                    }
+                }
+                else
+                {
+                    ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "No scripts available!");
+                }
+
+                if (ImGui::BeginPopupModal("ScriptAlreadyExists", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+                {
+                    ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "This script is already attached!");
+                    ImGui::Spacing();
+                    if (ImGui::Button("OK", ImVec2(120, 0)))
+                    {
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::EndPopup();
                 }
 
                 ImGui::Spacing();
-                ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Active: %s", script.ScriptName.c_str());
 
-                ImGui::Unindent();*/
+                if (script.ScriptName.empty())
+                {
+                    ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.0f, 1.0f), "No scripts attached");
+                }
+                else
+                {
+                    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Active Scripts: %zu attached", script.ScriptName.size());
+                }
+
+                ImGui::Unindent();
             }
 
             ImGui::Separator();
         }
     }
+
     void Inspector_AudioComponent(Coordinator *g)
     {
         if (g->HasComponent<AudioSource>(selectedEntity))
