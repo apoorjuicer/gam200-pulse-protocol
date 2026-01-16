@@ -1,3 +1,6 @@
+using System;
+using ScriptAPI;
+
 public class MouseClickScript : Script
 {
     public override void Update()
