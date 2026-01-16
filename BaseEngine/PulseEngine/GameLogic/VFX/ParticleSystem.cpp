@@ -1,6 +1,5 @@
 #include "ParticleSystem.h"
 #include <cstdlib>
-#include <algorithm>
 #include <cmath>
 
 float ParticleSystem::Rand01()
@@ -8,52 +7,71 @@ float ParticleSystem::Rand01()
     return float(std::rand()) / float(RAND_MAX);
 }
 
-void ParticleSystem::Reserve(size_t maxParticles)
+void ParticleSystem::CreatePool(std::size_t maxParticles)
 {
-    mParticles.reserve(maxParticles);
+    mParticles.assign(maxParticles, Particle{});
+    mNextSearch = 0;
 }
 
 void ParticleSystem::Clear()
 {
-    mParticles.clear();
+    // Pooling: do NOT clear the vector.
+    for (auto& p : mParticles)
+        p.active = false;
+
+    mNextSearch = 0;
+}
+
+Particle* ParticleSystem::FindFree()
+{
+    if (mParticles.empty()) return nullptr;
+
+    // Start searching from last free index to reduce scans
+    for (std::size_t i = 0; i < mParticles.size(); ++i)
+    {
+        std::size_t idx = (mNextSearch + i) % mParticles.size();
+        if (!mParticles[idx].active)
+        {
+            mNextSearch = (idx + 1) % mParticles.size();
+            return &mParticles[idx];
+        }
+    }
+    return nullptr; // pool full
 }
 
 void ParticleSystem::SpawnBurst(const ParticleSpawnDesc& d)
 {
     for (int i = 0; i < d.count; ++i)
     {
-        Particle p;
-        p.pos = d.position;
+        Particle* p = FindFree();
+        if (!p) break;
 
-        float a = Rand01() * 6.2831853f; // 2pi
+        p->active = true;
+        p->pos = d.position;
+
+        float a = Rand01() * 6.2831853f;
         float s = d.speedMin + (d.speedMax - d.speedMin) * Rand01();
-        p.vel = glm::vec2(std::cos(a), std::sin(a)) * s;
+        p->vel = glm::vec2(std::cos(a), std::sin(a)) * s;
 
-        p.lifeMax = d.lifeMin + (d.lifeMax - d.lifeMin) * Rand01();
-        p.life = p.lifeMax;
-
-        p.size = 1.0f;
-
-        mParticles.push_back(p);
+        p->lifeMax = d.lifeMin + (d.lifeMax - d.lifeMin) * Rand01();
+        p->life = p->lifeMax;
+        p->size = 1.0f;
     }
 }
 
 void ParticleSystem::Update(float dt)
 {
-    // update + remove dead (swap-pop)
-    for (size_t i = 0; i < mParticles.size(); )
+    for (auto& p : mParticles)
     {
-        Particle& p = mParticles[i];
-        p.life -= dt;
+        if (!p.active) continue;
 
+        p.life -= dt;
         if (p.life <= 0.0f)
         {
-            mParticles[i] = mParticles.back();
-            mParticles.pop_back();
+            p.active = false;
             continue;
         }
 
         p.pos += p.vel * dt;
-        ++i;
     }
 }

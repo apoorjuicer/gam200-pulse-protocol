@@ -1,16 +1,16 @@
 #pragma once
 #include <vector>
 #include <glm/vec2.hpp>
-#include <cstdint>
+#include <cstddef>
 
 struct Particle
 {
+    bool active = false;
     glm::vec2 pos{ 0,0 };
     glm::vec2 vel{ 0,0 };
-    float life = 0.0f;        // remaining
-    float lifeMax = 0.0f;     // original
+    float life = 0.0f;
+    float lifeMax = 0.0f;
     float size = 1.0f;
-    // add color/rotation if you want
 };
 
 struct ParticleSpawnDesc
@@ -26,9 +26,8 @@ struct ParticleSpawnDesc
 class ParticleSystem
 {
 public:
-    void Reserve(size_t maxParticles);
-    void Clear();
-
+    void CreatePool(std::size_t maxParticles);
+    void Clear();                  // deactivate only (keep memory)
     void SpawnBurst(const ParticleSpawnDesc& desc);
     void Update(float dt);
 
@@ -36,6 +35,8 @@ public:
 
 private:
     std::vector<Particle> mParticles;
+    std::size_t mNextSearch = 0;   // makes FindFree faster
 
     float Rand01();
+    Particle* FindFree();
 };
