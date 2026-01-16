@@ -11,9 +11,9 @@
 *              prior written consent of DigiPen Institute of Technology is prohibited.
 *
 /******************************************************************************/
-#using "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.22\\System.Private.CoreLib.dll"
-#using "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.22\\System.Runtime.dll"
-#using "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.22\\System.Runtime.Loader.dll"
+//#using "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.22\\System.Private.CoreLib.dll"
+#using <System.Runtime.dll>
+#using <System.Runtime.Loader.dll>
 #pragma warning(disable: 4945)  // Suppress assembly conflict warnings for dotnet System.Runtime.CoreLib and Loader :p
 
 #include "EngineInterface.h"
