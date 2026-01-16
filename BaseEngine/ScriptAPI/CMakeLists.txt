@@ -65,6 +65,21 @@ set_target_properties(ScriptAPI PROPERTIES
     CXX_STANDARD_REQUIRED ON
     #VS_DOTNET_REFERENCES "System;System.Core"
 )
+if(MSVC)
+    # Add .NET reference assemblies path
+    set(DOTNET_REF_PATH
+        "C:/Program Files/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.0/ref/net8.0"
+    )
+
+    if(EXISTS "${DOTNET_REF_PATH}")
+        target_compile_options(ScriptAPI PRIVATE
+            /AI"${DOTNET_REF_PATH}"
+        )
+        message(STATUS "ScriptAPI: Using .NET ref assemblies at ${DOTNET_REF_PATH}")
+    else()
+        message(WARNING "ScriptAPI: .NET reference assemblies not found at ${DOTNET_REF_PATH}")
+    endif()
+endif()
 
 # C++/CLI requires /EHa instead of /EHs
 if(MSVC)
