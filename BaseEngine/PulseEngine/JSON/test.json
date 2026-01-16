@@ -1,48 +1,104 @@
 {
-    "components": [
+    "scene": "test",
+    "entities": [
         {
-            "transform": {
-                "position": {
-                    "x": 50.0,
-                    "y": 0.0
+            "components": [
+                {
+                    "Typing": {
+                        "Type": "Player"
+                    }
                 },
-                "scale": {
-                    "x": 200.0,
-                    "y": 200.0
+                {
+                    "transform": {
+                        "position": {
+                            "x": -906.075927734375,
+                            "y": -309.5775146484375
+                        },
+                        "scale": {
+                            "x": 700.0,
+                            "y": 700.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
                 },
-                "rotation": {
-                    "x": 0.0,
-                    "y": 0.0
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/hero_idle.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
                 },
-                "angle_disp": 0.0,
-                "angle_speed": 0.0,
-                "mdl_ref": 1.0,
-                "shd_ref": 0.0,
-                "textureID": 0,
-                "spriteName": "",
-                "currentFrame": 0,
-                "elapsedTime": 0.0,
-                "totalFrames": 6,
-                "columns": 1,
-                "rows": 1,
-                "animationSpeed": 2.0,
-                "isVisible": true,
-                "visibilityTimer": 0.0,
-                "autoHide": false,
-                "mdl_to_ndc_xform": [
-                    1.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1.0
-                ]
-            },
-            "script": {"ScriptName": "PlayerScript"},
-            "health" : {"hp": 5, "IsAlive": true} 
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.3185708522796631,
+                        "totalFrames": 2,
+                        "columns": 2,
+                        "rows": 1,
+                        "animationSpeed": 1.5
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "TestScript"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Jeff"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 3,
+                        "damage": 1,
+                        "isAlive": true
+                    }
+                },
+                {
+                    "AABB": {
+                        "min": {
+                            "x": 0.0,
+                            "y": -10.0
+                        },
+                        "max": {
+                            "x": 529.0,
+                            "y": 529.0
+                        },
+                        "width": 50.0,
+                        "height": 50.0
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "Jeff",
+                        "isLinked": true
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 50,
+                        "z": 0.0
+                    }
+                }
+            ]
         }
     ]
 }

@@ -29,7 +29,6 @@
 #include "Graphics/Animation.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Text.h"
-#include "Graphics/Text.h"
 #include "CoreEngine/Assets.h"
 #include "CoreEngine/Prefab/PrefabInstance.h"
 #include "Components/Health.h"
@@ -94,13 +93,11 @@ void SceneManager::SaveCurrentScene()
 	auto& alloc = d.GetAllocator();
 
 	// grab scene name for the json file name
-	//std::filesystem::path path = static_cast<std::filesystem::path>("../../PulseEngine/JSON/Saved" + PreviousScene + "Scene.json"); 
-	std::filesystem::path path = "../../PulseEngine/JSON/" + PreviousScene + ".json"; // file we want to save data into
-	//std::string path = "../../PulseEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
+	std::filesystem::path path = "../../PulseEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
 
 	// Save scene name first
 	Value SceneName;
-	SceneName.SetString(PreviousScene.c_str(), static_cast<SizeType>(PreviousScene.length()), alloc);
+	SceneName.SetString(CurrentScene.c_str(), static_cast<SizeType>(CurrentScene.length()), alloc);
 	d.AddMember("scene", SceneName, alloc);
 
 	// First we make a container for entity
@@ -318,7 +315,7 @@ void SceneManager::SaveCurrentScene()
 
 #ifdef _DEBUG
 	std::cout << "\n================================================" << std::endl;
-	std::cout << "  [SceneManager]: " << PreviousScene << " has been saved!" << std::endl;
+	std::cout << "  [SceneManager]: " << CurrentScene << " has been saved!" << std::endl;
 	std::cout << "================================================" << std::endl;
 #endif
 }
