@@ -92,19 +92,8 @@ void SceneManager::SaveCurrentScene()
 	d.SetObject();
 	auto& alloc = d.GetAllocator();
 
-	// Use the stored path from when we loaded the scene
-	std::filesystem::path path = LoadedScenePath;
-
-	// Fallback if path is empty (shouldn't happen, but just in case)
-	if (path.empty())
-	{
-		path = "../../../PulseEngine/JSON/" + CurrentScene + ".json";
-		std::cerr << "[SceneManager] Warning: Using fallback path!\n";
-	}
-
-#ifdef _DEBUG
-	std::cout << "[SceneManager] Saving to: " << path << std::endl;
-#endif
+	// grab scene name for the json file name
+	std::filesystem::path path = "../../PulseEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
 
 	// Save scene name first
 	Value SceneName;
@@ -115,7 +104,7 @@ void SceneManager::SaveCurrentScene()
 	Value JsonEntityArray(kArrayType);
 
 	// save one entity one at a time into 1 Json file
-	for (auto const& entity : SceneEntityList)
+	for (auto const& entity : g_coordinator->GetAllEntities())
 	{
 		// Skip engine-managed entities (names starting with underscore)
 		if (g_coordinator->HasComponent<Name>(entity)) {
@@ -427,13 +416,6 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 	UnloadCurrentScene();
 
-	// Extract just the filename (e.g., "MainMenu.json", "Level1.json", etc.)
-	std::filesystem::path inputPath = path;
-	std::string filename = inputPath.filename().string();
-
-	// Build correct absolute path to source folder
-	LoadedScenePath = std::filesystem::absolute("../../../PulseEngine/JSON") / filename;
-
 #ifdef _DEBUG
 	std::cout << "\n================================================" << std::endl;
 	std::cout << "       [SceneManager] Loading in progress!" << std::endl;
@@ -445,8 +427,8 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	using namespace rapidjson;
 	Factory factory;
 
-	// USE LoadedScenePath instead of path for reading the file
-	std::ifstream ifs(LoadedScenePath);
+	std::ifstream ifs(path);
+	
 	if (!ifs.is_open())
 	{
 		std::cerr << "Error: Cannot open file for reading: " << path << "\n";
