@@ -43,8 +43,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.0667542964220047,
+                        "currentFrame": 0,
+                        "elapsedTime": 0.13705618679523468,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -110,7 +110,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 565.7930297851563,
+                            "x": 512.7930297851563,
                             "y": -348.4979553222656
                         },
                         "scale": {
