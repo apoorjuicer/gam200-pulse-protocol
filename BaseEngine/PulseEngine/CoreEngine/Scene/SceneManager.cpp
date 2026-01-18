@@ -428,6 +428,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	Factory factory;
 
 	std::ifstream ifs(path);
+	
 	if (!ifs.is_open())
 	{
 		std::cerr << "Error: Cannot open file for reading: " << path << "\n";

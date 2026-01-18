@@ -16,7 +16,7 @@
                         },
                         "scale": {
                             "x": 700.0,
-                            "y": 700.0
+                            "y": 2380.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -54,7 +54,8 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "TestScript"
+                            "TestScript",
+                            "SimpleMovementScript"
                         ]
                     }
                 },
