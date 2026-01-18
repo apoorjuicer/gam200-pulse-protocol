@@ -16,7 +16,7 @@
                         },
                         "scale": {
                             "x": 700.0,
-                            "y": 2380.0
+                            "y": 700.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -43,8 +43,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.13705618679523468,
+                        "currentFrame": 1,
+                        "elapsedTime": 0.29037851095199585,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -112,14 +112,14 @@
                     "transform": {
                         "position": {
                             "x": 512.7930297851563,
-                            "y": -348.4979553222656
+                            "y": -38.49800109863281
                         },
                         "scale": {
                             "x": 600.0,
                             "y": 600.0
                         },
                         "rotation": {
-                            "x": 0.0,
+                            "x": 73.0,
                             "y": 0.0
                         },
                         "isVisible": true,
@@ -204,6 +204,66 @@
                         "volume": 1.0,
                         "loop": false,
                         "playOnAwake": false
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -449.23065185546875,
+                            "y": 246.15383911132813
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon bat.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "GameObject"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 0,
+                        "z": 0.0
                     }
                 }
             ]
