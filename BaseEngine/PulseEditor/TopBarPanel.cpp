@@ -133,7 +133,8 @@ namespace PulseEditor
         ofn.lpstrTitle = "Select scene JSON";
 
         namespace fs = std::filesystem;
-        std::string dir = (fs::current_path() / "../../PulseEngine/JSON").lexically_normal().string();
+        //std::string dir = (fs::current_path() / "../../PulseEngine/JSON").lexically_normal().string();
+        std::string dir = "../../PulseEngine/JSON";
         ofn.lpstrInitialDir = dir.c_str();
 
 
