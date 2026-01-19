@@ -16,23 +16,27 @@
 #include "Health.h"
 #include "DeltaTime.h"
 #include "InputAPI.h"
+#include "AudioAPI.h"
 
 namespace ScriptAPI
 {
     //forward delcaration
     value struct TransformComponent;
     value struct HealthComponent;
+    value struct AudioComponent;
    // value struct DeltaTime 
     //value struct LogicComponent;
 
     public ref class Script abstract
     {
     public:
+        virtual void Start() {}
         void virtual Update() {};
 
         TransformComponent GetTransform();
         HealthComponent GetHealth();
         InputComponent GetInput();
+        AudioComponent GetAudio();
         //DeltaTime GetDeltaTime();
         //LogicComponent GetScriptName();
 
