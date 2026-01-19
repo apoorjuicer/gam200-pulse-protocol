@@ -51,6 +51,7 @@ void SceneManager::Init()
 {
 	// Starting scene will be main menu
 	LoadSceneFromJson(StartingScene);
+	std::cout << std::filesystem::absolute("../../../PulseEngine/JSON/MainMenu.json") << std::endl;
 	PreviousScene = CurrentScene;
 
 	// testing for it it works 
@@ -94,7 +95,7 @@ void SceneManager::SaveCurrentScene()
 
 	// grab scene name for the json file name
 	std::filesystem::path path = "../../PulseEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
-
+	std::cout << std::filesystem::absolute(path) << std::endl;
 	// Save scene name first
 	Value SceneName;
 	SceneName.SetString(CurrentScene.c_str(), static_cast<SizeType>(CurrentScene.length()), alloc);
@@ -753,6 +754,8 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	std::cout << "\n===================================================" << std::endl;
 	std::cout << "   [Scene Manager]: " << CurrentScene << " loaded successfully!" << std::endl;
 	std::cout << "===================================================" << std::endl;
+
+	std::cout << std::filesystem::absolute(path) << std::endl;
 #endif
 }
 

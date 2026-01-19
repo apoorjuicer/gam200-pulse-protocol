@@ -98,7 +98,7 @@ private:
 	std::string LastScene;			// For ESC navigation - the scene we came FROM
 	std::vector<Entity> SceneEntityList;
 
-	std::string StartingScene = "../../PulseEngine/JSON/MainMenu.json"; 
+	std::string StartingScene = "../../../PulseEngine/JSON/MainMenu.json"; 
 	//std::string StartingScene = "../../PulseEngine/JSON/Level1.json"; // level 1 for reg to test scripts 
 
 	void Deserialize(const rapidjson::Value& in);
