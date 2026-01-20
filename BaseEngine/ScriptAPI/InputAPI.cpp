@@ -59,24 +59,47 @@ namespace ScriptAPI
 		return inputMgr->GetMouseInGameViewport();
 	}
 
-	bool InputComponent::IsButtonPressed(int button)
+	// Mouse
+	bool InputComponent::IsMouseButtonPressed(int button)
 	{
 		auto inputMgr = Coordinator::GetInstance()->GetSystem<InputManager>();
 		if (!inputMgr) return false;
 		return inputMgr->isMouseButtonPressed(button);
 	}
 
-	bool InputComponent::IsButtonTriggered(int button)
+	bool InputComponent::IsMouseButtonTriggered(int button)
 	{
 		auto inputMgr = Coordinator::GetInstance()->GetSystem<InputManager>();
 		if (!inputMgr) return false;
 		return inputMgr->isMouseButtonTriggered(button);
 	}
 
-	bool InputComponent::IsButtonReleased(int button)
+	bool InputComponent::IsMouseButtonReleased(int button)
 	{
 		auto inputMgr = Coordinator::GetInstance()->GetSystem<InputManager>();
 		if (!inputMgr) return false;
 		return inputMgr->isMouseButtonReleased(button);
+	}
+
+	// Keyboard
+	bool InputComponent::IsKeyPressed(int keyCode)
+	{
+		auto inputMgr = Coordinator::GetInstance()->GetSystem<InputManager>();
+		if (!inputMgr) return false;
+		return inputMgr->isKeyPressed(keyCode);
+	}
+
+	bool InputComponent::IsKeyTriggered(int keyCode)
+	{
+		auto inputMgr = Coordinator::GetInstance()->GetSystem<InputManager>();
+		if (!inputMgr) return false;
+		return inputMgr->isKeyTriggered(keyCode);
+	}
+
+	bool InputComponent::IsKeyReleased(int keyCode)
+	{
+		auto inputMgr = Coordinator::GetInstance()->GetSystem<InputManager>();
+		if (!inputMgr) return false;
+		return inputMgr->isKeyReleased(keyCode);
 	}
 }
