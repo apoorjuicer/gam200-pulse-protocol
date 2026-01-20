@@ -198,17 +198,11 @@ std::string CoreEngine::buildTpaList(const std::string& directory)
 
 void CoreEngine::CompileScriptAssembly()
 {
-	/*std::cout << std::filesystem::current_path() << std::endl;
-	const char* PROJ_PATH = "..\\..\\..\\ManagedScripts\\ManagedScripts.csproj";
-
-	std::cout << std::filesystem::absolute(PROJ_PATH);
-
-	std::wstring buildCmd = L" build \"" + std::filesystem::absolute(PROJ_PATH).wstring() +
-		L"\" -c Debug -p:Platform=x64";*/
-
+#ifdef _DEBUG
 	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
+#endif
 
-	// ✅ Calculate from current working dir (wherever we are)
+	// Calculate from current working dir (wherever we are)
 	auto currentDir = std::filesystem::current_path();
 
 	// Go up to BaseEngine folder
@@ -218,10 +212,15 @@ void CoreEngine::CompileScriptAssembly()
 		baseEngineDir = baseEngineDir.parent_path();
 	}
 
+#ifdef _DEBUG
 	std::cout << "[Hot Reload] BaseEngine dir: " << baseEngineDir << std::endl;
+#endif
 
 	auto projectPath = baseEngineDir / "ManagedScripts" / "ManagedScripts.csproj";
+
+#ifdef _DEBUG
 	std::cout << "[Hot Reload] Project path: " << projectPath << std::endl;
+#endif
 
 	if (!std::filesystem::exists(projectPath))
 	{
@@ -273,7 +272,9 @@ void CoreEngine::CompileScriptAssembly()
 
 	if (exitCode == 0)
 	{
+#ifdef _DEBUG
 		std::cout << "[CoreEngine] Scripts compiled successfully!\n";
+#endif
 	}
 
 	else
@@ -764,10 +765,12 @@ void CoreEngine::Update(float dt)
 	{
 		if (!wasRPressed)
 		{
+#ifdef _DEBUG
 			std::cout << "[Hot Reload] Recompiling scripts...\n";
+#endif
 			CompileScriptAssembly();
 
-
+			//change the working directory so that i can get the .net stuff for hot reload else I will skin my pet goldfish alive
 			HMODULE hEngine = GetModuleHandleA("PulseEngine.dll");
 			if (hEngine)
 			{
@@ -776,7 +779,9 @@ void CoreEngine::Update(float dt)
 				PathRemoveFileSpecA(debugPath.data());
 				debugPath.resize(std::strlen(debugPath.data()));
 
+#ifdef _DEBUG
 				std::cout << "[Hot Reload] Setting working dir to: " << debugPath << std::endl;
+#endif
 				std::filesystem::current_path(debugPath);
 			}
 
