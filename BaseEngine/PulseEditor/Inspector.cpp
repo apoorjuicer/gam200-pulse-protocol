@@ -1446,6 +1446,25 @@ namespace PulseEditor
                 ImGui::SetTooltip("Offset from the entity's Transform position.\nUseful for positioning text relative to a sprite.");
             }
 
+            // === Text Alignment ===
+            ImGui::Text("Alignment:");
+            ImGui::SameLine();
+
+            const char* alignmentOptions[] = { "Left", "Center", "Right" };
+            int currentAlignment = static_cast<int>(txt.alignment);
+
+            ImGui::SetNextItemWidth(150.0f);
+            if (ImGui::Combo("##TextAlignment", &currentAlignment, alignmentOptions, IM_ARRAYSIZE(alignmentOptions)))
+            {
+                txt.alignment = static_cast<TextAlignment>(currentAlignment);
+            }
+            ImGui::SameLine();
+            ImGui::TextDisabled("(?)");
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::SetTooltip("Left: Text starts at position\nCenter: Text centered on position\nRight: Text ends at position");
+            }
+
             // === Visibility Toggle ===
             ImGui::Checkbox("Visible##TextComponent", &txt.visible);
 

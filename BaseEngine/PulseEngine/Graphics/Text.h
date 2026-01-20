@@ -11,10 +11,7 @@
  */
 /******************************************************************************/
 #pragma once
-#include <string>
-#include <glm/vec3.hpp>
-#include <rapidjson/document.h>
-#include <iostream>
+#include "pch/pch_temp.h"
 #include "Math/math.h"
 
 enum class TextAlignment
@@ -26,16 +23,16 @@ enum class TextAlignment
 
 struct TextComponent
 {
-    std::string text{};    // Text to display
+    std::string text{};    // text to display
     std::string font_id{}; // key to font registry
     // float x{}, y{}; //might change to offset
     Vector2 offset{0, 0};
     float font_size{};           // pixel height
     glm::vec3 color = {1, 1, 1}; // RGB
     bool visible = true;         // toggle on/off
+    TextAlignment alignment = TextAlignment::Left; // text alignment
     // To be added, probably typed class enum
     // std::string font_style;
-    TextAlignment alignment = TextAlignment::Left;
 
     // ---------------------------------------------------
     // Serialize
@@ -141,7 +138,8 @@ struct TextComponent
         {
             visible = (in["visible"].GetBool());
         }
-
+        
+        // alignment
         if (in.HasMember("alignment") && in["alignment"].IsInt())
         {
             alignment = static_cast<TextAlignment>(in["alignment"].GetInt());

@@ -182,6 +182,9 @@ void GraphicsManager::Initialize()
         glBindVertexArray(0);
     }
 
+    // Initialize TextRenderer
+    m_textRenderer.Initialize(VAO, VBO, projection);
+
     // Set text shader sampler uniform once
     {
         auto &textShader = GLApp::shdrpgms[3]; // index 3 assumed to be text shader
@@ -291,80 +294,6 @@ void GraphicsManager::ToggleDebugOverlay()
     }
 
     std::cout << "[DEBUG OVERLAY] " << (m_showDebugOverlay ? "SHOWN" : "HIDDEN") << " (F8 to toggle)\n";
-}
-
-void GraphicsManager::RenderText(
-    GLSLShader &shader,
-    const std::string &text,
-    float x, float y,
-    float scale,
-    const glm::vec3 &color,
-    const FontData *fontData)
-{
-    if (!fontData)
-    {
-        std::cerr << "[GraphicsManager] : fontData not found!!! in RenderText\n";
-        return;
-    }
-
-    shader.Use();
-
-    glUniformMatrix4fv(
-        glGetUniformLocation(shader.GetHandle(), "projection"),
-        1, GL_FALSE,
-        glm::value_ptr(projection));
-
-    glUniform3f(
-        glGetUniformLocation(shader.GetHandle(), "textColor"),
-        color.x, color.y, color.z);
-
-    glUniform1i(
-        glGetUniformLocation(shader.GetHandle(), "text"),
-        0);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(VAO);
-
-    for (unsigned char c : text)
-    {
-        auto it = fontData->glyphs.find(c);
-        if (it == fontData->glyphs.end())
-            continue;
-
-        const auto &ch = it->second;
-
-        // screen quad placement
-        float xpos = x + ch.Bearing.x * scale;
-        float ypos = y - ch.Bearing.y * scale + ch.Size.y * scale;
-        float w = ch.Size.x * scale;
-        float h = ch.Size.y * scale;
-
-        // 6 verts, each vert = {pos.x, pos.y, uv.x, uv.y}
-        float verts[6][4] = {
-            {xpos, ypos, 0.0f, 1.0f},
-            {xpos, ypos - h, 0.0f, 0.0f},
-            {xpos + w, ypos - h, 1.0f, 0.0f},
-
-            {xpos, ypos, 0.0f, 1.0f},
-            {xpos + w, ypos - h, 1.0f, 0.0f},
-            {xpos + w, ypos, 1.0f, 1.0f}};
-
-        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(verts), verts);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        // advance cursor (FreeType gives advance in 1/64 pixels)
-        x += (ch.Advance >> 6) * scale;
-    }
-
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    // std::cout << "[GraphicsManager] RenderText successful for " << text << "\n";
 }
 
 void GraphicsManager::OnResize(int width, int height)
@@ -758,9 +687,10 @@ void GraphicsManager::DrawText2D(
     std::string const& fontId,
     float x, float y,
     float pixelHeight,
-     glm::vec3 const& color
+    glm::vec3 const& color,
+    TextAlignment alignment
 ) {
-    if (text.empty()) { //empty text dont need draw
+    if (text.empty()) {
         return;
     }
 
@@ -772,14 +702,14 @@ void GraphicsManager::DrawText2D(
     }
 
     float scale = 1.0f;
-    //Font height is baked at 48pixels need to scale accordingly
     if (fontData->pixelHeight > 0u) {
         scale = pixelHeight / static_cast<float>(fontData->pixelHeight);
     }
 
-    //text shader
     GLSLShader& textShader = GLApp::shdrpgms[3];
-    RenderText(textShader, text, x, y, scale, color, fontData);
+
+    // Use TextRenderer instead of old RenderText
+    m_textRenderer.RenderText(textShader, text, x, y, scale, color, fontData, alignment);
 }
 
 
@@ -840,7 +770,8 @@ void GraphicsManager::Update2DTextComponent() {
             screenX,
             screenY,
             txt.font_size,
-            txt.color
+            txt.color,
+            txt.alignment
         );
     }
 }
