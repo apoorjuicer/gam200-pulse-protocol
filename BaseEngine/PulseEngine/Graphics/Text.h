@@ -17,6 +17,13 @@
 #include <iostream>
 #include "Math/math.h"
 
+enum class TextAlignment
+{
+    Left = 0,
+    Center = 1,
+    Right = 2
+};
+
 struct TextComponent
 {
     std::string text{};    // Text to display
@@ -28,7 +35,7 @@ struct TextComponent
     bool visible = true;         // toggle on/off
     // To be added, probably typed class enum
     // std::string font_style;
-    // std::string aligment;
+    TextAlignment alignment = TextAlignment::Left;
 
     // ---------------------------------------------------
     // Serialize
@@ -69,6 +76,8 @@ struct TextComponent
 
         // bool
         out.AddMember("visible", visible, alloc);
+
+        out.AddMember("alignment", static_cast<int>(alignment), alloc);
     }
     // ---------------------------------------------------
     // Deserialize
@@ -131,6 +140,11 @@ struct TextComponent
         if (in.HasMember("visible") && in["visible"].IsBool())
         {
             visible = (in["visible"].GetBool());
+        }
+
+        if (in.HasMember("alignment") && in["alignment"].IsInt())
+        {
+            alignment = static_cast<TextAlignment>(in["alignment"].GetInt());
         }
     }
 };
