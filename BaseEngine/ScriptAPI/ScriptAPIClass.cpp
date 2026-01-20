@@ -16,7 +16,9 @@
 #include "ScriptAPIClass.h"
 #include "TransformComponent.h"
 #include "Health.h"
+#include "Animation.h"
 #include "ScriptName.h"
+#include "Collision.h"
 
 namespace ScriptAPI
 {
@@ -31,12 +33,16 @@ namespace ScriptAPI
         return HealthComponent(EntityID);
     }
 
+    Animation Script::GetAnimation()
+    {
+        return Animation(EntityID);
+    }
 
-    //std::optional<int> Script::Instantiate(System::String^ ScriptName)
-    //{
-    //    Factory::CreateEntityFromJson(ScriptName);
-    //}
-    
+    CollisionComponent Script::GetCollision()
+    {
+        return CollisionComponent(EntityID);
+    }
+
     InputComponent Script::GetInput()
     {
         return InputComponent(EntityID);

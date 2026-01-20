@@ -15,7 +15,7 @@
 namespace ScriptAPI
 {
 	// abstract sealed make it global I think? 
-	public ref class Scene abstract sealed
+	public value class Scene // abstract sealed
 	{
 	public:
 		static void LoadScene(System::String^ Filename);

@@ -23,6 +23,11 @@
 #include "CoreEngine/Assets.h"
 #include "Graphics/Transform.h"
 
+//for .NET
+#include "CoreEngine/Core/ImportExport.h" // for DLL_API
+#pragma warning(push)
+#pragma warning(disable: 4251)
+
  // Forward declare
 namespace Framework { class Transform; }
 
@@ -30,7 +35,7 @@ namespace Framework { class Transform; }
  * @struct OBB
  * @brief Represents an Oriented Bounding Box for rotational collision detection.
  */
-struct OBB
+struct DLL_API OBB
 {
     Vector2 center;        // Center of the box
     Vector2 halfExtents;   // Half width / height
@@ -55,14 +60,14 @@ inline float ToAngleRadians(const Vector2& dir) {
  * @class CollisionManager
  * @brief Handles all collision-related computations, separated from gameplay logic.
  */
-class CollisionManager : public Systems
+class DLL_API CollisionManager : public Systems
 {
 public:
     void Init() override;
     void Update(float dt) override;
 
     // --- Core AABB Utilities ---
-    AABB BuildAABBFromTransform(const Framework::Transform& transform, const AABB& baseBox);
+    AABB BuildAABBFromTransform(const Framework::Transform& transform, const AABB& baseBox);//carrie dunnid
 
     // --- Collision Detection ---
     bool CheckAABBCollision(const AABB& a, const AABB& b);
@@ -70,9 +75,9 @@ public:
     bool CheckDistanceCollision(const Vector2& a, float aradius, const Vector2& b, float bradius);
 
     // --- Rotational (OBB) Collision Support ---
-    OBB BuildOBBFromTransform(const Framework::Transform& transform, const AABB& baseBox);
-    bool CheckOBBvsOBB(const OBB& obbA, const OBB& obbB);
-    void ResolveOBBCollision(Framework::Transform& a, Framework::Transform& b, float elasticity = 0.25f);
+    OBB BuildOBBFromTransform(const Framework::Transform& transform, const AABB& baseBox);//carrie dunnid
+    bool CheckOBBvsOBB(const OBB& obbA, const OBB& obbB);//carrie dunnid
+    void ResolveOBBCollision(Framework::Transform& a, Framework::Transform& b, float elasticity = 0.25f);//carrie dunnid
 };
 
 #endif // COLLISION_H
