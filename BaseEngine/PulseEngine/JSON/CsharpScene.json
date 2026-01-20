@@ -44,7 +44,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.29037851095199585,
+                        "elapsedTime": 0.5797467827796936,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -130,7 +130,7 @@
                 {
                     "render": {
                         "mdl_ref": 1.0,
-                        "shd_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "BlueGorillaEnemy",
                         "tintColor": {
@@ -251,6 +251,73 @@
                         "columns": 1,
                         "rows": 1,
                         "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "GameObject"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -105.76924896240234,
+                            "y": -40.38462448120117
+                        },
+                        "scale": {
+                            "x": 700.0,
+                            "y": 700.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/hero_spritesheet.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 1,
+                        "elapsedTime": 0.1969478577375412,
+                        "totalFrames": 3,
+                        "columns": 3,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "PlayerScript"
+                        ]
                     }
                 },
                 {

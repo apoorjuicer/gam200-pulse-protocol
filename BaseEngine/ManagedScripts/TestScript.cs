@@ -22,6 +22,7 @@ public class TestScript : Script
     bool deadalready = false;
     float sceneCoolDown = 20.0f;
     bool hasSpawned = false;
+    bool said = false;
     public override void Update()
     {
         Console.Write("Script 1\n");
@@ -29,7 +30,8 @@ public class TestScript : Script
 
         TransformComponent TFC = GetTransform();
         HealthComponent HC = GetHealth();
-        //LogicComponent LC = GetScriptName();
+        Animation AM = GetAnimation();
+        // You can just call factory and scene function since its not tight to any entity
 
         //Timer Example ig :3
         float dt = Time.DeltaTime;
@@ -45,14 +47,17 @@ public class TestScript : Script
         }
 
         // Test modifying health
-        Console.WriteLine($"HP: {HC.hp}, Damage: {HC.damage}, Alive: {HC.isAlive}");
+        //Console.WriteLine($"HP: {HC.hp}, Damage: {HC.damage}, Alive: {HC.isAlive}");
         HC.hp -= 1;  // Decrease health each frame
         HC.damage += 1;  // Increase damage 
+        AM.SetAnimationSpeed(HC.damage);
 
         // Check if dead
-        if (HC.hp <= 0)
+        if (HC.hp <= 0 && !said)
         {
+            said = true;
             HC.isAlive = false; Console.WriteLine("ENTITY IS DEAD!");
+            AM.SetAnimation("hero_spritesheet", 1,3,3,2.0f);
         }
 
 
@@ -78,6 +83,7 @@ public class TestScript : Script
             Factory.Destroy(enemy);
             enemy = -1;
             Console.WriteLine("ENTITY IS DELETED!\n\n\n\n\n\n\n");
+            Console.WriteLine($"Current Animation: {AM.GetCurrentAnimation()}");
             deadalready = true;
         }
 
@@ -87,13 +93,14 @@ public class TestScript : Script
             Console.WriteLine("New Scene Loaded!\n\n\n\n\n\n\n");
             return;
         }
-
+       
         TFC.RotX += 50.0f * dt;
      
         TFC.X += 20.0f * dt ;
         TFC.Y += 20.0f *dt;
 
         Console.WriteLine($"Frams: {Time.FrameCount}, Time: {Time.GameTime}\n\n\n\n\n\n\n");
+        Console.WriteLine($"Current Animation: {AM.GetCurrentAnimation()}");
     }
 }
 
@@ -105,5 +112,6 @@ public class TestScript2 : Script
 
         TFC.ScaleX -= 2.5f;
         TFC.ScaleY -= 2.5f;
+
     }
 }
