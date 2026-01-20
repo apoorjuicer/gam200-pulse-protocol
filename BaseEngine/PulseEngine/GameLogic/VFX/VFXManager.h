@@ -8,6 +8,7 @@ enum class HitResult
 {
     Perfect,
     Good,
+    Bad,
     Miss
 };
 

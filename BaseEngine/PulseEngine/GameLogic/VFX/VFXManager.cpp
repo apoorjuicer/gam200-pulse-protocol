@@ -42,6 +42,10 @@ void VFXManager::OnHit(HitResult r, const glm::vec2& worldPos)
         break;
     case HitResult::Good:
         shake.amplitude = 0.012f; shake.decay = 9.0f;
+        burst.count = 12;
+        break;
+    case HitResult::Bad:
+        shake.amplitude = 0.09f; shake.decay = 8.0f;
         burst.count = 10;
         break;
     case HitResult::Miss:
