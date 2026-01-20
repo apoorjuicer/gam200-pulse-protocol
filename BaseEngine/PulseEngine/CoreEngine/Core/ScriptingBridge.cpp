@@ -17,6 +17,7 @@
 #include "Graphics/Transform.h"
 #include "GameLogic/GameLogic.h"
 #include "CoreEngine/ECS/Coordinator.h"
+#include "Audio/AudioSource.h"
 
 Framework::Transform* ScriptBridge::GetTransformComponent(int ID)
 {
@@ -28,6 +29,12 @@ Health* ScriptBridge::GetHealthComponent(int ID)
 {
 	auto g_coordinator = Coordinator::GetInstance();
 	return &g_coordinator->GetComponent<Health>(ID);
+}
+
+AudioSource* ScriptBridge::GetAudioSourceComponent(int entityID)
+{
+    auto g_coordinator = Coordinator::GetInstance();
+    return &g_coordinator->GetComponent<AudioSource>(entityID);
 }
 
 

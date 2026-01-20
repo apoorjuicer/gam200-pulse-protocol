@@ -45,6 +45,13 @@ public class TestScript : Script
         {
             sceneCoolDown -= dt; // Subtract tiny slice of time
         }
+        //LogicComponent LC = GetScriptName();
+        CollisionComponent CC = GetCollision();
+        
+        
+        Console.WriteLine($"Collided?: {CC.CheckAABB(9)}");
+        Console.WriteLine($"HP: {HC.hp}, Damage: {HC.damage}, Alive: {HC.isAlive}");
+        //Console.WriteLine($"Script being used: {LC.ScriptName}");
 
         // Test modifying health
         //Console.WriteLine($"HP: {HC.hp}, Damage: {HC.damage}, Alive: {HC.isAlive}");

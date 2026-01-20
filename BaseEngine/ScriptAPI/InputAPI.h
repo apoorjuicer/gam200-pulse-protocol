@@ -43,9 +43,15 @@ namespace ScriptAPI
 			bool get();
 		}
 
-		bool IsButtonPressed(int button);
-		bool IsButtonTriggered(int button);
-		bool IsButtonReleased(int button);
+		// FOR MOUSE
+		bool IsMouseButtonPressed(int button);
+		bool IsMouseButtonTriggered(int button);
+		bool IsMouseButtonReleased(int button);
+
+		// FOR INPUT (W, A, S, D)
+		bool IsKeyPressed(int keyCode);
+		bool IsKeyTriggered(int keyCode);
+		bool IsKeyReleased(int keyCode);
 
 	internal:
 		//Constructor when GetInputComponent() with Entity ID gets called

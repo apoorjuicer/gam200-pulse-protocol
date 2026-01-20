@@ -18,6 +18,7 @@
 #include "Health.h"
 #include "Animation.h"
 #include "ScriptName.h"
+#include "Collision.h"
 
 namespace ScriptAPI
 {
@@ -35,6 +36,9 @@ namespace ScriptAPI
     Animation Script::GetAnimation()
     {
         return Animation(EntityID);
+    CollisionComponent Script::GetCollision()
+    {
+        return CollisionComponent(EntityID);
     }
 
     InputComponent Script::GetInput()
@@ -42,4 +46,18 @@ namespace ScriptAPI
         return InputComponent(EntityID);
     }
 
+    AudioComponent Script::GetAudio()
+    {
+        return AudioComponent(EntityID);
+    }
+
+    /*LogicComponent Script::GetScriptName()
+    {
+        return LogicComponent(EntityID);
+    }*/
+
+   /* DeltaTime Script::GetDeltaTime()
+    {
+        return DeltaTime(dt);
+    }*/
 }
