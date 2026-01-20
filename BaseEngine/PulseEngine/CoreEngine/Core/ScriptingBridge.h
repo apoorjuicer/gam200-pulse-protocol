@@ -14,7 +14,8 @@
 #include "CoreEngine/Core/ImportExport.h"
 
 class CoreEngine;
-class Health;
+struct Health;
+struct AudioSource;  
 //class InputManager;
 //class LogicComponent;
 namespace Framework { class Transform; }
@@ -27,6 +28,7 @@ public:
 	//static LogicComponent* GetLogicComponent(int ID);
 	static Framework::Transform* GetTransformComponent(int ID);
 	//static float GetDeltaTime(float dt);
+	static AudioSource* GetAudioSourceComponent(int entityID);
 
 	//void CallHelloWorld(CoreEngine* engine);
 };

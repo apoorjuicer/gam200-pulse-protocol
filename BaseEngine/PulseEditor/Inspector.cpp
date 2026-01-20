@@ -546,14 +546,17 @@ namespace PulseEditor
             ImGui::Separator();
         }
     }
-    void Inspector_TransformComponent(Coordinator *g)
+    void Inspector_TransformComponent(Coordinator* g)
     {
         if (g->HasComponent<Framework::Transform>(selectedEntity))
         {
-            auto &tr = g->GetComponent<Framework::Transform>(selectedEntity);
+            auto& tr = g->GetComponent<Framework::Transform>(selectedEntity);
 
             bool removeTransform = false;
-            bool transformOpen = ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
+            bool transformOpen = ImGui::CollapsingHeader(
+                "Transform",
+                ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap
+            );
             removeTransform = DrawInlineRemoveButton("Transform");
 
             if (removeTransform)
@@ -564,36 +567,75 @@ namespace PulseEditor
             {
                 ImGui::Indent();
 
-                // UNDO Manager
-                //  ====================================================
-                //  1. Save transform data before performing any
-                //  editting, taking a "snapshot" or "backup-copy"
-                //  ====================================================
-                //  ====================================================
-                //  2. Display editable ImGUI widgets for Transform
-                //  and Undo the Changes if CTRL+Z key is pressed
-                //  ====================================================
-                //  --- Position ---
-                float pos[2] = {tr.Pos.x, tr.Pos.y};
+                // --- Position ---
+                float pos[2] = { tr.Pos.x, tr.Pos.y };
                 ImGui::DragFloat2("Position", pos, 0.5f);
                 tr.Pos.x = pos[0];
                 tr.Pos.y = pos[1];
                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
-                // --- Scale ---
-                float sc[2] = {tr.Scale.x, tr.Scale.y};
+
+                // --- Scale + Keep Aspect Ratio ---
+                static std::unordered_map<std::uint32_t, bool>  s_keepAspect;
+                static std::unordered_map<std::uint32_t, float> s_aspectXY; // ratio = X / Y
+
+                const std::uint32_t entKey = static_cast<std::uint32_t>(selectedEntity);
+
+                // current (before edit)
+                float oldX = tr.Scale.x;
+                float oldY = tr.Scale.y;
+
+                bool& keepAspect = s_keepAspect[entKey];
+
+                // checkbox
+                if (ImGui::Checkbox("Keep Aspect Ratio", &keepAspect))
+                {
+                    // When turning ON, capture ratio from current scale
+                    if (std::fabs(oldY) > 1e-6f)
+                        s_aspectXY[entKey] = oldX / oldY;
+                    else
+                        s_aspectXY[entKey] = 1.0f; // fallback if Y is ~0
+                }
+
+                float sc[2] = { tr.Scale.x, tr.Scale.y };
                 ImGui::DragFloat2("Scale", sc, 0.5f);
+
+                if (keepAspect)
+                {
+                    float ratio = (s_aspectXY.count(entKey) ? s_aspectXY[entKey] : 1.0f);
+                    if (std::fabs(ratio) < 1e-6f) ratio = 1.0f;
+
+                    float dx = std::fabs(sc[0] - oldX);
+                    float dy = std::fabs(sc[1] - oldY);
+
+                    // infer which axis user changed more
+                    if (dx > dy)
+                    {
+                        // X changed -> update Y
+                        sc[1] = sc[0] / ratio;
+                    }
+                    else if (dy > dx)
+                    {
+                        // Y changed -> update X
+                        sc[0] = sc[1] * ratio;
+                    }
+                }
+
                 tr.Scale.x = sc[0];
                 tr.Scale.y = sc[1];
                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
+
                 // --- Rotation (deg) ---
                 ImGui::DragFloat("Rotation (deg)", &tr.Rotation.x, 1.0f, -360.f, 360.f);
                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
+
                 // --- Rotation Speed ---
                 ImGui::DragFloat("Rotation Speed", &tr.Rotation.y, 0.1f, -10.0f, 10.0f);
                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
+
                 // --- Visible ---
                 ImGui::Checkbox("Visible", &tr.isVisible);
                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
+
                 ImGui::Unindent();
             }
 
