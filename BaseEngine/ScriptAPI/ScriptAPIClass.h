@@ -16,12 +16,14 @@
 #include "Health.h"
 #include "DeltaTime.h"
 #include "InputAPI.h"
+#include "Collision.h"
 
 namespace ScriptAPI
 {
     //forward delcaration
     value struct TransformComponent;
     value struct HealthComponent;
+    value struct CollisionComponent;
    // value struct DeltaTime 
     //value struct LogicComponent;
 
@@ -33,6 +35,7 @@ namespace ScriptAPI
         TransformComponent GetTransform();
         HealthComponent GetHealth();
         InputComponent GetInput();
+        CollisionComponent GetCollision();
         //DeltaTime GetDeltaTime();
         //LogicComponent GetScriptName();
 
