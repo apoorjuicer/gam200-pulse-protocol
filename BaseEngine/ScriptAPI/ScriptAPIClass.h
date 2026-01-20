@@ -17,6 +17,7 @@
 #include "DeltaTime.h"
 #include "InputAPI.h"
 #include "Collision.h"
+#include "AudioAPI.h"
 
 namespace ScriptAPI
 {
@@ -24,18 +25,21 @@ namespace ScriptAPI
     value struct TransformComponent;
     value struct HealthComponent;
     value struct CollisionComponent;
+    value struct AudioComponent;
    // value struct DeltaTime 
     //value struct LogicComponent;
 
     public ref class Script abstract
     {
     public:
+        virtual void Start() {}
         void virtual Update() {};
 
         TransformComponent GetTransform();
         HealthComponent GetHealth();
         InputComponent GetInput();
         CollisionComponent GetCollision();
+        AudioComponent GetAudio();
         //DeltaTime GetDeltaTime();
         //LogicComponent GetScriptName();
 

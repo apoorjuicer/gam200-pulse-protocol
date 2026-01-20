@@ -47,6 +47,11 @@ namespace ScriptAPI
         return InputComponent(EntityID);
     }
 
+    AudioComponent Script::GetAudio()
+    {
+        return AudioComponent(EntityID);
+    }
+
     /*LogicComponent Script::GetScriptName()
     {
         return LogicComponent(EntityID);
