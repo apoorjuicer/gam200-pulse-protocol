@@ -8,24 +8,22 @@
     "net8.0": []
   },
   "packageFolders": {
-    "C:\\Users\\leuju\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\Reginald Lew\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\leuju\\OneDrive\\Desktop\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+      "projectUniqueName": "C:\\Users\\Reginald Lew\\Documents\\GitHub\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
       "projectName": "ManagedScripts",
-      "projectPath": "C:\\Users\\leuju\\OneDrive\\Desktop\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
-      "packagesPath": "C:\\Users\\leuju\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\leuju\\OneDrive\\Desktop\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\obj\\",
+      "projectPath": "C:\\Users\\Reginald Lew\\Documents\\GitHub\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+      "packagesPath": "C:\\Users\\Reginald Lew\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Reginald Lew\\Documents\\GitHub\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\leuju\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\Reginald Lew\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -72,7 +70,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.308/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

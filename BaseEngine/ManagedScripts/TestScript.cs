@@ -23,9 +23,12 @@ public class TestScript : Script
         TransformComponent TFC = GetTransform();
         HealthComponent HC = GetHealth();
         //LogicComponent LC = GetScriptName();
+        CollisionComponent CC = GetCollision();
         
+        bool T= CC.CheckAABB(9);
 
-        Console.WriteLine($"HP: {HC.hp}, Damage: {HC.damage}, Alive: {HC.isAlive}");
+
+        Console.WriteLine($"HP: {HC.hp}, Damage: {HC.damage}, Alive: {HC.isAlive}, {T}");
         //Console.WriteLine($"Script being used: {LC.ScriptName}");
 
         // Test modifying health

@@ -17,6 +17,7 @@
 #include "TransformComponent.h"
 #include "Health.h"
 #include "ScriptName.h"
+#include "Collision.h"
 
 namespace ScriptAPI
 {
@@ -31,6 +32,10 @@ namespace ScriptAPI
         return HealthComponent(EntityID);
     }
 
+    CollisionComponent Script::GetCollision()
+    {
+        return CollisionComponent(EntityID);
+    }
 
     //std::optional<int> Script::Instantiate(System::String^ ScriptName)
     //{
