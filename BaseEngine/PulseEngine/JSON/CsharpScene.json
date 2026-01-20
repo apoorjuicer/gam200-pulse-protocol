@@ -11,8 +11,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -906.075927734375,
-                            "y": -309.5775146484375
+                            "x": -1106.0760498046875,
+                            "y": -481.88519287109375
                         },
                         "scale": {
                             "x": 700.0,
@@ -43,8 +43,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.5797467827796936,
+                        "currentFrame": 0,
+                        "elapsedTime": 0.5655507445335388,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -273,8 +273,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -105.76924896240234,
-                            "y": -40.38462448120117
+                            "x": -1124.23046875,
+                            "y": 267.3077087402344
                         },
                         "scale": {
                             "x": 700.0,
@@ -306,7 +306,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.1969478577375412,
+                        "elapsedTime": 0.18275362253189087,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
