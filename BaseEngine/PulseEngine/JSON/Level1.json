@@ -77,7 +77,7 @@
                     "transform": {
                         "position": {
                             "x": -931.922119140625,
-                            "y": -348.49798583984377
+                            "y": -348.49798583984375
                         },
                         "scale": {
                             "x": 636.3574829101563,
@@ -109,7 +109,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.46324622631073,
+                        "elapsedTime": 0.05665600672364235,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -118,7 +118,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "PlayerScript"
+                        "ScriptName": []
                     }
                 },
                 {
@@ -181,7 +181,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1622.7440185546876,
+                            "x": 1622.7440185546875,
                             "y": -348.4979553222656
                         },
                         "scale": {
@@ -223,7 +223,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "EnemyScript"
+                        "ScriptName": []
                     }
                 },
                 {
@@ -269,7 +269,7 @@
                 {
                     "audiosource": {
                         "audio_id": "SFX_Invalid_Key",
-                        "volume": 0.17000000178813935,
+                        "volume": 0.17000000178813934,
                         "loop": false,
                         "playOnAwake": false
                     }
@@ -323,7 +323,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "ButtonScript"
+                        "ScriptName": []
                     }
                 },
                 {
@@ -350,7 +350,7 @@
                             "y": 628.3078002929688
                         },
                         "scale": {
-                            "x": 440.83599853515627,
+                            "x": 440.83599853515625,
                             "y": 154.0
                         },
                         "rotation": {
@@ -448,7 +448,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "PulsingBorderScript"
+                        "ScriptName": []
                     }
                 },
                 {
@@ -467,7 +467,7 @@
                 {
                     "audiosource": {
                         "audio_id": "SFX_Border_Beat",
-                        "volume": 0.18000000715255738,
+                        "volume": 0.18000000715255737,
                         "loop": false,
                         "playOnAwake": false
                     }
@@ -586,7 +586,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "EnemyScript"
+                        "ScriptName": []
                     }
                 },
                 {
@@ -644,7 +644,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -44.30799865722656,
+                            "x": 17.23040771484375,
                             "y": -98.46154022216797
                         },
                         "scale": {
@@ -686,7 +686,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "CountdownScript"
+                        "ScriptName": []
                     }
                 },
                 {
@@ -724,199 +724,8 @@
                             1.0,
                             1.0
                         ],
-                        "visible": true
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 73.846435546875,
-                            "y": 675.6923828125
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 90.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Sword UI.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Sword"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -373.5386047363281,
-                            "y": 450.46160888671877
-                        },
-                        "scale": {
-                            "x": 95.0,
-                            "y": 95.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/W.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "W"
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "W",
-                        "isLinked": true
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -49.84672546386719,
-                            "y": 450.4620056152344
-                        },
-                        "scale": {
-                            "x": 96.0,
-                            "y": 96.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/A.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "A"
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "A",
-                        "isLinked": true
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 0,
-                        "z": 0.0
+                        "visible": true,
+                        "alignment": 1
                     }
                 }
             ]
@@ -930,8 +739,8 @@
                             "y": 159.99996948242188
                         },
                         "scale": {
-                            "x": 146.60443115234376,
-                            "y": 146.60443115234376
+                            "x": 146.60443115234375,
+                            "y": 146.60443115234375
                         },
                         "rotation": {
                             "x": 0.0,
@@ -968,144 +777,12 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "FeedbackScript"
+                        "ScriptName": []
                     }
                 },
                 {
                     "name": {
                         "name": "Feedback"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 235.69207763671876,
-                            "y": 450.46160888671877
-                        },
-                        "scale": {
-                            "x": 95.0,
-                            "y": 95.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/W.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "W"
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "W",
-                        "isLinked": true
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 547.0765991210938,
-                            "y": 450.4620056152344
-                        },
-                        "scale": {
-                            "x": 96.0,
-                            "y": 96.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/A.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "A"
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "A",
-                        "isLinked": true
                     }
                 },
                 {
