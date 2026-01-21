@@ -34,6 +34,7 @@
 // #include "glapp.h"
 #include "Resources/AssetRegistry.h"
 #include "CoreEngine/Asset/AssetsManager.h"
+#include "GameState.h"
 
 #include "Components/DisplayName.h"
 #include "Components/EntityType.h"
@@ -1176,6 +1177,8 @@ void CoreEngine::RenderDebugDraw()
 void CoreEngine::PlayGame()
 {
 	m_isPlaying = true;
+	m_paused = false;
+	Framework::GameState::SetPlaying(true);
 	auto coord = Coordinator::GetInstance();
 
 	// ALWAYS update the original scene path when Play is pressed
@@ -1219,6 +1222,8 @@ void CoreEngine::PlayGame()
 void CoreEngine::StopGame()
 {
 	m_isPlaying = false;
+	m_paused = true;
+	Framework::GameState::SetPlaying(false);
 	auto coord = Coordinator::GetInstance();
 
 	// Stop all audio (BGM and AudioSource components)
@@ -1265,6 +1270,8 @@ void CoreEngine::RestartRuntimeForPlay()
 void CoreEngine::PauseGame()
 {
 	m_isPlaying = false;
+	m_paused = true;
+	Framework::GameState::SetPlaying(false);
 	auto coord = Coordinator::GetInstance();
 
 	if (auto audio = coord->GetSystem<AudioManager>()) {
@@ -1275,6 +1282,8 @@ void CoreEngine::PauseGame()
 void CoreEngine::ResumeGame()
 {
 	m_isPlaying = true;
+	m_paused = false;
+	Framework::GameState::SetPlaying(true);
 	auto coord = Coordinator::GetInstance();
 
 	if (auto audio = coord->GetSystem<AudioManager>()) {
