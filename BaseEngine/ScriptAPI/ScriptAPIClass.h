@@ -16,6 +16,7 @@
 #include "Health.h"
 #include "DeltaTime.h"
 #include "InputAPI.h"
+#include "Collision.h"
 #include "AudioAPI.h"
 
 namespace ScriptAPI
@@ -23,6 +24,10 @@ namespace ScriptAPI
     //forward delcaration
     value struct TransformComponent;
     value struct HealthComponent;
+    value struct Factory;
+    value struct Animation;
+    // value struct DeltaTime 
+    value struct CollisionComponent;
     value struct AudioComponent;
    // value struct DeltaTime 
     //value struct LogicComponent;
@@ -35,7 +40,9 @@ namespace ScriptAPI
 
         TransformComponent GetTransform();
         HealthComponent GetHealth();
+        Animation GetAnimation();
         InputComponent GetInput();
+        CollisionComponent GetCollision();
         AudioComponent GetAudio();
         //DeltaTime GetDeltaTime();
         //LogicComponent GetScriptName();
@@ -58,6 +65,5 @@ namespace ScriptAPI
 
     private:
         int EntityID;
-        //int dt;
     };
 }

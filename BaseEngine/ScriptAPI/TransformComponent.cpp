@@ -55,7 +55,6 @@ namespace ScriptAPI
 	}
 
 
-
 	// Rotation acessor and modifer
 	float TransformComponent::RotX::get()
 	{
@@ -85,6 +84,7 @@ namespace ScriptAPI
 		transform.Rotation.y = value;
 	}
 
+
 	// Translate accessor and modifer 
 	float TransformComponent::X::get()
 	{
@@ -113,6 +113,4 @@ namespace ScriptAPI
 		auto& transform = g_coordinator->GetComponent<Framework::Transform>(entityID);
 		transform.Pos.y = value;
 	}
-
-
 }
