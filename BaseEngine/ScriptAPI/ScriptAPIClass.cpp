@@ -36,6 +36,8 @@ namespace ScriptAPI
     Animation Script::GetAnimation()
     {
         return Animation(EntityID);
+    }
+
     CollisionComponent Script::GetCollision()
     {
         return CollisionComponent(EntityID);
