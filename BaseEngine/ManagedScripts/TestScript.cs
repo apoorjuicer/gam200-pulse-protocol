@@ -29,6 +29,7 @@ public class TestScript : Script
         //Console.WriteLine("[Testing CSHARP]: Hello from ManagedScripts! \n ");
 
         TransformComponent TFC = GetTransform();
+        CollisionComponent CC = GetCollision();
         HealthComponent HC = GetHealth();
         Animation AM = GetAnimation();
         // You can just call factory and scene function since its not tight to any entity
@@ -44,10 +45,7 @@ public class TestScript : Script
         if (sceneCoolDown > 0)
         {
             sceneCoolDown -= dt; // Subtract tiny slice of time
-        }
-        //LogicComponent LC = GetScriptName();
-        CollisionComponent CC = GetCollision();
-        
+        }        
         
         Console.WriteLine($"Collided?: {CC.CheckAABB(9)}");
         Console.WriteLine($"HP: {HC.hp}, Damage: {HC.damage}, Alive: {HC.isAlive}");
