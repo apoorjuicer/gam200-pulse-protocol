@@ -14,7 +14,7 @@
  /******************************************************************************/
 #include "Animation.h"
 #include "Math/math.h"
-#include "../GameState.h"
+
 
 namespace Framework
 {
