@@ -101,8 +101,8 @@ public class TestScript : Script
        
         TFC.RotX += 50.0f * dt;
      
-        TFC.X += 20.0f * dt ;
-        TFC.Y += 20.0f *dt;
+        TFC.X -= 20.0f * dt ;
+        TFC.Y -= 20.0f *dt;
 
         Console.WriteLine($"Frams: {Time.FrameCount}, Time: {Time.GameTime}\n\n\n\n\n\n\n");
         Console.WriteLine($"Current Animation: {AM.GetCurrentAnimation()}");

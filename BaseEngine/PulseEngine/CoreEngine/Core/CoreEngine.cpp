@@ -70,6 +70,8 @@ Framework::Transform* CoreEngine::GetTransformComponent(int ID)
 // contained within it to interface with the .NET runtime
 void CoreEngine::startScriptEngine()
 {
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
+
 	// Steppppppppppp 1, we get the current executable directory so that we can find the coreclr.dll to load
 	std::string runtimePath(MAX_PATH, '\0');
 
@@ -152,7 +154,7 @@ void CoreEngine::startScriptEngine()
 		throw std::runtime_error(oss.str());
 	}
 
-
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
 }
 
 // Unload the .NET runtime 
@@ -228,8 +230,11 @@ void CoreEngine::CompileScriptAssembly()
 		return;
 	}
 
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
+
 	std::wstring buildCmd = L" build \"" + projectPath.wstring() + L"\" -c Debug -p:Platform=x64";
 
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
 
 	// Define the struct to config the compiler process call
 	STARTUPINFOW startInfo;
@@ -238,10 +243,14 @@ void CoreEngine::CompileScriptAssembly()
 	ZeroMemory(&pi, sizeof(pi));
 	startInfo.cb = sizeof(startInfo);
 
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
+
 	// Start compiler process
 	const auto Launch = CreateProcessW(L"C:\\Program Files\\dotnet\\dotnet.exe", 
 		                              buildCmd.data(),nullptr, nullptr, true, NULL, nullptr, nullptr,
 		                              &startInfo, &pi);
+
+	std::cout << Launch << "\n\n\n\n\n";
 
 	// Check that we launched the process
 	if (!Launch)
@@ -275,6 +284,31 @@ void CoreEngine::CompileScriptAssembly()
 #ifdef _DEBUG
 		std::cout << "[CoreEngine] Scripts compiled successfully!\n";
 #endif
+
+		// Copy the ManageScripts.dll to the PulseEditor and PulseProtocol cos ITS FUCKING STUPID FK CMAKE BS
+		std::filesystem::path dllSource = baseEngineDir / "build" / ".bin" / "Debug-x64" / "ManagedScripts.dll";
+		std::filesystem::path dllDest1 = baseEngineDir / "build" / "PulseEditor" / "Debug" / "ManagedScripts.dll";
+		std::filesystem::path dllDest2 = baseEngineDir / "build" / "PulseProtocol" / "Debug" / "ManagedScripts.dll";
+
+		if (!std::filesystem::exists(dllSource))
+		{
+			std::cerr << "[Hot Reload] ERROR: Built DLL not found!" << std::endl;
+			return;
+		}
+
+		try
+		{
+			std::filesystem::copy_file(dllSource, dllDest1, std::filesystem::copy_options::overwrite_existing);
+			std::filesystem::copy_file(dllSource, dllDest2, std::filesystem::copy_options::overwrite_existing);
+#ifdef _DEBUG
+			std::cout << "[CoreEngine] ManagedScripts.dll copied to both locations!\n";
+#endif
+		}
+
+		catch (const std::exception& e)
+		{
+			std::cerr << "[Hot Reload] ERROR copying DLL: " << e.what() << std::endl;
+		}
 	}
 
 	else
@@ -625,11 +659,14 @@ void CoreEngine::Init()
 	//	std::cout << "Texture loaded and assigned to box 2: " << barTexture << std::endl;
 	// }
 
+	std::cout << "[CHEESE BURGER FOR SALE] " << std::filesystem::current_path() << std::endl;
+
 	GameRunning = true;	 // 3.. 2.. 1.. GAME START
 	startScriptEngine(); // 3.. 2.. 1.. DLL SCRIPT! START ROLLINGGGGGGGGGGGGGGGGGG
 
 	CompileScriptAssembly();
 
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
 	// Step 1. Get the function ptrs
 	InitFunctionPtr initFunc = GetFunctionPtr<InitFunctionPtr>
 		(
@@ -654,6 +691,7 @@ void CoreEngine::Init()
 	// Step 2: Initialize it with  pointer to CoreEngine as param
 	initFunc(this); 
 
+	std::cout << "here?\n\n\n\n";
 
 	g_coordinator->InitializeAllSystems();
 }
