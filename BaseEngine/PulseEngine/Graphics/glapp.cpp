@@ -14,7 +14,7 @@
  /******************************************************************************/
 #include "glapp.h"
 #include <filesystem>
-#include "GameState.h"
+#include "GameState/GameState.h"
 /*                                                   objects with file scope
 ----------------------------------------------------------------------------- */
 // define singleton containers
