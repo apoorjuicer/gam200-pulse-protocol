@@ -52,7 +52,8 @@ void SceneManager::Init()
 	// Starting scene will be main menu
 	LoadSceneFromJson(StartingScene);
 #ifdef _DEBUG
-	std::cout << std::filesystem::absolute("../../../PulseEngine/JSON/MainMenu.json") << std::endl;
+	std::cout << std::filesystem::absolute(StartingScene) << std::endl;
+	std::cout << std::filesystem::current_path() << std::endl;
 #endif
 	PreviousScene = CurrentScene;
 
@@ -95,9 +96,23 @@ void SceneManager::SaveCurrentScene()
 	d.SetObject();
 	auto& alloc = d.GetAllocator();
 
+	// Make it so that it saves from the BaseEngine onwards, which we can then save to PulseEngfie/Json file
+	char exePath[MAX_PATH];
+	GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+	std::filesystem::path basePath = std::filesystem::path(exePath).parent_path(); // Remove exe name
+
+	std::cout << std::filesystem::absolute(basePath) << std::endl;
+	std::cout << std::filesystem::absolute(basePath.parent_path()) << std::endl;
+	std::cout << std::filesystem::absolute(basePath.parent_path().parent_path()) << std::endl;
+	std::cout << std::filesystem::absolute(basePath.parent_path().parent_path().parent_path()) << std::endl;
+
+	//  ONE MORE parent_path() to get OUT of build folder!
+	std::filesystem::path path = basePath.parent_path().parent_path().parent_path() / "PulseEngine" / "JSON" / (CurrentScene + ".json");
+	
+
 	// grab scene name for the json file name
 #ifdef _DEBUG
-	std::filesystem::path path = "../../PulseEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
+	//std::filesystem::path path = "../../PulseEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
 	std::cout << std::filesystem::absolute(path) << std::endl;
 #endif
 	// Save scene name first

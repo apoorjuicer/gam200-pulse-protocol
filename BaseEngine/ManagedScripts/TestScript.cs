@@ -25,7 +25,7 @@ public class TestScript : Script
     bool said = false;
     public override void Update()
     {
-        Console.Write("Script 1\n");
+        Console.Write("gay 1\n");
         //Console.WriteLine("[Testing CSHARP]: Hello from ManagedScripts! \n ");
 
         TransformComponent TFC = GetTransform();
