@@ -45,8 +45,6 @@ namespace PulseEditor {
     void Draw();
     void Render();
     void Shutdown();
-    void SetEnabled(bool enabled);
-    bool IsEnabled();
     bool IsPlaying();
     void SetPlaying(bool p);
 
