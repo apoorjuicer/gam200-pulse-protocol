@@ -427,7 +427,7 @@ namespace PulseEditor
                             // Convert to relative path
                             size_t pos = pathStr.find("PulseEngine/Assets");
                             if (pos != std::string::npos)
-                                rend.spriteName = "../../" + pathStr.substr(pos);
+                                rend.spriteName = "../../../" + pathStr.substr(pos);
                             else
                                 rend.spriteName = pathStr;
 
