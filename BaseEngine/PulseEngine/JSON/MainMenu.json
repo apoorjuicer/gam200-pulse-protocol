@@ -66,7 +66,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -752.7066040039063,
+                            "x": -761.1705322265625,
                             "y": -2.6414566040039063
                         },
                         "scale": {
@@ -104,14 +104,6 @@
                         "columns": 1,
                         "rows": 1,
                         "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "SimpleClickDetectScript",
-                            "SimpleMovementScript"
-                        ]
                     }
                 },
                 {
