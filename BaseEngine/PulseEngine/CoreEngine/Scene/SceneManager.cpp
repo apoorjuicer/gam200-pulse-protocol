@@ -51,6 +51,9 @@ void SceneManager::Init()
 {
 	// Starting scene will be main menu
 	LoadSceneFromJson(StartingScene);
+#ifdef _DEBUG
+	std::cout << std::filesystem::absolute("../../../PulseEngine/JSON/MainMenu.json") << std::endl;
+#endif
 	PreviousScene = CurrentScene;
 
 	// testing for it it works 
@@ -93,8 +96,10 @@ void SceneManager::SaveCurrentScene()
 	auto& alloc = d.GetAllocator();
 
 	// grab scene name for the json file name
+#ifdef _DEBUG
 	std::filesystem::path path = "../../PulseEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
-
+	std::cout << std::filesystem::absolute(path) << std::endl;
+#endif
 	// Save scene name first
 	Value SceneName;
 	SceneName.SetString(CurrentScene.c_str(), static_cast<SizeType>(CurrentScene.length()), alloc);
@@ -329,9 +334,10 @@ void SceneManager::UnloadCurrentScene()
 #endif
 
 	auto* g_coordinator = Coordinator::GetInstance();
+#ifdef _DEBUG
 	std::cout << "[SceneManager::UnloadCurrentScene] Got coordinator: " << (g_coordinator ? "YES" : "NO") << std::endl;
 	std::cout << "[SceneManager::UnloadCurrentScene] SceneEntityList size: " << SceneEntityList.size() << std::endl;
-
+#endif
 	// Call Exit() on all scripts BEFORE destroying entities
 	auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
 	std::cout << "[SceneManager::UnloadCurrentScene] Got LogicSystem: " << (logicSystem ? "YES" : "NO") << std::endl;
@@ -381,7 +387,9 @@ void SceneManager::UnloadCurrentScene()
 
 
 	// Clear the Csharp script when scene change
+#ifdef _DEBUG
 	std::cout << "[SceneManager::UnloadCurrentScene] Clearing C# scripts..." << std::endl;
+#endif
 	if (m_coreEngine && m_coreEngine->clearScriptsFunc)
 	{
 		m_coreEngine->clearScriptsFunc();
@@ -485,21 +493,9 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 			if (component.HasMember("transform") && component["transform"].IsObject())
 			{
-				//void AddTransformComponent(entity)
-
-				/*void AddTransformComponent(Entity entity);
-				{
-					Framework::Transform t;
-					t.Deserialize(component["transform"]);
-					g_coordinator->AddComponent<Framework::Transform>(entity, t);
-				}*/
 				Framework::Transform t;
 				t.Deserialize(component["transform"]);
 				g_coordinator->AddComponent<Framework::Transform>(entity, t);
-
-				// DEBUG: Print what we just loaded
-				//std::cout << "[SceneManager] Loaded transform at ("
-				//	<< t.Pos.x << ", " << t.Pos.y << ")" << std::endl;
 			}
 
 			if (component.HasMember("render") && component["render"].IsObject())
@@ -623,10 +619,6 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 		// save obj to a vector for deleting later
 		SceneEntityList.push_back(entity);
-
-		//std::cout << "[SceneManager] Created " << SceneEntityList.size() << " entities" << std::endl;
-		//std::cout << "[SceneManager] Total entities in system: "
-		//	<< g_coordinator->GetAllEntities().size() << std::endl;
 	}
 
 	ChangeCurrentScene(d["scene"].GetString());
@@ -639,9 +631,10 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 		"AddScriptViaName"
 	);
 
+#ifdef _DEBUG
 	std::cout << "[SceneManager] addScriptFunc = " << (addScriptFunc ? "FOUND" : "NULL") << "\n";
 	std::cout << "[SceneManager] SceneEntityList.size() = " << SceneEntityList.size() << "\n";
-
+#endif
 
 	/*for (Entity entity : SceneEntityList)
 	{
@@ -712,10 +705,12 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			}
 		}
 
+#ifdef _DEBUG
 		std::cout << "\n[SceneManager] ========== SUMMARY ==========\n";
 		std::cout << "[SceneManager] Total entities checked: " << SceneEntityList.size() << "\n";
 		std::cout << "[SceneManager] Total scripts attached: " << totalAttached << "\n";
 		std::cout << "[SceneManager] ============================\n";
+#endif
 	}
 
 
@@ -753,6 +748,8 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	std::cout << "\n===================================================" << std::endl;
 	std::cout << "   [Scene Manager]: " << CurrentScene << " loaded successfully!" << std::endl;
 	std::cout << "===================================================" << std::endl;
+
+	std::cout << std::filesystem::absolute(path) << std::endl;
 #endif
 }
 

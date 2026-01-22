@@ -546,6 +546,8 @@ namespace PulseEditor
             ImGui::Separator();
         }
     }
+
+
     void Inspector_TransformComponent(Coordinator* g)
     {
         if (g->HasComponent<Framework::Transform>(selectedEntity))
@@ -574,46 +576,53 @@ namespace PulseEditor
                 tr.Pos.y = pos[1];
                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
 
-                // --- Scale + Keep Aspect Ratio ---
+                // --- Scale + Keep Aspect Ratio (Option A: changing both updates ratio) ---
                 static std::unordered_map<std::uint32_t, bool>  s_keepAspect;
                 static std::unordered_map<std::uint32_t, float> s_aspectXY; // ratio = X / Y
 
                 const std::uint32_t entKey = static_cast<std::uint32_t>(selectedEntity);
 
-                // current (before edit)
+                // capture old values before editing
                 float oldX = tr.Scale.x;
                 float oldY = tr.Scale.y;
 
                 bool& keepAspect = s_keepAspect[entKey];
 
-                // checkbox
                 if (ImGui::Checkbox("Keep Aspect Ratio", &keepAspect))
                 {
-                    // When turning ON, capture ratio from current scale
-                    if (std::fabs(oldY) > 1e-6f)
-                        s_aspectXY[entKey] = oldX / oldY;
-                    else
-                        s_aspectXY[entKey] = 1.0f; // fallback if Y is ~0
+                    // when toggled ON, capture current ratio
+                    if (keepAspect)
+                    {
+                        if (std::fabs(oldY) > 1e-6f) s_aspectXY[entKey] = oldX / oldY;
+                        else                         s_aspectXY[entKey] = 1.0f;
+                    }
                 }
 
                 float sc[2] = { tr.Scale.x, tr.Scale.y };
                 ImGui::DragFloat2("Scale", sc, 0.5f);
 
+                const float eps = 1e-6f;
+                bool changedX = (std::fabs(sc[0] - oldX) > eps);
+                bool changedY = (std::fabs(sc[1] - oldY) > eps);
+
                 if (keepAspect)
                 {
                     float ratio = (s_aspectXY.count(entKey) ? s_aspectXY[entKey] : 1.0f);
-                    if (std::fabs(ratio) < 1e-6f) ratio = 1.0f;
+                    if (std::fabs(ratio) < eps) ratio = 1.0f;
 
-                    float dx = std::fabs(sc[0] - oldX);
-                    float dy = std::fabs(sc[1] - oldY);
-
-                    // infer which axis user changed more
-                    if (dx > dy)
+                    if (changedX && changedY)
+                    {
+                        // user changed BOTH -> treat as new ratio and remember it
+                        if (std::fabs(sc[1]) > eps) s_aspectXY[entKey] = sc[0] / sc[1];
+                        else                        s_aspectXY[entKey] = 1.0f;
+                        // do not force either axis this frame
+                    }
+                    else if (changedX)
                     {
                         // X changed -> update Y
                         sc[1] = sc[0] / ratio;
                     }
-                    else if (dy > dx)
+                    else if (changedY)
                     {
                         // Y changed -> update X
                         sc[0] = sc[1] * ratio;
@@ -642,6 +651,10 @@ namespace PulseEditor
             ImGui::Separator();
         }
     }
+
+
+
+   
     void Inspector_RenderableComponent(Coordinator *g)
     {
         if (g->HasComponent<Framework::Renderable>(selectedEntity))
@@ -1431,6 +1444,25 @@ namespace PulseEditor
             if (ImGui::IsItemHovered())
             {
                 ImGui::SetTooltip("Offset from the entity's Transform position.\nUseful for positioning text relative to a sprite.");
+            }
+
+            // === Text Alignment ===
+            ImGui::Text("Alignment:");
+            ImGui::SameLine();
+
+            const char* alignmentOptions[] = { "Left", "Center", "Right" };
+            int currentAlignment = static_cast<int>(txt.alignment);
+
+            ImGui::SetNextItemWidth(150.0f);
+            if (ImGui::Combo("##TextAlignment", &currentAlignment, alignmentOptions, IM_ARRAYSIZE(alignmentOptions)))
+            {
+                txt.alignment = static_cast<TextAlignment>(currentAlignment);
+            }
+            ImGui::SameLine();
+            ImGui::TextDisabled("(?)");
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::SetTooltip("Left: Text starts at position\nCenter: Text centered on position\nRight: Text ends at position");
             }
 
             // === Visibility Toggle ===

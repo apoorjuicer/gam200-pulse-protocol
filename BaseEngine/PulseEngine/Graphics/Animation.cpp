@@ -14,28 +14,28 @@
  /******************************************************************************/
 #include "Animation.h"
 #include "Math/math.h"
+#include "../GameState.h"
 
 namespace Framework
 {
-	static inline bool IsSingleImage(const Framework::Animation& a) {
-		// treat anything that's logically 1 frame as "not a spritesheet"
+	bool Animation::IsSingleImage(const Animation& a) {
 		return (a.rows <= 1 && a.columns <= 1) || a.totalFrames <= 1;
 	}
 
-	// Pseudocode in your per-frame update for an entity:
-	void TickAnimation(Framework::Animation& anim, float dt)
-	{
-		if (IsSingleImage(anim)) {
-			anim.currentFrame = 0;
-			anim.elapsedTime = 0.0f; // keep it frozen
+	void Animation::Tick(float dt) {
+		if (!Framework::GameState::IsPlaying()) return;
+
+		if (IsSingleImage(*this)) {
+			currentFrame = 0;
+			elapsedTime = 0.0f;
 			return;
 		}
 
-		anim.elapsedTime += dt;
-		const float secondsPerFrame = (anim.animationSpeed > 0.0f) ? (1.0f / anim.animationSpeed) : 1.0f;
-		while (anim.elapsedTime >= secondsPerFrame) {
-			anim.elapsedTime -= secondsPerFrame;
-			anim.currentFrame = (anim.currentFrame + 1) % std::max(1, anim.totalFrames);
+		elapsedTime += dt;
+		float spf = (animationSpeed > 0.0f) ? (1.0f / animationSpeed) : 1.0f;
+		while (elapsedTime >= spf) {
+			elapsedTime -= spf;
+			currentFrame = (currentFrame + 1) % std::max(1, totalFrames);
 		}
 	}
 

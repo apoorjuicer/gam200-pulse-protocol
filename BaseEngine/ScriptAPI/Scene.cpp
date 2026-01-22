@@ -38,5 +38,7 @@ namespace ScriptAPI
 		sceneManager->LoadSceneFromJson(Filename_pathway);
 
 		System::Console::WriteLine("Loaded new scene\n");
+
+		//Give reg access to container of entity in scene with script component 
 	}
 }

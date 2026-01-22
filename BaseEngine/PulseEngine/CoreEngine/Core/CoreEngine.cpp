@@ -34,6 +34,7 @@
 // #include "glapp.h"
 #include "Resources/AssetRegistry.h"
 #include "CoreEngine/Asset/AssetsManager.h"
+#include "GameState.h"
 
 #include "Components/DisplayName.h"
 #include "Components/EntityType.h"
@@ -195,16 +196,41 @@ std::string CoreEngine::buildTpaList(const std::string& directory)
 	return tpaList.str();
 }
 
+
 void CoreEngine::CompileScriptAssembly()
 {
-	const char* PROJ_PATH = "..\\..\\..\\ManagedScripts\\ManagedScripts.csproj";
+#ifdef _DEBUG
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
+#endif
 
+	// Calculate from current working dir (wherever we are)
+	auto currentDir = std::filesystem::current_path();
 
-	std::wstring buildCmd = L" build \"" + std::filesystem::absolute(PROJ_PATH).wstring() +
-		L"\" -c Debug -p:Platform=x64";
+	// Go up to BaseEngine folder
+	auto baseEngineDir = currentDir;
+	while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+	{
+		baseEngineDir = baseEngineDir.parent_path();
+	}
 
-	//std::wstring buildCmd = L" build \"" + std::filesystem::absolute(PROJ_PATH).wstring() +
-		//	                L"\" -c Debug --no-self-contained " + L"-o \"./tmp_build/\" -r \"win-x64\"";
+#ifdef _DEBUG
+	std::cout << "[Hot Reload] BaseEngine dir: " << baseEngineDir << std::endl;
+#endif
+
+	auto projectPath = baseEngineDir / "ManagedScripts" / "ManagedScripts.csproj";
+
+#ifdef _DEBUG
+	std::cout << "[Hot Reload] Project path: " << projectPath << std::endl;
+#endif
+
+	if (!std::filesystem::exists(projectPath))
+	{
+		std::cerr << "[Hot Reload] ERROR: Project not found!" << std::endl;
+		return;
+	}
+
+	std::wstring buildCmd = L" build \"" + projectPath.wstring() + L"\" -c Debug -p:Platform=x64";
+
 
 	// Define the struct to config the compiler process call
 	STARTUPINFOW startInfo;
@@ -247,20 +273,20 @@ void CoreEngine::CompileScriptAssembly()
 
 	if (exitCode == 0)
 	{
+#ifdef _DEBUG
 		std::cout << "[CoreEngine] Scripts compiled successfully!\n";
-
-		std::filesystem::path dllSource = "../../.bin/Debug-x64/ManagedScripts.dll";
-		std::filesystem::path dllDest = "ManagedScripts.dll";
-		std::filesystem::copy_file(dllSource, dllDest, std::filesystem::copy_options::overwrite_existing);
-
-		std::cout << "[CoreEngine] ManagedScripts.dll copied!\n";
+#endif
 	}
 
 	else
 	{
 		std::cerr << "[CoreEngine] Build failed! Exit code: " << exitCode << "\n";
 	}
+
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
 }
+
 
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
@@ -740,8 +766,26 @@ void CoreEngine::Update(float dt)
 	{
 		if (!wasRPressed)
 		{
+#ifdef _DEBUG
 			std::cout << "[Hot Reload] Recompiling scripts...\n";
+#endif
 			CompileScriptAssembly();
+
+			//change the working directory so that i can get the .net stuff for hot reload else I will skin my pet goldfish alive
+			HMODULE hEngine = GetModuleHandleA("PulseEngine.dll");
+			if (hEngine)
+			{
+				std::string debugPath(MAX_PATH, '\0');
+				GetModuleFileNameA(hEngine, debugPath.data(), MAX_PATH);
+				PathRemoveFileSpecA(debugPath.data());
+				debugPath.resize(std::strlen(debugPath.data()));
+
+#ifdef _DEBUG
+				std::cout << "[Hot Reload] Setting working dir to: " << debugPath << std::endl;
+#endif
+				std::filesystem::current_path(debugPath);
+			}
+
 
 			auto reloadScripts = GetFunctionPtr<void(*)(void)>
 				(
@@ -750,7 +794,7 @@ void CoreEngine::Update(float dt)
 					"Reload"
 				);
 
-			reloadScripts(); 
+			reloadScripts();
 
 		}
 
@@ -836,21 +880,31 @@ void CoreEngine::Update(float dt)
 
 void CoreEngine::GameLoop()
 {
-    LastTime = timeGetTime();
+    //LastTime = timeGetTime();		
+	LastFrame = timeGetTime();
+
     auto profiler = ProfilingManager::GetInstance();
 
     while (!glfwWindowShouldClose(window) && GameRunning)
     {
         // --- dt calculation ---
-        unsigned currenttime = timeGetTime();
-        float dt = (currenttime - LastTime) / 1000.0f;
-        LastTime = currenttime;
+        //unsigned currenttime = timeGetTime();
+        //float dt = (currenttime - LastTime) / 1000.0f;
+        //LastTime = currenttime;
+
+		CurrentFrame = timeGetTime();
+		DeltaTime = (CurrentFrame - LastFrame) / 1000.f;
+		LastFrame = CurrentFrame;
+
+		// --- count frames and time ---
+		FrameCount++;
+		TimePassed += DeltaTime;
 
         glfwPollEvents();
 
         // --- Game update (ECS systems) ---
         profiler->StartFrame();
-        Update(dt);
+        Update(DeltaTime);
         profiler->EndFrame();
 
         // --- Game rendering ---
@@ -1123,6 +1177,8 @@ void CoreEngine::RenderDebugDraw()
 void CoreEngine::PlayGame()
 {
 	m_isPlaying = true;
+	m_paused = false;
+	Framework::GameState::SetPlaying(true);
 	auto coord = Coordinator::GetInstance();
 
 	// ALWAYS update the original scene path when Play is pressed
@@ -1166,6 +1222,8 @@ void CoreEngine::PlayGame()
 void CoreEngine::StopGame()
 {
 	m_isPlaying = false;
+	m_paused = true;
+	Framework::GameState::SetPlaying(false);
 	auto coord = Coordinator::GetInstance();
 
 	// Stop all audio (BGM and AudioSource components)
@@ -1212,6 +1270,8 @@ void CoreEngine::RestartRuntimeForPlay()
 void CoreEngine::PauseGame()
 {
 	m_isPlaying = false;
+	m_paused = true;
+	Framework::GameState::SetPlaying(false);
 	auto coord = Coordinator::GetInstance();
 
 	if (auto audio = coord->GetSystem<AudioManager>()) {
@@ -1222,6 +1282,8 @@ void CoreEngine::PauseGame()
 void CoreEngine::ResumeGame()
 {
 	m_isPlaying = true;
+	m_paused = false;
+	Framework::GameState::SetPlaying(true);
 	auto coord = Coordinator::GetInstance();
 
 	if (auto audio = coord->GetSystem<AudioManager>()) {
