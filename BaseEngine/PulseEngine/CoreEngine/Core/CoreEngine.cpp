@@ -34,7 +34,7 @@
 // #include "glapp.h"
 #include "Resources/AssetRegistry.h"
 #include "CoreEngine/Asset/AssetsManager.h"
-#include "GameState/GameState.h"
+#include "GameState.h"
 
 #include "Components/DisplayName.h"
 #include "Components/EntityType.h"
