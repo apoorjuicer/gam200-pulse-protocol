@@ -123,9 +123,13 @@ namespace PulseEditor
 
         if (!IsImageExt(item.fullPath)) return;
 
-        FolderType folderType = GetFolderType(currentDir);
-        if (!IsValidExtensionForFolder(folderType, item.fullPath))
-            return;
+        // =============================================================
+        // NOTE: We intentionally do NOT validate folder type here.
+        // We want to SHOW thumbnails for all images regardless of 
+        // whether they're in the "correct" folder type.
+        // Invalid files are already highlighted in red by DrawFileLabel().
+        // =============================================================
+        (void)currentDir;  // Unused now, kept for API compatibility
 
         // =============================================================
         // Convert absolute path to relative path for AssetsManager
@@ -135,7 +139,7 @@ namespace PulseEditor
 
         size_t pos = pathStr.find("PulseEngine/Assets");
         if (pos != std::string::npos)
-            pathStr = "../../" + pathStr.substr(pos);
+            pathStr = "../../../" + pathStr.substr(pos);
 
         item.texID = mAssets.GetOrLoadTexture(pathStr);
     }

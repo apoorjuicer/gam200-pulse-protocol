@@ -25,7 +25,7 @@ public class TestScript : Script
     bool said = false;
     public override void Update()
     {
-        Console.Write("Script 1\n");
+        Console.Write("gay 1\n");
         //Console.WriteLine("[Testing CSHARP]: Hello from ManagedScripts! \n ");
 
         TransformComponent TFC = GetTransform();
@@ -101,8 +101,8 @@ public class TestScript : Script
        
         TFC.RotX += 50.0f * dt;
      
-        TFC.X += 20.0f * dt ;
-        TFC.Y += 20.0f *dt;
+        TFC.X -= 20.0f * dt ;
+        TFC.Y -= 20.0f *dt;
 
         Console.WriteLine($"Frams: {Time.FrameCount}, Time: {Time.GameTime}\n\n\n\n\n\n\n");
         Console.WriteLine($"Current Animation: {AM.GetCurrentAnimation()}");
