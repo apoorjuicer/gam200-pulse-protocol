@@ -50,7 +50,7 @@ namespace PulseEditor
     extern std::vector<Entity> entityDisplayOrder;   // defined in Editor / Hierarchy panel
 
     // ── Asset browser state ─────────────────────────────────────
-    static std::string s_assetRoot = "../../../PulseEngine/Assets";
+    static std::string s_assetRoot = "../../PulseEngine/Assets";
     static std::string s_currentDir = s_assetRoot;
     static std::vector<AssetItem> s_dirEntries;
 
@@ -421,16 +421,11 @@ namespace PulseEditor
                             auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
 
                             namespace fs = std::filesystem;
-                            std::string pathStr = item.fullPath;
-                            std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
 
-                            // Convert to relative path
-                            size_t pos = pathStr.find("PulseEngine/Assets");
-                            if (pos != std::string::npos)
-                                rend.spriteName = "../../../" + pathStr.substr(pos);
-                            else
-                                rend.spriteName = pathStr;
+                            // Use GetRelativeAssetPath to get the correct absolute path
+                            std::string spritePath = GetRelativeAssetPath(item.fullPath);
 
+                            rend.spriteName = spritePath;
                             rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
 
                             // Auto-detect spritesheet based on filename

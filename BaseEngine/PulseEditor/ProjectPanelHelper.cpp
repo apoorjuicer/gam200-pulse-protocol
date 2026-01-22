@@ -24,6 +24,26 @@
 namespace PulseEditor
 {
     // =============================================================
+    // HELPER FUNCTION: Convert Absolute Path to Relative Path
+    // =============================================================
+
+    /**
+     * Converts an absolute path to a path relative to the Assets folder.
+     * This works regardless of where the project folder is located.
+     *
+     * Example:
+     *   Input:  "C:/Users/Me/Project/PulseEngine/Assets/Textures/UI/button.png"
+     *   Output: "Assets/Textures/UI/button.png"  (relative to executable)
+     */
+    std::string GetRelativeAssetPath(const std::string& absolutePath)
+    {
+        // stbi_load() opens files directly from disk, needs ABSOLUTE paths
+        std::string pathStr = absolutePath;
+        std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
+        return pathStr;
+    }
+
+    // =============================================================
     // FILE VALIDATION HELPERS
     // =============================================================
 
@@ -134,12 +154,8 @@ namespace PulseEditor
         // =============================================================
         // Convert absolute path to relative path for AssetsManager
         // =============================================================
-        std::string pathStr = item.fullPath;
+        std::string pathStr = GetRelativeAssetPath(item.fullPath);
         std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
-
-        size_t pos = pathStr.find("PulseEngine/Assets");
-        if (pos != std::string::npos)
-            pathStr = "../../../" + pathStr.substr(pos);
 
         item.texID = mAssets.GetOrLoadTexture(pathStr);
     }
@@ -174,8 +190,10 @@ namespace PulseEditor
         }
 
         // 2) Force a fresh GL texture id and cache entry
-        mAssets.EvictTexture(dstPath);
-        GLuint newTex = mAssets.GetOrLoadTexture(dstPath);
+        std::string relativePath = GetRelativeAssetPath(dstPath);
+        mAssets.EvictTexture(relativePath);
+        GLuint newTex = mAssets.GetOrLoadTexture(relativePath);
+
         if (!newTex)
         {
             std::cerr << "[ProjectPanel] Reload failed for: " << dstPath << "\n";
@@ -205,10 +223,14 @@ namespace PulseEditor
                 std::string rBase = std::filesystem::path(r.spriteName).filename().string();
                 std::string dBase = std::filesystem::path(dstPath).filename().string();
 
-                if (!r.spriteName.empty() &&
-                    (r.spriteName == dstPath || rBase == dBase))
+                // Compare both the full path and just the filename
+                // This handles cases where spriteName might be absolute or relative
+                bool pathMatches = (r.spriteName == dstPath || r.spriteName == relativePath);
+                bool nameMatches = (rBase == dBase);
+
+                if (!r.spriteName.empty() && (pathMatches || nameMatches))
                 {
-                    r.spriteName = dstPath;
+                    r.spriteName = dstPath;  // Use the absolute path (dstPath)
                     r.textureID = newTex;
                 }
             }

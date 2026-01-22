@@ -181,9 +181,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "ButtonScript"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
