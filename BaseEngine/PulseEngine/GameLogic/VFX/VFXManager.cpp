@@ -37,16 +37,16 @@ void VFXManager::OnHit(HitResult r, const glm::vec2& worldPos)
     switch (r)
     {
     case HitResult::Perfect:
-        shake.amplitude = 0.02f; shake.decay = 10.0f;
+        shake.amplitude = 0.021f; shake.decay = 10.0f;
         burst.count = 18;
         break;
     case HitResult::Good:
-        shake.amplitude = 0.012f; shake.decay = 9.0f;
+        shake.amplitude = 0.015f; shake.decay = 9.0f;
         burst.count = 12;
         break;
     case HitResult::Bad:
         shake.amplitude = 0.09f; shake.decay = 8.0f;
-        burst.count = 10;
+        burst.count = 8;
         break;
     case HitResult::Miss:
         shake.amplitude = 0.03f; shake.decay = 7.0f;

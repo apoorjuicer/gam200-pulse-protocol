@@ -23,6 +23,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "glhelper.h"
 #include <string>
+#include "GameState.h"
 #ifndef FRAMEWORK_ANIMATION_H
 #define FRAMEWORK_ANIMATION_H
 
