@@ -25,9 +25,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "C:/Users/carri/Desktop/csd2401f25_team_bloop/BaseEngine/PulseEngine/Assets/Textures/Backgrounds/Pause_SS_V1_1x14.png",
+                        "spriteName": "C:/GAM200/csd2401f25_team_bloop/BaseEngine/PulseEngine/Assets/Textures/Backgrounds/Pause_SS_V1_1x14.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
