@@ -233,7 +233,15 @@ void CoreEngine::CompileScriptAssembly()
 
 	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
 
-	std::wstring buildCmd = L" build \"" + projectPath.wstring() + L"\" -c Debug -p:Platform=x64";
+
+	// Change the Configuration depending on mode
+	std::string configuration = "Debug";
+#ifdef NDEBUG
+	configuration = "Release";
+#endif
+
+	std::wstring configWStr(configuration.begin(), configuration.end());
+	std::wstring buildCmd = L" build \"" + projectPath.wstring() + L"\" -c " + configWStr + L" -p:Platform=x64";
 
 	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
 
@@ -287,9 +295,9 @@ void CoreEngine::CompileScriptAssembly()
 #endif
 
 		// Copy the ManageScripts.dll to the PulseEditor and PulseProtocol cos ITS FUCKING STUPID FK CMAKE BS
-		std::filesystem::path dllSource = baseEngineDir / "build" / ".bin" / "Debug-x64" / "ManagedScripts.dll";
-		std::filesystem::path dllDest1 = baseEngineDir / "build" / "PulseEditor" / "Debug" / "ManagedScripts.dll";
-		std::filesystem::path dllDest2 = baseEngineDir / "build" / "PulseProtocol" / "Debug" / "ManagedScripts.dll";
+		std::filesystem::path dllSource = baseEngineDir / "build" / ".bin" / (configuration + "-x64") / "ManagedScripts.dll";
+		std::filesystem::path dllDest1 = baseEngineDir / "build" / "PulseEditor" / configuration / "ManagedScripts.dll";
+		std::filesystem::path dllDest2 = baseEngineDir / "build" / "PulseProtocol" / configuration / "ManagedScripts.dll";
 
 		if (!std::filesystem::exists(dllSource))
 		{
