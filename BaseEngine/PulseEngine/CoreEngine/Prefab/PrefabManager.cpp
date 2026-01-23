@@ -35,6 +35,13 @@
 PrefabManager::PrefabManager()
 {
 	factory = new Factory();
+
+	assetRoot = CoreEngine::GetAssetRoot();
+	prefabDirectory = (assetRoot / "Prefabs").string() + "/";
+
+	// optional debug:
+	std::cout << "[PrefabManager] assetRoot = " << assetRoot << "\n";
+	std::cout << "[PrefabManager] prefabDirectory = " << prefabDirectory << "\n";
 }
 
 PrefabManager::~PrefabManager()

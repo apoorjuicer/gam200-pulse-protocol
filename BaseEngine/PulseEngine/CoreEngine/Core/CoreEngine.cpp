@@ -1383,3 +1383,21 @@ void CoreEngine::ToggleFullscreen()
 {
 	SetFullscreen(!m_isFullscreen);
 }
+
+std::filesystem::path CoreEngine::GetAssetRoot()
+{
+	// Find directory of PulseEngine.dll
+	std::string runtimePath(MAX_PATH, '\0');
+	HMODULE hEngine = GetModuleHandleA("PulseEngine.dll");
+	if (!hEngine) return std::filesystem::current_path(); // fallback
+
+	GetModuleFileNameA(hEngine, runtimePath.data(), MAX_PATH);
+	PathRemoveFileSpecA(runtimePath.data());
+	runtimePath.resize(std::strlen(runtimePath.data()));
+
+	// If your Assets folder is next to the dll:
+	// return std::filesystem::path(runtimePath) / "Assets";
+
+	// If Assets is inside BaseEngine/PulseEngine/Assets, adapt accordingly:
+	return std::filesystem::path(runtimePath) / "Assets";
+}
