@@ -107,6 +107,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "InputTestScript"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "NewGameBtn"
                     }
@@ -259,9 +266,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "ButtonScript"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -339,9 +344,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "ButtonScript"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {

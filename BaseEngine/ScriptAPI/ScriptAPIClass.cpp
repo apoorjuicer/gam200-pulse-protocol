@@ -19,6 +19,8 @@
 #include "Animation.h"
 #include "ScriptName.h"
 #include "Collision.h"
+#include "InputAPI.h"
+#include "Sprite.h"
 
 namespace ScriptAPI
 {
@@ -51,6 +53,11 @@ namespace ScriptAPI
     AudioComponent Script::GetAudio()
     {
         return AudioComponent(EntityID);
+    }
+
+    SpriteComponent Script::GetSprite()
+    {
+        return SpriteComponent(EntityID);
     }
 
     /*LogicComponent Script::GetScriptName()
