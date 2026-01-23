@@ -37,9 +37,17 @@ namespace PulseEditor
      */
     std::string GetRelativeAssetPath(const std::string& absolutePath)
     {
-        // stbi_load() opens files directly from disk, needs ABSOLUTE paths
         std::string pathStr = absolutePath;
         std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
+
+        // Convert absolute path to relative
+        size_t assetsPos = pathStr.find("Assets/");
+        if (assetsPos != std::string::npos)
+        {
+            return "../../PulseEngine/" + pathStr.substr(assetsPos);
+        }
+
+        // Fallback: return as-is
         return pathStr;
     }
 

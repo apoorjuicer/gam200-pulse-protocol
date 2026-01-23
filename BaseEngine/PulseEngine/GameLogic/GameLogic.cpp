@@ -81,8 +81,8 @@ void LogicSystem::Init()
     AddScript("PlayerScript", std::make_shared<PlayerScript>());
     //AddScript("EnemySpawnerScript", std::make_shared<EnemySpawnerScript>());
     AddScript("EnemyScript", std::make_shared<EnemyScript>());
-    AddScript("ButtonScript", std::make_shared<ButtonScript>());
-    AddScript("PulsingBorderScript", std::make_shared<PulsingBorderScript>());
+    //AddScript("ButtonScript", std::make_shared<ButtonScript>());
+    //AddScript("PulsingBorderScript", std::make_shared<PulsingBorderScript>());
     AddScript("CsharpScript", std::make_shared<Csharptestscript>());
     
     AddScript("CountdownScript", std::make_shared<CountdownScript>());
@@ -153,7 +153,7 @@ void LogicSystem::Update(float dt)
 
 void LogicSystem::Exit()
 {
-    auto* g_coordinator = Coordinator::GetInstance();
+    //auto* g_coordinator = Coordinator::GetInstance();
 
     //// clear all scripts 
     //auto clearFunc = Engine->GetFunctionPtr<void(*)()>(
@@ -1282,229 +1282,229 @@ EnemyScript* EnemyScript::Clone()
     return new EnemyScript{};
 }
 
-// =====================================================================
-// BUTTON SCRIPT
-// =====================================================================
-void ButtonScript::Init(Entity ID)
-{
-    auto* coord = Coordinator::GetInstance();
-
-    // Create button data for this entity
-    ButtonData& data = buttonDataMap[ID];
-
-    if (!coord->HasComponent<Name>(ID)) return;
-    auto& name = coord->GetComponent<Name>(ID);
-    data.buttonName = name.name;
-
-    // Get textures from Renderable
-    if (coord->HasComponent<Framework::Renderable>(ID)) {
-        auto& renderable = coord->GetComponent<Framework::Renderable>(ID);
-        data.normalTexture = renderable.spriteName;
-
-        // Construct hover texture name
-        size_t extPos = data.normalTexture.find_last_of('.');
-        if (extPos != std::string::npos) {
-            data.hoverTexture = data.normalTexture.substr(0, extPos) + "_hover" + data.normalTexture.substr(extPos);
-        }
-    }
-
-    /*std::cout << "[ButtonScript] Init: " << data.buttonName << " Normal: " << data.normalTexture  << " Hover: " << data.hoverTexture << std::endl;*/
-}
-
-void ButtonScript::Update(Entity ID)
-{
-    auto* coord = Coordinator::GetInstance();
-    auto inputMgr = coord->GetSystem<InputManager>();
-    if (!inputMgr) return;
-
-    // Get this button's data - if missing, initialize it
-    auto it = buttonDataMap.find(ID);
-    if (it == buttonDataMap.end()) {
-        /*std::cout << "[ButtonScript] Re-initializing button entity " << ID << std::endl;*/
-        Init(ID);  // Re-initialize if missing
-        it = buttonDataMap.find(ID);
-        if (it == buttonDataMap.end()) return; // Still missing, bail out
-    }
-    ButtonData& data = it->second;
-
-    if (!coord->HasComponent<Framework::Transform>(ID)) return;
-    if (!coord->HasComponent<Framework::Renderable>(ID)) return;
-
-    auto& transform = coord->GetComponent<Framework::Transform>(ID);
-    auto& renderable = coord->GetComponent<Framework::Renderable>(ID);
-    if (!transform.isVisible) return;
-
-    // Get mouse position
-    glm::vec2 mouseVirtual = inputMgr->getMousePositionVirtual();
-    Vector2 mousePos{ mouseVirtual.x, mouseVirtual.y };
-
-    // Calculate AABB directly (DON'T use BuildAABBFromTransform)
-    AABB buttonAABB;
-    buttonAABB.width = transform.Scale.x;
-    buttonAABB.height = transform.Scale.y;
-    buttonAABB.min.x = transform.Pos.x - (buttonAABB.width * 0.5f);
-    buttonAABB.max.x = transform.Pos.x + (buttonAABB.width * 0.5f);
-    buttonAABB.min.y = transform.Pos.y - (buttonAABB.height * 0.5f);
-    buttonAABB.max.y = transform.Pos.y + (buttonAABB.height * 0.5f);
-
-    // DEBUG - print every second for NEW GAME button
-    //static int debugFrameCount = 0;
-    //debugFrameCount++;
-    //if (debugFrameCount % 60 == 0) {
-    //    std::cout << "\n===== " << data.buttonName << " =====" << std::endl;
-    //    std::cout << "Transform.Pos: (" << transform.Pos.x << ", " << transform.Pos.y << ")" << std::endl;
-    //    std::cout << "Transform.Scale: (" << transform.Scale.x << ", " << transform.Scale.y << ")" << std::endl;
-    //    std::cout << "AABB: [" << buttonAABB.min.x << " to " << buttonAABB.max.x
-    //        << ", " << buttonAABB.min.y << " to " << buttonAABB.max.y << "]" << std::endl;
-    //    std::cout << "Mouse: (" << mousePos.x << ", " << mousePos.y << ")" << std::endl;
-    //    std::cout << "========================\n" << std::endl;
-    //}
-
-    // Check if mouse is in bounds
-    bool wasHovering = data.isHovering;
-    bool inX = (mousePos.x >= buttonAABB.min.x && mousePos.x <= buttonAABB.max.x);
-    bool inY = (mousePos.y >= buttonAABB.min.y && mousePos.y <= buttonAABB.max.y);
-    // UI buttons work without viewport check (fixes Level1 camera issue)
-    data.isHovering = inX && inY;
-
-    // Handle texture swap
-    if (data.isHovering && !wasHovering) {
-        /*std::cout << "[ButtonScript] Trying to load hover texture: " << data.hoverTexture << std::endl;*/
-        renderable.spriteName = data.hoverTexture;
-        renderable.needsTextureReload = true;
-        /*std::cout << "[ButtonScript] Hover: " << data.buttonName << std::endl;*/
-    }
-    else if (!data.isHovering && wasHovering) {
-        renderable.spriteName = data.normalTexture;
-        renderable.needsTextureReload = true;
-    }
-
-    // Handle click - track button press state per entity
-    static std::unordered_map<Entity, bool> wasClickedLastFrame;
-    bool isClickedThisFrame = data.isHovering && inputMgr->isMouseButtonPressed(0);
-    bool wasClickedPreviously = wasClickedLastFrame[ID];
-
-    // Trigger action on button RELEASE while still hovering (prevents double-triggers)
-    if (data.isHovering && wasClickedPreviously && !isClickedThisFrame) {
-        /*std::cout << "[ButtonScript] Clicked: " << data.buttonName << std::endl;*/
-
-        auto sceneMgr = coord->GetSystem<SceneManager>();
-        if (!sceneMgr) return;
-
-        if (data.buttonName == "NewGameBtn") {
-            sceneMgr->CurrentScene = "Level1";
-        }
-        else if (data.buttonName == "ContinueBtn") {
-            std::cout << "[ButtonScript] Continue not implemented yet" << std::endl;
-        }
-        else if (data.buttonName == "SettingsBtn") {
-            std::cout << "[ButtonScript] Settings not implemented yet" << std::endl;
-        }
-        else if (data.buttonName == "BackBtn") {
-            sceneMgr->CurrentScene = "MainMenu";
-        }
-        else if (data.buttonName == "RestartBtn") {
-            sceneMgr->CurrentScene = "MainMenu";
-        }
-        else if (data.buttonName == "QuitBtn") {
-            if (Engine) {
-                glfwSetWindowShouldClose(Engine->GetWindow(), GLFW_TRUE);
-            }
-        }
-    }
-
-    wasClickedLastFrame[ID] = isClickedThisFrame;
-}
-
-void ButtonScript::Exit(Entity ID)
-{
-    // Clean up button data for this entity
-    buttonDataMap.erase(ID);
-}
-
-ButtonScript* ButtonScript::Clone()
-{
-    return new ButtonScript{};
-}
-
-// =====================================================================
-// PULSING BORDER SCRIPT
-// =====================================================================
-void PulsingBorderScript::Init(Entity ID)
-{
-    auto* g_coordinator = Coordinator::GetInstance();
-
-    pulseTimer = static_cast<float>(glfwGetTime());  // Store START time
-
-    if (g_coordinator->HasComponent<Framework::Transform>(ID))
-    {
-        auto& transform = g_coordinator->GetComponent<Framework::Transform>(ID);
-        transform.isVisible = false;
-    }
-}
-
-void PulsingBorderScript::Update(Entity ID)
-{
-    auto* g_coordinator = Coordinator::GetInstance();
-
-    float beatInterval = 0.5f;
-    double timeSource = 0.0;
-
-    if (!g_countdownFinished)
-    {
-        timeSource = glfwGetTime() - pulseTimer;
-    }
-    else
-    {
-        auto audioSystem = g_coordinator->GetSystem<AudioManager>();
-        if (!audioSystem)
-            return;
-
-        timeSource = audioSystem->GetBGMPositionSeconds();
-
-        // Only skip if BGM not started yet (negative), 0.0 is valid first beat
-        if (timeSource < 0.0)
-            return;
-    }
-
-    float normalizedTime = fmodf((float)timeSource, beatInterval) / beatInterval;
-    float beatWindow = 0.15f;
-
-    bool shouldBeVisible = (normalizedTime < beatWindow || normalizedTime >(1.0f - beatWindow));
-
-    if (g_coordinator->HasComponent<Framework::Transform>(ID))
-    {
-        auto& transform = g_coordinator->GetComponent<Framework::Transform>(ID);
-
-        bool wasVisible = transform.isVisible;
-        if (shouldBeVisible && !wasVisible)
-        {
-            if (g_coordinator->HasComponent<AudioSource>(ID))
-            {
-                auto audioSystem = g_coordinator->GetSystem<AudioManager>();
-                auto& audioSrc = g_coordinator->GetComponent<AudioSource>(ID);
-                if (audioSystem && !audioSrc.audio_id.empty())
-                {
-                    audioSystem->PlayFromAudioSource(audioSrc);
-                }
-            }
-        }
-
-        transform.isVisible = shouldBeVisible;
-    }
-}
-
-void PulsingBorderScript::Exit(Entity ID)
-{
-    (void)ID;
-    //std::cout << "[PulsingBorderScript] Shutdown for entity " << ID << std::endl;
-}
-
-
-PulsingBorderScript* PulsingBorderScript::Clone()
-{
-    return new PulsingBorderScript{};
-}
+//// =====================================================================
+//// BUTTON SCRIPT
+//// =====================================================================
+//void ButtonScript::Init(Entity ID)
+//{
+//    auto* coord = Coordinator::GetInstance();
+//
+//    // Create button data for this entity
+//    ButtonData& data = buttonDataMap[ID];
+//
+//    if (!coord->HasComponent<Name>(ID)) return;
+//    auto& name = coord->GetComponent<Name>(ID);
+//    data.buttonName = name.name;
+//
+//    // Get textures from Renderable
+//    if (coord->HasComponent<Framework::Renderable>(ID)) {
+//        auto& renderable = coord->GetComponent<Framework::Renderable>(ID);
+//        data.normalTexture = renderable.spriteName;
+//
+//        // Construct hover texture name
+//        size_t extPos = data.normalTexture.find_last_of('.');
+//        if (extPos != std::string::npos) {
+//            data.hoverTexture = data.normalTexture.substr(0, extPos) + "_hover" + data.normalTexture.substr(extPos);
+//        }
+//    }
+//
+//    /*std::cout << "[ButtonScript] Init: " << data.buttonName << " Normal: " << data.normalTexture  << " Hover: " << data.hoverTexture << std::endl;*/
+//}
+//
+//void ButtonScript::Update(Entity ID)
+//{
+//    auto* coord = Coordinator::GetInstance();
+//    auto inputMgr = coord->GetSystem<InputManager>();
+//    if (!inputMgr) return;
+//
+//    // Get this button's data - if missing, initialize it
+//    auto it = buttonDataMap.find(ID);
+//    if (it == buttonDataMap.end()) {
+//        /*std::cout << "[ButtonScript] Re-initializing button entity " << ID << std::endl;*/
+//        Init(ID);  // Re-initialize if missing
+//        it = buttonDataMap.find(ID);
+//        if (it == buttonDataMap.end()) return; // Still missing, bail out
+//    }
+//    ButtonData& data = it->second;
+//
+//    if (!coord->HasComponent<Framework::Transform>(ID)) return;
+//    if (!coord->HasComponent<Framework::Renderable>(ID)) return;
+//
+//    auto& transform = coord->GetComponent<Framework::Transform>(ID);
+//    auto& renderable = coord->GetComponent<Framework::Renderable>(ID);
+//    if (!transform.isVisible) return;
+//
+//    // Get mouse position
+//    glm::vec2 mouseVirtual = inputMgr->getMousePositionVirtual();
+//    Vector2 mousePos{ mouseVirtual.x, mouseVirtual.y };
+//
+//    // Calculate AABB directly (DON'T use BuildAABBFromTransform)
+//    AABB buttonAABB;
+//    buttonAABB.width = transform.Scale.x;
+//    buttonAABB.height = transform.Scale.y;
+//    buttonAABB.min.x = transform.Pos.x - (buttonAABB.width * 0.5f);
+//    buttonAABB.max.x = transform.Pos.x + (buttonAABB.width * 0.5f);
+//    buttonAABB.min.y = transform.Pos.y - (buttonAABB.height * 0.5f);
+//    buttonAABB.max.y = transform.Pos.y + (buttonAABB.height * 0.5f);
+//
+//    // DEBUG - print every second for NEW GAME button
+//    //static int debugFrameCount = 0;
+//    //debugFrameCount++;
+//    //if (debugFrameCount % 60 == 0) {
+//    //    std::cout << "\n===== " << data.buttonName << " =====" << std::endl;
+//    //    std::cout << "Transform.Pos: (" << transform.Pos.x << ", " << transform.Pos.y << ")" << std::endl;
+//    //    std::cout << "Transform.Scale: (" << transform.Scale.x << ", " << transform.Scale.y << ")" << std::endl;
+//    //    std::cout << "AABB: [" << buttonAABB.min.x << " to " << buttonAABB.max.x
+//    //        << ", " << buttonAABB.min.y << " to " << buttonAABB.max.y << "]" << std::endl;
+//    //    std::cout << "Mouse: (" << mousePos.x << ", " << mousePos.y << ")" << std::endl;
+//    //    std::cout << "========================\n" << std::endl;
+//    //}
+//
+//    // Check if mouse is in bounds
+//    bool wasHovering = data.isHovering;
+//    bool inX = (mousePos.x >= buttonAABB.min.x && mousePos.x <= buttonAABB.max.x);
+//    bool inY = (mousePos.y >= buttonAABB.min.y && mousePos.y <= buttonAABB.max.y);
+//    // UI buttons work without viewport check (fixes Level1 camera issue)
+//    data.isHovering = inX && inY;
+//
+//    // Handle texture swap
+//    if (data.isHovering && !wasHovering) {
+//        /*std::cout << "[ButtonScript] Trying to load hover texture: " << data.hoverTexture << std::endl;*/
+//        renderable.spriteName = data.hoverTexture;
+//        renderable.needsTextureReload = true;
+//        /*std::cout << "[ButtonScript] Hover: " << data.buttonName << std::endl;*/
+//    }
+//    else if (!data.isHovering && wasHovering) {
+//        renderable.spriteName = data.normalTexture;
+//        renderable.needsTextureReload = true;
+//    }
+//
+//    // Handle click - track button press state per entity
+//    static std::unordered_map<Entity, bool> wasClickedLastFrame;
+//    bool isClickedThisFrame = data.isHovering && inputMgr->isMouseButtonPressed(0);
+//    bool wasClickedPreviously = wasClickedLastFrame[ID];
+//
+//    // Trigger action on button RELEASE while still hovering (prevents double-triggers)
+//    if (data.isHovering && wasClickedPreviously && !isClickedThisFrame) {
+//        /*std::cout << "[ButtonScript] Clicked: " << data.buttonName << std::endl;*/
+//
+//        auto sceneMgr = coord->GetSystem<SceneManager>();
+//        if (!sceneMgr) return;
+//
+//        if (data.buttonName == "NewGameBtn") {
+//            sceneMgr->CurrentScene = "Level1";
+//        }
+//        else if (data.buttonName == "ContinueBtn") {
+//            std::cout << "[ButtonScript] Continue not implemented yet" << std::endl;
+//        }
+//        else if (data.buttonName == "SettingsBtn") {
+//            std::cout << "[ButtonScript] Settings not implemented yet" << std::endl;
+//        }
+//        else if (data.buttonName == "BackBtn") {
+//            sceneMgr->CurrentScene = "MainMenu";
+//        }
+//        else if (data.buttonName == "RestartBtn") {
+//            sceneMgr->CurrentScene = "MainMenu";
+//        }
+//        else if (data.buttonName == "QuitBtn") {
+//            if (Engine) {
+//                glfwSetWindowShouldClose(Engine->GetWindow(), GLFW_TRUE);
+//            }
+//        }
+//    }
+//
+//    wasClickedLastFrame[ID] = isClickedThisFrame;
+//}
+//
+//void ButtonScript::Exit(Entity ID)
+//{
+//    // Clean up button data for this entity
+//    buttonDataMap.erase(ID);
+//}
+//
+//ButtonScript* ButtonScript::Clone()
+//{
+//    return new ButtonScript{};
+//}
+//
+//// =====================================================================
+//// PULSING BORDER SCRIPT
+//// =====================================================================
+//void PulsingBorderScript::Init(Entity ID)
+//{
+//    auto* g_coordinator = Coordinator::GetInstance();
+//
+//    pulseTimer = static_cast<float>(glfwGetTime());  // Store START time
+//
+//    if (g_coordinator->HasComponent<Framework::Transform>(ID))
+//    {
+//        auto& transform = g_coordinator->GetComponent<Framework::Transform>(ID);
+//        transform.isVisible = false;
+//    }
+//}
+//
+//void PulsingBorderScript::Update(Entity ID)
+//{
+//    auto* g_coordinator = Coordinator::GetInstance();
+//
+//    float beatInterval = 0.5f;
+//    double timeSource = 0.0;
+//
+//    if (!g_countdownFinished)
+//    {
+//        timeSource = glfwGetTime() - pulseTimer;
+//    }
+//    else
+//    {
+//        auto audioSystem = g_coordinator->GetSystem<AudioManager>();
+//        if (!audioSystem)
+//            return;
+//
+//        timeSource = audioSystem->GetBGMPositionSeconds();
+//
+//        // Only skip if BGM not started yet (negative), 0.0 is valid first beat
+//        if (timeSource < 0.0)
+//            return;
+//    }
+//
+//    float normalizedTime = fmodf((float)timeSource, beatInterval) / beatInterval;
+//    float beatWindow = 0.15f;
+//
+//    bool shouldBeVisible = (normalizedTime < beatWindow || normalizedTime >(1.0f - beatWindow));
+//
+//    if (g_coordinator->HasComponent<Framework::Transform>(ID))
+//    {
+//        auto& transform = g_coordinator->GetComponent<Framework::Transform>(ID);
+//
+//        bool wasVisible = transform.isVisible;
+//        if (shouldBeVisible && !wasVisible)
+//        {
+//            if (g_coordinator->HasComponent<AudioSource>(ID))
+//            {
+//                auto audioSystem = g_coordinator->GetSystem<AudioManager>();
+//                auto& audioSrc = g_coordinator->GetComponent<AudioSource>(ID);
+//                if (audioSystem && !audioSrc.audio_id.empty())
+//                {
+//                    audioSystem->PlayFromAudioSource(audioSrc);
+//                }
+//            }
+//        }
+//
+//        transform.isVisible = shouldBeVisible;
+//    }
+//}
+//
+//void PulsingBorderScript::Exit(Entity ID)
+//{
+//    (void)ID;
+//    //std::cout << "[PulsingBorderScript] Shutdown for entity " << ID << std::endl;
+//}
+//
+//
+//PulsingBorderScript* PulsingBorderScript::Clone()
+//{
+//    return new PulsingBorderScript{};
+//}
 
 void Csharptestscript::Init(Entity ID)
 {

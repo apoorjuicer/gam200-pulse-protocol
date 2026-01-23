@@ -18,6 +18,7 @@
 #include "InputAPI.h"
 #include "Collision.h"
 #include "AudioAPI.h"
+#include "Sprite.h"
 
 namespace ScriptAPI
 {
@@ -29,6 +30,7 @@ namespace ScriptAPI
     // value struct DeltaTime 
     value struct CollisionComponent;
     value struct AudioComponent;
+    value struct SpriteComponent;
    // value struct DeltaTime 
     //value struct LogicComponent;
 
@@ -44,6 +46,7 @@ namespace ScriptAPI
         InputComponent GetInput();
         CollisionComponent GetCollision();
         AudioComponent GetAudio();
+        SpriteComponent GetSprite();
         //DeltaTime GetDeltaTime();
         //LogicComponent GetScriptName();
 

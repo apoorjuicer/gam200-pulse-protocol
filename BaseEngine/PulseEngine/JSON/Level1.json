@@ -304,7 +304,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "C:/Users/carri/Desktop/csd2401f25_team_bloop/BaseEngine/PulseEngine/Assets/Textures/UI/Pause.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Pause.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -823,7 +823,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "C:/Users/carri/Desktop/csd2401f25_team_bloop/BaseEngine/PulseEngine/Assets/Textures/UI/enemy icon bat.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon bat.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -883,7 +883,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "C:/Users/carri/Desktop/csd2401f25_team_bloop/BaseEngine/PulseEngine/Assets/Textures/UI/enemy icon rat greyed (1).png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat greyed (1).png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,

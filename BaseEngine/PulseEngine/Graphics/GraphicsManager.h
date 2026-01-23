@@ -151,7 +151,6 @@ private:
     // =========================================================================
     Entity m_fpsTextEntity = static_cast<Entity>(-1);
     Entity m_topSystemTextEntity = static_cast<Entity>(-1);
-    Entity m_teamLabelEntity = static_cast<Entity>(-1);
 
     void CreateDebugTextEntities();
     void UpdateDebugTextEntities();

@@ -29,3 +29,6 @@ C:\Users\racha\School\Yr2_Tri1\GAM200\csd2401f25_team_bloop\BaseEngine\ManagedSc
 C:\Users\racha\School\Yr2_Tri1\GAM200\csd2401f25_team_bloop\BaseEngine\ManagedScripts\obj\x64\Release\ManagedScripts.csproj.AssemblyReference.cache
 C:\Users\racha\School\Yr2_Tri1\GAM200\csd2401f25_team_bloop\BaseEngine\ManagedScripts\obj\x64\Release\ManagedS.0CD0AA41.Up2Date
 C:\Users\racha\School\Yr2_Tri1\GAM200\csd2401f25_team_bloop\BaseEngine\ManagedScripts\obj\x64\Release\ref\ManagedScripts.dll
+C:\Users\racha\School\Yr2_Tri1\GAM200\csd2401f25_team_bloop\BaseEngine\build\.bin\Release-x64\ManagedScripts.deps.json
+C:\Users\racha\School\Yr2_Tri1\GAM200\csd2401f25_team_bloop\BaseEngine\build\.bin\Release-x64\ManagedScripts.dll
+C:\Users\racha\School\Yr2_Tri1\GAM200\csd2401f25_team_bloop\BaseEngine\build\.bin\Release-x64\ManagedScripts.pdb
