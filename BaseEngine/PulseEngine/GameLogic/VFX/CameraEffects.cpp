@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-static float Clamp01(float x) { return std::max(0.0f, std::min(1.0f, x)); }
+//static float Clamp01(float x) { return std::max(0.0f, std::min(1.0f, x)); }
 
 float CameraEffects::Rand01()
 {

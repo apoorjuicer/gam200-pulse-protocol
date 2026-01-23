@@ -85,8 +85,6 @@ namespace PulseEditor
         fs::path cwd = fs::current_path();
         std::string cwdStr = cwd.string();
 
-        std::cout << "[ProjectPanel] Working Directory: " << cwdStr << std::endl;
-
         // ═══════════════════════════════════════════════════════════════
         // PRIORITY 1: Parse path string to find "BaseEngine"
         // ═══════════════════════════════════════════════════════════════
@@ -96,18 +94,18 @@ namespace PulseEditor
         size_t baseEnginePos = cwdStr.find("BaseEngine");
         if (baseEnginePos != std::string::npos)
         {
-            std::cout << "\n[ProjectPanel] Found 'BaseEngine' in path at position " << baseEnginePos << std::endl;
+            //std::cout << "\n[ProjectPanel] Found 'BaseEngine' in path at position " << baseEnginePos << std::endl;
 
             // Extract substring: everything up to and including "BaseEngine"
             std::string baseEnginePart = cwdStr.substr(0, baseEnginePos + 10);  // "BaseEngine" = 10 chars
             fs::path baseEnginePath(baseEnginePart);
             fs::path targetPath = baseEnginePath / "PulseEngine" / "Assets";
 
-            std::cout << "[ProjectPanel] Constructed path: " << targetPath.string() << std::endl;
+            //std::cout << "[ProjectPanel] Constructed path: " << targetPath.string() << std::endl;
 
             if (fs::exists(targetPath) && fs::is_directory(targetPath))
             {
-                std::cout << "[ProjectPanel] Asset Root: " << targetPath.string() << std::endl << std::endl;
+                //std::cout << "[ProjectPanel] Asset Root: " << targetPath.string() << std::endl << std::endl;
                 return targetPath.string();
             }
 

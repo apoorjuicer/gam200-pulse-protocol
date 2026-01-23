@@ -88,7 +88,7 @@ float TextRenderer::CalculateTextHeight(
 }
 
 void TextRenderer::RenderLine(
-    GLSLShader& shader,
+    GLSLShader& /*shader*/,
     const std::string& line,
     float x, float y,
     float scale,
