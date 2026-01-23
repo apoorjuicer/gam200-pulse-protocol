@@ -25,9 +25,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/MainMenu.png",
+                        "spriteName": "C:/Users/carri/Desktop/csd2401f25_team_bloop/BaseEngine/PulseEngine/Assets/Textures/Backgrounds/Pause_SS_V1_1x14.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -38,10 +38,10 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
+                        "currentFrame": 8,
+                        "elapsedTime": 0.006828032433986664,
+                        "totalFrames": 14,
+                        "columns": 14,
                         "rows": 1,
                         "animationSpeed": 12.0
                     }
