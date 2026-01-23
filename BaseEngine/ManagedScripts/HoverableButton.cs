@@ -1,132 +1,84 @@
 using System;
 using ScriptAPI;
 
-public class HoverableButton : Script
+public class MainMenuButton : Script
 {
-    // Set these in editor or initialize in Start()
-    private string defaultTexture;
-    private string hoverTexture;
-    
-    private float originalScaleX;
-    private float originalScaleY;
-    private bool wasHovered = false;
+    private string defaultTexture = "";
+    private string hoverTexture = "";
+    private bool isCurrentlyHovered = false;
     private bool initialized = false;
-    
-    // Hover scale multiplier (1.0 = no change, 1.1 = 10% bigger)
-    private float hoverScaleMultiplier = 1.05f;
-
-    public override void Start()
-    {
-        // Grab current texture as default
-        defaultTexture = GetSprite().Texture;
-        
-        // Build hover texture path by inserting "_hover" before extension
-        // e.g., "path/to/button.png" -> "path/to/button_hover.png"
-        hoverTexture = BuildHoverTexturePath(defaultTexture);
-        
-        // Store original scale
-        originalScaleX = GetTransform().ScaleX;
-        originalScaleY = GetTransform().ScaleY;
-        
-        initialized = true;
-        
-        Console.WriteLine($"[HoverableButton] Default: {defaultTexture}");
-        Console.WriteLine($"[HoverableButton] Hover:   {hoverTexture}");
-    }
+    private float hoverScaleBoost = 1.05f;
 
     public override void Update()
     {
-        if (!initialized)
-            return;
-
         InputComponent input = GetInput();
+        TransformComponent t = GetTransform();
         
-        if (!input.InGameViewport)
-            return;
-
-        bool isHovered = IsMouseOverEntity(input);
-
-        // Hover enter
-        if (isHovered && !wasHovered)
+        if (!initialized)
         {
-            OnHoverEnter();
+            SpriteComponent sprite = GetSprite();
+            defaultTexture = sprite.Texture;
+            
+            int dotIndex = defaultTexture.LastIndexOf('.');
+            if (dotIndex >= 0)
+                hoverTexture = defaultTexture.Substring(0, dotIndex) + "_hover" + defaultTexture.Substring(dotIndex);
+            else
+                hoverTexture = defaultTexture + "_hover";
+            
+            initialized = true;
         }
-        // Hover exit
-        else if (!isHovered && wasHovered)
+        
+        float currentScaleX = t.ScaleX;
+        float currentScaleY = t.ScaleY;
+        float baseScaleX = isCurrentlyHovered ? currentScaleX / hoverScaleBoost : currentScaleX;
+        float baseScaleY = isCurrentlyHovered ? currentScaleY / hoverScaleBoost : currentScaleY;
+        
+        float halfW = baseScaleX / 2f;
+        float halfH = baseScaleY / 2f;
+        float mx = input.WorldMouseX;
+        float my = input.WorldMouseY;
+        
+        bool isHovered = mx >= t.X - halfW && mx <= t.X + halfW &&
+                         my >= t.Y - halfH && my <= t.Y + halfH;
+        
+        if (isHovered && !isCurrentlyHovered)
         {
-            OnHoverExit();
+            SpriteComponent sprite = GetSprite();
+            TransformComponent transform = GetTransform();
+            sprite.Texture = hoverTexture;
+            transform.ScaleX = currentScaleX * hoverScaleBoost;
+            transform.ScaleY = currentScaleY * hoverScaleBoost;
+            isCurrentlyHovered = true;
         }
-
-        // Click while hovering
+        else if (!isHovered && isCurrentlyHovered)
+        {
+            SpriteComponent sprite = GetSprite();
+            TransformComponent transform = GetTransform();
+            sprite.Texture = defaultTexture;
+            transform.ScaleX = currentScaleX / hoverScaleBoost;
+            transform.ScaleY = currentScaleY / hoverScaleBoost;
+            isCurrentlyHovered = false;
+        }
+        
         if (isHovered && input.IsMouseButtonTriggered(0))
         {
             OnClick();
         }
-
-        wasHovered = isHovered;
     }
-
-    private bool IsMouseOverEntity(InputComponent input)
-    {
-        TransformComponent transform = GetTransform();
-        
-        // Use ORIGINAL scale for hit detection (not current scaled-up size)
-        float halfW = originalScaleX / 2f;
-        float halfH = originalScaleY / 2f;
-
-        float mx = input.WorldMouseX;
-        float my = input.WorldMouseY;
-
-        return mx >= transform.X - halfW && mx <= transform.X + halfW &&
-               my >= transform.Y - halfH && my <= transform.Y + halfH;
-    }
-
-    private void OnHoverEnter()
-    {
-        // Change texture
-        GetSprite().Texture = hoverTexture;
-        
-        // Scale up slightly
-        GetTransform().ScaleX = originalScaleX * hoverScaleMultiplier;
-        GetTransform().ScaleY = originalScaleY * hoverScaleMultiplier;
-        
-        Console.WriteLine("[HOVER ENTER]");
-    }
-
-    private void OnHoverExit()
-    {
-        // Restore texture
-        GetSprite().Texture = defaultTexture;
-        
-        // Restore scale
-        GetTransform().ScaleX = originalScaleX;
-        GetTransform().ScaleY = originalScaleY;
-        
-        Console.WriteLine("[HOVER EXIT]");
-    }
-
+    
     private void OnClick()
     {
-        Console.WriteLine("[CLICKED]");
-        // Add your button action here
-    }
-
-    private string BuildHoverTexturePath(string originalPath)
-    {
-        // Find last dot for extension
-        int dotIndex = originalPath.LastIndexOf('.');
+        string tex = defaultTexture.ToLower();
         
-        if (dotIndex == -1)
-        {
-            // No extension, just append _hover
-            return originalPath + "_hover";
-        }
-        
-        // Insert _hover before extension
-        // "folder/button.png" -> "folder/button_hover.png"
-        string basePath = originalPath.Substring(0, dotIndex);
-        string extension = originalPath.Substring(dotIndex);
-        
-        return basePath + "_hover" + extension;
+        if (tex.Contains("newgame") || tex.Contains("new_game") || tex.Contains("new game"))
+            Scene.LoadScene("Level1");
+        else if (tex.Contains("continue"))
+            // Scene.LoadScene("SavedGame");
+            Console.WriteLine("NOT IMPLEMENTED YET!");
+        else if (tex.Contains("settings"))
+            // Scene.LoadScene("Settings");
+            Console.WriteLine("NOT IMPLEMENTED YET!");
+        else if (tex.Contains("quit"))
+            Console.WriteLine("NOT IMPLEMENTED YET!");
     }
 }
