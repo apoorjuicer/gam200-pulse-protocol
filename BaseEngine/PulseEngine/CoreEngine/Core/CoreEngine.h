@@ -54,7 +54,7 @@ public:
 		std::cout << "Hello Native World!" << std::endl;
 	}
 	static Framework::Transform* GetTransformComponent(int ID);
-	
+	static std::filesystem::path GetAssetRoot();
 	// void BroadcastMessage(Message* message);	  // One of the ways to glue systems tgt.
 	// AssetsManager& getAssetsManager() { return mAssets; }
 

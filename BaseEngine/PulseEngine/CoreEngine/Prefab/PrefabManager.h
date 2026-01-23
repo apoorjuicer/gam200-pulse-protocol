@@ -65,7 +65,8 @@ public:
     void UpdatePrefabInAllScenes(std::string const& prefabName);
 
 private:
-    std::string prefabDirectory = "../../PulseEngine/Assets/Prefabs/";
+    std::filesystem::path assetRoot;
+    std::string prefabDirectory;
 
     // updates a single entity from a prefab file (private helper)
     bool UpdateEntityFromPrefab(Entity entity, std::string const& prefabPath);

@@ -133,44 +133,44 @@ public:
 //	static std::unordered_map<Entity, float> HopTimer;
 //};
 
-// Per-button data structure
-struct ButtonData
-{
-	std::string buttonName;
-	std::string normalTexture;
-	std::string hoverTexture;
-	bool isHovering = false;
-};
-
-class ButtonScript : public Iscript
-{
-public:
-	void Init(Entity ID) override;
-	void Update(Entity ID) override;
-	void Exit(Entity ID) override;
-
-	ButtonScript* Clone() override;
-
-private:
-	// Store data per entity ID
-	std::unordered_map<Entity, ButtonData> buttonDataMap;
-};
-
-class PulsingBorderScript : public Iscript
-{
-public:
-	void Init(Entity ID) override;
-	void Update(Entity ID) override;
-	void Exit(Entity ID) override;
-
-	PulsingBorderScript* Clone() override;
-
-private:
-	float pulseTimer = 0.0f;
-	float bpm = 120.0f;
-	float minAlpha = 0.2f;
-	float maxAlpha = 1.0f;
-};
+//// Per-button data structure
+//struct ButtonData
+//{
+//	std::string buttonName;
+//	std::string normalTexture;
+//	std::string hoverTexture;
+//	bool isHovering = false;
+//};
+//
+//class ButtonScript : public Iscript
+//{
+//public:
+//	void Init(Entity ID) override;
+//	void Update(Entity ID) override;
+//	void Exit(Entity ID) override;
+//
+//	ButtonScript* Clone() override;
+//
+//private:
+//	// Store data per entity ID
+//	std::unordered_map<Entity, ButtonData> buttonDataMap;
+//};
+//
+//class PulsingBorderScript : public Iscript
+//{
+//public:
+//	void Init(Entity ID) override;
+//	void Update(Entity ID) override;
+//	void Exit(Entity ID) override;
+//
+//	PulsingBorderScript* Clone() override;
+//
+//private:
+//	float pulseTimer = 0.0f;
+//	float bpm = 120.0f;
+//	float minAlpha = 0.2f;
+//	float maxAlpha = 1.0f;
+//};
 
 class Csharptestscript : public Iscript
 {

@@ -50,7 +50,7 @@ namespace PulseEditor
     extern std::vector<Entity> entityDisplayOrder;   // defined in Editor / Hierarchy panel
 
     // ── Asset browser state ─────────────────────────────────────
-    static std::string s_assetRoot = "../../PulseEngine/Assets";
+    static std::string s_assetRoot = "";
     static std::string s_currentDir = s_assetRoot;
     static std::vector<AssetItem> s_dirEntries;
 
@@ -78,15 +78,136 @@ namespace PulseEditor
         ValidateFolderContents(s_currentDir, s_dirEntries);
     }
 
+    static std::string FindAssetRoot()
+    {
+        namespace fs = std::filesystem;
+
+        fs::path cwd = fs::current_path();
+        std::string cwdStr = cwd.string();
+
+        // ═══════════════════════════════════════════════════════════════
+        // PRIORITY 1: Parse path string to find "BaseEngine"
+        // ═══════════════════════════════════════════════════════════════
+        // This is the MOST RELIABLE method when working directory is set
+        // to something like: build/PulseEngine/Assets/Textures/UI
+
+        size_t baseEnginePos = cwdStr.find("BaseEngine");
+        if (baseEnginePos != std::string::npos)
+        {
+            //std::cout << "\n[ProjectPanel] Found 'BaseEngine' in path at position " << baseEnginePos << std::endl;
+
+            // Extract substring: everything up to and including "BaseEngine"
+            std::string baseEnginePart = cwdStr.substr(0, baseEnginePos + 10);  // "BaseEngine" = 10 chars
+            fs::path baseEnginePath(baseEnginePart);
+            fs::path targetPath = baseEnginePath / "PulseEngine" / "Assets";
+
+            //std::cout << "[ProjectPanel] Constructed path: " << targetPath.string() << std::endl;
+
+            if (fs::exists(targetPath) && fs::is_directory(targetPath))
+            {
+                //std::cout << "[ProjectPanel] Asset Root: " << targetPath.string() << std::endl << std::endl;
+                return targetPath.string();
+            }
+
+        }
+        else
+        {
+            std::cout << "[ProjectPanel] Note: 'BaseEngine' not found in working directory path" << std::endl;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // PRIORITY 2: Walk up directory tree
+        // ═══════════════════════════════════════════════════════════════
+        // Skip the "build" folder since we want the actual source Assets
+
+        std::cout << "\n[ProjectPanel] Attempting directory walk (skipping 'build')..." << std::endl;
+        fs::path current = cwd;
+        int iterations = 0;
+        int maxIterations = 25;
+
+        while (maxIterations-- > 0 && iterations++ < 25)
+        {
+            std::string currentName = current.filename().string();
+            std::cout << "[ProjectPanel]   Level " << iterations << ": " << currentName << std::endl;
+
+            // ─────────────────────────────────────────────────────────
+            // SKIP "build" folder - we want the real Assets at root
+            // ─────────────────────────────────────────────────────────
+            if (currentName == "build")
+            {
+                std::cout << "[ProjectPanel]   -> Detected 'build' folder, SKIPPING..." << std::endl;
+                fs::path parent = current.parent_path();
+                if (parent == current)  // Reached root
+                {
+                    std::cout << "[ProjectPanel]   -> At filesystem root, cannot go higher" << std::endl;
+                    break;
+                }
+                current = parent;
+                continue;  // Skip the rest of the loop, go to next iteration
+            }
+
+            // ─────────────────────────────────────────────────────────
+            // Check for PulseEngine/Assets in current directory
+            // ─────────────────────────────────────────────────────────
+            fs::path pulseEngineAssets = current / "PulseEngine" / "Assets";
+
+            if (fs::exists(pulseEngineAssets) && fs::is_directory(pulseEngineAssets))
+            {
+                std::cout << "[ProjectPanel] Asset Root: " << pulseEngineAssets.string() << std::endl << std::endl;
+                return pulseEngineAssets.string();
+            }
+            else
+            {
+                std::cout << " ... not found" << std::endl;
+            }
+
+            // Move to parent directory
+            fs::path parent = current.parent_path();
+            if (parent == current)  // Reached filesystem root
+            {
+                break;
+            }
+            current = parent;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // FAILURE: Could not find Assets
+        // ═══════════════════════════════════════════════════════════════
+
+        std::cerr << "[ProjectPanel] Working Directory: " << cwd.string() << std::endl;
+        std::cerr << "[ProjectPanel] Expected structure: BaseEngine/PulseEngine/Assets/" << std::endl;
+        std::cerr << "[ProjectPanel] Could not find 'BaseEngine' in path" << std::endl;
+        std::cerr << "[ProjectPanel] Walked up " << iterations << " directory levels without finding it" << std::endl;
+        std::cerr << "\nTEAM BLOOP: Check your project structure and working directory!" << std::endl << std::endl;
+
+        return fs::current_path().string();
+    }
+
     // ── Init ────────────────────────────────────────────────────
     void InitProjectPanel()
     {
         namespace fs = std::filesystem;
-        std::error_code ec;
 
+        // Initialize asset root if not already done
+        if (s_assetRoot.empty())
+        {
+            s_assetRoot = FindAssetRoot();
+        }
+
+        // Validate and convert to absolute canonical path
+        std::error_code ec;
         fs::path abs = fs::weakly_canonical(fs::absolute(s_assetRoot), ec);
-        if (!ec && !abs.empty())
+
+        if (!ec && !abs.empty() && fs::exists(abs, ec))
+        {
             s_assetRoot = abs.string();
+        }
+        else
+        {
+            if (ec)
+                std::cerr << "[ProjectPanel] Error: " << ec.message() << std::endl;
+            s_assetRoot = fs::current_path().string();
+        }
 
         s_currentDir = s_assetRoot;
         RefreshCurrentDir();

@@ -283,8 +283,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1347.077392578125,
-                            "y": 655.968017578125
+                            "x": 1294.006591796875,
+                            "y": 644.8541870117188
                         },
                         "scale": {
                             "x": 100.0,
@@ -304,7 +304,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../../PulseEngine/Assets/Textures/UI/Pause.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Pause.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -349,7 +349,7 @@
                     "transform": {
                         "position": {
                             "x": -1041.50146484375,
-                            "y": 622.5385131835938
+                            "y": 601.0
                         },
                         "scale": {
                             "x": 400.0,
@@ -482,7 +482,7 @@
                     "transform": {
                         "position": {
                             "x": -951.0045166015625,
-                            "y": 590.4030151367188
+                            "y": 568.8645629882813
                         },
                         "scale": {
                             "x": 290.0,
@@ -657,7 +657,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -726,7 +726,7 @@
                             1.0,
                             1.0
                         ],
-                        "visible": true,
+                        "visible": false,
                         "alignment": 1
                     }
                 }
@@ -802,8 +802,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1095.4337158203125,
-                            "y": 480.4603271484375
+                            "x": 1030.3013916015625,
+                            "y": 482.3045654296875
                         },
                         "scale": {
                             "x": 180.0,
@@ -823,7 +823,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../../PulseEngine/Assets/Textures/UI/enemy icon bat.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon bat.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -862,12 +862,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 0.0,
-                            "y": 0.0
+                            "x": 1310.229248046875,
+                            "y": 382.25341796875
                         },
                         "scale": {
-                            "x": 200.0,
-                            "y": 200.0
+                            "x": 130.0,
+                            "y": 130.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -881,9 +881,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat greyed (1).png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -905,66 +905,6 @@
                 {
                     "name": {
                         "name": "Next Up"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "scale": {
-                            "x": 200.0,
-                            "y": 200.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
-                        "useTexture": true,
-                        "spriteName": "",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "GameObject"
                     }
                 },
                 {

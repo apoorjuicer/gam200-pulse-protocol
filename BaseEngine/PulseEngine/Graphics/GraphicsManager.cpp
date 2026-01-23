@@ -288,9 +288,6 @@ void GraphicsManager::ToggleDebugOverlay()
 
         if (m_topSystemTextEntity != NULL_ENTITY && g->HasComponent<TextComponent>(m_topSystemTextEntity))
             g->GetComponent<TextComponent>(m_topSystemTextEntity).visible = m_showDebugOverlay;
-
-        if (m_teamLabelEntity != NULL_ENTITY && g->HasComponent<TextComponent>(m_teamLabelEntity))
-            g->GetComponent<TextComponent>(m_teamLabelEntity).visible = m_showDebugOverlay;
     }
 
     std::cout << "[DEBUG OVERLAY] " << (m_showDebugOverlay ? "SHOWN" : "HIDDEN") << " (F8 to toggle)\n";
@@ -862,48 +859,9 @@ void GraphicsManager::CreateDebugTextEntities()
         g->AddComponent(m_topSystemTextEntity, name);
     }
 
-    // ===== TEAM LABEL ENTITY =====
-    m_teamLabelEntity = g->CreateEntity();
-
-    {
-        Framework::Transform t;
-        t.Pos = { 1500.0f, 130.0f };  // Top-right area
-        t.Scale = { 1.0f, 1.0f };
-        t.Rotation = { 0.0f, 0.0f };
-        t.isVisible = true;
-        t.autoHide = false;
-        g->AddComponent(m_teamLabelEntity, t);
-    }
-
-    {
-        TextComponent txt;
-        txt.text = "Team BLOOP";
-        txt.font_id = "PatrickHand_font";
-        txt.font_size = 60.0f;
-        txt.color = { 1.0f, 1.0f, 1.0f };  // White
-        txt.offset = { 0.0f, 0.0f };
-        txt.visible = m_showDebugOverlay;
-        g->AddComponent(m_teamLabelEntity, txt);
-    }
-
-    {
-        LayerTag layer;
-        layer.mask = LAYER_UI;
-        layer.orderInLayer = 997;
-        layer.z = 100.0f;
-        g->AddComponent(m_teamLabelEntity, layer);
-    }
-
-    {
-        Name name;
-        name.name = "_Team_Label";
-        g->AddComponent(m_teamLabelEntity, name);
-    }
-
     std::cout << "[GraphicsManager] Created debug text entities (F8 to toggle)\n";
     std::cout << "                  FPS: Entity " << m_fpsTextEntity << "\n";
     std::cout << "                  TopSystem: Entity " << m_topSystemTextEntity << "\n";
-    std::cout << "                  TeamLabel: Entity " << m_teamLabelEntity << "\n";
 }
 
 void GraphicsManager::UpdateDebugTextEntities()
@@ -945,13 +903,6 @@ void GraphicsManager::UpdateDebugTextEntities()
         std::ostringstream ss;
         ss << topSystem << ": " << std::fixed << std::setprecision(2) << topPercentage << "%";
         txt.text = ss.str();
-        txt.visible = m_showDebugOverlay;
-    }
-
-    // Update team label visibility (text is static)
-    if (m_teamLabelEntity != NULL_ENTITY && g->HasComponent<TextComponent>(m_teamLabelEntity))
-    {
-        auto& txt = g->GetComponent<TextComponent>(m_teamLabelEntity);
         txt.visible = m_showDebugOverlay;
     }
 }
