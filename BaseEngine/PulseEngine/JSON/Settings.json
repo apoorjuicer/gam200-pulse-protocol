@@ -55,8 +55,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
+                        "orderInLayer": 10,
                         "z": 0.0
                     }
                 }
@@ -116,7 +115,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -182,7 +180,6 @@
                     "layerTag": {
                         "layerName": "Background",
                         "mask": 1,
-                        "sortingLayer": 0,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -250,7 +247,6 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
-                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 100.0
                     }
@@ -318,7 +314,6 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
-                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 100.0
                     }
@@ -379,7 +374,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -440,7 +434,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -508,7 +501,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -576,7 +568,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -637,7 +628,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -698,7 +688,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -710,12 +699,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -1276.6673583984375,
-                            "y": 664.414794921875
+                            "x": -1335.12890625,
+                            "y": 707.4917602539063
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 85.5,
+                            "y": 85.5
                         },
                         "rotation": {
                             "x": 0.0,
@@ -759,7 +748,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -771,8 +759,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -438.86602783203125,
-                            "y": 17.32411003112793
+                            "x": -460.4045715332031,
+                            "y": 32.70872497558594
                         },
                         "scale": {
                             "x": 200.0,
@@ -820,7 +808,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -899,7 +886,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -967,7 +953,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -1035,7 +1020,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -1096,7 +1080,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -1108,8 +1091,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1234.2855224609375,
-                            "y": -47.64923095703125
+                            "x": 1240.3846435546875,
+                            "y": -49.572269439697266
                         },
                         "scale": {
                             "x": 56.0,
@@ -1164,7 +1147,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -1176,8 +1158,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 398.2855224609375,
-                            "y": -47.64923095703125
+                            "x": 404.3846435546875,
+                            "y": -49.572269439697266
                         },
                         "scale": {
                             "x": 864.0,
@@ -1232,7 +1214,6 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
-                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
