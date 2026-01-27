@@ -35,7 +35,8 @@ namespace ScriptAPI
 
 		auto* coord = Coordinator::GetInstance();
 		auto sceneManager = coord->GetSystem<SceneManager>();
-		sceneManager->LoadSceneFromJson(Filename_pathway);
+		//sceneManager->LoadSceneFromJson(Filename_pathway);
+		sceneManager->ChangeCurrentScene(context.marshal_as<std::string>(Filename));
 
 		System::Console::WriteLine("Loaded new scene\n");
 
