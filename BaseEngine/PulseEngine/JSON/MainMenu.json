@@ -110,7 +110,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "MainMenuButton"
+                            "NavigationButtons"
                         ]
                     }
                 },
@@ -191,7 +191,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "MainMenuButton"
+                            "NavigationButtons"
                         ]
                     }
                 },
@@ -272,7 +272,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "MainMenuButton"
+                            "NavigationButtons"
                         ]
                     }
                 },
@@ -353,7 +353,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "MainMenuButton"
+                            "NavigationButtons"
                         ]
                     }
                 },
