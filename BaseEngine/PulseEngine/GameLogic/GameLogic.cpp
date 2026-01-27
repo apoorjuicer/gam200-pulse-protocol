@@ -71,8 +71,27 @@ void LogicSystem::Init()
     //        "ScriptAPI.EngineInterface",
     //        "AddScriptViaName"
     //    );
+    mVfx.Init(/*bpm=*/120.0f, /*maxParticles=*/2000);
 
+    auto* coord = Coordinator::GetInstance();
+    auto rhythm = coord->GetSystem<RhythmGameplayInput>();
+    if (rhythm)
+    {
+        rhythm->registerInputListener("VFX_Judgement",
+            [this](const InputEvent& evt)
+            {
+                if (evt.type != InputEvent::Type::COMBO_EXECUTED)
+                    return;
 
+                // Choose a spawn position (replace with your hit-line position if you have one)
+                glm::vec2 spawnPos{ 0.0f, 0.0f };
+
+                // If you can access something like evt.hitPos, use that instead:
+                // glm::vec2 spawnPos = evt.hitPos;
+
+                mVfx.OnJudgement(evt.feedback, spawnPos);
+            });
+    }
 
 
     //register scripts here. I think it it will be the Csharp / Lua game code here. Ask Eli if i did it right 
@@ -97,8 +116,7 @@ void LogicSystem::Init()
 
 void LogicSystem::Update(float dt)
 {
-    (void)dt;
-
+	mVfx.Update(dt);    //always update vfx manager
     // don't update scripts, if not playing the game
     if (!Engine->IsPlaying()) {
         return;

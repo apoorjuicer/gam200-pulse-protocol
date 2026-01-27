@@ -1,36 +1,38 @@
 #pragma once
-#include "BeatTracker.h"
-#include "CameraEffects.h"
-#include "ParticleSystem.h"
+#include <string>
 #include <glm/vec2.hpp>
-
-enum class HitResult
-{
-    Perfect,
-    Good,
-    Bad,
-    Miss
-};
+#include "ParticleSystem.h"
+#include "CameraEffects.h"
 
 class VFXManager
 {
 public:
-    void Init(float bpm);
-    void Reset(float songTimeSec = 0.0f);
+    void Init(float bpm, size_t maxParticles);
 
-    // Call every frame
-    void Update(float dt, float songTimeSec);
+    void SetBpm(float bpm);
+    void Update(float dt);
 
-    // Gameplay calls these
-    void OnHit(HitResult r, const glm::vec2& worldPos);
+    // call this when beat occurs (or when BeatTracker says “beat”)
+    void OnBeat();
 
-    // Access
-    BeatTracker& Beat() { return mBeat; }
-    CameraEffects& Camera() { return mCamFx; }
-    ParticleSystem& Particles() { return mParticles; }
+    // call this when judgement occurs ("MISS", "BAD", "GOOD", "PERFECT")
+    void OnJudgement(const std::string& judgement, const glm::vec2& worldPos);
+
+    // camera outputs (apply to your camera each frame)
+    float GetPunchZoom01() const { return mCamFx.GetPunchZoom01(); }
+    glm::vec2 GetShakeOffset() const { return mCamFx.GetShakeOffset(); }
+
+    const std::vector<Particle>& GetParticles() const { return mParticles.GetParticles(); }
 
 private:
-    BeatTracker mBeat;
-    CameraEffects mCamFx;
+    float mBpm = 120.0f;
+
     ParticleSystem mParticles;
+    CameraEffects  mCamFx;
+
+    // Tuning per judgement
+    void SpawnForMiss(const glm::vec2& p);
+    void SpawnForBad(const glm::vec2& p);
+    void SpawnForGood(const glm::vec2& p);
+    void SpawnForPerfect(const glm::vec2& p);
 };
