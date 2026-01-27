@@ -26,16 +26,16 @@ struct ParticleSpawnDesc
 class ParticleSystem
 {
 public:
-    void CreatePool(std::size_t maxParticles);
-    void Clear();                  // deactivate only (keep memory)
-    void SpawnBurst(const ParticleSpawnDesc& desc);
+    void CreatePool(size_t maxParticles);
+    void Clear();
+
+    void SpawnBurst(const ParticleSpawnDesc& d);
     void Update(float dt);
 
     const std::vector<Particle>& GetParticles() const { return mParticles; }
 
 private:
     std::vector<Particle> mParticles;
-    std::size_t mNextSearch = 0;   // makes FindFree faster
 
     float Rand01();
     Particle* FindFree();

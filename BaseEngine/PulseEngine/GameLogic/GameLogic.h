@@ -27,6 +27,7 @@
 //#include "../PulseEngine/Components/ScriptName.h"
 // #include "Serialization/Serialization.h"
 #include "Input/RhythmGameplayInput.h"
+#include "VFX/VFXManager.h"
 
 //components:
 #include "Graphics/Transform.h"
@@ -226,11 +227,13 @@ public:
 
 	// We give script name as param and get the update function of each script(child of Iscript)
 	std::shared_ptr<Iscript> GrabScript(std::string const& ScriptName);
-
+	VFXManager& GetVfx() { return mVfx; }
+	const VFXManager& GetVfx() const { return mVfx; }
 private:
 	// key is the name of script which is a component, then reward is the class parent but can also grab kid functions and data
 	std::unordered_map<std::string, std::shared_ptr<Iscript>> map_of_scripts; // template
 	std::unordered_map<Entity, std::unordered_map<std::string, std::shared_ptr<Iscript>>> map_of_scriptInstances; // copying from template (wrap raw ptr into smart ptr(shared) to prevent mem leak ltr )
+	VFXManager mVfx;
 };
 
 struct DLL_API LogicComponent
