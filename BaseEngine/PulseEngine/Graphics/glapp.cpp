@@ -137,7 +137,7 @@ glm::mat3 GLApp::BuildPanZoomNDC(const GLApp::Camera2D& cam) {
 
 
 void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
-	Framework::Transform& z, const glm::mat3& ZoomNDC)
+	Framework::Transform& z, const glm::mat3& ZoomNDC, int drawOrder)
 {
 	float frameWidth = 1.0f / y.columns;
 	float frameHeight = 1.0f / y.rows;
@@ -156,6 +156,7 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 	gBatch.Push(static_cast<uint16_t>(x.shd_ref),
 		static_cast<uint16_t>(x.mdl_ref),
 		x.textureID,
+		drawOrder,
 		modelNDC, u0, v0, u1, v1);
 }
 
@@ -270,6 +271,7 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	}
 
 	// Draw
+	int drawOrder = 0;
 	for (auto e : drawList) {
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(e);
 		auto& re = g_coordinator->GetComponent<Framework::Renderable>(e);
@@ -316,7 +318,8 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &re.texW);
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &re.texH);
 
-		drawTrans(re, an, tr, PanZoom);
+		drawTrans(re, an, tr, PanZoom, drawOrder);
+		drawOrder++;
 	}
 
 	gBatch.Flush(shdrpgms);

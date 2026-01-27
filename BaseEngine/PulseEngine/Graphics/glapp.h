@@ -46,7 +46,7 @@ public:
 	GLuint vaoid; // handle to VAO
 	GLuint idx_elem_cnt;
 	GLenum primitive_type;
-	void drawTrans(Framework::Renderable& x, Framework::Animation& y, Framework::Transform& z, const glm::mat3& VP);
+	void drawTrans(Framework::Renderable& x, Framework::Animation& y, Framework::Transform& z, const glm::mat3& ZoomNDC, int drawOrder);
 	void updateAnimation(Framework::Animation& x, float deltaTime);
 
 	static inline int GameWidth = VIRTUAL_W;  // actual GL viewport width after letterbox
@@ -60,20 +60,24 @@ public:
 
 	struct BatchRender {
 		struct Vtx { glm::vec2 pos; glm::vec2 uv; };
+
+		// Add drawOrder to the Key
 		struct Key {
-			uint16_t shd;     // shader index (from Renderable.shd_ref)
-			uint16_t mdl;     // model index  (from Renderable.mdl_ref)
-			GLuint   tex;     // GL texture id
+			uint16_t shd;
+			uint16_t mdl;
+			GLuint   tex;
+			int      drawOrder;  // NEW: preserves sort order
 
 			bool operator==(const Key& o) const {
-				return shd == o.shd && mdl == o.mdl && tex == o.tex;
+				return shd == o.shd && mdl == o.mdl && tex == o.tex && drawOrder == o.drawOrder;
 			}
 		};
+
 		struct KeyHash {
 			size_t operator()(const Key& k) const noexcept {
 				size_t h = std::hash<uint32_t>{}((uint32_t(k.shd) << 16) ^ uint32_t(k.mdl));
-				// mix texture id
 				h ^= std::hash<GLuint>{}(k.tex) + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
+				h ^= std::hash<int>{}(k.drawOrder) + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
 				return h;
 			}
 		};
@@ -120,7 +124,7 @@ public:
 		void Begin() { buckets.clear(); }
 
 		// shd_ref & mdl_ref come from Framework::Renderable
-		void Push(uint16_t shd_ref, uint16_t mdl_ref, GLuint tex,
+		void Push(uint16_t shd_ref, uint16_t mdl_ref, GLuint tex, int drawOrder,
 			const glm::mat3& modelToNDC, float u0, float v0, float u1, float v1)
 		{
 			// Choose model-space corners based on model type.
@@ -144,7 +148,7 @@ public:
 				return glm::vec2(h.x, h.y);
 				};
 
-			Key k{ shd_ref, mdl_ref, tex };
+			Key k{ shd_ref, mdl_ref, tex, drawOrder };  // Include drawOrder in key
 			auto& buf = buckets[k];
 			buf.reserve(buf.size() + 4);
 
@@ -161,7 +165,8 @@ public:
 			// Sort buckets by shader/model to ensure consistent draw order
 			std::vector<std::pair<Key, std::vector<Vtx>>> sortedBuckets(buckets.begin(), buckets.end());
 			std::sort(sortedBuckets.begin(), sortedBuckets.end(), [](const auto& a, const auto& b) {
-				// Draw lower shader indices first (background shader before sprite shader)
+				if (a.first.drawOrder != b.first.drawOrder)
+					return a.first.drawOrder < b.first.drawOrder;  // DRAW ORDER IS PRIMARY
 				if (a.first.shd != b.first.shd) return a.first.shd < b.first.shd;
 				if (a.first.mdl != b.first.mdl) return a.first.mdl < b.first.mdl;
 				return a.first.tex < b.first.tex;
