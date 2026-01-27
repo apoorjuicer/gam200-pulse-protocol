@@ -1,4 +1,4 @@
-/******************************************************************************/
+﻿/******************************************************************************/
 /**
  * @file        glapp.cpp
  * @project     Pulse Protocol
@@ -217,41 +217,57 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		drawList.push_back(it);
 	}
 
-	// BEFORE (ORIGINAL CODE):
-	//     std::stable_sort(drawList.begin(), drawList.end(), [&](Entity a, Entity b) {
-	//         auto& A = g_coordinator->GetComponent<LayerTag>(a);
-	//         auto& B = g_coordinator->GetComponent<LayerTag>(b);
-	//         if (A.orderInLayer != B.orderInLayer) return A.orderInLayer < B.orderInLayer;
-	//         return A.z < B.z;
-	//     });
-
-	// AFTER:
 	std::stable_sort(drawList.begin(), drawList.end(), [&](Entity a, Entity b) {
-		LayerMask maskA = LAYER_WORLD, maskB = LAYER_WORLD;
+		// Defaults (if no LayerTag)
+		int sortingLayerA = 1, sortingLayerB = 1;  // Default to World
 		int orderA = 0, orderB = 0;
-		float zA = 0.0f, zB = 0.0f;
 
 		if (g_coordinator->HasComponent<LayerTag>(a)) {
 			auto& A = g_coordinator->GetComponent<LayerTag>(a);
-			maskA = A.mask;
+			sortingLayerA = A.sortingLayer;
 			orderA = A.orderInLayer;
-			zA = A.z;
 		}
 
 		if (g_coordinator->HasComponent<LayerTag>(b)) {
 			auto& B = g_coordinator->GetComponent<LayerTag>(b);
-			maskB = B.mask;
+			sortingLayerB = B.sortingLayer;
 			orderB = B.orderInLayer;
-			zB = B.z;
 		}
 
-		// Sort by layer first (Background < World < UI)
-		if (maskA != maskB) return maskA < maskB;
-		// Then by orderInLayer within same layer
-		if (orderA != orderB) return orderA < orderB;
-		// Then by z depth
-		return zA < zB;
-		});
+		// Sort by sorting layer first (Background=0 < World=1 < UI=2)
+		if (sortingLayerA != sortingLayerB)
+			return sortingLayerA < sortingLayerB;
+
+		// Then by orderInLayer within same sorting layer
+		return orderA < orderB;
+	});
+
+	// ═══════════════════════════════════════════════════════════════
+	// DEBUG: Print draw order every 5 seconds
+	// ═══════════════════════════════════════════════════════════════
+	static int debugFrame = 0;
+	if (debugFrame++ % 300 == 0 && drawList.size() > 0) {
+		std::cout << "\n=== DRAW ORDER DEBUG ===\n";
+		for (size_t i = 0; i < drawList.size(); ++i) {
+			Entity e = drawList[i];
+			std::string name = "Entity_" + std::to_string(e);
+			int sl = 1, order = 0;
+
+			if (g_coordinator->HasComponent<Name>(e)) {
+				name = g_coordinator->GetComponent<Name>(e).name;
+			}
+			if (g_coordinator->HasComponent<LayerTag>(e)) {
+				auto& lt = g_coordinator->GetComponent<LayerTag>(e);
+				sl = lt.sortingLayer;
+				order = lt.orderInLayer;
+			}
+
+			std::cout << i << ": " << name
+				<< " | SortingLayer=" << sl
+				<< " | OrderInLayer=" << order << "\n";
+		}
+		std::cout << "========================\n";
+	}
 
 	// Draw
 	for (auto e : drawList) {

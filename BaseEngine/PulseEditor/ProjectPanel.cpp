@@ -38,11 +38,13 @@
 #include "ProjectPanel.h"
 #include "ProjectPanelHelper.h"
 #include "FolderValidation.h"
+#include "SnapShot.h"
 
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "CoreEngine/ECS/Coordinator.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Transform.h"
+#include "Graphics/Layer.h"
 
 namespace PulseEditor
 {
@@ -108,7 +110,6 @@ namespace PulseEditor
                 //std::cout << "[ProjectPanel] Asset Root: " << targetPath.string() << std::endl << std::endl;
                 return targetPath.string();
             }
-
         }
         else
         {
@@ -530,6 +531,7 @@ namespace PulseEditor
                             std::cerr << "[ProjectPanel] Failed to instantiate prefab: " << prefabName << std::endl;
                         }
                     }
+                    
                     // ── TEXTURE: Only assign if valid image in correct folder ──
                     else if (selectedEntity != INVALID_ENTITY &&
                         IsImageExt(item.fullPath) &&
@@ -539,6 +541,15 @@ namespace PulseEditor
                         auto* coord = Coordinator::GetInstance();
                         if (coord && coord->HasComponent<Framework::Renderable>(selectedEntity))
                         {
+                            // ═══════════════════════════════════════════════════════════════
+                            // UNDO: Snapshot BEFORE texture change
+                            // ═══════════════════════════════════════════════════════════════
+                            Entity e = selectedEntity;
+                            EntitySnapshot before = MakeEntitySnapshot(e);
+                            mUndo.Push([e, before]() {
+                                RestoreEntityFromSnapshot(e, before);
+                                });
+
                             auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
 
                             namespace fs = std::filesystem;
@@ -557,6 +568,42 @@ namespace PulseEditor
                             bool isSheet = (lowerName.find("sheet") != std::string::npos ||
                                 lowerName.find("atlas") != std::string::npos);
                             rend.shd_ref = isSheet ? 2.0f : 1.0f;
+
+                            // ═══════════════════════════════════════════════════════════════
+                            // AUTO-SET SORTING LAYER BASED ON FOLDER
+                            // ═══════════════════════════════════════════════════════════════
+                            if (coord->HasComponent<LayerTag>(selectedEntity))
+                            {
+                                auto& layerTag = coord->GetComponent<LayerTag>(selectedEntity);
+
+                                // Convert path to lowercase for comparison
+                                std::string pathLower = item.fullPath;
+                                std::transform(pathLower.begin(), pathLower.end(), pathLower.begin(), ::tolower);
+
+                                // Background folder → Background layer
+                                if (pathLower.find("/background/") != std::string::npos ||
+                                    pathLower.find("\\background\\") != std::string::npos)
+                                {
+                                    layerTag.sortingLayer = 0;
+                                    layerTag.mask = LAYER_BACKGROUND;
+                                    std::cout << "[ProjectPanel] Auto-set Sorting Layer: Background (0)" << std::endl;
+                                }
+                                // UI folder → UI layer
+                                else if (pathLower.find("/ui/") != std::string::npos ||
+                                    pathLower.find("\\ui\\") != std::string::npos)
+                                {
+                                    layerTag.sortingLayer = 2;
+                                    layerTag.mask = LAYER_UI;
+                                    std::cout << "[ProjectPanel] Auto-set Sorting Layer: UI (2)" << std::endl;
+                                }
+                                // Everything else → World layer (Characters, Enemies, Textures root, etc.)
+                                else
+                                {
+                                    layerTag.sortingLayer = 1;
+                                    layerTag.mask = LAYER_WORLD;
+                                    std::cout << "[ProjectPanel] Auto-set Sorting Layer: World (1)" << std::endl;
+                                }
+                            }
 
                             std::cout << "[ProjectPanel] Assigned texture to entity " << selectedEntity << std::endl;
                         }

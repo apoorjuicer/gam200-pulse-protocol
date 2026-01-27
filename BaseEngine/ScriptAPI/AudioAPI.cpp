@@ -25,9 +25,15 @@ namespace ScriptAPI
         return sys.get();
     }
 
+    static float Normalize01(float v)
+    {
+        if (v < 0.0f) return 0.0f;
+        if (v > 1.0f) return 1.0f;
+        return v;
+    }
+
     AudioComponent::AudioComponent(int id) : EntityID(id) {}
 
-    // Plays the AudioSource attached to THIS entity (whatever you picked in Inspector)
     void AudioComponent::Play()
     {
         auto mgr = GetAudioManager();
@@ -39,7 +45,6 @@ namespace ScriptAPI
         mgr->PlayFromAudioSource(*src);
     }
 
-    // Optional helpers (global BGM control)
     void AudioComponent::PlayBGM(String^ name)
     {
         auto mgr = GetAudioManager();
@@ -80,5 +85,56 @@ namespace ScriptAPI
         auto mgr = GetAudioManager();
         if (!mgr) return;
         mgr->PlaySound(marshal_as<std::string>(name));
+    }
+
+    void AudioComponent::SetMasterVolume(float volume01)
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr) return;
+
+        float v = Normalize01(volume01);
+        mgr->mMasterVol = v;
+        mgr->applyMasterVolume();
+    }
+
+    void AudioComponent::SetMusicVolume(float volume01)
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr) return;
+
+        float v = Normalize01(volume01);
+        mgr->mMusicVol = v;
+        mgr->applyMusicVolume();
+    }
+
+    void AudioComponent::SetSfxVolume(float volume01)
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr) return;
+
+        float v = Normalize01(volume01);
+        mgr->mSfxVol = v;
+        mgr->applySfxVolume();
+    }
+
+    float AudioComponent::GetMasterVolume()
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr) return 1.0f;
+        return mgr->mMasterVol;
+    }
+
+    float AudioComponent::GetMusicVolume()
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr) return 1.0f;
+        return mgr->mMusicVol;
+    }
+
+    float AudioComponent::GetSfxVolume()
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr) return 1.0f;
+        return mgr->mSfxVol;
     }
 }

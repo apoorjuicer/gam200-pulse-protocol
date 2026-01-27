@@ -809,11 +809,19 @@ void AudioManager::ProcessAudioSources()
             {
                 float base = res->volume;
                 float user = std::clamp(src.volume, 0.0f, 1.0f);
-                float final = clampto0and1(base * mSfxVol * user);
+
+                // Pick the correct group volume
+                float groupVol = 1.0f;
+                if (res->audiotype == "BGM")
+                    groupVol = mMusicVol;
+                else if (res->audiotype == "SFX")
+                    groupVol = mSfxVol;
+
+                float final = clampto0and1(base * groupVol * user);
 
                 src.channel->setVolume(final);
-                src.channel->setMode(src.loop ? FMOD_LOOP_NORMAL
-                    : FMOD_LOOP_OFF);
+                src.channel->setMode(src.loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF);
+
             }
             continue; // go to next entity
         }   
