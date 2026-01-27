@@ -11,6 +11,9 @@ public class NavigationButtons : Script
     // Track if we've set the initial scene THIS play session
     private static int lastFrameCount = -1;
 
+    // === QUIT OVERLAY STATE ===
+    public static bool ShowQuitOverlay = false;
+
     private string defaultTexture = "";
     private string hoverTexture = "";
     private bool isCurrentlyHovered = false;
@@ -26,7 +29,7 @@ public class NavigationButtons : Script
             // New play session detected - reset everything
             sceneHistory.Clear();
             currentScene = "";
-            Console.WriteLine("Navigation: Reset for new play session");
+            // Console.WriteLine("Navigation: Reset for new play session");
         }
         lastFrameCount = currentFrame;
 
@@ -42,7 +45,7 @@ public class NavigationButtons : Script
             if (string.IsNullOrEmpty(currentScene))
             {
                 currentScene = DetectCurrentScene();
-                Console.WriteLine($"Navigation: Detected starting scene as {currentScene}");
+                // Console.WriteLine($"Navigation: Detected starting scene as {currentScene}");
             }
             
             int dotIndex = defaultTexture.LastIndexOf('.');
@@ -52,6 +55,28 @@ public class NavigationButtons : Script
                 hoverTexture = defaultTexture + "_hover";
             
             buttonInitialized = true;
+        }
+
+        // ============================================
+        // BLOCK INTERACTION WHEN OVERLAY IS SHOWING
+        // (except for overlay buttons)
+        // ============================================
+        string texLower = defaultTexture.ToLower();
+        bool isOverlayButton = texLower.Contains("quit yes") || texLower.Contains("quit no");
+        
+        if (ShowQuitOverlay && !isOverlayButton)
+        {
+            // Reset hover state if we were hovering
+            if (isCurrentlyHovered)
+            {
+                SpriteComponent sprite = GetSprite();
+                TransformComponent transform = GetTransform();
+                sprite.Texture = defaultTexture;
+                transform.ScaleX = t.ScaleX / hoverScaleBoost;
+                transform.ScaleY = t.ScaleY / hoverScaleBoost;
+                isCurrentlyHovered = false;
+            }
+            return; // Skip all interaction for this button
         }
         
         float currentScaleX = t.ScaleX;
@@ -148,20 +173,72 @@ public class NavigationButtons : Script
     private void OnClick()
     {
         string tex = defaultTexture.ToLower();
+        Console.WriteLine($"Button clicked: {tex}");
         
+        // ============================================
+        // QUIT OVERLAY BUTTONS
+        // ============================================
+        if (tex.Contains("quit yes"))
+        {
+            Console.WriteLine("QUIT YES - Closing game");
+            Application.Quit();
+            return;
+        }
+        
+        if (tex.Contains("quit no"))
+        {
+            Console.WriteLine("QUIT NO - Hiding overlay");
+            ShowQuitOverlay = false;
+            return;
+        }
+        
+        // ============================================
+        // MAIN MENU BUTTONS
+        // ============================================
         if (tex.Contains("new game") || tex.Contains("new_game") || tex.Contains("start"))
+        {
             NavigateTo("Level1");
-        else if (tex.Contains("continue"))
+            return;
+        }
+        
+        if (tex.Contains("continue"))
+        {
             Console.WriteLine("NOT IMPLEMENTED YET!");
-        else if (tex.Contains("settings") || tex.Contains("options"))
+            return;
+        }
+        
+        if (tex.Contains("settings") || tex.Contains("options"))
+        {
             NavigateTo("Settings");
-        else if (tex.Contains("quit") || tex.Contains("exit"))
-            Console.WriteLine("NOT IMPLEMENTED YET!");
-        else if (tex.Contains("back") || tex.Contains("return"))
+            return;
+        }
+        
+        if (tex.Contains("back") || tex.Contains("return"))
+        {
             GoBack();
-        // else if (tex.Contains("mainmenu") || tex.Contains("main_menu"))
-        //     GoToMainMenu();
-        // else if (tex.Contains("restart") || tex.Contains("retry"))
-        //     Scene.LoadScene(currentScene);
+            return;
+        }
+        
+        // ============================================
+        // GENERAL QUIT - CHECK LAST
+        // ============================================
+        if (tex.Contains("quit"))
+        {
+            Console.WriteLine("QUIT - Showing overlay");
+            ShowQuitOverlay = true;
+            return;
+        }
+    }
+}
+
+// ============================================
+// (background, "Are you sure?" text, yes/no buttons)
+// ============================================
+public class QuitOverlay : Script
+{
+    public override void Update()
+    {
+        TransformComponent t = GetTransform();
+        t.IsVisible = NavigationButtons.ShowQuitOverlay;
     }
 }
