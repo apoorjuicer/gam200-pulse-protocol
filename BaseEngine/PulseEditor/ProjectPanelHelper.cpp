@@ -305,8 +305,38 @@ namespace PulseEditor
 
             if (fs::exists(dst, ec))
             {
-                // Handle replacement
+                // Handle replacement - copy file and update all entities using this texture
                 fs::copy_file(srcPath, dst, fs::copy_options::overwrite_existing, ec);
+
+                if (!ec && IsImageExt(dst.string()))
+                {
+                    std::string relativePath = GetRelativeAssetPath(dst.string());
+                    std::string dstFilename = dst.filename().string();
+
+                    // Evict old texture and load new one
+                    mAssets.EvictTexture(relativePath);
+                    GLuint newTex = mAssets.GetOrLoadTexture(relativePath);
+
+                    // Update all entities using this texture filename
+                    if (auto* coord = Coordinator::GetInstance())
+                    {
+                        for (Entity e : coord->GetAllEntities())
+                        {
+                            if (!coord->HasComponent<Framework::Renderable>(e))
+                                continue;
+
+                            auto& r = coord->GetComponent<Framework::Renderable>(e);
+                            std::string rFilename = fs::path(r.spriteName).filename().string();
+
+                            if (rFilename == dstFilename)
+                            {
+                                r.spriteName = relativePath;
+                                r.textureID = newTex;
+                                r.needsTextureReload = false;
+                            }
+                        }
+                    }
+                }
             }
             else
             {

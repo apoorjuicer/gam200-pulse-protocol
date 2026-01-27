@@ -1,20 +1,34 @@
 using System;
+using System.Collections.Generic;
 using ScriptAPI;
 
-public class MainMenuButton : Script
+public class NavigationButtons : Script
 {
+    // === STATIC SCENE HISTORY (shared across all buttons) ===
+    private static Stack<string> sceneHistory = new Stack<string>();
+    private static string currentScene = "MainMenu";
+    private static bool initialized = false;
+
     private string defaultTexture = "";
     private string hoverTexture = "";
     private bool isCurrentlyHovered = false;
-    private bool initialized = false;
+    private bool buttonInitialized = false;
     private float hoverScaleBoost = 1.05f;
 
     public override void Update()
     {
+        // Initialize scene history once
+        if (!initialized)
+        {
+            sceneHistory.Clear();
+            currentScene = "MainMenu";  // Or detect from your engine if possible
+            initialized = true;
+        }
+
         InputComponent input = GetInput();
         TransformComponent t = GetTransform();
         
-        if (!initialized)
+        if (!buttonInitialized)
         {
             SpriteComponent sprite = GetSprite();
             defaultTexture = sprite.Texture;
@@ -25,7 +39,7 @@ public class MainMenuButton : Script
             else
                 hoverTexture = defaultTexture + "_hover";
             
-            initialized = true;
+            buttonInitialized = true;
         }
         
         float currentScaleX = t.ScaleX;
@@ -65,19 +79,59 @@ public class MainMenuButton : Script
             OnClick();
         }
     }
+
+    // === NAVIGATION HELPERS ===
+    private void NavigateTo(string newScene)
+    {
+        if (!string.IsNullOrEmpty(currentScene))
+        {
+            sceneHistory.Push(currentScene);
+        }
+        currentScene = newScene;
+        Console.WriteLine($"Navigating to: {newScene} | History: {sceneHistory.Count} scenes");
+        Scene.LoadScene(newScene);
+    }
+
+    private void GoBack()
+    {
+        if (sceneHistory.Count > 0)
+        {
+            currentScene = sceneHistory.Pop();
+            Console.WriteLine($"Going back to: {currentScene}");
+            Scene.LoadScene(currentScene);
+        }
+        else
+        {
+            Console.WriteLine("No history, going to MainMenu");
+            currentScene = "MainMenu";
+            Scene.LoadScene("MainMenu");
+        }
+    }
+
+    private void GoToMainMenu()
+    {
+        sceneHistory.Clear();
+        currentScene = "MainMenu";
+        Scene.LoadScene("MainMenu");
+    }
     
     private void OnClick()
     {
         string tex = defaultTexture.ToLower();
         
-        if (tex.Contains("newgame") || tex.Contains("new_game") || tex.Contains("new game"))
-            Scene.LoadScene("Level1");
+        if (tex.Contains("new game") || tex.Contains("new_game") || tex.Contains("start"))
+            NavigateTo("Level1");
         else if (tex.Contains("continue"))
-            // Scene.LoadScene("SavedGame");
             Console.WriteLine("NOT IMPLEMENTED YET!");
-        else if (tex.Contains("settings"))
-            Scene.LoadScene("Settings");
-        else if (tex.Contains("quit"))
+        else if (tex.Contains("settings") || tex.Contains("options"))
+            NavigateTo("Settings");
+        else if (tex.Contains("quit") || tex.Contains("exit"))
             Console.WriteLine("NOT IMPLEMENTED YET!");
+        else if (tex.Contains("back") || tex.Contains("return"))
+            GoBack();
+        // else if (tex.Contains("mainmenu") || tex.Contains("main_menu"))
+        //     GoToMainMenu();
+        // else if (tex.Contains("restart") || tex.Contains("retry"))
+        //     Scene.LoadScene(currentScene);  // Reload current scene
     }
 }
