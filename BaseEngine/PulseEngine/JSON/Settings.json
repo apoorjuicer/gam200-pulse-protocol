@@ -1166,6 +1166,58 @@
                     }
                 }
             ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "GeneralBGM"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "BGM_Manager"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "BGM_GENERAL",
+                        "volume": 0.20000000298023224,
+                        "loop": true,
+                        "playOnAwake": false
+                    }
+                }
+            ]
         }
     ]
 }

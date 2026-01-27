@@ -6,8 +6,10 @@ public class NavigationButtons : Script
 {
     // === STATIC SCENE HISTORY (shared across all buttons) ===
     private static Stack<string> sceneHistory = new Stack<string>();
-    private static string currentScene = "MainMenu";
-    private static bool initialized = false;
+    private static string currentScene = "";
+    
+    // Track if we've set the initial scene THIS play session
+    private static int lastFrameCount = -1;
 
     private string defaultTexture = "";
     private string hoverTexture = "";
@@ -17,13 +19,16 @@ public class NavigationButtons : Script
 
     public override void Update()
     {
-        // Initialize scene history once
-        if (!initialized)
+        // Reset history when a new Play session starts (frame count resets to 0)
+        int currentFrame = Time.FrameCount;
+        if (currentFrame < lastFrameCount || lastFrameCount < 0)
         {
+            // New play session detected - reset everything
             sceneHistory.Clear();
-            currentScene = "MainMenu";  // Or detect from your engine if possible
-            initialized = true;
+            currentScene = "";
+            Console.WriteLine("Navigation: Reset for new play session");
         }
+        lastFrameCount = currentFrame;
 
         InputComponent input = GetInput();
         TransformComponent t = GetTransform();
@@ -32,6 +37,13 @@ public class NavigationButtons : Script
         {
             SpriteComponent sprite = GetSprite();
             defaultTexture = sprite.Texture;
+            
+            // Detect current scene from texture path if not set
+            if (string.IsNullOrEmpty(currentScene))
+            {
+                currentScene = DetectCurrentScene();
+                Console.WriteLine($"Navigation: Detected starting scene as {currentScene}");
+            }
             
             int dotIndex = defaultTexture.LastIndexOf('.');
             if (dotIndex >= 0)
@@ -80,6 +92,22 @@ public class NavigationButtons : Script
         }
     }
 
+    // Try to detect which scene we're in based on button type
+    private string DetectCurrentScene()
+    {
+        string tex = defaultTexture.ToLower();
+        
+        // If this is a "new game" or "settings" button, we're probably in MainMenu
+        if (tex.Contains("new game") || tex.Contains("new_game") || tex.Contains("settings") || tex.Contains("continue") || tex.Contains("quit"))
+            return "MainMenu";
+        
+        // If this is a "back" button, could be Settings or other
+        if (tex.Contains("back"))
+            return "Settings";  // Assume back button means we're in Settings
+        
+        return "MainMenu";  // Default
+    }
+
     // === NAVIGATION HELPERS ===
     private void NavigateTo(string newScene)
     {
@@ -88,12 +116,14 @@ public class NavigationButtons : Script
             sceneHistory.Push(currentScene);
         }
         currentScene = newScene;
-        Console.WriteLine($"Navigating to: {newScene} | History: {sceneHistory.Count} scenes");
+        Console.WriteLine($"Navigating to: {newScene} | History: [{string.Join(", ", sceneHistory.ToArray())}]");
         Scene.LoadScene(newScene);
     }
 
     private void GoBack()
     {
+        Console.WriteLine($"GoBack called | Current: {currentScene} | History: [{string.Join(", ", sceneHistory.ToArray())}]");
+        
         if (sceneHistory.Count > 0)
         {
             currentScene = sceneHistory.Pop();
@@ -132,6 +162,6 @@ public class NavigationButtons : Script
         // else if (tex.Contains("mainmenu") || tex.Contains("main_menu"))
         //     GoToMainMenu();
         // else if (tex.Contains("restart") || tex.Contains("retry"))
-        //     Scene.LoadScene(currentScene);  // Reload current scene
+        //     Scene.LoadScene(currentScene);
     }
 }

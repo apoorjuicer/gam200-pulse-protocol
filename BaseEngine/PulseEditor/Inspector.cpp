@@ -1249,11 +1249,11 @@ namespace PulseEditor
         }
     }
 
-    void Inspector_AudioComponent(Coordinator *g)
+    void Inspector_AudioComponent(Coordinator* g)
     {
         if (g->HasComponent<AudioSource>(selectedEntity))
         {
-            auto &audio = g->GetComponent<AudioSource>(selectedEntity);
+            auto& audio = g->GetComponent<AudioSource>(selectedEntity);
 
             bool removeAudio = false;
             bool audioOpen = ImGui::CollapsingHeader("AudioSource", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
@@ -1270,31 +1270,134 @@ namespace PulseEditor
                 ImGui::Text("Audio File:");
                 ImGui::SameLine();
 
-                auto &audioResources = mAssets.getAudioRegContainer();
+                auto& audioResources = mAssets.getAudioRegContainer();
                 std::string preview = audio.audio_id.empty() ? "<None>" : audio.audio_id;
+
+                // ═══════════════════════════════════════════════════════════════
+                // SEARCHABLE AUDIO DROPDOWN
+                // ═══════════════════════════════════════════════════════════════
+                static char audioSearchFilter[128] = "";
 
                 ImGui::SetNextItemWidth(300.0f);
                 if (ImGui::BeginCombo("##AudioFile", preview.c_str()))
                 {
-                    if (ImGui::Selectable("<None>", audio.audio_id.empty()))
-                    {
-                        audio.audio_id = "";
-                    }
+                    // Search input at top of dropdown
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::InputTextWithHint("##AudioSearch", "Search audio...", audioSearchFilter, IM_ARRAYSIZE(audioSearchFilter));
+                    ImGui::Separator();
 
-                    for (auto const &[id, resource] : audioResources)
-                    {
-                        bool isSelected = (audio.audio_id == id);
-                        std::string label = id + " [" + resource.audiotype + "]";
+                    // Convert search to lowercase for case-insensitive matching
+                    std::string filterLower = audioSearchFilter;
+                    for (auto& c : filterLower) c = static_cast<char>(tolower(c));
 
-                        if (ImGui::Selectable(label.c_str(), isSelected))
+                    // <None> option (always visible)
+                    if (filterLower.empty() || std::string("<none>").find(filterLower) != std::string::npos)
+                    {
+                        if (ImGui::Selectable("<None>", audio.audio_id.empty()))
                         {
-                            audio.audio_id = id;
-                            std::cout << "[Inspector] Selected audio: " << id << "\n";
+                            audio.audio_id = "";
+                            audioSearchFilter[0] = '\0';  // Clear filter on selection
                         }
-
-                        if (isSelected)
-                            ImGui::SetItemDefaultFocus();
                     }
+
+                    // ─────────────────────────────────────────────────────────
+                    // Separate by audio type: BGM first, then SFX
+                    // ─────────────────────────────────────────────────────────
+                    bool hasBGM = false;
+                    bool hasSFX = false;
+
+                    // Check if we have any matching items in each category
+                    for (auto const& [id, resource] : audioResources)
+                    {
+                        std::string labelLower = id;
+                        for (auto& c : labelLower) c = static_cast<char>(tolower(c));
+                        std::string typeLower = resource.audiotype;
+                        for (auto& c : typeLower) c = static_cast<char>(tolower(c));
+
+                        bool matchesFilter = filterLower.empty() ||
+                            labelLower.find(filterLower) != std::string::npos ||
+                            typeLower.find(filterLower) != std::string::npos;
+
+                        if (matchesFilter)
+                        {
+                            if (resource.audiotype == "BGM") hasBGM = true;
+                            else hasSFX = true;
+                        }
+                    }
+
+                    // ─────────────────────────────────────────────────────────
+                    // BGM Section
+                    // ─────────────────────────────────────────────────────────
+                    if (hasBGM)
+                    {
+                        ImGui::Spacing();
+                        ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "== BGM ==");
+
+                        for (auto const& [id, resource] : audioResources)
+                        {
+                            if (resource.audiotype != "BGM") continue;
+
+                            std::string labelLower = id;
+                            for (auto& c : labelLower) c = static_cast<char>(tolower(c));
+
+                            bool matchesFilter = filterLower.empty() ||
+                                labelLower.find(filterLower) != std::string::npos;
+
+                            if (!matchesFilter) continue;
+
+                            bool isSelected = (audio.audio_id == id);
+                            std::string label = "  " + id;  // Indent items under header
+
+                            if (ImGui::Selectable(label.c_str(), isSelected))
+                            {
+                                audio.audio_id = id;
+                                audioSearchFilter[0] = '\0';  // Clear filter on selection
+                                std::cout << "[Inspector] Selected audio: " << id << "\n";
+                            }
+
+                            if (isSelected)
+                                ImGui::SetItemDefaultFocus();
+                        }
+                    }
+
+                    // ─────────────────────────────────────────────────────────
+                    // SFX Section
+                    // ─────────────────────────────────────────────────────────
+                    if (hasSFX)
+                    {
+                        ImGui::Spacing();
+                        ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.4f, 1.0f), "== SFX ==");
+
+                        for (auto const& [id, resource] : audioResources)
+                        {
+                            if (resource.audiotype == "BGM") continue;  // Skip BGM, show everything else as SFX
+
+                            std::string labelLower = id;
+                            for (auto& c : labelLower) c = static_cast<char>(tolower(c));
+                            std::string typeLower = resource.audiotype;
+                            for (auto& c : typeLower) c = static_cast<char>(tolower(c));
+
+                            bool matchesFilter = filterLower.empty() ||
+                                labelLower.find(filterLower) != std::string::npos ||
+                                typeLower.find(filterLower) != std::string::npos;
+
+                            if (!matchesFilter) continue;
+
+                            bool isSelected = (audio.audio_id == id);
+                            std::string label = "  " + id;  // Indent items under header
+
+                            if (ImGui::Selectable(label.c_str(), isSelected))
+                            {
+                                audio.audio_id = id;
+                                audioSearchFilter[0] = '\0';  // Clear filter on selection
+                                std::cout << "[Inspector] Selected audio: " << id << "\n";
+                            }
+
+                            if (isSelected)
+                                ImGui::SetItemDefaultFocus();
+                        }
+                    }
+
                     ImGui::EndCombo();
                 }
 
@@ -1305,7 +1408,7 @@ namespace PulseEditor
                     std::string path = mAssets.GetAudioPath(audio.audio_id);
                     ImGui::TextWrapped("Path: %s", path.c_str());
 
-                    if (auto *resource = mAssets.getRegistry().FindAudio(audio.audio_id))
+                    if (auto* resource = mAssets.getRegistry().FindAudio(audio.audio_id))
                     {
                         ImGui::Text("Type: %s", resource->audiotype.c_str());
                     }
@@ -1333,7 +1436,7 @@ namespace PulseEditor
                             auto audioManager = g->GetSystem<AudioManager>();
                             if (audioManager)
                             {
-                                auto *resource = mAssets.getRegistry().FindAudio(audio.audio_id);
+                                auto* resource = mAssets.getRegistry().FindAudio(audio.audio_id);
                                 if (resource)
                                 {
                                     audioManager->PlayFromAudioSource(audio);
