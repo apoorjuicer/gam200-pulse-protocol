@@ -34,13 +34,18 @@ namespace ScriptAPI
 			return -1;
 		}
 
-		// change c# string to c++ string
+		// change c# string to c++ , and get prefab json pathway
 		msclr::interop::marshal_context context;
-		std::string pathway = context.marshal_as<std::string>(scriptname);
 
-		// Use prefab manager to load entity and create it from .json file 
-		::PrefabManager prefab;
-		auto new_entity = prefab.InstantiatePrefab(pathway);
+		
+		std::string prefabDirectory =  "../../PulseEngine/Assets/Prefabs/";
+
+		std::string prefabPath = prefabDirectory + context.marshal_as<std::string>(scriptname) + ".json";
+
+
+		// Use factory manager to create entity from .json file 
+		::Factory factory;
+		auto new_entity = factory.CreateEntityFromJson(prefabPath);
 		
 		System::Console::WriteLine(new_entity.value());
 

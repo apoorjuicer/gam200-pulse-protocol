@@ -113,4 +113,18 @@ namespace ScriptAPI
 		auto& transform = g_coordinator->GetComponent<Framework::Transform>(entityID);
 		transform.Pos.y = value;
 	}
+
+	bool TransformComponent::IsVisible::get()
+	{
+		auto g_coordinator = Coordinator::GetInstance();
+		auto& transform = g_coordinator->GetComponent<Framework::Transform>(entityID);
+		return transform.isVisible;
+	}
+
+	void TransformComponent::IsVisible::set(bool value)
+	{
+		auto g_coordinator = Coordinator::GetInstance();
+		auto& transform = g_coordinator->GetComponent<Framework::Transform>(entityID);
+		transform.isVisible = value;
+	}
 }
