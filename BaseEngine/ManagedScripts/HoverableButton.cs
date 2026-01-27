@@ -76,8 +76,7 @@ public class MainMenuButton : Script
             // Scene.LoadScene("SavedGame");
             Console.WriteLine("NOT IMPLEMENTED YET!");
         else if (tex.Contains("settings"))
-            // Scene.LoadScene("Settings");
-            Console.WriteLine("NOT IMPLEMENTED YET!");
+            Scene.LoadScene("Settings");
         else if (tex.Contains("quit"))
             Console.WriteLine("NOT IMPLEMENTED YET!");
     }
