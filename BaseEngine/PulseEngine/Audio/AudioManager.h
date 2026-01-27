@@ -71,6 +71,18 @@ public:
     bool LoadAllSFX();
     void PlaySound(const std::string &id);
 
+    // for sliders
+    FMOD::ChannelGroup *mMasterGroup = nullptr;
+    FMOD::ChannelGroup *mMusicGroup = nullptr;
+    FMOD::ChannelGroup *mSfxGroup = nullptr;
+    float mMasterVol = 1.f, mMusicVol = 1.f, mSfxVol = 1.f;
+
+    void applyAllVolumes();
+    void applyMasterVolume();
+    void applyMusicVolume();
+    void applySfxVolume();
+    static float clampto0and1(float v);
+
     // checks how far into the song the music has played
 
     double GetBGMPositionSeconds() const;
@@ -102,18 +114,6 @@ private:
     std::unordered_map<std::string, FMOD::Sound *> mSfxCache;        // id -> sound
     std::unordered_map<std::string, FMOD::Channel *> mChannels; // id -> active Channel
     AssetRegistry *mRegistry = nullptr;                         // link to asset registry
-
-    // for sliders
-    FMOD::ChannelGroup *mMasterGroup = nullptr;
-    FMOD::ChannelGroup *mMusicGroup = nullptr;
-    FMOD::ChannelGroup *mSfxGroup = nullptr;
-    float mMasterVol = 1.f, mMusicVol = 1.f, mSfxVol = 1.f;
-
-    void applyAllVolumes();
-    void applyMasterVolume();
-    void applyMusicVolume();
-    void applySfxVolume();
-    static float clampto0and1(float v);
 
 
     void ProcessAudioSources();

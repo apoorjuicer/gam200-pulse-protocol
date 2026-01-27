@@ -50,6 +50,7 @@
 #include "Factory.h"
 #include "CoreEngine/Assets.h"
 #include "Components/DisplayName.h"
+#include "Components/ParentChild.h"
 
 using namespace rapidjson;
 
@@ -163,6 +164,20 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path)
 			txt_component.Deserialize(component["TextComponent"]);
 			g_coordinator->AddComponent<TextComponent>(entity, txt_component);
 		}
+
+		if (component.HasMember("Parent") && component["Parent"].IsObject())
+		{
+			Parent p;
+			p.Deserialize(component["Parent"]);
+			g_coordinator->AddComponent<Parent>(entity, p);
+		}
+
+		if (component.HasMember("Children") && component["Children"].IsObject())
+		{
+			Children c;
+			c.Deserialize(component["Children"]);
+			g_coordinator->AddComponent<Children>(entity, c);
+		}
 	}
 	// add entity to list of entity in the current scene
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
@@ -171,7 +186,12 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path)
 	
 	if (!g_coordinator->HasComponent<LayerTag>(entity))
 	{
-		g_coordinator->AddComponent(entity, LayerTag{LAYER_WORLD, 0, 0.0f});
+		LayerTag defaultLayer;
+		defaultLayer.mask = LAYER_WORLD;
+		defaultLayer.sortingLayer = 1;    // World
+		defaultLayer.orderInLayer = 0;
+		defaultLayer.z = 0.0f;
+		g_coordinator->AddComponent(entity, defaultLayer);
 	}
 	
 
@@ -218,11 +238,18 @@ Entity Factory::DefaultObj()
 	Name n;
 	n.name = "GameObject"; // Default name
 
+	// Default LayerTag with sortingLayer
+	LayerTag layer;
+	layer.mask = LAYER_WORLD;
+	layer.sortingLayer = 1;    // 0=Background, 1=World, 2=UI
+	layer.orderInLayer = 0;
+	layer.z = 0.0f;	
+
 	g_coordinator->AddComponent(entity, t);
 	g_coordinator->AddComponent(entity, r);
 	g_coordinator->AddComponent(entity, a);
 	g_coordinator->AddComponent(entity, n);
-	g_coordinator->AddComponent(entity, LayerTag{LAYER_WORLD, 0, 0.0f});
+	g_coordinator->AddComponent(entity, layer);
 
 	// add entity to list of entity in the current scene
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
@@ -394,6 +421,30 @@ bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const &path)
 		textComp.Serialize(TextVal, alloc);
 
 		ComponentObj.AddMember("TextComponent", TextVal, alloc);
+		componentsArray.PushBack(ComponentObj, alloc);
+	}
+
+	if (g_coordinator->HasComponent<Parent>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value ParentVal;
+
+		auto& parent = g_coordinator->GetComponent<Parent>(entity);
+		parent.Serialize(ParentVal, alloc);
+
+		ComponentObj.AddMember("Parent", ParentVal, alloc);
+		componentsArray.PushBack(ComponentObj, alloc);
+	}
+
+	if (g_coordinator->HasComponent<Children>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value ChildrenVal;
+
+		auto& children = g_coordinator->GetComponent<Children>(entity);
+		children.Serialize(ChildrenVal, alloc);
+
+		ComponentObj.AddMember("Children", ChildrenVal, alloc);
 		componentsArray.PushBack(ComponentObj, alloc);
 	}
 

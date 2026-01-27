@@ -12,6 +12,8 @@
  */
 /******************************************************************************/
 #pragma once
+#include "Editor.h"
+
 #include "Graphics/Transform.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Animation.h"
@@ -26,7 +28,8 @@
 #include "Audio/AudioSource.h"                //AudioSource
 #include "Graphics/Text.h"                    //TextComponent
 #include "CoreEngine/Prefab/PrefabInstance.h" //prefab instance
-#include "Editor.h"
+#include "Components/ParentChild.h"
+
 namespace PulseEditor
 {
     // struct
@@ -47,6 +50,8 @@ namespace PulseEditor
         bool hasAudioSource = false;
         bool hasTextComponent = false;
         bool hasPrefabInstance = false;
+        bool hasParent = false;
+        bool hasChildren = false;
 
         // Actual component data
         Framework::Transform transform_snap{};
@@ -62,9 +67,14 @@ namespace PulseEditor
         AudioSource audiosource_snap{};
         TextComponent text_snap{};
         PrefabInstance prefabinstance_snap{};
+        Parent parent_snap{};
+        Children children_snap{};
     };
     // make a "snapshot" or "copy" of entity
     EntitySnapshot MakeEntitySnapshot(Entity e);
     Entity CreateEntityFromEntitySnapshot(EntitySnapshot const &snap);
     // void printsnapshot(EntitySnapshot snap);
+
+    // Restore entity to a previous state WITHOUT deleting/recreating
+    void RestoreEntityFromSnapshot(Entity e, const EntitySnapshot& snap);
 }

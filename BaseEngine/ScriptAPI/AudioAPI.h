@@ -12,12 +12,21 @@ namespace ScriptAPI
         // Plays whatever is set on the entity's AudioSource in the Inspector
         void Play();
 
-        // Optional helpers (still useful)
+        // Existing helpers
         void PlaySFX(String^ name);
         void PlayBGM(String^ name);
         void StopBGM();
         void PauseBGM();
         void ResumeBGM();
         void SetBGMVolume(float volume);
+
+        void SetMasterVolume(float volume01);
+        void SetMusicVolume(float volume01);
+        void SetSfxVolume(float volume01);
+
+        // (optional) readback if you want debug / show numbers
+        float GetMasterVolume();
+        float GetMusicVolume();
+        float GetSfxVolume();
     };
-} 
+}

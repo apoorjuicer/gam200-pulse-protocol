@@ -38,6 +38,7 @@
 
 #include "Components/DisplayName.h"
 #include "Components/EntityType.h"
+#include "Components/ParentChild.h"
 
 #include "Audio/AudioSource.h"
 #include "Graphics/Text.h"
@@ -726,6 +727,8 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<PrefabInstance>();
 	g_coordinator->RegisterComponent<AudioSource>();
 	g_coordinator->RegisterComponent<TextComponent>();
+	g_coordinator->RegisterComponent<Parent>();
+	g_coordinator->RegisterComponent<Children>();
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
