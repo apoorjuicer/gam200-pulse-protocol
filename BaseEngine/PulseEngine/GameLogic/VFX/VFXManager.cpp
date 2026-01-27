@@ -34,7 +34,6 @@ void VFXManager::OnJudgement(const std::string& judgement, const glm::vec2& worl
     // Normalize (some systems send PERFECT/GOOD/MISS)
     if (judgement == "PERFECT")      SpawnForPerfect(worldPos);
     else if (judgement == "GOOD")    SpawnForGood(worldPos);
-    else if (judgement == "BAD")     SpawnForBad(worldPos);
     else                              SpawnForMiss(worldPos);
 }
 
@@ -50,21 +49,6 @@ void VFXManager::SpawnForMiss(const glm::vec2& p)
     ShakeDesc s;
     s.amplitude = 0.020f;
     s.decay = 14.0f;
-    mCamFx.AddShake(s);
-}
-
-void VFXManager::SpawnForBad(const glm::vec2& p)
-{
-    ParticleSpawnDesc d;
-    d.position = p;
-    d.count = 14;
-    d.speedMin = 0.5f; d.speedMax = 1.0f;
-    d.lifeMin = 0.15f; d.lifeMax = 0.35f;
-    mParticles.SpawnBurst(d);
-
-    ShakeDesc s;
-    s.amplitude = 0.028f;
-    s.decay = 12.0f;
     mCamFx.AddShake(s);
 }
 

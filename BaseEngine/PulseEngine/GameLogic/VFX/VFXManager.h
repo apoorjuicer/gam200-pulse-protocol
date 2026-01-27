@@ -32,7 +32,6 @@ private:
 
     // Tuning per judgement
     void SpawnForMiss(const glm::vec2& p);
-    void SpawnForBad(const glm::vec2& p);
     void SpawnForGood(const glm::vec2& p);
     void SpawnForPerfect(const glm::vec2& p);
 };
