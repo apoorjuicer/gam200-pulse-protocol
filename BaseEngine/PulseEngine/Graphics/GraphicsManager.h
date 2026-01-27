@@ -39,6 +39,7 @@
 #include "Text.h"
 #include "CoreEngine/ECS/System.h"
 #include "CoreEngine/Core/ImportExport.h"
+#include "TextRenderer.h"
 // #include "CoreEngine/ECS/SystemManager.h"
 //#include "UI/GUIManager.h"
 //#include "UI/UIElement.h"
@@ -115,32 +116,19 @@ public:
     void SetRegistry(AssetRegistry* registry);
 
     //text component
-    // Draw Text component at a given position
     void DrawText2D(
         std::string const& text,
         std::string const& fontId,
         float x, float y,
         float pixelHeight,
-        glm::vec3 const& color
+        glm::vec3 const& color,
+        TextAlignment alignment = TextAlignment::Left // default left aligned
     );
 
     void Update2DTextComponent();
 private:
     // Draw text (world overlay / debug text etc.)
-    void RenderText(
-        GLSLShader &shader,
-        const std::string &text,
-        float x, float y,
-        float scale,
-        const glm::vec3 &color,
-        const FontData *fontData);
-
-    // For In-Game GUI System
-    // void RenderGUIButtons();
-    // void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
-
-    // For In-Game GUI System & ui overlay
-    // void RenderColoredQuad(float x, float y, float width, float height, glm::vec4 color);
+    TextRenderer m_textRenderer;
 
     bool LoadTexturesFromRegistry();
 
@@ -163,10 +151,10 @@ private:
     // =========================================================================
     Entity m_fpsTextEntity = static_cast<Entity>(-1);
     Entity m_topSystemTextEntity = static_cast<Entity>(-1);
-    Entity m_teamLabelEntity = static_cast<Entity>(-1);
 
     void CreateDebugTextEntities();
     void UpdateDebugTextEntities();
+
 private:
     // std::unique_ptr<GLApp> glapp;
     GLApp *glapp = nullptr; // owning raw pointer

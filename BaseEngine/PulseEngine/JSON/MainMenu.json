@@ -55,6 +55,7 @@
                     "layerTag": {
                         "layerName": "Background",
                         "mask": 1,
+                        "sortingLayer": 0,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -66,12 +67,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -771.168212890625,
-                            "y": 0.4354677200317383
+                            "x": -750.0,
+                            "y": 0.0
                         },
                         "scale": {
-                            "x": 334.09808349609377,
-                            "y": 107.33248901367188
+                            "x": 400.0,
+                            "y": 135.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -108,12 +109,21 @@
                 },
                 {
                     "script": {
-                        "ScriptName": ["ButtonScript"]
+                        "ScriptName": [
+                            "MainMenuButton"
+                        ]
                     }
                 },
                 {
                     "name": {
                         "name": "NewGameBtn"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 100,
+                        "damage": 0,
+                        "isAlive": true
                     }
                 },
                 {
@@ -126,6 +136,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 10,
                         "z": 100.0
                     }
@@ -137,12 +148,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -756.3988037109375,
-                            "y": -229.7178955078125
+                            "x": -750.0,
+                            "y": -230.0
                         },
                         "scale": {
-                            "x": 352.5,
-                            "y": 109.0
+                            "x": 400.0,
+                            "y": 135.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -179,12 +190,21 @@
                 },
                 {
                     "script": {
-                        "ScriptName": ["ButtonScript"]
+                        "ScriptName": [
+                            "MainMenuButton"
+                        ]
                     }
                 },
                 {
                     "name": {
                         "name": "ContinueBtn"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 100,
+                        "damage": 0,
+                        "isAlive": true
                     }
                 },
                 {
@@ -197,6 +217,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 10,
                         "z": 100.0
                     }
@@ -208,12 +229,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -756.3988037109375,
-                            "y": -442.6409912109375
+                            "x": -750.0,
+                            "y": -460.0
                         },
                         "scale": {
-                            "x": 352.5,
-                            "y": 109.0
+                            "x": 400.0,
+                            "y": 135.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -250,12 +271,21 @@
                 },
                 {
                     "script": {
-                        "ScriptName": ["ButtonScript"]
+                        "ScriptName": [
+                            "MainMenuButton"
+                        ]
                     }
                 },
                 {
                     "name": {
                         "name": "SettingsBtn"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 100,
+                        "damage": 0,
+                        "isAlive": true
                     }
                 },
                 {
@@ -268,6 +298,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 10,
                         "z": 100.0
                     }
@@ -279,12 +310,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -756.398681640625,
-                            "y": -670.1409912109375
+                            "x": -750.0,
+                            "y": -690.0
                         },
                         "scale": {
-                            "x": 350.0,
-                            "y": 109.0
+                            "x": 400.0,
+                            "y": 135.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -321,12 +352,21 @@
                 },
                 {
                     "script": {
-                        "ScriptName": ["ButtonScript"]
+                        "ScriptName": [
+                            "MainMenuButton"
+                        ]
                     }
                 },
                 {
                     "name": {
                         "name": "QuitBtn"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 100,
+                        "damage": 0,
+                        "isAlive": true
                     }
                 },
                 {
@@ -339,6 +379,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 10,
                         "z": 100.0
                     }

@@ -18,7 +18,8 @@
 
 struct LayerTag {
     LayerMask mask;
-    int   orderInLayer;  // Higher = draws later = appears in front
+    int sortingLayer = 1; // 0=Background, 1=World, 2=UI (for render order)
+    int orderInLayer = 0;  // Higher = draws later = appears in front
     float z = 0.f;       // Depth offset for fine-grained ordering
 
     void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
@@ -33,6 +34,7 @@ struct LayerTag {
         out.AddMember("layerName", nameVal, alloc);
 
         out.AddMember("mask", mask, alloc);
+        out.AddMember("sortingLayer", sortingLayer, alloc);
         out.AddMember("orderInLayer", orderInLayer, alloc);
         out.AddMember("z", z, alloc);
     }
@@ -52,6 +54,16 @@ struct LayerTag {
         else {
             // Default to World layer if nothing specified
             mask = LAYER_WORLD;
+        }
+
+        if (in.HasMember("sortingLayer") && in["sortingLayer"].IsInt()) {
+            sortingLayer = in["sortingLayer"].GetInt();
+        }
+        else {
+            // Backwards compatibility: derive from mask
+            if (mask == LAYER_BACKGROUND) sortingLayer = 0;
+            else if (mask == LAYER_UI) sortingLayer = 2;
+            else sortingLayer = 1;  // Default to World
         }
 
         if (in.HasMember("orderInLayer") && in["orderInLayer"].IsInt())

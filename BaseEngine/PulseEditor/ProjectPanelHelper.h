@@ -45,6 +45,10 @@ namespace PulseEditor
     // TEXTURE OPERATIONS
     // =============================================================
 
+    // Convert absolute file path to the format needed by GetOrLoadTexture
+    // Returns absolute path with forward slashes normalized
+    std::string GetRelativeAssetPath(const std::string& absolutePath);
+
     // Load thumbnail texture if not already loaded
     void EnsureThumbnailLoaded(AssetItem& item, const std::string& currentDir);
 

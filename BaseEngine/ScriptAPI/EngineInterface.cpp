@@ -11,13 +11,14 @@
 *              prior written consent of DigiPen Institute of Technology is prohibited.
 *
 /******************************************************************************/
-#using "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.22\\System.Private.CoreLib.dll"
-#using "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.22\\System.Runtime.dll"
-#using "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.22\\System.Runtime.Loader.dll"
+//#using "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.22\\System.Private.CoreLib.dll"
+#using <System.Runtime.dll>
+#using <System.Runtime.Loader.dll>
 #pragma warning(disable: 4945)  // Suppress assembly conflict warnings for dotnet System.Runtime.CoreLib and Loader :p
 
 #include "EngineInterface.h"
 #include "CoreEngine/Core/ScriptingBridge.h"
+#include <string>
 #pragma comment(lib, "PulseEngine.lib")
 
 namespace ScriptAPI
@@ -204,6 +205,8 @@ namespace ScriptAPI
                 System::Console::WriteLine("1 Script cleared!\n");
             }
         }
+
+        allScriptsCleared = true;
     }
 
     void EngineInterface::ClearEntityScript(int EntityID)
@@ -218,15 +221,99 @@ namespace ScriptAPI
         }
     }
 
+    const char* EngineInterface::GetAvailableScripts()
+    {
+        using namespace System;
+        using namespace System::Text;
+
+        if (scriptTypeList == nullptr)
+        {
+            Console::WriteLine("[EngineInterface] WARNING: scriptTypeList is null!");
+            return "";
+        }
+
+        // Create StringBuilder (don't make it static - managed types can't be static)
+        StringBuilder^ scriptNames = gcnew StringBuilder();
+        int count = 0;
+
+        for each(System::Type ^ type in scriptTypeList)
+        {
+            if (count > 0)
+            {
+                scriptNames->Append(",");
+            }
+            scriptNames->Append(type->Name);
+            count++;
+        }
+
+        String^ result = scriptNames->ToString();
+
+#ifdef _DEBUG
+        Console::WriteLine("[EngineInterface] GetAvailableScripts: Found {0} scripts", count);
+        Console::WriteLine("[EngineInterface] Available: {0}", result);
+#endif
+
+        // Convert System::String to const char*
+        // Use static to keep string alive between calls
+        static std::string nativeResult = "";
+        System::IntPtr ptr = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(result);
+        nativeResult = std::string(static_cast<const char*>(ptr.ToPointer()));
+        System::Runtime::InteropServices::Marshal::FreeHGlobal(ptr);
+
+        return nativeResult.c_str();
+    }
+
+    void EngineInterface::RemoveScriptFromEntity(int entityID, System::String^ scriptName)
+    {
+        // Check if valid entityid. our range is 0 - 5000
+        if (entityID < 0 || entityID > 5000)
+        {
+            return;
+        }
+
+        // Remove any whitespaces
+        scriptName = scriptName->Trim();
+
+        ScriptList^ entityScripts = scripts[entityID];
+        if (entityScripts == nullptr || entityScripts->Count == 0)
+        {
+            return;
+        }
+
+        // Find and remove the script with matching name
+        for (int i = 0; i < entityScripts->Count; ++i)
+        {
+            Script^ script = entityScripts[i];
+            System::Type^ scriptType = script->GetType();
+            
+            if (scriptType->FullName == scriptName || scriptType->Name == scriptName)
+            {
+                entityScripts->RemoveAt(i);
+                System::Console::WriteLine("Removed script: {0} from entity {1}\n", scriptName, entityID);
+                return;
+            }
+        }
+
+        System::Console::WriteLine("Script not found: {0} on entity {1}\n", scriptName, entityID);
+    }
+
     // iterate thru all of our scripts that has been created and execute our scripts.
     void EngineInterface::ExecuteUpdate()
     {
-        for each (ScriptList ^ entityScriptList in scripts)
+        allScriptsCleared = false;
+     
+        for each (ScriptList^ entityscriptlist in scripts)
         {
-            // Update each script available
-            for each (Script ^ script in entityScriptList)
+            // update each script available
+            for each (Script^ script in entityscriptlist)
             {
-                script->Update();
+                script->Update(); 
+     
+                if (allScriptsCleared)
+                  {
+                      System::Console::WriteLine("[executeupdate] all scripts cleared - stopping");
+                      return;
+                  }
             }
         }
     }

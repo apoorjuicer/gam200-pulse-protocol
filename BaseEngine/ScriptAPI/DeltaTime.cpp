@@ -1,26 +1,36 @@
-///******************************************************************************/
-///**
-//* @file        DeltaTime.cpp
-//* @project     Pulse Protocol
-//* @author      Chia Wei Xuan Rachael - 100%
-//* @brief
-//*
-//* @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
-//*              Reproduction or disclosure of this file or its contents without the
-//*              prior written consent of DigiPen Institute of Technology is prohibited.
-//*
-///******************************************************************************/
-//#pragma once
-//#define generic generic_workaround
-//#include "CoreEngine/Core/ScriptingBridge.h"
-//#undef generic
-//
-//namespace ScriptAPI
-//{
-//
-//	float DeltaTime::deltatime::get()
-//	{
-//		return ;
-//	}
-//
-//}
+/******************************************************************************/
+/**
+* @file        DeltaTime.cpp
+* @project     pulse protocol
+* @author      chia wei xuan rachael - 100%
+* @brief
+*
+* @copyright   copyright (c) 2025 digipen institute of technology.
+*              reproduction or disclosure of this file or its contents without the
+*              prior written consent of digipen institute of technology is prohibited.
+*
+/******************************************************************************/
+#pragma once
+#define generic generic_workaround
+#include "DeltaTime.h"
+#include "../CoreEngine/Core/CoreEngine.h"
+#undef generic
+
+namespace ScriptAPI
+{
+    float Time::DeltaTime::get()
+    {
+        return Engine->GetDeltaTime();
+    }
+
+    int Time::FrameCount::get()
+    {
+        return Engine->GetFrameCount();
+    }
+
+    float Time::GameTime::get()
+    {
+        return Engine->GetTimePassed();
+    }
+
+}

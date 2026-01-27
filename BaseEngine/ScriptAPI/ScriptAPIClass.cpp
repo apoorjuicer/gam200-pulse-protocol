@@ -12,10 +12,15 @@
 *
 /******************************************************************************/
 //#include "..//ScriptAPI/ScriptAPIClass.h"
+
 #include "ScriptAPIClass.h"
 #include "TransformComponent.h"
 #include "Health.h"
+#include "Animation.h"
 #include "ScriptName.h"
+#include "Collision.h"
+#include "InputAPI.h"
+#include "Sprite.h"
 
 namespace ScriptAPI
 {
@@ -28,6 +33,31 @@ namespace ScriptAPI
     HealthComponent Script::GetHealth()
     {
         return HealthComponent(EntityID);
+    }
+
+    Animation Script::GetAnimation()
+    {
+        return Animation(EntityID);
+    }
+
+    CollisionComponent Script::GetCollision()
+    {
+        return CollisionComponent(EntityID);
+    }
+
+    InputComponent Script::GetInput()
+    {
+        return InputComponent(EntityID);
+    }
+
+    AudioComponent Script::GetAudio()
+    {
+        return AudioComponent(EntityID);
+    }
+
+    SpriteComponent Script::GetSprite()
+    {
+        return SpriteComponent(EntityID);
     }
 
     /*LogicComponent Script::GetScriptName()

@@ -1,4 +1,4 @@
-/******************************************************************************/
+﻿/******************************************************************************/
 /**
  * @file        Inspector.cpp
  * @project     Pulse Protocol
@@ -20,6 +20,7 @@
 #include "Inspector.h"
 #include "Editor.h"                 // selectedEntity, INVALID_ENTITY, PrefabManager, etc.
 #include "TopBarPanel.h"
+#include "SnapShot.h"
 
 // engine files
 #include "Graphics/glapp.h"         // GLApp::shdrpgms
@@ -205,7 +206,8 @@ namespace PulseEditor
         {
             LayerTag tag{};
             tag.mask = LAYER_WORLD;
-            tag.orderInLayer = 1;
+            tag.sortingLayer = 1;  // World
+            tag.orderInLayer = 0;
             tag.z = 0.0f;
             g->AddComponent<LayerTag>(selectedEntity, tag);
         }
@@ -248,26 +250,41 @@ namespace PulseEditor
         {
             if (currentLayerIndex >= 0 && currentLayerIndex < static_cast<int>(allLayers.size()))
             {
-                LayerMask newMask = allLayers[currentLayerIndex].mask;
-                layer.mask = newMask;
+                layer.mask = allLayers[currentLayerIndex].mask;
 
-                if (newMask == LAYER_UI)
-                    layer.z = 100.0f;
-                else
-                    layer.z = 0.0f;
+                // Auto-sync sorting layer when mask changes
+                if (layer.mask == LAYER_BACKGROUND) layer.sortingLayer = 0;
+                else if (layer.mask == LAYER_WORLD) layer.sortingLayer = 1;
+                else if (layer.mask == LAYER_UI) layer.sortingLayer = 2;
             }
         }
 
-        // orderInLayer control (for fine-tuning draw order within layer)
-        ImGui::Text("Draw Order:");
+        // === SORTING LAYER (for render order) ===
+        ImGui::Text("Sorting Layer:");
         ImGui::SameLine();
-        ImGui::SetNextItemWidth(150.0f);
-        ImGui::DragInt("##OrderInLayer", &layer.orderInLayer, 1.0f, 0, 999);
+        ImGui::SetNextItemWidth(130.0f);
+
+        const char* sortingLayerNames[] = { "Background", "World", "UI" };
+        ImGui::Combo("##SortingLayer", &layer.sortingLayer, sortingLayerNames, IM_ARRAYSIZE(sortingLayerNames));
+
         ImGui::SameLine();
         ImGui::TextDisabled("(?)");
         if (ImGui::IsItemHovered())
         {
-            ImGui::SetTooltip("Higher number = drawn on top.\nControls render order within the same layer.");
+            ImGui::SetTooltip("Sorting Layer controls render order:\nBackground (0) -> World (1) -> UI (2)\nHigher = renders on top");
+        }
+
+        // === ORDER IN LAYER (fine-grained within sorting layer) ===
+        ImGui::Text("Order in Layer:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(150.0f);
+        ImGui::DragInt("##OrderInLayer", &layer.orderInLayer, 1.0f, -9999, 9999);
+
+        ImGui::SameLine();
+        ImGui::TextDisabled("(?)");
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("Order within the sorting layer.\nHigher number = drawn on top.\nWorks across ALL layers now!");
         }
 
         ImGui::Separator();
@@ -546,14 +563,19 @@ namespace PulseEditor
             ImGui::Separator();
         }
     }
-    void Inspector_TransformComponent(Coordinator *g)
+
+
+    void Inspector_TransformComponent(Coordinator* g)
     {
         if (g->HasComponent<Framework::Transform>(selectedEntity))
         {
-            auto &tr = g->GetComponent<Framework::Transform>(selectedEntity);
+            auto& tr = g->GetComponent<Framework::Transform>(selectedEntity);
 
             bool removeTransform = false;
-            bool transformOpen = ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
+            bool transformOpen = ImGui::CollapsingHeader(
+                "Transform",
+                ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap
+            );
             removeTransform = DrawInlineRemoveButton("Transform");
 
             if (removeTransform)
@@ -564,42 +586,92 @@ namespace PulseEditor
             {
                 ImGui::Indent();
 
-                // UNDO Manager
-                //  ====================================================
-                //  1. Save transform data before performing any
-                //  editting, taking a "snapshot" or "backup-copy"
-                //  ====================================================
-                //  ====================================================
-                //  2. Display editable ImGUI widgets for Transform
-                //  and Undo the Changes if CTRL+Z key is pressed
-                //  ====================================================
-                //  --- Position ---
-                float pos[2] = {tr.Pos.x, tr.Pos.y};
+                // --- Position ---
+                float pos[2] = { tr.Pos.x, tr.Pos.y };
                 ImGui::DragFloat2("Position", pos, 0.5f);
                 tr.Pos.x = pos[0];
                 tr.Pos.y = pos[1];
                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
-                // --- Scale ---
-                float sc[2] = {tr.Scale.x, tr.Scale.y};
+
+                // --- Scale + Keep Aspect Ratio (Option A: changing both updates ratio) ---
+                static std::unordered_map<std::uint32_t, bool>  s_keepAspect;
+                static std::unordered_map<std::uint32_t, float> s_aspectXY; // ratio = X / Y
+
+                const std::uint32_t entKey = static_cast<std::uint32_t>(selectedEntity);
+
+                // capture old values before editing
+                float oldX = tr.Scale.x;
+                float oldY = tr.Scale.y;
+
+                bool& keepAspect = s_keepAspect[entKey];
+
+                if (ImGui::Checkbox("Keep Aspect Ratio", &keepAspect))
+                {
+                    // when toggled ON, capture current ratio
+                    if (keepAspect)
+                    {
+                        if (std::fabs(oldY) > 1e-6f) s_aspectXY[entKey] = oldX / oldY;
+                        else                         s_aspectXY[entKey] = 1.0f;
+                    }
+                }
+
+                float sc[2] = { tr.Scale.x, tr.Scale.y };
                 ImGui::DragFloat2("Scale", sc, 0.5f);
+
+                const float eps = 1e-6f;
+                bool changedX = (std::fabs(sc[0] - oldX) > eps);
+                bool changedY = (std::fabs(sc[1] - oldY) > eps);
+
+                if (keepAspect)
+                {
+                    float ratio = (s_aspectXY.count(entKey) ? s_aspectXY[entKey] : 1.0f);
+                    if (std::fabs(ratio) < eps) ratio = 1.0f;
+
+                    if (changedX && changedY)
+                    {
+                        // user changed BOTH -> treat as new ratio and remember it
+                        if (std::fabs(sc[1]) > eps) s_aspectXY[entKey] = sc[0] / sc[1];
+                        else                        s_aspectXY[entKey] = 1.0f;
+                        // do not force either axis this frame
+                    }
+                    else if (changedX)
+                    {
+                        // X changed -> update Y
+                        sc[1] = sc[0] / ratio;
+                    }
+                    else if (changedY)
+                    {
+                        // Y changed -> update X
+                        sc[0] = sc[1] * ratio;
+                    }
+                }
+
                 tr.Scale.x = sc[0];
                 tr.Scale.y = sc[1];
                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
+
                 // --- Rotation (deg) ---
                 ImGui::DragFloat("Rotation (deg)", &tr.Rotation.x, 1.0f, -360.f, 360.f);
                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
+
                 // --- Rotation Speed ---
                 ImGui::DragFloat("Rotation Speed", &tr.Rotation.y, 0.1f, -10.0f, 10.0f);
                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
+
                 // --- Visible ---
                 ImGui::Checkbox("Visible", &tr.isVisible);
                 HandleTransformUndo(tr, mUndo, selectedEntity, g);
+
                 ImGui::Unindent();
             }
 
             ImGui::Separator();
         }
     }
+
+
+
+   
     void Inspector_RenderableComponent(Coordinator *g)
     {
         if (g->HasComponent<Framework::Renderable>(selectedEntity))
@@ -728,9 +800,9 @@ namespace PulseEditor
 
                     if (ImGui::BeginDragDropTarget())
                     {
-                        if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
+                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
                         {
-                            const char *droppedPath = static_cast<const char *>(payload->Data);
+                            const char* droppedPath = static_cast<const char*>(payload->Data);
                             if (droppedPath)
                             {
                                 namespace fs = std::filesystem;
@@ -744,6 +816,15 @@ namespace PulseEditor
 
                     if (reloadClicked)
                     {
+                        // ═══════════════════════════════════════════════════════════════
+                        // UNDO: Snapshot BEFORE texture change
+                        // ═══════════════════════════════════════════════════════════════
+                        Entity e = selectedEntity;
+                        EntitySnapshot before = MakeEntitySnapshot(e);
+                        mUndo.Push([e, before]() {
+                            RestoreEntityFromSnapshot(e, before);
+                        });
+
                         namespace fs = std::filesystem;
                         const std::string kTexturesRoot = "../../PulseEngine/Assets/Textures";
 
@@ -959,11 +1040,11 @@ namespace PulseEditor
             ImGui::Separator();
         }
     }
-    void Inspector_LogicComponent(Coordinator *g)
+    void Inspector_LogicComponent(Coordinator* g)
     {
         if (g->HasComponent<LogicComponent>(selectedEntity))
         {
-            auto &script = g->GetComponent<LogicComponent>(selectedEntity);
+            auto& script = g->GetComponent<LogicComponent>(selectedEntity);
 
             bool removeScript = false;
             bool scriptOpen = ImGui::CollapsingHeader("Script", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
@@ -975,45 +1056,199 @@ namespace PulseEditor
             }
             else if (scriptOpen)
             {
-                /*ImGui::Indent();
+                ImGui::Indent();
 
-                const char *scriptOptions[] = {
-                    "PlayerScript",
-                    "EnemyScript",
-                    "ButtonScript",
-                    "PulsingBorderScript",
-                    "CountdownScript",
-                    "FeedbackScript"};
-                const int numScripts = 6;
+                // ===== GET AVAILABLE SCRIPTS FROM SCRIPTAPI (FACTORY STYLE, NO HARDCODING!) =====
+                static std::vector<std::string> scriptOptions;
+                static bool scriptsLoaded = false;
 
-                int currentScriptIndex = 0;
-                for (int i = 0; i < numScripts; i++)
+                if (!scriptsLoaded)
                 {
-                    if (script.ScriptName == scriptOptions[i])
+                    auto getScriptsFunc = Engine->GetFunctionPtr<const char* (*)(void)>(
+                        "ScriptAPI",
+                        "ScriptAPI.EngineInterface",
+                        "GetAvailableScripts"
+                    );
+
+                    if (getScriptsFunc)
                     {
-                        currentScriptIndex = i;
-                        break;
+                        const char* result = getScriptsFunc();  // Simple C++ const char*, no System namespace!
+
+                        if (result != nullptr && strlen(result) > 0)
+                        {
+                            // Parse comma-separated list
+                            std::stringstream ss(result);
+                            std::string item;
+                            while (std::getline(ss, item, ','))
+                            {
+                                if (!item.empty())
+                                {
+                                    item.erase(0, item.find_first_not_of(" \t\r\n"));
+                                    item.erase(item.find_last_not_of(" \t\r\n") + 1);
+                                    scriptOptions.push_back(item);
+                                }
+                            }
+
+                            scriptsLoaded = true;
+                            std::cout << "[Inspector] Loaded " << scriptOptions.size()
+                                << " available scripts from ScriptAPI\n";
+                        }
                     }
                 }
 
-                ImGui::Text("Script:");
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(200.0f);
-                if (ImGui::Combo("##ScriptDropdown", &currentScriptIndex, scriptOptions, numScripts))
+                // Convert to C-style array for ImGui
+                std::vector<const char*> scriptNames;
+                for (auto& s : scriptOptions)
                 {
-                    script.ScriptName = scriptOptions[currentScriptIndex];
-                    std::cout << "[Inspector] Changed script to: " << script.ScriptName << std::endl;
+                    scriptNames.push_back(s.c_str());
+                }
+                int numScripts = (int)scriptNames.size();
+
+                // =========================================================================
+                // Display ALL scripts attached to this entity
+                // =========================================================================
+                ImGui::Text("Scripts Attached: %zu", script.ScriptName.size());
+                ImGui::Spacing();
+
+                for (size_t i = 0; i < script.ScriptName.size(); ++i)
+                {
+                    ImGui::PushID((int)i);
+
+                    ImGui::Text("%zu.", i + 1);
+                    ImGui::SameLine();
+                    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "%s", script.ScriptName[i].c_str());
+                    ImGui::SameLine();
+
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.2f, 0.2f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.3f, 0.3f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 0.2f, 0.2f, 1.0f));
+
+                    if (ImGui::SmallButton("Remove##Script"))
+                    {
+                        const char* scriptToRemove = script.ScriptName[i].c_str();
+
+                        // Remove from C++ array
+                        script.ScriptName.erase(script.ScriptName.begin() + i);
+
+                        // Remove from C# side
+                        auto removeScriptFunc = Engine->GetFunctionPtr<void(*)(int, const char*)>(
+                            "ScriptAPI",
+                            "ScriptAPI.EngineInterface",
+                            "RemoveScriptFromEntity"
+                        );
+                        if (removeScriptFunc)
+                        {
+                            removeScriptFunc(selectedEntity, scriptToRemove);
+                        }
+
+                        ImGui::PopStyleColor(3);
+                        ImGui::PopID();
+                        continue;
+                    }
+
+                    ImGui::PopStyleColor(3);
+                    ImGui::PopID();
+                    ImGui::Spacing();
+                }
+
+                // =========================================================================
+                // Add New Script Section
+                // =========================================================================
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                ImGui::Text("Add Script:");
+                ImGui::SameLine();
+
+                static int selectedScriptIndex = 0;
+                ImGui::SetNextItemWidth(250.0f);
+
+                if (numScripts > 0)
+                {
+                    if (ImGui::Combo("##ScriptDropdown", &selectedScriptIndex, scriptNames.data(), numScripts))
+                    {
+                        std::cout << "[Inspector] Selected script: " << scriptNames[selectedScriptIndex] << std::endl;
+                    }
+
+                    ImGui::SameLine();
+
+                    if (ImGui::SmallButton("Add"))
+                    {
+                        const char* selectedScript = scriptNames[selectedScriptIndex];
+
+                        // Check if already attached
+                        bool alreadyExists = false;
+                        for (const auto& s : script.ScriptName)
+                        {
+                            if (s == selectedScript)
+                            {
+                                alreadyExists = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyExists)
+                        {
+                            // Add to C++ array
+                            script.ScriptName.push_back(selectedScript);
+
+                            // Add to C# side
+                            auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>(
+                                "ScriptAPI",
+                                "ScriptAPI.EngineInterface",
+                                "AddScriptViaName"
+                            );
+                            if (addScriptFunc)
+                            {
+                                bool success = addScriptFunc(selectedEntity, selectedScript);
+                                std::cout << "[Inspector] Added script: " << selectedScript
+                                    << " (Success: " << success << ")" << std::endl;
+                            }
+
+                            selectedScriptIndex = 0;
+                        }
+                        else
+                        {
+                            std::cout << "[Inspector] Script already attached: " << selectedScript << std::endl;
+                            ImGui::OpenPopup("ScriptAlreadyExists");
+                        }
+                    }
+                }
+                else
+                {
+                    ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "No scripts available!");
+                }
+
+                if (ImGui::BeginPopupModal("ScriptAlreadyExists", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+                {
+                    ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "This script is already attached!");
+                    ImGui::Spacing();
+                    if (ImGui::Button("OK", ImVec2(120, 0)))
+                    {
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::EndPopup();
                 }
 
                 ImGui::Spacing();
-                ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Active: %s", script.ScriptName.c_str());
 
-                ImGui::Unindent();*/
+                if (script.ScriptName.empty())
+                {
+                    ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.0f, 1.0f), "No scripts attached");
+                }
+                else
+                {
+                    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Active Scripts: %zu attached", script.ScriptName.size());
+                }
+
+                ImGui::Unindent();
             }
 
             ImGui::Separator();
         }
     }
+
     void Inspector_AudioComponent(Coordinator *g)
     {
         if (g->HasComponent<AudioSource>(selectedEntity))
@@ -1235,6 +1470,25 @@ namespace PulseEditor
             if (ImGui::IsItemHovered())
             {
                 ImGui::SetTooltip("Offset from the entity's Transform position.\nUseful for positioning text relative to a sprite.");
+            }
+
+            // === Text Alignment ===
+            ImGui::Text("Alignment:");
+            ImGui::SameLine();
+
+            const char* alignmentOptions[] = { "Left", "Center", "Right" };
+            int currentAlignment = static_cast<int>(txt.alignment);
+
+            ImGui::SetNextItemWidth(150.0f);
+            if (ImGui::Combo("##TextAlignment", &currentAlignment, alignmentOptions, IM_ARRAYSIZE(alignmentOptions)))
+            {
+                txt.alignment = static_cast<TextAlignment>(currentAlignment);
+            }
+            ImGui::SameLine();
+            ImGui::TextDisabled("(?)");
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::SetTooltip("Left: Text starts at position\nCenter: Text centered on position\nRight: Text ends at position");
             }
 
             // === Visibility Toggle ===

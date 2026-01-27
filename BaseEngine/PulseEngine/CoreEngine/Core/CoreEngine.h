@@ -54,7 +54,7 @@ public:
 		std::cout << "Hello Native World!" << std::endl;
 	}
 	static Framework::Transform* GetTransformComponent(int ID);
-	
+	static std::filesystem::path GetAssetRoot();
 	// void BroadcastMessage(Message* message);	  // One of the ways to glue systems tgt.
 	// AssetsManager& getAssetsManager() { return mAssets; }
 
@@ -83,7 +83,22 @@ public:
 	void ToggleFullscreen();
 	void SetStartupFullscreen(bool fullscreen) { m_startupFullscreen = fullscreen; }
 	bool IsFullscreen() const { return m_isFullscreen; }
-	// AssetsManager& getAssetsManager() { return mAssets; }
+
+
+	// --- For Delta Time API :D  ---
+public:
+	float GetDeltaTime() const { return DeltaTime;}
+	int GetFrameCount() const { return FrameCount; }
+	float GetTimePassed() const { return TimePassed; }
+	void SetTime(float time) { TimePassed = time; }
+
+private:
+	float DeltaTime = 0.0f;		//float cos it was already float and i lazy change 
+	unsigned CurrentFrame = 0.0;
+	unsigned LastFrame = 0.0;
+	int FrameCount = 0;
+	float TimePassed = 0.0f;
+
 private:
 	bool GameRunning;
 	bool DebugMode = false;

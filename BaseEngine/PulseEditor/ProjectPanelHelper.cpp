@@ -1,4 +1,4 @@
-/******************************************************************************/
+﻿/******************************************************************************/
 /**
  * @file        ProjectPanelHelpers.cpp
  * @project     Pulse Protocol
@@ -23,6 +23,50 @@
 
 namespace PulseEditor
 {
+    // =============================================================
+    // HELPER FUNCTION: Convert Absolute Path to Relative Path
+    // =============================================================
+
+    /**
+     * Converts an absolute path to a path relative to the Assets folder.
+     * This works regardless of where the project folder is located.
+     *
+     * Example:
+     *   Input:  "C:/Users/Me/Project/PulseEngine/Assets/Textures/UI/button.png"
+     *   Output: "Assets/Textures/UI/button.png"  (relative to executable)
+     */
+    std::string GetRelativeAssetPath(const std::string& absolutePath)
+    {
+        std::string pathStr = absolutePath;
+        std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
+
+        // Debug: Print what we're converting
+        // std::cout << "[GetRelativeAssetPath] Input: " << pathStr << std::endl;
+
+        // Convert absolute path to relative
+        // Look for "PulseEngine/Assets/" first (more specific)
+        size_t pulseAssetsPos = pathStr.find("PulseEngine/Assets/");
+        if (pulseAssetsPos != std::string::npos)
+        {
+            std::string result = "../../" + pathStr.substr(pulseAssetsPos);
+            // std::cout << "[GetRelativeAssetPath] Output: " << result << std::endl;
+            return result;
+        }
+
+        // Fallback: Look for just "Assets/"
+        size_t assetsPos = pathStr.find("Assets/");
+        if (assetsPos != std::string::npos)
+        {
+            std::string result = "../../PulseEngine/" + pathStr.substr(assetsPos);
+            // std::cout << "[GetRelativeAssetPath] Output: " << result << std::endl;
+            return result;
+        }
+
+        // Last fallback: return as-is
+        // std::cout << "[GetRelativeAssetPath] Output (unchanged): " << pathStr << std::endl;
+        return pathStr;
+    }
+
     // =============================================================
     // FILE VALIDATION HELPERS
     // =============================================================
@@ -123,21 +167,22 @@ namespace PulseEditor
 
         if (!IsImageExt(item.fullPath)) return;
 
-        FolderType folderType = GetFolderType(currentDir);
-        if (!IsValidExtensionForFolder(folderType, item.fullPath))
-            return;
+        (void)currentDir;  // Unused now, kept for API compatibility
 
-        // =============================================================
         // Convert absolute path to relative path for AssetsManager
-        // =============================================================
-        std::string pathStr = item.fullPath;
+        std::string pathStr = GetRelativeAssetPath(item.fullPath);
         std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
 
-        size_t pos = pathStr.find("PulseEngine/Assets");
-        if (pos != std::string::npos)
-            pathStr = "../../" + pathStr.substr(pos);
-
+        // Try relative path first
         item.texID = mAssets.GetOrLoadTexture(pathStr);
+
+        // If failed, try absolute path as fallback
+        if (item.texID == 0)
+        {
+            std::string absPath = item.fullPath;
+            std::replace(absPath.begin(), absPath.end(), '\\', '/');
+            item.texID = mAssets.GetOrLoadTexture(absPath);
+        }
     }
 
     bool ReplaceTextureFile(const std::string& dstPath, const std::string& srcPath, std::vector<AssetItem>& dirEntries)
@@ -170,8 +215,10 @@ namespace PulseEditor
         }
 
         // 2) Force a fresh GL texture id and cache entry
-        mAssets.EvictTexture(dstPath);
-        GLuint newTex = mAssets.GetOrLoadTexture(dstPath);
+        std::string relativePath = GetRelativeAssetPath(dstPath);
+        mAssets.EvictTexture(relativePath);
+        GLuint newTex = mAssets.GetOrLoadTexture(relativePath);
+
         if (!newTex)
         {
             std::cerr << "[ProjectPanel] Reload failed for: " << dstPath << "\n";
@@ -201,10 +248,14 @@ namespace PulseEditor
                 std::string rBase = std::filesystem::path(r.spriteName).filename().string();
                 std::string dBase = std::filesystem::path(dstPath).filename().string();
 
-                if (!r.spriteName.empty() &&
-                    (r.spriteName == dstPath || rBase == dBase))
+                // Compare both the full path and just the filename
+                // This handles cases where spriteName might be absolute or relative
+                bool pathMatches = (r.spriteName == dstPath || r.spriteName == relativePath);
+                bool nameMatches = (rBase == dBase);
+
+                if (!r.spriteName.empty() && (pathMatches || nameMatches))
                 {
-                    r.spriteName = dstPath;
+                    r.spriteName = dstPath;  // Use the absolute path (dstPath)
                     r.textureID = newTex;
                 }
             }
@@ -266,6 +317,45 @@ namespace PulseEditor
             {
                 ++changed;
                 std::cout << "[ProjectPanel] Imported: " << fs::path(srcPath).filename().string() << std::endl;
+
+                // ═══════════════════════════════════════════════════════════════
+                // PRE-LOAD TEXTURE: Load immediately so thumbnail shows
+                // ═══════════════════════════════════════════════════════════════
+                if (IsImageExt(dst.string()))
+                {
+                    std::string relativePath = GetRelativeAssetPath(dst.string());
+
+                    // Debug output
+                    std::cout << "[ProjectPanel] Attempting to load texture:" << std::endl;
+                    std::cout << "  Absolute: " << dst.string() << std::endl;
+                    std::cout << "  Relative: " << relativePath << std::endl;
+
+                    // Evict any cached version first (in case of replacement)
+                    mAssets.EvictTexture(relativePath);
+
+                    // Load the texture
+                    GLuint texID = mAssets.GetOrLoadTexture(relativePath);
+
+                    if (texID != 0)
+                    {
+                        std::cout << "[ProjectPanel] Texture loaded successfully (ID: " << texID << ")" << std::endl;
+                    }
+                    else
+                    {
+                        std::cerr << "[ProjectPanel] FAILED to load texture: " << relativePath << std::endl;
+
+                        // Try loading with absolute path as fallback
+                        texID = mAssets.GetOrLoadTexture(dst.string());
+                        if (texID != 0)
+                        {
+                            std::cout << "[ProjectPanel] Loaded with absolute path instead (ID: " << texID << ")" << std::endl;
+                        }
+                        else
+                        {
+                            std::cerr << "[ProjectPanel] Also failed with absolute path!" << std::endl;
+                        }
+                    }
+                }
             }
         }
 

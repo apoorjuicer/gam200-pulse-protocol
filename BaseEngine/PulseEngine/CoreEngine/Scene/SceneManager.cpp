@@ -29,7 +29,6 @@
 #include "Graphics/Animation.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Text.h"
-#include "Graphics/Text.h"
 #include "CoreEngine/Assets.h"
 #include "CoreEngine/Prefab/PrefabInstance.h"
 #include "Components/Health.h"
@@ -52,6 +51,10 @@ void SceneManager::Init()
 {
 	// Starting scene will be main menu
 	LoadSceneFromJson(StartingScene);
+#ifdef _DEBUG
+	std::cout << std::filesystem::absolute(StartingScene) << std::endl;
+	std::cout << std::filesystem::current_path() << std::endl;
+#endif
 	PreviousScene = CurrentScene;
 
 	// testing for it it works 
@@ -93,14 +96,28 @@ void SceneManager::SaveCurrentScene()
 	d.SetObject();
 	auto& alloc = d.GetAllocator();
 
-	// grab scene name for the json file name
-	//std::filesystem::path path = static_cast<std::filesystem::path>("../../PulseEngine/JSON/Saved" + PreviousScene + "Scene.json"); 
-	std::filesystem::path path = "../../PulseEngine/JSON/" + PreviousScene + ".json"; // file we want to save data into
-	//std::string path = "../../PulseEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
+	// Make it so that it saves from the BaseEngine onwards, which we can then save to PulseEngfie/Json file
+	char exePath[MAX_PATH];
+	GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+	std::filesystem::path basePath = std::filesystem::path(exePath).parent_path(); // Remove exe name
 
+	std::cout << std::filesystem::absolute(basePath) << std::endl;
+	std::cout << std::filesystem::absolute(basePath.parent_path()) << std::endl;
+	std::cout << std::filesystem::absolute(basePath.parent_path().parent_path()) << std::endl;
+	std::cout << std::filesystem::absolute(basePath.parent_path().parent_path().parent_path()) << std::endl;
+
+	//  ONE MORE parent_path() to get OUT of build folder!
+	std::filesystem::path path = basePath.parent_path().parent_path().parent_path() / "PulseEngine" / "JSON" / (CurrentScene + ".json");
+	
+
+	// grab scene name for the json file name
+#ifdef _DEBUG
+	//std::filesystem::path path = "../../PulseEngine/JSON/" + CurrentScene + ".json"; // file we want to save data into
+	std::cout << std::filesystem::absolute(path) << std::endl;
+#endif
 	// Save scene name first
 	Value SceneName;
-	SceneName.SetString(PreviousScene.c_str(), static_cast<SizeType>(PreviousScene.length()), alloc);
+	SceneName.SetString(CurrentScene.c_str(), static_cast<SizeType>(CurrentScene.length()), alloc);
 	d.AddMember("scene", SceneName, alloc);
 
 	// First we make a container for entity
@@ -318,7 +335,7 @@ void SceneManager::SaveCurrentScene()
 
 #ifdef _DEBUG
 	std::cout << "\n================================================" << std::endl;
-	std::cout << "  [SceneManager]: " << PreviousScene << " has been saved!" << std::endl;
+	std::cout << "  [SceneManager]: " << CurrentScene << " has been saved!" << std::endl;
 	std::cout << "================================================" << std::endl;
 #endif
 }
@@ -332,9 +349,10 @@ void SceneManager::UnloadCurrentScene()
 #endif
 
 	auto* g_coordinator = Coordinator::GetInstance();
+#ifdef _DEBUG
 	std::cout << "[SceneManager::UnloadCurrentScene] Got coordinator: " << (g_coordinator ? "YES" : "NO") << std::endl;
 	std::cout << "[SceneManager::UnloadCurrentScene] SceneEntityList size: " << SceneEntityList.size() << std::endl;
-
+#endif
 	// Call Exit() on all scripts BEFORE destroying entities
 	auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
 	std::cout << "[SceneManager::UnloadCurrentScene] Got LogicSystem: " << (logicSystem ? "YES" : "NO") << std::endl;
@@ -384,7 +402,9 @@ void SceneManager::UnloadCurrentScene()
 
 
 	// Clear the Csharp script when scene change
+#ifdef _DEBUG
 	std::cout << "[SceneManager::UnloadCurrentScene] Clearing C# scripts..." << std::endl;
+#endif
 	if (m_coreEngine && m_coreEngine->clearScriptsFunc)
 	{
 		m_coreEngine->clearScriptsFunc();
@@ -431,6 +451,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	Factory factory;
 
 	std::ifstream ifs(path);
+	
 	if (!ifs.is_open())
 	{
 		std::cerr << "Error: Cannot open file for reading: " << path << "\n";
@@ -487,21 +508,9 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 			if (component.HasMember("transform") && component["transform"].IsObject())
 			{
-				//void AddTransformComponent(entity)
-
-				/*void AddTransformComponent(Entity entity);
-				{
-					Framework::Transform t;
-					t.Deserialize(component["transform"]);
-					g_coordinator->AddComponent<Framework::Transform>(entity, t);
-				}*/
 				Framework::Transform t;
 				t.Deserialize(component["transform"]);
 				g_coordinator->AddComponent<Framework::Transform>(entity, t);
-
-				// DEBUG: Print what we just loaded
-				//std::cout << "[SceneManager] Loaded transform at ("
-				//	<< t.Pos.x << ", " << t.Pos.y << ")" << std::endl;
 			}
 
 			if (component.HasMember("render") && component["render"].IsObject())
@@ -625,10 +634,6 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 		// save obj to a vector for deleting later
 		SceneEntityList.push_back(entity);
-
-		//std::cout << "[SceneManager] Created " << SceneEntityList.size() << " entities" << std::endl;
-		//std::cout << "[SceneManager] Total entities in system: "
-		//	<< g_coordinator->GetAllEntities().size() << std::endl;
 	}
 
 	ChangeCurrentScene(d["scene"].GetString());
@@ -641,9 +646,10 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 		"AddScriptViaName"
 	);
 
+#ifdef _DEBUG
 	std::cout << "[SceneManager] addScriptFunc = " << (addScriptFunc ? "FOUND" : "NULL") << "\n";
 	std::cout << "[SceneManager] SceneEntityList.size() = " << SceneEntityList.size() << "\n";
-
+#endif
 
 	/*for (Entity entity : SceneEntityList)
 	{
@@ -714,10 +720,12 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			}
 		}
 
+#ifdef _DEBUG
 		std::cout << "\n[SceneManager] ========== SUMMARY ==========\n";
 		std::cout << "[SceneManager] Total entities checked: " << SceneEntityList.size() << "\n";
 		std::cout << "[SceneManager] Total scripts attached: " << totalAttached << "\n";
 		std::cout << "[SceneManager] ============================\n";
+#endif
 	}
 
 
@@ -755,6 +763,8 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	std::cout << "\n===================================================" << std::endl;
 	std::cout << "   [Scene Manager]: " << CurrentScene << " loaded successfully!" << std::endl;
 	std::cout << "===================================================" << std::endl;
+
+	std::cout << std::filesystem::absolute(path) << std::endl;
 #endif
 }
 

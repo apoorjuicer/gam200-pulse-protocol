@@ -34,9 +34,11 @@
 // #include "glapp.h"
 #include "Resources/AssetRegistry.h"
 #include "CoreEngine/Asset/AssetsManager.h"
+#include "GameState.h"
 
 #include "Components/DisplayName.h"
 #include "Components/EntityType.h"
+#include "Components/ParentChild.h"
 
 #include "Audio/AudioSource.h"
 #include "Graphics/Text.h"
@@ -70,6 +72,8 @@ Framework::Transform* CoreEngine::GetTransformComponent(int ID)
 // contained within it to interface with the .NET runtime
 void CoreEngine::startScriptEngine()
 {
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
+
 	// Steppppppppppp 1, we get the current executable directory so that we can find the coreclr.dll to load
 	std::string runtimePath(MAX_PATH, '\0');
 
@@ -152,7 +156,7 @@ void CoreEngine::startScriptEngine()
 		throw std::runtime_error(oss.str());
 	}
 
-
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
 }
 
 // Unload the .NET runtime 
@@ -195,16 +199,52 @@ std::string CoreEngine::buildTpaList(const std::string& directory)
 	return tpaList.str();
 }
 
+
 void CoreEngine::CompileScriptAssembly()
 {
-	const char* PROJ_PATH = "..\\..\\..\\ManagedScripts\\ManagedScripts.csproj";
+#ifdef _DEBUG
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
+#endif
+
+	// Calculate from current working dir (wherever we are)
+	auto currentDir = std::filesystem::current_path();
+
+	// Go up to BaseEngine folder
+	auto baseEngineDir = currentDir;
+	while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+	{
+		baseEngineDir = baseEngineDir.parent_path();
+	}
+
+#ifdef _DEBUG
+	std::cout << "[Hot Reload] BaseEngine dir: " << baseEngineDir << std::endl;
+#endif
+
+	auto projectPath = baseEngineDir / "ManagedScripts" / "ManagedScripts.csproj";
+
+#ifdef _DEBUG
+	std::cout << "[Hot Reload] Project path: " << projectPath << std::endl;
+#endif
+
+	if (!std::filesystem::exists(projectPath))
+	{
+		std::cerr << "[Hot Reload] ERROR: Project not found!" << std::endl;
+		return;
+	}
+
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
 
 
-	std::wstring buildCmd = L" build \"" + std::filesystem::absolute(PROJ_PATH).wstring() +
-		L"\" -c Debug -p:Platform=x64";
+	// Change the Configuration depending on mode
+	std::string configuration = "Debug";
+#ifdef NDEBUG
+	configuration = "Release";
+#endif
 
-	//std::wstring buildCmd = L" build \"" + std::filesystem::absolute(PROJ_PATH).wstring() +
-		//	                L"\" -c Debug --no-self-contained " + L"-o \"./tmp_build/\" -r \"win-x64\"";
+	std::wstring configWStr(configuration.begin(), configuration.end());
+	std::wstring buildCmd = L" build \"" + projectPath.wstring() + L"\" -c " + configWStr + L" -p:Platform=x64";
+
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
 
 	// Define the struct to config the compiler process call
 	STARTUPINFOW startInfo;
@@ -213,10 +253,14 @@ void CoreEngine::CompileScriptAssembly()
 	ZeroMemory(&pi, sizeof(pi));
 	startInfo.cb = sizeof(startInfo);
 
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
+
 	// Start compiler process
 	const auto Launch = CreateProcessW(L"C:\\Program Files\\dotnet\\dotnet.exe", 
 		                              buildCmd.data(),nullptr, nullptr, true, NULL, nullptr, nullptr,
 		                              &startInfo, &pi);
+
+	std::cout << Launch << "\n\n\n\n\n";
 
 	// Check that we launched the process
 	if (!Launch)
@@ -247,20 +291,45 @@ void CoreEngine::CompileScriptAssembly()
 
 	if (exitCode == 0)
 	{
+#ifdef _DEBUG
 		std::cout << "[CoreEngine] Scripts compiled successfully!\n";
+#endif
 
-		std::filesystem::path dllSource = "../../.bin/Debug-x64/ManagedScripts.dll";
-		std::filesystem::path dllDest = "ManagedScripts.dll";
-		std::filesystem::copy_file(dllSource, dllDest, std::filesystem::copy_options::overwrite_existing);
+		// Copy the ManageScripts.dll to the PulseEditor and PulseProtocol cos ITS FUCKING STUPID FK CMAKE BS
+		std::filesystem::path dllSource = baseEngineDir / "build" / ".bin" / (configuration + "-x64") / "ManagedScripts.dll";
+		std::filesystem::path dllDest1 = baseEngineDir / "build" / "PulseEditor" / configuration / "ManagedScripts.dll";
+		std::filesystem::path dllDest2 = baseEngineDir / "build" / "PulseProtocol" / configuration / "ManagedScripts.dll";
 
-		std::cout << "[CoreEngine] ManagedScripts.dll copied!\n";
+		if (!std::filesystem::exists(dllSource))
+		{
+			std::cerr << "[Hot Reload] ERROR: Built DLL not found!" << std::endl;
+			return;
+		}
+
+		try
+		{
+			std::filesystem::copy_file(dllSource, dllDest1, std::filesystem::copy_options::overwrite_existing);
+			std::filesystem::copy_file(dllSource, dllDest2, std::filesystem::copy_options::overwrite_existing);
+#ifdef _DEBUG
+			std::cout << "[CoreEngine] ManagedScripts.dll copied to both locations!\n";
+#endif
+		}
+
+		catch (const std::exception& e)
+		{
+			std::cerr << "[Hot Reload] ERROR copying DLL: " << e.what() << std::endl;
+		}
 	}
 
 	else
 	{
 		std::cerr << "[CoreEngine] Build failed! Exit code: " << exitCode << "\n";
 	}
+
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
 }
+
 
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
@@ -600,11 +669,14 @@ void CoreEngine::Init()
 	//	std::cout << "Texture loaded and assigned to box 2: " << barTexture << std::endl;
 	// }
 
+	std::cout << "[CHEESE BURGER FOR SALE] " << std::filesystem::current_path() << std::endl;
+
 	GameRunning = true;	 // 3.. 2.. 1.. GAME START
 	startScriptEngine(); // 3.. 2.. 1.. DLL SCRIPT! START ROLLINGGGGGGGGGGGGGGGGGG
 
 	CompileScriptAssembly();
 
+	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
 	// Step 1. Get the function ptrs
 	InitFunctionPtr initFunc = GetFunctionPtr<InitFunctionPtr>
 		(
@@ -629,6 +701,7 @@ void CoreEngine::Init()
 	// Step 2: Initialize it with  pointer to CoreEngine as param
 	initFunc(this); 
 
+	std::cout << "here?\n\n\n\n";
 
 	g_coordinator->InitializeAllSystems();
 }
@@ -654,6 +727,8 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<PrefabInstance>();
 	g_coordinator->RegisterComponent<AudioSource>();
 	g_coordinator->RegisterComponent<TextComponent>();
+	g_coordinator->RegisterComponent<Parent>();
+	g_coordinator->RegisterComponent<Children>();
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
@@ -740,8 +815,26 @@ void CoreEngine::Update(float dt)
 	{
 		if (!wasRPressed)
 		{
+#ifdef _DEBUG
 			std::cout << "[Hot Reload] Recompiling scripts...\n";
+#endif
 			CompileScriptAssembly();
+
+			//change the working directory so that i can get the .net stuff for hot reload else I will skin my pet goldfish alive
+			HMODULE hEngine = GetModuleHandleA("PulseEngine.dll");
+			if (hEngine)
+			{
+				std::string debugPath(MAX_PATH, '\0');
+				GetModuleFileNameA(hEngine, debugPath.data(), MAX_PATH);
+				PathRemoveFileSpecA(debugPath.data());
+				debugPath.resize(std::strlen(debugPath.data()));
+
+#ifdef _DEBUG
+				std::cout << "[Hot Reload] Setting working dir to: " << debugPath << std::endl;
+#endif
+				std::filesystem::current_path(debugPath);
+			}
+
 
 			auto reloadScripts = GetFunctionPtr<void(*)(void)>
 				(
@@ -750,7 +843,7 @@ void CoreEngine::Update(float dt)
 					"Reload"
 				);
 
-			reloadScripts(); 
+			reloadScripts();
 
 		}
 
@@ -836,21 +929,31 @@ void CoreEngine::Update(float dt)
 
 void CoreEngine::GameLoop()
 {
-    LastTime = timeGetTime();
+    //LastTime = timeGetTime();		
+	LastFrame = timeGetTime();
+
     auto profiler = ProfilingManager::GetInstance();
 
     while (!glfwWindowShouldClose(window) && GameRunning)
     {
         // --- dt calculation ---
-        unsigned currenttime = timeGetTime();
-        float dt = (currenttime - LastTime) / 1000.0f;
-        LastTime = currenttime;
+        //unsigned currenttime = timeGetTime();
+        //float dt = (currenttime - LastTime) / 1000.0f;
+        //LastTime = currenttime;
+
+		CurrentFrame = timeGetTime();
+		DeltaTime = (CurrentFrame - LastFrame) / 1000.f;
+		LastFrame = CurrentFrame;
+
+		// --- count frames and time ---
+		FrameCount++;
+		TimePassed += DeltaTime;
 
         glfwPollEvents();
 
         // --- Game update (ECS systems) ---
         profiler->StartFrame();
-        Update(dt);
+        Update(DeltaTime);
         profiler->EndFrame();
 
         // --- Game rendering ---
@@ -1123,6 +1226,8 @@ void CoreEngine::RenderDebugDraw()
 void CoreEngine::PlayGame()
 {
 	m_isPlaying = true;
+	m_paused = false;
+	Framework::GameState::SetPlaying(true);
 	auto coord = Coordinator::GetInstance();
 
 	// ALWAYS update the original scene path when Play is pressed
@@ -1166,6 +1271,8 @@ void CoreEngine::PlayGame()
 void CoreEngine::StopGame()
 {
 	m_isPlaying = false;
+	m_paused = true;
+	Framework::GameState::SetPlaying(false);
 	auto coord = Coordinator::GetInstance();
 
 	// Stop all audio (BGM and AudioSource components)
@@ -1212,6 +1319,8 @@ void CoreEngine::RestartRuntimeForPlay()
 void CoreEngine::PauseGame()
 {
 	m_isPlaying = false;
+	m_paused = true;
+	Framework::GameState::SetPlaying(false);
 	auto coord = Coordinator::GetInstance();
 
 	if (auto audio = coord->GetSystem<AudioManager>()) {
@@ -1222,6 +1331,8 @@ void CoreEngine::PauseGame()
 void CoreEngine::ResumeGame()
 {
 	m_isPlaying = true;
+	m_paused = false;
+	Framework::GameState::SetPlaying(true);
 	auto coord = Coordinator::GetInstance();
 
 	if (auto audio = coord->GetSystem<AudioManager>()) {
@@ -1282,4 +1393,22 @@ void CoreEngine::SetFullscreen(bool fullscreen)
 void CoreEngine::ToggleFullscreen()
 {
 	SetFullscreen(!m_isFullscreen);
+}
+
+std::filesystem::path CoreEngine::GetAssetRoot()
+{
+	// Find directory of PulseEngine.dll
+	std::string runtimePath(MAX_PATH, '\0');
+	HMODULE hEngine = GetModuleHandleA("PulseEngine.dll");
+	if (!hEngine) return std::filesystem::current_path(); // fallback
+
+	GetModuleFileNameA(hEngine, runtimePath.data(), MAX_PATH);
+	PathRemoveFileSpecA(runtimePath.data());
+	runtimePath.resize(std::strlen(runtimePath.data()));
+
+	// If your Assets folder is next to the dll:
+	// return std::filesystem::path(runtimePath) / "Assets";
+
+	// If Assets is inside BaseEngine/PulseEngine/Assets, adapt accordingly:
+	return std::filesystem::path(runtimePath) / "Assets";
 }
