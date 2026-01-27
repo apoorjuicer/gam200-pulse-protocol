@@ -810,7 +810,8 @@ void GraphicsManager::CreateDebugTextEntities()
     {
         LayerTag layer;
         layer.mask = LAYER_UI;
-        layer.orderInLayer = 999;
+        layer.sortingLayer = 2;    // UI sorting layer
+        layer.orderInLayer = 999;  // On top of other UI
         layer.z = 100.0f;
         g->AddComponent(m_fpsTextEntity, layer);
     }

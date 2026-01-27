@@ -1,4 +1,4 @@
-/******************************************************************************/
+﻿/******************************************************************************/
 /**
  * @file        Inspector.cpp
  * @project     Pulse Protocol
@@ -20,6 +20,7 @@
 #include "Inspector.h"
 #include "Editor.h"                 // selectedEntity, INVALID_ENTITY, PrefabManager, etc.
 #include "TopBarPanel.h"
+#include "SnapShot.h"
 
 // engine files
 #include "Graphics/glapp.h"         // GLApp::shdrpgms
@@ -205,7 +206,8 @@ namespace PulseEditor
         {
             LayerTag tag{};
             tag.mask = LAYER_WORLD;
-            tag.orderInLayer = 1;
+            tag.sortingLayer = 1;  // World
+            tag.orderInLayer = 0;
             tag.z = 0.0f;
             g->AddComponent<LayerTag>(selectedEntity, tag);
         }
@@ -248,26 +250,41 @@ namespace PulseEditor
         {
             if (currentLayerIndex >= 0 && currentLayerIndex < static_cast<int>(allLayers.size()))
             {
-                LayerMask newMask = allLayers[currentLayerIndex].mask;
-                layer.mask = newMask;
+                layer.mask = allLayers[currentLayerIndex].mask;
 
-                if (newMask == LAYER_UI)
-                    layer.z = 100.0f;
-                else
-                    layer.z = 0.0f;
+                // Auto-sync sorting layer when mask changes
+                if (layer.mask == LAYER_BACKGROUND) layer.sortingLayer = 0;
+                else if (layer.mask == LAYER_WORLD) layer.sortingLayer = 1;
+                else if (layer.mask == LAYER_UI) layer.sortingLayer = 2;
             }
         }
 
-        // orderInLayer control (for fine-tuning draw order within layer)
-        ImGui::Text("Draw Order:");
+        // === SORTING LAYER (for render order) ===
+        ImGui::Text("Sorting Layer:");
         ImGui::SameLine();
-        ImGui::SetNextItemWidth(150.0f);
-        ImGui::DragInt("##OrderInLayer", &layer.orderInLayer, 1.0f, 0, 999);
+        ImGui::SetNextItemWidth(130.0f);
+
+        const char* sortingLayerNames[] = { "Background", "World", "UI" };
+        ImGui::Combo("##SortingLayer", &layer.sortingLayer, sortingLayerNames, IM_ARRAYSIZE(sortingLayerNames));
+
         ImGui::SameLine();
         ImGui::TextDisabled("(?)");
         if (ImGui::IsItemHovered())
         {
-            ImGui::SetTooltip("Higher number = drawn on top.\nControls render order within the same layer.");
+            ImGui::SetTooltip("Sorting Layer controls render order:\nBackground (0) -> World (1) -> UI (2)\nHigher = renders on top");
+        }
+
+        // === ORDER IN LAYER (fine-grained within sorting layer) ===
+        ImGui::Text("Order in Layer:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(150.0f);
+        ImGui::DragInt("##OrderInLayer", &layer.orderInLayer, 1.0f, -9999, 9999);
+
+        ImGui::SameLine();
+        ImGui::TextDisabled("(?)");
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("Order within the sorting layer.\nHigher number = drawn on top.\nWorks across ALL layers now!");
         }
 
         ImGui::Separator();
@@ -783,9 +800,9 @@ namespace PulseEditor
 
                     if (ImGui::BeginDragDropTarget())
                     {
-                        if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
+                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_TEXTURE"))
                         {
-                            const char *droppedPath = static_cast<const char *>(payload->Data);
+                            const char* droppedPath = static_cast<const char*>(payload->Data);
                             if (droppedPath)
                             {
                                 namespace fs = std::filesystem;
@@ -799,6 +816,15 @@ namespace PulseEditor
 
                     if (reloadClicked)
                     {
+                        // ═══════════════════════════════════════════════════════════════
+                        // UNDO: Snapshot BEFORE texture change
+                        // ═══════════════════════════════════════════════════════════════
+                        Entity e = selectedEntity;
+                        EntitySnapshot before = MakeEntitySnapshot(e);
+                        mUndo.Push([e, before]() {
+                            RestoreEntityFromSnapshot(e, before);
+                        });
+
                         namespace fs = std::filesystem;
                         const std::string kTexturesRoot = "../../PulseEngine/Assets/Textures";
 

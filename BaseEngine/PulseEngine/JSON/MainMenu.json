@@ -55,6 +55,7 @@
                     "layerTag": {
                         "layerName": "Background",
                         "mask": 1,
+                        "sortingLayer": 0,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -67,7 +68,7 @@
                     "transform": {
                         "position": {
                             "x": -750.0,
-                            "y": -0.0
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 400.0,
@@ -135,6 +136,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 10,
                         "z": 100.0
                     }
@@ -215,6 +217,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 10,
                         "z": 100.0
                     }
@@ -295,6 +298,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 10,
                         "z": 100.0
                     }
@@ -375,6 +379,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 10,
                         "z": 100.0
                     }

@@ -22,6 +22,7 @@
 #include "Editor.h" // for GameViewport, GizmoState, selectedEntity, INVALID_ENTITY
 #include "Gizmo.h"
 #include "LayerManagerPanel.h"  // for IsLayerVisible, IsLayerLocked
+#include "HierarchyHelpers.h"
 
 #include "CoreEngine/ECS/Coordinator.h"
 #include "CoreEngine/ECS/Types.h"
@@ -29,7 +30,8 @@
 #include "Graphics/glapp.h"
 #include "Graphics/Layer.h"
 #include "CoreEngine/Scene/SceneManager.h"  // For scene change detection
-#include "LayerManagerPanel.h" // for IsLayerVisible, IsLayerLocked
+#include "Components/ParentChild.h"
+
 // #include "../CoreEngine/ECS/Types.h"
 // #include "../Graphics/Transform.h"
 // #include "../Graphics/glapp.h"
@@ -44,7 +46,7 @@ namespace PulseEditor
 {
     // Gizmo-undo state (separate from Inspector)
     static bool s_gizmoEditing = false;
-    static Framework::Transform s_gizmoBeforeEdit;
+    static EntitySnapshot s_gizmoBeforeSnapshot;
     static Entity s_gizmoEntity = INVALID_ENTITY;
     GLFWwindow* window;
     // -------------------------------------------------------------------------
@@ -899,7 +901,7 @@ namespace PulseEditor
                 // UNDO: snapshot transform at start of gizmo drag
                 s_gizmoEditing = true;
                 s_gizmoEntity = selectedEntity;
-                s_gizmoBeforeEdit = tr;
+                s_gizmoBeforeSnapshot = MakeEntitySnapshot(selectedEntity);
             }
             else if (hovered != INVALID_ENTITY)
             {
@@ -932,9 +934,22 @@ namespace PulseEditor
                     break;
 
                 case GizmoHandle::MoveCenter:
-                    tr.Pos.x = g_gizmo.entityStartPos.x + (mouseWorld.x - g_gizmo.dragStartWorld.x);
-                    tr.Pos.y = g_gizmo.entityStartPos.y + (mouseWorld.y - g_gizmo.dragStartWorld.y);
+                {
+                    float deltaX = mouseWorld.x - g_gizmo.dragStartWorld.x;
+                    float deltaY = mouseWorld.y - g_gizmo.dragStartWorld.y;
+
+                    // Reset to start position
+                    tr.Pos.x = g_gizmo.entityStartPos.x;
+                    tr.Pos.y = g_gizmo.entityStartPos.y;
+
+                    // Move entity and all children
+                    HierarchyHelpers::MoveEntityAndChildren(g_gizmo.active, deltaX, deltaY);
+
+                    // Update start for smooth dragging
+                    g_gizmo.dragStartWorld = mouseWorld;
+                    g_gizmo.entityStartPos = tr.Pos;
                     break;
+                }
 
                     // ----- SCALE HANDLES -----
                 case GizmoHandle::ScaleX:
@@ -990,29 +1005,15 @@ namespace PulseEditor
             g_gizmo.active = INVALID_ENTITY;
             g_gizmo.activeHandle = GizmoHandle::None;
 
+            // Replace the entire if block with:
             if (s_gizmoEditing && s_gizmoEntity != INVALID_ENTITY)
             {
-                auto *c = Coordinator::GetInstance();
-                if (c && c->HasComponent<Framework::Transform>(s_gizmoEntity))
-                {
-                    auto &currentTr = c->GetComponent<Framework::Transform>(s_gizmoEntity);
+                Entity e = s_gizmoEntity;
+                EntitySnapshot before = s_gizmoBeforeSnapshot;
 
-                    // Only push undo if something actually changed
-                    if (currentTr != s_gizmoBeforeEdit)
-                    {
-                        Entity e = s_gizmoEntity;
-                        Framework::Transform before = s_gizmoBeforeEdit;
-
-                        mUndo.Push([e, before]()
-                                   {
-                                //reacquire, incase something changes
-                                auto* g = Coordinator::GetInstance();                                
-                                if (!g) return;
-                                if (!g->HasComponent<Framework::Transform>(e)) return;
-
-                                g->GetComponent<Framework::Transform>(e) = before; });
-                    }
-                }
+                mUndo.Push([e, before]() {
+                    RestoreEntityFromSnapshot(e, before);
+                    });
 
                 s_gizmoEditing = false;
                 s_gizmoEntity = INVALID_ENTITY;
@@ -1020,11 +1021,10 @@ namespace PulseEditor
         }
 
         // ---------------------------------------------------------------------
-        // DELETE KEY
+        // DELETE KEY (with children support)
         // ---------------------------------------------------------------------
         if (selectedEntity != INVALID_ENTITY && glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS)
         {
-
             Entity toDelete = selectedEntity;
             if (!coord)
                 return;
@@ -1037,48 +1037,80 @@ namespace PulseEditor
                 g_gizmo.activeHandle = GizmoHandle::None;
             }
 
-            // Find position in hierarchy BEFORE removing
-            auto it = std::find(entityDisplayOrder.begin(),
-                                entityDisplayOrder.end(),
-                                toDelete);
-            int index = -1;
-            if (it != entityDisplayOrder.end())
+            // Collect all entities to delete (including children)
+            std::vector<Entity> entitiesToDelete;
+            HierarchyHelpers::PrepareDeleteWithChildren(toDelete, entitiesToDelete);
+
+            // Store snapshots and indices for undo
+            std::vector<EntitySnapshot> snapshots;
+            std::vector<int> indices;
+
+            for (Entity e : entitiesToDelete)
             {
-                index = static_cast<int>(it - entityDisplayOrder.begin());
-                // Remove from the list now
-                entityDisplayOrder.erase(it);
+                // Find position in hierarchy
+                auto it = std::find(entityDisplayOrder.begin(),
+                    entityDisplayOrder.end(), e);
+                int index = -1;
+                if (it != entityDisplayOrder.end())
+                {
+                    index = static_cast<int>(it - entityDisplayOrder.begin());
+                }
+                indices.push_back(index);
+
+                // Snapshot while entity is still valid
+                snapshots.push_back(MakeEntitySnapshot(e));
             }
 
-            // --- SNAPSHOT WHILE ENTITY IS STILL VALID ---
-            EntitySnapshot snap = MakeEntitySnapshot(toDelete);
+            // Remove all from entityDisplayOrder
+            for (Entity e : entitiesToDelete)
+            {
+                auto it = std::find(entityDisplayOrder.begin(),
+                    entityDisplayOrder.end(), e);
+                if (it != entityDisplayOrder.end())
+                {
+                    entityDisplayOrder.erase(it);
+                }
+            }
 
-            // --- DESTROY ENTITY ONCE ---
+            // Delete all entities
             Factory factory;
-            factory.DeleteEntity(toDelete); // or coord->DestroyEntity(toDelete), but NOT both
+            for (Entity e : entitiesToDelete)
+            {
+                factory.DeleteEntity(e);
+            }
 
             selectedEntity = INVALID_ENTITY;
 
-            // --- UNDO: recreate entity from snapshot and reinsert ---
-            mUndo.Push([snap, index]()
-                       {
-                    // Recreate the entity with all its components
-                    Entity restored = CreateEntityFromEntitySnapshot(snap);
-                    if (restored == INVALID_ENTITY)
-                        return;
+            // --- UNDO: recreate all entities and restore hierarchy ---
+            mUndo.Push([snapshots, indices]()
+                {
+                    // Recreate entities in reverse order (children first, then parent)
+                    std::vector<Entity> restoredEntities;
 
-                    // Reinsert into hierarchy at original position
-                    int insertIndex = index;
-                    if (insertIndex < 0 ||
-                        insertIndex > static_cast<int>(entityDisplayOrder.size()))
+                    for (size_t i = 0; i < snapshots.size(); ++i)
                     {
-                        insertIndex = static_cast<int>(entityDisplayOrder.size());
+                        Entity restored = CreateEntityFromEntitySnapshot(snapshots[i]);
+                        if (restored != INVALID_ENTITY)
+                        {
+                            restoredEntities.push_back(restored);
+
+                            // Reinsert into hierarchy
+                            int insertIndex = indices[i];
+                            if (insertIndex < 0 ||
+                                insertIndex > static_cast<int>(entityDisplayOrder.size()))
+                            {
+                                insertIndex = static_cast<int>(entityDisplayOrder.size());
+                            }
+                            entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex, restored);
+                        }
                     }
 
-                    entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex,
-                        restored);
-
-                    // Select the restored entity
-                    selectedEntity = restored; });
+                    // Select the first restored entity (the original parent)
+                    if (!restoredEntities.empty())
+                    {
+                        selectedEntity = restoredEntities[0];
+                    }
+                });
         }
 
         dl->PopClipRect();

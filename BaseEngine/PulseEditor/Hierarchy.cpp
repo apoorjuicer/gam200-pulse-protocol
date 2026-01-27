@@ -1,4 +1,4 @@
-/******************************************************************************/
+﻿/******************************************************************************/
 /**
  * @file        Hierarchy.cpp
  * @project     Pulse Protocol
@@ -18,10 +18,12 @@
 // -----------------------------------------------------------------------------
 #include "pch/pch_temp.h"
 #include "Hierarchy.h"
+#include "HierarchyHelpers.h"
 #include "Editor.h"   // selectedEntity, INVALID_ENTITY, entityDisplayOrder, Game/ECS helpers
 #include "TopBarPanel.h"
 
 #include "CoreEngine/Prefab/PrefabInstance.h"
+#include "Components/ParentChild.h"
 
 // ImGui
 #include "imgui.h"
@@ -193,6 +195,242 @@ namespace PulseEditor
         s_renameState.renamingEntity = INVALID_ENTITY;
         s_renameState.renameBuffer[0] = '\0';
         s_renameState.justStartedRenaming = false;
+    }
+
+    // -------------------------------------------------------------------------
+    // RECURSIVE TREE NODE DRAWING
+    // -------------------------------------------------------------------------
+    static void DrawEntityNode(Entity entity, int& index, int depth, bool& anySelectableClicked, int& draggedIndex)
+    {
+        auto* g_coordinator = Coordinator::GetInstance();
+        if (!g_coordinator) return;
+
+        // Get display name
+        std::string display;
+        if (g_coordinator->HasComponent<Name>(entity))
+        {
+            display = g_coordinator->GetComponent<Name>(entity).name;
+        }
+        else
+        {
+            display = "Entity " + std::to_string(static_cast<int>(entity));
+        }
+
+        // Check for prefab instance
+        bool isPrefabInstance = false;
+        bool isPrefabLinked = false;
+        if (g_coordinator->HasComponent<PrefabInstance>(entity))
+        {
+            isPrefabInstance = true;
+            isPrefabLinked = g_coordinator->GetComponent<PrefabInstance>(entity).isLinked;
+        }
+
+        if (isPrefabInstance)
+        {
+            display = isPrefabLinked ? "[P] " + display : "[P-] " + display;
+        }
+
+        // Check if has children
+        bool hasChildren = HierarchyHelpers::HasChildren(entity);
+        std::vector<Entity> children = HierarchyHelpers::GetChildren(entity);
+
+        bool isSelected = (selectedEntity == entity);
+        std::string uniqueLabel = display + "##" + std::to_string(static_cast<int>(entity));
+
+        // Check if currently renaming this entity
+        bool isRenaming = (s_renameState.renamingEntity == entity);
+
+        // Indent based on depth
+        float indentWidth = depth * 20.0f;
+        if (indentWidth > 0)
+            ImGui::Indent(indentWidth);
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // INLINE RENAMING
+        // ═══════════════════════════════════════════════════════════════════════
+        if (isRenaming)
+        {
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+
+            if (s_renameState.justStartedRenaming)
+            {
+                ImGui::SetKeyboardFocusHere();
+                s_renameState.justStartedRenaming = false;
+            }
+
+            ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue |
+                ImGuiInputTextFlags_AutoSelectAll;
+
+            if (ImGui::InputText(("##rename" + std::to_string(entity)).c_str(),
+                s_renameState.renameBuffer,
+                sizeof(s_renameState.renameBuffer), flags))
+            {
+                FinishRenaming(true);
+            }
+
+            if (ImGui::IsKeyPressed(ImGuiKey_Escape))
+            {
+                FinishRenaming(false);
+            }
+
+            if (!ImGui::IsItemActive() && ImGui::IsMouseClicked(0))
+            {
+                FinishRenaming(true);
+            }
+        }
+        else
+        {
+            // ═══════════════════════════════════════════════════════════════════════
+            // TREE NODE DISPLAY
+            // ═══════════════════════════════════════════════════════════════════════
+
+            // Tree node flags
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow |
+                ImGuiTreeNodeFlags_SpanAvailWidth |
+                ImGuiTreeNodeFlags_DefaultOpen;
+
+            if (!hasChildren)
+                flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+
+            if (isSelected)
+                flags |= ImGuiTreeNodeFlags_Selected;
+
+            // Color for prefab instances
+            if (isPrefabInstance && isPrefabLinked)
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
+            else if (isPrefabInstance)
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.7f, 1.0f));
+
+            // Draw tree node
+            bool nodeOpen = ImGui::TreeNodeEx(
+                (void*)(intptr_t)entity,
+                flags,
+                "%s",
+                display.c_str()
+            );
+
+            if (isPrefabInstance)
+                ImGui::PopStyleColor();
+
+            // Handle selection
+            if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+            {
+                selectedEntity = entity;
+                anySelectableClicked = true;
+            }
+
+            // ═══════════════════════════════════════════════════════════════════════
+            // DRAG SOURCE - For reparenting
+            // ═══════════════════════════════════════════════════════════════════════
+            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+            {
+                draggedIndex = index;
+
+                struct HierarchyDragData {
+                    int index;
+                    Entity entity;
+                };
+
+                static HierarchyDragData s_dragData;
+                s_dragData.index = index;
+                s_dragData.entity = entity;
+
+                ImGui::SetDragDropPayload("HIERARCHY_ENTITY_REORDER", &s_dragData, sizeof(HierarchyDragData));
+                ImGui::Text("%s", display.c_str());
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Drop on entity to parent");
+                ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.0f, 1.0f), "Drop on empty = unparent");
+                ImGui::EndDragDropSource();
+            }
+
+            // ═══════════════════════════════════════════════════════════════════════
+            // DROP TARGET - For making children
+            // ═══════════════════════════════════════════════════════════════════════
+            if (ImGui::BeginDragDropTarget())
+            {
+                // Visual feedback
+                ImDrawList* draw_list = ImGui::GetWindowDrawList();
+                ImVec2 p_min = ImGui::GetItemRectMin();
+                ImVec2 p_max = ImGui::GetItemRectMax();
+                draw_list->AddRectFilled(p_min, p_max, IM_COL32(0, 150, 255, 50));
+
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_ENTITY_REORDER"))
+                {
+                    struct HierarchyDragData {
+                        int index;
+                        Entity entity;
+                    };
+
+                    const HierarchyDragData* dragData = (const HierarchyDragData*)payload->Data;
+                    Entity droppedEntity = dragData->entity;
+
+                    // Don't parent to self or to own descendants
+                    if (droppedEntity != entity && HierarchyHelpers::CanSetParent(droppedEntity, entity))
+                    {
+                        HierarchyHelpers::SetParent(droppedEntity, entity);
+                    }
+                }
+                ImGui::EndDragDropTarget();
+            }
+
+            // Double-click to rename
+            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+            {
+                StartRenaming(entity);
+            }
+
+            // ═══════════════════════════════════════════════════════════════════════
+            // RIGHT-CLICK CONTEXT MENU
+            // ═══════════════════════════════════════════════════════════════════════
+            if (ImGui::BeginPopupContextItem())
+            {
+                if (HierarchyHelpers::HasParent(entity))
+                {
+                    if (ImGui::MenuItem("Unparent"))
+                    {
+                        HierarchyHelpers::SetParent(entity, HierarchyHelpers::INVALID);
+                    }
+                }
+
+                if (ImGui::MenuItem("Create Child"))
+                {
+                    Entity newChild = CreateEntityWithName();
+                    if (newChild != INVALID_ENTITY)
+                    {
+                        HierarchyHelpers::SetParent(newChild, entity);
+                        entityDisplayOrder.push_back(newChild);
+                        selectedEntity = newChild;
+                    }
+                }
+
+                ImGui::EndPopup();
+            }
+
+            // ═══════════════════════════════════════════════════════════════════════
+            // DRAW CHILDREN RECURSIVELY
+            // ═══════════════════════════════════════════════════════════════════════
+            if (hasChildren && nodeOpen)
+            {
+                for (Entity child : children)
+                {
+                    // Unindent before recursion, child will add its own indent
+                    if (indentWidth > 0)
+                        ImGui::Unindent(indentWidth);
+
+                    index++;
+                    DrawEntityNode(child, index, depth + 1, anySelectableClicked, draggedIndex);
+
+                    // Re-indent after child is done
+                    if (indentWidth > 0)
+                        ImGui::Indent(indentWidth);
+                }
+                ImGui::TreePop();
+            }
+        }
+
+        if (indentWidth > 0)
+            ImGui::Unindent(indentWidth);
+
+        index++;
     }
 
     // -------------------------------------------------------------------------
@@ -416,226 +654,38 @@ namespace PulseEditor
             }
         }
 
-        // Display entities in tracked order WITH DRAG-DROP
+        // Display entities as tree view
         static int draggedIndex = -1;
+        int index = 0;
 
-        for (int i = 0; i < static_cast<int>(entityDisplayOrder.size()); ++i)
+        // Only draw root entities (children drawn recursively)
+        for (Entity entity : entityDisplayOrder)
         {
-            Entity entity = entityDisplayOrder[i];
-            // Get display name
-            std::string display;
-            if (g_coordinator->HasComponent<Name>(entity))
+            if (HierarchyHelpers::IsRoot(entity))
             {
-                display = g_coordinator->GetComponent<Name>(entity).name;
+                DrawEntityNode(entity, index, 0, anySelectableClicked, draggedIndex);
             }
-            else
+        }
+
+        // Drop zone for unparenting (empty space)
+        ImVec2 availSpace = ImGui::GetContentRegionAvail();
+        if (availSpace.y > 20.0f)
+        {
+            ImGui::InvisibleButton("##unparent_dropzone", ImVec2(-1, availSpace.y));
+
+            if (ImGui::BeginDragDropTarget())
             {
-                // Fallback only for legacy entities without Name component
-                display = "Entity " + std::to_string(static_cast<int>(entity));
-            }
-
-            // Check if prefab instance AND if it's linked
-            bool isPrefabInstance = false;
-            bool isPrefabLinked = false;
-
-            if (g_coordinator->HasComponent<PrefabInstance>(entity)) {
-                isPrefabInstance = true;
-                isPrefabLinked = g_coordinator->GetComponent<PrefabInstance>(entity).isLinked;
-            }
-
-            // Add prefix for prefab instances (different prefix based on linked status)
-            if (isPrefabInstance)
-            {
-                if (isPrefabLinked) {
-                    display = "[P] " + display;  // Linked - will receive updates
-                }
-                else {
-                    display = "[P-] " + display; // Unlinked - independent
-                }
-            }
-
-            bool isSelected = (selectedEntity == entity);
-            std::string uniqueLabel = display + "##" + std::to_string(static_cast<int>(entity));
-
-            // =================================================================
-            // INLINE RENAMING
-            // =================================================================
-
-            bool isRenaming = (s_renameState.renamingEntity == entity);
-
-            if (isRenaming)
-            {
-                // Show text input for renaming
-                ImGui::SetNextItemWidth(-FLT_MIN);
-
-                if (s_renameState.justStartedRenaming)
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_ENTITY_REORDER"))
                 {
-                    ImGui::SetKeyboardFocusHere();
-                    s_renameState.justStartedRenaming = false;
-                }
-
-                ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue |
-                    ImGuiInputTextFlags_AutoSelectAll;
-
-                if (ImGui::InputText(uniqueLabel.c_str(), s_renameState.renameBuffer,
-                    sizeof(s_renameState.renameBuffer), flags))
-                {
-                    // Enter pressed - save and finish
-                    FinishRenaming(true);
-                }
-
-                // Escape pressed - cancel
-                if (ImGui::IsKeyPressed(ImGuiKey_Escape))
-                {
-                    FinishRenaming(false);
-                }
-
-                // Clicked outside - save and finish
-                if (!ImGui::IsItemActive() && ImGui::IsMouseClicked(0))
-                {
-                    FinishRenaming(true);
-                }
-            }
-            else
-            {
-                // Color coding for prefab instances based on linked status
-                if (isPrefabInstance && isPrefabLinked)
-                {
-                    // Blue for LINKED prefab instances - will receive updates
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
-                }
-                else if (isPrefabInstance && !isPrefabLinked)
-                {
-                    // Gray for UNLINKED prefab instances - independent
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.7f, 1.0f));
-                }
-
-                if (ImGui::Selectable(uniqueLabel.c_str(), isSelected))
-                {
-                    selectedEntity = entity;
-                    anySelectableClicked = true;
-                }
-
-                if (isPrefabInstance)  // Pop color if we pushed one
-                {
-                    ImGui::PopStyleColor();
-                }
-
-                // =================================================================
-                // DROP TARGET - Must be RIGHT AFTER Selectable!
-                // =================================================================
-
-                if (ImGui::BeginDragDropTarget())
-                {
-                    // Visual feedback: Draw a blue line to show where the entity will be inserted
-                    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-                    ImVec2 p_min = ImGui::GetItemRectMin();
-                    ImVec2 p_max = ImGui::GetItemRectMax();
-
-                    // Draw a blue horizontal line above the hovered entity
-                    float line_y = p_min.y;
-                    draw_list->AddLine(
-                        ImVec2(p_min.x, line_y),
-                        ImVec2(p_max.x, line_y),
-                        IM_COL32(0, 150, 255, 255),
-                        3.0f
-                    );
-
-                    // Optional: Add small arrows/indicators at the ends
-                    float arrow_size = 4.0f;
-                    draw_list->AddTriangleFilled(
-                        ImVec2(p_min.x, line_y),
-                        ImVec2(p_min.x + arrow_size, line_y - arrow_size),
-                        ImVec2(p_min.x + arrow_size, line_y + arrow_size),
-                        IM_COL32(0, 150, 255, 255)
-                    );
-                    draw_list->AddTriangleFilled(
-                        ImVec2(p_max.x, line_y),
-                        ImVec2(p_max.x - arrow_size, line_y - arrow_size),
-                        ImVec2(p_max.x - arrow_size, line_y + arrow_size),
-                        IM_COL32(0, 150, 255, 255)
-                    );
-
-                    // Accept drop with flag to disable the default yellow rectangle
-                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_ENTITY_REORDER", ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
-                    {
-                        // Extract data from struct
-                        struct HierarchyDragData {
-                            int index;
-                            Entity entity;
-                        };
-
-                        const HierarchyDragData* dragData = (const HierarchyDragData*)payload->Data;
-                        int sourceIndex = dragData->index;
-                        int targetIndex = i;
-
-                        std::cout << "[Hierarchy] DROP ACCEPTED! Moving index " << sourceIndex << " to " << targetIndex << std::endl;
-
-                        if (sourceIndex != targetIndex &&
-                            sourceIndex >= 0 && sourceIndex < static_cast<int>(entityDisplayOrder.size()) &&
-                            targetIndex >= 0 && targetIndex < static_cast<int>(entityDisplayOrder.size()))
-                        {
-                            std::cout << "[Hierarchy] Performing reorder..." << std::endl;
-
-                            // Reorder: move source entity to target position
-                            Entity movedEntity = entityDisplayOrder[sourceIndex];
-                            entityDisplayOrder.erase(entityDisplayOrder.begin() + sourceIndex);
-
-                            // Adjust target index if we removed an element before it
-                            if (sourceIndex < targetIndex)
-                                targetIndex--;
-
-                            entityDisplayOrder.insert(entityDisplayOrder.begin() + targetIndex, movedEntity);
-
-                            std::cout << "[Hierarchy] Reorder complete!" << std::endl;
-                        }
-                        else
-                        {
-                            std::cout << "[Hierarchy] Reorder BLOCKED - sourceIndex=" << sourceIndex << " targetIndex=" << targetIndex << " size=" << entityDisplayOrder.size() << std::endl;
-                        }
-                    }
-                    ImGui::EndDragDropTarget();
-                }
-                else
-                {
-                    // BeginDragDropTarget returned false - not currently dragging anything
-                }
-
-                // =================================================================
-                // DRAG SOURCE - After drop target to not interfere
-                // =================================================================
-
-                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
-                {
-                    draggedIndex = i;
-
-                    // Store both index and entity data in a struct
                     struct HierarchyDragData {
                         int index;
                         Entity entity;
                     };
 
-                    static HierarchyDragData s_dragData;
-                    s_dragData.index = i;
-                    s_dragData.entity = entity;
-
-                    // Set payload for hierarchy reordering
-                    ImGui::SetDragDropPayload("HIERARCHY_ENTITY_REORDER", &s_dragData, sizeof(HierarchyDragData));
-
-                    ImGui::Text("%s", display.c_str());
-                    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Drag to reorder");
-                    ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.0f, 1.0f), "Drop in Project to create Prefab");
-                    ImGui::EndDragDropSource();
+                    const HierarchyDragData* dragData = (const HierarchyDragData*)payload->Data;
+                    HierarchyHelpers::SetParent(dragData->entity, HierarchyHelpers::INVALID);
                 }
-
-                // =================================================================
-                // DOUBLE CLICK TO RENAME - Check last to not interfere with drag/drop
-                // =================================================================
-
-                if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-                {
-                    StartRenaming(entity);
-                }
+                ImGui::EndDragDropTarget();
             }
         }
 
