@@ -20,6 +20,11 @@
 #ifndef COLLISION_H
 #define COLLISION_H
 
+#include <unordered_map> // Uniform Grid
+#include <unordered_set> // Uniform Grid
+#include <vector> // Uniform Grid
+#include <cstdint> // Uniform Grid
+#include <cmath> // Uniform Grid
 #include "CoreEngine/Assets.h"
 #include "Graphics/Transform.h"
 
@@ -66,6 +71,13 @@ public:
     void Init() override;
     void Update(float dt) override;
 
+    // --- Broad Phase API (NEW) ---
+    bool BroadPhaseAllows(unsigned int a, unsigned int b) const;
+
+    // (Optional) debug counters for rubric proof
+    size_t GetBroadPhasePairCount() const { return m_broadPairsLastFrame; }
+    size_t GetBroadPhaseCellCount() const { return m_cells.size(); }
+
     // --- Core AABB Utilities ---
     AABB BuildAABBFromTransform(const Framework::Transform& transform, const AABB& baseBox);//carrie dunnid
 
@@ -78,6 +90,50 @@ public:
     OBB BuildOBBFromTransform(const Framework::Transform& transform, const AABB& baseBox);//carrie dunnid
     bool CheckOBBvsOBB(const OBB& obbA, const OBB& obbB);//carrie dunnid
     void ResolveOBBCollision(Framework::Transform& a, Framework::Transform& b, float elasticity = 0.25f);//carrie dunnid
+
+private:
+    // --- Uniform Grid Broad Phase (NEW) ---
+    struct CellCoord
+    {
+        int x{}, y{};
+        bool operator==(const CellCoord& rhs) const { return x == rhs.x && y == rhs.y; }
+    };
+
+    struct CellHash
+    {
+        size_t operator()(const CellCoord& c) const noexcept
+        {
+            // simple hash combine
+            return (static_cast<size_t>(c.x) * 73856093u) ^ (static_cast<size_t>(c.y) * 19349663u);
+        }
+    };
+
+    struct PairKey
+    {
+        unsigned int a{}, b{}; // always stored ordered: a < b
+        bool operator==(const PairKey& rhs) const { return a == rhs.a && b == rhs.b; }
+    };
+
+    struct PairHash
+    {
+        size_t operator()(const PairKey& p) const noexcept
+        {
+            return (static_cast<size_t>(p.a) * 2654435761u) ^ static_cast<size_t>(p.b);
+        }
+    };
+
+    float m_cellSize = 200.0f; // tune later
+    std::unordered_map<CellCoord, std::vector<unsigned int>, CellHash> m_cells;
+    std::unordered_set<PairKey, PairHash> m_candidatePairs;
+
+    size_t m_broadPairsLastFrame = 0;
+
+private:
+    void RebuildUniformGrid();
+    static PairKey MakePair(unsigned int a, unsigned int b)
+    {
+        return (a < b) ? PairKey{ a, b } : PairKey{ b, a };
+    }
 };
 
 #endif // COLLISION_H
