@@ -19,7 +19,7 @@ public class Conductor : Script
 
     public override void Update()
     {
-        // Lazy init (same pattern as TestScript / HoverableButton)
+        
         if (!initialized)
         {
             secondsPerBeat = 60.0f / BPM;
@@ -30,7 +30,7 @@ public class Conductor : Script
             return;
         }
 
-        // ✅ CORRECT delta time usage
+        // delta time usage
         float dt = Time.DeltaTime;
         songTime += dt;
 
