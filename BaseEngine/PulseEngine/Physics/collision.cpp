@@ -249,7 +249,9 @@ void CollisionManager::ResolveOBBCollision(Framework::Transform& a, Framework::T
     b.Pos.y += push.y;
 }
 
-
+// =============================================================================
+// Uniform Grid Broad Phase Methods
+// =============================================================================
 bool CollisionManager::BroadPhaseAllows(unsigned int a, unsigned int b) const
 {
     // If grid is empty, we fail open (don’t block collisions)
