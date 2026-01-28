@@ -30,7 +30,8 @@ namespace PulseEditor
     // These maintain API compatibility with existing code
     // -------------------------------------------------------------------------
 
-    // Check if a layer is currently visible
+    // Check if a layer is currently 
+
     inline bool IsLayerVisible(LayerMask layer) {
         return LayerRegistry::Get().IsLayerVisible(layer);
     }

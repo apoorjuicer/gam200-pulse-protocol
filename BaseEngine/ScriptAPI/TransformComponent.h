@@ -54,6 +54,12 @@ namespace ScriptAPI
 			void set(float value);
 		}
 
+		property bool IsVisible
+		{
+			bool get();
+			void set(bool value);
+		}
+
 	internal:
 		//Constrcutor when GetTransform() with Entity ID gets called
 		TransformComponent(unsigned int ID);

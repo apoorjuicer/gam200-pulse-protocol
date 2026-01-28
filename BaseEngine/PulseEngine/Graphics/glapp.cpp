@@ -137,7 +137,7 @@ glm::mat3 GLApp::BuildPanZoomNDC(const GLApp::Camera2D& cam) {
 
 
 void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
-	Framework::Transform& z, const glm::mat3& ZoomNDC)
+	Framework::Transform& z, const glm::mat3& ZoomNDC, int drawOrder)
 {
 	float frameWidth = 1.0f / y.columns;
 	float frameHeight = 1.0f / y.rows;
@@ -156,6 +156,7 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 	gBatch.Push(static_cast<uint16_t>(x.shd_ref),
 		static_cast<uint16_t>(x.mdl_ref),
 		x.textureID,
+		drawOrder,
 		modelNDC, u0, v0, u1, v1);
 }
 
@@ -245,31 +246,32 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	// ═══════════════════════════════════════════════════════════════
 	// DEBUG: Print draw order every 5 seconds
 	// ═══════════════════════════════════════════════════════════════
-	static int debugFrame = 0;
-	if (debugFrame++ % 300 == 0 && drawList.size() > 0) {
-		std::cout << "\n=== DRAW ORDER DEBUG ===\n";
-		for (size_t i = 0; i < drawList.size(); ++i) {
-			Entity e = drawList[i];
-			std::string name = "Entity_" + std::to_string(e);
-			int sl = 1, order = 0;
+	//static int debugFrame = 0;
+	//if (debugFrame++ % 300 == 0 && drawList.size() > 0) {
+	//	std::cout << "\n=== DRAW ORDER DEBUG ===\n";
+	//	for (size_t i = 0; i < drawList.size(); ++i) {
+	//		Entity e = drawList[i];
+	//		std::string name = "Entity_" + std::to_string(e);
+	//		int sl = 1, order = 0;
 
-			if (g_coordinator->HasComponent<Name>(e)) {
-				name = g_coordinator->GetComponent<Name>(e).name;
-			}
-			if (g_coordinator->HasComponent<LayerTag>(e)) {
-				auto& lt = g_coordinator->GetComponent<LayerTag>(e);
-				sl = lt.sortingLayer;
-				order = lt.orderInLayer;
-			}
+	//		if (g_coordinator->HasComponent<Name>(e)) {
+	//			name = g_coordinator->GetComponent<Name>(e).name;
+	//		}
+	//		if (g_coordinator->HasComponent<LayerTag>(e)) {
+	//			auto& lt = g_coordinator->GetComponent<LayerTag>(e);
+	//			sl = lt.sortingLayer;
+	//			order = lt.orderInLayer;
+	//		}
 
-			std::cout << i << ": " << name
-				<< " | SortingLayer=" << sl
-				<< " | OrderInLayer=" << order << "\n";
-		}
-		std::cout << "========================\n";
-	}
+	//		std::cout << i << ": " << name
+	//			<< " | SortingLayer=" << sl
+	//			<< " | OrderInLayer=" << order << "\n";
+	//	}
+	//	std::cout << "========================\n";
+	//}
 
 	// Draw
+	int drawOrder = 0;
 	for (auto e : drawList) {
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(e);
 		auto& re = g_coordinator->GetComponent<Framework::Renderable>(e);
@@ -316,7 +318,8 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &re.texW);
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &re.texH);
 
-		drawTrans(re, an, tr, PanZoom);
+		drawTrans(re, an, tr, PanZoom, drawOrder);
+		drawOrder++;
 	}
 
 	gBatch.Flush(shdrpgms);

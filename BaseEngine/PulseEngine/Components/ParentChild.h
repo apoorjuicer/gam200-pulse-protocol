@@ -14,9 +14,8 @@
  /******************************************************************************/
 
 #pragma once
+#include "pch/pch_temp.h"
 #include "CoreEngine/ECS/Types.h"
-#include <vector>
-#include <rapidjson/document.h>
 
 // =============================================================================
 // PARENT COMPONENT

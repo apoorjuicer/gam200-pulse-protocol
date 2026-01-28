@@ -308,6 +308,9 @@ void CoreEngine::CompileScriptAssembly()
 
 		try
 		{
+			std::filesystem::create_directories(dllDest1.parent_path());
+			std::filesystem::create_directories(dllDest2.parent_path());
+
 			std::filesystem::copy_file(dllSource, dllDest1, std::filesystem::copy_options::overwrite_existing);
 			std::filesystem::copy_file(dllSource, dllDest2, std::filesystem::copy_options::overwrite_existing);
 #ifdef _DEBUG
