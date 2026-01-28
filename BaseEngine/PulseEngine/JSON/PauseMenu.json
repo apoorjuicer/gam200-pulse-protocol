@@ -10,8 +10,8 @@
                             "y": 0.0
                         },
                         "scale": {
-                            "x": 1600.0,
-                            "y": 900.0
+                            "x": 1920.0,
+                            "y": 1080.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -25,9 +25,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "C:/GAM200/csd2401f25_team_bloop/BaseEngine/PulseEngine/Assets/Textures/Backgrounds/Pause_SS_V1_1x14.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/Pause_Spritesheet.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -38,11 +38,11 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 8,
-                        "elapsedTime": 0.006828032433986664,
+                        "currentFrame": 11,
+                        "elapsedTime": 0.010259225964546204,
                         "totalFrames": 14,
-                        "columns": 14,
-                        "rows": 1,
+                        "columns": 2,
+                        "rows": 7,
                         "animationSpeed": 12.0
                     }
                 },
@@ -53,8 +53,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "Background",
-                        "mask": 1,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -128,6 +129,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 10,
                         "z": 100.0
                     }
@@ -206,6 +208,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 10,
                         "z": 100.0
                     }
@@ -286,6 +289,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 10,
                         "z": 100.0
                     }
@@ -366,6 +370,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 10,
                         "z": 100.0
                     }
