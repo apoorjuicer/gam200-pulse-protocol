@@ -41,6 +41,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -59,7 +60,8 @@
                             1.0,
                             0.0
                         ],
-                        "visible": true
+                        "visible": true,
+                        "alignment": 0
                     }
                 }
             ]
@@ -104,6 +106,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -122,7 +125,8 @@
                             1.0,
                             1.0
                         ],
-                        "visible": true
+                        "visible": true,
+                        "alignment": 0
                     }
                 }
             ]
@@ -174,7 +178,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "ButtonScript"
+                        "ScriptName": []
                     }
                 },
                 {
@@ -186,6 +190,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 100.0
                     }
@@ -202,7 +207,7 @@
                         },
                         "scale": {
                             "x": 331.360595703125,
-                            "y": 146.29217529296876
+                            "y": 146.29217529296875
                         },
                         "rotation": {
                             "x": 0.0,
@@ -239,7 +244,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": "ButtonScript"
+                        "ScriptName": []
                     }
                 },
                 {
@@ -251,6 +256,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 909,
                         "z": 100.0
                     }
@@ -262,7 +268,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 314.65399169921877,
+                            "x": 314.65399169921875,
                             "y": -91.19200134277344
                         },
                         "scale": {
@@ -297,6 +303,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -315,7 +322,8 @@
                             1.0,
                             1.0
                         ],
-                        "visible": true
+                        "visible": true,
+                        "alignment": 0
                     }
                 }
             ]

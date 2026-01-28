@@ -704,8 +704,6 @@ void CoreEngine::Init()
 	// Step 2: Initialize it with  pointer to CoreEngine as param
 	initFunc(this); 
 
-	std::cout << "here?\n\n\n\n";
-
 	g_coordinator->InitializeAllSystems();
 }
 

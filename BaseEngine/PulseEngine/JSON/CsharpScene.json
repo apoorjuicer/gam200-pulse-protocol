@@ -95,6 +95,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 50,
                         "z": 0.0
                     }
@@ -194,6 +195,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 10,
                         "z": 0.0
                     }
@@ -262,6 +264,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -329,6 +332,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }

@@ -3,7 +3,7 @@
 * @file        Scene.cpp
 * @project     Pulse Protocol
 * @author      Chia Wei Xuan Rachael - 100%
-* @brief
+* @brief	   Implementation of Scene class providing scene loading functionality.
 *
 * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the

@@ -1,9 +1,10 @@
-/******************************************************************************/
+	/******************************************************************************/
 /**
 * @file        Scene.h
 * @project     Pulse Protocol
 * @author      Chia Wei Xuan Rachael - 100%
-* @brief
+* @brief	   C++/CLI wrapper providing static scene loading functionality directly 
+*              accessible to C# scripts within the ScriptAPI namespace.
 *
 * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the
