@@ -13,7 +13,7 @@ public abstract class AudioSliderKnobBase : Script
     protected abstract string FixedTag { get; }
 
     // Empty bar width
-    public float BarWidth = 900.0f * 0.96f;
+    public float BarWidth = 1140.0f * 0.98f;
 
     // 2.0 => drag 2x farther, value changes 2x slower
     public float DragDistanceScale = 2.0f;
