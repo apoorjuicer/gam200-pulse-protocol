@@ -110,7 +110,7 @@
                 {
                     "animation": {
                         "currentFrame": 1,
-                        "elapsedTime": 0.05665600672364235,
+                        "elapsedTime": 0.04967234283685684,
                         "totalFrames": 2,
                         "columns": 2,
                         "rows": 1,
@@ -1045,13 +1045,13 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "ConductorBeatTester"
+                            "OrderSlipSystem"
                         ]
                     }
                 },
                 {
                     "name": {
-                        "name": "ConductorBeatTester"
+                        "name": "OrderSlipUI"
                     }
                 },
                 {
