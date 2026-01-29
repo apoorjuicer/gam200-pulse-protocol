@@ -78,6 +78,13 @@ public abstract class AudioSliderKnobBase : Script
         {
             lockedY = t.Y;
 
+            // SAVE the value BEFORE anything else
+            float savedValue = -1f;
+            if (States.ContainsKey(FixedTag))
+            {
+                savedValue = States[FixedTag].Value01;
+            }
+
             float knobHalfW = t.ScaleX * 0.5f;
 
             if (StartAtMax)
@@ -96,7 +103,16 @@ public abstract class AudioSliderKnobBase : Script
 
             RecomputeTrack(t);
 
-            t.X = Clamp(t.X, knobMinX, knobMaxX);
+            // RESTORE knob position from saved value
+            if (savedValue >= 0f)
+            {
+                t.X = knobMinX + (savedValue * (knobMaxX - knobMinX));
+            }
+            else
+            {
+                t.X = Clamp(t.X, knobMinX, knobMaxX);
+            }
+            
             if (LockKnobY) t.Y = lockedY;
 
             PublishState(ToValue01(t.X));
@@ -106,10 +122,20 @@ public abstract class AudioSliderKnobBase : Script
         {
             RecomputeTrack(t);
 
-            t.X = Clamp(t.X, knobMinX, knobMaxX);
+            if (States.ContainsKey(FixedTag) && States[FixedTag].Value01 > 0.001f)
+            {
+                float savedValue = States[FixedTag].Value01;
+                t.X = knobMinX + (savedValue * (knobMaxX - knobMinX));
+            }
+            else
+            {
+                t.X = Clamp(t.X, knobMinX, knobMaxX);
+            }
+            
             if (LockKnobY) t.Y = lockedY;
 
             PublishState(ToValue01(t.X));
+            initialized = true;
         }
 
         float mx = input.WorldMouseX;

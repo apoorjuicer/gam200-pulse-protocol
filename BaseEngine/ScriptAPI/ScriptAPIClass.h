@@ -19,6 +19,7 @@
 #include "Collision.h"
 #include "AudioAPI.h"
 #include "Sprite.h"
+#include "Application.h"
 
 namespace ScriptAPI
 {

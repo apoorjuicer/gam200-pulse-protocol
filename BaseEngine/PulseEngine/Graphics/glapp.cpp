@@ -246,29 +246,29 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	// ═══════════════════════════════════════════════════════════════
 	// DEBUG: Print draw order every 5 seconds
 	// ═══════════════════════════════════════════════════════════════
-	static int debugFrame = 0;
-	if (debugFrame++ % 300 == 0 && drawList.size() > 0) {
-		std::cout << "\n=== DRAW ORDER DEBUG ===\n";
-		for (size_t i = 0; i < drawList.size(); ++i) {
-			Entity e = drawList[i];
-			std::string name = "Entity_" + std::to_string(e);
-			int sl = 1, order = 0;
+	//static int debugFrame = 0;
+	//if (debugFrame++ % 300 == 0 && drawList.size() > 0) {
+	//	std::cout << "\n=== DRAW ORDER DEBUG ===\n";
+	//	for (size_t i = 0; i < drawList.size(); ++i) {
+	//		Entity e = drawList[i];
+	//		std::string name = "Entity_" + std::to_string(e);
+	//		int sl = 1, order = 0;
 
-			if (g_coordinator->HasComponent<Name>(e)) {
-				name = g_coordinator->GetComponent<Name>(e).name;
-			}
-			if (g_coordinator->HasComponent<LayerTag>(e)) {
-				auto& lt = g_coordinator->GetComponent<LayerTag>(e);
-				sl = lt.sortingLayer;
-				order = lt.orderInLayer;
-			}
+	//		if (g_coordinator->HasComponent<Name>(e)) {
+	//			name = g_coordinator->GetComponent<Name>(e).name;
+	//		}
+	//		if (g_coordinator->HasComponent<LayerTag>(e)) {
+	//			auto& lt = g_coordinator->GetComponent<LayerTag>(e);
+	//			sl = lt.sortingLayer;
+	//			order = lt.orderInLayer;
+	//		}
 
-			std::cout << i << ": " << name
-				<< " | SortingLayer=" << sl
-				<< " | OrderInLayer=" << order << "\n";
-		}
-		std::cout << "========================\n";
-	}
+	//		std::cout << i << ": " << name
+	//			<< " | SortingLayer=" << sl
+	//			<< " | OrderInLayer=" << order << "\n";
+	//	}
+	//	std::cout << "========================\n";
+	//}
 
 	// Draw
 	int drawOrder = 0;

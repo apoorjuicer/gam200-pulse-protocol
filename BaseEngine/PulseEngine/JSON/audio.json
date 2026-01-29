@@ -8,6 +8,13 @@
             "audiotype": "BGM"
         },
         {
+            "id": "BGM_GENERAL",
+            "path": "../../PulseEngine/Assets/Sound/BG & Ambience/TEMP_Menu_Demo_V1.mp3",
+            "loop": true,
+            "volume": 1.0,
+            "audiotype": "BGM"
+        },
+        {
             "id": "SFX_Ambience_Alarm",
             "path": "../../PulseEngine/Assets/Sound/BG & Ambience/SFX_Ambience_Alarm.wav",
             "loop": false,

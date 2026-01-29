@@ -6,8 +6,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 145.9933319091797,
-                            "y": -82.84619140625
+                            "x": 0.0,
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 1600.0,
@@ -27,7 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/Background1.jpg",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/Settings0000.jpg",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -48,13 +48,14 @@
                 },
                 {
                     "name": {
-                        "name": "Background"
+                        "name": "BG_PlaceholderImg"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
+                        "layerName": "Background",
+                        "mask": 1,
+                        "sortingLayer": 0,
                         "orderInLayer": 10,
                         "z": 0.0
                     }
@@ -113,9 +114,10 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 0,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 2,
                         "z": 0.0
                     }
                 }
@@ -178,8 +180,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "Background",
-                        "mask": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -247,6 +250,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 100.0
                     }
@@ -314,6 +318,7 @@
                     "layerTag": {
                         "layerName": "UI",
                         "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 100.0
                     }
@@ -374,6 +379,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -434,6 +440,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -501,6 +508,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -568,6 +576,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -628,6 +637,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -688,6 +698,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -699,12 +710,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -1335.12890625,
-                            "y": 707.4917602539063
+                            "x": -1378.4959716796875,
+                            "y": 683.5651245117188
                         },
                         "scale": {
-                            "x": 85.5,
-                            "y": 85.5
+                            "x": 100.0,
+                            "y": 100.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -740,94 +751,24 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "NavigationButtons"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "BackButton"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 0,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 5,
                         "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -460.4045715332031,
-                            "y": 32.70872497558594
-                        },
-                        "scale": {
-                            "x": 200.0,
-                            "y": 200.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
-                        "useTexture": true,
-                        "spriteName": "",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "SFX??"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "TextComponent": {
-                        "text": "SFX",
-                        "font_id": "",
-                        "offset": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "font_size": 79.0,
-                        "color": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true,
-                        "alignment": 0
                     }
                 }
             ]
@@ -886,6 +827,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -953,6 +895,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -1020,6 +963,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -1080,6 +1024,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -1091,7 +1036,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1240.3846435546875,
+                            "x": 0.0,
                             "y": -49.572269439697266
                         },
                         "scale": {
@@ -1147,6 +1092,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -1158,7 +1104,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 404.3846435546875,
+                            "x": -836.0,
                             "y": -49.572269439697266
                         },
                         "scale": {
@@ -1214,8 +1160,61 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "GeneralBGM"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "BGM_Manager"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "BGM_GENERAL",
+                        "volume": 0.20000000298023224,
+                        "loop": true,
+                        "playOnAwake": false
                     }
                 }
             ]
