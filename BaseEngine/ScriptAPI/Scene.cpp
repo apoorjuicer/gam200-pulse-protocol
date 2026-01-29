@@ -40,6 +40,13 @@ namespace ScriptAPI
 
 		System::Console::WriteLine("Loaded new scene\n");
 
-		//Give reg access to container of entity in scene with script component 
+	}
+
+	void Scene::RestartScene()
+	{
+		auto* g_coordinator = Coordinator::GetInstance();
+		auto SceneSystem = g_coordinator->GetSystem<SceneManager>();
+
+		SceneSystem->RestartCurrentScene();
 	}
 }
