@@ -37,15 +37,18 @@ namespace ScriptAPI
 
     void VFXAPI::PlayHit(HitResult result, float x, float y)
     {
+        // ITS BEING CALLED YIPPEEEEEEEEEEEEEEEEEEEEEE
+        System::Console::WriteLine("VFXAPI: PlayHit called with Result {0} at {1},{2}", result, x, y);
+
         auto* c = Coordinator::GetInstance();
         if (!c) return;
 
-        //auto logic = c->GetSystem<LogicSystem>();
-        //if (!logic) return;
+        auto logic = c->GetSystem<LogicSystem>();
+        if (!logic) return;
 
-        ::LogicSystem logic;
+        
         std::string judgement = msclr::interop::marshal_as<std::string>(ToJudgementString(result));
-        logic.GetVfx().OnJudgement(judgement, glm::vec2{x, y});
+        logic->GetVfx().OnJudgement(judgement, glm::vec2{x, y});
     }
 
     void VFXAPI::BeatPulse()
@@ -56,7 +59,7 @@ namespace ScriptAPI
         auto logic = c->GetSystem<LogicSystem>();
         if (!logic) return;
 
-        //logic->GetVfx().OnBeat();
+        logic->GetVfx().OnBeat();
     }
 
     void VFXAPI::SetBPM(float bpm)  //opt
@@ -67,6 +70,6 @@ namespace ScriptAPI
         auto logic = c->GetSystem<LogicSystem>();
         if (!logic) return;
 
-        //logic->GetVfx().SetBpm(bpm);
+        logic->GetVfx().SetBpm(bpm);
     }
 }

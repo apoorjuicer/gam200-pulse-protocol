@@ -94,11 +94,7 @@ public:
 private:
 	bool  isAttacking = false;
 	float attackTimer = 0.0f;
-	/*float autoMoveTimer = 2.0f;*/ // FOR TESTING THE STOP BUTTON FUNCTIONALITY PURPOSE
 };
-
-//PlayerScript playerScript;
-//playerScript.float_fields.emplace("Health", 100.0f);
 
 class EnemyScript : public Iscript
 {
@@ -114,76 +110,6 @@ public:
 	static bool testOBBCollision;
 
 	float enemyDmg;
-};
-
-//class EnemySpawnerScript : public Iscript
-//{
-//public:
-//	void Init(Entity ID) override;
-//	void Update(Entity ID) override;
-//	void Exit(Entity ID) override;
-//
-//	// Track the two enemies
-//	static Entity Enemy1ID;
-//	static Entity Enemy2ID;
-//
-//	// True when Enemy 1 has died
-//	static bool Enemy1Dead;
-//
-//	// Per-enemy hop timer (moved here)
-//	static std::unordered_map<Entity, float> HopTimer;
-//};
-
-//// Per-button data structure
-//struct ButtonData
-//{
-//	std::string buttonName;
-//	std::string normalTexture;
-//	std::string hoverTexture;
-//	bool isHovering = false;
-//};
-//
-//class ButtonScript : public Iscript
-//{
-//public:
-//	void Init(Entity ID) override;
-//	void Update(Entity ID) override;
-//	void Exit(Entity ID) override;
-//
-//	ButtonScript* Clone() override;
-//
-//private:
-//	// Store data per entity ID
-//	std::unordered_map<Entity, ButtonData> buttonDataMap;
-//};
-//
-//class PulsingBorderScript : public Iscript
-//{
-//public:
-//	void Init(Entity ID) override;
-//	void Update(Entity ID) override;
-//	void Exit(Entity ID) override;
-//
-//	PulsingBorderScript* Clone() override;
-//
-//private:
-//	float pulseTimer = 0.0f;
-//	float bpm = 120.0f;
-//	float minAlpha = 0.2f;
-//	float maxAlpha = 1.0f;
-//};
-
-class Csharptestscript : public Iscript
-{
-public:
-	void Init(Entity ID) override;
-	void Update(Entity ID) override;
-	void Exit(Entity ID) override;
-	Csharptestscript* Clone() override;
-
-private:
-	void(*initFunc)(CoreEngine*) = nullptr;
-	bool(*addScript)(int, const char*) = nullptr;
 };
 
 class CountdownScript : public Iscript
@@ -212,7 +138,7 @@ private:
 	float startTime = 0.0f;
 };
 
-class LogicSystem: public Systems
+class DLL_API LogicSystem: public Systems
 {
 public:
 	LogicSystem();  //constructor

@@ -93,24 +93,11 @@ void LogicSystem::Init()
     }
 
     mVfx.Init(/*bpm=*/120.0f, /*maxParticles=*/2000);
-    //register scripts here. I think it it will be the Csharp / Lua game code here. Ask Eli if i did it right 
-    // AddScript("PlayerScript", std::function<void(Entity)> function);
 
     AddScript("PlayerScript", std::make_shared<PlayerScript>());
-    //AddScript("EnemySpawnerScript", std::make_shared<EnemySpawnerScript>());
     AddScript("EnemyScript", std::make_shared<EnemyScript>());
-    //AddScript("ButtonScript", std::make_shared<ButtonScript>());
-    //AddScript("PulsingBorderScript", std::make_shared<PulsingBorderScript>());
-    AddScript("CsharpScript", std::make_shared<Csharptestscript>());
-    
     AddScript("CountdownScript", std::make_shared<CountdownScript>());
     AddScript("FeedbackScript", std::make_shared<FeedbackScript>());
-
-    //std::cout << "=== REGISTERED SCRIPTS ===" << std::endl;
-    //for (const auto& [name, script] : map_of_scripts) {
-    //    std::cout << "  - " << name << std::endl;
-    //}
-    //std::cout << "=========================" << std::endl;
 }
 
 void LogicSystem::Update(float dt)
@@ -1529,26 +1516,6 @@ EnemyScript* EnemyScript::Clone()
 //{
 //    return new PulsingBorderScript{};
 //}
-
-void Csharptestscript::Init(Entity ID)
-{
-    auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>
-        (
-            "ScriptAPI",
-            "ScriptAPI.EngineInterface",
-            "AddScriptViaName"
-        );
-
-    // Adding script to an entity[please work ;-; ]
-    addScriptFunc(ID, "TestScript");    // THE 0 IS ENTITY ID 0
-    addScriptFunc(ID, "TestScript2");	// show that u can run multiple codes and even multiple code for each entity :D
-}
-
-void Csharptestscript::Update(Entity ID){ (void)ID; }
-
-void Csharptestscript::Exit(Entity ID) { (void)ID; }
-
-Csharptestscript* Csharptestscript::Clone() {return new Csharptestscript{};}
 
 
 // =====================================================================
