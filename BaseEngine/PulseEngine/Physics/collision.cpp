@@ -16,7 +16,10 @@
 #include "pch/pch.h"
 
 void CollisionManager::Init() {}
-void CollisionManager::Update(float) {}
+
+void CollisionManager::Update(float) {
+    RebuildUniformGrid();
+}
 
 // =============================================================================
 // BuildAABBFromTransform
@@ -244,4 +247,80 @@ void CollisionManager::ResolveOBBCollision(Framework::Transform& a, Framework::T
     a.Pos.y -= push.y;
     b.Pos.x += push.x;
     b.Pos.y += push.y;
+}
+
+// =============================================================================
+// Uniform Grid Broad Phase Methods
+// =============================================================================
+bool CollisionManager::BroadPhaseAllows(unsigned int a, unsigned int b) const
+{
+    // If grid is empty, we fail open (don’t block collisions)
+    if (m_candidatePairs.empty())
+        return true;
+
+    PairKey key = MakePair(a, b);
+    return (m_candidatePairs.find(key) != m_candidatePairs.end());
+}
+
+void CollisionManager::RebuildUniformGrid()
+{
+    m_cells.clear();
+    m_candidatePairs.clear();
+    m_broadPairsLastFrame = 0;
+
+    auto g = Coordinator::GetInstance();
+
+    // mEntities comes from System base class
+    for (Entity id : EntityMember)
+    {
+        if (!g->HasComponent<Framework::Transform>(id) ||
+            !g->HasComponent<AABB>(id))
+            continue;
+
+        auto& t = g->GetComponent<Framework::Transform>(id);
+        auto& base = g->GetComponent<AABB>(id);
+
+        AABB world = BuildAABBFromTransform(t, base);
+
+        int minX = static_cast<int>(std::floor(world.min.x / m_cellSize));
+        int maxX = static_cast<int>(std::floor(world.max.x / m_cellSize));
+        int minY = static_cast<int>(std::floor(world.min.y / m_cellSize));
+        int maxY = static_cast<int>(std::floor(world.max.y / m_cellSize));
+
+        for (int cy = minY; cy <= maxY; ++cy)
+        {
+            for (int cx = minX; cx <= maxX; ++cx)
+            {
+                m_cells[{ cx, cy }].push_back(id);
+            }
+        }
+    }
+
+    // 2) Build candidate pairs within each cell
+    for (auto& kv : m_cells)
+    {
+        auto& list = kv.second;
+        const size_t n = list.size();
+        if (n < 2) continue;
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            for (size_t j = i + 1; j < n; ++j)
+            {
+                m_candidatePairs.insert(MakePair(list[i], list[j]));
+            }
+        }
+    }
+
+    m_broadPairsLastFrame = m_candidatePairs.size();
+
+     //Optional debug proof (uncomment in debug builds)
+    static int frameCounter = 0;
+    if (++frameCounter % 60 == 0) // print once per ~60 frames
+    {
+        std::cout << "[BroadPhase] cells=" << m_cells.size()
+            << " candidatePairs=" << m_candidatePairs.size()
+            << " entities=" << EntityMember.size()
+            << "\n";
+    }
 }

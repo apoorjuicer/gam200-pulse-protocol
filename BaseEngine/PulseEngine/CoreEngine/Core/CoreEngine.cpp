@@ -746,7 +746,7 @@ void CoreEngine::Setup()
 
 	// Set signature for component and system
 	Signature collisionSig;
-	collisionSig.set(g_coordinator->GetComponentType<NPC>());
+	collisionSig.set(g_coordinator->GetComponentType<Framework::Transform>());
 	collisionSig.set(g_coordinator->GetComponentType<AABB>());
 	collisionSig.set(g_coordinator->GetComponentType<Health>());
 	g_coordinator->SetSystemSignature<CollisionManager>(collisionSig);
