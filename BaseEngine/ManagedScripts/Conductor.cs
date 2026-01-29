@@ -4,6 +4,11 @@ using ScriptAPI;
 public class Conductor : Script
 {
     // =========================
+    // Global Access
+    // =========================
+    public static Conductor Instance { get; private set; }
+
+    // =========================
     // Tunables
     // =========================
     public float BPM = 120f;
@@ -19,14 +24,20 @@ public class Conductor : Script
 
     public override void Update()
     {
-        
+        // Lazy init
         if (!initialized)
         {
+            if (Instance == null) Instance = this;
+
             secondsPerBeat = 60.0f / BPM;
             songTime = 0.0f;
             nextHalfBeat = secondsPerBeat * 0.5f;
             lastBeat = -1;
+
             initialized = true;
+
+            // CMD proof that it started
+            Console.WriteLine($"[Conductor] Init | BPM={BPM} | SPB={secondsPerBeat:F3}");
             return;
         }
 
@@ -40,20 +51,19 @@ public class Conductor : Script
         if (currentBeat > lastBeat)
         {
             lastBeat = currentBeat;
-            // Beat-triggered logic here
-            // Console.WriteLine($"Beat {currentBeat}");
+            Console.WriteLine($"[Conductor] Beat {currentBeat} | GameTime={Time.GameTime:F3} | Frame={Time.FrameCount}");
         }
 
-        // Half beat
-        if (songTime >= nextHalfBeat)
+        // Half beat (use while to catch up if a frame skips)
+        while (songTime >= nextHalfBeat)
         {
+            Console.WriteLine($"[Conductor] HalfBeat near Beat {lastBeat} | GameTime={Time.GameTime:F3}");
             nextHalfBeat += secondsPerBeat * 0.5f;
-            // Half-beat logic here
         }
     }
 
-    public int GetCurrentBeat()
-    {
-        return lastBeat;
-    }
+    public int GetCurrentBeat() => lastBeat;
+    public float GetSongTime() => songTime;
+    public float SecondsPerBeat => secondsPerBeat;
 }
+
