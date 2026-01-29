@@ -180,9 +180,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -316,9 +316,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 100.0
                     }
@@ -433,7 +433,7 @@
                 },
                 {
                     "name": {
-                        "name": "NEmpty"
+                        "name": "MEmpty"
                     }
                 },
                 {
@@ -506,9 +506,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -893,9 +893,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -1036,8 +1036,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 0.0,
-                            "y": -49.572269439697266
+                            "x": 1239.2598876953125,
+                            "y": -53.23873519897461
                         },
                         "scale": {
                             "x": 56.0,
@@ -1090,9 +1090,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -1104,8 +1104,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -836.0,
-                            "y": -49.572269439697266
+                            "x": 403.2598876953125,
+                            "y": -53.23873519897461
                         },
                         "scale": {
                             "x": 864.0,
