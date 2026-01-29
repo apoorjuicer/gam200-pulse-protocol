@@ -53,7 +53,7 @@ public abstract class AudioSliderKnobBase : Script
     private float knobMinX, knobMaxX;
 
     private bool dragging = false;
-    private bool dragJustStarted = false;   // ✅ FIX: prevents instant cancel on click frame
+    private bool dragJustStarted = false;   //  FIX: prevents instant cancel on click frame
     private float dragOffsetX = 0.0f;
 
     // robust input binding
