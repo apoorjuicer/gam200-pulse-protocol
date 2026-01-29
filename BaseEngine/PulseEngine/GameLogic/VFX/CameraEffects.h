@@ -1,3 +1,19 @@
+/*****************************************************************************
+ * @file        CameraEffects.h
+ * @project     Pulse Protocol
+ * @author		Goh Pin Kai
+ *
+ * @brief       Camera effects container for rhythm/gameplay feedback. Provides a
+ *              beat "punch" (temporary zoom-in) and event-based camera shake with
+ *              configurable strength and decay. Exposes per-frame outputs that can
+ *              be applied to a camera's zoom and center/position.
+ *
+ * @copyright   Copyright (C) 2026
+ *              DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without
+ *              prior written consent is prohibited.
+ ******************************************************************************/
+
 #pragma once
 #include <glm/vec2.hpp>
 

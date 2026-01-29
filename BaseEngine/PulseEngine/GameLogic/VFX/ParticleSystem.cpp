@@ -1,3 +1,18 @@
+/*****************************************************************************
+ * @file        CameraEffects.h
+ * @project     Pulse Protocol
+ * @author		Goh Pin Kai
+ *
+ * @brief       Implements ParticleSystem pool management, burst spawning with random
+ *              polar velocities, and per-frame simulation (lifetime countdown and
+ *              position integration). Inactive particles are reused from the pool.
+ *
+ * @copyright   Copyright (C) 2026
+ *              DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without
+ *              prior written consent is prohibited.
+ ******************************************************************************/
+
 #include "ParticleSystem.h"
 #include <cstdlib>
 #include <cmath>

@@ -71,8 +71,7 @@ void LogicSystem::Init()
     //        "ScriptAPI.EngineInterface",
     //        "AddScriptViaName"
     //    );
-    mVfx.Init(/*bpm=*/120.0f, /*maxParticles=*/2000);
-
+       
     auto* coord = Coordinator::GetInstance();
     auto rhythm = coord->GetSystem<RhythmGameplayInput>();
     if (rhythm)
@@ -93,7 +92,7 @@ void LogicSystem::Init()
             });
     }
 
-
+    mVfx.Init(/*bpm=*/120.0f, /*maxParticles=*/2000);
     //register scripts here. I think it it will be the Csharp / Lua game code here. Ask Eli if i did it right 
     // AddScript("PlayerScript", std::function<void(Entity)> function);
 
@@ -116,7 +115,14 @@ void LogicSystem::Init()
 
 void LogicSystem::Update(float dt)
 {
-	mVfx.Update(dt);    //always update vfx manager
+    float songTimeSec = -1.0f;
+    if (auto* c = Coordinator::GetInstance())
+    {
+        if (auto audio = c->GetSystem<AudioManager>())
+            songTimeSec = (float)audio->GetBGMPositionSeconds();
+    }
+
+    mVfx.Update(dt, songTimeSec);
     // don't update scripts, if not playing the game
     if (!Engine->IsPlaying()) {
         return;

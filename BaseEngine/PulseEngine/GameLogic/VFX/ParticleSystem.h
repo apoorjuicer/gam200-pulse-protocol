@@ -1,3 +1,18 @@
+/*****************************************************************************
+ * @file        ParticleSystem.h
+ * @project     Pulse Protocol
+ * @author		Goh Pin Kai
+ *
+ * @brief       Simple CPU particle system using a fixed-size pool. Supports spawning
+ *              burst emissions with randomized direction/speed and lifetime ranges,
+ *              and updates active particles by integrating velocity and lifetime.
+ *
+ * @copyright   Copyright (C) 2026
+ *              DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without
+ *              prior written consent is prohibited.
+ ******************************************************************************/
+
 #pragma once
 #include <vector>
 #include <glm/vec2.hpp>
