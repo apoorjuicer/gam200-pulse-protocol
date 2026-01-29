@@ -36,6 +36,7 @@
 #include "Components/DisplayName.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "Graphics/Layer.h"
+#include "Components/ParentChild.h"
 #include "CoreEngine/Core/CoreEngine.h"  // For GetFunctionPtr
 //#include "../Components/AABB.h"
 
@@ -297,6 +298,32 @@ void SceneManager::SaveCurrentScene()
 			textComp.Serialize(TextVal, alloc);
 
 			ComponentObj.AddMember("TextComponent", TextVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// Save Parent component if entity has it
+		if (g_coordinator->HasComponent<Parent>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value ParentVal;
+
+			auto& parent = g_coordinator->GetComponent<Parent>(entity);
+			parent.Serialize(ParentVal, alloc);
+
+			ComponentObj.AddMember("Parent", ParentVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// Save Children component if entity has it
+		if (g_coordinator->HasComponent<Children>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value ChildrenVal;
+
+			auto& children = g_coordinator->GetComponent<Children>(entity);
+			children.Serialize(ChildrenVal, alloc);
+
+			ComponentObj.AddMember("Children", ChildrenVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
@@ -583,6 +610,22 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				TextComponent txtComp;
 				txtComp.Deserialize(component["TextComponent"]);
 				g_coordinator->AddComponent<TextComponent>(entity, txtComp);
+			}
+
+			// Load Parent component
+			if (component.HasMember("Parent") && component["Parent"].IsObject())
+			{
+				Parent p;
+				p.Deserialize(component["Parent"]);
+				g_coordinator->AddComponent<Parent>(entity, p);
+			}
+
+			// Load Children component
+			if (component.HasMember("Children") && component["Children"].IsObject())
+			{
+				Children c;
+				c.Deserialize(component["Children"]);
+				g_coordinator->AddComponent<Children>(entity, c);
 			}
 		}
 
