@@ -1,4 +1,4 @@
-/******************************************************************************/
+﻿/******************************************************************************/
 /**
  * @file       SceneManager.cpp
  * @project    Pulse Protocol
@@ -121,8 +121,26 @@ void SceneManager::SaveCurrentScene()
 	SceneName.SetString(CurrentScene.c_str(), static_cast<SizeType>(CurrentScene.length()), alloc);
 	d.AddMember("scene", SceneName, alloc);
 
+
 	// First we make a container for entity
 	Value JsonEntityArray(kArrayType);
+
+	// ═══════════════════════════════════════════════════════════════════════════
+	// Build entity-to-index map (must match save order exactly)
+	// ═══════════════════════════════════════════════════════════════════════════
+	std::unordered_map<Entity, int> entityToIndex;
+	int entityIndex = 0;
+	for (auto const& entity : g_coordinator->GetAllEntities())
+	{
+		if (g_coordinator->HasComponent<Name>(entity)) {
+			auto& name = g_coordinator->GetComponent<Name>(entity).name;
+			if (!name.empty() && name[0] == '_') {
+				continue;  // Skip engine-managed entities
+			}
+		}
+		entityToIndex[entity] = entityIndex;
+		entityIndex++;
+	}
 
 	// save one entity one at a time into 1 Json file
 	for (auto const& entity : g_coordinator->GetAllEntities())
@@ -133,7 +151,7 @@ void SceneManager::SaveCurrentScene()
 			if (!name.empty() && name[0] == '_') {
 				continue;  // Don't save _FPS_Display, _TopSystem_Display, etc.
 			}
-		}
+		} 
 
 		// We make an object first for JsonEntityArray[i]
 		Value entityObj(kObjectType);
@@ -301,30 +319,60 @@ void SceneManager::SaveCurrentScene()
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
-		// Save Parent component if entity has it
+		// Save Parent component
 		if (g_coordinator->HasComponent<Parent>(entity))
 		{
-			Value ComponentObj(rapidjson::kObjectType);
-			Value ParentVal;
-
 			auto& parent = g_coordinator->GetComponent<Parent>(entity);
-			parent.Serialize(ParentVal, alloc);
-
-			ComponentObj.AddMember("Parent", ParentVal, alloc);
-			componentsArray.PushBack(ComponentObj, alloc);
+			if (parent.parent != static_cast<Entity>(-1))
+			{
+				auto it = entityToIndex.find(parent.parent);
+				if (it != entityToIndex.end())
+				{
+//#ifdef _DEBUG
+//					std::string childName = g_coordinator->HasComponent<n>(entity) ?
+//						g_coordinator->GetComponent<n>(entity).name : "Unknown";
+//					std::string parentName = g_coordinator->HasComponent<n>(parent.parent) ?
+//						g_coordinator->GetComponent<n>(parent.parent).name : "Unknown";
+//					std::cout << "[SAVE] " << childName << " (Entity " << entity << ") parent="
+//						<< parentName << " (Entity " << parent.parent << ") -> saving index "
+//						<< it->second << std::endl;
+//#endif
+					Value ComponentObj(rapidjson::kObjectType);
+					Value ParentVal(kObjectType);
+					ParentVal.AddMember("parent", it->second, alloc);
+					ComponentObj.AddMember("Parent", ParentVal, alloc);
+					componentsArray.PushBack(ComponentObj, alloc);
+				}
+			}
 		}
 
-		// Save Children component if entity has it
+		// Save Children component
 		if (g_coordinator->HasComponent<Children>(entity))
 		{
-			Value ComponentObj(rapidjson::kObjectType);
-			Value ChildrenVal;
-
 			auto& children = g_coordinator->GetComponent<Children>(entity);
-			children.Serialize(ChildrenVal, alloc);
+			if (!children.children.empty())
+			{
+				Value ComponentObj(rapidjson::kObjectType);
+				Value ChildrenVal(kObjectType);
+				Value ChildArray(kArrayType);
 
-			ComponentObj.AddMember("Children", ChildrenVal, alloc);
-			componentsArray.PushBack(ComponentObj, alloc);
+				// ✓ ADD THIS LOOP - iterate through children and add indices
+				for (Entity child : children.children)
+				{
+					auto it = entityToIndex.find(child);
+					if (it != entityToIndex.end())
+					{
+						ChildArray.PushBack(it->second, alloc);
+					}
+				}
+
+				if (ChildArray.Size() > 0)
+				{
+					ChildrenVal.AddMember("children", ChildArray, alloc);
+					ComponentObj.AddMember("Children", ChildrenVal, alloc);
+					componentsArray.PushBack(ComponentObj, alloc);
+				}
+			}
 		}
 
 		// So for this entity, we add compoennt array
@@ -518,6 +566,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 		}
 
 		//Entity entity = factory.DefaultObj();	   // create entity with transform and render component.
+
 		Entity entity = g_coordinator->CreateEntity();
 		const auto& components = JsonEntity["components"];  // Get the components array
 
@@ -611,22 +660,6 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				txtComp.Deserialize(component["TextComponent"]);
 				g_coordinator->AddComponent<TextComponent>(entity, txtComp);
 			}
-
-			// Load Parent component
-			if (component.HasMember("Parent") && component["Parent"].IsObject())
-			{
-				Parent p;
-				p.Deserialize(component["Parent"]);
-				g_coordinator->AddComponent<Parent>(entity, p);
-			}
-
-			// Load Children component
-			if (component.HasMember("Children") && component["Children"].IsObject())
-			{
-				Children c;
-				c.Deserialize(component["Children"]);
-				g_coordinator->AddComponent<Children>(entity, c);
-			}
 		}
 
 		if (!g_coordinator->HasComponent<LayerTag>(entity)) {
@@ -678,6 +711,142 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 		// save obj to a vector for deleting later
 		SceneEntityList.push_back(entity);
 	}
+
+	for (rapidjson::SizeType i = 0; i < SceneEntityArray.Size(); ++i)
+	{
+		if (i >= SceneEntityList.size()) continue;
+		Entity entity = SceneEntityList[i];
+
+		const auto& entityData = SceneEntityArray[i];
+		if (!entityData.HasMember("components") || !entityData["components"].IsArray())
+			continue;
+
+		const auto& components = entityData["components"];
+
+		for (rapidjson::SizeType j = 0; j < components.Size(); ++j)
+		{
+			const auto& component = components[j];
+
+			// NEW: Load Parent (remap index to entity)
+			if (component.HasMember("Parent") && component["Parent"].IsObject())
+			{
+				const auto& parentObj = component["Parent"];
+				if (parentObj.HasMember("parent") && parentObj["parent"].IsInt())
+				{
+					int parentIndex = parentObj["parent"].GetInt();
+					if (parentIndex >= 0 && parentIndex < static_cast<int>(SceneEntityList.size()))
+					{
+						Parent p;
+						p.parent = SceneEntityList[parentIndex];
+						g_coordinator->AddComponent<Parent>(entity, p);
+
+#ifdef _DEBUG
+						std::string childName = g_coordinator->HasComponent<Name>(entity) ?
+							g_coordinator->GetComponent<Name>(entity).name : "Unknown";
+						std::string parentName = g_coordinator->HasComponent<Name>(p.parent) ?
+							g_coordinator->GetComponent<Name>(p.parent).name : "Unknown";
+						std::cout << "[LOAD] " << childName << " (Entity " << entity
+							<< ") parent index " << parentIndex << " -> " << parentName
+							<< " (Entity " << p.parent << ")" << std::endl;
+#endif
+					}
+				}
+			}
+
+			// NEW: Load Children (remap indices to entities)
+			if (component.HasMember("Children") && component["Children"].IsObject())
+			{
+				const auto& childrenObj = component["Children"];
+				if (childrenObj.HasMember("children") && childrenObj["children"].IsArray())
+				{
+					Children c;
+					const auto& childArray = childrenObj["children"];
+
+#ifdef _DEBUG
+					std::string parentName = g_coordinator->HasComponent<Name>(entity) ?
+						g_coordinator->GetComponent<Name>(entity).name : "Unknown";
+					std::cout << "[LOAD] " << parentName << " (Entity " << entity << ") children: ";
+#endif
+
+					for (rapidjson::SizeType k = 0; k < childArray.Size(); ++k)
+					{
+						if (childArray[k].IsInt())
+						{
+							int childIndex = childArray[k].GetInt();
+							if (childIndex >= 0 && childIndex < static_cast<int>(SceneEntityList.size()))
+							{
+								c.children.push_back(SceneEntityList[childIndex]);
+
+#ifdef _DEBUG
+								std::string childName = g_coordinator->HasComponent<Name>(SceneEntityList[childIndex]) ?
+									g_coordinator->GetComponent<Name>(SceneEntityList[childIndex]).name : "Unknown";
+								std::cout << childName << " (index " << childIndex << " -> Entity "
+									<< SceneEntityList[childIndex] << "), ";
+#endif
+							}
+						}
+					}
+
+#ifdef _DEBUG
+					std::cout << std::endl;
+#endif
+
+					if (!c.children.empty())
+					{
+						g_coordinator->AddComponent<Children>(entity, c);
+					}
+				}
+			}
+		}
+	}
+
+	// ═══════════════════════════════════════════════════════════════════════════
+	// DEBUG: Print loaded parent-child relationships
+	// ═══════════════════════════════════════════════════════════════════════════
+#ifdef _DEBUG
+	std::cout << "\n[SceneManager] === Parent/Children Debug ===" << std::endl;
+	for (Entity e : SceneEntityList)
+	{
+		std::string name = "Unknown";
+		if (g_coordinator->HasComponent<Name>(e))
+			name = g_coordinator->GetComponent<Name>(e).name;
+
+		bool hasParent = g_coordinator->HasComponent<Parent>(e);
+		bool hasChildren = g_coordinator->HasComponent<Children>(e);
+
+		std::cout << "Entity " << e << " (" << name << "): ";
+
+		if (hasParent)
+		{
+			Entity parent = g_coordinator->GetComponent<Parent>(e).parent;
+			std::string parentName = "Unknown";
+			if (g_coordinator->HasComponent<Name>(parent))
+				parentName = g_coordinator->GetComponent<Name>(parent).name;
+			std::cout << "Parent=" << parent << " (" << parentName << ") ";
+		}
+
+		if (hasChildren)
+		{
+			auto& children = g_coordinator->GetComponent<Children>(e).children;
+			std::cout << "Children=[";
+			for (Entity c : children)
+			{
+				std::string childName = "Unknown";
+				if (g_coordinator->HasComponent<Name>(c))
+					childName = g_coordinator->GetComponent<Name>(c).name;
+				std::cout << c << " (" << childName << "), ";
+			}
+			std::cout << "]";
+		}
+
+		if (!hasParent && !hasChildren)
+			std::cout << "(no parent/children)";
+
+		std::cout << std::endl;
+	}
+	std::cout << "==========================================\n" << std::endl;
+#endif
+
 
 	ChangeCurrentScene(d["scene"].GetString());
 
