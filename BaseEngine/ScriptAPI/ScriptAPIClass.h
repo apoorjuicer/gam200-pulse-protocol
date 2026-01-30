@@ -28,6 +28,7 @@ namespace ScriptAPI
     value struct HealthComponent;
     value struct Factory;
     value struct Animation;
+    value struct TextComponentAPI;
     // value struct DeltaTime 
     value struct CollisionComponent;
     value struct AudioComponent;
@@ -48,6 +49,7 @@ namespace ScriptAPI
         CollisionComponent GetCollision();
         AudioComponent GetAudio();
         SpriteComponent GetSprite();
+        TextComponentAPI GetTextComponent();
         //DeltaTime GetDeltaTime();
         //LogicComponent GetScriptName();
 

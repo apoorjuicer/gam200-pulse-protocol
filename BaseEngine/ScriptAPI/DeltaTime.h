@@ -3,7 +3,8 @@
 * @file        DeltaTime.h
 * @project     Pulse Protocol
 * @author      Chia Wei Xuan Rachael - 100%
-* @brief
+* @brief       Static utility class exposing engine timing data as read-only C# 
+*              properties for frame-rate independent gameplay and time-based logic.
 *
 * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the

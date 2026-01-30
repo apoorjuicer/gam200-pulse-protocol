@@ -3,7 +3,8 @@
 * @file        Factory.h
 * @project     Pulse Protocol
 * @author      Chia Wei Xuan Rachael - 100%
-* @brief
+* @brief	   Static utility class providing C# scripts with entity instantiation 
+*              from prefabs and entity destruction through factory pattern.
 *
 * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the

@@ -25,4 +25,13 @@ namespace ScriptAPI
             glfwSetWindowShouldClose(Engine->GetWindow(), GLFW_TRUE);
         }
     }
+
+    bool Application::IsPlaying()
+    {
+        if (Engine)
+        {
+            return Engine->IsPlaying();
+        }
+        return false;
+    }
 }
