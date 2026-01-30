@@ -67,6 +67,7 @@ public class NavigationButtons : Script
         string texLower = defaultTexture.ToLower();
         bool isQuitOverlayButton = texLower.Contains("quit yes") || texLower.Contains("quit no");
         bool isPauseOverlayButton = texLower.Contains("pause");
+        bool isOverlayButton = ShowQuitOverlay || ShowPauseOverlay;
         
         if ((ShowQuitOverlay || ShowPauseOverlay) && !isOverlayButton)
         {
