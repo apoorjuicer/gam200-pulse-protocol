@@ -77,8 +77,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -931.922119140625,
-                            "y": -348.49798583984375
+                            "x": -970.0,
+                            "y": -271.57489013671875
                         },
                         "scale": {
                             "x": 636.3574829101563,
@@ -120,7 +120,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "InputTestScript"
+                            "SimpleMove"
                         ]
                     }
                 },
@@ -206,7 +206,7 @@
                         "mdl_ref": 1.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "BlueGorillaEnemy",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1133,7 +1133,7 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "ORIGINL",
+                        "text": "",
                         "font_id": "",
                         "offset": {
                             "x": 0.0,

@@ -1048,3 +1048,329 @@ void SceneManager::Deserialize(const rapidjson::Value& in)
 	if (!in.IsObject()) throw std::runtime_error("Invalid JSON for LogicComponent");
 	if (in.HasMember("SceneName")) CurrentScene = in["SceneName"].GetString(); // already assigns it
 }
+
+/**
+ * @brief Serializes the entire current scene to a JSON string
+ *
+ * This is basically a copy of SaveCurrentScene() but instead of writing
+ * to a file, it returns the JSON as a string. Used by Editor for Play/Stop.
+ *
+ * @return JSON string containing all entities and their components
+ */
+std::string SceneManager::SerializeToString()
+{
+#ifdef _DEBUG
+	std::cout << "\n================================================" << std::endl;
+	std::cout << "   [SceneManager]: Serializing scene to string..." << std::endl;
+	std::cout << "================================================" << std::endl;
+#endif
+
+	using namespace rapidjson;
+	auto* g_coordinator = Coordinator::GetInstance();
+
+	// Create JSON document
+	Document d;
+	d.SetObject();
+	auto& alloc = d.GetAllocator();
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Save scene name first
+	// ─────────────────────────────────────────────────────────────────────────
+	Value SceneName;
+	SceneName.SetString(CurrentScene.c_str(), static_cast<SizeType>(CurrentScene.length()), alloc);
+	d.AddMember("scene", SceneName, alloc);
+
+	// Create array for all entities
+	Value JsonEntityArray(kArrayType);
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Build entity-to-index map for parent/child relationships
+	// This maps each Entity ID to its position in the save order
+	// ─────────────────────────────────────────────────────────────────────────
+	std::unordered_map<Entity, int> entityToIndex;
+	int entityIndex = 0;
+	for (auto const& entity : g_coordinator->GetAllEntities())
+	{
+		// Skip engine-managed entities (names starting with underscore like _FPS_Display)
+		if (g_coordinator->HasComponent<Name>(entity))
+		{
+			auto& name = g_coordinator->GetComponent<Name>(entity).name;
+			if (!name.empty() && name[0] == '_')
+			{
+				continue;
+			}
+		}
+		entityToIndex[entity] = entityIndex;
+		entityIndex++;
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Serialize each entity and all its components
+	// ─────────────────────────────────────────────────────────────────────────
+	for (auto const& entity : g_coordinator->GetAllEntities())
+	{
+		// Skip engine-managed entities
+		if (g_coordinator->HasComponent<Name>(entity))
+		{
+			auto& name = g_coordinator->GetComponent<Name>(entity).name;
+			if (!name.empty() && name[0] == '_')
+			{
+				continue;
+			}
+		}
+
+		Value entityObj(kObjectType);
+		Value componentsArray(kArrayType);
+
+		// ═══════════════════════════════════════════════════════════════════
+		// Serialize ALL component types (same as SaveCurrentScene)
+		// ═══════════════════════════════════════════════════════════════════
+
+		// NamingComponent
+		if (g_coordinator->HasComponent<NamingComponent>(entity))
+		{
+			Value ComponentObj(kObjectType);
+			Value val;
+			auto& comp = g_coordinator->GetComponent<NamingComponent>(entity);
+			comp.Serialize(val, alloc);
+			ComponentObj.AddMember("Typing", val, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// Transform
+		if (g_coordinator->HasComponent<Framework::Transform>(entity))
+		{
+			Value ComponentObj(kObjectType);
+			Value val;
+			auto& comp = g_coordinator->GetComponent<Framework::Transform>(entity);
+			comp.Serialize(val, alloc);
+			ComponentObj.AddMember("transform", val, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// Renderable
+		if (g_coordinator->HasComponent<Framework::Renderable>(entity))
+		{
+			Value ComponentObj(kObjectType);
+			Value val;
+			auto& comp = g_coordinator->GetComponent<Framework::Renderable>(entity);
+			comp.Serialize(val, alloc);
+			ComponentObj.AddMember("render", val, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// Animation
+		if (g_coordinator->HasComponent<Framework::Animation>(entity))
+		{
+			Value ComponentObj(kObjectType);
+			Value val;
+			auto& comp = g_coordinator->GetComponent<Framework::Animation>(entity);
+			comp.Serialize(val, alloc);
+			ComponentObj.AddMember("animation", val, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// LogicComponent (Scripts)
+		if (g_coordinator->HasComponent<LogicComponent>(entity))
+		{
+			Value ComponentObj(kObjectType);
+			Value val;
+			auto& comp = g_coordinator->GetComponent<LogicComponent>(entity);
+			comp.Serialize(val, alloc);
+			ComponentObj.AddMember("script", val, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// Name (n component)
+		if (g_coordinator->HasComponent<Name>(entity))
+		{
+			Value ComponentObj(kObjectType);
+			Value val;
+			auto& comp = g_coordinator->GetComponent<Name>(entity);
+			comp.Serialize(val, alloc);
+			ComponentObj.AddMember("name", val, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// Health
+		if (g_coordinator->HasComponent<Health>(entity))
+		{
+			Value ComponentObj(kObjectType);
+			Value val;
+			auto& comp = g_coordinator->GetComponent<Health>(entity);
+			comp.Serialize(val, alloc);
+			ComponentObj.AddMember("Health", val, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// AABB (collision)
+		if (g_coordinator->HasComponent<AABB>(entity))
+		{
+			Value ComponentObj(kObjectType);
+			Value val;
+			auto& comp = g_coordinator->GetComponent<AABB>(entity);
+			comp.Serialize(val, alloc);
+			ComponentObj.AddMember("AABB", val, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// PrefabInstance
+		if (g_coordinator->HasComponent<PrefabInstance>(entity))
+		{
+			Value ComponentObj(kObjectType);
+			Value val;
+			auto& comp = g_coordinator->GetComponent<PrefabInstance>(entity);
+			comp.Serialize(val, alloc);
+			ComponentObj.AddMember("prefabInstance", val, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// LayerTag
+		if (g_coordinator->HasComponent<LayerTag>(entity))
+		{
+			Value ComponentObj(kObjectType);
+			Value val;
+			auto& comp = g_coordinator->GetComponent<LayerTag>(entity);
+			comp.Serialize(val, alloc);
+			ComponentObj.AddMember("layerTag", val, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// AudioSource
+		if (g_coordinator->HasComponent<AudioSource>(entity))
+		{
+			Value ComponentObj(kObjectType);
+			Value val;
+			auto& comp = g_coordinator->GetComponent<AudioSource>(entity);
+			comp.Serialize(val, alloc);
+			ComponentObj.AddMember("audiosource", val, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// TextComponent - THIS IS THE IMPORTANT ONE FOR YOUR COUNTDOWN!
+		if (g_coordinator->HasComponent<TextComponent>(entity))
+		{
+			Value ComponentObj(kObjectType);
+			Value val;
+			auto& comp = g_coordinator->GetComponent<TextComponent>(entity);
+			comp.Serialize(val, alloc);
+			ComponentObj.AddMember("TextComponent", val, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
+		}
+
+		// Parent component (for hierarchy)
+		if (g_coordinator->HasComponent<Parent>(entity))
+		{
+			auto& parent = g_coordinator->GetComponent<Parent>(entity);
+			if (parent.parent != static_cast<Entity>(-1))
+			{
+				auto it = entityToIndex.find(parent.parent);
+				if (it != entityToIndex.end())
+				{
+					Value ComponentObj(kObjectType);
+					Value ParentVal(kObjectType);
+					ParentVal.AddMember("parent", it->second, alloc);
+					ComponentObj.AddMember("Parent", ParentVal, alloc);
+					componentsArray.PushBack(ComponentObj, alloc);
+				}
+			}
+		}
+
+		// Children component (for hierarchy)
+		if (g_coordinator->HasComponent<Children>(entity))
+		{
+			auto& children = g_coordinator->GetComponent<Children>(entity);
+			if (!children.children.empty())
+			{
+				Value ComponentObj(kObjectType);
+				Value ChildrenVal(kObjectType);
+				Value ChildArray(kArrayType);
+
+				for (Entity child : children.children)
+				{
+					auto it = entityToIndex.find(child);
+					if (it != entityToIndex.end())
+					{
+						ChildArray.PushBack(it->second, alloc);
+					}
+				}
+
+				if (ChildArray.Size() > 0)
+				{
+					ChildrenVal.AddMember("children", ChildArray, alloc);
+					ComponentObj.AddMember("Children", ChildrenVal, alloc);
+					componentsArray.PushBack(ComponentObj, alloc);
+				}
+			}
+		}
+
+		// Add components to entity object
+		entityObj.AddMember("components", componentsArray, alloc);
+
+		// Add entity to array
+		JsonEntityArray.PushBack(entityObj, alloc);
+	}
+
+	// Add entities array to document
+	d.AddMember("entities", JsonEntityArray, alloc);
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Convert JSON document to string (instead of writing to file)
+	// ─────────────────────────────────────────────────────────────────────────
+	StringBuffer buffer;
+	PrettyWriter<StringBuffer> writer(buffer);
+	d.Accept(writer);
+
+	return buffer.GetString();
+}
+
+
+/**
+ * @brief Loads a scene from a JSON string in memory
+ *
+ * This is used by the Editor when Stop is pressed to restore the scene
+ * to its state before Play was pressed.
+ *
+ * It works by:
+ * 1. Writing the JSON string to a temporary file
+ * 2. Calling LoadSceneFromJson() to load from that temp file
+ * 3. Deleting the temporary file
+ *
+ * This reuses existing loading logic rather than duplicating it.
+ *
+ * @param jsonString The JSON string from SerializeToString()
+ */
+void SceneManager::LoadFromString(const std::string& jsonString)
+{
+	if (jsonString.empty())
+	{
+		return;
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Write JSON string to a temporary file
+	// We use a temp file so we can reuse the existing LoadSceneFromJson() logic
+	// ─────────────────────────────────────────────────────────────────────────
+	std::string tempPath = "../../PulseEngine/JSON/_temp_editor_restore.json";
+
+	std::ofstream ofs(tempPath);
+	if (!ofs.is_open())
+	{
+		std::cerr << "[SceneManager] ERROR: Could not create temp file!" << std::endl;
+		return;
+	}
+
+	ofs << jsonString;
+	ofs.close();
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Load from the temp file (reuses all existing loading logic)
+	// This handles clearing scripts, destroying entities, creating new ones, etc.
+	// ─────────────────────────────────────────────────────────────────────────
+	LoadSceneFromJson(tempPath);
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Delete the temporary file (cleanup)
+	// ─────────────────────────────────────────────────────────────────────────
+	std::remove(tempPath.c_str());
+}
