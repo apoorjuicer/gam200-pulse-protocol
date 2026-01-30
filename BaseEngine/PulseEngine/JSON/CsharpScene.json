@@ -11,15 +11,15 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -1106.0760498046875,
-                            "y": -481.88519287109375
+                            "x": -1065.0955810546875,
+                            "y": -490.9050598144531
                         },
                         "scale": {
                             "x": 700.0,
                             "y": 700.0
                         },
                         "rotation": {
-                            "x": 0.0,
+                            "x": 22.549999237060547,
                             "y": 0.0
                         },
                         "isVisible": true,
@@ -32,7 +32,7 @@
                         "mdl_ref": 1.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/hero_idle.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/hero_spritesheet.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -44,11 +44,11 @@
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0.5655507445335388,
-                        "totalFrames": 2,
-                        "columns": 2,
+                        "elapsedTime": 0.03542499616742134,
+                        "totalFrames": 3,
+                        "columns": 3,
                         "rows": 1,
-                        "animationSpeed": 1.5
+                        "animationSpeed": 26.0
                     }
                 },
                 {
@@ -66,9 +66,9 @@
                 },
                 {
                     "Health": {
-                        "hp": 3,
-                        "damage": 1,
-                        "isAlive": true
+                        "hp": -22,
+                        "damage": 26,
+                        "isAlive": false
                     }
                 },
                 {
@@ -95,6 +95,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 50,
                         "z": 0.0
                     }
@@ -115,8 +116,8 @@
                             "y": -38.49800109863281
                         },
                         "scale": {
-                            "x": 600.0,
-                            "y": 600.0
+                            "x": 537.5,
+                            "y": 537.5
                         },
                         "rotation": {
                             "x": 73.0,
@@ -130,9 +131,9 @@
                 {
                     "render": {
                         "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "BlueGorillaEnemy",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/BlueGorillaEnemy.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -194,6 +195,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 10,
                         "z": 0.0
                     }
@@ -262,6 +264,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -305,8 +308,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.18275362253189087,
+                        "currentFrame": 2,
+                        "elapsedTime": 0.13786979019641876,
                         "totalFrames": 3,
                         "columns": 3,
                         "rows": 1,
@@ -329,6 +332,7 @@
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }

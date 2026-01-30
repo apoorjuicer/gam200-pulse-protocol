@@ -67,7 +67,8 @@ public class NavigationButtons : Script
         string texLower = defaultTexture.ToLower();
         bool isQuitOverlayButton = texLower.Contains("quit yes") || texLower.Contains("quit no");
         bool isPauseOverlayButton = texLower.Contains("pause");
-        
+        bool isOverlayButton = isQuitOverlayButton || isPauseOverlayButton;
+
         if ((ShowQuitOverlay || ShowPauseOverlay) && !isOverlayButton)
         {
             // Reset hover state if we were hovering
