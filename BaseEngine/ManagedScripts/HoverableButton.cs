@@ -1,23 +1,55 @@
 using System;
+using System.Collections.Generic;
 using ScriptAPI;
 
-public class MainMenuButton : Script
+public class NavigationButtons : Script
 {
+    // === STATIC SCENE HISTORY (shared across all buttons) ===
+    private static Stack<string> sceneHistory = new Stack<string>();
+    private static string currentScene = "";
+    
+    // Track if we've set the initial scene THIS play session
+    private static int lastFrameCount = -1;
+
+    // === QUIT & PAUSE OVERLAY STATE ===
+    public static bool ShowQuitOverlay = false;
+    public static bool ShowPauseOverlay = false;
+
     private string defaultTexture = "";
     private string hoverTexture = "";
     private bool isCurrentlyHovered = false;
-    private bool initialized = false;
+    private bool buttonInitialized = false;
     private float hoverScaleBoost = 1.05f;
 
     public override void Update()
     {
+        // Reset history when a new Play session starts (frame count resets to 0)
+        int currentFrame = Time.FrameCount;
+        if (currentFrame < lastFrameCount || lastFrameCount < 0)
+        {
+            // New play session detected - reset everything
+            sceneHistory.Clear();
+            currentScene = "";
+            ShowQuitOverlay = false;
+            ShowPauseOverlay = false;
+            // Console.WriteLine("Navigation: Reset for new play session");
+        }
+        lastFrameCount = currentFrame;
+
         InputComponent input = GetInput();
         TransformComponent t = GetTransform();
         
-        if (!initialized)
+        if (!buttonInitialized)
         {
             SpriteComponent sprite = GetSprite();
             defaultTexture = sprite.Texture;
+            
+            // Detect current scene from texture path if not set
+            if (string.IsNullOrEmpty(currentScene))
+            {
+                currentScene = DetectCurrentScene();
+                // Console.WriteLine($"Navigation: Detected starting scene as {currentScene}");
+            }
             
             int dotIndex = defaultTexture.LastIndexOf('.');
             if (dotIndex >= 0)
@@ -25,8 +57,36 @@ public class MainMenuButton : Script
             else
                 hoverTexture = defaultTexture + "_hover";
             
-            initialized = true;
+            buttonInitialized = true;
         }
+
+        // ============================================
+        // BLOCK INTERACTION WHEN OVERLAY IS SHOWING
+        // (except for overlay buttons)
+        // ============================================
+        string texLower = defaultTexture.ToLower();
+        bool isQuitOverlayButton = texLower.Contains("quit yes") || texLower.Contains("quit no");
+        bool isPauseOverlayButton = texLower.Contains("pause");
+        bool isOverlayButton = ShowQuitOverlay || ShowPauseOverlay;
+        
+        if ((ShowQuitOverlay || ShowPauseOverlay) && !isOverlayButton)
+        {
+            // Reset hover state if we were hovering
+            if (isCurrentlyHovered)
+            {
+                SpriteComponent sprite = GetSprite();
+                TransformComponent transform = GetTransform();
+                sprite.Texture = defaultTexture;
+                transform.ScaleX = t.ScaleX / hoverScaleBoost;
+                transform.ScaleY = t.ScaleY / hoverScaleBoost;
+                isCurrentlyHovered = false;
+            }
+            return; // Skip all interaction for this button
+        }
+
+        // Block quit overlay buttons when pause overlay is showing (and vice versa)
+        if (ShowQuitOverlay && isPauseOverlayButton && !isQuitOverlayButton) return;
+        if (ShowPauseOverlay && isQuitOverlayButton && !isPauseOverlayButton) return;
         
         float currentScaleX = t.ScaleX;
         float currentScaleY = t.ScaleY;
@@ -65,19 +125,177 @@ public class MainMenuButton : Script
             OnClick();
         }
     }
+
+    // Try to detect which scene we're in based on button type
+    private string DetectCurrentScene()
+    {
+        string tex = defaultTexture.ToLower();
+        
+        // If this is a "new game" or "settings" button, we're probably in MainMenu
+        if (tex.Contains("new game") || tex.Contains("new_game") || tex.Contains("settings") || tex.Contains("continue") || tex.Contains("quit"))
+            return "MainMenu";
+        
+        // If this is a "back" button, could be Settings or other
+        if (tex.Contains("back"))
+            return "Settings";  // Assume back button means we're in Settings
+        
+        return "MainMenu";  // Default
+    }
+
+    // === NAVIGATION HELPERS ===
+    private void NavigateTo(string newScene)
+    {
+        if (!string.IsNullOrEmpty(currentScene))
+        {
+            sceneHistory.Push(currentScene);
+        }
+        currentScene = newScene;
+        // Console.WriteLine($"Navigating to: {newScene} | History: [{string.Join(", ", sceneHistory.ToArray())}]");
+        Scene.LoadScene(newScene);
+    }
+
+    private void GoBack()
+    {
+        // Console.WriteLine($"GoBack called | Current: {currentScene} | History: [{string.Join(", ", sceneHistory.ToArray())}]");
+        
+        if (sceneHistory.Count > 0)
+        {
+            currentScene = sceneHistory.Pop();
+            Console.WriteLine($"Going back to: {currentScene}");
+            Scene.LoadScene(currentScene);
+        }
+        else
+        {
+            Console.WriteLine("No history, going to MainMenu");
+            currentScene = "MainMenu";
+            Scene.LoadScene("MainMenu");
+        }
+    }
+
+    private void GoToMainMenu()
+    {
+        sceneHistory.Clear();
+        currentScene = "MainMenu";
+        ShowPauseOverlay = false;
+        ShowQuitOverlay = false;
+        Scene.LoadScene("MainMenu");
+    }
     
     private void OnClick()
     {
         string tex = defaultTexture.ToLower();
+        // Console.WriteLine($"Button clicked: {tex}");
+
+        // ============================================
+        // PAUSE OVERLAY BUTTONS - CHECK FIRST
+        // ============================================
+        if (tex.Contains("pause"))
+        {
+            Console.WriteLine("PAUSE RESUME - Hiding overlay");
+            ShowPauseOverlay = false;
+            return;
+        }
         
-        if (tex.Contains("newgame") || tex.Contains("new_game") || tex.Contains("new game"))
-            Scene.LoadScene("Level1");
-        else if (tex.Contains("continue"))
-            // Scene.LoadScene("SavedGame");
+        if (tex.Contains("pause quit"))
+        {
+            Console.WriteLine("PAUSE QUIT - Going to main menu");
+            GoToMainMenu();
+            return;
+        }
+        
+        if (tex.Contains("pause settings"))
+        {
+            Console.WriteLine("PAUSE SETTINGS - Opening settings");
+            NavigateTo("Settings");
+            ShowPauseOverlay = false;
+            return;
+        }
+        
+        // ============================================
+        // QUIT OVERLAY BUTTONS
+        // ============================================
+        if (tex.Contains("quit yes"))
+        {
+            Console.WriteLine("QUIT YES - Closing game");
+            Application.Quit();
+            return;
+        }
+        
+        if (tex.Contains("quit no"))
+        {
+            Console.WriteLine("QUIT NO - Hiding overlay");
+            ShowQuitOverlay = false;
+            return;
+        }
+        
+        // ============================================
+        // MAIN MENU BUTTONS
+        // ============================================
+        if (tex.Contains("new game") || tex.Contains("new_game") || tex.Contains("start"))
+        {
+            NavigateTo("Level1");
+            return;
+        }
+        
+        if (tex.Contains("continue"))
+        {
             Console.WriteLine("NOT IMPLEMENTED YET!");
-        else if (tex.Contains("settings"))
-            Scene.LoadScene("Settings");
-        else if (tex.Contains("quit"))
-            Console.WriteLine("NOT IMPLEMENTED YET!");
+            return;
+        }
+        
+        if (tex.Contains("settings") || tex.Contains("options"))
+        {
+            NavigateTo("Settings");
+            return;
+        }
+        
+        if (tex.Contains("back") || tex.Contains("return"))
+        {
+            GoBack();
+            return;
+        }
+        
+        // ============================================
+        // GENERAL QUIT - CHECK LAST
+        // ============================================
+        if (tex.Contains("quit"))
+        {
+            // Console.WriteLine("QUIT - Showing overlay");
+            ShowQuitOverlay = true;
+            return;
+        }
+
+        // ============================================
+        // PAUSE BTN (IN-GAME)
+        // ============================================
+        if (tex.Contains("pause"))
+        {
+            ShowPauseOverlay = true;
+            return;
+        }
+    }
+}
+
+// ============================================
+// (quit background, "Are you sure?" text, yes/no buttons)
+// ============================================
+public class QuitOverlay : Script
+{
+    public override void Update()
+    {
+        TransformComponent t = GetTransform();
+        t.IsVisible = NavigationButtons.ShowQuitOverlay;
+    }
+}
+
+// ============================================
+// (pause background)
+// ============================================
+public class Paus : Script
+{
+    public override void Update()
+    {
+        TransformComponent t = GetTransform();
+        t.IsVisible = NavigationButtons.ShowQuitOverlay;
     }
 }

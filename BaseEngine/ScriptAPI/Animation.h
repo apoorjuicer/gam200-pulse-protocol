@@ -3,7 +3,8 @@
 * @file        Animation.h
 * @project     Pulse Protocol
 * @author      Chia Wei Xuan Rachael - 100%
-* @brief
+* @brief	   Managed wrapper class providing C# scripts with animation control 
+*              capabilities for individual entities through sprite and timing manipulation.
 *
 * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the
