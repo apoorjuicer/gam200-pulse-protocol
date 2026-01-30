@@ -70,6 +70,7 @@ public:
 	void LoadSceneFromJson(std::string const& path);
 	void SaveCurrentScene();
 	void UnloadCurrentScene();
+	void RestartCurrentScene();
 
 	std::string CurrentScene; // i need this public for me to call in other systems when i press the nbutton in hovered state
 	
