@@ -1231,6 +1231,11 @@ void CoreEngine::PlayGame()
 	m_isPlaying = true;
 	m_paused = false;
 	Framework::GameState::SetPlaying(true);
+
+	// RESET TIME!!!!
+	FrameCount = 0;
+	TimePassed = 0.0f;
+
 	auto coord = Coordinator::GetInstance();
 
 	// ALWAYS update the original scene path when Play is pressed
