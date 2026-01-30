@@ -99,29 +99,29 @@ namespace JSONUtils {
     bool WriteJSONToFile(Document const& d, std::filesystem::path const& path, bool pretty);
 
     //load
-    inline bool ReadJSONFromFile(Document& outDoc,
-        std::filesystem::path const& path)
-    {
-        std::ifstream ifs(path, std::ios::binary);
-        if (!ifs)
-        {
-            std::cerr << "Error: Cannot open file for reading: " << path << "\n";
-            return false;
-        }
+    //inline bool ReadJSONFromFile(Document& outDoc,
+    //    std::filesystem::path const& path)
+    //{
+    //    std::ifstream ifs(path, std::ios::binary);
+    //    if (!ifs)
+    //    {
+    //        std::cerr << "Error: Cannot open file for reading: " << path << "\n";
+    //        return false;
+    //    }
 
-        IStreamWrapper isw(ifs);
-        outDoc.ParseStream(isw);
+    //    IStreamWrapper isw(ifs);
+    //    outDoc.ParseStream(isw);
 
-        if (outDoc.HasParseError())
-        {
-            std::cerr << "Error: JSON parse error in " << path
-                << " : " << GetParseError_En(outDoc.GetParseError())
-                << " (offset " << outDoc.GetErrorOffset() << ")\n";
-            return false;
-        }
-        return true;
-    }
-
+    //    if (outDoc.HasParseError())
+    //    {
+    //        std::cerr << "Error: JSON parse error in " << path
+    //            << " : " << GetParseError_En(outDoc.GetParseError())
+    //            << " (offset " << outDoc.GetErrorOffset() << ")\n";
+    //        return false;
+    //    }
+    //    return true;
+    //}
+    bool ReadJSONFromFile(Document& outDoc,std::filesystem::path const& path);
 
     // ---------------------------
     // optimised SAVE / LOAD

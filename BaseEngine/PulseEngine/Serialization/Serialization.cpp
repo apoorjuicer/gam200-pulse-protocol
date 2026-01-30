@@ -105,7 +105,7 @@ bool LoadConfig(Config &cfg, std::string const &path)
     //}
 
     //cfg.Deserialize(d["config"]);
-    return true;
+    //return true;
 
     return JSONUtils::LoadObject(cfg, path, "config");
 }
@@ -187,5 +187,27 @@ namespace JSONUtils {
     }
 
     /*loading/parsing*/
+    bool ReadJSONFromFile(Document& outDoc,
+        std::filesystem::path const& path)
+    {
+        std::ifstream ifs(path, std::ios::binary);
+        if (!ifs)
+        {
+            std::cerr << "Error: Cannot open file for reading: " << path << "\n";
+            return false;
+        }
+
+        IStreamWrapper isw(ifs);
+        outDoc.ParseStream(isw);
+
+        if (outDoc.HasParseError())
+        {
+            std::cerr << "Error: JSON parse error in " << path
+                << " : " << GetParseError_En(outDoc.GetParseError())
+                << " (offset " << outDoc.GetErrorOffset() << ")\n";
+            return false;
+        }
+        return true;
+    }
 
 }//end of namespace JSONUtils

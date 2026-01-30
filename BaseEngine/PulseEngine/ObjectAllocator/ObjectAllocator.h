@@ -1,3 +1,16 @@
+/******************************************************************************/
+/**
+ * @file        ObjectAllocator.h
+ * @project     Pulse Protocol
+ * @author      Ban Kai Wei Benjamin
+ * @brief       This file manages 
+ *              and managing shader programs.
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
+
 //---------------------------------------------------------------------------
 #ifndef OBJECTALLOCATORH
 #define OBJECTALLOCATORH

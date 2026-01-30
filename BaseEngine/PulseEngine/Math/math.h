@@ -60,6 +60,13 @@ public:
 	bool operator==(Vector2 const& other) const;
 	bool operator!=(Vector2 const& other) const;
 
+	//getter/setter
+	float& setX();
+	float& setY();
+	float  getX() const;
+	float  getY() const;
+	Vector2& Set(float x, float y);
+
 	// Serialize
 	void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
 	void Deserialize(rapidjson::Value const &in);
