@@ -16,11 +16,11 @@ using ScriptAPI;
 public class TestScript : Script
 {
     int enemy;
-    float spawnCooldown = 5.0f;
-    float deathtimer = 10.0f;
+    float spawnCooldown = 1.0f;
+    float deathtimer = 2.0f;
     bool startdeathtimer = false;
     bool deadalready = false;
-    float sceneCoolDown = 20.0f;
+    float sceneCoolDown = 10.0f;
     bool hasSpawned = false;
     bool said = false;
     public override void Update()
@@ -94,7 +94,8 @@ public class TestScript : Script
 
         if (sceneCoolDown  <=0 )
         {
-            Scene.LoadScene("GameLose");
+            //Scene.LoadScene("GameLose");
+            Scene.RestartScene();
             Console.WriteLine("New Scene Loaded!\n\n\n\n\n\n\n");
             return;
         }

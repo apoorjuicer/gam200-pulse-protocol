@@ -81,6 +81,7 @@ void SceneManager::Update(float dt)
 }
 
 
+
 void SceneManager::SaveCurrentScene()
 {
 #ifdef _DEBUG
@@ -428,10 +429,10 @@ void SceneManager::UnloadCurrentScene()
 	std::cout << "[SceneManager::UnloadCurrentScene] Got coordinator: " << (g_coordinator ? "YES" : "NO") << std::endl;
 	std::cout << "[SceneManager::UnloadCurrentScene] SceneEntityList size: " << SceneEntityList.size() << std::endl;
 #endif
-	// Call Exit() on all scripts BEFORE destroying entities
-	auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
-	std::cout << "[SceneManager::UnloadCurrentScene] Got LogicSystem: " << (logicSystem ? "YES" : "NO") << std::endl;
 
+	//// Call Exit() on all scripts BEFORE destroying entities
+	//auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
+	//std::cout << "[SceneManager::UnloadCurrentScene] Got LogicSystem: " << (logicSystem ? "YES" : "NO") << std::endl;
 	/*if (logicSystem) {
 		std::cout << "[SceneManager::UnloadCurrentScene] Calling Exit() on scripts..." << std::endl;
 		int exitCount = 0;
@@ -473,6 +474,12 @@ void SceneManager::UnloadCurrentScene()
 				}
 			}
 		}
+	}
+
+	// CLEAR THE ASSETS!
+	auto gfxMgr = g_coordinator->GetSystem<GraphicsManager>();
+	if (gfxMgr) {
+		gfxMgr->Clear();  // Calls glDeleteTextures()
 	}
 
 
@@ -979,6 +986,55 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	std::cout << std::filesystem::absolute(path) << std::endl;
 #endif
 }
+
+void SceneManager::RestartCurrentScene()
+{
+#ifdef _DEBUG
+	std::cout << "\n======================================================" << std::endl;
+	std::cout << " [SceneManager] Relaoding current scene in progress!" << std::endl;
+	std::cout << "======================================================" << std::endl;
+#endif
+
+	auto* g_coordinator = Coordinator::GetInstance();
+
+	// Clear the Csharp script when scene change
+#ifdef _DEBUG
+	std::cout << "[SceneManager::UnloadCurrentScene] Clearing C# scripts..." << std::endl;
+#endif
+	if (m_coreEngine && m_coreEngine->clearScriptsFunc)
+	{
+		m_coreEngine->clearScriptsFunc();
+	}
+
+	else
+	{
+		std::cout << "[SceneManager::UnloadCurrentScene] WARNING: CoreEngine pointer not set!" << std::endl;
+	}
+
+	//kill all entity
+	for(auto entity: SceneEntityList)
+	{
+		g_coordinator->DestroyEntity(entity);
+	}
+
+
+	//This class owns entity container is cleared
+	SceneEntityList.clear();
+	
+	// Reload the scene without unloading the assets, 
+	std::string sceneToRestart = CurrentScene;
+	UnloadCurrentScene();
+	std::string ScenePath = "../../PulseEngine/JSON/" + sceneToRestart + ".json";
+	LoadSceneFromJson(ScenePath);
+
+#ifdef _DEBUG
+	std::cout << "\n================================================" << std::endl;
+	std::cout << "    [SceneManager] Scene successfully reloaded!" << std::endl;
+	std::cout << "================================================" << std::endl;
+#endif
+}
+
+
 
 void SceneManager::Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
 {
