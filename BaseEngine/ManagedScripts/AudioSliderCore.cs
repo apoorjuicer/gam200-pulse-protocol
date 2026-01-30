@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using ScriptAPI;
 
 // =========================================================
@@ -53,26 +52,20 @@ public abstract class AudioSliderKnobBase : Script
     private float knobMinX, knobMaxX;
 
     private bool dragging = false;
-    private bool dragJustStarted = false;   //  FIX: prevents instant cancel on click frame
+    private bool dragJustStarted = false;   // prevents instant cancel on click frame
     private float dragOffsetX = 0.0f;
 
-    // robust input binding
+    // Robust held binding (click uses IsMouseButtonTriggered like your hover buttons)
     private object cachedInputObj;
-
-    private MethodInfo heldMI = null;
+    private System.Reflection.MethodInfo heldMI = null;
     private Type heldParamType = null;
-
-    private MethodInfo releasedMI = null;
-    private Type releasedParamType = null;
-
-    private bool toggleFallback = false;
 
     public override void Update()
     {
         InputComponent input = GetInput();
         TransformComponent t = GetTransform();
 
-        BindInputIfNeeded(input);
+        BindHeldIfNeeded(input);
 
         if (!initialized)
         {
@@ -112,7 +105,7 @@ public abstract class AudioSliderKnobBase : Script
             {
                 t.X = Clamp(t.X, knobMinX, knobMaxX);
             }
-            
+
             if (LockKnobY) t.Y = lockedY;
 
             PublishState(ToValue01(t.X));
@@ -131,7 +124,7 @@ public abstract class AudioSliderKnobBase : Script
             {
                 t.X = Clamp(t.X, knobMinX, knobMaxX);
             }
-            
+
             if (LockKnobY) t.Y = lockedY;
 
             PublishState(ToValue01(t.X));
@@ -153,15 +146,17 @@ public abstract class AudioSliderKnobBase : Script
             (mx >= st.TrackLeftX && mx <= st.TrackRightX &&
              my >= lockedY - hoverHalfH && my <= lockedY + hoverHalfH);
 
+        // Same "button style" click API you use everywhere
         bool click = input.IsMouseButtonTriggered(0);
+
+        // For dragging we still need a "held" signal; bind it robustly
         bool held = MouseHeld(input, 0);
-        bool released = MouseReleased(input, 0);
 
         // Start drag
         if (!dragging && click && (knobHovered || barHovered))
         {
             dragging = true;
-            dragJustStarted = true; 
+            dragJustStarted = true;
             dragOffsetX = knobHovered ? (t.X - mx) : 0.0f;
 
             // Click bar (not knob) -> jump immediately
@@ -173,29 +168,17 @@ public abstract class AudioSliderKnobBase : Script
             }
         }
 
-        // Stop drag (AFTER grace frame)
-        if (dragging && !dragJustStarted)
-        {
-            if (!toggleFallback)
-            {
-                // stop if mouse not held OR released
-                if (!held || released) dragging = false;
-            }
-            else
-            {
-                // fallback: stop on next click (toggle behavior)
-                if (click && !(knobHovered || barHovered)) dragging = false;
-            }
-        }
+        // Stop drag after the grace frame when the button is no longer held
+        if (dragging && !dragJustStarted && !held)
+            dragging = false;
 
-        // Drag movement (ONLY when held, except fallback)
-        if (dragging && (toggleFallback || held))
+        // Drag movement (allow one grace frame so it doesn't instantly cancel)
+        if (dragging && (held || dragJustStarted))
         {
             t.X = Clamp(mx + dragOffsetX, knobMinX, knobMaxX);
             if (LockKnobY) t.Y = lockedY;
             PublishState(ToValue01(t.X));
         }
-
 
         // End grace frame
         dragJustStarted = false;
@@ -295,31 +278,29 @@ public abstract class AudioSliderKnobBase : Script
     }
 
     // =========================
-    // Robust mouse binding
+    // Robust held binding (only)
     // =========================
-    private void BindInputIfNeeded(InputComponent input)
+    private void BindHeldIfNeeded(InputComponent input)
     {
         if (cachedInputObj == (object)input) return;
         cachedInputObj = input;
 
-        //  include Pressed as a fallback too (some engines misname these)
-        heldMI = FindBool1ParamMethod(input, new string[] { "IsMouseButtonDown", "IsMouseButtonHeld", "IsMouseButtonPressed" }, out heldParamType);
-        releasedMI = FindBool1ParamMethod(input, new string[] { "IsMouseButtonReleased", "IsMouseButtonUp" }, out releasedParamType);
-
-        toggleFallback = (heldMI == null && releasedMI == null);
+        heldMI = FindBool1ParamMethod(input,
+            new string[] { "IsMouseButtonDown", "IsMouseButtonHeld", "IsMouseButtonPressed" },
+            out heldParamType);
     }
 
-    private MethodInfo FindBool1ParamMethod(object obj, string[] names, out Type paramType)
+    private System.Reflection.MethodInfo FindBool1ParamMethod(object obj, string[] names, out Type paramType)
     {
         paramType = null;
         Type tp = obj.GetType();
 
         foreach (string name in names)
         {
-            MethodInfo best = null;
+            System.Reflection.MethodInfo best = null;
             Type bestParam = null;
 
-            foreach (var mi in tp.GetMethods(BindingFlags.Instance | BindingFlags.Public))
+            foreach (var mi in tp.GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
             {
                 if (mi.Name != name) continue;
                 if (mi.ReturnType != typeof(bool)) continue;
@@ -353,20 +334,13 @@ public abstract class AudioSliderKnobBase : Script
 
     private bool MouseHeld(InputComponent input, int button)
     {
-        if (heldMI == null || heldParamType == null) return dragging;
+        if (heldMI == null || heldParamType == null)
+            return dragging; // fallback: keep dragging
+
         object arg = ConvertButtonArg(heldParamType, button);
 
         try { return (bool)heldMI.Invoke(input, new object[] { arg }); }
         catch { return dragging; }
-    }
-
-    private bool MouseReleased(InputComponent input, int button)
-    {
-        if (releasedMI == null || releasedParamType == null) return false;
-        object arg = ConvertButtonArg(releasedParamType, button);
-
-        try { return (bool)releasedMI.Invoke(input, new object[] { arg }); }
-        catch { return false; }
     }
 
     private object ConvertButtonArg(Type pt, int button)

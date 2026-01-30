@@ -15,52 +15,51 @@ public static class DropdownState
 // ======================================================
 public class DropdownToggle : Script
 {
-    public float Width = 420f;
-    public float Height = 64f;
+    public float HoverScaleBoost = 1.0f; // keep 1.0 if no hover animation
 
-    public float HitboxPadX = 10f;
-    public float HitboxPadY = 6f;
+    private bool initialized = false;
+    private float baseScaleX;
+    private float baseScaleY;
 
     public override void Update()
     {
         InputComponent input = GetInput();
         TransformComponent t = GetTransform();
 
+        // Cache base scale once (same as buttons)
+        if (!initialized)
+        {
+            baseScaleX = t.ScaleX;
+            baseScaleY = t.ScaleY;
+            initialized = true;
+        }
+
         float mx = input.WorldMouseX;
         float my = input.WorldMouseY;
 
-        float cx = t.X;
-        float cy = t.Y;
+        float halfW = baseScaleX;
+        float halfH = baseScaleY;
 
-        bool click = input.IsMouseButtonTriggered(0);
+        bool isHovered =
+            mx >= t.X - halfW && mx <= t.X + halfW &&
+            my >= t.Y - halfH && my <= t.Y + halfH;
 
-        // Click on closed box → toggle
-        if (click && PointInRect(mx, my, cx, cy, Width, Height))
+        // Click to toggle dropdown
+        if (isHovered && input.IsMouseButtonTriggered(0))
         {
             DropdownState.ScreenDropdownOpen =
                 !DropdownState.ScreenDropdownOpen;
             return;
         }
 
-        // Click elsewhere → close
-        if (click)
+        // Click outside closes dropdown
+        if (input.IsMouseButtonTriggered(0) && !isHovered)
         {
             DropdownState.ScreenDropdownOpen = false;
         }
     }
-
-    private bool PointInRect(
-        float px, float py,
-        float cx, float cy,
-        float w, float h)
-    {
-        float halfW = (w * 0.5f) + HitboxPadX;
-        float halfH = (h * 0.5f) + HitboxPadY;
-
-        return px >= cx - halfW && px <= cx + halfW &&
-               py >= cy - halfH && py <= cy + halfH;
-    }
 }
+
 
 // ======================================================
 // Shows / hides the open dropdown graphic
