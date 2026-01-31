@@ -430,9 +430,7 @@ void PlayerScript::Update(Entity ID)
     auto g_coordinator = Coordinator::GetInstance();
 
     static double lastTime = glfwGetTime();
-    double currentTime = glfwGetTime();
-    float dt = static_cast<float>(currentTime - lastTime);
-    lastTime = currentTime;
+    float dt = Engine->GetDeltaTime();
 
     // switch back to idle animation
     if (isAttacking)

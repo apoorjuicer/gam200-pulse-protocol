@@ -130,3 +130,17 @@ public class TestScript2 : Script
 
     }
 }
+
+public class TestPause : Script
+{
+    private float speed = 5.0f;
+
+    public override void Update()
+    {
+        if (NavigationButtons.ShowPauseOverlay)
+            return;  // Stop moving when paused
+        
+        TransformComponent t = GetTransform();
+        t.X += speed * Time.DeltaTime;
+    }
+}
