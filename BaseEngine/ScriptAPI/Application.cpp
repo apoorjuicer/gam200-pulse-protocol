@@ -34,4 +34,24 @@ namespace ScriptAPI
         }
         return false;
     }
+
+    // When paused, CoreEngine::GetDeltaTime() returns 0
+    // This stops all game updates since scripts use DeltaTime for frame-independent movement
+    void Application::SetPaused(bool paused)
+    {
+        if (Engine)
+        {
+            Engine->SetPaused(paused);
+        }
+    }
+
+    // Check if game is currently paused
+    bool Application::IsPaused()
+    {
+        if (Engine)
+        {
+            return Engine->IsPaused();
+        }
+        return false;
+    }
 }

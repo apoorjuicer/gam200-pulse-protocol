@@ -474,6 +474,9 @@ void SceneManager::UnloadCurrentScene()
 				}
 			}
 		}
+
+		// IMPORTANT: Stop global BGM (played via AudioComponent.PlayBGM())
+		audioMgr->StopBGM();
 	}
 
 	// CLEAR THE ASSETS!

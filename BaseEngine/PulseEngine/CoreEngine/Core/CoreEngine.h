@@ -87,7 +87,11 @@ public:
 
 	// --- For Delta Time API :D  ---
 public:
-	float GetDeltaTime() const { return DeltaTime;}
+	// Returns DeltaTime, but returns 0 if game is paused
+	// This ensures all movement/animations stop when m_paused is true
+	// because scripts use DeltaTime for frame-independent updates (pos += speed * DeltaTime)
+	// When DeltaTime = 0, no movement occurs
+	float GetDeltaTime() const { return m_paused ? 0.0f : DeltaTime; }
 	int GetFrameCount() const { return FrameCount; }
 	float GetTimePassed() const { return TimePassed; }
 	void SetTime(float time) { TimePassed = time; }
