@@ -512,6 +512,11 @@
                         "orderInLayer": 0,
                         "z": 0.0
                     }
+                },
+                {
+                    "Parent": {
+                        "parent": 8
+                    }
                 }
             ]
         },
@@ -579,6 +584,13 @@
                         "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
+                    }
+                },
+                {
+                    "Children": {
+                        "children": [
+                            7
+                        ]
                     }
                 }
             ]

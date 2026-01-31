@@ -3,7 +3,8 @@
 * @file        Health.h
 * @project     Pulse Protocol
 * @author      Chia Wei Xuan Rachael - 100%
-* @brief
+* @brief       Managed wrapper struct exposing Health component data as C# properties 
+*              for script-based health management and combat systems.
 *
 * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the

@@ -67,6 +67,11 @@ namespace ScriptAPI
             !TryGetWorldAABB(static_cast<unsigned int>(otherEntity), b))
             return false;
 
+        auto g = Coordinator::GetInstance();
+        auto cmSystem = g->GetSystem<CollisionManager>();
+        if (cmSystem && !cmSystem->BroadPhaseAllows(entityID, static_cast<unsigned int>(otherEntity)))
+            return false;
+
         CollisionManager cm;
         return cm.CheckAABBCollision(a, b);
     }
@@ -76,6 +81,11 @@ namespace ScriptAPI
         AABB a{}, b{};
         if (!TryGetWorldAABB(entityID, a) ||
             !TryGetWorldAABB(static_cast<unsigned int>(otherEntity), b))
+            return false;
+
+        auto g = Coordinator::GetInstance();
+        auto cmSystem = g->GetSystem<CollisionManager>();
+        if (cmSystem && !cmSystem->BroadPhaseAllows(entityID, static_cast<unsigned int>(otherEntity)))
             return false;
 
         CollisionManager cm;

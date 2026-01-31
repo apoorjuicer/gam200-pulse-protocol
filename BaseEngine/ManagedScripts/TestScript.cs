@@ -16,13 +16,14 @@ using ScriptAPI;
 public class TestScript : Script
 {
     int enemy;
-    float spawnCooldown = 5.0f;
-    float deathtimer = 10.0f;
+    float spawnCooldown = 1.0f;
+    float deathtimer = 2.0f;
     bool startdeathtimer = false;
     bool deadalready = false;
-    float sceneCoolDown = 20.0f;
+    float sceneCoolDown = 10.0f;
     bool hasSpawned = false;
     bool said = false;
+    float gayshitttt = 120.0f;
     public override void Update()
     {
         Console.Write("gay 1\n");
@@ -94,7 +95,8 @@ public class TestScript : Script
 
         if (sceneCoolDown  <=0 )
         {
-            Scene.LoadScene("GameLose");
+            //Scene.LoadScene("GameLose");
+            Scene.RestartScene();
             Console.WriteLine("New Scene Loaded!\n\n\n\n\n\n\n");
             return;
         }
@@ -106,6 +108,14 @@ public class TestScript : Script
 
         Console.WriteLine($"Frams: {Time.FrameCount}, Time: {Time.GameTime}\n\n\n\n\n\n\n");
         Console.WriteLine($"Current Animation: {AM.GetCurrentAnimation()}");
+
+
+        // scuff way I tested VFX API Lmao, IT PRINTS BUT I NO CLUE IF ANYTHING ELSE
+        VFXAPI.SetBPM(gayshitttt);
+        VFXAPI.BeatPulse();
+        VFXAPI.PlayHit(HitResult.Perfect, 50.0f, 50.0f);
+        VFXAPI.PlayHit(HitResult.Good, 400, 300);
+
     }
 }
 

@@ -18,5 +18,6 @@ namespace ScriptAPI
     {
     public:
         static void Quit();
+        static bool IsPlaying();
     };
 }

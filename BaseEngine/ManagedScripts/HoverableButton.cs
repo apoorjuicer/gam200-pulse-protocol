@@ -11,8 +11,9 @@ public class NavigationButtons : Script
     // Track if we've set the initial scene THIS play session
     private static int lastFrameCount = -1;
 
-    // === QUIT OVERLAY STATE ===
+    // === QUIT & PAUSE OVERLAY STATE ===
     public static bool ShowQuitOverlay = false;
+    public static bool ShowPauseOverlay = false;
 
     private string defaultTexture = "";
     private string hoverTexture = "";
@@ -29,6 +30,8 @@ public class NavigationButtons : Script
             // New play session detected - reset everything
             sceneHistory.Clear();
             currentScene = "";
+            ShowQuitOverlay = false;
+            ShowPauseOverlay = false;
             // Console.WriteLine("Navigation: Reset for new play session");
         }
         lastFrameCount = currentFrame;
@@ -62,9 +65,11 @@ public class NavigationButtons : Script
         // (except for overlay buttons)
         // ============================================
         string texLower = defaultTexture.ToLower();
-        bool isOverlayButton = texLower.Contains("quit yes") || texLower.Contains("quit no");
-        
-        if (ShowQuitOverlay && !isOverlayButton)
+        bool isQuitOverlayButton = texLower.Contains("quit yes") || texLower.Contains("quit no");
+        bool isPauseOverlayButton = texLower.Contains("pause");
+        bool isOverlayButton = isQuitOverlayButton || isPauseOverlayButton;
+
+        if ((ShowQuitOverlay || ShowPauseOverlay) && !isOverlayButton)
         {
             // Reset hover state if we were hovering
             if (isCurrentlyHovered)
@@ -78,6 +83,10 @@ public class NavigationButtons : Script
             }
             return; // Skip all interaction for this button
         }
+
+        // Block quit overlay buttons when pause overlay is showing (and vice versa)
+        if (ShowQuitOverlay && isPauseOverlayButton && !isQuitOverlayButton) return;
+        if (ShowPauseOverlay && isQuitOverlayButton && !isPauseOverlayButton) return;
         
         float currentScaleX = t.ScaleX;
         float currentScaleY = t.ScaleY;
@@ -141,13 +150,13 @@ public class NavigationButtons : Script
             sceneHistory.Push(currentScene);
         }
         currentScene = newScene;
-        Console.WriteLine($"Navigating to: {newScene} | History: [{string.Join(", ", sceneHistory.ToArray())}]");
+        // Console.WriteLine($"Navigating to: {newScene} | History: [{string.Join(", ", sceneHistory.ToArray())}]");
         Scene.LoadScene(newScene);
     }
 
     private void GoBack()
     {
-        Console.WriteLine($"GoBack called | Current: {currentScene} | History: [{string.Join(", ", sceneHistory.ToArray())}]");
+        // Console.WriteLine($"GoBack called | Current: {currentScene} | History: [{string.Join(", ", sceneHistory.ToArray())}]");
         
         if (sceneHistory.Count > 0)
         {
@@ -167,13 +176,40 @@ public class NavigationButtons : Script
     {
         sceneHistory.Clear();
         currentScene = "MainMenu";
+        ShowPauseOverlay = false;
+        ShowQuitOverlay = false;
         Scene.LoadScene("MainMenu");
     }
     
     private void OnClick()
     {
         string tex = defaultTexture.ToLower();
-        Console.WriteLine($"Button clicked: {tex}");
+        // Console.WriteLine($"Button clicked: {tex}");
+
+        // ============================================
+        // PAUSE OVERLAY BUTTONS - CHECK FIRST
+        // ============================================
+        if (tex.Contains("pause"))
+        {
+            Console.WriteLine("PAUSE RESUME - Hiding overlay");
+            ShowPauseOverlay = false;
+            return;
+        }
+        
+        if (tex.Contains("pause quit"))
+        {
+            Console.WriteLine("PAUSE QUIT - Going to main menu");
+            GoToMainMenu();
+            return;
+        }
+        
+        if (tex.Contains("pause settings"))
+        {
+            Console.WriteLine("PAUSE SETTINGS - Opening settings");
+            NavigateTo("Settings");
+            ShowPauseOverlay = false;
+            return;
+        }
         
         // ============================================
         // QUIT OVERLAY BUTTONS
@@ -224,17 +260,38 @@ public class NavigationButtons : Script
         // ============================================
         if (tex.Contains("quit"))
         {
-            Console.WriteLine("QUIT - Showing overlay");
+            // Console.WriteLine("QUIT - Showing overlay");
             ShowQuitOverlay = true;
+            return;
+        }
+
+        // ============================================
+        // PAUSE BTN (IN-GAME)
+        // ============================================
+        if (tex.Contains("pause"))
+        {
+            ShowPauseOverlay = true;
             return;
         }
     }
 }
 
 // ============================================
-// (background, "Are you sure?" text, yes/no buttons)
+// (quit background, "Are you sure?" text, yes/no buttons)
 // ============================================
 public class QuitOverlay : Script
+{
+    public override void Update()
+    {
+        TransformComponent t = GetTransform();
+        t.IsVisible = NavigationButtons.ShowQuitOverlay;
+    }
+}
+
+// ============================================
+// (pause background)
+// ============================================
+public class Paus : Script
 {
     public override void Update()
     {

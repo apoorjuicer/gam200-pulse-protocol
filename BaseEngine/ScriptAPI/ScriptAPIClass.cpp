@@ -21,6 +21,7 @@
 #include "Collision.h"
 #include "InputAPI.h"
 #include "Sprite.h"
+#include "TextAPI.h"
 
 namespace ScriptAPI
 {
@@ -58,6 +59,11 @@ namespace ScriptAPI
     SpriteComponent Script::GetSprite()
     {
         return SpriteComponent(EntityID);
+    }
+
+    TextComponentAPI Script::GetTextComponent()
+    {
+        return TextComponentAPI(EntityID);
     }
 
     /*LogicComponent Script::GetScriptName()

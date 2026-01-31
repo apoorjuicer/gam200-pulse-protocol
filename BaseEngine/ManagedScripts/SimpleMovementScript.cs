@@ -1,24 +1,61 @@
 using System;
 using ScriptAPI;
 
-public class SimpleMovementScript : Script
+public class SimpleMove : Script
 {
-    private int frameCounter = 0;
-    private float direction = 1.0f;
-
+    private float speed = 200f;
+    
+    // GLFW Key Codes
+    private const int KEY_W = 87;
+    private const int KEY_A = 65;
+    private const int KEY_S = 83;
+    private const int KEY_D = 68;
+    private const int KEY_UP = 265;
+    private const int KEY_DOWN = 264;
+    private const int KEY_LEFT = 263;
+    private const int KEY_RIGHT = 262;
+    
     public override void Update()
     {
-        TransformComponent TFC = GetTransform();
+        var transform = GetTransform();
+        var input = GetInput();
         
-        frameCounter++;
+        float dt = Time.DeltaTime;
         
-        if (frameCounter > 60)
+        // WASD
+        if (input.IsKeyPressed(KEY_W))
         {
-            direction *= -1;
-            frameCounter = 0;
+            transform.Y += speed * dt;
+        }
+        if (input.IsKeyPressed(KEY_S))
+        {
+            transform.Y -= speed * dt;
+        }
+        if (input.IsKeyPressed(KEY_A))
+        {
+            transform.X -= speed * dt;
+        }
+        if (input.IsKeyPressed(KEY_D))
+        {
+            transform.X += speed * dt;
         }
         
-        TFC.X += direction * 2.0f;
-        Console.WriteLine($"SimpleMovementScript moving: {direction}");
+        // Arrow Keys
+        if (input.IsKeyPressed(KEY_UP))
+        {
+            transform.Y += speed * dt;
+        }
+        if (input.IsKeyPressed(KEY_DOWN))
+        {
+            transform.Y -= speed * dt;
+        }
+        if (input.IsKeyPressed(KEY_LEFT))
+        {
+            transform.X -= speed * dt;
+        }
+        if (input.IsKeyPressed(KEY_RIGHT))
+        {
+            transform.X += speed * dt;
+        }
     }
 }

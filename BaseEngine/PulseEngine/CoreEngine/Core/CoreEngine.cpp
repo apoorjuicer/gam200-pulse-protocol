@@ -704,8 +704,6 @@ void CoreEngine::Init()
 	// Step 2: Initialize it with  pointer to CoreEngine as param
 	initFunc(this); 
 
-	std::cout << "here?\n\n\n\n";
-
 	g_coordinator->InitializeAllSystems();
 }
 
@@ -748,7 +746,7 @@ void CoreEngine::Setup()
 
 	// Set signature for component and system
 	Signature collisionSig;
-	collisionSig.set(g_coordinator->GetComponentType<NPC>());
+	collisionSig.set(g_coordinator->GetComponentType<Framework::Transform>());
 	collisionSig.set(g_coordinator->GetComponentType<AABB>());
 	collisionSig.set(g_coordinator->GetComponentType<Health>());
 	g_coordinator->SetSystemSignature<CollisionManager>(collisionSig);
@@ -1231,6 +1229,11 @@ void CoreEngine::PlayGame()
 	m_isPlaying = true;
 	m_paused = false;
 	Framework::GameState::SetPlaying(true);
+
+	// RESET TIME!!!!
+	FrameCount = 0;
+	TimePassed = 0.0f;
+
 	auto coord = Coordinator::GetInstance();
 
 	// ALWAYS update the original scene path when Play is pressed
