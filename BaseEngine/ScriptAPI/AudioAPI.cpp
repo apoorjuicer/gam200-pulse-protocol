@@ -1,3 +1,17 @@
+/******************************************************************************/
+/**
+ * @file        AudioAPI.cpp
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 100%
+ *
+ * @brief       ScriptAPI audio functions to control audio sources (play/stop, volume, basic helpers) and connect scripts to the engine audio system.
+ *
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
+
 #define generic generic_workaround
 
 #include "AudioAPI.h"
