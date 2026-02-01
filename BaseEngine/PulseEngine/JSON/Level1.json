@@ -867,6 +867,11 @@
                         "orderInLayer": 0,
                         "z": 0.0
                     }
+                },
+                {
+                    "Parent": {
+                        "parent": 14
+                    }
                 }
             ]
         },
@@ -896,7 +901,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat greyed (1).png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat greyed.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -922,11 +927,16 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 14
                     }
                 }
             ]
@@ -1047,13 +1057,13 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "ConductorBeatTester"
+                            "TextSample"
                         ]
                     }
                 },
                 {
                     "name": {
-                        "name": "ConductorBeatTester"
+                        "name": "TextTest"
                     }
                 },
                 {
@@ -1063,6 +1073,24 @@
                         "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
+                    }
+                },
+                {
+                    "TextComponent": {
+                        "text": "",
+                        "font_id": "",
+                        "offset": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "font_size": 48.0,
+                        "color": [
+                            1.0,
+                            0.5,
+                            0.0
+                        ],
+                        "visible": true,
+                        "alignment": 1
                     }
                 }
             ]
@@ -1113,15 +1141,8 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": [
-                            "TextSample"
-                        ]
-                    }
-                },
-                {
                     "name": {
-                        "name": "TextTest"
+                        "name": "OrderSlipUI"
                     }
                 },
                 {
@@ -1134,21 +1155,11 @@
                     }
                 },
                 {
-                    "TextComponent": {
-                        "text": "",
-                        "font_id": "",
-                        "offset": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "font_size": 48.0,
-                        "color": [
-                            1.0,
-                            0.5,
-                            0.0
-                        ],
-                        "visible": true,
-                        "alignment": 1
+                    "Children": {
+                        "children": [
+                            10,
+                            11
+                        ]
                     }
                 }
             ]
