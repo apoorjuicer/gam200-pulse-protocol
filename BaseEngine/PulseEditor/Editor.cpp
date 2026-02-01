@@ -19,9 +19,22 @@
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "Input/InputManager.h"
 
+//Vector2 v2{};
+//    OAConfig cfg(
+//        false,                     // UseCPPMemManager_
+//        64,            // ObjectsPerPage_
+//        0,                  // MaxPages_ (0 = unlimited)
+//        false,                   // DebugOn_
+//        0,                         // PadBytes_
+//        0,                         // HeaderBlocks_
+//        alignof(std::max_align_t)  // Alignment_
+//    );
+//
+//   ObjectAllocator oa(sizeof(Benchmark::Student), cfg);
+
 
 // ==========================================================================
-
+//Benchmark::OABenchmarkResult test;
 
 namespace PulseEditor
 {
@@ -520,15 +533,25 @@ namespace PulseEditor
 
             // Example on logging usage
             // Plain text
-            debugConsole.AddLog("Hello plain text");
+            //debugConsole.AddLog("Hello plain text");
 
-            // With level (colored automatically)
-            debugConsole.AddLogLevel(ConsoleLevel::Info, "Loaded %d textures", &Systems::EntityMember);
-            debugConsole.AddLogLevel(ConsoleLevel::Warn, "FPS is low: %.1f", GLHelper::fps);
-            debugConsole.AddLogLevel(ConsoleLevel::Error, "Failed to open '%s'", "[filename]");
 
-            //// With explicit color (custom)
-            debugConsole.AddLogColored(ImVec4(0.6f, 1.0f, 0.6f, 1.0f), "Green success message");
+            if (ImGui::IsKeyPressed(ImGuiKey_M))
+            {
+               auto r = Benchmark::RunOABenchmark(1000);
+               debugConsole.AddLog("%s", Benchmark::PrintOABenchmark(r).c_str());
+            }
+
+            //auto r = Benchmark::RunOABenchmark(1000);
+            //debugConsole.AddLog("%s", Benchmark::PrintOABenchmark(r).c_str());
+
+            //// With level (colored automatically)
+            //debugConsole.AddLogLevel(ConsoleLevel::Info, "Loaded %d textures", &Systems::EntityMember);
+            //debugConsole.AddLogLevel(ConsoleLevel::Warn, "FPS is low: %.1f", GLHelper::fps);
+            //debugConsole.AddLogLevel(ConsoleLevel::Error, "Failed to open '%s'", "[filename]");
+
+            ////// With explicit color (custom)
+            //debugConsole.AddLogColored(ImVec4(0.6f, 1.0f, 0.6f, 1.0f), "Green success message");
         }
         ImGui::End();
 

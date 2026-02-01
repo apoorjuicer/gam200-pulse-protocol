@@ -141,10 +141,10 @@ float  Vector2::getX() const {
 float  Vector2::getY() const { 
     return m[1]; 
 }
-Vector2& Vector2::Set(float x, float y)
+Vector2& Vector2::Set(float x_, float y_)
 {
-    m[0] = x;
-    m[1] = y;
+    m[0] = x_;
+    m[1] = y_;
     return *this;
 }
 //non-member functions

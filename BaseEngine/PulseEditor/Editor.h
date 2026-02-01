@@ -33,7 +33,8 @@
 #include "Components/DisplayName.h"     // For display name in hierarchy list
 #include "Graphics/glapp.h"
 #include "Math/math.h"
-
+#include "oabenchmark.h"
+#include "ObjectAllocator/ObjectAllocator.h"
 
 #include "UndoManager.h" //FOR UNDO
 struct GLFWwindow;

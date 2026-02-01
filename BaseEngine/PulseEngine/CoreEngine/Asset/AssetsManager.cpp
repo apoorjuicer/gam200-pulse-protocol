@@ -45,16 +45,6 @@ void AssetsManager::Shutdown()
     // Registry is POD metadata; no special teardown needed
     // Registry no external dependences, constructed
     // and destroyed automatically by compiler(RAII)
-    // reset unique_ptr calls dtor for graphics and audio
-    //if (mGraphics)
-    //{ /*mGraphics->Shutdown();*/
-    //    mGraphics.reset();
-    //}
-    //if (mAudio)
-    //{ /*mAudio->Shutdown();  */
-    //    mAudio.reset();
-    //}
-
     std::cout << "[AssetsManager] Shutdown complete.\n";
 }
 

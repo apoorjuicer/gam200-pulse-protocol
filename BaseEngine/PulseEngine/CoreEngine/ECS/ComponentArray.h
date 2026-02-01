@@ -20,7 +20,6 @@
 #include "pch/pch_temp.h"
 #include "EntityManager.h"
 
-
 // parent
 class ComponentTypeList	
 {
@@ -117,5 +116,62 @@ private:
 	std::unordered_map<Entity, size_t> Map_For_EntityToIndex{}; // Entity ID to find component Index
 	std::unordered_map<size_t, Entity> Map_For_IndexToEntity{}; // component Index to find Entity ID
 };
+
+//template <typename T>
+//class ComponentList : public ComponentTypeList
+//{
+//public:
+//    ComponentList(size_t objectsPerPage = 64, size_t maxPages = 0, bool debugOn = false)
+//        : compPool(sizeof(T), MakeCfg(objectsPerPage, maxPages, debugOn))
+//    {
+//        entityToPtr.fill(nullptr);
+//    }
+//
+//    void AddData(Entity e, const T& c)
+//    {
+//        assert(entityToPtr[e] == nullptr && "Component added twice.");
+//        void* mem = compPool.Allocate();
+//        entityToPtr[e] = new (mem) T(c);
+//    }
+//
+//    void RemoveData(Entity e)
+//    {
+//        T* obj = entityToPtr[e];
+//        assert(obj && "Removing non-existent component.");
+//        obj->~T();
+//        compPool.Free(obj);
+//        entityToPtr[e] = nullptr;
+//    }
+//
+//    void RemoveEntity(Entity e) override
+//    {
+//        if (entityToPtr[e]) RemoveData(e);
+//    }
+//
+//    T& GrabData(Entity e)
+//    {
+//        T* obj = entityToPtr[e];
+//        assert(obj && "Retrieving non-existent component.");
+//        return *obj;
+//    }
+//
+//private:
+//    static OAConfig MakeCfg(size_t objectsPerPage, size_t maxPages, bool debugOn)
+//    {
+//        return OAConfig(
+//            false,                     // UseCPPMemManager_
+//            objectsPerPage,            // ObjectsPerPage_
+//            maxPages,                  // MaxPages_ (0 = unlimited)
+//            debugOn,                   // DebugOn_
+//            0,                         // PadBytes_
+//            0,                         // HeaderBlocks_
+//            alignof(std::max_align_t)  // Alignment_
+//        );
+//    }
+//
+//private:
+//    std::array<T*, MaxEntity> entityToPtr{};
+//    ObjectAllocator compPool;   
+//};
 
 #pragma once

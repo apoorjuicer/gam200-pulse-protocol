@@ -4,8 +4,9 @@
  * @project     Pulse Protocol
  * @author      Ban Kai Wei Benjamin
  * @brief       This file manages 
- *              and managing shader programs.
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *               
+ * 
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
@@ -19,13 +20,13 @@
 #ifdef _MSC_VER
 #pragma warning( disable : 4290 ) // suppress warning: C++ Exception Specification ignored
 #endif
-
+#include "CoreEngine/Core/ImportExport.h"
 #include <string>
 #include <iostream>
 #include <memory>
 // If the client doesn't specify these:
-static const int DEFAULT_OBJECTS_PER_PAGE = 4;  
-static const int DEFAULT_MAX_PAGES = 3;
+inline constexpr int DEFAULT_OBJECTS_PER_PAGE = 4;
+inline constexpr int DEFAULT_MAX_PAGES = 3;
 /*====================================================================================================================*/
 // ObjectAllocator configuration parameters
 class OAException
@@ -148,7 +149,7 @@ struct GenericObject
 };
 
 // This memory manager class 
-class ObjectAllocator
+class DLL_API ObjectAllocator
 {
   public:
     typedef void (*DUMPCALLBACK)(const void *, unsigned int);
@@ -180,17 +181,26 @@ class ObjectAllocator
 void *Allocate();                                             // can still throw
 void Free(void *Object);                                      // can still throw
 
-      // Calls the callback fn for each block still in use
-    unsigned DumpMemoryInUse(DUMPCALLBACK fn) const;
+    //  // Calls the callback fn for each block still in use
+    // //Use it when you want to print leak
+    //      -at program shutdown
+    //      -after a test case finishes
+    //unsigned DumpMemoryInUse(DUMPCALLBACK fn) const;
 
-      // Calls the callback fn for each block that is potentially corrupted
-    unsigned ValidatePages(VALIDATECALLBACK fn) const;
+    //  // Calls the callback fn for each block that is potentially corrupted
+    //  // Use it in debug mode to catch “bad memory writes” early
+    //  // after Allocate(), Free() , or in a debug command / test
+    //  
+    //unsigned ValidatePages(VALIDATECALLBACK fn) const;
 
-      // Frees all empty pages
-    unsigned FreeEmptyPages(void);
+    //  // Frees all empty pages (give memory back)
+    // // Use after a bunch of frees (like level unload)
+    // // or stress tests
+    //unsigned FreeEmptyPages(void);
+    
 
-      // [EXTRA] Returns true if FreeEmptyPages and alignments are implemented
-    static bool ImplementedExtraCredit(void);
+    //  // [EXTRA] Returns true if FreeEmptyPages and alignments are implemented
+    //static bool ImplementedExtraCredit(void);
 
       // Testing/Debugging/Statistic methods
     void SetDebugState(bool State);       // true=enable, false=disable

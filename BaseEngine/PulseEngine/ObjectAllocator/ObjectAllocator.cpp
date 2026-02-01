@@ -1,3 +1,16 @@
+/******************************************************************************/
+/**
+ * @file        ObjectAllocator.cpp
+ * @project     Pulse Protocol
+ * @author      Ban Kai Wei Benjamin
+ * @brief       This file manages 
+ * 
+ * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
+
 #include "ObjectAllocator.h"
 /*
 Page size should be at least 4096 bytes, in multiples of this
@@ -96,20 +109,28 @@ ObjectAllocator::~ObjectAllocator(){//} throw(){
 // pophead node from freeList_
 // update states Allocations_++, FreeObjects_--, ObjectsInUse++
 // update mostobjects_?
-void *ObjectAllocator::Allocate() /*throw(OAException)*/{
+/*
+debug mode:
+When a new page is created (and debug mode is ON), it fills every block in that page with a known byte value
+"UNALLOCATED_PATTERN" = 0xaa
+[AA AA AA AA ...]  block 0
+[AA AA AA AA ...]  block 1
+[AA AA AA AA ...]  block 2
+*/
+void* ObjectAllocator::Allocate() /*throw(OAException)*/ {
     //this means use default CPP new/delete. if CPPmemManager is true
-    if(Config_.UseCPPMemManager_){
+    if (Config_.UseCPPMemManager_) {
         //call global function operator new with ObjectSize_ bytes
         //assigned to raw pointer, p
-        void *p = ::operator new(OAStats_.ObjectSize_);
+        void* p = ::operator new(OAStats_.ObjectSize_);
         OAStats_.Allocations_++;
         OAStats_.ObjectsInUse_++;
         //update MostObjects(The highest number of objects that 
         //was simultaneously allocated at any point in the program's lifetime.)
-        if (OAStats_.ObjectsInUse_ > OAStats_.MostObjects_){
+        if (OAStats_.ObjectsInUse_ > OAStats_.MostObjects_) {
             OAStats_.MostObjects_ = OAStats_.ObjectsInUse_;
         }
-        return p; 
+        return p;
     }// end of block of using default CPP 
 
 
@@ -117,15 +138,16 @@ void *ObjectAllocator::Allocate() /*throw(OAException)*/{
      //so we need to allocate new pages if max number of pages is not reached
     if (!freeList_) {
         //max pages is assigned zero and pagesinuse >= throw exception
-        if (Config_.MaxPages_ != 0 && OAStats_.PagesInUse_ >= Config_.MaxPages_){
-             throw OAException(OAException::E_NO_PAGES, 
+        if (Config_.MaxPages_ != 0 && OAStats_.PagesInUse_ >= Config_.MaxPages_) {
+            throw OAException(OAException::E_NO_PAGES,
                 "[ObjectAllocator] Allocate : max pages reached or maxpages set to zero ");
         }
-           
+
         unsigned char* rawPage = nullptr;
         try {
             rawPage = reinterpret_cast<unsigned char*>(::operator new(OAStats_.PageSize_));
-        } catch (...) {
+        }
+        catch (...) {
             throw OAException(OAException::E_NO_MEMORY, "[ObjectAllocator] Allocate: cannot allocate new page");
         }
 
@@ -155,11 +177,22 @@ void *ObjectAllocator::Allocate() /*throw(OAException)*/{
         // Build free-list from blocks in the page
         /*
         1) Page memory is contiguous and partitioend into fixed-size blocks (ObjectSize_ bytes).
-        2) Allocation may appear "backwards" because blocks are pushed to the free list 
+        2) Allocation may appear "backwards" because blocks are pushed to the free list
         in LIFO(last in first out) order.
         3) GenericObject is used to overlay a 'Next' pointer on top of the block while it is free.
         */
         unsigned char* firstBlock = rawPage + sizeof(GenericObject);
+
+        // DEBUG MODE (optional): mark every block as "unallocated" first
+        if (Config_.DebugOn_) {
+            for (unsigned i = 0; i < Config_.ObjectsPerPage_; ++i) {
+                unsigned char* blockAddr = firstBlock + i * OAStats_.ObjectSize_;
+                for (unsigned j = 0; j < OAStats_.ObjectSize_; ++j) {
+                    blockAddr[j] = UNALLOCATED_PATTERN;
+                }
+            }
+        }
+
         for (unsigned i = 0; i < Config_.ObjectsPerPage_; ++i) {
             // Compute address of block i: base + i * block size
             unsigned char* blockAddr = firstBlock + i * OAStats_.ObjectSize_;
@@ -167,7 +200,10 @@ void *ObjectAllocator::Allocate() /*throw(OAException)*/{
             //Treat free block memory as a free-list node
             //use first few bytes of "memory" to store a ptr while block is free
             // "pretend a memory starting at blockAddr is a GO"
-            // so we can wrtie next ptor there
+            // so we can write next ptor there
+
+            //overwrites the first sizeof(void*) bytes of each block, because that’s where blockNode->Next lives.
+            //[ Next pointer bytes ][ AA AA AA AA AA ... ]
             GenericObject* blockNode = reinterpret_cast<GenericObject*>(blockAddr);
 
             // (linking blockNode to freelist), Push block onto free list 
@@ -191,10 +227,22 @@ void *ObjectAllocator::Allocate() /*throw(OAException)*/{
     OAStats_.Allocations_++;
     OAStats_.FreeObjects_--;
     OAStats_.ObjectsInUse_++;
-        //update MostObjects(The highest number of objects that 
-        //was simultaneously allocated at any point in the program's lifetime.)
-    if (OAStats_.ObjectsInUse_ > OAStats_.MostObjects_){
+    //update MostObjects(The highest number of objects that 
+    //was simultaneously allocated at any point in the program's lifetime.)
+    if (OAStats_.ObjectsInUse_ > OAStats_.MostObjects_) {
         OAStats_.MostObjects_ = OAStats_.ObjectsInUse_;
+    }
+
+    // DEBUG MODE: mark the block we are handing out as "allocated"
+    //block no longer free, mark the whole block as 0xBB
+    //if accessing bad memory e.g. unintiializaed memory
+    //Student* s = (Student*)node;
+    //std::cout << s->Age; // reads 0xBBBBBBBB
+    if (Config_.DebugOn_) {
+        unsigned char* bytes = reinterpret_cast<unsigned char*>(node);
+        for (unsigned i = 0; i < OAStats_.ObjectSize_; ++i) {
+            bytes[i] = ALLOCATED_PATTERN;
+        }
     }
 
     return node; //return allocated block of memory
@@ -209,93 +257,99 @@ Allocator version of "delete"
 1) hands the pointer back to the normal heap
 2) puts the block back onto the OA free list
 */
-void ObjectAllocator::Free(void* Object) /*throw(OAException)*/{
+void ObjectAllocator::Free(void* Object) /*throw(OAException)*/ {
 
-    if (!Object) {return;}
+    if (!Object) { return; }
 
     //using CPP delete instead, dont use pool use real heap
     if (Config_.UseCPPMemManager_) {
-        ::operator delete(Object); 
+        ::operator delete(Object);
         OAStats_.Deallocations_++;
         OAStats_.ObjectsInUse_--;
         return;
     }
 
-    // (later) validate boundary/multiple-free/pad bytes here
-    // 1) Pointer not from this allocator
-    unsigned char* obj = reinterpret_cast<unsigned char*>(Object);
+    /// FASTer : Debug OFF
+    if (!Config_.DebugOn_) {
+        GenericObject* node = reinterpret_cast<GenericObject*>(Object);
+        node->Next = freeList_;
+        freeList_ = node;
 
-    // 1) Pointer not from this allocator (E_BAD_ADDRESS)
-    GenericObject* owningPage = nullptr;
-    //iterate through page list
-    for (GenericObject* p = pageList_; p; p = p->Next)
-    {
-        unsigned char* pageStart = reinterpret_cast<unsigned char*>(p);
-        //start+total size
-        unsigned char* pageEnd   = pageStart + OAStats_.PageSize_;
+        OAStats_.Deallocations_++;
+        OAStats_.FreeObjects_++;
+        OAStats_.ObjectsInUse_--;
+        return;
+    }
+    // DEBUG PATH: Debug ON
+    else {
+        // (later) validate boundary/multiple-free/pad bytes here
+           // 1) Pointer not from this allocator
+        unsigned char* obj = reinterpret_cast<unsigned char*>(Object);
 
-        if (obj >= pageStart && obj < pageEnd) //if inside page
+        // 1) Pointer not from this allocator (E_BAD_ADDRESS)
+        GenericObject* owningPage = nullptr;
+        //iterate through page list
+        for (GenericObject* p = pageList_; p; p = p->Next)
         {
-            owningPage = p; // assign owning page to p
-            break;//break out of loop
-        }
-    }
-    
-    if (!owningPage){  //no owning page
-        throw OAException(OAException::E_BAD_ADDRESS, "[ObjectAllocator] Free: pointer not in any page");
-    }
-        
-    // 2) Pointer is inside a page but not at start of a block
-    //is this pointer EXACTLY inside the start block
-    unsigned char* pageStart  = reinterpret_cast<unsigned char*>(owningPage);
-    unsigned char* firstBlock = pageStart + sizeof(GenericObject);
+            unsigned char* pageStart = reinterpret_cast<unsigned char*>(p);
+            //start+total size
+            unsigned char* pageEnd = pageStart + OAStats_.PageSize_;
 
-    // must be within the block region
-    unsigned char* blockRegionEnd = firstBlock + Config_.ObjectsPerPage_ * OAStats_.ObjectSize_;
-    if (obj < firstBlock || obj >= blockRegionEnd){
-        throw OAException(OAException::E_BAD_BOUNDARY, "[ObjectAllocator] Free: pointer not in block region");
-    }
-    
-    unsigned offset = static_cast<unsigned>(obj - firstBlock);
-    if (offset % OAStats_.ObjectSize_ != 0){
-         throw OAException(OAException::E_BAD_BOUNDARY, "[ObjectAllocator] Free: pointer not on block boundary");
-    }
-       
-    // 3) Pointer already Freed
+            if (obj >= pageStart && obj < pageEnd) //if inside page
+            {
+                owningPage = p; // assign owning page to p
+                break;//break out of loop
+            }
+        }
+
+        if (!owningPage) {  //no owning page
+            throw OAException(OAException::E_BAD_ADDRESS, "[ObjectAllocator] Free: pointer not in any page");
+        }
+
+        // 2) Pointer is inside a page but not at start of a block
+        //is this pointer EXACTLY inside the start block
+        unsigned char* pageStart = reinterpret_cast<unsigned char*>(owningPage);
+        unsigned char* firstBlock = pageStart + sizeof(GenericObject);
+
+        // must be within the block region
+        unsigned char* blockRegionEnd = firstBlock + Config_.ObjectsPerPage_ * OAStats_.ObjectSize_;
+        if (obj < firstBlock || obj >= blockRegionEnd) {
+            throw OAException(OAException::E_BAD_BOUNDARY, "[ObjectAllocator] Free: pointer not in block region");
+        }
+
+        unsigned offset = static_cast<unsigned>(obj - firstBlock);
+        if (offset % OAStats_.ObjectSize_ != 0) {
+            throw OAException(OAException::E_BAD_BOUNDARY, "[ObjectAllocator] Free: pointer not on block boundary");
+        }
+
+        // 3) Pointer already Freed
         for (GenericObject* n = freeList_; n; n = n->Next)
-    {
-        if (reinterpret_cast<void*>(n) == Object){ //block is already freed found on the free list
-            throw OAException(OAException::E_MULTIPLE_FREE, "[ObjectAllocator] Free: double free detected");
+        {
+            if (reinterpret_cast<void*>(n) == Object) { //block is already freed found on the free list
+                throw OAException(OAException::E_MULTIPLE_FREE, "[ObjectAllocator] Free: double free detected");
+            }
+
         }
-            
+
+
+        // 4) Memory overwritten Only possible when implement PadBytes_ (and/or headers).
+
+
+        //pool mode, using our memory pool, give it back to the freelist
+        //block of memory we are returning to the free pool
+        GenericObject* node = reinterpret_cast<GenericObject*>(Object);
+        //block that used to be at top of stack becomes next block after node
+        node->Next = freeList_;
+        //now this node is at the top of free stack
+        freeList_ = node;
+
+        //update stats
+        OAStats_.Deallocations_++;
+        OAStats_.FreeObjects_++;
+        OAStats_.ObjectsInUse_--;
     }
-    // 4) Memory overwritten Only possible when implement PadBytes_ (and/or headers).
 
-
-    //pool mode, using our memory pool, give it back to the freelist
-    //block of memory we are returning to the free pool
-    GenericObject* node = reinterpret_cast<GenericObject*>(Object); 
-    //block that used to be at top of stack becomes next block after node
-    node->Next = freeList_; 
-    //now this node is at the top of free stack
-    freeList_ = node; 
-
-    //update stats
-    OAStats_.Deallocations_++;
-    OAStats_.FreeObjects_++;
-    OAStats_.ObjectsInUse_--;
 }
-
-// //overload operator new and delete
-// void * operator new(size_t size)
-// {
-//     return ObjectAllocator::Allocate();
-// }
-
-// void operator delete(void * p)
-// {
-//     return ObjectAllocator::Free(p);
-// }
 
 //Gettters and Setters
 void ObjectAllocator::SetDebugState(bool State){
