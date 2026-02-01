@@ -695,7 +695,10 @@
                         "children": [
                             20,
                             22,
-                            21
+                            21,
+                            23,
+                            24,
+                            25
                         ]
                     }
                 }
@@ -1463,12 +1466,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -238.26881408691406,
-                            "y": 648.6311645507813
+                            "x": -229.81077575683594,
+                            "y": 557.34912109375
                         },
                         "scale": {
-                            "x": 254.48196411132813,
-                            "y": 31.014989852905273
+                            "x": 200.0,
+                            "y": 31.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1505,12 +1508,14 @@
                 },
                 {
                     "script": {
-                        "ScriptName": []
+                        "ScriptName": [
+                            "DropdownOptionWindowed"
+                        ]
                     }
                 },
                 {
                     "name": {
-                        "name": "DisplayText"
+                        "name": "Windowed (Open)"
                     }
                 },
                 {
@@ -1584,6 +1589,225 @@
                 {
                     "name": {
                         "name": "Dropdownbox(Open)"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 9
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -231.79489135742188,
+                            "y": 557.9487915039063
+                        },
+                        "scale": {
+                            "x": 251.0,
+                            "y": 31.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Full screen.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "DropdownOptionFullscreen"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Fullscreen (Open)"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 9
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -232.57635498046875,
+                            "y": 654.1206665039063
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 31.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/windowed.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "DropdownClosedLabelWindowed"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Windowed (Closed)"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 9
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -234.6527862548828,
+                            "y": 654.1207275390625
+                        },
+                        "scale": {
+                            "x": 254.0,
+                            "y": 31.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Full screen.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "DropdownClosedLabelFullscreen"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "FullScreen (Closed)"
                     }
                 },
                 {
