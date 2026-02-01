@@ -119,5 +119,37 @@ public class TestScript2 : Script
         TFC.ScaleX -= 2.5f;
         TFC.ScaleY -= 2.5f;
 
+        // Ben vc2 testing 
+        Vector2 v = new Vector2(3.0f, 4.0f);
+        Console.WriteLine($"Test 1: ({v.X}, {v.Y}) vs (3, 4)\n");
+        Console.WriteLine($"Test 2, magnitude: {v.magnitude} vs a 5\n");
+        
+        Vector2 norm = v.normalized;
+        Console.WriteLine($"Normalized: ({norm.X}, {norm.Y}) vs (0.6, 0.8)\n");
+
+        Vector2 zero = Vector2.zero;
+        Console.WriteLine($"Zero: ({zero.X}, {zero.Y}) vs (0, 0)\n");
+
+        Vector2 a = new Vector2(1, 2);
+        Vector2 b = new Vector2(3, 4);
+        Vector2 sum = a + b;
+        Console.WriteLine($"Sum: ({sum.X}, {sum.Y}) vs (4, 6)\n");
+
+        Vector2 Min = b - a;
+        Console.WriteLine($"Min: ({Min.X}, {Min.Y}) vs (2, 2)\n");
+
+        Vector2 multi = v * 2.0f;
+        Console.WriteLine($"multi: ({multi.X}, {multi.Y}) vs (6, 8)\n");
+
+        Vector2 xAxis = new Vector2(1, 0);
+        Vector2 yAxis = new Vector2(0, 1);
+        float angle = Vector2.Angle(xAxis, yAxis);
+        Console.WriteLine($"Angle: {angle} vs 90 drgree\n");
+
+        Vector2 min = Vector2.Min(a, b);
+        Vector2 max = Vector2.Max(a, b);
+        Console.WriteLine($"Min: ({min.X}, {min.Y}) vs (1, 2)\n");
+        Console.WriteLine($"Max: ({max.X}, {max.Y}) vs (3, 4)\n");
+
     }
 }
