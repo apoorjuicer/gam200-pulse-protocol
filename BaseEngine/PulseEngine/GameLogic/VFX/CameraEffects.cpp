@@ -1,55 +1,65 @@
+/*****************************************************************************
+ * @file        CameraEffects.cpp
+ * @project     Pulse Protocol
+ * @author		Goh Pin Kai
+ *
+ * @brief       Implements CameraEffects: stacks/limits punch and shake inputs,
+ *              decays them over time, and generates per-frame random shake offsets.
+ *              The punch zoom eases back to zero at a configurable return speed.
+ *
+ * @copyright   Copyright (C) 2026
+ *              DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without
+ *              prior written consent is prohibited.
+ ******************************************************************************/
+
 #include "CameraEffects.h"
 #include <cstdlib>
-#include <algorithm>
-#include <cmath>
-
-//static float Clamp01(float x) { return std::max(0.0f, std::min(1.0f, x)); }
 
 float CameraEffects::Rand01()
 {
     return float(std::rand()) / float(RAND_MAX);
 }
 
-void CameraEffects::TriggerBeatPunch(const CameraPunchParams& p)
+void CameraEffects::AddBeatPunch(const PunchDesc& d)
 {
-    // Add a punch immediately
-    mPunchZoom01 = std::max(mPunchZoom01, p.zoomAmount);
-    mPunchReturnSpeed = p.zoomReturnSpeed;
+    // “Punch” just sets the target amount; Update() eases it back
+    mPunchZoom01 = (mPunchZoom01 < d.zoomAmount) ? d.zoomAmount : mPunchZoom01;
+    mPunchReturnSpeed = d.zoomReturnSpeed;
 }
 
-void CameraEffects::TriggerShake(const CameraShakeParams& p)
+void CameraEffects::AddShake(const ShakeDesc& d)
 {
-    mShakeStrength = std::max(mShakeStrength, p.amplitude);
-    mShakeDecay = p.decay;
+    // Stack shake strength (keep max)
+    mShakeStrength = (mShakeStrength < d.amplitude) ? d.amplitude : mShakeStrength;
+    mShakeDecay = d.decay;
 }
 
 void CameraEffects::Update(float dt)
 {
-    // Return punch back to 0
+    // Punch return to 0
     if (mPunchZoom01 > 0.0f)
     {
-        mPunchZoom01 -= mPunchReturnSpeed * dt * mPunchZoom01; // exponential-ish
-        if (mPunchZoom01 < 0.0001f) mPunchZoom01 = 0.0f;
+        mPunchZoom01 -= mPunchReturnSpeed * dt;
+        if (mPunchZoom01 < 0.0f) mPunchZoom01 = 0.0f;
     }
 
-    // Shake
+    // Shake decay
     if (mShakeStrength > 0.0f)
     {
-        // Random direction each frame
-        float ax = (Rand01() * 2.0f - 1.0f);
-        float ay = (Rand01() * 2.0f - 1.0f);
-        mShakeOffset = glm::vec2(ax, ay) * mShakeStrength;
+        mShakeStrength -= mShakeDecay * dt;
+        if (mShakeStrength < 0.0f) mShakeStrength = 0.0f;
+    }
 
-        // Decay
-        mShakeStrength -= mShakeDecay * dt * mShakeStrength;
-        if (mShakeStrength < 0.0001f)
-        {
-            mShakeStrength = 0.0f;
-            mShakeOffset = glm::vec2(0.0f);
-        }
+    // Random offset each frame while shaking
+    if (mShakeStrength > 0.0f)
+    {
+        float ox = (Rand01() * 2.0f - 1.0f) * mShakeStrength;
+        float oy = (Rand01() * 2.0f - 1.0f) * mShakeStrength;
+        mShakeOffset = { ox, oy };
     }
     else
     {
-        mShakeOffset = glm::vec2(0.0f);
+        mShakeOffset = { 0.0f, 0.0f };
     }
 }

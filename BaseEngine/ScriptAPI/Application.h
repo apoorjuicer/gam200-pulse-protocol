@@ -19,5 +19,8 @@ namespace ScriptAPI
     public:
         static void Quit();
         static bool IsPlaying();
+
+        static void SetPaused(bool paused);
+        static bool IsPaused();
     };
 }

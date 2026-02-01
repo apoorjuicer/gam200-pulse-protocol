@@ -175,8 +175,11 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	float deltaTime =
 		std::chrono::duration<float>(currentTime - lastTime).count();
 	lastTime = currentTime;
-	if (!Framework::GameState::IsPlaying())
+
+	// Don't advance time if not playing or if paused
+	if (!Framework::GameState::IsPlaying() || (Engine && Engine->IsPaused()))
 		deltaTime = 0.0f;
+
 	gBatch.Begin();
 
 	std::vector<Entity> drawList;

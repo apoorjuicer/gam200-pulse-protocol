@@ -26,18 +26,62 @@
 #include "ComponentManager.h"
 #include "CoreEngine/ECS/Singleton.h"
 #include "CoreEngine/Core/ImportExport.h"
+#include "../PulseEngine/ObjectAllocator/ObjectAllocator.h"
 
 //  Acts as a mediator that allows us to have a single instance of the coordinator to use for all 3 manager :D
 class DLL_API Coordinator : public Singleton<Coordinator>
 {
 public:	
+	Coordinator()
+		: cfg_(/*UseCPPMemManager*/ false,
+			/*ObjectsPerPage*/  4,
+			/*MaxPages*/        2,
+			/*DebugOn*/         false,
+			/*PadBytes*/        0,
+			/*HeaderBlocks*/    0,
+			/*Alignment*/       alignof(std::max_align_t)),
+		entityOA_(sizeof(EntityManager), cfg_),
+		compOA_(sizeof(ComponentManager), cfg_),
+		sysOA_(sizeof(SystemManager), cfg_)
+	{
+	}
+
 	//static Coordinator* GetInstance();
 	void init()
 	{
+		//OAConfig cfg;
+
+		//cfg.ObjectsPerPage_ = 4;
+		//cfg.MaxPages_ = 2;
+		//cfg.UseCPPMemManager_ = false; // use your pool
+
+		//ObjectAllocator studentObjMgr(sizeof(Student), cfg);
+		//std::cout << "B4 Alloc:\n";
+		//PrintCounts2(&studentObjMgr);
+		//// 2) Allocate a few students
+		//// Student* s1 = reinterpret_cast<Student*>(studentObjMgr.Allocate());
+		//// Student* s2 = reinterpret_cast<Student*>(studentObjMgr.Allocate());
+		//// Student* s3 = reinterpret_cast<Student*>(studentObjMgr.Allocate());
+		//// Student* s4 = reinterpret_cast<Student*>(studentObjMgr.Allocate());
+		//std::unique_ptr<Student, OADeleter> s1 = oa_make_unique<Student>(studentObjMgr);
+		//std::unique_ptr<Student, OADeleter> s2 = oa_make_unique<Student>(studentObjMgr);
+		//std::unique_ptr<Student, OADeleter> s3 = oa_make_unique<Student>(studentObjMgr);
+		//std::unique_ptr<Student, OADeleter> s4 = oa_make_unique<Student>(studentObjMgr);
+
+		//std::unique_ptr<EntityManager> CoordEnitiyManager;
+		//std::unique_ptr<ComponentManager> CoordComponentManager;
+		//std::unique_ptr<SystemManager> CoordSystemManager;
+
 		// Create pointers to each manager
-		CoordEnitiyManager = std::make_unique<EntityManager>();
-		CoordComponentManager = std::make_unique<ComponentManager>();
-		CoordSystemManager = std::make_unique<SystemManager>();
+		//CoordEnitiyManager = std::make_unique<EntityManager>();
+		//CoordComponentManager = std::make_unique<ComponentManager>();
+		//CoordSystemManager = std::make_unique<SystemManager>();
+
+		
+
+		CoordComponentManager = oa_make_unique<ComponentManager>(compOA_);
+		CoordEnitiyManager = oa_make_unique<EntityManager>(entityOA_);
+		CoordSystemManager = oa_make_unique<SystemManager>(sysOA_);
 	}
 
 	// Shortcuts for create/kill entity 
@@ -162,9 +206,19 @@ public:
 		return &CoordComponentManager->GetComponent<T>(entity);
 	}
 private:
-	std::unique_ptr<EntityManager> CoordEnitiyManager;
-	std::unique_ptr<ComponentManager> CoordComponentManager;
-	std::unique_ptr<SystemManager> CoordSystemManager;
+	//std::unique_ptr<EntityManager> CoordEnitiyManager;
+	//std::unique_ptr<ComponentManager> CoordComponentManager;
+	//std::unique_ptr<SystemManager> CoordSystemManager;
+	OAConfig cfg_;
+	ObjectAllocator entityOA_;
+	ObjectAllocator compOA_;
+	ObjectAllocator sysOA_;
+
+	std::unique_ptr<EntityManager, OADeleter> CoordEnitiyManager;
+	std::unique_ptr<ComponentManager, OADeleter> CoordComponentManager;
+	std::unique_ptr<SystemManager, OADeleter> CoordSystemManager;
 	
+
+
 };
 

@@ -36,6 +36,7 @@ namespace PulseEditor
     UndoManager mUndo;
     static Framework::Transform beforeEdit;
     static bool isEditing = false;
+
     // -------------------------------------------------------------------------
     // Function to handle Transform undo
     // -------------------------------------------------------------------------
@@ -70,6 +71,112 @@ namespace PulseEditor
 
             isEditing = false; // reset edit session
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Helper: add a "add component" button at the bottom, more intuitive
+    // compared to right-clicking
+    // -------------------------------------------------------------------------
+    static void DrawAddComponentMenu(Coordinator* g, Entity entity)
+    {
+        // This will hold all the "add component" menu items
+        auto* coord = g;
+
+        // Transform
+        if (!coord->HasComponent<Framework::Transform>(entity))
+        {
+            if (ImGui::MenuItem("Transform"))
+            {
+                Framework::Transform t{};
+                t.Pos = { 0.0f, 0.0f };
+                t.Scale = { 1.0f, 1.0f };
+                t.Rotation.x = 0.0f;
+                t.Rotation.y = 0.0f;
+                t.isVisible = true;
+                t.autoHide = false;
+                coord->AddComponent<Framework::Transform>(entity, t);
+            }
+        }
+
+        // Renderable
+        if (!coord->HasComponent<Framework::Renderable>(entity))
+        {
+            if (ImGui::MenuItem("Renderable"))
+            {
+                Framework::Renderable r{};
+                r.mdl_ref = 1.0f;           // Sprite quad model
+                r.shd_ref = 2.0f;           // Sprite shader
+                coord->AddComponent<Framework::Renderable>(entity, r);
+            }
+        }
+
+        // Animation
+        if (!coord->HasComponent<Framework::Animation>(entity))
+        {
+            if (ImGui::MenuItem("Animation"))
+            {
+                Framework::Animation a{};
+                coord->AddComponent<Framework::Animation>(entity, a);
+            }
+        }
+
+        // LogicComponent
+        if (!coord->HasComponent<LogicComponent>(entity))
+        {
+            if (ImGui::MenuItem("LogicComponent"))
+            {
+                LogicComponent lc{};
+                coord->AddComponent<LogicComponent>(entity, lc);
+            }
+        }
+
+        //// Health
+        //if (!coord->HasComponent<Health>(entity))
+        //{
+        //    if (ImGui::MenuItem("Health"))
+        //    {
+        //        Health h{};  // Uses defaults: hp=10, damage=1, isAlive=true
+        //        coord->AddComponent<Health>(entity, h);
+        //    }
+        //}
+
+        //// AABB
+        //if (!coord->HasComponent<AABB>(entity))
+        //{
+        //    if (ImGui::MenuItem("AABB"))
+        //    {
+        //        AABB a{};
+        //        a.min = { -0.5f, -0.5f };
+        //        a.max = { 0.5f, 0.5f };
+        //        coord->AddComponent<AABB>(entity, a);
+        //    }
+        //}
+
+        // AudioSource
+        if (!coord->HasComponent<AudioSource>(entity))
+        {
+            if (ImGui::MenuItem("AudioSource"))
+            {
+                AudioSource as{};
+                coord->AddComponent<AudioSource>(entity, as);
+            }
+        }
+
+        // TextComponent
+        if (!coord->HasComponent<TextComponent>(entity))
+        {
+            if (ImGui::MenuItem("TextComponent"))
+            {
+                TextComponent tc{};
+                tc.text = "New Text";
+                tc.font_size = 24.0f;
+                tc.color = { 1.0f, 1.0f, 1.0f };
+                tc.visible = true;
+                coord->AddComponent<TextComponent>(entity, tc);
+            }
+        }
+
+        // Add more components as needed...
     }
 
     // -------------------------------------------------------------------------
@@ -374,118 +481,6 @@ namespace PulseEditor
         }
 
         // ---------------------------------------------------------------------
-        // Right-click anywhere in inspector to add components
-        // ---------------------------------------------------------------------
-        if (selectedEntity != INVALID_ENTITY &&
-            ImGui::BeginPopupContextWindow("AddCompPopup",
-                                           ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
-        {
-            auto *coord = Coordinator::GetInstance();
-
-            // Transform
-            if (!coord->HasComponent<Framework::Transform>(selectedEntity))
-            {
-                if (ImGui::MenuItem("Transform"))
-                {
-                    Framework::Transform t{};
-                    t.Pos = {0.0f, 0.0f};
-                    t.Scale = {1.0f, 1.0f};
-                    t.Rotation.x = 0.0f;
-                    t.Rotation.y = 0.0f;
-                    t.isVisible = true;
-                    t.autoHide = false;
-                    coord->AddComponent<Framework::Transform>(selectedEntity, t);
-                }
-            }
-
-            // Renderable
-            if (!coord->HasComponent<Framework::Renderable>(selectedEntity))
-            {
-                if (ImGui::MenuItem("Renderable"))
-                {
-                    Framework::Renderable r{};
-                    r.mdl_ref = 0.0f;
-                    r.shd_ref = 2.0f;
-                    r.textureID = 0;
-                    r.spriteName.clear();
-                    coord->AddComponent<Framework::Renderable>(selectedEntity, r);
-                }
-            }
-
-            // Animation
-            if (!coord->HasComponent<Framework::Animation>(selectedEntity))
-            {
-                if (ImGui::MenuItem("Animation"))
-                {
-                    Framework::Animation a{};
-                    a.rows = 1;
-                    a.columns = 1;
-                    a.totalFrames = 1;
-                    a.currentFrame = 0;
-                    a.elapsedTime = 0.0f;
-                    coord->AddComponent<Framework::Animation>(selectedEntity, a);
-                }
-            }
-
-            // Name
-            if (!coord->HasComponent<Name>(selectedEntity))
-            {
-                if (ImGui::MenuItem("Name"))
-                {
-                    Name nm{};
-                    nm.name = std::string("Entity ") + std::to_string((int)selectedEntity);
-                    coord->AddComponent<Name>(selectedEntity, nm);
-                }
-            }
-
-            // LogicComponent (Script)
-            if (!coord->HasComponent<LogicComponent>(selectedEntity))
-            {
-                if (ImGui::MenuItem("Script"))
-                {
-                    LogicComponent script{};
-                    script.ScriptName = { "PlayerScript" }; ; // Default
-                    coord->AddComponent<LogicComponent>(selectedEntity, script);
-                }
-            }
-
-            // AudioSource
-            if (!g->HasComponent<AudioSource>(selectedEntity))
-            {
-                if (ImGui::MenuItem("AudioSource"))
-                {
-                    AudioSource audioSrc{};
-                    audioSrc.audio_id = "";
-                    audioSrc.volume = 1.0f;
-                    audioSrc.loop = false;
-                    audioSrc.playOnAwake = false;
-                    audioSrc.channel = nullptr;
-                    g->AddComponent<AudioSource>(selectedEntity, audioSrc);
-                    ImGui::CloseCurrentPopup();
-                }
-            }
-
-            // TextComponent
-            if (!g->HasComponent<TextComponent>(selectedEntity))
-            {
-                if (ImGui::MenuItem("TextComponent"))
-                {
-                    TextComponent txtComp{};
-                    txtComp.text = "New Text";
-                    txtComp.font_id = ""; // Empty = use default font
-                    txtComp.font_size = 48.0f;
-                    txtComp.color = {1.0f, 1.0f, 1.0f};
-                    txtComp.offset = {0.0f, 0.0f};
-                    txtComp.visible = true;
-                    g->AddComponent<TextComponent>(selectedEntity, txtComp);
-                    ImGui::CloseCurrentPopup();
-                }
-            }
-
-            ImGui::EndPopup();
-        }
-
-        // ---------------------------------------------------------------------
         // Name component
         // ---------------------------------------------------------------------
         Inspector_NameComponent(g);
@@ -519,6 +514,25 @@ namespace PulseEditor
         // Text component
         // ---------------------------------------------------------------------
         Inspector_TextComponentUI(g);
+
+        // =====================================================================
+        // "add component" button
+        // =====================================================================
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        if (ImGui::Button("Add New Component", ImVec2(-1, 30)))
+        {
+            ImGui::OpenPopup("AddComponentPopup");
+        }
+
+        if (ImGui::BeginPopup("AddComponentPopup"))
+        {
+            DrawAddComponentMenu(g, selectedEntity);
+            ImGui::EndPopup();
+        }
+
+        ImGui::Spacing();
 
         // Re-enable if we disabled for play mode
         if (isPlaying)
