@@ -1,3 +1,17 @@
+/******************************************************************************/
+/**
+ * @file        AudioSliderCore.cs
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 100%
+ *
+ * @brief       main audio slider logic (mouse input, dragging, clamping, converting knob position to volume value).
+ *
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
+
 using System;
 using System.Collections.Generic;
 using ScriptAPI;

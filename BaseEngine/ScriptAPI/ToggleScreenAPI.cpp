@@ -1,3 +1,17 @@
+/******************************************************************************/
+/**
+ * @file        ToggleScreenAPI.cpp
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 100%
+ *
+ * @brief       ScriptAPI function(s) to toggle fullscreen/windowed by calling the engine's fullscreen toggle.
+ *
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
+
 #define generic generic_workaround
 
 #include "ToggleScreenAPI.h"

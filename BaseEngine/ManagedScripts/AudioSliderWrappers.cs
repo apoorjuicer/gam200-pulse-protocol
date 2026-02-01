@@ -1,3 +1,16 @@
+/******************************************************************************/
+/**
+ * @file        AudioSliderWrappers.cs
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 100%
+ *
+ * @brief       Small wrapper scripts for different slider types using the shared slider core.
+ *
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
 using ScriptAPI;
 
 // ==========================
