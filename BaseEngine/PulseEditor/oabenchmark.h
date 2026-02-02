@@ -1,8 +1,9 @@
 #pragma once
-
+#include "../../PulseEngine/CoreEngine/ECS/Types.h"
 #include <string>
 #include <chrono>
 class ObjectAllocator; // forward declaration
+
 // -----------------------------
 // Benchmark type
 // -----------------------------
@@ -12,13 +13,38 @@ namespace Benchmark {
         long  Year;
         float GPA;
         long  ID;
+
+      //  static void* operator new(std::size_t size);
+        //static void operator delete(void* ptr) noexcept;
     };
+
+    struct ECSBenchmarkResult
+    {
+        int        N;
+        long long  spawn_us;     // create entity + add components
+        long long  destroy_us;   // destroy entity 
+        long long  spawn_destroy_us; // spawn then destroy in one timed region
+    };
+
     struct OABenchmarkResult
     {
         int        N;
         long long heap_us;
         long long oa_us;
     };
+
+    // -----------------------------
+    // ECS benchmark API
+    // -----------------------------
+    // Measures "Create GameObject" workload (entity + components).
+    ECSBenchmarkResult RunECSBenchmark(int N);
+    std::string PrintECSBenchmark(ECSBenchmarkResult const& r);
+
+
+
+    // -----------------------------
+    // OA benchmark API 
+    // -----------------------------
     long long benchmark_heap_unique_ptr(int N);
     long long benchmark_oa_allocate_free_unique_ptr(int N, ObjectAllocator& oa);
     //// Runs the benchmark and returns results
@@ -29,9 +55,10 @@ namespace Benchmark {
         unsigned maxPages = 0,
         bool debugOn = false
     );
-    // Optional helper for console output
     std::string PrintOABenchmark( OABenchmarkResult const& r);
-    //time in microsconds
+    // -----------------------------
+    // timing helper, time in microsconds(us)
+    // -----------------------------
     template <typename T>
     inline long long time_us(T&& fn, int trials = 7)
     {
@@ -48,5 +75,6 @@ namespace Benchmark {
         }
         return best;
     }
-}//end of namespace
 
+   
+}//end of namespace

@@ -217,6 +217,10 @@ void* ObjectAllocator::Allocate() /*throw(OAException)*/ {
         OAStats_.FreeObjects_ += Config_.ObjectsPerPage_;
     }// end of assigning new pages if no freelist
 
+    if (!freeList_) {
+        throw OAException(OAException::E_NO_MEMORY, "[ObjectAllocator] no free page");
+    }
+
     //Actual Allocation
     // pop from free list, typical when there is space on the freelist
     GenericObject* node = freeList_;  // take the current head (the block we will return)
@@ -369,6 +373,8 @@ OAConfig ObjectAllocator::GetConfig() const{       // returns the configuration 
 OAStats ObjectAllocator::GetStats() const{    // returns the statistics for the allocator
     return OAStats_;
 }
+
+
 
 /*
 OA_EXCEPTION -> custom exception type

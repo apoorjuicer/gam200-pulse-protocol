@@ -535,11 +535,15 @@ namespace PulseEditor
             // Plain text
             //debugConsole.AddLog("Hello plain text");
 
-
+            // OA::BenchMark
             if (ImGui::IsKeyPressed(ImGuiKey_M))
             {
-               auto r = Benchmark::RunOABenchmark(1000);
-               debugConsole.AddLog("%s", Benchmark::PrintOABenchmark(r).c_str());
+               //Student
+               //auto r = Benchmark::RunOABenchmark(1000);
+               //debugConsole.AddLog("%s", Benchmark::PrintOABenchmark(r).c_str());
+
+                auto r = Benchmark::RunECSBenchmark(100);
+                debugConsole.AddLog("%s", Benchmark::PrintECSBenchmark(r).c_str());
             }
 
             //auto r = Benchmark::RunOABenchmark(1000);

@@ -174,4 +174,122 @@ private:
 //    ObjectAllocator compPool;   
 //};
 
+//#pragma once
+//#include "Types.h"
+//#include "System.h"
+//#include "pch/pch_temp.h"
+//#include "EntityManager.h"
+//
+//#include <array>
+//#include <cassert>
+//
+//// parent
+//class ComponentTypeList
+//{
+//public:
+//    virtual ~ComponentTypeList() = default;
+//    virtual void RemoveEntity(Entity entity) = 0;
+//};
+//
+//template<typename T>
+//class ComponentList : public ComponentTypeList
+//{
+//public:
+//    ComponentList()
+//    {
+//        Has.fill(false);
+//        // EntityToIndex / IndexToEntity don't need initialization if Has guards access
+//    }
+//
+//    void AddData(Entity entity, const T& component)
+//    {
+//        assert(entity < MaxEntity && "Entity out of range");
+//        assert(!Has[entity] && "Component added to same entity more than once.");
+//        assert(Size < MaxEntity && "Component array is full");
+//
+//        size_t newID = Size;
+//
+//        ComponentArray[newID] = component;
+//
+//        EntityToIndex[entity] = newID;
+//        IndexToEntity[newID] = entity;
+//        Has[entity] = true;
+//
+//        ++Size;
+//    }
+//
+//    void RemoveData(Entity entity)
+//    {
+//        assert(entity < MaxEntity && "Entity out of range");
+//        assert(Has[entity] && "Removing non-existent component.");
+//        assert(Size > 0 && "Internal error: Size underflow");
+//
+//        size_t removedIndex = EntityToIndex[entity];
+//        size_t lastIndex = Size - 1;
+//
+//        // Move last element into removed slot (if not already last)
+//        if (removedIndex != lastIndex)
+//        {
+//            ComponentArray[removedIndex] = ComponentArray[lastIndex];
+//
+//            Entity movedEntity = IndexToEntity[lastIndex];
+//            EntityToIndex[movedEntity] = removedIndex;
+//            IndexToEntity[removedIndex] = movedEntity;
+//        }
+//
+//        // Mark removed entity as not having this component
+//        Has[entity] = false;
+//
+//        --Size;
+//    }
+//
+//    void RemoveEntity(Entity entity) override
+//    {
+//        assert(entity < MaxEntity && "Entity out of range");
+//
+//        if (Has[entity])
+//            RemoveData(entity);
+//    }
+//
+//    T& GrabData(Entity entity)
+//    {
+//        assert(entity < MaxEntity && "Entity out of range");
+//        assert(Has[entity] && "Retrieving non-existent component.");
+//
+//        return ComponentArray[EntityToIndex[entity]];
+//    }
+//
+//    const T& GrabData(Entity entity) const
+//    {
+//        assert(entity < MaxEntity && "Entity out of range");
+//        assert(Has[entity] && "Retrieving non-existent component.");
+//
+//        return ComponentArray[EntityToIndex[entity]];
+//    }
+//
+//    bool HasData(Entity entity) const
+//    {
+//        assert(entity < MaxEntity && "Entity out of range");
+//        return Has[entity];
+//    }
+//
+//    size_t GetSize() const { return Size; }
+//
+//    // Optional: for tight iteration in systems
+//    // iterate i in [0, Size) over ComponentArray and use IndexToEntity[i] for the owner entity.
+//    //T* GetDenseArray() { return ComponentArray.data(); }
+//    //const T* GetDenseArray() const { return ComponentArray.data(); }
+//    //Entity GetEntityByDenseIndex(size_t i) const
+//    //{
+//    //    assert(i < Size && "Dense index out of range");
+//    //    return IndexToEntity[i];
+//    //}
+//
+//private:
+//    size_t Size{};                               // number of active components (dense)
+//    std::array<T, MaxEntity> ComponentArray{};   // dense packed components [0..Size)
+//    std::array<size_t, MaxEntity> EntityToIndex{}; // entity -> dense index
+//    std::array<Entity, MaxEntity> IndexToEntity{}; // dense index -> entity
+//    std::array<bool, MaxEntity> Has{};           // entity owns this component?
+//};
 #pragma once
