@@ -2,9 +2,10 @@
 /**
  * @file        Inspector.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 60%
+ * @author      Leu Jun Yong (primary) - 50%
  *              Chloe Lau Rey En (secondary) - 20%
  *              Ban Kai Wei Benjamin (secondary) - 20%
+ *              Goh Pin Kai (secondary) - 10%
  * 
  * @brief       Entity inspector panel with component editors and undo support.
  *
