@@ -9,7 +9,7 @@
  *              state tracking, combo detection, rhythm timing feedback,
  *              event broadcasting to subscribed systems, debug toggles.
  *
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
@@ -89,7 +89,7 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
 	// Store InputManager pointer in window for callback access
 	glfwSetWindowUserPointer(window, this);
 
-	std::cout << "[InputManager] Successfully initialized." << std::endl;
+	//std::cout << "[InputManager] Successfully initialized." << std::endl;
 }
 
 void InputManager::Update(float) {
@@ -224,18 +224,36 @@ void InputManager::processDebugToggles() {
 		}
 	}
 
-	//if (isKeyTriggered(GLFW_KEY_F7)) {
-	//	stressToggleRequested = true;
-	//}
-
-	// F8: Toggle debug overlay (FPS counter, performance stats)
+	// ========================================================================
+	// F8: Toggle Debug Display Text visibility
+	// ========================================================================
+#ifdef _DEBUG
 	if (isKeyTriggered(GLFW_KEY_F8)) {
 		auto* coord = Coordinator::GetInstance();
-		auto graphics = coord->GetSystem<GraphicsManager>();
-		if (graphics) {
-			graphics->ToggleDebugOverlay();
+		auto sceneManager = coord->GetSystem<SceneManager>();
+
+		if (coord && sceneManager)
+		{
+			const auto& sceneEntities = sceneManager->GetSceneEntities();
+
+			for (auto entity : sceneEntities)
+			{
+				if (coord->HasComponent<TextComponent>(entity) && coord->HasComponent<Name>(entity))
+				{
+					auto& name = coord->GetComponent<Name>(entity);
+					if (name.name == "Debug Display Text")
+					{
+						auto& txt = coord->GetComponent<TextComponent>(entity);
+						txt.visible = !txt.visible;
+						std::cout << "[DEBUG DISPLAY] " << (txt.visible ? "SHOWN" : "HIDDEN") << " (F8)" << std::endl;
+						break;
+					}
+				}
+			}
 		}
 	}
+#endif
+	// ========================================================================
 }
 
 // -------------------------------------------------

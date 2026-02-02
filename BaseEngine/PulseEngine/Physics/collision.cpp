@@ -315,12 +315,12 @@ void CollisionManager::RebuildUniformGrid()
     m_broadPairsLastFrame = m_candidatePairs.size();
 
      //Optional debug proof (uncomment in debug builds)
-    static int frameCounter = 0;
-    if (++frameCounter % 60 == 0) // print once per ~60 frames
-    {
-        std::cout << "[BroadPhase] cells=" << m_cells.size()
-            << " candidatePairs=" << m_candidatePairs.size()
-            << " entities=" << EntityMember.size()
-            << "\n";
-    }
+    //static int frameCounter = 0;
+    //if (++frameCounter % 60 == 0) // print once per ~60 frames
+    //{
+    //    std::cout << "[BroadPhase] cells=" << m_cells.size()
+    //        << " candidatePairs=" << m_candidatePairs.size()
+    //        << " entities=" << EntityMember.size()
+    //        << "\n";
+    //}
 }
