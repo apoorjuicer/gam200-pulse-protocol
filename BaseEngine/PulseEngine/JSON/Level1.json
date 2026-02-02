@@ -78,11 +78,11 @@
                     "transform": {
                         "position": {
                             "x": -970.0,
-                            "y": -271.57489013671875
+                            "y": -236.12451171875
                         },
                         "scale": {
-                            "x": 636.3574829101563,
-                            "y": 629.4405517578125
+                            "x": 300.0,
+                            "y": 755.3286743164063
                         },
                         "rotation": {
                             "x": 0.0,
@@ -96,9 +96,9 @@
                 {
                     "render": {
                         "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/hero_idle.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/hero.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -109,10 +109,10 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.0626910924911499,
-                        "totalFrames": 2,
-                        "columns": 2,
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
                         "rows": 1,
                         "animationSpeed": 1.5
                     }
@@ -126,7 +126,7 @@
                 },
                 {
                     "name": {
-                        "name": "Jeff"
+                        "name": "Player"
                     }
                 },
                 {
@@ -196,7 +196,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -867,6 +867,11 @@
                         "orderInLayer": 0,
                         "z": 0.0
                     }
+                },
+                {
+                    "Parent": {
+                        "parent": 16
+                    }
                 }
             ]
         },
@@ -896,7 +901,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat greyed (1).png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat greyed.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -922,11 +927,16 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 16
                     }
                 }
             ]
@@ -1169,7 +1179,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1219,14 +1229,84 @@
                         "z": 0.0
                     }
                 }
-            ,
+            ]
+        },
         {
             "components": [
                 {
                     "transform": {
                         "position": {
-                            "x": 800.0,
-                            "y": 300.0
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": true,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "OrderSlipUI"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Children": {
+                        "children": [
+                            10,
+                            11
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -1246,7 +1326,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_220x432.png",
+                        "spriteName": "",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1259,15 +1339,22 @@
                     "animation": {
                         "currentFrame": 0,
                         "elapsedTime": 0.0,
-                        "totalFrames": 16,
-                        "columns": 4,
-                        "rows": 4,
-                        "animationSpeed": 12.0
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "EnemyRhythmController"
+                        ]
                     }
                 },
                 {
                     "name": {
-                        "name": "TestRat"
+                        "name": "TestEnemy"
                     }
                 },
                 {
@@ -1275,14 +1362,11 @@
                         "layerName": "World",
                         "mask": 2,
                         "sortingLayer": 1,
-                        "orderInLayer": 5,
+                        "orderInLayer": 10,
                         "z": 0.0
-                    }
-                },
-                {
-                    "script": {
-                        "scriptName": "EnemyRhythmController"
                     }
                 }
             ]
         }
+    ]
+}

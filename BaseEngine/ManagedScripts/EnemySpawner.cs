@@ -4,126 +4,91 @@ using ScriptAPI;
 
 public class EnemySpawner : Script
 {
-    // =========================
-    // Config
-    // =========================
-    public float enemyDistanceFromPlayer = 8.0f;
-    public bool spawnOnStart = true;
-    public int totalEnemiesToWin = 5;
+    // === SPAWN SETTINGS ===
+    public string EnemyPrefabName = "Rat_Enemy";  // Name of prefab in Assets/Prefabs/ folder
+    public float SpawnX = 800f;                    // Where enemies spawn (X position)
+    public float SpawnY = 300f;                    // Where enemies spawn (Y position)
 
-    // Prefab names (match engine prefab names)
-    public string redEnemyPrefab = "RedEnemy";
-    public string yellowEnemyPrefab = "YellowEnemy";
-    public string blueEnemyPrefab = "BlueEnemy";
+    // === WAVE SETTINGS ===
+    public int EnemiesToSpawn = 3;
+    public float SpawnInterval = 2f;               // Seconds between spawns
 
-    // =========================
-    // State
-    // =========================
-    private List<string> spawnSequence = new List<string>();
-    private int enemiesDefeated = 0;
-    private int currentEnemyId = -1;
+    // === INTERNAL STATE ===
+    private bool initialized = false;
+    private List<int> spawnedEnemies = new List<int>();
+    private int enemiesSpawned = 0;
+    private float timeSinceLastSpawn = 0f;
+    private bool waveComplete = false;
 
-    private bool waitingForGameStart = true;
-    private bool waitingToSpawn = false;
-
-    private float spawnDelayTimer = 0.0f;
-    private const float SPAWN_DELAY = 2.0f;
-
-    // =========================
-    // Lifecycle
-    // =========================
     public override void Update()
     {
-        float dt = Time.DeltaTime;
-
-        // Wait until game actually starts
-        if (waitingForGameStart)
+        if (!initialized)
         {
-            if (IsGamePlaying())
-            {
-                waitingForGameStart = false;
-                BuildSpawnSequence();
-
-                if (spawnOnStart)
-                    SpawnNextEnemy();
-            }
+            Initialize();
+            initialized = true;
             return;
         }
 
-        // Handle delayed spawn
-        if (waitingToSpawn)
+        if (waveComplete) return;
+
+        // Spawn enemies over time
+        if (enemiesSpawned < EnemiesToSpawn)
         {
-            spawnDelayTimer -= dt;
-            if (spawnDelayTimer <= 0.0f)
+            timeSinceLastSpawn += Time.DeltaTime;
+
+            if (timeSinceLastSpawn >= SpawnInterval)
             {
-                waitingToSpawn = false;
-                SpawnNextEnemy();
+                SpawnEnemy();
+                timeSinceLastSpawn = 0f;
             }
         }
-    }
-
-    // =========================
-    // Spawn Logic
-    // =========================
-    private void BuildSpawnSequence()
-    {
-        spawnSequence.Clear();
-
-        // 2 red, 2 yellow, 1 blue
-        spawnSequence.Add(redEnemyPrefab);
-        spawnSequence.Add(redEnemyPrefab);
-        spawnSequence.Add(yellowEnemyPrefab);
-        spawnSequence.Add(yellowEnemyPrefab);
-        spawnSequence.Add(blueEnemyPrefab);
-    }
-
-    private void SpawnNextEnemy()
-    {
-        if (currentEnemyId != -1)
-            return;
-
-        int index = Math.Min(enemiesDefeated, spawnSequence.Count - 1);
-        string prefabName = spawnSequence[index];
-
-        currentEnemyId = Factory.Instantiate(prefabName);
-
-        Console.WriteLine($"Spawned enemy #{enemiesDefeated + 1}: {prefabName}");
-    }
-
-
-    // =========================
-    // Called externally when enemy dies
-    // =========================
-    public void NotifyEnemyDefeated()
-    {
-        currentEnemyId = -1;
-        enemiesDefeated++;
-
-        // Win condition
-        if (enemiesDefeated >= totalEnemiesToWin)
+        else if (!waveComplete)
         {
-            Console.WriteLine("All enemies defeated!");
-            SetGameWin();
+            waveComplete = true;
+            Console.WriteLine($"[EnemySpawner] Wave complete! Spawned {enemiesSpawned} enemies");
+        }
+    }
+
+    private void Initialize()
+    {
+        Console.WriteLine("[EnemySpawner] Initialized");
+        Console.WriteLine($"  Will spawn {EnemiesToSpawn} enemies");
+        Console.WriteLine($"  Prefab: {EnemyPrefabName}");
+        Console.WriteLine($"  Spawn position: ({SpawnX}, {SpawnY})");
+    }
+
+    private void SpawnEnemy()
+    {
+        // Spawn enemy from prefab
+        int enemyID = Factory.Instantiate(EnemyPrefabName);
+
+        if (enemyID < 0)
+        {
+            Console.WriteLine($"[EnemySpawner] Failed to spawn enemy! Prefab '{EnemyPrefabName}' not found");
+            Console.WriteLine($"  Make sure {EnemyPrefabName}.json exists in PulseEngine/Assets/Prefabs/");
             return;
         }
 
-        // Delay before next spawn
-        waitingToSpawn = true;
-        spawnDelayTimer = SPAWN_DELAY;
+        spawnedEnemies.Add(enemyID);
+        enemiesSpawned++;
+
+        Console.WriteLine($"[EnemySpawner] Spawned enemy {enemiesSpawned}/{EnemiesToSpawn} (ID: {enemyID})");
     }
 
-    // =========================
-    // Game State Helpers
-    // =========================
-    private bool IsGamePlaying()
+    // === PUBLIC API ===
+    public void SpawnWave(int count)
     {
-        // Temporary assumption until script lookup exists
-        return true;
+        EnemiesToSpawn = count;
+        enemiesSpawned = 0;
+        timeSinceLastSpawn = 0f;
+        waveComplete = false;
+        spawnedEnemies.Clear();
+
+        Console.WriteLine($"[EnemySpawner] Starting new wave: {count} enemies");
     }
 
-    private void SetGameWin()
+    public int GetSpawnedCount()
     {
-        // Temporary placeholder — GameStateManager will handle this later
-        Scene.LoadScene("WinScene");
+        return spawnedEnemies.Count;
     }
 }
