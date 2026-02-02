@@ -8,14 +8,23 @@
  *
  * @brief       Implements GraphicsManager:
  *              - Initializes GL rendering systems
- *              - Draws world (via GLApp) then overlay text (FPS, controls)
- *              - Handles message subscriptions for debug combo inputs
- *              - Handles shutdown of local GL resources
+ *              - Draws world (via GLApp) and overlay text (via TextRenderer)
+ *              - Updates FPS display text every frame (entity from scene JSON)
+ *              - Handles window resize notifications
+ *              - Manages font loading and lifecycle
+ *              - Shutdown of local GL resources
  *
- *              Fonts:
- *              - We DO NOT create glyphs here.
- *              - We pull them from AssetsManager::GetFont() which returns
- *                const Framework::FontData*.
+ *              DEBUG TEXT (FPS DISPLAY):
+ *              The FPS text entity ("_FPS_Display") is created in the scene JSON
+ *              with a TextComponent. Every frame, Update() finds this entity and
+ *              updates its text field with the current FPS value. The entity is
+ *              destroyed/managed by SceneManager when the scene unloads.
+ *              Visibility toggle (F11 to show/hide) is handled by the input system
+ *              by setting TextComponent::visible on the FPS entity.
+ *
+ *              FONTS:
+ *              Fonts are loaded via FreeType and stored in m_fontMap.
+ *              FontData contains glyph information rendered by TextRenderer.
  * 
  * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
  *             Reproduction or disclosure of this file or its contents without the
@@ -207,9 +216,6 @@ void GraphicsManager::Initialize()
 
     // create white texture for colored quads
     InitWhiteTexture();
-
-    // create FPS/debug text entities (proper text objects - rubric compliant)
-    CreateDebugTextEntities();
 }
 
 void GraphicsManager::Update()
@@ -225,9 +231,6 @@ void GraphicsManager::Update()
 
     //--- Rendering passes ---
     glapp->draw(EntityMember, m_editorLayerFilter);
-
-    // Update FPS text content (syncs visibility with m_showDebugOverlay)
-    UpdateDebugTextEntities();
 
     // Render ALL TextComponent entities (including FPS text objects)
     Update2DTextComponent();
@@ -273,24 +276,6 @@ void GraphicsManager::Shutdown()
     ShutdownFonts();
 
     std::cout << "[GraphicsManager] Shutdown completed\n";
-}
-
-void GraphicsManager::ToggleDebugOverlay()
-{
-    m_showDebugOverlay = !m_showDebugOverlay;
-
-    // Immediately update visibility on text entities
-    auto* g = Coordinator::GetInstance();
-    if (g)
-    {
-        if (m_fpsTextEntity != NULL_ENTITY && g->HasComponent<TextComponent>(m_fpsTextEntity))
-            g->GetComponent<TextComponent>(m_fpsTextEntity).visible = m_showDebugOverlay;
-
-        if (m_topSystemTextEntity != NULL_ENTITY && g->HasComponent<TextComponent>(m_topSystemTextEntity))
-            g->GetComponent<TextComponent>(m_topSystemTextEntity).visible = m_showDebugOverlay;
-    }
-
-    std::cout << "[DEBUG OVERLAY] " << (m_showDebugOverlay ? "SHOWN" : "HIDDEN") << " (F8 to toggle)\n";
 }
 
 void GraphicsManager::OnResize(int width, int height)
@@ -770,140 +755,5 @@ void GraphicsManager::Update2DTextComponent() {
             txt.color,
             txt.alignment
         );
-    }
-}
-
-// =============================================================================
-// Debug Text Entities (FPS, Top System, Team Label)
-// These are proper text objects that can be moved/edited in the editor
-// =============================================================================
-
-void GraphicsManager::CreateDebugTextEntities()
-{
-    auto* g = Coordinator::GetInstance();
-    if (!g) return;
-
-    // ===== FPS TEXT ENTITY =====
-    m_fpsTextEntity = g->CreateEntity();
-
-    {
-        Framework::Transform t;
-        t.Pos = { 100.0f, 80.0f };
-        t.Scale = { 1.0f, 1.0f };
-        t.Rotation = { 0.0f, 0.0f };
-        t.isVisible = true;
-        t.autoHide = false;
-        g->AddComponent(m_fpsTextEntity, t);
-    }
-
-    {
-        TextComponent txt;
-        txt.text = "FPS: --";
-        txt.font_id = "liberation_font";
-        txt.font_size = 40.0f;
-        txt.color = { 0.0f, 1.0f, 1.0f };  // Cyan
-        txt.offset = { 0.0f, 0.0f };
-        txt.visible = m_showDebugOverlay;
-        g->AddComponent(m_fpsTextEntity, txt);
-    }
-
-    {
-        LayerTag layer;
-        layer.mask = LAYER_UI;
-        layer.sortingLayer = 2;    // UI sorting layer
-        layer.orderInLayer = 999;  // On top of other UI
-        layer.z = 100.0f;
-        g->AddComponent(m_fpsTextEntity, layer);
-    }
-
-    {
-        Name name;
-        name.name = "_FPS_Display";
-        g->AddComponent(m_fpsTextEntity, name);
-    }
-
-    // ===== TOP SYSTEM TEXT ENTITY =====
-    m_topSystemTextEntity = g->CreateEntity();
-
-    {
-        Framework::Transform t;
-        t.Pos = { 100.0f, 130.0f };
-        t.Scale = { 1.0f, 1.0f };
-        t.Rotation = { 0.0f, 0.0f };
-        t.isVisible = true;
-        t.autoHide = false;
-        g->AddComponent(m_topSystemTextEntity, t);
-    }
-
-    {
-        TextComponent txt;
-        txt.text = "Top: --";
-        txt.font_id = "liberation_font";
-        txt.font_size = 40.0f;
-        txt.color = { 1.0f, 0.0f, 1.0f };  // Magenta
-        txt.offset = { 0.0f, 0.0f };
-        txt.visible = m_showDebugOverlay;
-        g->AddComponent(m_topSystemTextEntity, txt);
-    }
-
-    {
-        LayerTag layer;
-        layer.mask = LAYER_UI;
-        layer.orderInLayer = 998;
-        layer.z = 100.0f;
-        g->AddComponent(m_topSystemTextEntity, layer);
-    }
-
-    {
-        Name name;
-        name.name = "_TopSystem_Display";
-        g->AddComponent(m_topSystemTextEntity, name);
-    }
-
-    std::cout << "[GraphicsManager] Created debug text entities (F8 to toggle)\n";
-    std::cout << "                  FPS: Entity " << m_fpsTextEntity << "\n";
-    std::cout << "                  TopSystem: Entity " << m_topSystemTextEntity << "\n";
-}
-
-void GraphicsManager::UpdateDebugTextEntities()
-{
-    auto* g = Coordinator::GetInstance();
-    if (!g) return;
-
-    // Update FPS text
-    if (m_fpsTextEntity != NULL_ENTITY && g->HasComponent<TextComponent>(m_fpsTextEntity))
-    {
-        auto& txt = g->GetComponent<TextComponent>(m_fpsTextEntity);
-
-        std::ostringstream ss;
-        ss << "FPS: " << std::fixed << std::setprecision(1) << GLHelper::fps;
-        txt.text = ss.str();
-        txt.visible = m_showDebugOverlay;
-    }
-
-    // Update top system text
-    if (m_topSystemTextEntity != NULL_ENTITY && g->HasComponent<TextComponent>(m_topSystemTextEntity))
-    {
-        auto& txt = g->GetComponent<TextComponent>(m_topSystemTextEntity);
-
-        auto* profiler = ProfilingManager::GetInstance();
-        const auto& profiles = profiler->GetDisplayProfiles();
-
-        std::string topSystem = "None";
-        double topPercentage = 0.0;
-
-        for (const auto& [name, profile] : profiles)
-        {
-            if (profile.percentage > topPercentage)
-            {
-                topPercentage = profile.percentage;
-                topSystem = name;
-            }
-        }
-
-        std::ostringstream ss;
-        ss << topSystem << ": " << std::fixed << std::setprecision(2) << topPercentage << "%";
-        txt.text = ss.str();
-        txt.visible = m_showDebugOverlay;
     }
 }

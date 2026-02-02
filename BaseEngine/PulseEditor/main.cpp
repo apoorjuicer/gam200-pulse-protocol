@@ -5,7 +5,7 @@
  * @author      Goh Pin Kai
  * @brief       Main
 
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
@@ -20,6 +20,24 @@ int main()
     Engine->SetStartupFullscreen(false);
     Engine->Setup();
     Engine->Init();                     
+
+    // Hide debug display in Release mode
+#ifndef _DEBUG
+    auto* coord = Coordinator::GetInstance();
+    auto sceneManager = coord->GetSystem<SceneManager>();
+    if (coord && sceneManager) {
+        const auto& entities = sceneManager->GetSceneEntities();
+        for (auto entity : entities) {
+            if (coord->HasComponent<Name>(entity)) {
+                auto& name = coord->GetComponent<Name>(entity);
+                if (name.name == "Debug Display Text" && coord->HasComponent<TextComponent>(entity)) {
+                    auto& txt = coord->GetComponent<TextComponent>(entity);
+                    txt.visible = false;
+                }
+            }
+        }
+    }
+#endif
 
     GLFWwindow* win = Engine->GetWindow(); 
 
