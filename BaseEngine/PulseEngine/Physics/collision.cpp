@@ -314,7 +314,7 @@ void CollisionManager::RebuildUniformGrid()
 
     m_broadPairsLastFrame = m_candidatePairs.size();
 
-     //Optional debug proof (uncomment in debug builds)
+    /* //Optional debug proof (uncomment in debug builds)
     static int frameCounter = 0;
     if (++frameCounter % 60 == 0) // print once per ~60 frames
     {
@@ -322,5 +322,5 @@ void CollisionManager::RebuildUniformGrid()
             << " candidatePairs=" << m_candidatePairs.size()
             << " entities=" << EntityMember.size()
             << "\n";
-    }
+    }*/
 }
