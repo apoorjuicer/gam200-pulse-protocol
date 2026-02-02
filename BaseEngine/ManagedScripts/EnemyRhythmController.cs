@@ -91,9 +91,6 @@ public class EnemyRhythmController : Script
         // Press 4 for Hurt
         if (input.IsKeyTriggered(52)) // Key '4'
         {
-                public int HurtFrames = 15;
-    public int HurtColumns = 5;
-    public int HurtRows = 3;
             Console.WriteLine("[TEST] Switching to HURT");
             SetStateVisuals(EnemyState.Dead);
         }
