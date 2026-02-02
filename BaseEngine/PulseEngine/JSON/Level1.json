@@ -855,6 +855,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "OrderSlipCurrentIcon"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "Queued"
                     }
@@ -918,6 +925,13 @@
                         "columns": 1,
                         "rows": 1,
                         "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "OrderSlipNextIcon"
+                        ]
                     }
                 },
                 {
@@ -1277,6 +1291,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "OrderSlipUIController"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "OrderSlipUI"
                     }
@@ -1354,7 +1375,7 @@
                 },
                 {
                     "name": {
-                        "name": "TestRat"
+                        "name": "Enemy"
                     }
                 },
                 {

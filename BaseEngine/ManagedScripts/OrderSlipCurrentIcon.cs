@@ -14,12 +14,15 @@ public class OrderSlipCurrentIcon : Script
         if (!initialized)
         {
             TransformComponent tf0 = GetTransform();
-            slotX = tf0.X; slotY = tf0.Y;
+            slotX = tf0.X;
+            slotY = tf0.Y;
 
+            // Wait for controller to exist before registering
             if (OrderSlipUIController.Instance != null)
+            {
                 OrderSlipUIController.Instance.RegisterCurrentSlot(slotX, slotY);
-
-            initialized = true;
+                initialized = true;
+            }
             return;
         }
 
@@ -28,42 +31,41 @@ public class OrderSlipCurrentIcon : Script
 
         TransformComponent tf = GetTransform();
 
-        // Always anchored to current slot
-        tf.X = slotX;
-        tf.Y = slotY;
-
         if (!ui.Transitioning)
         {
             if (wasTransitioning)
             {
-                // after transition ends, this becomes the "next" icon
-                if (ui.SlotsReady())
-                {
-                    tf.X = ui.NextSlotX;
-                    tf.Y = ui.NextSlotY;
-                }
-
+                // Transition just ended - stay at current slot with current appearance
+                tf.X = slotX;
+                tf.Y = slotY;
                 tf.RotX = 0.0f;
-                tf.ScaleX = ui.nextScale;
-                tf.ScaleY = ui.nextScale;
+                tf.ScaleX = ui.currentScale;
+                tf.ScaleY = ui.currentScale;
 
-                SetSprite(ui.GetDimSprite(ui.NextType));
+                SetSprite(ui.GetVibrantSprite(ui.CurrentType));
+                wasTransitioning = false;
             }
             else
             {
+                // Normal state - positioned at current slot, vibrant sprite
+                tf.X = slotX;
+                tf.Y = slotY;
                 tf.RotX = 0.0f;
                 tf.ScaleX = ui.currentScale;
                 tf.ScaleY = ui.currentScale;
 
                 SetSprite(ui.GetVibrantSprite(ui.CurrentType));
             }
-
-            wasTransitioning = false;
             return;
         }
 
-        // Transitioning: "fade" via shrink
+        // During transition: fade out by shrinking
         wasTransitioning = true;
+
+        // Keep position stable during fade
+        tf.X = slotX;
+        tf.Y = slotY;
+
         float s = ui.Lerp(ui.currentScale, ui.currentScale * 0.85f, ui.Fade01);
         tf.ScaleX = s;
         tf.ScaleY = s;
@@ -76,6 +78,7 @@ public class OrderSlipCurrentIcon : Script
         if (spriteName == lastSprite) return;
         lastSprite = spriteName;
         Console.WriteLine($"[OrderSlipCurrent] Sprite -> {spriteName}");
-        // replace with real sprite setter later
+        // TODO: Add actual sprite changing code here based on your engine's API
+        // Example: GetSprite().SetTexture(spriteName); or similar
     }
 }

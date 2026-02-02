@@ -33,9 +33,50 @@ public class OrderSlipUIController : Script
 
     private bool initialized = false;
 
-    // Call once externally after scripts exist (or call from a bootstrap script)
+    public override void Update()
+    {
+        // First-frame setup - establish singleton immediately
+        if (!initialized)
+        {
+            if (Instance != null && Instance != this)
+            {
+                Console.WriteLine("[OrderSlipUI] WARNING: Multiple OrderSlipUIController instances detected!");
+            }
+            Instance = this;
+            initialized = true;
+            Console.WriteLine("[OrderSlipUI] Controller initialized");
+            return;
+        }
+
+        if (!Transitioning) return;
+
+        float dt = Time.DeltaTime;
+
+        // Update fade progress
+        Fade01 = (fadeDuration <= 0.0001f) ? 1.0f : (Fade01 + dt / fadeDuration);
+        if (Fade01 > 1.0f) Fade01 = 1.0f;
+
+        // Update movement progress
+        Move01 = (transitionDuration <= 0.0001f) ? 1.0f : (Move01 + dt / transitionDuration);
+        if (Move01 > 1.0f) Move01 = 1.0f;
+
+        // End transition when both animations complete
+        if (Move01 >= 1.0f && Fade01 >= 1.0f)
+        {
+            Transitioning = false;
+            Console.WriteLine("[OrderSlipUI] Transition complete");
+        }
+    }
+
+    // Call once externally after scripts exist (or from a bootstrap script)
     public void Init(EnemyIconType current, EnemyIconType upcoming)
     {
+        if (Transitioning)
+        {
+            Console.WriteLine("[OrderSlipUI] WARNING: Init called during transition - ignoring");
+            return;
+        }
+
         CurrentType = current;
         NextType = upcoming;
 
@@ -48,11 +89,23 @@ public class OrderSlipUIController : Script
 
     public void AdvanceQueue(EnemyIconType newUpcoming)
     {
-        if (Transitioning) return;
+        if (Transitioning)
+        {
+            Console.WriteLine("[OrderSlipUI] WARNING: AdvanceQueue called during transition - ignoring");
+            return;
+        }
 
+        if (!SlotsReady())
+        {
+            Console.WriteLine("[OrderSlipUI] WARNING: Slots not registered yet - cannot advance");
+            return;
+        }
+
+        // Shift queue forward
         CurrentType = NextType;
         NextType = newUpcoming;
 
+        // Start transition
         Transitioning = true;
         Move01 = 0.0f;
         Fade01 = 0.0f;
@@ -60,38 +113,31 @@ public class OrderSlipUIController : Script
         Console.WriteLine($"[OrderSlipUI] Advance -> Current={CurrentType}, Next={NextType}");
     }
 
-    public override void Update()
+    public void RegisterCurrentSlot(float x, float y)
     {
-        // first-frame "OnCreate"
-        if (!initialized)
-        {
-            Instance = this;
-            initialized = true;
-            return;
-        }
-
-        if (!Transitioning) return;
-
-        float dt = Time.DeltaTime;
-
-        Fade01 = (fadeDuration <= 0.0001f) ? 1.0f : (Fade01 + dt / fadeDuration);
-        if (Fade01 > 1.0f) Fade01 = 1.0f;
-
-        Move01 = (transitionDuration <= 0.0001f) ? 1.0f : (Move01 + dt / transitionDuration);
-        if (Move01 > 1.0f) Move01 = 1.0f;
-
-        if (Move01 >= 1.0f && Fade01 >= 1.0f)
-        {
-            Transitioning = false;
-            Console.WriteLine("[OrderSlipUI] Transition done");
-        }
+        CurrentSlotX = x;
+        CurrentSlotY = y;
+        hasCurrentSlot = true;
+        Console.WriteLine($"[OrderSlipUI] Current slot registered at ({x}, {y})");
     }
 
-    public void RegisterCurrentSlot(float x, float y) { CurrentSlotX = x; CurrentSlotY = y; hasCurrentSlot = true; }
-    public void RegisterNextSlot(float x, float y) { NextSlotX = x; NextSlotY = y; hasNextSlot = true; }
-    public bool SlotsReady() { return hasCurrentSlot && hasNextSlot; }
+    public void RegisterNextSlot(float x, float y)
+    {
+        NextSlotX = x;
+        NextSlotY = y;
+        hasNextSlot = true;
+        Console.WriteLine($"[OrderSlipUI] Next slot registered at ({x}, {y})");
+    }
 
+    public bool SlotsReady()
+    {
+        return hasCurrentSlot && hasNextSlot;
+    }
+
+    // Easing function for smooth animation
     public float EaseSmooth(float t) => t * t * (3f - 2f * t);
+
+    // Linear interpolation
     public float Lerp(float a, float b, float t) => a + (b - a) * t;
 
     public string GetVibrantSprite(EnemyIconType type)
@@ -116,4 +162,3 @@ public class OrderSlipUIController : Script
         }
     }
 }
-
