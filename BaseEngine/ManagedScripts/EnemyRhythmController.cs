@@ -31,15 +31,15 @@ public class EnemyRhythmController : Script
     public float AnimationSpeed = 12f;
 
     // Base size for consistent visual appearance
-    public float BaseWidth = 200f;   // Target visual width
-    public float BaseHeight = 200f;  // Target visual height
+    public float BaseWidth = 200f;
+    public float BaseHeight = 200f;
 
     // === RHYTHM SETTINGS ===
     public RhythmType RhythmType = RhythmType.Syncopated;
-    public float StepDistance = 50f;  // 50 pixels per beat = 8 beats to reach player
+    public float StepDistance = 50f;
 
     // === COMBAT SETTINGS ===
-    public float AttackRange = 25f;   // Attack when within 50 pixels (very close)
+    public float AttackRange = 25f;
     public float AttackDamage = 12f;
     public float Health = 15f;
 
@@ -53,14 +53,11 @@ public class EnemyRhythmController : Script
     // === REFERENCES ===
     public Conductor ConductorRef = null;
     public ComboSystem ComboRef = null;
+    public TurnManager TurnManagerRef = null;
 
     // === INTERNAL STATE ===
     private bool initialized = false;
-    private bool gameStarted = false;
-    private int beatCounter = 0;
     private int lastBeat = -1;
-    private bool canMove = true;
-    private bool recentlyAttacked = false;
     private bool isDead = false;
     private EnemyState currentState = EnemyState.Idle;
 
@@ -68,12 +65,10 @@ public class EnemyRhythmController : Script
     private float deathTimer = 0f;
     private bool waitingToDie = false;
 
-    // For auto-movement testing
-    private float moveTimer = 0f;
-    private float moveInterval = 0.5f;
-
-    // For time-based fallback
-    private float elapsedTime = 0f;
+    // Track movement during enemy turn
+    private int movementStepsTaken = 0;
+    private int maxMovementSteps = 4;
+    private int remainingPunishmentSteps = 0;
 
     public override void Update()
     {
@@ -82,21 +77,6 @@ public class EnemyRhythmController : Script
             Initialize();
             initialized = true;
             return;
-        }
-
-        elapsedTime += Time.DeltaTime;
-
-        if (!gameStarted)
-        {
-            if (CheckGameStarted())
-            {
-                gameStarted = true;
-                Console.WriteLine("[Enemy] Game started! Beginning movement.");
-            }
-            else
-            {
-                return;
-            }
         }
 
         if (isDead)
@@ -118,8 +98,6 @@ public class EnemyRhythmController : Script
             attackCooldownTimer -= Time.DeltaTime;
             if (attackCooldownTimer <= 0f)
             {
-                recentlyAttacked = false;
-                canMove = true;
                 if (currentState == EnemyState.Attacking)
                     SetState(EnemyState.Idle);
             }
@@ -130,30 +108,20 @@ public class EnemyRhythmController : Script
         float distanceToPlayer = Math.Abs(myTf.X - PlayerX);
 
         // If in attack range, attack
-        if (distanceToPlayer <= AttackRange && !recentlyAttacked && canMove)
+        if (distanceToPlayer <= AttackRange && currentState != EnemyState.Attacking)
         {
-            canMove = false;
             AttackSequence();
             return;
         }
 
-        // Movement logic
-        if (ConductorRef != null)
+        // Movement logic - only during enemy turn
+        if (ConductorRef != null && TurnManagerRef != null)
         {
             int currentBeat = ConductorRef.GetCurrentBeat();
             if (currentBeat != lastBeat)
             {
                 lastBeat = currentBeat;
                 HandleBeat(currentBeat);
-            }
-        }
-        else
-        {
-            moveTimer += Time.DeltaTime;
-            if (moveTimer >= moveInterval && canMove)
-            {
-                moveTimer = 0f;
-                Step();
             }
         }
     }
@@ -163,16 +131,12 @@ public class EnemyRhythmController : Script
         Console.WriteLine("[Enemy] Initializing...");
 
         TransformComponent tf = GetTransform();
-
-        // Set initial scale for idle sprite
         SetScaleForSprite(IdleSpriteSheet, 220, 432);
-
         SetState(EnemyState.Idle);
 
         if (ConductorRef != null)
         {
-            beatCounter = ConductorRef.GetCurrentBeat();
-            lastBeat = beatCounter;
+            lastBeat = ConductorRef.GetCurrentBeat();
             Console.WriteLine("[Enemy] Conductor connected");
         }
 
@@ -183,38 +147,20 @@ public class EnemyRhythmController : Script
         }
 
         Console.WriteLine($"[Enemy] Initialized at ({tf.X}, {tf.Y})");
-        Console.WriteLine("[Enemy] Waiting for countdown to finish...");
     }
 
     private void SetScaleForSprite(string spriteName, float spriteWidth, float spriteHeight)
     {
         TransformComponent tf = GetTransform();
-
-        // Target bounding box - all rats should fit in this area
-        float targetSize = 200f;  // Adjust this to control overall size
-
-        // Calculate scale factor to fit within the box
+        float targetSize = 200f;
         float scaleX = targetSize / spriteWidth;
         float scaleY = targetSize / spriteHeight;
-
-        // Use the SMALLER scale to ensure sprite fits entirely
         float uniformScale = Math.Min(scaleX, scaleY);
 
-        // Apply uniform scaling (maintains aspect ratio)
         tf.ScaleX = spriteWidth * uniformScale;
         tf.ScaleY = spriteHeight * uniformScale;
 
         Console.WriteLine($"[Enemy] Scale set for {spriteName}: ({tf.ScaleX:F1}, {tf.ScaleY:F1})");
-    }
-
-    private bool CheckGameStarted()
-    {
-        if (ConductorRef != null)
-        {
-            int currentBeat = ConductorRef.GetCurrentBeat();
-            return currentBeat >= 3;  // Wait until Beat 3
-        }
-        return elapsedTime >= 3.0f;
     }
 
     private void SetState(EnemyState newState)
@@ -256,27 +202,49 @@ public class EnemyRhythmController : Script
 
     private void HandleBeat(int beat)
     {
-        beatCounter++;
+        if (TurnManagerRef == null)
+            return;
 
-        bool shouldMove = false;
+        TurnPhase currentPhase = TurnManagerRef.GetCurrentPhase();
 
-        if (RhythmType == RhythmType.OneBeat)
-            shouldMove = true;
-        else if (RhythmType == RhythmType.TwoBeat && beatCounter % 2 == 0)
-            shouldMove = true;
-        else if (RhythmType == RhythmType.FourBeat && beatCounter % 4 == 0)
-            shouldMove = true;
-        else if (RhythmType == RhythmType.Syncopated)
-            shouldMove = true;
+        // During countdown - stay idle
+        if (currentPhase == TurnPhase.Countdown)
+        {
+            SetState(EnemyState.Idle);
+            return;
+        }
 
-        if (shouldMove && canMove)
-            Step();
+        // During enemy display - move
+        if (currentPhase == TurnPhase.EnemyDisplay)
+        {
+            if (movementStepsTaken < maxMovementSteps)
+            {
+                Step();
+                movementStepsTaken++;
+            }
+            return;
+        }
+
+        // During player input - freeze
+        if (currentPhase == TurnPhase.PlayerInput)
+        {
+            SetState(EnemyState.Idle);
+            return;
+        }
+
+        // During resolution - execute punishment steps if needed
+        if (currentPhase == TurnPhase.Resolution)
+        {
+            if (remainingPunishmentSteps > 0)
+            {
+                Step();
+                remainingPunishmentSteps--;
+            }
+        }
     }
 
     private void Step()
     {
-        if (!canMove) return;
-
         SetState(EnemyState.Moving);
 
         TransformComponent myTf = GetTransform();
@@ -287,11 +255,10 @@ public class EnemyRhythmController : Script
 
     private void AttackSequence()
     {
-        if (recentlyAttacked || isDead) return;
+        if (isDead) return;
 
         Console.WriteLine("[Enemy] ATTACKING!");
         SetState(EnemyState.Attacking);
-        recentlyAttacked = true;
 
         attackCooldownTimer = AttackFrames / AnimationSpeed;
 
@@ -299,17 +266,16 @@ public class EnemyRhythmController : Script
         if (ComboRef != null)
         {
             playerSucceeded = ComboRef.PlayerDidSuccessfulCombo;
-            ComboRef.ResetCombo();
         }
 
         if (!playerSucceeded)
         {
             Console.WriteLine($"[Enemy] Player failed! Dealing {AttackDamage} damage");
+            // Apply damage to player here
         }
         else
         {
-            Console.WriteLine("[Enemy] Player succeeded! Dying...");
-            Die();
+            Console.WriteLine("[Enemy] Player succeeded! Taking damage...");
         }
     }
 
@@ -329,5 +295,23 @@ public class EnemyRhythmController : Script
         deathTimer = 0f;
         SetState(EnemyState.Dead);
         Console.WriteLine("[Enemy] Defeated!");
+    }
+
+    // Called by TurnManager when player fails
+    public void ExecuteFailurePunishment()
+    {
+        remainingPunishmentSteps = maxMovementSteps - movementStepsTaken;
+        Console.WriteLine($"[Enemy] Player failed! Moving {remainingPunishmentSteps} remaining steps and attacking!");
+
+        // Reset for next turn
+        movementStepsTaken = 0;
+    }
+
+    // Called by TurnManager at start of enemy turn
+    public void ResetMovementForNewTurn()
+    {
+        movementStepsTaken = 0;
+        remainingPunishmentSteps = 0;
+        SetState(EnemyState.Idle);
     }
 }
