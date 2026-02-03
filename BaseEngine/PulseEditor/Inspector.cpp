@@ -2,9 +2,10 @@
 /**
  * @file        Inspector.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 60%
+ * @author      Leu Jun Yong (primary) - 50%
  *              Chloe Lau Rey En (secondary) - 20%
  *              Ban Kai Wei Benjamin (secondary) - 20%
+ *              Goh Pin Kai (secondary) - 10%
  * 
  * @brief       Entity inspector panel with component editors and undo support.
  *
@@ -958,51 +959,59 @@ namespace PulseEditor
             {
                 ImGui::Indent();
 
-                auto StepperInt = [&](const char *label, int *v, int minv, int maxv, int step = 1)
-                {
-                    ImGui::PushID(label);
-                    ImGui::SetNextItemWidth(120.0f);
-                    bool changed = ImGui::InputInt("", v);
-                    ImGui::SameLine();
-                    if (ImGui::SmallButton(" - "))
+                auto StepperInt = [&](const char* label, int* v, int minv, int maxv, int step = 1)
                     {
-                        *v = std::max(minv, *v - step);
-                        changed = true;
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::SmallButton(" + "))
-                    {
-                        *v = std::min(maxv, *v + step);
-                        changed = true;
-                    }
-                    ImGui::SameLine();
-                    ImGui::TextUnformatted(label);
-                    ImGui::PopID();
-                    return changed;
-                };
+                        ImGui::PushID(label);
+                        ImGui::SetNextItemWidth(120.0f);
 
-                auto StepperFloat = [&](const char *label, float *v, float minv, float maxv, float step = 0.1f)
-                {
-                    ImGui::PushID(label);
-                    ImGui::SetNextItemWidth(120.0f);
-                    bool changed = ImGui::InputFloat("", v, 0.0f, 0.0f, "%.1f");
-                    ImGui::SameLine();
-                    if (ImGui::SmallButton(" - "))
+                        // Disable ImGui built-in +/- buttons
+                        bool changed = ImGui::InputInt("##value", v, 0, 0);
+
+                        ImGui::SameLine();
+                        if (ImGui::SmallButton("-"))
+                        {
+                            *v = std::max(minv, *v - step);
+                            changed = true;
+                        }
+                        ImGui::SameLine();
+                        if (ImGui::SmallButton("+"))
+                        {
+                            *v = std::min(maxv, *v + step);
+                            changed = true;
+                        }
+                        ImGui::SameLine();
+                        ImGui::TextUnformatted(label);
+
+                        ImGui::PopID();
+                        return changed;
+                    };
+
+                auto StepperFloat = [&](const char* label, float* v, float minv, float maxv, float step = 0.1f)
                     {
-                        *v = std::max(minv, *v - step);
-                        changed = true;
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::SmallButton(" + "))
-                    {
-                        *v = std::min(maxv, *v + step);
-                        changed = true;
-                    }
-                    ImGui::SameLine();
-                    ImGui::TextUnformatted(label);
-                    ImGui::PopID();
-                    return changed;
-                };
+                        ImGui::PushID(label);
+                        ImGui::SetNextItemWidth(120.0f);
+
+                        // Disable ImGui built-in +/- buttons (step args are for arrows)
+                        bool changed = ImGui::InputFloat("##value", v, 0.0f, 0.0f, "%.1f");
+
+                        ImGui::SameLine();
+                        if (ImGui::SmallButton("-"))
+                        {
+                            *v = std::max(minv, *v - step);
+                            changed = true;
+                        }
+                        ImGui::SameLine();
+                        if (ImGui::SmallButton("+"))
+                        {
+                            *v = std::min(maxv, *v + step);
+                            changed = true;
+                        }
+                        ImGui::SameLine();
+                        ImGui::TextUnformatted(label);
+
+                        ImGui::PopID();
+                        return changed;
+                    };
 
                 // Rows
                 {
@@ -1028,7 +1037,18 @@ namespace PulseEditor
                     }
                 }
 
-                ImGui::Text("Total Frames: %d", a.totalFrames);
+                // Total Frames 
+                {
+                    const int maxFrames = std::max(1, a.rows * a.columns);
+                    int frames = a.totalFrames;
+
+                    if (StepperInt("Total Frames", &frames, 1, maxFrames))
+                    {
+                        a.totalFrames = std::clamp(frames, 1, maxFrames);
+                        a.currentFrame = std::clamp(a.currentFrame, 0, a.totalFrames - 1);
+                        a.elapsedTime = 0.0f;
+                    }
+                }
 
                 // Current frame
                 {
