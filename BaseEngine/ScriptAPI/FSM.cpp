@@ -16,6 +16,7 @@
 #include "FSM.h"
 #include "../CoreEngine/ECS/Coordinator.h"
 #include "../StateMachine/FSMComponent.h"
+#include "../StateMachine/StateMachine.h"
 
 #undef generic
 
@@ -24,7 +25,7 @@ namespace ScriptAPI
     FSMComponentAPI::FSMComponentAPI(unsigned int ID) : entityID(ID) {}
 
     // Helper: safely get native FSMComponent
-    static bool TryGetFSM(unsigned int id, FSMComponent*& outFSM)
+    /*static bool TryGetFSM(unsigned int id, FSMComponent*& outFSM)
     {
         auto g = Coordinator::GetInstance();
         if (!g->HasComponent<FSMComponent>(id))
@@ -32,54 +33,54 @@ namespace ScriptAPI
 
         outFSM = &g->GetComponent<FSMComponent>(id);
         return true;
-    }
+    }*/
 
     int FSMComponentAPI::GetState()
     {
-        FSMComponent* fsm = nullptr;
-        if (!TryGetFSM(entityID, fsm))
-            return -1; // entity has no FSMComponent
+        ::StateMachine fsm ;
+        //if (!TryGetFSM(entityID, fsm))
+        //    return -1; // entity has no FSMComponent
 
-        return static_cast<int>(fsm->machine.GetState());
+        return static_cast<int>(fsm.GetState());
     }
 
     void FSMComponentAPI::RequestMove(bool moving)
     {
-        FSMComponent* fsm = nullptr;
-        if (!TryGetFSM(entityID, fsm))
-            return;
+        ::FSMContext fsm ;
+        /*if (!TryGetFSM(entityID, fsm))
+            return;*/
 
-        fsm->ctx.wantsMove = moving;
+        fsm.wantsMove = moving;
     }
 
     void FSMComponentAPI::RequestAttack()
     {
-        FSMComponent* fsm = nullptr;
-        if (!TryGetFSM(entityID, fsm))
-            return;
+        ::FSMContext fsm;
+        /*if (!TryGetFSM(entityID, fsm))
+            return;*/
 
         // one-frame request; your FSM Update() should clear it after consuming
-        fsm->ctx.wantsAttack = true;
+        fsm.wantsAttack = true;
     }
 
     void FSMComponentAPI::NotifyDamage()
     {
-        FSMComponent* fsm = nullptr;
-        if (!TryGetFSM(entityID, fsm))
-            return;
+        FSMContext fsm;
+        /*if (!TryGetFSM(entityID, fsm))
+            return;*/
 
         // one-frame flag; FSM Update() should clear it after consuming
-        fsm->ctx.tookDamage = true;
+        fsm.tookDamage = true;
     }
 
     void FSMComponentAPI::ClearRequests()
     {
-        FSMComponent* fsm = nullptr;
-        if (!TryGetFSM(entityID, fsm))
-            return;
+        FSMContext fsm;
+        /*if (!TryGetFSM(entityID, fsm))
+            return;*/
 
-        fsm->ctx.wantsMove = false;
-        fsm->ctx.wantsAttack = false;
-        fsm->ctx.tookDamage = false;
+        fsm.wantsMove = false;
+        fsm.wantsAttack = false;
+        fsm.tookDamage = false;
     }
 }

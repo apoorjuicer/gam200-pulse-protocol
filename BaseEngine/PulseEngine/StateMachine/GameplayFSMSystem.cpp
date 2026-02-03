@@ -31,8 +31,9 @@ void GameplayFSMSystem::Update(float dt)
         auto& fsm = g->GetComponent<FSMComponent>(e);
         auto& hp = g->GetComponent<Health>(e);
 
+		FSMContext* fsmcontext = nullptr;
         // Update ctx signals
-        fsm.ctx.isDead = (hp.hp <= 0) || !hp.isAlive; // adjust to your Health fields
+        fsmcontext->isDead = (hp.hp <= 0) || !hp.isAlive; // adjust to your Health fields
 
         // NOTE: these should be set by your input/gameplay pipeline:
         /*fsm.ctx.wantsMove = true;
@@ -40,7 +41,9 @@ void GameplayFSMSystem::Update(float dt)
         fsm.ctx.tookDamage = false;*/
 
         // Run FSM
-        fsm.machine.Update(fsm.ctx, dt);
+        FSMContext ctx;
+		StateMachine* statemachine = nullptr;
+        statemachine->Update(ctx, dt);
 
         // Optionally: you can react engine-side to state changes here
         // e.g. lock movement during Attack/Damage, etc.

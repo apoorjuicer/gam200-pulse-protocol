@@ -17,8 +17,9 @@
 
 struct FSMComponent
 {
-    StateMachine machine;
-    FSMContext   ctx;
+    /*StateMachine machine;
+    FSMContext   ctx;*/
+    FSMState  States;
 
     // Requests (set by input/scripts; consumed by FSM each frame)
     // You can set these directly from your input system or ScriptAPI.
