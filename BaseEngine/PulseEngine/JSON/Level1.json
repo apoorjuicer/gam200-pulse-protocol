@@ -78,11 +78,11 @@
                     "transform": {
                         "position": {
                             "x": -970.0,
-                            "y": -271.57489013671875
+                            "y": -236.12451171875
                         },
                         "scale": {
-                            "x": 636.3574829101563,
-                            "y": 629.4405517578125
+                            "x": 300.0,
+                            "y": 755.3286743164063
                         },
                         "rotation": {
                             "x": 0.0,
@@ -96,9 +96,9 @@
                 {
                     "render": {
                         "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/hero_idle.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/hero.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -109,10 +109,10 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 1,
-                        "elapsedTime": 0.0626910924911499,
-                        "totalFrames": 2,
-                        "columns": 2,
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
                         "rows": 1,
                         "animationSpeed": 1.5
                     }
@@ -126,7 +126,7 @@
                 },
                 {
                     "name": {
-                        "name": "Jeff"
+                        "name": "Player"
                     }
                 },
                 {
@@ -196,7 +196,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -855,6 +855,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "OrderSlipCurrentIcon"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "Queued"
                     }
@@ -870,7 +877,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 14
+                        "parent": 16
                     }
                 }
             ]
@@ -921,6 +928,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "OrderSlipNextIcon"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "Next Up"
                     }
@@ -936,7 +950,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 14
+                        "parent": 16
                     }
                 }
             ]
@@ -1057,13 +1071,13 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "TextSample"
+                            "ConductorBeatTester"
                         ]
                     }
                 },
                 {
                     "name": {
-                        "name": "TextTest"
+                        "name": "ConductorBeatTester"
                     }
                 },
                 {
@@ -1073,24 +1087,6 @@
                         "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
-                    }
-                },
-                {
-                    "TextComponent": {
-                        "text": "",
-                        "font_id": "",
-                        "offset": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "font_size": 48.0,
-                        "color": [
-                            1.0,
-                            0.5,
-                            0.0
-                        ],
-                        "visible": true,
-                        "alignment": 1
                     }
                 }
             ]
@@ -1141,8 +1137,15 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "TextSample"
+                        ]
+                    }
+                },
+                {
                     "name": {
-                        "name": "OrderSlipUI"
+                        "name": "TextTest"
                     }
                 },
                 {
@@ -1155,11 +1158,21 @@
                     }
                 },
                 {
-                    "Children": {
-                        "children": [
-                            10,
-                            11
-                        ]
+                    "TextComponent": {
+                        "text": "",
+                        "font_id": "",
+                        "offset": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "font_size": 48.0,
+                        "color": [
+                            1.0,
+                            0.5,
+                            0.0
+                        ],
+                        "visible": true,
+                        "alignment": 1
                     }
                 }
             ]
@@ -1180,7 +1193,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1227,6 +1240,150 @@
                         "mask": 4,
                         "sortingLayer": 2,
                         "orderInLayer": 1,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": true,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "OrderSlipUIController"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "OrderSlipUI"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Children": {
+                        "children": [
+                            10,
+                            11
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 1181.8182373046875,
+                            "y": -370.1049499511719
+                        },
+                        "scale": {
+                            "x": 150.0,
+                            "y": 250.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 2.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_220x432.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 15,
+                        "columns": 4,
+                        "rows": 4,
+                        "animationSpeed": 12.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "EnemyRhythmController"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Enemy"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 5,
                         "z": 0.0
                     }
                 }

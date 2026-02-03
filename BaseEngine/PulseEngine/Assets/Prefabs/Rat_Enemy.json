@@ -1,0 +1,63 @@
+{
+  "components": [
+    {
+      "transform": {
+        "position": {
+          "x": 800.0,
+          "y": 300.0
+        },
+        "scale": {
+          "x": 200.0,
+          "y": 200.0
+        },
+        "rotation": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "isVisible": true
+      }
+    },
+    {
+      "render": {
+        "mdl_ref": 0.0,
+        "shd_ref": 2.0,
+        "useTexture": true,
+        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_220x432.png",
+        "tintColor": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 1.0
+        }
+      }
+    },
+    {
+      "animation": {
+        "currentFrame": 0,
+        "elapsedTime": 0.0,
+        "totalFrames": 16,
+        "columns": 4,
+        "rows": 4,
+        "animationSpeed": 12.0
+      }
+    },
+    {
+      "name": {
+        "name": "Rat_Enemy"
+      }
+    },
+    {
+      "LayerTag": {
+        "layerName": "World",
+        "mask": 2,
+        "orderInLayer": 5,
+        "z": 0.0
+      }
+    },
+    {
+      "script": {
+        "scriptName": "EnemyRhythmController"
+      }
+    }
+  ]
+}

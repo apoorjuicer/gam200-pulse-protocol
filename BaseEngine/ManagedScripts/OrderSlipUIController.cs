@@ -7,47 +7,44 @@ public class OrderSlipUIController : Script
 {
     public static OrderSlipUIController Instance;
 
-    // Tunables (timing + motion only)
+    // Tunables
+    public float currentScale = 1.0f;
+    public float nextScale = 0.75f;
     public float transitionDuration = 0.35f;
     public float fadeDuration = 0.25f;
-    public float rotateDegrees = 90.0f; // RotZ
-    public float arcHeight = 30.0f;     // Y arc amount
+    public float rotateDegrees = 90.0f;
+    public float arcHeight = 30.0f;
 
     // State
     public EnemyIconType CurrentType { get; private set; } = EnemyIconType.None;
     public EnemyIconType NextType { get; private set; } = EnemyIconType.None;
 
     public bool Transitioning { get; private set; } = false;
-    public float Move01 { get; private set; } = 0.0f; // 0..1
-    public float Fade01 { get; private set; } = 0.0f; // 0..1
+    public float Move01 { get; private set; } = 0.0f;
+    public float Fade01 { get; private set; } = 0.0f;
 
-    // “Slots” captured from editor placement (positions + scales)
     public float CurrentSlotX { get; private set; }
     public float CurrentSlotY { get; private set; }
-    public float CurrentSlotScaleX { get; private set; }
-    public float CurrentSlotScaleY { get; private set; }
-
     public float NextSlotX { get; private set; }
     public float NextSlotY { get; private set; }
-    public float NextSlotScaleX { get; private set; }
-    public float NextSlotScaleY { get; private set; }
 
     private bool hasCurrentSlot = false;
     private bool hasNextSlot = false;
 
-    // Swap token: increments when a transition finishes so icon scripts can “commit” the swap.
-    public int SwapToken { get; private set; } = 0;
-
-    private bool booted = false;
+    private bool initialized = false;
 
     public override void Update()
     {
-        // first frame boot
-        if (!booted)
+        // First-frame setup - establish singleton immediately
+        if (!initialized)
         {
+            if (Instance != null && Instance != this)
+            {
+                Console.WriteLine("[OrderSlipUI] WARNING: Multiple OrderSlipUIController instances detected!");
+            }
             Instance = this;
-            booted = true;
-            Console.WriteLine("[OrderSlipUI] Booted: Instance set");
+            initialized = true;
+            Console.WriteLine("[OrderSlipUI] Controller initialized");
             return;
         }
 
@@ -55,24 +52,31 @@ public class OrderSlipUIController : Script
 
         float dt = Time.DeltaTime;
 
-        // advance fade + move
+        // Update fade progress
         Fade01 = (fadeDuration <= 0.0001f) ? 1.0f : (Fade01 + dt / fadeDuration);
         if (Fade01 > 1.0f) Fade01 = 1.0f;
 
+        // Update movement progress
         Move01 = (transitionDuration <= 0.0001f) ? 1.0f : (Move01 + dt / transitionDuration);
         if (Move01 > 1.0f) Move01 = 1.0f;
 
+        // End transition when both animations complete
         if (Move01 >= 1.0f && Fade01 >= 1.0f)
         {
             Transitioning = false;
-            SwapToken++; // tell icon scripts: “commit swap now”
-            Console.WriteLine("[OrderSlipUI] Transition done");
+            Console.WriteLine("[OrderSlipUI] Transition complete");
         }
     }
 
-    // Called once at game start (from a test driver / spawner / bootstrap)
+    // Call once externally after scripts exist (or from a bootstrap script)
     public void Init(EnemyIconType current, EnemyIconType upcoming)
     {
+        if (Transitioning)
+        {
+            Console.WriteLine("[OrderSlipUI] WARNING: Init called during transition - ignoring");
+            return;
+        }
+
         CurrentType = current;
         NextType = upcoming;
 
@@ -83,15 +87,25 @@ public class OrderSlipUIController : Script
         Console.WriteLine($"[OrderSlipUI] Init Current={CurrentType}, Next={NextType}");
     }
 
-    // Call on enemy defeat: provide the NEW upcoming enemy type
     public void AdvanceQueue(EnemyIconType newUpcoming)
     {
-        if (Transitioning) return;
+        if (Transitioning)
+        {
+            Console.WriteLine("[OrderSlipUI] WARNING: AdvanceQueue called during transition - ignoring");
+            return;
+        }
 
-        // shift
+        if (!SlotsReady())
+        {
+            Console.WriteLine("[OrderSlipUI] WARNING: Slots not registered yet - cannot advance");
+            return;
+        }
+
+        // Shift queue forward
         CurrentType = NextType;
         NextType = newUpcoming;
 
+        // Start transition
         Transitioning = true;
         Move01 = 0.0f;
         Fade01 = 0.0f;
@@ -99,36 +113,40 @@ public class OrderSlipUIController : Script
         Console.WriteLine($"[OrderSlipUI] Advance -> Current={CurrentType}, Next={NextType}");
     }
 
-    // Slot registration (called by icon scripts on their first Update)
-    public void RegisterCurrentSlot(float x, float y, float sx, float sy)
+    public void RegisterCurrentSlot(float x, float y)
     {
-        CurrentSlotX = x; CurrentSlotY = y;
-        CurrentSlotScaleX = sx; CurrentSlotScaleY = sy;
+        CurrentSlotX = x;
+        CurrentSlotY = y;
         hasCurrentSlot = true;
+        Console.WriteLine($"[OrderSlipUI] Current slot registered at ({x}, {y})");
     }
 
-    public void RegisterNextSlot(float x, float y, float sx, float sy)
+    public void RegisterNextSlot(float x, float y)
     {
-        NextSlotX = x; NextSlotY = y;
-        NextSlotScaleX = sx; NextSlotScaleY = sy;
+        NextSlotX = x;
+        NextSlotY = y;
         hasNextSlot = true;
+        Console.WriteLine($"[OrderSlipUI] Next slot registered at ({x}, {y})");
     }
 
-    public bool SlotsReady() => hasCurrentSlot && hasNextSlot;
+    public bool SlotsReady()
+    {
+        return hasCurrentSlot && hasNextSlot;
+    }
 
-    // Helpers
+    // Easing function for smooth animation
     public float EaseSmooth(float t) => t * t * (3f - 2f * t);
+
+    // Linear interpolation
     public float Lerp(float a, float b, float t) => a + (b - a) * t;
 
-    // IMPORTANT: Use the names EXACTLY like your asset browser shows.
-    // Based on your screenshot, your engine loads by sprite name WITHOUT ".png".
     public string GetVibrantSprite(EnemyIconType type)
     {
         switch (type)
         {
-            case EnemyIconType.Rat: return "enemy icon rat";
-            case EnemyIconType.Bat: return "enemy icon bat";
-            case EnemyIconType.Gorilla: return "enemy icon gorilla";
+            case EnemyIconType.Rat: return "enemy icon rat.png";
+            case EnemyIconType.Bat: return "enemy icon bat.png";
+            case EnemyIconType.Gorilla: return "enemy icon gorilla.png";
             default: return "Icon_None";
         }
     }
@@ -137,9 +155,9 @@ public class OrderSlipUIController : Script
     {
         switch (type)
         {
-            case EnemyIconType.Rat: return "enemy icon rat greyed";
-            case EnemyIconType.Bat: return "enemy icon bat greyed";
-            case EnemyIconType.Gorilla: return "enemy icon gorilla greyed";
+            case EnemyIconType.Rat: return "enemy icon rat greyed (1).png";
+            case EnemyIconType.Bat: return "enemy icon bat greyed.png";
+            case EnemyIconType.Gorilla: return "enemy icon gorilla greyed.png";
             default: return "Icon_None";
         }
     }

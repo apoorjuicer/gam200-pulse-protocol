@@ -537,8 +537,8 @@
                             "y": -300.0
                         },
                         "scale": {
-                            "x": 200.0,
-                            "y": 200.0
+                            "x": 250.0,
+                            "y": 133.3333282470703
                         },
                         "rotation": {
                             "x": 0.0,
@@ -611,8 +611,8 @@
                             "y": -300.0
                         },
                         "scale": {
-                            "x": 200.0,
-                            "y": 200.0
+                            "x": 250.0,
+                            "y": 133.3300018310547
                         },
                         "rotation": {
                             "x": 0.0,
@@ -672,6 +672,98 @@
                 {
                     "Parent": {
                         "parent": 6
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -884.6515502929688,
+                            "y": -820.6863403320313
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 48.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": true,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "DebugDisplayScript"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Debug Display Text"
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "Debug Display Text",
+                        "isLinked": false
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "TextComponent": {
+                        "text": "New Text",
+                        "font_id": "PatrickHand_font",
+                        "offset": {
+                            "x": 483.0,
+                            "y": -312.0
+                        },
+                        "font_size": 40.0,
+                        "color": [
+                            0.0,
+                            1.0,
+                            0.7352938652038574
+                        ],
+                        "visible": true,
+                        "alignment": 2
                     }
                 }
             ]

@@ -3,104 +3,117 @@ using ScriptAPI;
 
 public class OrderSlipNextIcon : Script
 {
-    private bool booted = false;
-    private bool isCurrentSlot = false; // this script starts as next slot
-    private int lastSwapToken = 0;
+    private bool initialized = false;
 
-    // For anim
-    private float startX, startY, startRotZ;
-    private float startSX, startSY;
+    private float slotX, slotY;
+    private bool wasTransitioning = false;
+
+    private float startX, startY, startRotX;
+    private bool capturedStart = false;
+
+    private string lastSprite = "";
 
     public override void Update()
     {
-        var ui = OrderSlipUIController.Instance;
-        if (ui == null) return;
-
-        // One-time: register this entity’s editor placement as “next slot”
-        if (!booted)
+        if (!initialized)
         {
-            booted = true;
+            TransformComponent tf0 = GetTransform();
+            slotX = tf0.X;
+            slotY = tf0.Y;
 
-            TransformComponent tf = GetTransform();
-            ui.RegisterNextSlot(tf.X, tf.Y, tf.ScaleX, tf.ScaleY);
-
-            ApplySprite(ui.GetDimSprite(ui.NextType));
-            Console.WriteLine($"[OrderSlipNext] Sprite -> {ui.GetDimSprite(ui.NextType)}");
+            // Wait for controller to exist before registering
+            if (OrderSlipUIController.Instance != null)
+            {
+                OrderSlipUIController.Instance.RegisterNextSlot(slotX, slotY);
+                initialized = true;
+            }
             return;
         }
 
-        // If we're transitioning and I'm the next slot, animate into current slot
-        if (ui.Transitioning && !isCurrentSlot && ui.SlotsReady())
+        var ui = OrderSlipUIController.Instance;
+        if (ui == null) return;
+
+        TransformComponent tf = GetTransform();
+
+        if (!ui.Transitioning)
         {
-            TransformComponent tf = GetTransform();
-
-            // Capture start values at the beginning of movement (Move01 == 0)
-            if (ui.Move01 <= 0.0001f)
+            if (wasTransitioning)
             {
-                startX = tf.X;
-                startY = tf.Y;
-                startRotZ = tf.RotZ;
-                startSX = tf.ScaleX;
-                startSY = tf.ScaleY;
-            }
+                // Transition just ended - snap to current slot with vibrant appearance
+                if (ui.SlotsReady())
+                {
+                    tf.X = ui.CurrentSlotX;
+                    tf.Y = ui.CurrentSlotY;
+                }
 
-            float eased = ui.EaseSmooth(ui.Move01);
+                tf.RotX = 0.0f;
+                tf.ScaleX = ui.currentScale;
+                tf.ScaleY = ui.currentScale;
 
-            // move next -> current
-            float x = ui.Lerp(startX, ui.CurrentSlotX, eased);
-            float y = ui.Lerp(startY, ui.CurrentSlotY, eased);
+                SetSprite(ui.GetVibrantSprite(ui.CurrentType));
 
-            // arc upward illusion
-            float arc = ui.arcHeight * 4f * eased * (1f - eased);
-            y += arc;
-
-            tf.X = x;
-            tf.Y = y;
-
-            // rotate up
-            tf.RotZ = ui.Lerp(startRotZ, startRotZ + ui.rotateDegrees, eased);
-
-            // scale toward current slot scale (editor-defined)
-            tf.ScaleX = ui.Lerp(startSX, ui.CurrentSlotScaleX, eased);
-            tf.ScaleY = ui.Lerp(startSY, ui.CurrentSlotScaleY, eased);
-        }
-
-        // Commit swap when controller finishes (SwapToken changes)
-        if (ui.SwapToken != lastSwapToken)
-        {
-            lastSwapToken = ui.SwapToken;
-            isCurrentSlot = !isCurrentSlot;
-
-            TransformComponent tf = GetTransform();
-
-            if (isCurrentSlot)
-            {
-                tf.X = ui.CurrentSlotX;
-                tf.Y = ui.CurrentSlotY;
-                tf.ScaleX = ui.CurrentSlotScaleX;
-                tf.ScaleY = ui.CurrentSlotScaleY;
-                tf.RotZ = 0.0f;
-
-                ApplySprite(ui.GetVibrantSprite(ui.CurrentType));
-                Console.WriteLine($"[OrderSlipNext] (now current) -> {ui.GetVibrantSprite(ui.CurrentType)}");
+                wasTransitioning = false;
+                capturedStart = false;
             }
             else
             {
-                tf.X = ui.NextSlotX;
-                tf.Y = ui.NextSlotY;
-                tf.ScaleX = ui.NextSlotScaleX;
-                tf.ScaleY = ui.NextSlotScaleY;
-                tf.RotZ = 0.0f;
+                // Normal state - positioned at next slot, dim sprite
+                tf.X = slotX;
+                tf.Y = slotY;
+                tf.RotX = 0.0f;
+                tf.ScaleX = ui.nextScale;
+                tf.ScaleY = ui.nextScale;
 
-                ApplySprite(ui.GetDimSprite(ui.NextType));
-                Console.WriteLine($"[OrderSlipNext] (now next) -> {ui.GetDimSprite(ui.NextType)}");
+                SetSprite(ui.GetDimSprite(ui.NextType));
             }
+            return;
         }
+
+        // During transition: move from next slot to current slot with arc and rotation
+        wasTransitioning = true;
+
+        if (!capturedStart)
+        {
+            startX = tf.X;
+            startY = tf.Y;
+            startRotX = tf.RotX;
+            capturedStart = true;
+        }
+
+        float eased = ui.EaseSmooth(ui.Move01);
+
+        // Interpolate position
+        float x = ui.Lerp(startX, ui.CurrentSlotX, eased);
+        float y = ui.Lerp(startY, ui.CurrentSlotY, eased);
+
+        // Add parabolic arc
+        float arc = ui.arcHeight * 4f * eased * (1f - eased);
+        y += arc;
+
+        tf.X = x;
+        tf.Y = y;
+
+        // Rotate during transition
+        tf.RotX = ui.Lerp(startRotX, startRotX + ui.rotateDegrees, eased);
+
+        // Scale from next size to current size
+        float sc = ui.Lerp(ui.nextScale, ui.currentScale, eased);
+        tf.ScaleX = sc;
+        tf.ScaleY = sc;
+
+        // Switch to vibrant sprite partway through transition
+        if (eased > 0.6f)
+            SetSprite(ui.GetVibrantSprite(ui.CurrentType));
+        else
+            SetSprite(ui.GetDimSprite(ui.NextType));
     }
 
-    private void ApplySprite(string spriteName)
+    private void SetSprite(string spriteName)
     {
-        SpriteComponent sp = GetSprite();
-        sp.SpriteName = spriteName;
+        if (spriteName == lastSprite) return;
+        lastSprite = spriteName;
+        Console.WriteLine($"[OrderSlipNext] Sprite -> {spriteName}");
+        // TODO: Add actual sprite changing code here based on your engine's API
+        // Example: GetSprite().SetTexture(spriteName); or similar
     }
 }
