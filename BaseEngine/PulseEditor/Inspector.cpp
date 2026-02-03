@@ -903,6 +903,8 @@ namespace PulseEditor
                             }
                         }
 
+                        // Evict old cached version so it's re-loaded from disk
+                        mAssets.EvictTexture(r.spriteName);
                         r.textureID = mAssets.GetOrLoadTexture(r.spriteName);
                         r.loadedSpriteName = r.spriteName;
                         r.needsTextureReload = false;
