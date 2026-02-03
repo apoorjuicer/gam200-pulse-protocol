@@ -256,41 +256,43 @@ public class NavigationButtons : Script
             return;
         }
         
-        // if (tex.Contains("pause quit"))
-        // {
-        //     Console.WriteLine("PAUSE QUIT - Going to main menu");
-        //     GoToMainMenu();
-        //     return;
-        // }
+        if (tex.Contains("pausequit"))
+        {
+            // Console.WriteLine("PAUSE QUIT - Going to main menu");
+            GoToMainMenu();
+            return;
+        }
         
-        // if (tex.Contains("pause settings"))
-        // {
-        //     Console.WriteLine("PAUSE SETTINGS - Opening settings");
-        //     NavigateTo("Settings");
-        //     ShowPauseOverlay = false;
-        //     return;
-        // }
+        if (tex.Contains("pauserestart"))
+        {
+            // Console.WriteLine("PAUSE RESTART - Restarting level");
+            // reload current scene
+            Scene.LoadScene(currentScene);
+            ShowPauseOverlay = false;
+            return;
+        }
 
-        //         if (tex.Contains("pause restart"))
-        // {
-        //     Console.WriteLine("PAUSE RESTART - Hiding overlay");
-        //     ShowPauseOverlay = false;
-        //     return;
-        // }
+        if (tex.Contains("pausesettings"))
+        {
+            // Console.WriteLine("PAUSE SETTINGS - Opening settings");
+            NavigateTo("Settings");
+            ShowPauseOverlay = false;
+            return;
+        }
         
         // ============================================
         // QUIT OVERLAY BUTTONS
         // ============================================
         if (tex.Contains("quit yes"))
         {
-            Console.WriteLine("QUIT YES - Closing game");
+            // Console.WriteLine("QUIT YES - Closing game");
             Application.Quit();
             return;
         }
         
         if (tex.Contains("quit no"))
         {
-            Console.WriteLine("QUIT NO - Hiding overlay");
+            // Console.WriteLine("QUIT NO - Hiding overlay");
             ShowQuitOverlay = false;
             return;
         }
@@ -352,5 +354,14 @@ public class QuitOverlay : Script
     {
         TransformComponent t = GetTransform();
         t.IsVisible = NavigationButtons.ShowQuitOverlay;
+    }
+}
+
+public class PauseOverlay : Script
+{
+    public override void Update()
+    {
+        TransformComponent t = GetTransform();
+        t.IsVisible = NavigationButtons.ShowPauseOverlay;
     }
 }
