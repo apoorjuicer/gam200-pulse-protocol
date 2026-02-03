@@ -317,6 +317,17 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 			}
 		}
 
+		// Validate texture before binding
+		if (re.textureID == 0 || !glIsTexture(re.textureID))
+		{
+			std::cerr << "[GUARD] Caught invalid textureID=" << re.textureID
+				<< " for sprite=" << re.spriteName << "\n";
+			// Texture was deleted or invalid — mark for reload next frame
+			re.textureID = 0;
+			drawOrder++;
+			continue;
+		}
+
 		glBindTexture(GL_TEXTURE_2D, re.textureID);
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &re.texW);
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &re.texH);
