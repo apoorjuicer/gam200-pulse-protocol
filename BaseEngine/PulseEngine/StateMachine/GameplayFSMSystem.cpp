@@ -21,6 +21,9 @@ void GameplayFSMSystem::Update(float dt)
 {
     auto g = Coordinator::GetInstance();
 
+    FSMContext* fsmcontext = nullptr;
+    StateMachine* statemachine = nullptr;
+
     // IMPORTANT: in your ECS, Systems stores entities in EntityMember
     for (Entity e : EntityMember)
     {
@@ -31,7 +34,6 @@ void GameplayFSMSystem::Update(float dt)
         auto& fsm = g->GetComponent<FSMComponent>(e);
         auto& hp = g->GetComponent<Health>(e);
 
-		FSMContext* fsmcontext = nullptr;
         // Update ctx signals
         fsmcontext->isDead = (hp.hp <= 0) || !hp.isAlive; // adjust to your Health fields
 
@@ -42,7 +44,6 @@ void GameplayFSMSystem::Update(float dt)
 
         // Run FSM
         FSMContext ctx;
-		StateMachine* statemachine = nullptr;
         statemachine->Update(ctx, dt);
 
         // Optionally: you can react engine-side to state changes here
