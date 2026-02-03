@@ -9,10 +9,9 @@
  *              a valid song time is provided, beat crossings are detected via BeatTracker
  *              and trigger OnBeat().
  *
- * @copyright   Copyright (C) 2026
- *              DigiPen Institute of Technology.
- *              Reproduction or disclosure of this file or its contents without
- *              prior written consent is prohibited.
+ * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
  ******************************************************************************/
 
 #include "VFXManager.h"

@@ -6,7 +6,7 @@
 * @brief       Defines DLL export/import macros for exposing C++ engine
 *              functions to external consumers (C# scripts, other DLLs).
 *
-* @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+* @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the
 *              prior written consent of DigiPen Institute of Technology is prohibited.
 *
