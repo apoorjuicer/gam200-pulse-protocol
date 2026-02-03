@@ -94,7 +94,8 @@ namespace PulseEditor
     // DIRECTORY OPERATIONS
     // =============================================================
 
-    void RefreshDirectory(const std::string& assetRoot, const std::string& currentDir, std::vector<AssetItem>& entries)
+    void RefreshDirectory(const std::string& assetRoot, const std::string& currentDir,
+        std::vector<AssetItem>& entries)
     {
         entries.clear();
 
@@ -105,10 +106,13 @@ namespace PulseEditor
         if (ec || cur.empty() || !fs::exists(cur, ec))
             return;
 
+        ec.clear();
+
         fs::path root = fs::weakly_canonical(fs::absolute(assetRoot), ec);
 
         // Add ".." (only if not at the asset root)
-        if (!ec && cur != root)
+        ec.clear();
+        if (cur != root)
         {
             AssetItem up;
             up.name = "..";
@@ -118,10 +122,12 @@ namespace PulseEditor
         }
 
         // List the directory (non-recursive)
+        ec.clear();
         for (auto const& entry : fs::directory_iterator(cur, ec))
         {
+            std::error_code entry_ec;  // USE SEPARATE ec per entry
             AssetItem it;
-            it.fullPath = fs::weakly_canonical(entry.path(), ec).string();
+            it.fullPath = fs::weakly_canonical(entry.path(), entry_ec).string();
             it.name = entry.path().filename().string();
             it.isDir = entry.is_directory();
             entries.push_back(std::move(it));

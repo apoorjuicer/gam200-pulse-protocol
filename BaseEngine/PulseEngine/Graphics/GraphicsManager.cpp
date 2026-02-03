@@ -623,24 +623,72 @@ void GraphicsManager::PrintFontMap()
     std::cout << "===== END OF FONT MAP =====\n";
 }
 
-bool GraphicsManager::EvictTexture(std::string const &idOrPath)
+bool GraphicsManager::EvictTexture(std::string const& idOrPath)
 {
-    // Find by key (the same string used in GetOrLoad). Today you store by tex_name.
+    namespace fs = std::filesystem;
+
+    // 1. Try exact key match
     auto it = texHandle_key.find(idOrPath);
+
+    // 2. If not found, try matching by filename stem
+    if (it == texHandle_key.end())
+    {
+        std::string targetFile = fs::path(idOrPath).filename().string();
+        for (auto candidate = texHandle_key.begin();
+            candidate != texHandle_key.end(); ++candidate)
+        {
+            std::string candidateFile = fs::path(candidate->first).filename().string();
+            if (candidateFile == targetFile)
+            {
+                it = candidate;
+                break;
+            }
+        }
+    }
+
     if (it == texHandle_key.end())
         return false;
 
     GLuint oldId = it->second;
+
     // Delete GPU object
     if (oldId)
         glDeleteTextures(1, &oldId);
 
-    // Remove both directions
+    // Remove forward mapping
     texHandle_key.erase(it);
-    if (auto it2 = texHandle_id.find(oldId); it2 != texHandle_id.end())
-        texHandle_id.erase(it2);
 
-    //std::cout << "[Graphics] Evicted texture: " << idOrPath << "\n";
+    // Remove reverse mapping
+    texHandle_id.erase(oldId);
+
+    // 3. Also remove any OTHER entries pointing to the same GL ID
+    // (handles the duplicate-key problem)
+    for (auto jt = texHandle_key.begin(); jt != texHandle_key.end(); )
+    {
+        if (jt->second == oldId)
+            jt = texHandle_key.erase(jt);
+        else
+            ++jt;
+    }
+
+    // 4. Reset ALL live entities that were using this deleted texture
+    //    Without this, entities keep binding the deleted GL ID every frame
+    //    causing GL_INVALID_OPERATION in BindTexture
+    if (auto* coord = Coordinator::GetInstance())
+    {
+        for (Entity e : coord->GetAllEntities())
+        {
+            if (!coord->HasComponent<Framework::Renderable>(e))
+                continue;
+            auto& r = coord->GetComponent<Framework::Renderable>(e);
+            if (r.textureID == oldId)
+            {
+                r.textureID = 0;              // forces re-load next frame
+                r.needsTextureReload = true;
+            }
+        }
+    }
+
     return true;
 }
 
