@@ -1,5 +1,5 @@
 /*****************************************************************************
- * @file        CameraEffects.h
+ * @file        ParticleSystem.cpp
  * @project     Pulse Protocol
  * @author		Goh Pin Kai
  *
@@ -7,10 +7,9 @@
  *              polar velocities, and per-frame simulation (lifetime countdown and
  *              position integration). Inactive particles are reused from the pool.
  *
- * @copyright   Copyright (C) 2026
- *              DigiPen Institute of Technology.
- *              Reproduction or disclosure of this file or its contents without
- *              prior written consent is prohibited.
+ * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
  ******************************************************************************/
 
 #include "ParticleSystem.h"

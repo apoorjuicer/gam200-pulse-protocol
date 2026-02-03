@@ -8,7 +8,7 @@
  *				minimum and maximum corners, along with its width and height.
  *				It is purely geometric and contains no gameplay logic.
  * 
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
