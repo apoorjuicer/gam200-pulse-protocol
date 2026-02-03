@@ -10,7 +10,7 @@ public class PlayerInputHandler : Script
     public TurnManager TurnManagerRef = null;
 
     // =========================
-    // Input Settings
+    // Input Settings (GLFW key codes)
     // =========================
     public int KeyW = 87;  // GLFW_KEY_W
     public int KeyA = 65;  // GLFW_KEY_A
@@ -39,26 +39,16 @@ public class PlayerInputHandler : Script
             return;
         }
 
-        // Get input component (it's a struct, so no null check needed)
-        InputComponent input = GetInput();
+        // IMPORTANT: This script is meant to work WITH your existing C++ RhythmGameplayInput
+        // It just controls when input is allowed (turn-based locking)
+        // The actual input detection happens in RhythmGameplayInput.cpp
 
-        // Check each key
-        if (input.IsKeyTriggered(KeyW))
-        {
-            RegisterKey('W');
-        }
-        else if (input.IsKeyTriggered(KeyA))
-        {
-            RegisterKey('A');
-        }
-        else if (input.IsKeyTriggered(KeyS))
-        {
-            RegisterKey('S');
-        }
-        else if (input.IsKeyTriggered(KeyD))
-        {
-            RegisterKey('D');
-        }
+        // If you want pure C# input handling, you would need to access InputManager
+        // directly through your engine's C++/C# bridge, but that's not exposed yet.
+
+        // For now, this script just manages the turn state and combo checking.
+        // The C++ code (RhythmGameplayInput.cpp) should check TurnManager.IsInputLocked
+        // before processing inputs.
     }
 
     // =========================
@@ -67,14 +57,17 @@ public class PlayerInputHandler : Script
     private void Initialize()
     {
         Console.WriteLine("[PlayerInputHandler] Initialized");
+        Console.WriteLine("[PlayerInputHandler] NOTE: Input is handled by C++ RhythmGameplayInput.cpp");
+        Console.WriteLine("[PlayerInputHandler] This script manages turn-based locking only");
         initialized = true;
     }
 
     // =========================
-    // Input Processing
+    // Public API (for C++ or other scripts to call)
     // =========================
-    private void RegisterKey(char key)
+    public void RegisterKey(char key)
     {
+        // This can be called by C++ RhythmGameplayInput when a key is pressed
         Console.WriteLine($"[PlayerInput] Key pressed: {key}");
 
         if (ComboSystemRef != null)
@@ -93,16 +86,12 @@ public class PlayerInputHandler : Script
         }
     }
 
-    // =========================
-    // Helpers
-    // =========================
-    private InputComponent GetInput()
+    // Allow C++ or other systems to check if input should be locked
+    public bool ShouldBlockInput()
     {
-        // InputComponent is a struct (value type), not a class
-        // Your engine provides this through the Script base class or entity
-        // Based on your InputAPI.cpp, it should be accessible via the entity ID
+        if (TurnManagerRef == null)
+            return false;
 
-        // This should work based on your engine's scripting bridge:
-        return new InputComponent(EntityID);
+        return TurnManagerRef.IsInputLocked;
     }
 }

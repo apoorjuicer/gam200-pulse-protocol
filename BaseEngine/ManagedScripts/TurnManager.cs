@@ -12,11 +12,9 @@ public enum TurnPhase
 public class TurnManager : Script
 {
     // =========================
-    // References
+    // Global Access (Singleton)
     // =========================
-    public Conductor ConductorRef = null;
-    public ComboSystem ComboSystemRef = null;
-    public EnemyRhythmController EnemyRef = null;
+    public static TurnManager Instance { get; private set; }
 
     // =========================
     // Config
@@ -47,10 +45,11 @@ public class TurnManager : Script
             return;
         }
 
-        if (ConductorRef == null)
+        // Use singleton to get Conductor
+        if (Conductor.Instance == null)
             return;
 
-        int currentBeat = ConductorRef.GetCurrentBeat();
+        int currentBeat = Conductor.Instance.GetCurrentBeat();
 
         // Only process on new beats
         if (currentBeat == lastBeat)
@@ -76,12 +75,7 @@ public class TurnManager : Script
                 }
                 else
                 {
-                    // Enemy moves during display
-                    if (EnemyRef != null)
-                    {
-                        // Enemy movement is handled in EnemyRhythmController
-                        Console.WriteLine($"[TurnManager] Enemy Display Beat {beatsInPhase + 1}/{EnemyDisplayBeats}");
-                    }
+                    Console.WriteLine($"[TurnManager] Enemy Display Beat {beatsInPhase + 1}/{EnemyDisplayBeats}");
                 }
                 break;
 
@@ -108,11 +102,15 @@ public class TurnManager : Script
     // =========================
     private void Initialize()
     {
+        // Set singleton
+        if (Instance == null)
+            Instance = this;
+
         Console.WriteLine("[TurnManager] Initializing...");
 
-        if (ConductorRef != null)
+        if (Conductor.Instance != null)
         {
-            phaseStartBeat = ConductorRef.GetCurrentBeat();
+            phaseStartBeat = Conductor.Instance.GetCurrentBeat();
             lastBeat = phaseStartBeat;
         }
 
@@ -128,37 +126,32 @@ public class TurnManager : Script
     private void StartEnemyDisplay()
     {
         currentPhase = TurnPhase.EnemyDisplay;
-        phaseStartBeat = ConductorRef.GetCurrentBeat();
+        phaseStartBeat = Conductor.Instance.GetCurrentBeat();
 
         Console.WriteLine("[TurnManager] === ENEMY TURN ===");
-        Console.WriteLine($"[TurnManager] Displaying combo: {EnemyRef?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input LOCKED");
 
-        // Reset combo system for new attempt
-        if (ComboSystemRef != null)
-        {
-            ComboSystemRef.ResetCombo();
-        }
+        // Lock player input via Application.SetPaused
+        // This will stop C++ RhythmGameplayInput from processing
+        Application.SetPaused(true);
 
-        // UI should display the enemy combo here
-        // You'll need to trigger your UI system to show the combo
+        // Reset combo system for new attempt
+        if (ComboSystem.Instance != null)
+        {
+            ComboSystem.Instance.ResetCombo();
+        }
     }
 
     private void StartPlayerInput()
     {
         currentPhase = TurnPhase.PlayerInput;
-        phaseStartBeat = ConductorRef.GetCurrentBeat();
+        phaseStartBeat = Conductor.Instance.GetCurrentBeat();
 
         Console.WriteLine("[TurnManager] === PLAYER TURN ===");
-        Console.WriteLine($"[TurnManager] Input the combo: {EnemyRef?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input UNLOCKED");
 
-        // Enemy freezes during player input
-        if (EnemyRef != null)
-        {
-            // Enemy's canMove flag should be set to false
-            // This is handled in EnemyRhythmController
-        }
+        // Unlock player input
+        Application.SetPaused(false);
     }
 
     private void ResolvePlayerInput()
@@ -166,9 +159,9 @@ public class TurnManager : Script
         currentPhase = TurnPhase.Resolution;
 
         bool success = false;
-        if (ComboSystemRef != null)
+        if (ComboSystem.Instance != null)
         {
-            success = ComboSystemRef.PlayerDidSuccessfulCombo;
+            success = ComboSystem.Instance.PlayerDidSuccessfulCombo;
         }
 
         Console.WriteLine($"[TurnManager] === RESOLUTION ===");
@@ -178,30 +171,26 @@ public class TurnManager : Script
             Console.WriteLine("[TurnManager] ? Player succeeded!");
             Console.WriteLine("[TurnManager] Enemy takes damage!");
 
-            // Enemy takes damage and might die
-            if (EnemyRef != null)
+            if (EnemyRhythmController.Instance != null)
             {
-                EnemyRef.TakeDamage(10f); // Adjust damage as needed
+                EnemyRhythmController.Instance.TakeDamage(10f);
             }
         }
         else
         {
             Console.WriteLine("[TurnManager] ? Player failed!");
-            Console.WriteLine("[TurnManager] Enemy attacks and moves remaining steps!");
+            Console.WriteLine("[TurnManager] Enemy attacks!");
 
-            // Enemy attacks player
-            if (EnemyRef != null)
+            if (EnemyRhythmController.Instance != null)
             {
-                // Enemy should attack the player here
-                // Then move remaining steps
-                Console.WriteLine("[TurnManager] Player takes damage!");
+                EnemyRhythmController.Instance.ExecuteFailurePunishment();
             }
         }
 
         // Reset for next turn
-        if (ComboSystemRef != null)
+        if (ComboSystem.Instance != null)
         {
-            ComboSystemRef.ResetCombo();
+            ComboSystem.Instance.ResetCombo();
         }
     }
 
@@ -215,10 +204,10 @@ public class TurnManager : Script
 
     public int GetBeatsInCurrentPhase()
     {
-        if (ConductorRef == null)
+        if (Conductor.Instance == null)
             return 0;
 
-        return ConductorRef.GetCurrentBeat() - phaseStartBeat;
+        return Conductor.Instance.GetCurrentBeat() - phaseStartBeat;
     }
 
     public int GetBeatsRemainingInPhase()

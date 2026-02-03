@@ -6,6 +6,11 @@ public enum RhythmType { OneBeat, TwoBeat, Syncopated, FourBeat }
 
 public class EnemyRhythmController : Script
 {
+    // =========================
+    // Global Access (Singleton)
+    // =========================
+    public static EnemyRhythmController Instance { get; private set; }
+
     // === SPRITE SHEET SETTINGS ===
     public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_220x432";
     public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_322x433";
@@ -49,11 +54,6 @@ public class EnemyRhythmController : Script
 
     // === WEAKNESS ===
     public string WeaknessCombo = "ASAS";
-
-    // === REFERENCES ===
-    public Conductor ConductorRef = null;
-    public ComboSystem ComboRef = null;
-    public TurnManager TurnManagerRef = null;
 
     // === INTERNAL STATE ===
     private bool initialized = false;
@@ -115,9 +115,9 @@ public class EnemyRhythmController : Script
         }
 
         // Movement logic - only during enemy turn
-        if (ConductorRef != null && TurnManagerRef != null)
+        if (Conductor.Instance != null && TurnManager.Instance != null)
         {
-            int currentBeat = ConductorRef.GetCurrentBeat();
+            int currentBeat = Conductor.Instance.GetCurrentBeat();
             if (currentBeat != lastBeat)
             {
                 lastBeat = currentBeat;
@@ -128,21 +128,25 @@ public class EnemyRhythmController : Script
 
     private void Initialize()
     {
+        // Set singleton
+        if (Instance == null)
+            Instance = this;
+
         Console.WriteLine("[Enemy] Initializing...");
 
         TransformComponent tf = GetTransform();
         SetScaleForSprite(IdleSpriteSheet, 220, 432);
         SetState(EnemyState.Idle);
 
-        if (ConductorRef != null)
+        if (Conductor.Instance != null)
         {
-            lastBeat = ConductorRef.GetCurrentBeat();
+            lastBeat = Conductor.Instance.GetCurrentBeat();
             Console.WriteLine("[Enemy] Conductor connected");
         }
 
-        if (ComboRef != null)
+        if (ComboSystem.Instance != null)
         {
-            ComboRef.SetEnemyWeakness(WeaknessCombo);
+            ComboSystem.Instance.SetEnemyWeakness(WeaknessCombo);
             Console.WriteLine($"[Enemy] Weakness: {WeaknessCombo}");
         }
 
@@ -202,10 +206,10 @@ public class EnemyRhythmController : Script
 
     private void HandleBeat(int beat)
     {
-        if (TurnManagerRef == null)
+        if (TurnManager.Instance == null)
             return;
 
-        TurnPhase currentPhase = TurnManagerRef.GetCurrentPhase();
+        TurnPhase currentPhase = TurnManager.Instance.GetCurrentPhase();
 
         // During countdown - stay idle
         if (currentPhase == TurnPhase.Countdown)
@@ -263,9 +267,9 @@ public class EnemyRhythmController : Script
         attackCooldownTimer = AttackFrames / AnimationSpeed;
 
         bool playerSucceeded = false;
-        if (ComboRef != null)
+        if (ComboSystem.Instance != null)
         {
-            playerSucceeded = ComboRef.PlayerDidSuccessfulCombo;
+            playerSucceeded = ComboSystem.Instance.PlayerDidSuccessfulCombo;
         }
 
         if (!playerSucceeded)
