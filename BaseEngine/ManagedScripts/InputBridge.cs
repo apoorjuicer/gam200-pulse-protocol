@@ -2,16 +2,8 @@ using System;
 using ScriptAPI;
 
 /// <summary>
-/// CRITICAL: This script bridges C++ input (RhythmGameplayInput.cpp) to C# combo system
-/// 
-/// HOW IT WORKS:
-/// 1. C++ RhythmGameplayInput detects W/A/S/D keys
-/// 2. This script reads those inputs and forwards to ComboSystem
-/// 3. TurnManager controls when input is allowed via Application.SetPaused()
-/// 
-/// SETUP:
-/// - Attach to same entity as Conductor, TurnManager, ComboSystem
-/// - C++ RhythmGameplayInput.cpp should respect Application.IsPaused()
+/// MINIMAL VERSION: Input bridge without audio calls
+/// Use this if the audio version causes compilation errors
 /// </summary>
 public class InputBridge : Script
 {
@@ -60,7 +52,7 @@ public class InputBridge : Script
             return;
         }
 
-        // Check for key presses (manual detection since C++ might not be calling us)
+        // Check for key presses
         var input = GetInput();
 
         CheckKey(input, KeyW, ref lastWState, 'W');
@@ -74,17 +66,7 @@ public class InputBridge : Script
     // =========================
     private void Initialize()
     {
-        Console.WriteLine("[InputBridge] ========================================");
-        Console.WriteLine("[InputBridge] INITIALIZING INPUT BRIDGE");
-        Console.WriteLine("[InputBridge] ========================================");
-        Console.WriteLine("[InputBridge] This script forwards W/A/S/D inputs to ComboSystem");
-        Console.WriteLine("[InputBridge] ");
-        Console.WriteLine("[InputBridge] IMPORTANT: Your C++ RhythmGameplayInput.cpp should:");
-        Console.WriteLine("[InputBridge]   1. Check Application.IsPaused() before processing input");
-        Console.WriteLine("[InputBridge]   2. OR let this C# script handle ALL input");
-        Console.WriteLine("[InputBridge] ");
-        Console.WriteLine("[InputBridge] ========================================");
-
+        Console.WriteLine("[InputBridge] Initialized (Minimal Version - No Audio)");
         initialized = true;
     }
 
@@ -113,27 +95,6 @@ public class InputBridge : Script
         {
             ComboSystem.Instance.RegisterInput(key);
 
-            // Play audio feedback
-            var audio = GetAudio();
-            if (audio != null)
-            {
-                switch (key)
-                {
-                    case 'W':
-                        audio.PlaySFX("SFX_W_Key");
-                        break;
-                    case 'A':
-                        audio.PlaySFX("SFX_A_Key");
-                        break;
-                    case 'S':
-                        audio.PlaySFX("SFX_S_Key");
-                        break;
-                    case 'D':
-                        audio.PlaySFX("SFX_D_Key");
-                        break;
-                }
-            }
-
             // Check if combo is complete
             if (ComboSystem.Instance.HasCompletedCombo())
             {
@@ -141,19 +102,11 @@ public class InputBridge : Script
 
                 if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
                 {
-                    // Play success sound
-                    if (audio != null)
-                    {
-                        audio.PlaySFX("SFX_SwordSwing");  // Or whatever your success sound is
-                    }
+                    Console.WriteLine("[InputBridge] SUCCESS!");
                 }
                 else
                 {
-                    // Play failure sound
-                    if (audio != null)
-                    {
-                        audio.PlaySFX("SFX_WrongInput");
-                    }
+                    Console.WriteLine("[InputBridge] FAILED!");
                 }
             }
         }

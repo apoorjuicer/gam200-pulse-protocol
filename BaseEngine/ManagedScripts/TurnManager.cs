@@ -45,7 +45,6 @@ public class TurnManager : Script
             return;
         }
 
-        // Use singleton to get Conductor
         if (Conductor.Instance == null)
             return;
 
@@ -129,16 +128,23 @@ public class TurnManager : Script
         phaseStartBeat = Conductor.Instance.GetCurrentBeat();
 
         Console.WriteLine("[TurnManager] === ENEMY TURN ===");
+        Console.WriteLine($"[TurnManager] Displaying combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input LOCKED");
 
-        // Lock player input via Application.SetPaused
-        // This will stop C++ RhythmGameplayInput from processing
-        Application.SetPaused(true);
+        // DON'T PAUSE THE GAME!
+        // Just set IsInputLocked = true (which is automatic based on currentPhase)
+        // The InputBridge checks this flag before processing keys
 
         // Reset combo system for new attempt
         if (ComboSystem.Instance != null)
         {
             ComboSystem.Instance.ResetCombo();
+        }
+
+        // Reset enemy movement for new turn
+        if (EnemyRhythmController.Instance != null)
+        {
+            EnemyRhythmController.Instance.ResetMovementForNewTurn();
         }
     }
 
@@ -148,10 +154,10 @@ public class TurnManager : Script
         phaseStartBeat = Conductor.Instance.GetCurrentBeat();
 
         Console.WriteLine("[TurnManager] === PLAYER TURN ===");
+        Console.WriteLine($"[TurnManager] Input the combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input UNLOCKED");
 
-        // Unlock player input
-        Application.SetPaused(false);
+        // Enemy freezes during player input (handled in EnemyRhythmController.HandleBeat)
     }
 
     private void ResolvePlayerInput()
@@ -171,6 +177,7 @@ public class TurnManager : Script
             Console.WriteLine("[TurnManager] ? Player succeeded!");
             Console.WriteLine("[TurnManager] Enemy takes damage!");
 
+            // Enemy takes damage and might die
             if (EnemyRhythmController.Instance != null)
             {
                 EnemyRhythmController.Instance.TakeDamage(10f);
@@ -179,8 +186,9 @@ public class TurnManager : Script
         else
         {
             Console.WriteLine("[TurnManager] ? Player failed!");
-            Console.WriteLine("[TurnManager] Enemy attacks!");
+            Console.WriteLine("[TurnManager] Enemy attacks and moves remaining steps!");
 
+            // Enemy executes punishment
             if (EnemyRhythmController.Instance != null)
             {
                 EnemyRhythmController.Instance.ExecuteFailurePunishment();
