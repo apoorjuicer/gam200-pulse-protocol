@@ -5,8 +5,9 @@ public class PauseBackgroundAnimator : Script
 {
     private int currentFrame = 1;
     private float frameTimer = 0f;
-    private float frameDelay = 0.08f;
-    private bool initialized = false;
+    private float frameDelay = 0.12f;
+    private bool reverse = false;
+    private Random rand = new Random();
 
     public override void Update()
     {
@@ -16,37 +17,41 @@ public class PauseBackgroundAnimator : Script
         
         t.IsVisible = isShowing;
         
-        if (isShowing)
+        if (!isShowing) return;
+        
+        float deltaTime = Time.DeltaTime;
+        if (deltaTime == 0f)
+            deltaTime = 0.016f;
+        
+        frameTimer += deltaTime;
+        
+        if (frameTimer >= frameDelay)
         {
-            if (!initialized)
+            // Ping-pong animation
+            if (reverse)
             {
-                Random rand = new Random();
-                currentFrame = rand.Next(1, 15);
-                frameTimer = 0f;
-                initialized = true;
+                currentFrame--;
+                if (currentFrame < 1)
+                {
+                    currentFrame = 2;
+                    reverse = false;
+                }
             }
-            
-            float deltaTime = Time.DeltaTime;
-            if (deltaTime == 0f)
-                deltaTime = 0.016f;
-            
-            frameTimer += deltaTime;
-            
-            if (frameTimer >= frameDelay)
+            else
             {
                 currentFrame++;
                 if (currentFrame > 14)
-                    currentFrame = 1;
-                
-                sprite.Texture = $"../../PulseEngine/Assets/Textures/UI/pause{currentFrame}.png";
-                frameTimer = 0f;
+                {
+                    currentFrame = 13;
+                    reverse = true;
+                }
             }
-        }
-        else
-        {
-            currentFrame = 1;
+            
+            sprite.Texture = $"../../PulseEngine/Assets/Textures/UI/pause{currentFrame}.png";
+            
+            // Slight random variation in timing
+            frameDelay = 0.10f + (float)(rand.NextDouble() * 0.05f);
             frameTimer = 0f;
-            initialized = false;
         }
     }
 }
