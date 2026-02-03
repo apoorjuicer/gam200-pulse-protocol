@@ -1001,6 +1001,7 @@ void CoreEngine::Exit()
 
 	DebugDraw::Shutdown();
 	MessageManager::DestroyInstance();
+	ProfilingManager::DestroyInstance();
 
 	if (window)
 	{
@@ -1008,6 +1009,7 @@ void CoreEngine::Exit()
 		window = nullptr;
 	}
 	glfwTerminate();
+
 }
 
 void CoreEngine::RenderDebugDraw()
