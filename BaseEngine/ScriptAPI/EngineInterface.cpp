@@ -40,6 +40,10 @@ namespace ScriptAPI
 
         coreEngine = p_coreEngine;
 
+        if (QueuedScript != nullptr)
+        {
+            delete QueuedScript;
+        }
         QueuedScript = new std::vector<int>();
         
         // Create unloadable assembly context
