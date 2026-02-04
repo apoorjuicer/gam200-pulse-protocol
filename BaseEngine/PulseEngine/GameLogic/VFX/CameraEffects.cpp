@@ -7,10 +7,9 @@
  *              decays them over time, and generates per-frame random shake offsets.
  *              The punch zoom eases back to zero at a configurable return speed.
  *
- * @copyright   Copyright (C) 2026
- *              DigiPen Institute of Technology.
- *              Reproduction or disclosure of this file or its contents without
- *              prior written consent is prohibited.
+ * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
  ******************************************************************************/
 
 #include "CameraEffects.h"

@@ -8,7 +8,8 @@
  *				between entities and component indices, using swap-and-pop for
  *				O(1) removal while keeping the array tightly packed for cache
  *				efficiency and optimal iteration performance
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * 
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */

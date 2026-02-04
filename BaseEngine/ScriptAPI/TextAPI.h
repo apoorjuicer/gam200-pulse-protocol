@@ -2,7 +2,7 @@
 /**
 * @file        TextAPI.h
 * @project     Pulse Protocol
-* @author      [Your Name]
+* @author      Ban Kai Wei Benjamin
 * @brief       Wrapper for TextComponent access from C# scripts
 *
 * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
