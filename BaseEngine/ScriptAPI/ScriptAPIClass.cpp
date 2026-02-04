@@ -66,13 +66,4 @@ namespace ScriptAPI
         return TextComponentAPI(EntityID);
     }
 
-    /*LogicComponent Script::GetScriptName()
-    {
-        return LogicComponent(EntityID);
-    }*/
-
-   /* DeltaTime Script::GetDeltaTime()
-    {
-        return DeltaTime(dt);
-    }*/
 }

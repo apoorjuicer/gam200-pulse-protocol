@@ -12,6 +12,7 @@
 *
 /******************************************************************************/
 #pragma once
+#include "EngineInterface.h"
 #define generic generic_workaround
 #include "Health.h"
 #include "CoreEngine/Core/ScriptingBridge.h"

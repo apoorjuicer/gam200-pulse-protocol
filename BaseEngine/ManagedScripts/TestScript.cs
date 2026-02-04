@@ -124,7 +124,6 @@ public class TestScript2 : Script
     public override void Update()
     {
         TransformComponent TFC = GetTransform();
-
         TFC.ScaleX -= 2.5f;
         TFC.ScaleY -= 2.5f;
 

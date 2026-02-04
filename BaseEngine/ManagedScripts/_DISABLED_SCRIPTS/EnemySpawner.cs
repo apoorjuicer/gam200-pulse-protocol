@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using ScriptAPI;
 
@@ -139,7 +139,8 @@ public class EnemySpawner : Script
 
     private void SpawnEnemy()
     {
-        int enemyID = Factory.Instantiate(EnemyPrefabName);
+        //int enemyID = Factory.Instantiate("TestPrefab");
+        int enemyID = Factory.Instantiate("Rat_Enemy");
 
         if (enemyID < 0)
         {

@@ -13,6 +13,7 @@
 /******************************************************************************/
 #pragma once
 #include "ScriptAPIClass.h"
+#include <vector>
 
 class CoreEngine;
 
@@ -30,6 +31,11 @@ namespace ScriptAPI
         static void ExecuteUpdate();
         static void ClearAllScripts();
         static void ClearEntityScript(int EntityID);
+
+        // for adding a script to an enity when the scripts are being iterated
+        // TLDR delay the add til after finish iterating thru them
+        static void InQueueScripts(int entityID);
+        static void ProcessQueuedScript();
 
         static void RemoveScriptFromEntity(int entityID, System::String^ scriptName);
         static const char* GetAvailableScripts();
@@ -52,6 +58,11 @@ namespace ScriptAPI
 
         // For hot reloading 
         static System::Runtime::Loader::AssemblyLoadContext^ loadContext;
+
+        // A contianer for storing scripts that need to be added later
+        // static System::Collections::Generic::List<System::Int32>^ QueuedScript;
+        //using QueuedScriptList = System::Collections::Generic::List<int>;
+        static std::vector<int>* QueuedScript;
 
         // To ensure that cleared scripts are not being updated when change scene
         static bool allScriptsCleared = false;

@@ -12,16 +12,17 @@
 *
 /******************************************************************************/
 #pragma once
+#include <msclr/marshal_cppstd.h>   // for converting C# to C++ string
+#include "EngineInterface.h"
 #define generic generic_workaround
 #include <optional>
-#include "Factory.h"
-#include <msclr/marshal_cppstd.h>   // for converting C# to C++ string
+#include "Factory.h" 
 #include "../CoreEngine/Factory/Factory.h"
 #include "../CoreEngine/ECS/Coordinator.h"
 #include "../CoreEngine/Prefab/PrefabManager.h"
 #include "CoreEngine/Core/ScriptingBridge.h"
-
 #undef generic
+
 
 namespace ScriptAPI
 {
@@ -37,20 +38,20 @@ namespace ScriptAPI
 
 		// change c# string to c++ , and get prefab json pathway
 		msclr::interop::marshal_context context;
-
-		
 		std::string prefabDirectory =  "../../PulseEngine/Assets/Prefabs/";
-
 		std::string prefabPath = prefabDirectory + context.marshal_as<std::string>(scriptname) + ".json";
 
 
 		// Use factory manager to create entity from .json file 
 		::Factory factory;
-		auto new_entity = factory.CreateEntityFromJson(prefabPath);
+		auto new_entity = factory.CreateEntityFromJson(prefabPath, false);
 		
 		System::Console::WriteLine(new_entity.value());
 
-		int entityID = static_cast<int>(new_entity.value());;
+		int entityID = static_cast<int>(new_entity.value());
+
+		EngineInterface::InQueueScripts(entityID); // add LATER instead!
+
 		return entityID;
 	}
 
@@ -60,6 +61,4 @@ namespace ScriptAPI
 		::Factory factory;
 		factory.DeleteEntity(entityID);
 	}
-
-
 }
