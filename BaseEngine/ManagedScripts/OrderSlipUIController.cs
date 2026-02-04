@@ -16,12 +16,16 @@ public class OrderSlipUIController : Script
     public float arcHeight = 30.0f;
 
     // State
+    // State
     public EnemyIconType CurrentType { get; private set; } = EnemyIconType.None;
     public EnemyIconType NextType { get; private set; } = EnemyIconType.None;
 
     public bool Transitioning { get; private set; } = false;
     public float Move01 { get; private set; } = 0.0f;
     public float Fade01 { get; private set; } = 0.0f;
+
+    public float CurrentFadeOut => 1.0f - Fade01;  // Current icon fades out
+    public float NextFadeIn => Fade01;             // Next icon fades in
 
     public float CurrentSlotX { get; private set; }
     public float CurrentSlotY { get; private set; }
