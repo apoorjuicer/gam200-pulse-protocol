@@ -11,6 +11,17 @@ file(GLOB_RECURSE GAME_SRC CONFIGURE_DEPENDS
 
 add_executable(${GAME_NAME} ${GAME_SRC})
 
+# Hide console in Release (GUI subsystem), keep console in Debug
+if (WIN32)
+  set_target_properties(${GAME_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+
+  target_link_options(${GAME_NAME} PRIVATE
+    $<$<CONFIG:Debug>:/SUBSYSTEM:CONSOLE>
+    $<$<NOT:$<CONFIG:Debug>>:/SUBSYSTEM:WINDOWS>
+    $<$<NOT:$<CONFIG:Debug>>:/ENTRY:mainCRTStartup>
+  )
+endif()
+
 add_dependencies(PulseProtocol PulseEngine)
 
 # Ensures POST_BUILD copy commands run

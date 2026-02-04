@@ -28,7 +28,7 @@
  *             - DecrementEntityArray(entity): Removes specific entity from list using
  *               std::find + erase (removes ONLY first matching entity)
  * 
- * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
  *             Reproduction or disclosure of this file or its contents without the
  *             prior written consent of DigiPen Institute of Technology is prohibited.
  */
@@ -73,6 +73,34 @@ public:
 	void RestartCurrentScene();
 
 	std::string CurrentScene; // i need this public for me to call in other systems when i press the nbutton in hovered state
+
+	/**
+	 * @brief Serializes the entire current scene to a JSON string in memory
+	 *
+	 * This function is used by the Editor when Play is pressed.
+	 * It saves ALL entities and ALL their components to a JSON string
+	 * so we can restore the exact scene state when Stop is pressed.
+	 *
+	 * Unlike SaveCurrentScene() which writes to a file, this returns
+	 * a string that stays in memory - faster and doesn't overwrite your saved scene.
+	 *
+	 * @return JSON string containing the entire scene state
+	 */
+	std::string SerializeToString();
+
+	/**
+	 * @brief Loads a scene from a JSON string in memory
+	 *
+	 * This function is used by the Editor when Stop is pressed.
+	 * It restores the scene to the state captured by SerializeToString().
+	 * All runtime changes made during Play are discarded.
+	 *
+	 * Unlike LoadSceneFromJson() which reads from a file, this reads
+	 * from a string in memory - faster and doesn't need file I/O.
+	 *
+	 * @param jsonString The JSON string from SerializeToString()
+	 */
+	void LoadFromString(const std::string& jsonString);
 	
 	std::string GrabCurrentScene() const { return CurrentScene; }
 	std::string GrabLastScene() const { return LastScene; }
@@ -100,7 +128,6 @@ private:
 	std::vector<Entity> SceneEntityList;
 
 	std::string StartingScene = "../../../PulseEngine/JSON/MainMenu.json"; 
-	//std::string StartingScene = "../../PulseEngine/JSON/Level1.json"; // level 1 for reg to test scripts 
 
 	void Deserialize(const rapidjson::Value& in);
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;

@@ -7,7 +7,7 @@
  *              and SAT-based OBB collision for rotated entities. Contains helper methods
  *              for building bounding volumes and detecting mouse/GUI interactions.
  * 
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  * 
@@ -315,12 +315,12 @@ void CollisionManager::RebuildUniformGrid()
     m_broadPairsLastFrame = m_candidatePairs.size();
 
      //Optional debug proof (uncomment in debug builds)
-    static int frameCounter = 0;
-    if (++frameCounter % 60 == 0) // print once per ~60 frames
-    {
-        std::cout << "[BroadPhase] cells=" << m_cells.size()
-            << " candidatePairs=" << m_candidatePairs.size()
-            << " entities=" << EntityMember.size()
-            << "\n";
-    }
+    //static int frameCounter = 0;
+    //if (++frameCounter % 60 == 0) // print once per ~60 frames
+    //{
+    //    std::cout << "[BroadPhase] cells=" << m_cells.size()
+    //        << " candidatePairs=" << m_candidatePairs.size()
+    //        << " entities=" << EntityMember.size()
+    //        << "\n";
+    //}
 }

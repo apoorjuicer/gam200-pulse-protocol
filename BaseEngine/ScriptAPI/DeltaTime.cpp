@@ -6,7 +6,7 @@
 * @brief       Implementation of Time class providing C# scripts with frame timing 
 *              and game time data through read-only property accessors.
 *
-* @copyright   copyright (c) 2025 digipen institute of technology.
+* @copyright   copyright (c) 2026 digipen institute of technology.
 *              reproduction or disclosure of this file or its contents without the
 *              prior written consent of digipen institute of technology is prohibited.
 *

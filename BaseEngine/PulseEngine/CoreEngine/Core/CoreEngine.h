@@ -7,7 +7,7 @@
  * @brief		Declares the core engine class that manages subsystem
  *				initialization, the main game loop, and development utilities.
  *
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
@@ -87,7 +87,11 @@ public:
 
 	// --- For Delta Time API :D  ---
 public:
-	float GetDeltaTime() const { return DeltaTime;}
+	// Returns DeltaTime, but returns 0 if game is paused
+	// This ensures all movement/animations stop when m_paused is true
+	// because scripts use DeltaTime for frame-independent updates (pos += speed * DeltaTime)
+	// When DeltaTime = 0, no movement occurs
+	float GetDeltaTime() const { return m_paused ? 0.0f : DeltaTime; }
 	int GetFrameCount() const { return FrameCount; }
 	float GetTimePassed() const { return TimePassed; }
 	void SetTime(float time) { TimePassed = time; }

@@ -1,3 +1,17 @@
+/*****************************************************************************
+ * @file        ParticleSystem.h
+ * @project     Pulse Protocol
+ * @author		Goh Pin Kai
+ *
+ * @brief       Simple CPU particle system using a fixed-size pool. Supports spawning
+ *              burst emissions with randomized direction/speed and lifetime ranges,
+ *              and updates active particles by integrating velocity and lifetime.
+ *
+ * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
+ ******************************************************************************/
+
 #pragma once
 #include <vector>
 #include <glm/vec2.hpp>
@@ -26,16 +40,16 @@ struct ParticleSpawnDesc
 class ParticleSystem
 {
 public:
-    void CreatePool(std::size_t maxParticles);
-    void Clear();                  // deactivate only (keep memory)
-    void SpawnBurst(const ParticleSpawnDesc& desc);
+    void CreatePool(size_t maxParticles);
+    void Clear();
+
+    void SpawnBurst(const ParticleSpawnDesc& d);
     void Update(float dt);
 
     const std::vector<Particle>& GetParticles() const { return mParticles; }
 
 private:
     std::vector<Particle> mParticles;
-    std::size_t mNextSearch = 0;   // makes FindFree faster
 
     float Rand01();
     Particle* FindFree();

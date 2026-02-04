@@ -7,7 +7,7 @@
  * @brief       Defines the rendering layer system used to control draw order.
  *              Updated to use LayerRegistry for editable layer names.
  * 
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */

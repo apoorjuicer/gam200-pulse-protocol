@@ -7,7 +7,7 @@
  * @brief		Implements OpenGL application utilities for initializing
  *				shaders, models, viewports, and rendering textured entities.
  * 
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
@@ -175,8 +175,11 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	float deltaTime =
 		std::chrono::duration<float>(currentTime - lastTime).count();
 	lastTime = currentTime;
-	if (!Framework::GameState::IsPlaying())
+
+	// Don't advance time if not playing or if paused
+	if (!Framework::GameState::IsPlaying() || (Engine && Engine->IsPaused()))
 		deltaTime = 0.0f;
+
 	gBatch.Begin();
 
 	std::vector<Entity> drawList;
@@ -312,6 +315,17 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 				if (an.currentFrame >= an.totalFrames)
 					an.currentFrame %= an.totalFrames;
 			}
+		}
+
+		// Validate texture before binding
+		if (re.textureID == 0 || !glIsTexture(re.textureID))
+		{
+			std::cerr << "[GUARD] Caught invalid textureID=" << re.textureID
+				<< " for sprite=" << re.spriteName << "\n";
+			// Texture was deleted or invalid — mark for reload next frame
+			re.textureID = 0;
+			drawOrder++;
+			continue;
 		}
 
 		glBindTexture(GL_TEXTURE_2D, re.textureID);

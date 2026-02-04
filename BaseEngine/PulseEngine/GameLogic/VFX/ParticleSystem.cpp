@@ -1,3 +1,17 @@
+/*****************************************************************************
+ * @file        ParticleSystem.cpp
+ * @project     Pulse Protocol
+ * @author		Goh Pin Kai
+ *
+ * @brief       Implements ParticleSystem pool management, burst spawning with random
+ *              polar velocities, and per-frame simulation (lifetime countdown and
+ *              position integration). Inactive particles are reused from the pool.
+ *
+ * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
+ ******************************************************************************/
+
 #include "ParticleSystem.h"
 #include <cstdlib>
 #include <cmath>
@@ -7,36 +21,22 @@ float ParticleSystem::Rand01()
     return float(std::rand()) / float(RAND_MAX);
 }
 
-void ParticleSystem::CreatePool(std::size_t maxParticles)
+void ParticleSystem::CreatePool(size_t maxParticles)
 {
-    mParticles.assign(maxParticles, Particle{});
-    mNextSearch = 0;
+    mParticles.clear();
+    mParticles.resize(maxParticles); // fixed-size pool
 }
 
 void ParticleSystem::Clear()
 {
-    // Pooling: do NOT clear the vector.
-    for (auto& p : mParticles)
-        p.active = false;
-
-    mNextSearch = 0;
+    mParticles.clear();
 }
 
 Particle* ParticleSystem::FindFree()
 {
-    if (mParticles.empty()) return nullptr;
-
-    // Start searching from last free index to reduce scans
-    for (std::size_t i = 0; i < mParticles.size(); ++i)
-    {
-        std::size_t idx = (mNextSearch + i) % mParticles.size();
-        if (!mParticles[idx].active)
-        {
-            mNextSearch = (idx + 1) % mParticles.size();
-            return &mParticles[idx];
-        }
-    }
-    return nullptr; // pool full
+    for (auto& p : mParticles)
+        if (!p.active) return &p;
+    return nullptr;
 }
 
 void ParticleSystem::SpawnBurst(const ParticleSpawnDesc& d)

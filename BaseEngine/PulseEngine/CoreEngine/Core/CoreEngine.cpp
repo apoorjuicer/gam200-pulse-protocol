@@ -10,7 +10,7 @@
  *				updates, integrates ImGui editor support, and provides debug
  *				rendering utilities for development visualization.
  *
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
@@ -1094,6 +1094,8 @@ void CoreEngine::RenderDebugDraw()
 		}
 	}
 
+	DebugDraw::End();
+
 	//// ---------------------------------------------------------------------
 	//// F7: spawn/delete 1,000 moving sprites (hero)
 	//// ---------------------------------------------------------------------
@@ -1231,6 +1233,11 @@ void CoreEngine::PlayGame()
 	m_isPlaying = true;
 	m_paused = false;
 	Framework::GameState::SetPlaying(true);
+
+	// RESET TIME!!!!
+	FrameCount = 0;
+	TimePassed = 0.0f;
+
 	auto coord = Coordinator::GetInstance();
 
 	// ALWAYS update the original scene path when Play is pressed

@@ -13,10 +13,9 @@
  *              Managed by `LogicSystem` which handles script registration,
  *              updating, and serialization of script names to JSON.
  *
- * @copyright   Copyright (C) 2025
- *              DigiPen Institute of Technology.
- *              Reproduction or disclosure of this file or its contents without
- *              prior written consent is prohibited.
+ * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
  ******************************************************************************/
 #pragma once
 #include "pch/pch_temp.h"
@@ -27,6 +26,7 @@
 //#include "../PulseEngine/Components/ScriptName.h"
 // #include "Serialization/Serialization.h"
 #include "Input/RhythmGameplayInput.h"
+#include "VFX/VFXManager.h"
 
 //components:
 #include "Graphics/Transform.h"
@@ -93,11 +93,7 @@ public:
 private:
 	bool  isAttacking = false;
 	float attackTimer = 0.0f;
-	/*float autoMoveTimer = 2.0f;*/ // FOR TESTING THE STOP BUTTON FUNCTIONALITY PURPOSE
 };
-
-//PlayerScript playerScript;
-//playerScript.float_fields.emplace("Health", 100.0f);
 
 class EnemyScript : public Iscript
 {
@@ -113,76 +109,6 @@ public:
 	static bool testOBBCollision;
 
 	float enemyDmg;
-};
-
-//class EnemySpawnerScript : public Iscript
-//{
-//public:
-//	void Init(Entity ID) override;
-//	void Update(Entity ID) override;
-//	void Exit(Entity ID) override;
-//
-//	// Track the two enemies
-//	static Entity Enemy1ID;
-//	static Entity Enemy2ID;
-//
-//	// True when Enemy 1 has died
-//	static bool Enemy1Dead;
-//
-//	// Per-enemy hop timer (moved here)
-//	static std::unordered_map<Entity, float> HopTimer;
-//};
-
-//// Per-button data structure
-//struct ButtonData
-//{
-//	std::string buttonName;
-//	std::string normalTexture;
-//	std::string hoverTexture;
-//	bool isHovering = false;
-//};
-//
-//class ButtonScript : public Iscript
-//{
-//public:
-//	void Init(Entity ID) override;
-//	void Update(Entity ID) override;
-//	void Exit(Entity ID) override;
-//
-//	ButtonScript* Clone() override;
-//
-//private:
-//	// Store data per entity ID
-//	std::unordered_map<Entity, ButtonData> buttonDataMap;
-//};
-//
-//class PulsingBorderScript : public Iscript
-//{
-//public:
-//	void Init(Entity ID) override;
-//	void Update(Entity ID) override;
-//	void Exit(Entity ID) override;
-//
-//	PulsingBorderScript* Clone() override;
-//
-//private:
-//	float pulseTimer = 0.0f;
-//	float bpm = 120.0f;
-//	float minAlpha = 0.2f;
-//	float maxAlpha = 1.0f;
-//};
-
-class Csharptestscript : public Iscript
-{
-public:
-	void Init(Entity ID) override;
-	void Update(Entity ID) override;
-	void Exit(Entity ID) override;
-	Csharptestscript* Clone() override;
-
-private:
-	void(*initFunc)(CoreEngine*) = nullptr;
-	bool(*addScript)(int, const char*) = nullptr;
 };
 
 class CountdownScript : public Iscript
@@ -211,7 +137,7 @@ private:
 	float startTime = 0.0f;
 };
 
-class LogicSystem: public Systems
+class DLL_API LogicSystem: public Systems
 {
 public:
 	LogicSystem();  //constructor
@@ -226,11 +152,13 @@ public:
 
 	// We give script name as param and get the update function of each script(child of Iscript)
 	std::shared_ptr<Iscript> GrabScript(std::string const& ScriptName);
-
+	VFXManager& GetVfx() { return mVfx; }
+	const VFXManager& GetVfx() const { return mVfx; }
 private:
 	// key is the name of script which is a component, then reward is the class parent but can also grab kid functions and data
 	std::unordered_map<std::string, std::shared_ptr<Iscript>> map_of_scripts; // template
 	std::unordered_map<Entity, std::unordered_map<std::string, std::shared_ptr<Iscript>>> map_of_scriptInstances; // copying from template (wrap raw ptr into smart ptr(shared) to prevent mem leak ltr )
+	VFXManager mVfx;
 };
 
 struct DLL_API LogicComponent

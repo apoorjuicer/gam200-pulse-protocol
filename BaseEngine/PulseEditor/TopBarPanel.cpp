@@ -1,4 +1,4 @@
-/******************************************************************************/
+﻿/******************************************************************************/
 /**
  * @file        TopBarPanel.cpp
  * @project     Pulse Protocol
@@ -52,9 +52,10 @@ namespace PulseEditor
         }
     };
             
-    static bool s_hasEditorBaseline = false;       
+    static bool s_hasEditorBaseline = false;     
+    static Entity s_selectedBeforePlay = INVALID_ENTITY;
     static std::vector<SavedEntityState> s_editorBaseline;
-
+    static std::string s_sceneBeforePlay;
 
     void CaptureEditorBaseline()
     {
@@ -217,26 +218,52 @@ namespace PulseEditor
         else
             ImGui::SameLine();
 
-        // --- Play / Stop ---
+        // ═══════════════════════════════════════════════════════════════════════
+        // Play / Stop Button
+        // ═══════════════════════════════════════════════════════════════════════
         if (ImGui::Button(playStopLabel, playStopButtonSize))
         {
             if (!IsPlaying())
             {
-                // START PLAYING
+                // PLAY PRESSED
+
+                // Save selected entity
+                s_selectedBeforePlay = selectedEntity;
+
+                // Deselect to avoid issues
+                selectedEntity = INVALID_ENTITY;
+
+                // Save scene state
+                if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>())
+                {
+                    s_sceneBeforePlay = sceneMgr->SerializeToString();
+                }
+
                 Engine->PlayGame();
                 SetPlaying(true);
                 isPaused = false;
-
-                //std::cout << "[Editor] Play Started\n";
             }
             else
             {
-                // STOP PLAYING
+                // STOP PRESSED
+
                 Engine->StopGame();
+
+                // Restore scene
+                if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>())
+                {
+                    if (!s_sceneBeforePlay.empty())
+                    {
+                        sceneMgr->LoadFromString(s_sceneBeforePlay);
+                    }
+                }
+
+                // DON'T restore selected - just clear it
+                selectedEntity = INVALID_ENTITY;
+
+                s_sceneBeforePlay.clear();
                 SetPlaying(false);
                 isPaused = false;
-
-                //std::cout << "[Editor] Stopped - Scene Restored\n";
             }
         }
 

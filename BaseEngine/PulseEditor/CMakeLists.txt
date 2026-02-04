@@ -26,6 +26,17 @@ endif()
 
 add_executable(${EDITOR_NAME} ${EDITOR_SRC})
 
+# Hide console in Release (GUI subsystem), keep console in Debug
+if (WIN32)
+  set_target_properties(${EDITOR_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+
+  target_link_options(${EDITOR_NAME} PRIVATE
+    $<$<CONFIG:Debug>:/SUBSYSTEM:CONSOLE>
+    $<$<NOT:$<CONFIG:Debug>>:/SUBSYSTEM:WINDOWS>
+    $<$<NOT:$<CONFIG:Debug>>:/ENTRY:mainCRTStartup>
+  )
+endif()
+
 # ensures POST_BUILD copy commands run when DLLs change
 set_target_properties(${EDITOR_NAME} PROPERTIES 
     VS_GLOBAL_DisableFastUpToDateCheck true

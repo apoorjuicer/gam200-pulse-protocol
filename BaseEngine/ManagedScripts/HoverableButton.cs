@@ -1,3 +1,16 @@
+/******************************************************************************/
+/**
+* @file        HoverableButton.cs
+* @project     Pulse Protocol
+* @author      Chloe Lau Rey En
+* @brief       Script for hovering of buttons, and transition of scenes and showing overlay for quit button
+*
+* @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+*              Reproduction or disclosure of this file or its contents without the
+*              prior written consent of DigiPen Institute of Technology is prohibited.
+*
+/******************************************************************************/
+
 using System;
 using System.Collections.Generic;
 using ScriptAPI;
@@ -15,10 +28,16 @@ public class NavigationButtons : Script
     public static bool ShowQuitOverlay = false;
     public static bool ShowPauseOverlay = false;
 
+    private string pauseTexture = "";  
+    private string pauseHoverTexture = "";
     private string defaultTexture = "";
     private string hoverTexture = "";
+    private string exitTexture = "";
+    private string exitHoverTexture = "";
     private bool isCurrentlyHovered = false;
     private bool buttonInitialized = false;
+    private bool lastPauseState = false;
+    private bool isPauseButton = false;
     private float hoverScaleBoost = 1.05f;
 
     public override void Update()
@@ -43,6 +62,7 @@ public class NavigationButtons : Script
         {
             SpriteComponent sprite = GetSprite();
             defaultTexture = sprite.Texture;
+            pauseTexture = defaultTexture;
             
             // Detect current scene from texture path if not set
             if (string.IsNullOrEmpty(currentScene))
@@ -57,18 +77,59 @@ public class NavigationButtons : Script
             else
                 hoverTexture = defaultTexture + "_hover";
             
+            pauseHoverTexture = hoverTexture;
+            isPauseButton = defaultTexture.ToLower().Contains("pause");
+        
             buttonInitialized = true;
+
+            // exit textures
+            if (defaultTexture.ToLower().Contains("pause"))
+            {
+                exitTexture = defaultTexture.Replace("Pause", "Exit");  // Automatically generates Exit.png
+                exitHoverTexture = pauseHoverTexture.Replace("Pause", "Exit");
+            }
         }
+
+        // this switches pause icon to exit when pause overlay is showing
+        string texLower = defaultTexture.ToLower();
+        if (isPauseButton)
+        {
+            bool isPauseShowing = ShowPauseOverlay;
+            
+            if (isPauseShowing != lastPauseState)
+            {
+                SpriteComponent sprite = GetSprite();
+                if (isPauseShowing)
+                {
+                    // Pause the game when overlay shows
+                    Application.SetPaused(true);
+                    
+                    sprite.Texture = exitTexture;
+                    defaultTexture = exitTexture;
+                    hoverTexture = exitHoverTexture;
+                }
+                else
+                {
+                    // Resume the game when overlay closes
+                    Application.SetPaused(false);
+
+                    sprite.Texture = pauseTexture;
+                    defaultTexture = pauseTexture;
+                    hoverTexture = pauseHoverTexture;
+                }
+                lastPauseState = isPauseShowing;
+            }
+        }
+
 
         // ============================================
         // BLOCK INTERACTION WHEN OVERLAY IS SHOWING
         // (except for overlay buttons)
         // ============================================
-        string texLower = defaultTexture.ToLower();
         bool isQuitOverlayButton = texLower.Contains("quit yes") || texLower.Contains("quit no");
-        bool isPauseOverlayButton = texLower.Contains("pause");
-        
-        if ((ShowQuitOverlay || ShowPauseOverlay) )//&& !isOverlayButton)
+        bool isPauseOverlayButton = texLower.Contains("pause") || texLower.Contains("exit");; 
+        bool isOverlayButton = isQuitOverlayButton || isPauseOverlayButton;
+        if ((ShowQuitOverlay || ShowPauseOverlay) && !isOverlayButton)
         {
             // Reset hover state if we were hovering
             if (isCurrentlyHovered)
@@ -183,28 +244,37 @@ public class NavigationButtons : Script
     private void OnClick()
     {
         string tex = defaultTexture.ToLower();
-        // Console.WriteLine($"Button clicked: {tex}");
+        Console.WriteLine($"Button clicked: {tex}");
 
         // ============================================
         // PAUSE OVERLAY BUTTONS - CHECK FIRST
         // ============================================
-        if (tex.Contains("pause"))
+        if (tex.Contains("exit"))
         {
-            Console.WriteLine("PAUSE RESUME - Hiding overlay");
+            Console.WriteLine("PAUSE EXIT - Hiding overlay");
             ShowPauseOverlay = false;
             return;
         }
         
-        if (tex.Contains("pause quit"))
+        if (tex.Contains("pausequit"))
         {
-            Console.WriteLine("PAUSE QUIT - Going to main menu");
+            // Console.WriteLine("PAUSE QUIT - Going to main menu");
             GoToMainMenu();
             return;
         }
         
-        if (tex.Contains("pause settings"))
+        if (tex.Contains("pauserestart"))
         {
-            Console.WriteLine("PAUSE SETTINGS - Opening settings");
+            // Console.WriteLine("PAUSE RESTART - Restarting level");
+            // reload current scene
+            Scene.LoadScene(currentScene);
+            ShowPauseOverlay = false;
+            return;
+        }
+
+        if (tex.Contains("pausesettings"))
+        {
+            // Console.WriteLine("PAUSE SETTINGS - Opening settings");
             NavigateTo("Settings");
             ShowPauseOverlay = false;
             return;
@@ -215,14 +285,14 @@ public class NavigationButtons : Script
         // ============================================
         if (tex.Contains("quit yes"))
         {
-            Console.WriteLine("QUIT YES - Closing game");
+            // Console.WriteLine("QUIT YES - Closing game");
             Application.Quit();
             return;
         }
         
         if (tex.Contains("quit no"))
         {
-            Console.WriteLine("QUIT NO - Hiding overlay");
+            // Console.WriteLine("QUIT NO - Hiding overlay");
             ShowQuitOverlay = false;
             return;
         }
@@ -287,14 +357,11 @@ public class QuitOverlay : Script
     }
 }
 
-// ============================================
-// (pause background)
-// ============================================
-public class Paus : Script
+public class PauseOverlay : Script
 {
     public override void Update()
     {
         TransformComponent t = GetTransform();
-        t.IsVisible = NavigationButtons.ShowQuitOverlay;
+        t.IsVisible = NavigationButtons.ShowPauseOverlay;
     }
 }

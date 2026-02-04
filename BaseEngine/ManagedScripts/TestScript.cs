@@ -23,6 +23,7 @@ public class TestScript : Script
     float sceneCoolDown = 10.0f;
     bool hasSpawned = false;
     bool said = false;
+    float gayshitttt = 120.0f;
     public override void Update()
     {
         Console.Write("gay 1\n");
@@ -107,6 +108,14 @@ public class TestScript : Script
 
         Console.WriteLine($"Frams: {Time.FrameCount}, Time: {Time.GameTime}\n\n\n\n\n\n\n");
         Console.WriteLine($"Current Animation: {AM.GetCurrentAnimation()}");
+
+
+        // scuff way I tested VFX API Lmao, IT PRINTS BUT I NO CLUE IF ANYTHING ELSE
+        VFXAPI.SetBPM(gayshitttt);
+        VFXAPI.BeatPulse();
+        VFXAPI.PlayHit(HitResult.Perfect, 50.0f, 50.0f);
+        VFXAPI.PlayHit(HitResult.Good, 400, 300);
+
     }
 }
 
@@ -119,5 +128,19 @@ public class TestScript2 : Script
         TFC.ScaleX -= 2.5f;
         TFC.ScaleY -= 2.5f;
 
+    }
+}
+
+public class TestPause : Script
+{
+    private float speed = 5.0f;
+
+    public override void Update()
+    {
+        if (NavigationButtons.ShowPauseOverlay)
+            return;  // Stop moving when paused
+        
+        TransformComponent t = GetTransform();
+        t.X += speed * Time.DeltaTime;
     }
 }

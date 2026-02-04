@@ -7,7 +7,8 @@
  *             one instance of a class exists throughout the application lifetime.
  *             Provides thread-safe lazy initialization and prevents multiple
  *             instantiations of templated types
- * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+ * 
+ * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
  *             Reproduction or disclosure of this file or its contents without the
  *             prior written consent of DigiPen Institute of Technology is prohibited.
  */
