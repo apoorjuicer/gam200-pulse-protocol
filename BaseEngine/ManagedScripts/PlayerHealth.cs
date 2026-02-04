@@ -1,8 +1,13 @@
-using System;
+﻿using System;
 using ScriptAPI;
 
 public class PlayerHealth : Script
 {
+    // =========================
+    // Singleton Access
+    // =========================
+    public static PlayerHealth Instance { get; private set; }
+
     // =========================
     // Config
     // =========================
@@ -15,6 +20,20 @@ public class PlayerHealth : Script
     // Internal
     // =========================
     private bool initialized = false;
+
+    private void Awake()
+    {
+        // Set singleton
+        if (Instance == null)
+            Instance = this;
+
+        Console.WriteLine("[PlayerHealth] Singleton initialized");
+    }
+
+    public override void Update()
+    {
+        EnsureInit();
+    }
 
     private void EnsureInit()
     {
@@ -34,6 +53,14 @@ public class PlayerHealth : Script
         hc.isAlive = true;
 
         initialized = true;
+
+        // Notify health bar controller if it exists
+        if (HealthBarController.Instance != null)
+        {
+            HealthBarController.Instance.SetPlayerHealthReference(this);
+        }
+
+        Console.WriteLine($"[PlayerHealth] Initialized with {hc.hp}/{maxHP} HP");
     }
 
     // =========================
@@ -46,10 +73,19 @@ public class PlayerHealth : Script
         if (dmg <= 0) return;
 
         HealthComponent hc = GetHealth();
+        int oldHP = hc.hp;
         hc.hp -= dmg;
 
         if (hc.hp < 0)
             hc.hp = 0;
+
+        Console.WriteLine($"[PlayerHealth] Took {dmg} damage! HP: {oldHP} → {hc.hp}");
+
+        // Notify health bar
+        if (HealthBarController.Instance != null)
+        {
+            HealthBarController.Instance.ForceUpdate();
+        }
 
         if (hc.hp <= 0)
             Die();
@@ -62,10 +98,19 @@ public class PlayerHealth : Script
         if (amount <= 0) return;
 
         HealthComponent hc = GetHealth();
+        int oldHP = hc.hp;
         hc.hp += amount;
 
         if (hc.hp > maxHP)
             hc.hp = maxHP;
+
+        Console.WriteLine($"[PlayerHealth] Healed {amount}! HP: {oldHP} → {hc.hp}");
+
+        // Notify health bar
+        if (HealthBarController.Instance != null)
+        {
+            HealthBarController.Instance.ForceUpdate();
+        }
     }
 
     public void Die()
@@ -75,7 +120,13 @@ public class PlayerHealth : Script
         HealthComponent hc = GetHealth();
         hc.isAlive = false;
 
-        Console.WriteLine("Player defeated!");
+        Console.WriteLine("[PlayerHealth] ☠️ Player defeated!");
+
+        // Notify health bar one last time
+        if (HealthBarController.Instance != null)
+        {
+            HealthBarController.Instance.ForceUpdate();
+        }
 
         // Engine-safe lose handling (no GameStateManager singleton assumed)
         Scene.LoadScene(loseSceneName);

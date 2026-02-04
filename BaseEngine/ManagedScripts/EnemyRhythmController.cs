@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using ScriptAPI;
 
 public enum EnemyState { Idle, Moving, Attacking, Dead }
@@ -45,7 +45,7 @@ public class EnemyRhythmController : Script
 
     // === COMBAT SETTINGS ===
     public float AttackRange = 25f;
-    public float AttackDamage = 12f;
+    public int AttackDamage = 12;  // Changed to int for PlayerHealth compatibility
     public float Health = 15f;
 
     // === PLAYER DETECTION ===
@@ -114,9 +114,6 @@ public class EnemyRhythmController : Script
             }
         }
 
-        // REMOVED: Distance check and attack logic from Update()
-        // Attack only happens during Resolution phase now
-
         // Movement logic - only during appropriate phases
         if (Conductor.Instance != null)
         {
@@ -138,7 +135,11 @@ public class EnemyRhythmController : Script
         Console.WriteLine("[Enemy] Initializing...");
 
         TransformComponent tf = GetTransform();
-        SetScaleForSprite(IdleSpriteSheet, 220, 432);
+
+        // FIXED: Use simpler scale setting
+        tf.ScaleX = 200f;
+        tf.ScaleY = 200f;
+
         SetState(EnemyState.Idle);
 
         if (Conductor.Instance != null)
@@ -163,35 +164,23 @@ public class EnemyRhythmController : Script
         {
             ComboSystem.Instance.SetEnemyWeakness(WeaknessCombo);
             weaknessSet = true;
-            Console.WriteLine($"[Enemy] ? Weakness successfully set to: {WeaknessCombo}");
+            Console.WriteLine($"[Enemy] ✓ Weakness successfully set to: {WeaknessCombo}");
         }
         else if (weaknessRetryCount == 0)
         {
-            Console.WriteLine("[Enemy] ?? ComboSystem.Instance is null - will retry...");
+            Console.WriteLine("[Enemy] ⚠️ ComboSystem.Instance is null - will retry...");
         }
         else if (weaknessRetryCount == maxWeaknessRetries - 1)
         {
-            Console.WriteLine("[Enemy] ? ERROR: ComboSystem never initialized!");
+            Console.WriteLine("[Enemy] ❌ ERROR: ComboSystem never initialized!");
         }
-    }
-
-    private void SetScaleForSprite(string spriteName, float spriteWidth, float spriteHeight)
-    {
-        TransformComponent tf = GetTransform();
-        float targetSize = 200f;
-        float scaleX = targetSize / spriteWidth;
-        float scaleY = targetSize / spriteHeight;
-        float uniformScale = Math.Min(scaleX, scaleY);
-
-        tf.ScaleX = spriteWidth * uniformScale;
-        tf.ScaleY = spriteHeight * uniformScale;
     }
 
     private void SetState(EnemyState newState)
     {
         if (currentState == newState) return;
 
-        Console.WriteLine($"[Enemy] State: {currentState} ? {newState}");
+        Console.WriteLine($"[Enemy] State: {currentState} → {newState}");
         currentState = newState;
         UpdateSpriteSheet(newState);
     }
@@ -203,22 +192,18 @@ public class EnemyRhythmController : Script
         switch (state)
         {
             case EnemyState.Idle:
-                SetScaleForSprite(IdleSpriteSheet, 220, 432);
                 anim.SetAnimation(IdleSpriteSheet, IdleRows, IdleColumns, IdleFrames, AnimationSpeed);
                 break;
 
             case EnemyState.Moving:
-                SetScaleForSprite(WalkSpriteSheet, 322, 433);
                 anim.SetAnimation(WalkSpriteSheet, WalkRows, WalkColumns, WalkFrames, AnimationSpeed);
                 break;
 
             case EnemyState.Attacking:
-                SetScaleForSprite(AttackSpriteSheet, 634, 431);
                 anim.SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, AnimationSpeed);
                 break;
 
             case EnemyState.Dead:
-                SetScaleForSprite(HurtSpriteSheet, 515, 428);
                 anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, AnimationSpeed / 2f);
                 break;
         }
@@ -295,16 +280,21 @@ public class EnemyRhythmController : Script
     {
         if (isDead) return;
 
-        Console.WriteLine($"[Enemy] ??? ATTACKING PLAYER for {AttackDamage} damage!");
+        Console.WriteLine($"[Enemy] ⚔️⚔️ ATTACKING PLAYER for {AttackDamage} damage!");
         SetState(EnemyState.Attacking);
 
         attackCooldownTimer = AttackFrames / AnimationSpeed;
 
-        // TODO: Apply damage to player
-        // if (PlayerHealthSystem.Instance != null)
-        // {
-        //     PlayerHealthSystem.Instance.TakeDamage(AttackDamage);
-        // }
+        // FIXED: Apply damage to player using singleton
+        if (PlayerHealth.Instance != null)
+        {
+            PlayerHealth.Instance.TakeDamage(AttackDamage);
+            Console.WriteLine($"[Enemy] ✓ Successfully damaged player");
+        }
+        else
+        {
+            Console.WriteLine($"[Enemy] ⚠️ WARNING: PlayerHealth.Instance is null - damage not applied!");
+        }
     }
 
     // ========================================================================
@@ -333,9 +323,16 @@ public class EnemyRhythmController : Script
         deathTimer = 0f;
         SetState(EnemyState.Dead);
 
-        Console.WriteLine("[Enemy] ?? DEFEATED!");
+        Console.WriteLine("[Enemy] ☠️ DEFEATED!");
+
+        // Notify the spawner that this enemy is down
+        if (EnemySpawner.Instance != null)
+        {
+            EnemySpawner.Instance.OnEnemyDefeated();
+        }
+
         Console.WriteLine("==============================================");
-        Console.WriteLine("?? VICTORY! Enemy defeated!");
+        Console.WriteLine("🏆 VICTORY! Enemy defeated!");
         Console.WriteLine("==============================================");
     }
 

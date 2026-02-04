@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using ScriptAPI;
 
 public class ComboSystem : Script
@@ -116,12 +116,16 @@ public class ComboSystem : Script
         hitResults.Add(judgement);
         currentCombo.Add(key);
 
-        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (?={delta:F3}s)");
+        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s)");
 
-        // === VISUAL FEEDBACK ===
-        if (ComboDisplayController.Instance != null)
+        // === VISUAL FEEDBACK - UPDATED TO USE NEW MANAGER ===
+        if (ComboDisplayManager.Instance != null)
         {
-            ComboDisplayController.Instance.ShowJudgement(judgement);
+            ComboDisplayManager.Instance.ShowJudgement(judgement);
+        }
+        else
+        {
+            Console.WriteLine("[ComboSystem] WARNING: ComboDisplayManager not found!");
         }
 
         // === PERFECT STREAK ===
@@ -130,7 +134,7 @@ public class ComboSystem : Script
             perfectStreak++;
             if (perfectStreak >= 5)
             {
-                Console.WriteLine("[ComboSystem] ? PERFECT STREAK x5!");
+                Console.WriteLine("[ComboSystem] 🔥 PERFECT STREAK x5!");
                 perfectStreak = 0;
             }
         }
@@ -183,12 +187,12 @@ public class ComboSystem : Script
 
         if (allGood && comboString == currentEnemyWeakness)
         {
-            Console.WriteLine("[ComboSystem] ? COMBO SUCCESS!");
+            Console.WriteLine("[ComboSystem] ✅ COMBO SUCCESS!");
             PlayerDidSuccessfulCombo = true;
         }
         else
         {
-            Console.WriteLine("[ComboSystem] ? COMBO FAILED!");
+            Console.WriteLine("[ComboSystem] ❌ COMBO FAILED!");
             PlayerDidSuccessfulCombo = false;
         }
 

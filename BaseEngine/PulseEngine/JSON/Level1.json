@@ -434,7 +434,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -869,9 +869,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "OrderSlipCurrentIcon"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -942,9 +940,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "OrderSlipNextIcon"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -1400,9 +1396,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "OrderSlipUIController"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -1684,9 +1678,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "EnemySpawner"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -1752,9 +1744,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "ComboDisplayController"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
