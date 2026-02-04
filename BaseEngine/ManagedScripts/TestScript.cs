@@ -127,6 +127,13 @@ public class TestScript2 : Script
         TFC.ScaleX -= 2.5f;
         TFC.ScaleY -= 2.5f;
 
+        FSMComponentAPI fsm = GetFSM();
+        Console.WriteLine($" State: {fsm.GetState()}");
+        fsm.RequestMove(true);
+        fsm.RequestAttack();
+        fsm.NotifyDamage();
+        fsm.ClearRequests();
+
     }
 }
 

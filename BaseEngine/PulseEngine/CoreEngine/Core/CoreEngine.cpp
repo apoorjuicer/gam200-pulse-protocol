@@ -39,6 +39,8 @@
 #include "Components/DisplayName.h"
 #include "Components/EntityType.h"
 #include "Components/ParentChild.h"
+#include "../../StateMachine/FSMComponent.h"
+#include "../../StateMachine/GameplayFSMSystem.h"
 
 #include "Audio/AudioSource.h"
 #include "Graphics/Text.h"
@@ -733,6 +735,7 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<NPC>();
 	g_coordinator->RegisterComponent<AABB>();
 	g_coordinator->RegisterComponent<Health>();
+	g_coordinator->RegisterComponent<FSMComponent>();
 	g_coordinator->RegisterComponent<LogicComponent>();
 	g_coordinator->RegisterComponent<NamingComponent>();
 	g_coordinator->RegisterComponent<Name>();
@@ -745,7 +748,8 @@ void CoreEngine::Setup()
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
-	//g_coordinator->RegisterSystem<RhythmGameplayInput>();
+	g_coordinator->RegisterSystem<RhythmGameplayInput>();
+	g_coordinator->RegisterSystem<GameplayFSMSystem>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<CollisionManager>();
@@ -762,6 +766,12 @@ void CoreEngine::Setup()
 	collisionSig.set(g_coordinator->GetComponentType<AABB>());
 	collisionSig.set(g_coordinator->GetComponentType<Health>());
 	g_coordinator->SetSystemSignature<CollisionManager>(collisionSig);
+
+	Signature fsmSig;
+	fsmSig.set(g_coordinator->GetComponentType<FSMComponent>());
+	fsmSig.set(g_coordinator->GetComponentType<Health>());
+	fsmSig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	g_coordinator->SetSystemSignature<GameplayFSMSystem>(fsmSig);
 
 	Signature inputSig;
 	inputSig.set(g_coordinator->GetComponentType<Framework::Transform>());
