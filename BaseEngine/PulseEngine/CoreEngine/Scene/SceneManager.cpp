@@ -636,7 +636,18 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			{
 				FSM f;
 				f.Deserialize(component["State"]);
+
+				std::cout << "[Factory] Loaded FSM - CurrentState: "
+					<< static_cast<int>(f.CurrentState) << std::endl;
+
 				g_coordinator->AddComponent<FSM>(entity, f);
+
+				if (g_coordinator->HasComponent<FSM>(entity))
+				{
+					auto& fsm = g_coordinator->GetComponent<FSM>(entity);
+					std::cout << "[Factory] FSM component added successfully! State: "
+						<< static_cast<int>(fsm.CurrentState) << std::endl;
+				}
 			}
 
 			if (component.HasMember("name") && component["name"].IsObject())
