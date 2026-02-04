@@ -48,16 +48,20 @@
 /******************************************************************************/
 #pragma once
 #include "Factory.h"
+#include "Graphics/Text.h"
+#include "Graphics/Animation.h"
+#include "Graphics/Renderable.h"
 #include "CoreEngine/Assets.h"
 #include "Components/DisplayName.h"
 #include "Components/ParentChild.h"
+
 
 using namespace rapidjson;
 
 // change to optional for bool(if loaded succeessfully) and entity ID(for chloe)
 // added file path that will be given from either scene manager/ImGui
 // Read from file, loop thru a check if have type and component. Add component base on type.
-std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path)
+std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, bool attachScripts)
 {
 	auto *g_coordinator = Coordinator::GetInstance();
 
@@ -196,8 +200,8 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path)
 	
 
 	
-	// Add them to C# script container 
-	if (g_coordinator->HasComponent<LogicComponent>(entity))
+	// Add them to C# script container AND ONLY IF IT NOT ITERATING THRU THE SCRIPTS 
+	if (attachScripts && g_coordinator->HasComponent<LogicComponent>(entity))
 	{
 		auto addScriptFunc = m_coreEngine->GetFunctionPtr<bool(*)(int, const char*)>(
 			"ScriptAPI",

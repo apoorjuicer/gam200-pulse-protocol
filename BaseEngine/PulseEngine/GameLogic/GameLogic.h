@@ -74,26 +74,26 @@ public:
 	//virtual Iscript* Clone(); // i remove the = 0 for testing(past rae)
 };
 
-class PlayerScript : public Iscript
-{
-
-public:
-	void Init(Entity ID) override;
-	void Update(Entity ID) override;
-	void Exit(Entity ID) override;
-
-	void Serialize() override;
-
-	//std::map<std::string, std::any(bool,float,int,std::string)>;
-	// add in game variables here.
-	int health = 0;
-
-	PlayerScript* Clone() override;
-
-private:
-	bool  isAttacking = false;
-	float attackTimer = 0.0f;
-};
+//class PlayerScript : public Iscript
+//{
+//
+//public:
+//	void Init(Entity ID) override;
+//	void Update(Entity ID) override;
+//	void Exit(Entity ID) override;
+//
+//	void Serialize() override;
+//
+//	//std::map<std::string, std::any(bool,float,int,std::string)>;
+//	// add in game variables here.
+//	int health = 0;
+//
+//	PlayerScript* Clone() override;
+//
+//private:
+//	bool  isAttacking = false;
+//	float attackTimer = 0.0f;
+//};
 
 class EnemyScript : public Iscript
 {
@@ -111,31 +111,31 @@ public:
 	float enemyDmg;
 };
 
-class CountdownScript : public Iscript
-{
-public:
-	void Init(Entity ID) override;
-	void Update(Entity ID) override;
-	void Exit(Entity ID) override;
-	CountdownScript* Clone() override;
-
-private:
-	float countdownTimer = 0.0f;
-};
-
-class FeedbackScript : public Iscript
-{
-public:
-	void Init(Entity ID) override;
-	void Update(Entity ID) override;
-	void Exit(Entity ID) override;
-	FeedbackScript* Clone() override;
-
-private:
-	float displayTimer = 0.0f;
-	bool isShowing = false;
-	float startTime = 0.0f;
-};
+//class CountdownScript : public Iscript
+//{
+//public:
+//	void Init(Entity ID) override;
+//	void Update(Entity ID) override;
+//	void Exit(Entity ID) override;
+//	CountdownScript* Clone() override;
+//
+//private:
+//	float countdownTimer = 0.0f;
+//};
+//
+//class FeedbackScript : public Iscript
+//{
+//public:
+//	void Init(Entity ID) override;
+//	void Update(Entity ID) override;
+//	void Exit(Entity ID) override;
+//	FeedbackScript* Clone() override;
+//
+//private:
+//	float displayTimer = 0.0f;
+//	bool isShowing = false;
+//	float startTime = 0.0f;
+//};
 
 class DLL_API LogicSystem: public Systems
 {

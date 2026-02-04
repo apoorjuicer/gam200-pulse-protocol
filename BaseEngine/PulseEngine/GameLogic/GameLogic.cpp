@@ -72,32 +72,32 @@ void LogicSystem::Init()
     //        "AddScriptViaName"
     //    );
        
-    auto* coord = Coordinator::GetInstance();
-    auto rhythm = coord->GetSystem<RhythmGameplayInput>();
-    if (rhythm)
-    {
-        rhythm->registerInputListener("VFX_Judgement",
-            [this](const InputEvent& evt)
-            {
-                if (evt.type != InputEvent::Type::COMBO_EXECUTED)
-                    return;
+    //auto* coord = Coordinator::GetInstance();
+    //auto rhythm = coord->GetSystem<RhythmGameplayInput>();
+    //if (rhythm)
+    //{
+    //    rhythm->registerInputListener("VFX_Judgement",
+    //        [this](const InputEvent& evt)
+    //        {
+    //            if (evt.type != InputEvent::Type::COMBO_EXECUTED)
+    //                return;
 
-                // Choose a spawn position (replace with your hit-line position if you have one)
-                glm::vec2 spawnPos{ 0.0f, 0.0f };
+    //            // Choose a spawn position (replace with your hit-line position if you have one)
+    //            glm::vec2 spawnPos{ 0.0f, 0.0f };
 
-                // If you can access something like evt.hitPos, use that instead:
-                // glm::vec2 spawnPos = evt.hitPos;
+    //            // If you can access something like evt.hitPos, use that instead:
+    //            // glm::vec2 spawnPos = evt.hitPos;
 
-                mVfx.OnJudgement(evt.feedback, spawnPos);
-            });
-    }
+    //            mVfx.OnJudgement(evt.feedback, spawnPos);
+    //        });
+    //}
 
     mVfx.Init(/*bpm=*/120.0f, /*maxParticles=*/2000);
 
-    AddScript("PlayerScript", std::make_shared<PlayerScript>());
+    /*AddScript("PlayerScript", std::make_shared<PlayerScript>());*/
     AddScript("EnemyScript", std::make_shared<EnemyScript>());
-    AddScript("CountdownScript", std::make_shared<CountdownScript>());
-    AddScript("FeedbackScript", std::make_shared<FeedbackScript>());
+    //AddScript("CountdownScript", std::make_shared<CountdownScript>());
+    //AddScript("FeedbackScript", std::make_shared<FeedbackScript>());
 }
 
 void LogicSystem::Update(float dt)
@@ -316,165 +316,165 @@ bool LoadScriptName(LogicComponent& t, std::string const& path)
 // FOR SCRIPTS ONLY ONWARDS
 // ---------------------------------------------------------------------
 
-// =====================================================================
-// PLAYER SCRIPT
-// =====================================================================
-void PlayerScript::Init(Entity ID)
-{
-    //autoMoveTimer = 2.0f; // reset timer
-    auto* coord = Coordinator::GetInstance();
-    auto  rhythm = coord->GetSystem<RhythmGameplayInput>();
-
-    if (!rhythm) return;
-
-    rhythm->registerInputListener("PlayerCombo",
-        [this, ID](const InputEvent& evt)
-        {
-            if (evt.type != InputEvent::Type::COMBO_EXECUTED)
-                return;
-
-            if (evt.comboName.empty() || evt.comboName != "Basic Strike")
-                return;
-
-            auto* c = Coordinator::GetInstance();
-
-            if (!c->HasComponent<Framework::Renderable>(ID) ||
-                !c->HasComponent<Framework::Animation>(ID))
-                return;
-
-            auto& rend = c->GetComponent<Framework::Renderable>(ID);
-            auto& anim = c->GetComponent<Framework::Animation>(ID);
-
-            // PLAY SUCCESS SFX FROM PLAYER'S AUDIOSOURCE
-            if (c->HasComponent<AudioSource>(ID))
-            {
-                auto& audioSrc = c->GetComponent<AudioSource>(ID);
-                if (auto audio = c->GetSystem<AudioManager>())
-                {
-                    audio->PlayFromAudioSource(audioSrc);
-                }
-            }
-
-            // SWITCH TO ATTACK SPRITE
-            rend.spriteName = "../../PulseEngine/Assets/Textures/Characters/hero_spritesheet.png";
-            rend.needsTextureReload = true;
-
-            anim.totalFrames = 3;
-            anim.columns = 3;
-            anim.rows = 1;
-            anim.animationSpeed = 8.0f;
-            anim.currentFrame = 0;
-            anim.elapsedTime = 0.0f;
-
-            isAttacking = true;
-            attackTimer = 0.5f;
-
-            // === KILL THE ACTIVE ENEMY ===
-            extern Entity g_firstEnemy;
-            extern Entity g_secondEnemy;
-
-            Entity targetEnemy = (Entity)-1;
-
-            // Kill first enemy if alive, otherwise kill second
-            if (g_firstEnemy != (Entity)-1 && c->HasComponent<Health>(g_firstEnemy))
-            {
-                auto& hp = c->GetComponent<Health>(g_firstEnemy);
-                if (hp.isAlive)
-                {
-                    targetEnemy = g_firstEnemy;
-                }
-            }
-
-            if (targetEnemy == (Entity)-1 && g_secondEnemy != (Entity)-1 && c->HasComponent<Health>(g_secondEnemy))
-            {
-                auto& hp = c->GetComponent<Health>(g_secondEnemy);
-                if (hp.isAlive)
-                {
-                    targetEnemy = g_secondEnemy;
-                }
-            }
-
-            // Delete the enemy
-            if (targetEnemy != (Entity)-1)
-            {
-                if (c->HasComponent<Health>(targetEnemy))
-                {
-                    c->GetComponent<Health>(targetEnemy).isAlive = false;
-                }
-
-                Factory factory;
-                factory.DeleteEntity(targetEnemy);
-
-                // Check if ALL enemies are now dead -> GameWin
-                bool firstDead = (g_firstEnemy == (Entity)-1) ||
-                    !c->HasComponent<Health>(g_firstEnemy) ||
-                    !c->GetComponent<Health>(g_firstEnemy).isAlive;
-                bool secondDead = (g_secondEnemy == (Entity)-1) ||
-                    !c->HasComponent<Health>(g_secondEnemy) ||
-                    !c->GetComponent<Health>(g_secondEnemy).isAlive;
-
-                if (firstDead && secondDead)
-                {
-                    auto sceneMgr = c->GetSystem<SceneManager>();
-                    if (sceneMgr)
-                    {
-                        sceneMgr->CurrentScene = "GameWin";
-                    }
-                }
-            }
-        });
-}
-
-void PlayerScript::Update(Entity ID)
-{
-    auto g_coordinator = Coordinator::GetInstance();
-
-    static double lastTime = glfwGetTime();
-    float dt = Engine->GetDeltaTime();
-
-    // switch back to idle animation
-    if (isAttacking)
-    {
-        attackTimer -= dt;
-        if (attackTimer <= 0.0f)
-        {
-            isAttacking = false;
-
-            if (g_coordinator->HasComponent<Framework::Renderable>(ID) &&
-                g_coordinator->HasComponent<Framework::Animation>(ID))
-            {
-                auto& rend = g_coordinator->GetComponent<Framework::Renderable>(ID);
-                auto& anim = g_coordinator->GetComponent<Framework::Animation>(ID);
-
-                // idle sheet (your 2-frame image)
-                rend.spriteName = "../../PulseEngine/Assets/Textures/Characters/hero_idle.png";
-                rend.needsTextureReload = true;
-
-                anim.totalFrames = 2;
-                anim.columns = 2;
-                anim.rows = 1;
-                anim.animationSpeed = 2.0f;
-                anim.currentFrame = 0;
-                anim.elapsedTime = 0.0f;
-            }
-        }
-    }
-}
-
-void PlayerScript::Exit(Entity ID)
-{
-    (void)ID;
-}
-
-void PlayerScript::Serialize() 
-{
-    health++;
-    //enemyDmg; can't use since its enemy.
-}
-
-PlayerScript* PlayerScript::Clone() {
-    return new PlayerScript{};
-}
+//// =====================================================================
+//// PLAYER SCRIPT
+//// =====================================================================
+//void PlayerScript::Init(Entity ID)
+//{
+//    //autoMoveTimer = 2.0f; // reset timer
+//    auto* coord = Coordinator::GetInstance();
+//    auto  rhythm = coord->GetSystem<RhythmGameplayInput>();
+//
+//    if (!rhythm) return;
+//
+//    rhythm->registerInputListener("PlayerCombo",
+//        [this, ID](const InputEvent& evt)
+//        {
+//            if (evt.type != InputEvent::Type::COMBO_EXECUTED)
+//                return;
+//
+//            if (evt.comboName.empty() || evt.comboName != "Basic Strike")
+//                return;
+//
+//            auto* c = Coordinator::GetInstance();
+//
+//            if (!c->HasComponent<Framework::Renderable>(ID) ||
+//                !c->HasComponent<Framework::Animation>(ID))
+//                return;
+//
+//            auto& rend = c->GetComponent<Framework::Renderable>(ID);
+//            auto& anim = c->GetComponent<Framework::Animation>(ID);
+//
+//            // PLAY SUCCESS SFX FROM PLAYER'S AUDIOSOURCE
+//            if (c->HasComponent<AudioSource>(ID))
+//            {
+//                auto& audioSrc = c->GetComponent<AudioSource>(ID);
+//                if (auto audio = c->GetSystem<AudioManager>())
+//                {
+//                    audio->PlayFromAudioSource(audioSrc);
+//                }
+//            }
+//
+//            // SWITCH TO ATTACK SPRITE
+//            rend.spriteName = "../../PulseEngine/Assets/Textures/Characters/hero_spritesheet.png";
+//            rend.needsTextureReload = true;
+//
+//            anim.totalFrames = 3;
+//            anim.columns = 3;
+//            anim.rows = 1;
+//            anim.animationSpeed = 8.0f;
+//            anim.currentFrame = 0;
+//            anim.elapsedTime = 0.0f;
+//
+//            isAttacking = true;
+//            attackTimer = 0.5f;
+//
+//            // === KILL THE ACTIVE ENEMY ===
+//            extern Entity g_firstEnemy;
+//            extern Entity g_secondEnemy;
+//
+//            Entity targetEnemy = (Entity)-1;
+//
+//            // Kill first enemy if alive, otherwise kill second
+//            if (g_firstEnemy != (Entity)-1 && c->HasComponent<Health>(g_firstEnemy))
+//            {
+//                auto& hp = c->GetComponent<Health>(g_firstEnemy);
+//                if (hp.isAlive)
+//                {
+//                    targetEnemy = g_firstEnemy;
+//                }
+//            }
+//
+//            if (targetEnemy == (Entity)-1 && g_secondEnemy != (Entity)-1 && c->HasComponent<Health>(g_secondEnemy))
+//            {
+//                auto& hp = c->GetComponent<Health>(g_secondEnemy);
+//                if (hp.isAlive)
+//                {
+//                    targetEnemy = g_secondEnemy;
+//                }
+//            }
+//
+//            // Delete the enemy
+//            if (targetEnemy != (Entity)-1)
+//            {
+//                if (c->HasComponent<Health>(targetEnemy))
+//                {
+//                    c->GetComponent<Health>(targetEnemy).isAlive = false;
+//                }
+//
+//                Factory factory;
+//                factory.DeleteEntity(targetEnemy);
+//
+//                // Check if ALL enemies are now dead -> GameWin
+//                bool firstDead = (g_firstEnemy == (Entity)-1) ||
+//                    !c->HasComponent<Health>(g_firstEnemy) ||
+//                    !c->GetComponent<Health>(g_firstEnemy).isAlive;
+//                bool secondDead = (g_secondEnemy == (Entity)-1) ||
+//                    !c->HasComponent<Health>(g_secondEnemy) ||
+//                    !c->GetComponent<Health>(g_secondEnemy).isAlive;
+//
+//                if (firstDead && secondDead)
+//                {
+//                    auto sceneMgr = c->GetSystem<SceneManager>();
+//                    if (sceneMgr)
+//                    {
+//                        sceneMgr->CurrentScene = "GameWin";
+//                    }
+//                }
+//            }
+//        });
+//}
+//
+//void PlayerScript::Update(Entity ID)
+//{
+//    auto g_coordinator = Coordinator::GetInstance();
+//
+//    static double lastTime = glfwGetTime();
+//    float dt = Engine->GetDeltaTime();
+//
+//    // switch back to idle animation
+//    if (isAttacking)
+//    {
+//        attackTimer -= dt;
+//        if (attackTimer <= 0.0f)
+//        {
+//            isAttacking = false;
+//
+//            if (g_coordinator->HasComponent<Framework::Renderable>(ID) &&
+//                g_coordinator->HasComponent<Framework::Animation>(ID))
+//            {
+//                auto& rend = g_coordinator->GetComponent<Framework::Renderable>(ID);
+//                auto& anim = g_coordinator->GetComponent<Framework::Animation>(ID);
+//
+//                // idle sheet (your 2-frame image)
+//                rend.spriteName = "../../PulseEngine/Assets/Textures/Characters/hero_idle.png";
+//                rend.needsTextureReload = true;
+//
+//                anim.totalFrames = 2;
+//                anim.columns = 2;
+//                anim.rows = 1;
+//                anim.animationSpeed = 2.0f;
+//                anim.currentFrame = 0;
+//                anim.elapsedTime = 0.0f;
+//            }
+//        }
+//    }
+//}
+//
+//void PlayerScript::Exit(Entity ID)
+//{
+//    (void)ID;
+//}
+//
+//void PlayerScript::Serialize() 
+//{
+//    health++;
+//    //enemyDmg; can't use since its enemy.
+//}
+//
+//PlayerScript* PlayerScript::Clone() {
+//    return new PlayerScript{};
+//}
 //// Static variables
 //Entity EnemySpawnerScript::Enemy1ID = (Entity)-1;
 //Entity EnemySpawnerScript::Enemy2ID = (Entity)-1;
@@ -1516,156 +1516,156 @@ EnemyScript* EnemyScript::Clone()
 //}
 
 
-// =====================================================================
-// COUNTDOWN SCRIPT
-// =====================================================================
-void CountdownScript::Init(Entity ID)
-{
-    (void)ID;
-    countdownTimer = static_cast<float>(glfwGetTime());  // Store START time
-    g_countdownFinished = false;
-}
-
-void CountdownScript::Update(Entity ID)
-{
-    auto* coord = Coordinator::GetInstance();
-
-    if (!coord->HasComponent<TextComponent>(ID))
-        return;
-
-    auto& text = coord->GetComponent<TextComponent>(ID);
-
-    if (g_countdownFinished)
-    {
-        text.visible = false;
-        return;
-    }
-
-    float elapsed = static_cast<float>(glfwGetTime()) - countdownTimer;
-
-    if (elapsed < 1.0f)
-    {
-        text.text = "Ready?";
-    }
-    else if (elapsed < 2.0f)
-    {
-        text.text = "3";
-    }
-    else if (elapsed < 3.0f)
-    {
-        text.text = "2";
-    }
-    else if (elapsed < 4.0f)
-    {
-        text.text = "1";
-    }
-    else if (elapsed < 5.0f)
-    {
-        text.text = "GO!";
-    }
-    else
-    {
-        g_countdownFinished = true;
-        text.visible = false;
-
-        if (coord->HasComponent<AudioSource>(ID))
-        {
-            auto& audioSrc = coord->GetComponent<AudioSource>(ID);
-            auto audioManager = coord->GetSystem<AudioManager>();
-            if (audioManager && !audioSrc.audio_id.empty())
-            {
-                audioManager->PlayFromAudioSource(audioSrc);
-            }
-        }
-    }
-}
-
-void CountdownScript::Exit(Entity ID)
-{
-    (void)ID;
-    g_countdownFinished = false;
-}
-
-CountdownScript* CountdownScript::Clone() { return new CountdownScript{}; }
-
-// =====================================================================
-// FEEDBACK SCRIPT (PERFECT/GOOD/MISS images)
-// =====================================================================
-void FeedbackScript::Init(Entity ID)
-{
-    auto* coord = Coordinator::GetInstance();
-
-    // Hide initially
-    if (coord->HasComponent<Framework::Transform>(ID))
-    {
-        auto& transform = coord->GetComponent<Framework::Transform>(ID);
-        transform.isVisible = false;
-    }
-
-    // Register listener for combo events
-    auto rhythm = coord->GetSystem<RhythmGameplayInput>();
-    if (!rhythm) return;
-
-    rhythm->registerInputListener("FeedbackDisplay",
-        [this, ID](const InputEvent& evt)
-        {
-            if (evt.type != InputEvent::Type::COMBO_EXECUTED)
-                return;
-
-            auto* c = Coordinator::GetInstance();
-
-            if (!c->HasComponent<Framework::Renderable>(ID) ||
-                !c->HasComponent<Framework::Transform>(ID))
-                return;
-
-            auto& rend = c->GetComponent<Framework::Renderable>(ID);
-            auto& transform = c->GetComponent<Framework::Transform>(ID);
-
-            // Change texture based on feedback
-            if (evt.feedback == "PERFECT")
-            {
-                rend.spriteName = "../../PulseEngine/Assets/Textures/UI/perfect.png";
-            }
-            else if (evt.feedback == "GOOD")
-            {
-                rend.spriteName = "../../PulseEngine/Assets/Textures/UI/great.png";
-            }
-            else // MISS
-            {
-                rend.spriteName = "../../PulseEngine/Assets/Textures/UI/miss.png";
-            }
-
-            rend.needsTextureReload = true;
-            transform.isVisible = true;
-            isShowing = true;
-            startTime = static_cast<float>(glfwGetTime());
-            displayTimer = 0.5f;  // Show for 0.5 seconds
-        });
-}
-
-void FeedbackScript::Update(Entity ID)
-{
-    if (!isShowing)
-        return;
-
-    auto* coord = Coordinator::GetInstance();
-
-    float elapsed = static_cast<float>(glfwGetTime()) - startTime;
-
-    if (elapsed >= displayTimer)
-    {
-        if (coord->HasComponent<Framework::Transform>(ID))
-        {
-            auto& transform = coord->GetComponent<Framework::Transform>(ID);
-            transform.isVisible = false;
-        }
-        isShowing = false;
-    }
-}
-
-void FeedbackScript::Exit(Entity ID)
-{
-    (void)ID;
-}
-
-FeedbackScript* FeedbackScript::Clone() { return new FeedbackScript{}; }
+//// =====================================================================
+//// COUNTDOWN SCRIPT
+//// =====================================================================
+//void CountdownScript::Init(Entity ID)
+//{
+//    (void)ID;
+//    countdownTimer = static_cast<float>(glfwGetTime());  // Store START time
+//    g_countdownFinished = false;
+//}
+//
+//void CountdownScript::Update(Entity ID)
+//{
+//    auto* coord = Coordinator::GetInstance();
+//
+//    if (!coord->HasComponent<TextComponent>(ID))
+//        return;
+//
+//    auto& text = coord->GetComponent<TextComponent>(ID);
+//
+//    if (g_countdownFinished)
+//    {
+//        text.visible = false;
+//        return;
+//    }
+//
+//    float elapsed = static_cast<float>(glfwGetTime()) - countdownTimer;
+//
+//    if (elapsed < 1.0f)
+//    {
+//        text.text = "Ready?";
+//    }
+//    else if (elapsed < 2.0f)
+//    {
+//        text.text = "3";
+//    }
+//    else if (elapsed < 3.0f)
+//    {
+//        text.text = "2";
+//    }
+//    else if (elapsed < 4.0f)
+//    {
+//        text.text = "1";
+//    }
+//    else if (elapsed < 5.0f)
+//    {
+//        text.text = "GO!";
+//    }
+//    else
+//    {
+//        g_countdownFinished = true;
+//        text.visible = false;
+//
+//        if (coord->HasComponent<AudioSource>(ID))
+//        {
+//            auto& audioSrc = coord->GetComponent<AudioSource>(ID);
+//            auto audioManager = coord->GetSystem<AudioManager>();
+//            if (audioManager && !audioSrc.audio_id.empty())
+//            {
+//                audioManager->PlayFromAudioSource(audioSrc);
+//            }
+//        }
+//    }
+//}
+//
+//void CountdownScript::Exit(Entity ID)
+//{
+//    (void)ID;
+//    g_countdownFinished = false;
+//}
+//
+//CountdownScript* CountdownScript::Clone() { return new CountdownScript{}; }
+//
+//// =====================================================================
+//// FEEDBACK SCRIPT (PERFECT/GOOD/MISS images)
+//// =====================================================================
+//void FeedbackScript::Init(Entity ID)
+//{
+//    auto* coord = Coordinator::GetInstance();
+//
+//    // Hide initially
+//    if (coord->HasComponent<Framework::Transform>(ID))
+//    {
+//        auto& transform = coord->GetComponent<Framework::Transform>(ID);
+//        transform.isVisible = false;
+//    }
+//
+//    // Register listener for combo events
+//    auto rhythm = coord->GetSystem<RhythmGameplayInput>();
+//    if (!rhythm) return;
+//
+//    rhythm->registerInputListener("FeedbackDisplay",
+//        [this, ID](const InputEvent& evt)
+//        {
+//            if (evt.type != InputEvent::Type::COMBO_EXECUTED)
+//                return;
+//
+//            auto* c = Coordinator::GetInstance();
+//
+//            if (!c->HasComponent<Framework::Renderable>(ID) ||
+//                !c->HasComponent<Framework::Transform>(ID))
+//                return;
+//
+//            auto& rend = c->GetComponent<Framework::Renderable>(ID);
+//            auto& transform = c->GetComponent<Framework::Transform>(ID);
+//
+//            // Change texture based on feedback
+//            if (evt.feedback == "PERFECT")
+//            {
+//                rend.spriteName = "../../PulseEngine/Assets/Textures/UI/perfect.png";
+//            }
+//            else if (evt.feedback == "GOOD")
+//            {
+//                rend.spriteName = "../../PulseEngine/Assets/Textures/UI/great.png";
+//            }
+//            else // MISS
+//            {
+//                rend.spriteName = "../../PulseEngine/Assets/Textures/UI/miss.png";
+//            }
+//
+//            rend.needsTextureReload = true;
+//            transform.isVisible = true;
+//            isShowing = true;
+//            startTime = static_cast<float>(glfwGetTime());
+//            displayTimer = 0.5f;  // Show for 0.5 seconds
+//        });
+//}
+//
+//void FeedbackScript::Update(Entity ID)
+//{
+//    if (!isShowing)
+//        return;
+//
+//    auto* coord = Coordinator::GetInstance();
+//
+//    float elapsed = static_cast<float>(glfwGetTime()) - startTime;
+//
+//    if (elapsed >= displayTimer)
+//    {
+//        if (coord->HasComponent<Framework::Transform>(ID))
+//        {
+//            auto& transform = coord->GetComponent<Framework::Transform>(ID);
+//            transform.isVisible = false;
+//        }
+//        isShowing = false;
+//    }
+//}
+//
+//void FeedbackScript::Exit(Entity ID)
+//{
+//    (void)ID;
+//}
+//
+//FeedbackScript* FeedbackScript::Clone() { return new FeedbackScript{}; }

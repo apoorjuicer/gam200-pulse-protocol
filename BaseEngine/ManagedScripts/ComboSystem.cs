@@ -1,9 +1,13 @@
 using System;
-using System.Collections.Generic;
 using ScriptAPI;
 
 public class ComboSystem : Script
 {
+    // =========================
+    // Global Access (Singleton)
+    // =========================
+    public static ComboSystem Instance { get; private set; }
+
     // =========================
     // Config
     // =========================
@@ -36,18 +40,37 @@ public class ComboSystem : Script
     private string currentEnemyWeakness = "";
 
     // =========================
+    // Initialization tracking
+    // =========================
+    private bool initialized = false;
+
+    // =========================
     // Update Loop
     // =========================
     public override void Update()
     {
+        // Set singleton instance
+        if (Instance == null)
+        {
+            Instance = this;
+            Console.WriteLine("[ComboSystem] Singleton instance set");
+        }
+
+        // First-time initialization
+        if (!initialized)
+        {
+            Console.WriteLine("[ComboSystem] Initializing...");
+            ResetCombo();
+            initialized = true;
+        }
+
         float dt = Time.DeltaTime;
         timeSinceLastBeat += dt;
 
-        Conductor conductor = GetConductor();
-        if (conductor == null)
+        if (Conductor.Instance == null)
             return;
 
-        int currentBeat = conductor.GetCurrentBeat();
+        int currentBeat = Conductor.Instance.GetCurrentBeat();
         if (currentBeat != lastBeatIndex)
         {
             lastBeatIndex = currentBeat;
@@ -62,10 +85,18 @@ public class ComboSystem : Script
     {
         currentEnemyWeakness = weaknessCombo;
         ResetCombo();
+        Console.WriteLine($"[ComboSystem] Weakness set to: {weaknessCombo}");
     }
 
     public void RegisterInput(char key)
     {
+        // Sanity check: don't allow input if no weakness set
+        if (string.IsNullOrEmpty(currentEnemyWeakness))
+        {
+            Console.WriteLine("[ComboSystem] ERROR: No weakness set! Cannot register input.");
+            return;
+        }
+
         float delta = Math.Abs(timeSinceLastBeat);
 
         string judgement;
@@ -81,7 +112,7 @@ public class ComboSystem : Script
         hitResults.Add(judgement);
         currentCombo.Add(key);
 
-        Console.WriteLine($"[{key}] Timing: {judgement} (?={delta:F3}s)");
+        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (?={delta:F3}s)");
 
         // === PERFECT STREAK ===
         if (judgement == "PERFECT")
@@ -89,7 +120,7 @@ public class ComboSystem : Script
             perfectStreak++;
             if (perfectStreak >= 5)
             {
-                Console.WriteLine("Perfect streak reached!");
+                Console.WriteLine("[ComboSystem] ? PERFECT STREAK x5!");
                 perfectStreak = 0;
             }
         }
@@ -116,6 +147,9 @@ public class ComboSystem : Script
         currentCombo.Clear();
         hitResults.Clear();
         comboFailedEarly = false;
+
+        // Don't log every reset, too spammy
+        // Console.WriteLine("[ComboSystem] Combo reset");
     }
 
     // =========================
@@ -135,32 +169,37 @@ public class ComboSystem : Script
             }
         }
 
+        Console.WriteLine($"[ComboSystem] Entered: {comboString} | Expected: {currentEnemyWeakness}");
+
         if (allGood && comboString == currentEnemyWeakness)
         {
-            Console.WriteLine("Combo success!");
+            Console.WriteLine("[ComboSystem] ? COMBO SUCCESS!");
             PlayerDidSuccessfulCombo = true;
         }
         else
         {
-            Console.WriteLine("Combo failed!");
+            Console.WriteLine("[ComboSystem] ? COMBO FAILED!");
             PlayerDidSuccessfulCombo = false;
         }
 
-        ResetCombo();
+        // Note: Don't call ResetCombo() here - let TurnManager control when to reset
     }
 
     // =========================
-    // Helpers
+    // Debug/Utility
     // =========================
-    private Conductor GetConductor()
+    public string GetCurrentComboString()
     {
-        // TEMP: assume ComboSystem lives on same entity as Conductor
-        return GetScriptLike<Conductor>();
+        return new string(currentCombo.ToArray());
     }
 
-    // Placeholder until engine supports script lookup
-    private T GetScriptLike<T>() where T : Script
+    public int GetComboProgress()
     {
-        return default;
+        return currentCombo.Count;
+    }
+
+    public string GetExpectedCombo()
+    {
+        return currentEnemyWeakness;
     }
 }

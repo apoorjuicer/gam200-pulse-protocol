@@ -634,7 +634,7 @@ void CoreEngine::Init()
 	auto g_coordinator = Coordinator::GetInstance();
 
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
-	auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
+	//auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
 	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();		//default cons
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>(); //default cons
 	auto g_CollisionManager = g_coordinator->GetSystem<CollisionManager>();
@@ -653,7 +653,7 @@ void CoreEngine::Init()
 
 	// Initialize systems AFTER GL is ready
 	g_inputSystem->Initialize(window);
-	g_rhythmSystem->Initialize();
+	//g_rhythmSystem->Initialize();
 	g_graphicsSystem->Initialize();
 	g_audioSystem->Initialize();
 	//g_coordinator->InitializeAllSystems();
@@ -733,7 +733,7 @@ void CoreEngine::Setup()
 
 	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
 	g_coordinator->RegisterSystem<InputManager>();
-	g_coordinator->RegisterSystem<RhythmGameplayInput>();
+	//g_coordinator->RegisterSystem<RhythmGameplayInput>();
 	g_coordinator->RegisterSystem<GraphicsManager>();
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<CollisionManager>();
@@ -757,11 +757,11 @@ void CoreEngine::Setup()
 	inputSig.set(g_coordinator->GetComponentType<Framework::Animation>());
 	g_coordinator->SetSystemSignature<InputManager>(inputSig);
 
-	Signature rhythmSig;
-	rhythmSig.set(g_coordinator->GetComponentType<Framework::Transform>());
-	rhythmSig.set(g_coordinator->GetComponentType<Framework::Renderable>());
-	rhythmSig.set(g_coordinator->GetComponentType<Framework::Animation>());
-	g_coordinator->SetSystemSignature<RhythmGameplayInput>(rhythmSig);
+	//Signature rhythmSig;
+	//rhythmSig.set(g_coordinator->GetComponentType<Framework::Transform>());
+	//rhythmSig.set(g_coordinator->GetComponentType<Framework::Renderable>());
+	//rhythmSig.set(g_coordinator->GetComponentType<Framework::Animation>());
+	//g_coordinator->SetSystemSignature<RhythmGameplayInput>(rhythmSig);
 
 	//Signature UISig;
 	//UISig.set(g_coordinator->GetComponentType<Framework::Transform>());
@@ -797,7 +797,7 @@ void CoreEngine::Update(float dt)
 	auto g_coordinator = Coordinator::GetInstance();
 	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
-	auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
+	//auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 	auto g_sceneSystem = g_coordinator->GetSystem<SceneManager>();
 	auto profiler = ProfilingManager::GetInstance();
@@ -897,10 +897,10 @@ void CoreEngine::Update(float dt)
 		g_inputSystem->Update(dt);
 	profiler->EndSystem("Input System");
 
-	profiler->StartSystem("RhythmGameplayInput");
-	if (g_rhythmSystem)
-		g_rhythmSystem->Update(dt);
-	profiler->EndSystem("RhythmGameplayInput");
+	//profiler->StartSystem("RhythmGameplayInput");
+	//if (g_rhythmSystem)
+	//	g_rhythmSystem->Update(dt);
+	//profiler->EndSystem("RhythmGameplayInput");
 
 	profiler->StartSystem("Audio System");
 	if (g_audioSystem)
@@ -924,7 +924,7 @@ void CoreEngine::Update(float dt)
 
 	// 3) Normal running path
 	if (g_inputSystem)    g_inputSystem->Update(dt);
-	if (g_rhythmSystem)   g_rhythmSystem->Update(dt);
+	//if (g_rhythmSystem)   g_rhythmSystem->Update(dt);
 
 }
 
@@ -981,15 +981,15 @@ void CoreEngine::Exit()
 	auto g_coordinator = Coordinator::GetInstance();
 
 	auto g_inputSystem = g_coordinator->GetSystem<InputManager>();
-	auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
+	//auto g_rhythmSystem = g_coordinator->GetSystem<RhythmGameplayInput>();
 	auto g_audioSystem = g_coordinator->GetSystem<AudioManager>();
 	auto g_graphicsSystem = g_coordinator->GetSystem<GraphicsManager>();
 
 	if (g_inputSystem)
 		g_inputSystem->Shutdown();
 
-	if (g_rhythmSystem)
-		g_rhythmSystem->Shutdown();
+	//if (g_rhythmSystem)
+	//	g_rhythmSystem->Shutdown();
 
 	if (g_audioSystem)
 		g_audioSystem->Shutdown();

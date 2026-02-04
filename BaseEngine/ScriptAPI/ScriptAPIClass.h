@@ -26,15 +26,11 @@ namespace ScriptAPI
     //forward delcaration
     value struct TransformComponent;
     value struct HealthComponent;
-    value struct Factory;
     value struct Animation;
     value struct TextComponentAPI;
-    // value struct DeltaTime 
     value struct CollisionComponent;
     value struct AudioComponent;
     value struct SpriteComponent;
-   // value struct DeltaTime 
-    //value struct LogicComponent;
 
     public ref class Script abstract
     {

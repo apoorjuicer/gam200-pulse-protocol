@@ -13,7 +13,7 @@
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
 /******************************************************************************/
-
+/*
 #include "Input/RhythmGameplayInput.h"
 #include "CoreEngine/Core/CoreEngine.h"
 #include "Components/DisplayName.h"
@@ -402,3 +402,4 @@ void RhythmGameplayInput::checkForMissedBeat()
         inputReceivedOnThisBeat = false;
     }
 }
+*/

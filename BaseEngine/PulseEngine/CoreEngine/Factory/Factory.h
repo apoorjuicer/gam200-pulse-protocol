@@ -16,11 +16,10 @@
 #pragma once
 #include "pch/pch_temp.h"	
 #include "Components/EntityType.h"
-//#include "../Components/AABB.h"
 #include "Components/Health.h"
 #include "Graphics/Transform.h"
-#include "Graphics/Animation.h"
-#include "Graphics/Renderable.h"
+//#include "Graphics/Animation.h"
+//#include "Graphics/Renderable.h"
 #include "GameLogic/GameLogic.h"
 #include "CoreEngine/ECS/Types.h"
 #include "CoreEngine/ECS/Coordinator.h"
@@ -29,7 +28,7 @@
 #include "CoreEngine/Core/ImportExport.h" // for DLL_API
 
 #include "Audio/AudioSource.h"
-#include "Graphics/Text.h"
+//#include "Graphics/Text.h"
 //Serialize
 #pragma warning(push, 0)
 #include <rapidjson/document.h>     // for Document, Value, AllocatorType
@@ -45,11 +44,11 @@
 class DLL_API Factory
 {
 public: 
-
-	std::optional<Entity> CreateEntityFromJson(std::string const& path);
+	std::optional<Entity> CreateEntityFromJson(std::string const& path, bool AttachScripts = true);
 	// call onto default object function to get the basic SRT and render
 	// then we check the file path from param and check for any components it wanna add 
 	// call component deserialize functions with json filepath and entity as param
+	// Added a attachscript param as we need to run thru all the scripts first then add this into the script list. 
 
 	// Creates entity with component SRT and RENDER. ITS ALL HARD CODED SO AS TO NOT BE CHANGE IT. ALL entity has these.
 	Entity DefaultObj(); 
