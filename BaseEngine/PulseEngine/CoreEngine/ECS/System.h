@@ -7,7 +7,8 @@
  *             entities matching the system's component signature. Defines
  *             virtual Init() and Update() methods for derived systems to
  *             implement their specific logic EXP: Graphics, Physics, Input
- * @copyright  Copyright (C) 2025 DigiPen Institute of Technology.
+ * 
+ * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
  *             Reproduction or disclosure of this file or its contents without the
  *             prior written consent of DigiPen Institute of Technology is prohibited.
  */

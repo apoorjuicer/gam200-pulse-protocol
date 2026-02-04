@@ -1,3 +1,19 @@
+/*****************************************************************************
+ * @file        VFXManager.cpp
+ * @project     Pulse Protocol
+ * @author		Goh Pin Kai
+ *
+ * @brief       Implements VFXManager behavior: initializes particle pools and tuning,
+ *              applies beat-driven camera punch, maps judgement strings to distinct
+ *              particle/shake presets, and updates particles/camera each frame. When
+ *              a valid song time is provided, beat crossings are detected via BeatTracker
+ *              and trigger OnBeat().
+ *
+ * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
+ *             Reproduction or disclosure of this file or its contents without the
+ *             prior written consent of DigiPen Institute of Technology is prohibited.
+ ******************************************************************************/
+
 #include "VFXManager.h"
 #include <algorithm>
 
@@ -13,12 +29,6 @@ void VFXManager::Init(float bpm, size_t maxParticles)
 void VFXManager::SetBpm(float bpm)
 {
     mBpm = std::max(1.0f, bpm);
-}
-
-void VFXManager::Update(float dt)
-{
-    mParticles.Update(dt);
-    mCamFx.Update(dt);
 }
 
 void VFXManager::OnBeat()
@@ -81,3 +91,18 @@ void VFXManager::SpawnForPerfect(const glm::vec2& p)
     s.decay = 9.0f;
     mCamFx.AddShake(s);
 }
+
+void VFXManager::Update(float dt, float songTimeSec)
+{
+    // particle + camera always update
+    mParticles.Update(dt);
+    mCamFx.Update(dt);
+
+    // beat-driven stuff only if we have a valid song time
+    if (songTimeSec >= 0.0f)
+    {
+        if (mBeat.Update(songTimeSec)) // <-- matches your BeatTracker.h
+            OnBeat();
+    }
+}
+

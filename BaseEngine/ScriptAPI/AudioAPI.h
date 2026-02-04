@@ -1,3 +1,16 @@
+/******************************************************************************/
+/**
+ * @file        AudioAPI.h
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 100%
+ *
+ * @brief       Declared the ScriptAPI audio functions/classes used by C# scripts.
+ *
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
 #pragma once
 using namespace System;
 

@@ -180,8 +180,10 @@ void TextRenderer::RenderText(
     float currentY = y;
 
     // Render each line
-    for (const std::string& line : lines)
+    for (size_t lineIndex = 0; lineIndex < lines.size(); ++lineIndex)
     {
+        const std::string& line = lines[lineIndex];
+
         if (line.empty())
         {
             // Empty line, just move down
@@ -189,26 +191,34 @@ void TextRenderer::RenderText(
             continue;
         }
 
-        // Calculate X offset based on alignment
+        // Calculate the width of this line for horizontal alignment
         float lineWidth = CalculateTextWidth(line, scale, fontData);
         float lineX = x;
 
+        // Apply horizontal alignment
         switch (alignment)
-        {
+        {   
         case TextAlignment::Left:
-            // lineX stays as x
+            // Left aligned: x is the left edge of the text
+            lineX = x;
             break;
 
         case TextAlignment::Center:
+            // Center aligned: x is the center point, subtract half width to get left edge
             lineX = x - (lineWidth / 2.0f);
             break;
 
         case TextAlignment::Right:
+            // Right aligned: x is the right edge, subtract full width to get left edge
             lineX = x - lineWidth;
+            break;
+
+        default:
+            lineX = x;
             break;
         }
 
-        // Render the line
+        // Render the line at calculated position
         RenderLine(shader, line, lineX, currentY, scale, fontData);
 
         // Move to next line

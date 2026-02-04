@@ -3,8 +3,7 @@
  * @file        ObjectAllocator.h
  * @project     Pulse Protocol
  * @author      Ban Kai Wei Benjamin
- * @brief       This file manages 
- *               
+ * @brief       TBF
  * 
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

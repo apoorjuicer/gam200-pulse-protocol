@@ -8,7 +8,7 @@
  *              the primary interface for entity instantiation in both editor (ImGui)
  *              and runtime contexts (spawning bullets, enemies, etc.).
  *
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */

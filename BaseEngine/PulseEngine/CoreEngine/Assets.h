@@ -5,7 +5,8 @@
  * @author      Reginald Lew Yee Ren (primary)- 40%
  * @author      Ban Kai Wei Benjamin (secondary) - 60%
  * @brief       Core asset data structures used by the ECS system for collision entity
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * 
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */

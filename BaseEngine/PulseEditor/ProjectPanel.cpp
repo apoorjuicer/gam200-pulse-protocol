@@ -371,6 +371,12 @@ namespace PulseEditor
                 // ══════════════════════════════════════════════════
                 EnsureThumbnailLoaded(item, s_currentDir);
 
+                if (item.texID != 0 && !glIsTexture(item.texID))
+                {
+                    item.texID = 0;
+                    item.triedLoad = false;
+                }
+
                 // Draw thumbnail or button
                 if (item.texID != 0)
                 {

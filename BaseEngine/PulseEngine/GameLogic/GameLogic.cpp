@@ -21,7 +21,7 @@
  *              OBB (Oriented Bounding Box) via 'N' key.
  *              Includes the LogicSystem that registers, updates, and executes scripts.
  *
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
@@ -71,8 +71,7 @@ void LogicSystem::Init()
     //        "ScriptAPI.EngineInterface",
     //        "AddScriptViaName"
     //    );
-    mVfx.Init(/*bpm=*/120.0f, /*maxParticles=*/2000);
-
+       
     auto* coord = Coordinator::GetInstance();
     auto rhythm = coord->GetSystem<RhythmGameplayInput>();
     if (rhythm)
@@ -93,30 +92,24 @@ void LogicSystem::Init()
             });
     }
 
-
-    //register scripts here. I think it it will be the Csharp / Lua game code here. Ask Eli if i did it right 
-    // AddScript("PlayerScript", std::function<void(Entity)> function);
+    mVfx.Init(/*bpm=*/120.0f, /*maxParticles=*/2000);
 
     AddScript("PlayerScript", std::make_shared<PlayerScript>());
-    //AddScript("EnemySpawnerScript", std::make_shared<EnemySpawnerScript>());
     AddScript("EnemyScript", std::make_shared<EnemyScript>());
-    //AddScript("ButtonScript", std::make_shared<ButtonScript>());
-    //AddScript("PulsingBorderScript", std::make_shared<PulsingBorderScript>());
-    AddScript("CsharpScript", std::make_shared<Csharptestscript>());
-    
     AddScript("CountdownScript", std::make_shared<CountdownScript>());
     AddScript("FeedbackScript", std::make_shared<FeedbackScript>());
-
-    //std::cout << "=== REGISTERED SCRIPTS ===" << std::endl;
-    //for (const auto& [name, script] : map_of_scripts) {
-    //    std::cout << "  - " << name << std::endl;
-    //}
-    //std::cout << "=========================" << std::endl;
 }
 
 void LogicSystem::Update(float dt)
 {
-	mVfx.Update(dt);    //always update vfx manager
+    float songTimeSec = -1.0f;
+    if (auto* c = Coordinator::GetInstance())
+    {
+        if (auto audio = c->GetSystem<AudioManager>())
+            songTimeSec = (float)audio->GetBGMPositionSeconds();
+    }
+
+    mVfx.Update(dt, songTimeSec);
     // don't update scripts, if not playing the game
     if (!Engine->IsPlaying()) {
         return;
@@ -437,9 +430,7 @@ void PlayerScript::Update(Entity ID)
     auto g_coordinator = Coordinator::GetInstance();
 
     static double lastTime = glfwGetTime();
-    double currentTime = glfwGetTime();
-    float dt = static_cast<float>(currentTime - lastTime);
-    lastTime = currentTime;
+    float dt = Engine->GetDeltaTime();
 
     // switch back to idle animation
     if (isAttacking)
@@ -1523,26 +1514,6 @@ EnemyScript* EnemyScript::Clone()
 //{
 //    return new PulsingBorderScript{};
 //}
-
-void Csharptestscript::Init(Entity ID)
-{
-    auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>
-        (
-            "ScriptAPI",
-            "ScriptAPI.EngineInterface",
-            "AddScriptViaName"
-        );
-
-    // Adding script to an entity[please work ;-; ]
-    addScriptFunc(ID, "TestScript");    // THE 0 IS ENTITY ID 0
-    addScriptFunc(ID, "TestScript2");	// show that u can run multiple codes and even multiple code for each entity :D
-}
-
-void Csharptestscript::Update(Entity ID){ (void)ID; }
-
-void Csharptestscript::Exit(Entity ID) { (void)ID; }
-
-Csharptestscript* Csharptestscript::Clone() {return new Csharptestscript{};}
 
 
 // =====================================================================

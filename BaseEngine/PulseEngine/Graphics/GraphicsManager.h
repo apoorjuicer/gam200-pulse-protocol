@@ -7,20 +7,32 @@
  * @author      Ban Kai Wei Benjamin (secondary) - 10%
  *
  * @brief       Handles high-level rendering:
- *              - World draw via GLApp
- *              - Text rendering overlay (FPS, UI, debug info)
+ *              - World draw via GLApp (sprites, backgrounds, entities)
+ *              - Text rendering via TextRenderer (overlay text, UI)
  *              - Window resize notifications
- *              - Message subscription for debug combos
+ *              - Font loading and management via FreeType
+ *              - FPS display update every frame (text entity from scene JSON)
  *
- *              NOTE:
- *              Fonts are owned by . We just grab
- *              const FontData* and render with it. We do NOT own or free
- *              the glyph textures here.
+ *              NOTE ON DEBUG TEXT (FPS DISPLAY):
+ *              The FPS text entity is created in the scene JSON with TextComponent.
+ *              GraphicsManager updates its text content every frame by finding the
+ *              entity by name ("_FPS_Display") and updating the text field.
+ *              The entity lifecycle is managed by SceneManager, not GraphicsManager.
+ *              Visibility toggle (F11) is handled by the input system via
+ *              TextComponent::visible flag.
+ *
+ *              NOTE ON FONTS:
+ *              Fonts are loaded and owned by GraphicsManager. FontData* is stored
+ *              in m_fontMap. Glyphs are rendered via TextRenderer.
  *
  *              IMPORTANT:
  *              Transform still lives in namespace Framework, unchanged.
+ * 
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 
 // #include "pch/pch.h"
 // #include "glapp.h"
@@ -99,7 +111,6 @@ public:
     GraphicsManager &operator=(GraphicsManager &&) noexcept = default;
 
     // Debug overlay toggle (hidden by default in Release, auto shown in Debug)
-    void ToggleDebugOverlay();
     bool IsDebugOverlayEnabled() const { return m_showDebugOverlay; }
 
     // Texture
@@ -144,16 +155,6 @@ private:
     bool LoadFontsFromRegistry();
 
     void InitWhiteTexture();
-
-    // =========================================================================
-    // FPS/Debug text entities (proper text objects)
-    // These are normal entities that can be moved/edited in the editor
-    // =========================================================================
-    Entity m_fpsTextEntity = static_cast<Entity>(-1);
-    Entity m_topSystemTextEntity = static_cast<Entity>(-1);
-
-    void CreateDebugTextEntities();
-    void UpdateDebugTextEntities();
 
 private:
     // std::unique_ptr<GLApp> glapp;

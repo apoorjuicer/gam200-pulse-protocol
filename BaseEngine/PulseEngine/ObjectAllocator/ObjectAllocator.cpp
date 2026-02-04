@@ -3,9 +3,9 @@
  * @file        ObjectAllocator.cpp
  * @project     Pulse Protocol
  * @author      Ban Kai Wei Benjamin
- * @brief       This file manages 
- * 
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @brief       TBF
+ *
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
@@ -202,7 +202,7 @@ void* ObjectAllocator::Allocate() /*throw(OAException)*/ {
             // "pretend a memory starting at blockAddr is a GO"
             // so we can write next ptor there
 
-            //overwrites the first sizeof(void*) bytes of each block, because that’s where blockNode->Next lives.
+            //overwrites the first sizeof(void*) bytes of each block, because thatï¿½s where blockNode->Next lives.
             //[ Next pointer bytes ][ AA AA AA AA AA ... ]
             GenericObject* blockNode = reinterpret_cast<GenericObject*>(blockAddr);
 

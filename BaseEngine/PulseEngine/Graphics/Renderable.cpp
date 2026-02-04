@@ -8,7 +8,7 @@
  *              serialization and deserialization of Renderable data for
  *              scene saving and loading. This includes model reference,
  *              shader reference, texture ID, and sprite/texture lookup name.
- * @copyright   Copyright (C) 2025 DigiPen Institute of Technology.
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
