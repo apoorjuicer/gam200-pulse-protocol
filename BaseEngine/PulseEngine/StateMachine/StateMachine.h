@@ -13,7 +13,22 @@
 /******************************************************************************/
 
 #pragma once
+#include <pch/pch_temp.h>
 #include <cstdint>
+
+//Serialize
+#pragma warning(push, 0)
+#include <rapidjson/document.h>     // for Document, Value, AllocatorType
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/stringbuffer.h> // for StringBuffer
+#pragma warning(pop)
+
+
+//for .NET
+#include "CoreEngine/Core/ImportExport.h" // for DLL_API
+#pragma warning(push)
+#pragma warning(disable: 4251)
 
 enum class FSMState : uint8_t
 {
@@ -57,4 +72,25 @@ private:
     void UpdateAttack(FSMContext& ctx, float dt);
     void UpdateDamage(FSMContext& ctx, float dt);
     void UpdateDeath(FSMContext& ctx, float dt);
+};
+
+
+
+struct DLL_API FSM
+{
+    FSMState CurrentState;
+
+    void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
+    {
+        out.SetObject();
+        out.AddMember("CurrentState", static_cast<uint8_t>(CurrentState), alloc);
+    }
+
+    void Deserialize(const rapidjson::Value& in)
+    {
+        if (in.HasMember("CurrentState") && in["CurrentState"].IsUint())
+        {
+            CurrentState = static_cast<FSMState>(in["CurrentState"].GetUint());
+        }
+    }
 };

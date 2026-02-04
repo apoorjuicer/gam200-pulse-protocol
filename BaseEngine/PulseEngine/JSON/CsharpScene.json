@@ -389,6 +389,11 @@
                     }
                 },
                 {
+                    "State": {
+                        "CurrentState": "Idle"
+                    }
+                },
+                {
                     "name": {
                         "name": "CheeseStealer"
                     }

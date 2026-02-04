@@ -37,6 +37,7 @@
 #include "CoreEngine/Factory/Factory.h"
 #include "Graphics/Layer.h"
 #include "Components/ParentChild.h"
+#include "StateMachine/StateMachine.h"
 #include "CoreEngine/Core/CoreEngine.h"  // For GetFunctionPtr
 //#include "../Components/AABB.h"
 
@@ -226,7 +227,18 @@ void SceneManager::SaveCurrentScene()
 
 			ComponentObj.AddMember("script", ScriptVal, alloc);
 			componentsArray.PushBack(ComponentObj, alloc);
+		}
 
+		if (g_coordinator->HasComponent<FSM>(entity))
+		{
+			Value ComponentObj(rapidjson::kObjectType);
+			Value FSMVal;
+
+			auto& fsm = g_coordinator->GetComponent<FSM>(entity);
+			fsm.Serialize(FSMVal, alloc);
+
+			ComponentObj.AddMember("State", FSMVal, alloc);
+			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
 		if (g_coordinator->HasComponent<Name>(entity))
@@ -618,6 +630,13 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				LogicComponent l;
 				l.Deserialize(component["script"]);
 				g_coordinator->AddComponent<LogicComponent>(entity, l);
+			}
+
+			if (component.HasMember("State") && component["State"].IsObject())
+			{
+				FSM f;
+				f.Deserialize(component["State"]);
+				g_coordinator->AddComponent<FSM>(entity, f);
 			}
 
 			if (component.HasMember("name") && component["name"].IsObject())
