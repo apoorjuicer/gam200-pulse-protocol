@@ -1,31 +1,33 @@
 using System;
 using ScriptAPI;
 
+/// <summary>
+/// Displays the enemy's combo pattern during the Enemy Display phase.
+/// Shows visual feedback for each key in the sequence.
+/// </summary>
 public class ComboDisplayUI : Script
 {
     // =========================
-    // References
+    // Global Access (Singleton)
     // =========================
-    public TurnManager TurnManagerRef = null;
-    public EnemyRhythmController EnemyRef = null;
+    public static ComboDisplayUI Instance { get; private set; }
 
     // =========================
-    // UI Settings
+    // Config
     // =========================
-    public float FlashInterval = 0.5f;  // How fast the keys flash
-    public float DisplayScale = 1.5f;   // Scale of the combo display
-
-    // UI element entity IDs (you'll need to set these based on your UI system)
-    public int ComboTextEntityId = 0;
-    public int PhaseTextEntityId = 0;
+    public bool ShowDuringEnemyTurn = true;
+    public bool ShowDuringPlayerTurn = false;
+    public float FlashDuration = 0.2f;  // How long each key "flashes"
 
     // =========================
     // State
     // =========================
     private bool initialized = false;
+    private string currentComboToDisplay = "";
+    private int currentKeyIndex = 0;
     private float flashTimer = 0f;
-    private bool isVisible = false;
-    private TurnPhase lastPhase = TurnPhase.Countdown;
+    private bool isFlashing = false;
+    private int lastBeat = -1;
 
     // =========================
     // Update Loop
@@ -40,37 +42,26 @@ public class ComboDisplayUI : Script
 
         float dt = Time.DeltaTime;
 
-        if (TurnManagerRef == null || EnemyRef == null)
-            return;
-
-        TurnPhase currentPhase = TurnManagerRef.GetCurrentPhase();
-
-        // Phase change detection
-        if (currentPhase != lastPhase)
+        // Handle flashing animation
+        if (isFlashing)
         {
-            OnPhaseChanged(lastPhase, currentPhase);
-            lastPhase = currentPhase;
+            flashTimer -= dt;
+            if (flashTimer <= 0)
+            {
+                isFlashing = false;
+            }
         }
 
-        // Update display based on phase
-        switch (currentPhase)
+        // Check for beat changes during Enemy Display
+        if (Conductor.Instance != null && TurnManager.Instance != null)
         {
-            case TurnPhase.Countdown:
-                ShowCountdown();
-                break;
+            int currentBeat = Conductor.Instance.GetCurrentBeat();
 
-            case TurnPhase.EnemyDisplay:
-                ShowEnemyCombo();
-                UpdateFlashing(dt);
-                break;
-
-            case TurnPhase.PlayerInput:
-                ShowPlayerPrompt();
-                break;
-
-            case TurnPhase.Resolution:
-                ShowResolution();
-                break;
+            if (currentBeat != lastBeat)
+            {
+                lastBeat = currentBeat;
+                HandleBeatChange();
+            }
         }
     }
 
@@ -79,153 +70,105 @@ public class ComboDisplayUI : Script
     // =========================
     private void Initialize()
     {
+        if (Instance == null)
+            Instance = this;
+
         Console.WriteLine("[ComboDisplayUI] Initialized");
         initialized = true;
-
-        if (TurnManagerRef != null)
-        {
-            lastPhase = TurnManagerRef.GetCurrentPhase();
-        }
     }
 
     // =========================
-    // Phase Change Handler
+    // Display Logic
     // =========================
-    private void OnPhaseChanged(TurnPhase oldPhase, TurnPhase newPhase)
+    private void HandleBeatChange()
     {
-        Console.WriteLine($"[ComboDisplayUI] Phase changed: {oldPhase} ? {newPhase}");
-
-        switch (newPhase)
+        if (TurnManager.Instance.GetCurrentPhase() != TurnPhase.EnemyDisplay)
         {
-            case TurnPhase.EnemyDisplay:
-                flashTimer = 0f;
-                isVisible = true;
-                break;
-
-            case TurnPhase.PlayerInput:
-                isVisible = true;  // Keep showing but stop flashing
-                break;
-
-            case TurnPhase.Resolution:
-                // Could show success/fail animation here
-                break;
-        }
-    }
-
-    // =========================
-    // Display Methods
-    // =========================
-    private void ShowCountdown()
-    {
-        if (TurnManagerRef == null)
+            // Hide UI when not in enemy display phase
+            HideComboDisplay();
             return;
+        }
 
-        int remaining = TurnManagerRef.GetBeatsRemainingInPhase();
-        Console.WriteLine($"[UI] Countdown: {remaining}");
+        // During enemy display phase, show one key per beat
+        int beatInPhase = TurnManager.Instance.GetBeatsInCurrentPhase();
 
-        // Update your UI text here
-        // Example: SetUIText(PhaseTextEntityId, $"Get Ready... {remaining}");
-    }
-
-    private void ShowEnemyCombo()
-    {
-        if (EnemyRef == null)
-            return;
-
-        string combo = EnemyRef.WeaknessCombo;
-        int remaining = TurnManagerRef.GetBeatsRemainingInPhase();
-
-        // Format the combo for display
-        string formattedCombo = FormatCombo(combo);
-
-        Console.WriteLine($"[UI] Enemy Combo: {formattedCombo} (beats remaining: {remaining})");
-
-        // Update your UI text here
-        // Example: SetUIText(ComboTextEntityId, formattedCombo);
-        // Example: SetUIText(PhaseTextEntityId, $"ENEMY TURN ({remaining} beats left)");
-    }
-
-    private void ShowPlayerPrompt()
-    {
-        if (EnemyRef == null)
-            return;
-
-        string combo = EnemyRef.WeaknessCombo;
-        int remaining = TurnManagerRef.GetBeatsRemainingInPhase();
-
-        string formattedCombo = FormatCombo(combo);
-
-        Console.WriteLine($"[UI] YOUR TURN! Input: {formattedCombo} ({remaining} beats left)");
-
-        // Update your UI text here with different color/style
-        // Example: SetUIText(PhaseTextEntityId, $"YOUR TURN! ({remaining} beats left)");
-    }
-
-    private void ShowResolution()
-    {
-        // Show success or failure message
-        Console.WriteLine("[UI] Resolving...");
-    }
-
-    // =========================
-    // Visual Effects
-    // =========================
-    private void UpdateFlashing(float dt)
-    {
-        flashTimer += dt;
-
-        if (flashTimer >= FlashInterval)
+        if (EnemyRhythmController.Instance != null)
         {
-            flashTimer = 0f;
-            isVisible = !isVisible;
+            currentComboToDisplay = EnemyRhythmController.Instance.WeaknessCombo;
 
-            // Toggle visibility of combo display
-            // Example: SetUIVisibility(ComboTextEntityId, isVisible);
+            if (beatInPhase < currentComboToDisplay.Length)
+            {
+                // Flash the current key
+                char keyToShow = currentComboToDisplay[beatInPhase];
+                FlashKey(keyToShow);
+            }
         }
     }
 
-    private string FormatCombo(string combo)
+    private void FlashKey(char key)
     {
-        if (string.IsNullOrEmpty(combo))
-            return "";
+        isFlashing = true;
+        flashTimer = FlashDuration;
+        currentKeyIndex++;
 
-        // Add spaces between letters for readability
-        string formatted = "";
-        for (int i = 0; i < combo.Length; i++)
+        Console.WriteLine($"[ComboUI] ?? FLASH: {key} ({currentKeyIndex}/{currentComboToDisplay.Length})");
+
+        // TODO: Update actual UI elements here
+        // For example:
+        // if (key == 'W') highlightWButton.SetActive(true);
+        // if (key == 'A') highlightAButton.SetActive(true);
+        // etc.
+    }
+
+    private void HideComboDisplay()
+    {
+        if (currentKeyIndex > 0)
         {
-            formatted += combo[i];
-            if (i < combo.Length - 1)
-                formatted += " ";
+            Console.WriteLine("[ComboUI] Hiding combo display");
+            currentKeyIndex = 0;
+            currentComboToDisplay = "";
+            isFlashing = false;
         }
-
-        return formatted;
     }
 
     // =========================
-    // UI Helper Methods
+    // Player Feedback
     // =========================
-    // You'll need to implement these based on your engine's UI system
-
-    private void SetUIText(int entityId, string text)
+    public void ShowInputFeedback(char key, string timing)
     {
-        // Placeholder - implement based on your UI system
-        // Example using your engine's TextComponent:
-        // TextComponent textComp = GetTextComponent(entityId);
-        // if (textComp != null)
-        //     textComp.Text = text;
+        Console.WriteLine($"[ComboUI] Player pressed {key} - {timing}");
+
+        // TODO: Show visual feedback for player input
+        // For example, briefly highlight the pressed key with color based on timing:
+        // - PERFECT = Gold
+        // - GOOD = Green  
+        // - LATE/MISS = Red
     }
 
-    private void SetUIVisibility(int entityId, bool visible)
+    public void ShowComboResult(bool success)
     {
-        // Placeholder - implement based on your UI system
-        // Example:
-        // TransformComponent tf = GetTransformComponent(entityId);
-        // if (tf != null)
-        //     tf.IsVisible = visible;
+        if (success)
+        {
+            Console.WriteLine("[ComboUI] ? COMBO SUCCESS!");
+            // TODO: Show success animation
+        }
+        else
+        {
+            Console.WriteLine("[ComboUI] ? COMBO FAILED!");
+            // TODO: Show failure animation
+        }
     }
 
-    private void SetUIColor(int entityId, float r, float g, float b, float a)
+    // =========================
+    // Public API
+    // =========================
+    public bool IsCurrentlyFlashing()
     {
-        // Placeholder - implement based on your UI system
+        return isFlashing;
+    }
+
+    public string GetCurrentCombo()
+    {
+        return currentComboToDisplay;
     }
 }

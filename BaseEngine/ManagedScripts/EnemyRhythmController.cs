@@ -53,7 +53,7 @@ public class EnemyRhythmController : Script
     public float PlayerY = 300f;
 
     // === WEAKNESS ===
-    public string WeaknessCombo = "ASAS";
+    public string WeaknessCombo = "WASD";  // CHANGED FROM "ASAS" TO MATCH YOUR COMBO SYSTEM
 
     // === INTERNAL STATE ===
     private bool initialized = false;
@@ -68,7 +68,6 @@ public class EnemyRhythmController : Script
     // Track movement during enemy turn
     private int movementStepsTaken = 0;
     private int maxMovementSteps = 4;
-    private int remainingPunishmentSteps = 0;
 
     public override void Update()
     {
@@ -103,25 +102,32 @@ public class EnemyRhythmController : Script
             }
         }
 
-        // Check distance to player
+        // Check distance to player (for attack range detection)
         TransformComponent myTf = GetTransform();
         float distanceToPlayer = Math.Abs(myTf.X - PlayerX);
 
-        // If in attack range, attack
-        if (distanceToPlayer <= AttackRange && currentState != EnemyState.Attacking)
-        {
-            AttackSequence();
-            return;
-        }
-
-        // Movement logic - only during enemy turn
-        if (Conductor.Instance != null && TurnManager.Instance != null)
+        // Movement logic - only during appropriate phases
+        if (Conductor.Instance != null)
         {
             int currentBeat = Conductor.Instance.GetCurrentBeat();
             if (currentBeat != lastBeat)
             {
                 lastBeat = currentBeat;
                 HandleBeat(currentBeat);
+            }
+        }
+
+        // Check if enemy reached player and should attack
+        if (distanceToPlayer <= AttackRange && currentState != EnemyState.Attacking)
+        {
+            // Don't attack during enemy display or player input phases
+            if (TurnManager.Instance != null)
+            {
+                TurnPhase phase = TurnManager.Instance.GetCurrentPhase();
+                if (phase == TurnPhase.Resolution)
+                {
+                    AttackPlayer();
+                }
             }
         }
     }
@@ -144,13 +150,18 @@ public class EnemyRhythmController : Script
             Console.WriteLine("[Enemy] Conductor connected");
         }
 
+        // CRITICAL: Set the weakness combo in the ComboSystem
         if (ComboSystem.Instance != null)
         {
             ComboSystem.Instance.SetEnemyWeakness(WeaknessCombo);
-            Console.WriteLine($"[Enemy] Weakness: {WeaknessCombo}");
+            Console.WriteLine($"[Enemy] Weakness set to: {WeaknessCombo}");
+        }
+        else
+        {
+            Console.WriteLine("[Enemy] WARNING: ComboSystem.Instance is null!");
         }
 
-        Console.WriteLine($"[Enemy] Initialized at ({tf.X}, {tf.Y})");
+        Console.WriteLine($"[Enemy] Initialized at ({tf.X}, {tf.Y}) | Health: {Health}");
     }
 
     private void SetScaleForSprite(string spriteName, float spriteWidth, float spriteHeight)
@@ -163,15 +174,13 @@ public class EnemyRhythmController : Script
 
         tf.ScaleX = spriteWidth * uniformScale;
         tf.ScaleY = spriteHeight * uniformScale;
-
-        Console.WriteLine($"[Enemy] Scale set for {spriteName}: ({tf.ScaleX:F1}, {tf.ScaleY:F1})");
     }
 
     private void SetState(EnemyState newState)
     {
         if (currentState == newState) return;
 
-        Console.WriteLine($"[Enemy] {currentState} ? {newState}");
+        Console.WriteLine($"[Enemy] State: {currentState} ? {newState}");
         currentState = newState;
         UpdateSpriteSheet(newState);
     }
@@ -204,6 +213,9 @@ public class EnemyRhythmController : Script
         }
     }
 
+    // ========================================================================
+    // CRITICAL FIX: This is where your turn-based movement logic happens
+    // ========================================================================
     private void HandleBeat(int beat)
     {
         if (TurnManager.Instance == null)
@@ -211,40 +223,50 @@ public class EnemyRhythmController : Script
 
         TurnPhase currentPhase = TurnManager.Instance.GetCurrentPhase();
 
-        // During countdown - stay idle
+        // ============================================================
+        // PHASE 1: COUNTDOWN (First 4 beats)
+        // Enemy stays IDLE, doesn't move
+        // ============================================================
         if (currentPhase == TurnPhase.Countdown)
         {
             SetState(EnemyState.Idle);
+            Console.WriteLine($"[Enemy] Countdown - staying idle (Beat {beat})");
             return;
         }
 
-        // During enemy display - move
+        // ============================================================
+        // PHASE 2: ENEMY DISPLAY (Next 4 beats)
+        // Enemy MOVES one step per beat (4 steps total)
+        // Player input is LOCKED
+        // ============================================================
         if (currentPhase == TurnPhase.EnemyDisplay)
         {
+            // Only move if we haven't moved all 4 steps yet
             if (movementStepsTaken < maxMovementSteps)
             {
                 Step();
                 movementStepsTaken++;
+                Console.WriteLine($"[Enemy] Enemy Display - moved step {movementStepsTaken}/{maxMovementSteps}");
             }
             return;
         }
 
-        // During player input - freeze
+        // ============================================================
+        // PHASE 3: PLAYER INPUT (Next 4 beats)
+        // Enemy FREEZES (doesn't move)
+        // Player can now input combo
+        // ============================================================
         if (currentPhase == TurnPhase.PlayerInput)
         {
             SetState(EnemyState.Idle);
+            // Don't log every beat, just once when phase starts
             return;
         }
 
-        // During resolution - execute punishment steps if needed
-        if (currentPhase == TurnPhase.Resolution)
-        {
-            if (remainingPunishmentSteps > 0)
-            {
-                Step();
-                remainingPunishmentSteps--;
-            }
-        }
+        // ============================================================
+        // PHASE 4: RESOLUTION
+        // Check combo result, handled by TurnManager
+        // ============================================================
     }
 
     private void Step()
@@ -252,70 +274,84 @@ public class EnemyRhythmController : Script
         SetState(EnemyState.Moving);
 
         TransformComponent myTf = GetTransform();
-        myTf.X -= StepDistance;
+        myTf.X -= StepDistance;  // Move LEFT towards player
 
-        Console.WriteLine($"[Enemy] Stepped to X={myTf.X}, Distance to player: {Math.Abs(myTf.X - PlayerX)}");
+        Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}, Distance to player: {Math.Abs(myTf.X - PlayerX):F1}");
     }
 
-    private void AttackSequence()
+    private void AttackPlayer()
     {
         if (isDead) return;
 
-        Console.WriteLine("[Enemy] ATTACKING!");
+        Console.WriteLine($"[Enemy] ATTACKING PLAYER for {AttackDamage} damage!");
         SetState(EnemyState.Attacking);
 
         attackCooldownTimer = AttackFrames / AnimationSpeed;
 
-        bool playerSucceeded = false;
-        if (ComboSystem.Instance != null)
-        {
-            playerSucceeded = ComboSystem.Instance.PlayerDidSuccessfulCombo;
-        }
-
-        if (!playerSucceeded)
-        {
-            Console.WriteLine($"[Enemy] Player failed! Dealing {AttackDamage} damage");
-            // Apply damage to player here
-        }
-        else
-        {
-            Console.WriteLine("[Enemy] Player succeeded! Taking damage...");
-        }
+        // TODO: Apply damage to player
+        // if (PlayerHealthSystem.Instance != null)
+        // {
+        //     PlayerHealthSystem.Instance.TakeDamage(AttackDamage);
+        // }
     }
+
+    // ========================================================================
+    // PUBLIC API - Called by TurnManager
+    // ========================================================================
 
     public void TakeDamage(float dmg)
     {
         if (isDead) return;
+
         Health -= dmg;
-        Console.WriteLine($"[Enemy] Took {dmg} damage! HP: {Health}");
-        if (Health <= 0) Die();
+        Console.WriteLine($"[Enemy] Took {dmg} damage! HP: {Health}/{Health + dmg}");
+
+        if (Health <= 0)
+        {
+            Die();
+        }
     }
 
     private void Die()
     {
         if (isDead) return;
+
         isDead = true;
         waitingToDie = true;
         deathTimer = 0f;
         SetState(EnemyState.Dead);
-        Console.WriteLine("[Enemy] Defeated!");
+
+        Console.WriteLine("[Enemy] ?? DEFEATED!");
+        Console.WriteLine("==============================================");
+        Console.WriteLine("VICTORY! Enemy defeated!");
+        Console.WriteLine("==============================================");
     }
 
-    // Called by TurnManager when player fails
+    // Called by TurnManager when player FAILS combo
     public void ExecuteFailurePunishment()
     {
-        remainingPunishmentSteps = maxMovementSteps - movementStepsTaken;
-        Console.WriteLine($"[Enemy] Player failed! Moving {remainingPunishmentSteps} remaining steps and attacking!");
+        Console.WriteLine("[Enemy] ExecuteFailurePunishment() called");
 
-        // Reset for next turn
-        movementStepsTaken = 0;
+        // Calculate how many steps we DIDN'T move during enemy display
+        int remainingSteps = maxMovementSteps - movementStepsTaken;
+
+        Console.WriteLine($"[Enemy] Player failed! Moving {remainingSteps} remaining steps");
+
+        // Move those remaining steps NOW
+        for (int i = 0; i < remainingSteps; i++)
+        {
+            Step();
+        }
+
+        // Then attack
+        AttackPlayer();
     }
 
-    // Called by TurnManager at start of enemy turn
+    // Called by TurnManager at start of EACH enemy display phase
     public void ResetMovementForNewTurn()
     {
+        Console.WriteLine("[Enemy] ResetMovementForNewTurn() - resetting step counter");
         movementStepsTaken = 0;
-        remainingPunishmentSteps = 0;
         SetState(EnemyState.Idle);
     }
 }
