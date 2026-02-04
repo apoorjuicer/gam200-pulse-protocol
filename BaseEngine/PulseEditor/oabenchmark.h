@@ -1,3 +1,24 @@
+/******************************************************************************/
+/**
+ * @file        oabenchmark.h
+ * @project     Pulse Protocol
+ * @author      Ban Kai Wei Benjamin
+ * @brief       Benchmarks heap allocation versus a custom ObjectAllocator.
+ *
+ *              Provides APIs to measure allocation and deallocation performance
+ *              for OS heap-based allocation and ObjectAllocator-based allocation.
+ *              Timing results are reported in microseconds(us).
+ *
+ *              Intended for profiling allocator performance under repeated
+ *              construction/destruction workloads.
+ * 
+ *              Added to improve memory based performance
+ *
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 #include "../../PulseEngine/CoreEngine/ECS/Types.h"
 #include <string>
@@ -13,40 +34,22 @@ namespace Benchmark {
         long  Year;
         float GPA;
         long  ID;
-
-      //  static void* operator new(std::size_t size);
-        //static void operator delete(void* ptr) noexcept;
+         void* operator new(std::size_t size);
+         void operator delete(void* ptr) noexcept;
+        void* operator new(std::size_t, void* place) noexcept;
+        void operator delete(void*, void*) noexcept;
     };
-
-    struct ECSBenchmarkResult
-    {
-        int        N;
-        long long  spawn_us;     // create entity + add components
-        long long  destroy_us;   // destroy entity 
-        long long  spawn_destroy_us; // spawn then destroy in one timed region
-    };
-
     struct OABenchmarkResult
     {
         int        N;
         long long heap_us;
         long long oa_us;
     };
-
     // -----------------------------
-    // ECS benchmark API
+    // OA Student benchmark API 
     // -----------------------------
-    // Measures "Create GameObject" workload (entity + components).
-    ECSBenchmarkResult RunECSBenchmark(int N);
-    std::string PrintECSBenchmark(ECSBenchmarkResult const& r);
-
-
-
-    // -----------------------------
-    // OA benchmark API 
-    // -----------------------------
-    long long benchmark_heap_unique_ptr(int N);
-    long long benchmark_oa_allocate_free_unique_ptr(int N, ObjectAllocator& oa);
+    long long student_benchmark_heap_unique_ptr(int N);
+    long long student_benchmark_oa_allocate_free_unique_ptr(int N, ObjectAllocator& oa);
     //// Runs the benchmark and returns results
     //// Safe to call from editor / tools / tests
     OABenchmarkResult RunOABenchmark(
@@ -74,7 +77,5 @@ namespace Benchmark {
             if (us < best) { best = us; } //keep best time
         }
         return best;
-    }
-
-   
+    }  
 }//end of namespace

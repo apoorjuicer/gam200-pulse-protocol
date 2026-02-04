@@ -32,9 +32,14 @@
 // RapidJSON for scene file updates
 #include <rapidjson/ostreamwrapper.h>
 
-PrefabManager::PrefabManager()
+PrefabManager::PrefabManager() 
+	: factoryOA(sizeof(Factory),
+	OAConfig{
+	  false, 4, 2, false, 0, 0, alignof(std::max_align_t)
+	})
 {
-	factory = new Factory();
+	//factory = new Factory();
+	factory = oa_make_unique<Factory>(factoryOA);
 
 	assetRoot = CoreEngine::GetAssetRoot();
 	prefabDirectory = (assetRoot / "Prefabs").string() + "/";
@@ -46,7 +51,8 @@ PrefabManager::PrefabManager()
 
 PrefabManager::~PrefabManager()
 {
-	delete factory;
+	//dont need dlt anymore
+	//delete factory;
 }
 
 bool PrefabManager::SaveEntityAsPrefab(Entity entity, std::string const& prefabName)

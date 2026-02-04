@@ -17,7 +17,7 @@
 #pragma once
 #include "pch/pch_temp.h"
 #include "CoreEngine/ECS/Types.h"
-
+#include "../PulseEngine/ObjectAllocator/ObjectAllocator.h"
 //for .NET
 #include "CoreEngine/Core/ImportExport.h" // for DLL_API
 // stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
@@ -72,7 +72,10 @@ private:
     bool UpdateEntityFromPrefab(Entity entity, std::string const& prefabPath);
 
     // using Factory internally
-    Factory* factory;
+   // Factory* factory;
+
+    ObjectAllocator factoryOA;
+    std::unique_ptr<Factory, OADeleter> factory;
 };
 
 #pragma warning(pop)

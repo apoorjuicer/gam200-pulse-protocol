@@ -374,8 +374,6 @@ OAStats ObjectAllocator::GetStats() const{    // returns the statistics for the 
     return OAStats_;
 }
 
-
-
 /*
 OA_EXCEPTION -> custom exception type
 You can catch OAException if (and only if) 
@@ -395,7 +393,6 @@ catch (const OAException& e) {
 reinterpret_cast in C++ is a low-level casting operator 
 that tells the compiler to treat a memory address as a completely different data type
 bit-level interprtation
-
 */
 
 

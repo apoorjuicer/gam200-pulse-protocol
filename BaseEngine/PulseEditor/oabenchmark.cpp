@@ -1,11 +1,19 @@
-
 /******************************************************************************/
 /**
  * @file        oabenchmark.cpp
  * @project     Pulse Protocol
  * @author      Ban Kai Wei Benjamin
- * @brief       This file manages
- *
+ * @brief       Implementation of allocation benchmarks 
+ *                  - Uses best-of-N timing to reduce OS jitter.
+ *                  - Objects are written to after construction to prevent
+ *                    compiler dead-code elimination.
+ *                  - Both heap and ObjectAllocator paths use std::unique_ptr
+ *                    to enforce identical RAII lifetime semantics.
+ *                  - ObjectAllocator uses placement new and a custom deleter
+ *                    to ensure destructor and Free() are both invoked.
+ *                  - Allocator initialization cost is excluded from timing.
+ *              
+ *              using Student data struct to showcase that the object allocator works
  *
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
@@ -19,77 +27,12 @@
 #include "../../PulseEngine/CoreEngine/ECS/Coordinator.h"
 #include "../../PulseEngine/CoreEngine/Factory/Factory.h"
 #include "oabenchmark.h"
-
-#include <new>
-#include <cstdlib>
-#include <cstdio>
-#include <windows.h>
-
-
+//#include <new>
+//#include <cstdlib>
+//#include <cstdio>
+//#include <windows.h>
 namespace Benchmark {
-
-    const Entity INVALID_ENTITY = static_cast<Entity>(-1);
-
-    static Entity SpawnViaFactory()
-    {
-        Factory factory;
-        return factory.DefaultObj();
-    }
-
-    ECSBenchmarkResult RunECSBenchmark(int N)
-    {
-        ECSBenchmarkResult r{};
-        r.N = N;
-
-        std::vector<Entity> created;
-        created.reserve(N);
-
-        // -----------------------
-        // Spawn only
-        // -----------------------
-        r.spawn_us = time_us([&]() {
-            created.clear();
-            for (int i = 0; i < N; ++i)
-            {
-                Entity e = SpawnViaFactory();
-                if (e != INVALID_ENTITY)
-                    created.push_back(e);
-            }
-            });
-
-        // -----------------------
-        // Destroy only
-        // -----------------------
-        r.destroy_us = time_us([&]() {
-            Coordinator* coord = Coordinator::GetInstance();
-            for (Entity e : created)
-                coord->DestroyEntity(e);
-            created.clear();
-            });
-
-        // -----------------------
-        // Spawn + destroy
-        // -----------------------
-        r.spawn_destroy_us = time_us([&]() {
-            created.clear();
-            Coordinator* coord = Coordinator::GetInstance();
-
-            for (int i = 0; i < N; ++i)
-            {
-                Entity e = SpawnViaFactory();
-                if (e != INVALID_ENTITY)
-                    created.push_back(e);
-            }
-
-            for (Entity e : created)
-                coord->DestroyEntity(e);
-            });
-
-        return r;
-    }
-
-
-    long long benchmark_heap_unique_ptr(int N)
+     long long student_benchmark_heap_unique_ptr(int N)
     {
         return time_us([&]() {
             //vector of unique_ptrs
@@ -104,19 +47,16 @@ namespace Benchmark {
                 u_ptrs.push_back(std::move(p)); // transfer ownership
             }
 
-
             u_ptrs.clear();
-
             });
     }
 
     //need to do reserve?
-    long long benchmark_oa_allocate_free_unique_ptr(int N, ObjectAllocator& oa)
+    long long student_benchmark_oa_allocate_free_unique_ptr(int N, ObjectAllocator& oa)
     {
         return time_us([&]() { //lambda
             std::vector<std::unique_ptr<Student, OADeleter>> u_ptrs;
             u_ptrs.reserve(N);
-
             for (int i = 0; i < N; ++i) {
                 //void* mem = oa.Allocate();        // raw block
                 //Student* p = new (mem) Student(); // placement-new ctor
@@ -141,7 +81,7 @@ namespace Benchmark {
         bool debugOn)
     {
         // Heap From OS
-        long long heap = benchmark_heap_unique_ptr(N);
+        long long heap = student_benchmark_heap_unique_ptr(N);
 
         // OA config (adjust constructor params to match OAConfig)
         // (UseCPPMemManager, ObjectsPerPage, MaxPages, DebugOn, PadBytes, HeaderBlocks, Alignment)
@@ -158,7 +98,7 @@ namespace Benchmark {
         ObjectAllocator oa(sizeof(Student), cfg);
 
         // OUR OA
-        long long oa_time = benchmark_oa_allocate_free_unique_ptr(N, oa);
+        long long oa_time = student_benchmark_oa_allocate_free_unique_ptr(N, oa);
 
         return OABenchmarkResult{ N, heap, oa_time };
     }
@@ -173,15 +113,6 @@ namespace Benchmark {
             "OA  oa_make_unique: " + std::to_string(r.oa_us) + " us\n";
     }
 
-    std::string Benchmark::PrintECSBenchmark(ECSBenchmarkResult const& r)
-    {
-        return
-            "N = " + std::to_string(r.N) + "\n" +
-            "spawn_us = " + std::to_string(r.spawn_us) + "\n" +
-            "destroy_us = " + std::to_string(r.destroy_us) + "\n" +
-            "spawn_destroy_us = " + std::to_string(r.spawn_destroy_us) + "\n";
-    }
-
     /*
     * Usage
     * i f (ImGui::Button("Run OA Benchmark"))
@@ -193,120 +124,93 @@ namespace Benchmark {
             
         }
     */
-
+    /*
+    *  Overload works, but spam console not useful in telling anything
+    */
     //void* Student::operator new(std::size_t size)
     //{
-    //    std::cout << "[Student] new " << size << " bytes\n";
+    //    std::printf("[Student] new %zu bytes\n", size);
     //    return ::operator new(size);
     //}
 
     //void Student::operator delete(void* ptr) noexcept
     //{
-    //    std::cout << "[Student] delete\n";
-    //    ::operator delete(ptr);
+
+    //   std::printf("[Student] delete\n");
+    //   ::operator delete(ptr);
     //}
+
+    // void* Student::operator new(std::size_t, void* place) noexcept
+    //{
+    //    return place;
+    //}
+
+    // void Student::operator delete(void*, void*) noexcept
+    //{
+    //    // never called, but required by the language
+    //}
+
+
+     long long particle_benchmark_heap_unique_ptr(int N)
+     {
+         return time_us([&]() {
+             std::vector<std::unique_ptr<Particle>> v;
+             v.reserve(N);
+
+             for (int i = 0; i < N; ++i)
+                 v.push_back(std::make_unique<Particle>());
+
+             v.clear(); // destroy
+             });
+     }
+
+     long long particle_benchmark_oa_unique_ptr(int N, ObjectAllocator& oa)
+     {
+         return time_us([&]() {
+             std::vector<std::unique_ptr<Particle, OADeleter>> v;
+             v.reserve(N);
+
+             for (int i = 0; i < N; ++i)
+                 v.push_back(oa_make_unique<Particle>(oa));
+
+             v.clear(); // calls OADeleter -> Free
+             });
+     }
+
+
 }// end of namespace
 
-//static thread_local bool g_inNew = false;
-//
-//void* operator new(std::size_t sz)
+// C++ has multiple delete signatures, and the compiler chooses which one to call based on
+// 4 categories
+// 1. Scalar delete 
+//    - void operator delete(void* ptr) noexcept;
+// 2. SZIED Scalar delete 
+//    - void operator delete(void* ptr, std::size_t size) noexcept;
+// 3. Array delete 
+//    - void operator delete[](void* ptr) noexcept;
+// 4. Sized array delete -> void operator delete(void* ptr) noexcept;
+//    - void operator delete[](void* ptr, std::size_t size) noexcept;
+
+// Global operator new
+/*
+ Constantly/perma printing stuff
+ possibly due to IMGUI,logging, iostream
+*/
+//void* operator new(std::size_t size)
 //{
-//    if (g_inNew) // re-entrancy: don't log, just malloc
-//        return std::malloc(sz);
+//    if (size >= 256)
+//    std::printf("[NEW ] %zu bytes\n", size);
 //
-//    g_inNew = true;
+//    if (void* p = std::malloc(size))
+//        return p;
 //
-//    char buf[64];
-//    int n = std::snprintf(buf, sizeof(buf), "[GLOBAL NEW] %zu bytes\n", sz);
-//    if (n > 0) OutputDebugStringA(buf);
-//
-//    g_inNew = false;
-//
-//    if (void* p = std::malloc(sz)) return p;
 //    throw std::bad_alloc{};
 //}
 //
-//void operator delete(void* p) noexcept
+//// Global operator delete
+//void operator delete(void* ptr) noexcept
 //{
-//    std::free(p);
+//
+//    std::printf("[DEL ] %p\n", ptr);
+//    std::free(ptr);
 //}
-//
-//// Also add aligned overloads (MSVC will call these sometimes)
-//void* operator new(std::size_t sz, std::align_val_t al)
-//{
-//    return operator new(sz); // simple for logging; or use _aligned_malloc
-//}
-//void operator delete(void* p, std::align_val_t) noexcept
-//{
-//    operator delete(p);
-//}
-
-
-//static std::atomic<int> g_newCount{ 0 };
-//static constexpr int MAX_LOGS = 10;
-//
-//void* operator new(std::size_t sz)
-//{
-//    int count = g_newCount.fetch_add(1, std::memory_order_relaxed);
-//
-//    if (count < MAX_LOGS)
-//    {
-//        char buf[64];
-//        std::snprintf(buf, sizeof(buf),
-//            "[GLOBAL NEW] %zu bytes (count=%d)\n", sz, count);
-//        OutputDebugStringA(buf);
-//    }
-//
-//    if (void* p = std::malloc(sz)) return p;
-//    throw std::bad_alloc{};
-//}
-//bool g_LogNew = false;
-//void* operator new(std::size_t sz)
-//{
-//    if (g_LogNew)
-//    {
-//        char buf[64];
-//        std::snprintf(buf, sizeof(buf),
-//            "[GLOBAL NEW] %zu bytes\n", sz);
-//        OutputDebugStringA(buf);
-//    }
-//
-//    if (void* p = std::malloc(sz)) return p;
-//    throw std::bad_alloc{};
-//}
-
-//static thread_local bool g_inNew = false;
-//
-//void* operator new(std::size_t sz)
-//{
-//    if (g_inNew) {
-//        if (void* p = std::malloc(sz)) return p;
-//        throw std::bad_alloc{};
-//    }
-//
-//    g_inNew = true;
-//    char buf[96];
-//    std::snprintf(buf, sizeof(buf), "\n>>> [GLOBAL NEW] %zu bytes <<<\n", sz);
-//    OutputDebugStringA(buf);
-//    g_inNew = false;
-//
-//    if (void* p = std::malloc(sz)) return p;
-//    throw std::bad_alloc{};
-//}
-//
-//void operator delete(void* p) noexcept
-//{
-//    std::free(p);
-//}
-//
-//// REQUIRED for MSVC / STL
-//void* operator new(std::size_t sz, std::align_val_t)
-//{
-//    return ::operator new(sz);
-//}
-//
-//void operator delete(void* p, std::align_val_t) noexcept
-//{
-//    ::operator delete(p);
-//}
-

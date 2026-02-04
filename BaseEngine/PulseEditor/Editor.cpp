@@ -539,11 +539,8 @@ namespace PulseEditor
             if (ImGui::IsKeyPressed(ImGuiKey_M))
             {
                //Student
-               //auto r = Benchmark::RunOABenchmark(1000);
-               //debugConsole.AddLog("%s", Benchmark::PrintOABenchmark(r).c_str());
-
-                auto r = Benchmark::RunECSBenchmark(100);
-                debugConsole.AddLog("%s", Benchmark::PrintECSBenchmark(r).c_str());
+               auto r = Benchmark::RunOABenchmark(1000);
+               debugConsole.AddLog("%s", Benchmark::PrintOABenchmark(r).c_str());
             }
 
             //auto r = Benchmark::RunOABenchmark(1000);

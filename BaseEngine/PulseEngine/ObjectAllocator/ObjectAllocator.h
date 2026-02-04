@@ -3,7 +3,10 @@
  * @file        ObjectAllocator.h
  * @project     Pulse Protocol
  * @author      Ban Kai Wei Benjamin
- * @brief       TBF
+ * @brief       Fixed-size memory pool allocator that serves objects from pages 
+ *              of pre-allocated blocks. integrated with std::unique_ptr via a custom deleter.
+ *             
+ *              
  * 
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
@@ -246,14 +249,14 @@ inline void PrintCounts2(const ObjectAllocator *nm)
 customer deleter
 */
 struct OADeleter {
-  ObjectAllocator* oa;
+  ObjectAllocator* oa = nullptr;
   template <typename T>
   void operator()(T* p) const noexcept {
     if (!p) return;
     //if p has its own dtor, and already constructed
     //if construct with placement new must destroy explicitly in deleter
     p->~T();      
-    oa->Free(p);
+    if (oa) oa->Free(p);
   }
 };
 /* 
@@ -281,7 +284,15 @@ std::unique_ptr<T, OADeleter> oa_make_unique(ObjectAllocator& oa) {
   void* mem_from_mempool = oa.Allocate();
   // placement new (must have T default ctor!!!!)
   T* obj = new (mem_from_mempool) T();                 
-  return { obj, OADeleter{&oa} };
+  return std::unique_ptr<T, OADeleter>(obj, OADeleter{ &oa });
+}
+
+template <typename T>
+std::shared_ptr<T> oa_make_shared(ObjectAllocator& oa)
+{
+    void* mem_from_mempool = oa.Allocate();
+    T* obj = new (mem_from_mempool) T(); // default ctor
+    return std::shared_ptr<T>(obj, OADeleter{ &oa });
 }
 
 #endif

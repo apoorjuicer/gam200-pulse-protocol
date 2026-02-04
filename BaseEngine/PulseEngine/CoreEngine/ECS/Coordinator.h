@@ -34,7 +34,7 @@ class DLL_API Coordinator : public Singleton<Coordinator>
 {
 public:	
 	Coordinator()
-		: cfg_(/*UseCPPMemManager*/ true,
+		: cfg_(/*UseCPPMemManager*/ false,
 			/*ObjectsPerPage*/  4,
 			/*MaxPages*/        2,
 			/*DebugOn*/         false,
