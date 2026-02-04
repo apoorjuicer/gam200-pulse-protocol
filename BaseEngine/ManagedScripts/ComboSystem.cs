@@ -40,12 +40,29 @@ public class ComboSystem : Script
     private string currentEnemyWeakness = "";
 
     // =========================
+    // Initialization tracking
+    // =========================
+    private bool initialized = false;
+
+    // =========================
     // Update Loop
     // =========================
     public override void Update()
     {
+        // Set singleton instance
         if (Instance == null)
+        {
             Instance = this;
+            Console.WriteLine("[ComboSystem] Singleton instance set");
+        }
+
+        // First-time initialization
+        if (!initialized)
+        {
+            Console.WriteLine("[ComboSystem] Initializing...");
+            ResetCombo();
+            initialized = true;
+        }
 
         float dt = Time.DeltaTime;
         timeSinceLastBeat += dt;
@@ -73,6 +90,13 @@ public class ComboSystem : Script
 
     public void RegisterInput(char key)
     {
+        // Sanity check: don't allow input if no weakness set
+        if (string.IsNullOrEmpty(currentEnemyWeakness))
+        {
+            Console.WriteLine("[ComboSystem] ERROR: No weakness set! Cannot register input.");
+            return;
+        }
+
         float delta = Math.Abs(timeSinceLastBeat);
 
         string judgement;
@@ -123,6 +147,9 @@ public class ComboSystem : Script
         currentCombo.Clear();
         hitResults.Clear();
         comboFailedEarly = false;
+
+        // Don't log every reset, too spammy
+        // Console.WriteLine("[ComboSystem] Combo reset");
     }
 
     // =========================
@@ -155,6 +182,24 @@ public class ComboSystem : Script
             PlayerDidSuccessfulCombo = false;
         }
 
-        ResetCombo();
+        // Note: Don't call ResetCombo() here - let TurnManager control when to reset
+    }
+
+    // =========================
+    // Debug/Utility
+    // =========================
+    public string GetCurrentComboString()
+    {
+        return new string(currentCombo.ToArray());
+    }
+
+    public int GetComboProgress()
+    {
+        return currentCombo.Count;
+    }
+
+    public string GetExpectedCombo()
+    {
+        return currentEnemyWeakness;
     }
 }

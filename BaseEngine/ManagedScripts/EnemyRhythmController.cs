@@ -53,7 +53,7 @@ public class EnemyRhythmController : Script
     public float PlayerY = 300f;
 
     // === WEAKNESS ===
-    public string WeaknessCombo = "WASD";  // CHANGED FROM "ASAS" TO MATCH YOUR COMBO SYSTEM
+    public string WeaknessCombo = "WASD";
 
     // === INTERNAL STATE ===
     private bool initialized = false;
@@ -69,6 +69,11 @@ public class EnemyRhythmController : Script
     private int movementStepsTaken = 0;
     private int maxMovementSteps = 4;
 
+    // CRITICAL FIX: Track if we've tried to set weakness
+    private bool weaknessSet = false;
+    private int weaknessRetryCount = 0;
+    private const int maxWeaknessRetries = 100; // Try for ~100 frames
+
     public override void Update()
     {
         if (!initialized)
@@ -76,6 +81,13 @@ public class EnemyRhythmController : Script
             Initialize();
             initialized = true;
             return;
+        }
+
+        // CRITICAL FIX: Keep trying to set weakness until ComboSystem is ready
+        if (!weaknessSet && weaknessRetryCount < maxWeaknessRetries)
+        {
+            TrySetWeakness();
+            weaknessRetryCount++;
         }
 
         if (isDead)
@@ -102,9 +114,8 @@ public class EnemyRhythmController : Script
             }
         }
 
-        // Check distance to player (for attack range detection)
-        TransformComponent myTf = GetTransform();
-        float distanceToPlayer = Math.Abs(myTf.X - PlayerX);
+        // REMOVED: Distance check and attack logic from Update()
+        // Attack only happens during Resolution phase now
 
         // Movement logic - only during appropriate phases
         if (Conductor.Instance != null)
@@ -114,20 +125,6 @@ public class EnemyRhythmController : Script
             {
                 lastBeat = currentBeat;
                 HandleBeat(currentBeat);
-            }
-        }
-
-        // Check if enemy reached player and should attack
-        if (distanceToPlayer <= AttackRange && currentState != EnemyState.Attacking)
-        {
-            // Don't attack during enemy display or player input phases
-            if (TurnManager.Instance != null)
-            {
-                TurnPhase phase = TurnManager.Instance.GetCurrentPhase();
-                if (phase == TurnPhase.Resolution)
-                {
-                    AttackPlayer();
-                }
             }
         }
     }
@@ -150,18 +147,32 @@ public class EnemyRhythmController : Script
             Console.WriteLine("[Enemy] Conductor connected");
         }
 
-        // CRITICAL: Set the weakness combo in the ComboSystem
+        // Try to set weakness immediately
+        TrySetWeakness();
+
+        Console.WriteLine($"[Enemy] Initialized at ({tf.X}, {tf.Y}) | Health: {Health}");
+    }
+
+    // CRITICAL FIX: Separate method that keeps trying until ComboSystem exists
+    private void TrySetWeakness()
+    {
+        if (weaknessSet)
+            return;
+
         if (ComboSystem.Instance != null)
         {
             ComboSystem.Instance.SetEnemyWeakness(WeaknessCombo);
-            Console.WriteLine($"[Enemy] Weakness set to: {WeaknessCombo}");
+            weaknessSet = true;
+            Console.WriteLine($"[Enemy] ? Weakness successfully set to: {WeaknessCombo}");
         }
-        else
+        else if (weaknessRetryCount == 0)
         {
-            Console.WriteLine("[Enemy] WARNING: ComboSystem.Instance is null!");
+            Console.WriteLine("[Enemy] ?? ComboSystem.Instance is null - will retry...");
         }
-
-        Console.WriteLine($"[Enemy] Initialized at ({tf.X}, {tf.Y}) | Health: {Health}");
+        else if (weaknessRetryCount == maxWeaknessRetries - 1)
+        {
+            Console.WriteLine("[Enemy] ? ERROR: ComboSystem never initialized!");
+        }
     }
 
     private void SetScaleForSprite(string spriteName, float spriteWidth, float spriteHeight)
@@ -214,7 +225,7 @@ public class EnemyRhythmController : Script
     }
 
     // ========================================================================
-    // CRITICAL FIX: This is where your turn-based movement logic happens
+    // Beat Handling - Core turn-based logic
     // ========================================================================
     private void HandleBeat(int beat)
     {
@@ -259,13 +270,13 @@ public class EnemyRhythmController : Script
         if (currentPhase == TurnPhase.PlayerInput)
         {
             SetState(EnemyState.Idle);
-            // Don't log every beat, just once when phase starts
+            // Don't log every beat, TurnManager already does
             return;
         }
 
         // ============================================================
         // PHASE 4: RESOLUTION
-        // Check combo result, handled by TurnManager
+        // Handled by TurnManager calling our public methods
         // ============================================================
     }
 
@@ -276,14 +287,15 @@ public class EnemyRhythmController : Script
         TransformComponent myTf = GetTransform();
         myTf.X -= StepDistance;  // Move LEFT towards player
 
-        Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}, Distance to player: {Math.Abs(myTf.X - PlayerX):F1}");
+        float distanceToPlayer = Math.Abs(myTf.X - PlayerX);
+        Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}, Distance to player: {distanceToPlayer:F1}");
     }
 
     private void AttackPlayer()
     {
         if (isDead) return;
 
-        Console.WriteLine($"[Enemy] ATTACKING PLAYER for {AttackDamage} damage!");
+        Console.WriteLine($"[Enemy] ??? ATTACKING PLAYER for {AttackDamage} damage!");
         SetState(EnemyState.Attacking);
 
         attackCooldownTimer = AttackFrames / AnimationSpeed;
@@ -323,7 +335,7 @@ public class EnemyRhythmController : Script
 
         Console.WriteLine("[Enemy] ?? DEFEATED!");
         Console.WriteLine("==============================================");
-        Console.WriteLine("VICTORY! Enemy defeated!");
+        Console.WriteLine("?? VICTORY! Enemy defeated!");
         Console.WriteLine("==============================================");
     }
 
@@ -343,8 +355,19 @@ public class EnemyRhythmController : Script
             Step();
         }
 
-        // Then attack
-        AttackPlayer();
+        // Check if we're in attack range after moving
+        TransformComponent myTf = GetTransform();
+        float distanceToPlayer = Math.Abs(myTf.X - PlayerX);
+
+        if (distanceToPlayer <= AttackRange)
+        {
+            Console.WriteLine($"[Enemy] In range ({distanceToPlayer:F1} <= {AttackRange}) - attacking!");
+            AttackPlayer();
+        }
+        else
+        {
+            Console.WriteLine($"[Enemy] Not in range yet ({distanceToPlayer:F1} > {AttackRange}) - waiting...");
+        }
     }
 
     // Called by TurnManager at start of EACH enemy display phase
@@ -352,6 +375,14 @@ public class EnemyRhythmController : Script
     {
         Console.WriteLine("[Enemy] ResetMovementForNewTurn() - resetting step counter");
         movementStepsTaken = 0;
+
+        // CRITICAL FIX: Reset weakness flag for new game sessions
+        if (!weaknessSet)
+        {
+            weaknessRetryCount = 0;
+            TrySetWeakness();
+        }
+
         SetState(EnemyState.Idle);
     }
 }

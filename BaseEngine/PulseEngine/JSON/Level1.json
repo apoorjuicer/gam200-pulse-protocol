@@ -52,6 +52,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "Conductor"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "Background"
                     }
@@ -835,7 +842,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon bat.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -868,16 +875,16 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 16
+                        "parent": 14
                     }
                 }
             ]
@@ -950,143 +957,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 16
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "scale": {
-                            "x": 200.0,
-                            "y": 200.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
-                        "useTexture": true,
-                        "spriteName": "",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "Conductor"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Conductor"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "scale": {
-                            "x": 200.0,
-                            "y": 200.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
-                        "useTexture": true,
-                        "spriteName": "",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "ConductorBeatTester"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "ConductorBeatTester"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
-                        "z": 0.0
+                        "parent": 14
                     }
                 }
             ]
@@ -1160,9 +1031,9 @@
                 {
                     "Children": {
                         "children": [
-                            15,
-                            16,
-                            17
+                            13,
+                            14,
+                            15
                         ]
                     }
                 }
@@ -1237,7 +1108,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 14
+                        "parent": 12
                     }
                 }
             ]
@@ -1311,7 +1182,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 14
+                        "parent": 12
                     }
                 }
             ]
@@ -1385,7 +1256,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 14
+                        "parent": 12
                     }
                 }
             ]
@@ -1578,7 +1449,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_220x432.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_fixed_220x432.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1615,6 +1486,146 @@
                         "mask": 2,
                         "sortingLayer": 1,
                         "orderInLayer": 5,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": true,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "Conductor",
+                            "TurnManager",
+                            "ComboSystem",
+                            "InputBridge",
+                            "InitializationDiagnostic"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "GameSystems"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": true,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "GameManager"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "GameManager"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 }
