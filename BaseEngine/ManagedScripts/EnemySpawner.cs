@@ -4,6 +4,9 @@ using ScriptAPI;
 
 public class EnemySpawner : Script
 {
+    // === SINGLETON ===
+    public static EnemySpawner Instance { get; private set; }
+
     // === SPAWN SETTINGS ===
     public string EnemyPrefabName = "Rat_Enemy";
     public float SpawnX = 800f;
@@ -76,6 +79,12 @@ public class EnemySpawner : Script
 
     private void Initialize()
     {
+        // Set singleton instance
+        if (Instance == null)
+            Instance = this;
+        else
+            Console.WriteLine("[EnemySpawner] WARNING: Multiple EnemySpawner instances detected!");
+
         Console.WriteLine("[EnemySpawner] Initialized");
         Console.WriteLine($"  Will spawn {EnemiesToSpawn} enemies");
         Console.WriteLine($"  Prefab: {EnemyPrefabName}");
@@ -154,17 +163,20 @@ public class EnemySpawner : Script
         Console.WriteLine($"[EnemySpawner] Spawned enemy {enemiesSpawned}/{EnemiesToSpawn} (ID: {enemyID})");
     }
 
+    // Called by EnemyRhythmController when an enemy dies
     public void OnEnemyDefeated()
     {
         enemiesDefeated++;
-        Console.WriteLine($"[EnemySpawner] Enemy defeated! ({enemiesDefeated} total)");
+        Console.WriteLine($"[EnemySpawner] ?? Enemy defeated! ({enemiesDefeated} total)");
 
         var ui = OrderSlipUIController.Instance;
         if (ui != null && enemyQueue.Count > 2)
         {
+            // Remove the defeated enemy from queue
             if (enemyQueue.Count > 0)
                 enemyQueue.Dequeue();
 
+            // Get the new "next" enemy (will be at index 1 after dequeue)
             if (enemyQueue.Count > 1)
             {
                 EnemyIconType newNext = PeekAtIndex(1);
@@ -172,13 +184,25 @@ public class EnemySpawner : Script
                 try
                 {
                     ui.AdvanceQueue(newNext);
-                    Console.WriteLine($"[EnemySpawner] UI advanced to show next enemy: {newNext}");
+                    Console.WriteLine($"[EnemySpawner] ?? UI advanced to show next enemy: {newNext}");
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"[EnemySpawner] ERROR during AdvanceQueue: {ex.Message}");
                 }
             }
+            else
+            {
+                Console.WriteLine("[EnemySpawner] No more enemies in queue!");
+            }
+        }
+        else if (ui == null)
+        {
+            Console.WriteLine("[EnemySpawner] WARNING: UI Controller is null");
+        }
+        else
+        {
+            Console.WriteLine($"[EnemySpawner] Queue too small to advance ({enemyQueue.Count} enemies remaining)");
         }
     }
 

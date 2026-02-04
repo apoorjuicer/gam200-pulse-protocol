@@ -1,37 +1,99 @@
 using System;
 using ScriptAPI;
 
+/// <summary>
+/// Player health management - FIXED VERSION with extensive debugging
+/// 
+/// SETUP:
+/// - Attach this script to your PLAYER entity (the entity at x=-970, y=-236 in Level1.json)
+/// - Player entity must have a Health component
+/// - For UI, create separate HealthBarUI script on the health bar entity
+/// </summary>
 public class PlayerHealth : Script
 {
     // =========================
+    // Singleton Access
+    // =========================
+    public static PlayerHealth Instance { get; private set; }
+
+    // =========================
     // Config
     // =========================
-    public int maxHP = 100;
-
-    // Optional: set this to whatever your lose scene is called
-    public string loseSceneName = "GameLose";
+    public int MaxHP = 100;
+    public int StartingHP = 100;
 
     // =========================
-    // Internal
+    // State
     // =========================
     private bool initialized = false;
+    private bool isDead = false;
+    private int updateCount = 0; // Track how many times Update() has been called
 
-    private void EnsureInit()
+    // =========================
+    // Update Loop
+    // =========================
+    public override void Update()
     {
-        if (initialized) return;
+        updateCount++;
 
-        // Your engine already has HealthComponent (from TestScript)
-        HealthComponent hc = GetHealth();
+        if (!initialized)
+        {
+            Initialize();
+            return;
+        }
 
-        // If hp was never set, initialize it
-        if (hc.hp <= 0)
-            hc.hp = maxHP;
+        // Print status every 60 frames (roughly once per second at 60fps)
+        if (updateCount % 60 == 0)
+        {
+            HealthComponent health = GetHealth();
+            Console.WriteLine($"[PlayerHealth] Status update - HP: {health.hp}/{MaxHP} ({GetHPPercent():P0})");
+        }
 
-        // You can also clamp hp if prefabs set it above max
-        if (hc.hp > maxHP)
-            hc.hp = maxHP;
+        // Check for death
+        HealthComponent health2 = GetHealth();
+        if (health2.hp <= 0 && !isDead)
+        {
+            Die();
+        }
+    }
 
-        hc.isAlive = true;
+    // =========================
+    // Initialization
+    // =========================
+    private void Initialize()
+    {
+        // Set singleton FIRST
+        if (Instance == null)
+        {
+            Instance = this;
+            Console.WriteLine("[PlayerHealth] ? Singleton instance set");
+        }
+        else
+        {
+            Console.WriteLine("[PlayerHealth] ? WARNING: Multiple PlayerHealth instances detected!");
+            return;
+        }
+
+        Console.WriteLine("[PlayerHealth] ???????????????????????????????");
+        Console.WriteLine("[PlayerHealth] Initializing Player Health System...");
+        Console.WriteLine("[PlayerHealth] ???????????????????????????????");
+
+        // Initialize health component
+        HealthComponent health = GetHealth();
+        health.hp = StartingHP;
+        health.isAlive = true;
+
+        Console.WriteLine($"[PlayerHealth] ? Initial HP set to: {health.hp}/{MaxHP}");
+
+        // Get and log player position for debugging
+        TransformComponent tf = GetTransform();
+        Console.WriteLine($"[PlayerHealth] ? Player position: ({tf.X}, {tf.Y})");
+        Console.WriteLine($"[PlayerHealth] ? Player scale: ({tf.ScaleX}, {tf.ScaleY})");
+        Console.WriteLine($"[PlayerHealth] ? Player visible: {tf.IsVisible}");
+
+        Console.WriteLine("[PlayerHealth] ???????????????????????????????");
+        Console.WriteLine("[PlayerHealth] Initialization complete!");
+        Console.WriteLine("[PlayerHealth] ???????????????????????????????");
 
         initialized = true;
     }
@@ -41,59 +103,164 @@ public class PlayerHealth : Script
     // =========================
     public void TakeDamage(int dmg)
     {
-        EnsureInit();
+        if (isDead)
+        {
+            Console.WriteLine("[PlayerHealth] ? Cannot take damage - player is dead");
+            return;
+        }
 
-        if (dmg <= 0) return;
+        HealthComponent health = GetHealth();
+        int oldHP = health.hp;
+        health.hp = Math.Max(0, health.hp - dmg);
 
-        HealthComponent hc = GetHealth();
-        hc.hp -= dmg;
+        Console.WriteLine("??????????????????????????????????????");
+        Console.WriteLine($"?  ?? PLAYER TOOK {dmg} DAMAGE!        ?");
+        Console.WriteLine("??????????????????????????????????????");
+        Console.WriteLine($"?  HP: {oldHP} ? {health.hp} / {MaxHP}");
+        Console.WriteLine($"?  Remaining: {GetHPPercent():P0}");
+        Console.WriteLine("??????????????????????????????????????");
 
-        if (hc.hp < 0)
-            hc.hp = 0;
+        // Play hurt sound
+        try
+        {
+            GetAudio().PlaySFX("SFX_PlayerHurt");
+            Console.WriteLine("[PlayerHealth] ? Played hurt sound");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PlayerHealth] ? Could not play hurt sound: {ex.Message}");
+        }
 
-        if (hc.hp <= 0)
+        // Flash red
+        FlashDamage();
+
+        if (health.hp <= 0)
+        {
             Die();
+        }
     }
 
     public void Heal(int amount)
     {
-        EnsureInit();
+        if (isDead)
+        {
+            Console.WriteLine("[PlayerHealth] ? Cannot heal - player is dead");
+            return;
+        }
 
-        if (amount <= 0) return;
+        HealthComponent health = GetHealth();
+        int oldHP = health.hp;
+        health.hp = Math.Min(MaxHP, health.hp + amount);
 
-        HealthComponent hc = GetHealth();
-        hc.hp += amount;
+        int actualHealing = health.hp - oldHP;
+        if (actualHealing > 0)
+        {
+            Console.WriteLine($"[PlayerHealth] ?? Healed {actualHealing}! HP: {health.hp}/{MaxHP}");
 
-        if (hc.hp > maxHP)
-            hc.hp = maxHP;
+            try
+            {
+                GetAudio().PlaySFX("SFX_Heal");
+            }
+            catch { }
+        }
     }
 
-    public void Die()
-    {
-        EnsureInit();
-
-        HealthComponent hc = GetHealth();
-        hc.isAlive = false;
-
-        Console.WriteLine("Player defeated!");
-
-        // Engine-safe lose handling (no GameStateManager singleton assumed)
-        Scene.LoadScene(loseSceneName);
-    }
-
-    // =========================
-    // Convenience
-    // =========================
     public int GetCurrentHP()
     {
-        EnsureInit();
+        if (!initialized)
+        {
+            Console.WriteLine("[PlayerHealth] ? WARNING: GetCurrentHP() called before initialization!");
+            return StartingHP;
+        }
         return GetHealth().hp;
     }
 
-    public float GetHP01()
+    public int GetMaxHP()
     {
-        EnsureInit();
-        int hp = GetHealth().hp;
-        return (maxHP <= 0) ? 0.0f : (float)hp / (float)maxHP;
+        return MaxHP;
+    }
+
+    public float GetHPPercent()
+    {
+        if (!initialized)
+        {
+            Console.WriteLine("[PlayerHealth] ? WARNING: GetHPPercent() called before initialization!");
+            return 1.0f;
+        }
+
+        int currentHP = GetHealth().hp;
+        float percent = (float)currentHP / (float)MaxHP;
+        return percent;
+    }
+
+    public bool IsDead()
+    {
+        return isDead;
+    }
+
+    // =========================
+    // Death Handling
+    // =========================
+    private void Die()
+    {
+        if (isDead) return;
+
+        isDead = true;
+        HealthComponent health = GetHealth();
+        health.isAlive = false;
+        health.hp = 0;
+
+        Console.WriteLine("\n\n");
+        Console.WriteLine("??????????????????????????????????????");
+        Console.WriteLine("?                                    ?");
+        Console.WriteLine("?        ?? PLAYER DEFEATED! ??      ?");
+        Console.WriteLine("?                                    ?");
+        Console.WriteLine("?          GAME OVER                 ?");
+        Console.WriteLine("?                                    ?");
+        Console.WriteLine("??????????????????????????????????????");
+        Console.WriteLine("\n\n");
+
+        // Play death sound
+        try
+        {
+            GetAudio().PlaySFX("SFX_PlayerDeath");
+        }
+        catch { }
+
+        // Make player invisible
+        TransformComponent tf = GetTransform();
+        tf.IsVisible = false;
+
+        // Notify TurnManager if it exists
+        if (TurnManager.Instance != null)
+        {
+            // TurnManager should handle game over logic
+            Console.WriteLine("[PlayerHealth] Notifying TurnManager of player death");
+        }
+    }
+
+    // =========================
+    // Visual Feedback
+    // =========================
+    private void FlashDamage()
+    {
+        try
+        {
+            // Flash player sprite red briefly
+            SpriteComponent sprite = GetSprite();
+            if (sprite.HasSprite())
+            {
+                // Set red tint
+                sprite.SetTint(1.0f, 0.3f, 0.3f, 1.0f);
+                Console.WriteLine("[PlayerHealth] ? Applied red damage tint");
+
+                // TODO: Reset tint after 0.2 seconds
+                // For now, it stays red (you'd need a timer system)
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PlayerHealth] ? Could not apply damage tint: {ex.Message}");
+        }
     }
 }

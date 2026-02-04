@@ -1,7 +1,7 @@
 using System;
 using ScriptAPI;
 
-public enum EnemyState { Idle, Moving, Attacking, Dead }
+public enum EnemyState { Idle, Moving, Attacking, Hurt, Dead }
 public enum RhythmType { OneBeat, TwoBeat, Syncopated, FourBeat }
 
 public class EnemyRhythmController : Script
@@ -44,35 +44,38 @@ public class EnemyRhythmController : Script
     public float StepDistance = 50f;
 
     // === COMBAT SETTINGS ===
-    public float AttackRange = 25f;
+    public float AttackRange = 500f;  // Increased for better detection
     public float AttackDamage = 12f;
-    public float Health = 15f;
-
-    // === PLAYER DETECTION ===
-    public float PlayerX = 400f;
-    public float PlayerY = 300f;
+    public float MaxHealth = 30f;
 
     // === WEAKNESS ===
     public string WeaknessCombo = "WASD";
+
+    // === PLAYER POSITION OVERRIDE ===
+    // FIX: Since GetPlayerPosition() returns wrong values, we'll use the actual position from Level1.json
+    // Player is at x=-970 in the scene file
+    private float PLAYER_X_POSITION = -970f;
 
     // === INTERNAL STATE ===
     private bool initialized = false;
     private int lastBeat = -1;
     private bool isDead = false;
     private EnemyState currentState = EnemyState.Idle;
+    private float currentHealth;
 
     private float attackCooldownTimer = 0f;
-    private float deathTimer = 0f;
-    private bool waitingToDie = false;
+    private float hurtAnimationTimer = 0f;
+    private float deathAnimationTimer = 0f;
+    private const float hurtAnimationDuration = 0.5f;
+    private const float deathAnimationDuration = 2.0f;
 
     // Track movement during enemy turn
     private int movementStepsTaken = 0;
     private int maxMovementSteps = 4;
 
-    // CRITICAL FIX: Track if we've tried to set weakness
     private bool weaknessSet = false;
     private int weaknessRetryCount = 0;
-    private const int maxWeaknessRetries = 100; // Try for ~100 frames
+    private const int maxWeaknessRetries = 100;
 
     public override void Update()
     {
@@ -83,39 +86,51 @@ public class EnemyRhythmController : Script
             return;
         }
 
-        // CRITICAL FIX: Keep trying to set weakness until ComboSystem is ready
+        // Keep trying to set weakness until ComboSystem is ready
         if (!weaknessSet && weaknessRetryCount < maxWeaknessRetries)
         {
             TrySetWeakness();
             weaknessRetryCount++;
         }
 
-        if (isDead)
+        // Handle timers
+        float dt = Time.DeltaTime;
+
+        // Hurt animation timer
+        if (hurtAnimationTimer > 0f)
         {
-            if (waitingToDie)
+            hurtAnimationTimer -= dt;
+            if (hurtAnimationTimer <= 0f)
             {
-                deathTimer += Time.DeltaTime;
-                if (deathTimer >= 2.5f)
-                {
-                    TransformComponent tf = GetTransform();
-                    tf.IsVisible = false;
-                }
+                // Return to idle after hurt animation
+                SetState(EnemyState.Idle);
             }
-            return;
         }
 
+        // Death animation timer
+        if (isDead)
+        {
+            deathAnimationTimer -= dt;
+            if (deathAnimationTimer <= 0f)
+            {
+                // Hide entity after death animation completes
+                TransformComponent tf = GetTransform();
+                tf.IsVisible = false;
+                Console.WriteLine("[Enemy] Fading out...");
+            }
+            return; // Don't process anything else if dead
+        }
+
+        // Attack cooldown timer
         if (attackCooldownTimer > 0f)
         {
-            attackCooldownTimer -= Time.DeltaTime;
+            attackCooldownTimer -= dt;
             if (attackCooldownTimer <= 0f)
             {
                 if (currentState == EnemyState.Attacking)
                     SetState(EnemyState.Idle);
             }
         }
-
-        // REMOVED: Distance check and attack logic from Update()
-        // Attack only happens during Resolution phase now
 
         // Movement logic - only during appropriate phases
         if (Conductor.Instance != null)
@@ -137,6 +152,9 @@ public class EnemyRhythmController : Script
 
         Console.WriteLine("[Enemy] Initializing...");
 
+        // Initialize health
+        currentHealth = MaxHealth;
+
         TransformComponent tf = GetTransform();
         SetScaleForSprite(IdleSpriteSheet, 220, 432);
         SetState(EnemyState.Idle);
@@ -150,10 +168,14 @@ public class EnemyRhythmController : Script
         // Try to set weakness immediately
         TrySetWeakness();
 
-        Console.WriteLine($"[Enemy] Initialized at ({tf.X}, {tf.Y}) | Health: {Health}");
+        Console.WriteLine($"[Enemy] Initialized at ({tf.X}, {tf.Y}) | Health: {currentHealth}/{MaxHealth}");
+        Console.WriteLine($"[Enemy] Player position (hardcoded): {PLAYER_X_POSITION}");
+
+        // Calculate initial distance
+        float distanceToPlayer = Math.Abs(tf.X - PLAYER_X_POSITION);
+        Console.WriteLine($"[Enemy] Initial distance to player: {distanceToPlayer:F1}");
     }
 
-    // CRITICAL FIX: Separate method that keeps trying until ComboSystem exists
     private void TrySetWeakness()
     {
         if (weaknessSet)
@@ -167,7 +189,7 @@ public class EnemyRhythmController : Script
         }
         else if (weaknessRetryCount == 0)
         {
-            Console.WriteLine("[Enemy] ?? ComboSystem.Instance is null - will retry...");
+            Console.WriteLine("[Enemy] ? ComboSystem.Instance is null - will retry...");
         }
         else if (weaknessRetryCount == maxWeaknessRetries - 1)
         {
@@ -217,6 +239,11 @@ public class EnemyRhythmController : Script
                 anim.SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, AnimationSpeed);
                 break;
 
+            case EnemyState.Hurt:
+                SetScaleForSprite(HurtSpriteSheet, 515, 428);
+                anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, AnimationSpeed);
+                break;
+
             case EnemyState.Dead:
                 SetScaleForSprite(HurtSpriteSheet, 515, 428);
                 anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, AnimationSpeed / 2f);
@@ -224,35 +251,25 @@ public class EnemyRhythmController : Script
         }
     }
 
-    // ========================================================================
-    // Beat Handling - Core turn-based logic
-    // ========================================================================
     private void HandleBeat(int beat)
     {
+        if (isDead) return;
+
         if (TurnManager.Instance == null)
             return;
 
         TurnPhase currentPhase = TurnManager.Instance.GetCurrentPhase();
 
-        // ============================================================
-        // PHASE 1: COUNTDOWN (First 4 beats)
-        // Enemy stays IDLE, doesn't move
-        // ============================================================
+        // PHASE 1: COUNTDOWN
         if (currentPhase == TurnPhase.Countdown)
         {
             SetState(EnemyState.Idle);
-            Console.WriteLine($"[Enemy] Countdown - staying idle (Beat {beat})");
             return;
         }
 
-        // ============================================================
-        // PHASE 2: ENEMY DISPLAY (Next 4 beats)
-        // Enemy MOVES one step per beat (4 steps total)
-        // Player input is LOCKED
-        // ============================================================
+        // PHASE 2: ENEMY DISPLAY - Move one step per beat
         if (currentPhase == TurnPhase.EnemyDisplay)
         {
-            // Only move if we haven't moved all 4 steps yet
             if (movementStepsTaken < maxMovementSteps)
             {
                 Step();
@@ -262,22 +279,14 @@ public class EnemyRhythmController : Script
             return;
         }
 
-        // ============================================================
-        // PHASE 3: PLAYER INPUT (Next 4 beats)
-        // Enemy FREEZES (doesn't move)
-        // Player can now input combo
-        // ============================================================
+        // PHASE 3: PLAYER INPUT - Freeze in idle
         if (currentPhase == TurnPhase.PlayerInput)
         {
-            SetState(EnemyState.Idle);
-            // Don't log every beat, TurnManager already does
+            // Only set to idle if not playing hurt animation
+            if (currentState != EnemyState.Hurt)
+                SetState(EnemyState.Idle);
             return;
         }
-
-        // ============================================================
-        // PHASE 4: RESOLUTION
-        // Handled by TurnManager calling our public methods
-        // ============================================================
     }
 
     private void Step()
@@ -285,26 +294,33 @@ public class EnemyRhythmController : Script
         SetState(EnemyState.Moving);
 
         TransformComponent myTf = GetTransform();
-        myTf.X -= StepDistance;  // Move LEFT towards player
+        myTf.X -= StepDistance;
 
-        float distanceToPlayer = Math.Abs(myTf.X - PlayerX);
-        Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}, Distance to player: {distanceToPlayer:F1}");
+        // Use hardcoded player position
+        float distanceToPlayer = Math.Abs(myTf.X - PLAYER_X_POSITION);
+
+        Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1} | Player at X={PLAYER_X_POSITION:F1} | Distance: {distanceToPlayer:F1}");
     }
 
     private void AttackPlayer()
     {
         if (isDead) return;
 
-        Console.WriteLine($"[Enemy] ??? ATTACKING PLAYER for {AttackDamage} damage!");
+        Console.WriteLine($"[Enemy] ?? ATTACKING PLAYER for {AttackDamage} damage!");
         SetState(EnemyState.Attacking);
 
         attackCooldownTimer = AttackFrames / AnimationSpeed;
 
-        // TODO: Apply damage to player
-        // if (PlayerHealthSystem.Instance != null)
-        // {
-        //     PlayerHealthSystem.Instance.TakeDamage(AttackDamage);
-        // }
+        // Apply damage to player
+        if (PlayerHealth.Instance != null)
+        {
+            PlayerHealth.Instance.TakeDamage((int)AttackDamage);
+            Console.WriteLine("[Enemy] ? Damage applied to player!");
+        }
+        else
+        {
+            Console.WriteLine("[Enemy] ? ERROR: PlayerHealth.Instance is null - cannot damage player!");
+        }
     }
 
     // ========================================================================
@@ -315,10 +331,15 @@ public class EnemyRhythmController : Script
     {
         if (isDead) return;
 
-        Health -= dmg;
-        Console.WriteLine($"[Enemy] Took {dmg} damage! HP: {Health}/{Health + dmg}");
+        currentHealth -= dmg;
+        Console.WriteLine($"[Enemy] ?? Took {dmg} damage! HP: {currentHealth}/{MaxHealth}");
 
-        if (Health <= 0)
+        // Play hurt animation
+        SetState(EnemyState.Hurt);
+        hurtAnimationTimer = hurtAnimationDuration;
+
+        // Check if dead
+        if (currentHealth <= 0)
         {
             Die();
         }
@@ -329,60 +350,94 @@ public class EnemyRhythmController : Script
         if (isDead) return;
 
         isDead = true;
-        waitingToDie = true;
-        deathTimer = 0f;
+        deathAnimationTimer = deathAnimationDuration;
         SetState(EnemyState.Dead);
 
-        Console.WriteLine("[Enemy] ?? DEFEATED!");
-        Console.WriteLine("==============================================");
-        Console.WriteLine("?? VICTORY! Enemy defeated!");
-        Console.WriteLine("==============================================");
+        Console.WriteLine("??????????????????????????????????????");
+        Console.WriteLine("?     ?? ENEMY DEFEATED!         ?");
+        Console.WriteLine("??????????????????????????????????????");
+        Console.WriteLine("?        ?? VICTORY! ??          ?");
+        Console.WriteLine("??????????????????????????????????????");
+
+        // Notify EnemySpawner if it exists
+        if (EnemySpawner.Instance != null)
+        {
+            EnemySpawner.Instance.OnEnemyDefeated();
+        }
     }
 
     // Called by TurnManager when player FAILS combo
     public void ExecuteFailurePunishment()
     {
+        if (isDead) return;
+
         Console.WriteLine("[Enemy] ExecuteFailurePunishment() called");
 
-        // Calculate how many steps we DIDN'T move during enemy display
+        // Calculate remaining steps
         int remainingSteps = maxMovementSteps - movementStepsTaken;
-
         Console.WriteLine($"[Enemy] Player failed! Moving {remainingSteps} remaining steps");
 
-        // Move those remaining steps NOW
+        // Move those remaining steps
         for (int i = 0; i < remainingSteps; i++)
         {
             Step();
         }
 
-        // Check if we're in attack range after moving
+        // NOW check if we're in range AFTER all movement is done
         TransformComponent myTf = GetTransform();
-        float distanceToPlayer = Math.Abs(myTf.X - PlayerX);
+        float distanceToPlayer = Math.Abs(myTf.X - PLAYER_X_POSITION);
 
         if (distanceToPlayer <= AttackRange)
         {
-            Console.WriteLine($"[Enemy] In range ({distanceToPlayer:F1} <= {AttackRange}) - attacking!");
+            Console.WriteLine($"[Enemy] ? In range ({distanceToPlayer:F1} <= {AttackRange}) - ATTACKING!");
             AttackPlayer();
         }
         else
         {
-            Console.WriteLine($"[Enemy] Not in range yet ({distanceToPlayer:F1} > {AttackRange}) - waiting...");
+            Console.WriteLine($"[Enemy] ?? Not in range yet ({distanceToPlayer:F1} > {AttackRange})");
+            SetState(EnemyState.Idle);
         }
     }
 
     // Called by TurnManager at start of EACH enemy display phase
     public void ResetMovementForNewTurn()
     {
+        if (isDead)
+        {
+            Console.WriteLine("[Enemy] Already dead, not resetting");
+            return;
+        }
+
         Console.WriteLine("[Enemy] ResetMovementForNewTurn() - resetting step counter");
         movementStepsTaken = 0;
 
-        // CRITICAL FIX: Reset weakness flag for new game sessions
+        // Reset weakness flag for new game sessions
         if (!weaknessSet)
         {
             weaknessRetryCount = 0;
             TrySetWeakness();
         }
 
-        SetState(EnemyState.Idle);
+        // Only set to idle if not playing hurt animation
+        if (currentState != EnemyState.Hurt)
+            SetState(EnemyState.Idle);
+    }
+
+    // ========================================================================
+    // Public Getters
+    // ========================================================================
+    public float GetCurrentHealth()
+    {
+        return currentHealth;
+    }
+
+    public float GetHealthPercent()
+    {
+        return currentHealth / MaxHealth;
+    }
+
+    public bool IsDead()
+    {
+        return isDead;
     }
 }

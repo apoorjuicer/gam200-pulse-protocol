@@ -9,13 +9,14 @@ public class ComboSystem : Script
     public static ComboSystem Instance { get; private set; }
 
     // =========================
-    // Config
+    // Config - LENIENT TIMING WINDOWS
     // =========================
     public int maxComboLength = 4;
 
-    public float perfectWindow = 0.05f;
-    public float goodWindow = 0.10f;
-    public float missWindow = 0.15f;
+    // CHANGED: Much more lenient timing windows
+    public float perfectWindow = 0.5f;   // 0.5 seconds = PERFECT
+    public float goodWindow = 1.0f;      // 1.0 seconds = GOOD
+    // Anything over 1.0s = MISS
 
     // =========================
     // State
@@ -60,6 +61,7 @@ public class ComboSystem : Script
         if (!initialized)
         {
             Console.WriteLine("[ComboSystem] Initializing...");
+            Console.WriteLine($"[ComboSystem] Timing windows: PERFECT ?{perfectWindow}s, GOOD ?{goodWindow}s, MISS >{goodWindow}s");
             ResetCombo();
             initialized = true;
         }
@@ -97,6 +99,7 @@ public class ComboSystem : Script
             return;
         }
 
+        // Use absolute value of time since last beat
         float delta = Math.Abs(timeSinceLastBeat);
 
         string judgement;
@@ -104,15 +107,15 @@ public class ComboSystem : Script
             judgement = "PERFECT";
         else if (delta <= goodWindow)
             judgement = "GOOD";
-        else if (delta <= missWindow)
-            judgement = "LATE";
         else
             judgement = "MISS";
 
         hitResults.Add(judgement);
         currentCombo.Add(key);
 
-        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (?={delta:F3}s)");
+        // Enhanced logging with visual indicator
+        string indicator = judgement == "PERFECT" ? "?" : (judgement == "GOOD" ? "?" : "?");
+        Console.WriteLine($"[ComboSystem] {indicator} [{key}] Timing: {judgement} (?={delta:F3}s)");
 
         // === PERFECT STREAK ===
         if (judgement == "PERFECT")
@@ -120,7 +123,7 @@ public class ComboSystem : Script
             perfectStreak++;
             if (perfectStreak >= 5)
             {
-                Console.WriteLine("[ComboSystem] ? PERFECT STREAK x5!");
+                Console.WriteLine("[ComboSystem] ?? PERFECT STREAK x5!");
                 perfectStreak = 0;
             }
         }
@@ -129,7 +132,8 @@ public class ComboSystem : Script
             perfectStreak = 0;
         }
 
-        if (judgement == "MISS" || judgement == "LATE")
+        // Only MISS causes failure now (GOOD is acceptable)
+        if (judgement == "MISS")
             comboFailedEarly = true;
 
         if (currentCombo.Count >= maxComboLength)
@@ -147,9 +151,6 @@ public class ComboSystem : Script
         currentCombo.Clear();
         hitResults.Clear();
         comboFailedEarly = false;
-
-        // Don't log every reset, too spammy
-        // Console.WriteLine("[ComboSystem] Combo reset");
     }
 
     // =========================
@@ -160,9 +161,10 @@ public class ComboSystem : Script
         string comboString = new string(currentCombo.ToArray());
         bool allGood = !comboFailedEarly;
 
+        // Check if all hits were PERFECT or GOOD (no MISS)
         foreach (string r in hitResults)
         {
-            if (r != "PERFECT" && r != "GOOD")
+            if (r == "MISS")
             {
                 allGood = false;
                 break;
@@ -178,11 +180,13 @@ public class ComboSystem : Script
         }
         else
         {
-            Console.WriteLine("[ComboSystem] ? COMBO FAILED!");
+            if (comboString != currentEnemyWeakness)
+                Console.WriteLine($"[ComboSystem] ? COMBO FAILED! Wrong sequence: {comboString} ? {currentEnemyWeakness}");
+            else
+                Console.WriteLine("[ComboSystem] ? COMBO FAILED! Timing was off (had MISS)");
+
             PlayerDidSuccessfulCombo = false;
         }
-
-        // Note: Don't call ResetCombo() here - let TurnManager control when to reset
     }
 
     // =========================
@@ -201,5 +205,10 @@ public class ComboSystem : Script
     public string GetExpectedCombo()
     {
         return currentEnemyWeakness;
+    }
+
+    public List<string> GetHitResults()
+    {
+        return new List<string>(hitResults); // Return copy
     }
 }
