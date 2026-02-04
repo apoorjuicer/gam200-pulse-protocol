@@ -2,8 +2,8 @@ using System;
 using ScriptAPI;
 
 /// <summary>
-/// Input bridge that detects keypresses and forwards to ComboSystem.
-/// Also updates the InputDisplayUI for visual feedback.
+/// MINIMAL VERSION: Input bridge without audio calls
+/// Use this if the audio version causes compilation errors
 /// </summary>
 public class InputBridge : Script
 {
@@ -66,7 +66,7 @@ public class InputBridge : Script
     // =========================
     private void Initialize()
     {
-        Console.WriteLine("[InputBridge] Initialized with UI feedback");
+        Console.WriteLine("[InputBridge] Initialized (Minimal Version - No Audio)");
         initialized = true;
     }
 
@@ -88,44 +88,25 @@ public class InputBridge : Script
 
     private void OnKeyPressed(char key)
     {
-        Console.WriteLine($"[InputBridge] ?? Key {key} pressed!");
+        Console.WriteLine($"[InputBridge] Key {key} pressed!");
 
         // Forward to ComboSystem
         if (ComboSystem.Instance != null)
         {
-            // Register the input
             ComboSystem.Instance.RegisterInput(key);
-
-            // Get timing feedback from the last registered input
-            var hitResults = ComboSystem.Instance.GetHitResults();
-            string timing = hitResults.Count > 0 ? hitResults[hitResults.Count - 1] : "UNKNOWN";
-
-            // Update UI display
-            if (InputDisplayUI.Instance != null)
-            {
-                InputDisplayUI.Instance.ShowKeyPress(key, timing);
-            }
 
             // Check if combo is complete
             if (ComboSystem.Instance.HasCompletedCombo())
             {
                 Console.WriteLine("[InputBridge] Combo sequence complete!");
 
-                bool success = ComboSystem.Instance.PlayerDidSuccessfulCombo;
-
-                if (success)
+                if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
                 {
-                    Console.WriteLine("[InputBridge] ? SUCCESS!");
+                    Console.WriteLine("[InputBridge] SUCCESS!");
                 }
                 else
                 {
-                    Console.WriteLine("[InputBridge] ? FAILED!");
-                }
-
-                // Show result in UI
-                if (InputDisplayUI.Instance != null)
-                {
-                    InputDisplayUI.Instance.ShowComboResult(success);
+                    Console.WriteLine("[InputBridge] FAILED!");
                 }
             }
         }
