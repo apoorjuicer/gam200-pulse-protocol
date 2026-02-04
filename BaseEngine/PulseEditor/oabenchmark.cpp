@@ -151,31 +151,31 @@ namespace Benchmark {
     //}
 
 
-     long long particle_benchmark_heap_unique_ptr(int N)
-     {
-         return time_us([&]() {
-             std::vector<std::unique_ptr<Particle>> v;
-             v.reserve(N);
+     //long long particle_benchmark_heap_unique_ptr(int N)
+     //{
+     //    return time_us([&]() {
+     //        std::vector<std::unique_ptr<Particle>> v;
+     //        v.reserve(N);
 
-             for (int i = 0; i < N; ++i)
-                 v.push_back(std::make_unique<Particle>());
+     //        for (int i = 0; i < N; ++i)
+     //            v.push_back(std::make_unique<Particle>());
 
-             v.clear(); // destroy
-             });
-     }
+     //        v.clear(); // destroy
+     //        });
+     //}
 
-     long long particle_benchmark_oa_unique_ptr(int N, ObjectAllocator& oa)
-     {
-         return time_us([&]() {
-             std::vector<std::unique_ptr<Particle, OADeleter>> v;
-             v.reserve(N);
+     //long long particle_benchmark_oa_unique_ptr(int N, ObjectAllocator& oa)
+     //{
+     //    return time_us([&]() {
+     //        std::vector<std::unique_ptr<Particle, OADeleter>> v;
+     //        v.reserve(N);
 
-             for (int i = 0; i < N; ++i)
-                 v.push_back(oa_make_unique<Particle>(oa));
+     //        for (int i = 0; i < N; ++i)
+     //            v.push_back(oa_make_unique<Particle>(oa));
 
-             v.clear(); // calls OADeleter -> Free
-             });
-     }
+     //        v.clear(); // calls OADeleter -> Free
+     //        });
+     //}
 
 
 }// end of namespace

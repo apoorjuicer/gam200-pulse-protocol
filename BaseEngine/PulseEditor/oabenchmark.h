@@ -34,10 +34,11 @@ namespace Benchmark {
         long  Year;
         float GPA;
         long  ID;
-         void* operator new(std::size_t size);
-         void operator delete(void* ptr) noexcept;
-        void* operator new(std::size_t, void* place) noexcept;
-        void operator delete(void*, void*) noexcept;
+        //Only for showing whether heap allocation actually okays
+        // void* operator new(std::size_t size);
+        // void operator delete(void* ptr) noexcept;
+        //void* operator new(std::size_t, void* place) noexcept;
+        //void operator delete(void*, void*) noexcept;
     };
     struct OABenchmarkResult
     {
