@@ -84,8 +84,12 @@ public class ComboSystem : Script
     public void SetEnemyWeakness(string weaknessCombo)
     {
         currentEnemyWeakness = weaknessCombo;
+
+        // Update max combo length to match the weakness
+        maxComboLength = weaknessCombo.Length;
+
         ResetCombo();
-        Console.WriteLine($"[ComboSystem] Weakness set to: {weaknessCombo}");
+        Console.WriteLine($"[ComboSystem] Weakness set to: {weaknessCombo} (length: {maxComboLength})");
     }
 
     public void RegisterInput(char key)
@@ -113,6 +117,12 @@ public class ComboSystem : Script
         currentCombo.Add(key);
 
         Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (?={delta:F3}s)");
+
+        // === VISUAL FEEDBACK ===
+        if (ComboDisplayController.Instance != null)
+        {
+            ComboDisplayController.Instance.ShowJudgement(judgement);
+        }
 
         // === PERFECT STREAK ===
         if (judgement == "PERFECT")
