@@ -7,6 +7,10 @@ public class OrderSlipNextIcon : Script
 
     private float slotX, slotY;
     private bool wasTransitioning = false;
+
+    private float startX, startY, startRotX;
+    private bool capturedStart = false;
+
     private string lastSprite = "";
 
     public override void Update()
@@ -30,103 +34,86 @@ public class OrderSlipNextIcon : Script
         if (ui == null) return;
 
         TransformComponent tf = GetTransform();
-        SpriteComponent sprite = GetSprite();
 
         if (!ui.Transitioning)
         {
             if (wasTransitioning)
             {
-                // Just finished transitioning - become the new current icon
-                tf.X = ui.CurrentSlotX;
-                tf.Y = ui.CurrentSlotY;
+                // Transition just ended - snap to current slot with vibrant appearance
+                if (ui.SlotsReady())
+                {
+                    tf.X = ui.CurrentSlotX;
+                    tf.Y = ui.CurrentSlotY;
+                }
+
+                tf.RotX = 0.0f;
                 tf.ScaleX = ui.currentScale;
                 tf.ScaleY = ui.currentScale;
 
-                if (sprite.HasSprite())
-                {
-                    sprite.TintA = 1.0f;
-                }
-
-                // Only update sprite if UI has been initialized
-                if (ui.CurrentType != EnemyIconType.None)
-                {
-                    SetSprite(ui.GetVibrantSprite(ui.CurrentType));
-                }
+                SetSprite(ui.GetVibrantSprite(ui.CurrentType));
 
                 wasTransitioning = false;
+                capturedStart = false;
             }
             else
             {
-                // Normal state: sit at next slot as dim
+                // Normal state - positioned at next slot, dim sprite
                 tf.X = slotX;
                 tf.Y = slotY;
+                tf.RotX = 0.0f;
                 tf.ScaleX = ui.nextScale;
                 tf.ScaleY = ui.nextScale;
 
-                if (sprite.HasSprite())
-                {
-                    sprite.TintA = 1.0f;
-                }
-
-                // Only update sprite if UI has been initialized
-                if (ui.NextType != EnemyIconType.None)
-                {
-                    SetSprite(ui.GetDimSprite(ui.NextType));
-                }
+                SetSprite(ui.GetDimSprite(ui.NextType));
             }
             return;
         }
 
-        // During transition: move to current slot and fade in
+        // During transition: move from next slot to current slot with arc and rotation
         wasTransitioning = true;
 
-        // Move to current slot position
-        tf.X = ui.CurrentSlotX;
-        tf.Y = ui.CurrentSlotY;
-        tf.ScaleX = ui.currentScale;
-        tf.ScaleY = ui.currentScale;
-
-        // Fade in: alpha goes from 0.0 to 1.0
-        float alpha = ui.NextFadeIn;
-        if (sprite.HasSprite())
+        if (!capturedStart)
         {
-            sprite.TintA = alpha;
+            startX = tf.X;
+            startY = tf.Y;
+            startRotX = tf.RotX;
+            capturedStart = true;
         }
 
-        // Show vibrant sprite (it's becoming the current) - only if initialized
-        if (ui.CurrentType != EnemyIconType.None)
-        {
+        float eased = ui.EaseSmooth(ui.Move01);
+
+        // Interpolate position
+        float x = ui.Lerp(startX, ui.CurrentSlotX, eased);
+        float y = ui.Lerp(startY, ui.CurrentSlotY, eased);
+
+        // Add parabolic arc
+        float arc = ui.arcHeight * 4f * eased * (1f - eased);
+        y += arc;
+
+        tf.X = x;
+        tf.Y = y;
+
+        // Rotate during transition
+        tf.RotX = ui.Lerp(startRotX, startRotX + ui.rotateDegrees, eased);
+
+        // Scale from next size to current size
+        float sc = ui.Lerp(ui.nextScale, ui.currentScale, eased);
+        tf.ScaleX = sc;
+        tf.ScaleY = sc;
+
+        // Switch to vibrant sprite partway through transition
+        if (eased > 0.6f)
             SetSprite(ui.GetVibrantSprite(ui.CurrentType));
-        }
+        else
+            SetSprite(ui.GetDimSprite(ui.NextType));
     }
 
     private void SetSprite(string spriteName)
     {
-        // Safety checks
         if (spriteName == lastSprite) return;
-        if (spriteName == "Icon_None")
-        {
-            Console.WriteLine("[OrderSlipNext] WARNING: Attempted to load Icon_None - UI not initialized?");
-            return;
-        }
-
-        SpriteComponent sprite = GetSprite();
-        if (!sprite.HasSprite())
-        {
-            Console.WriteLine("[OrderSlipNext] WARNING: Entity has no sprite component");
-            return;
-        }
-
-        try
-        {
-            lastSprite = spriteName;
-            sprite.Texture = spriteName;
-            Console.WriteLine($"[OrderSlipNext] Sprite -> {spriteName}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[OrderSlipNext] ERROR: Failed to load sprite '{spriteName}': {ex.Message}");
-            Console.WriteLine($"  Make sure this file exists in your Assets/Textures/UI/ folder");
-        }
+        lastSprite = spriteName;
+        Console.WriteLine($"[OrderSlipNext] Sprite -> {spriteName}");
+        // TODO: Add actual sprite changing code here based on your engine's API
+        // Example: GetSprite().SetTexture(spriteName); or similar
     }
 }

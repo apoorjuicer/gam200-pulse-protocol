@@ -30,7 +30,6 @@ public class TurnManager : Script
     private int phaseStartBeat = 0;
     private int lastBeat = -1;
     private bool initialized = false;
-    private bool gameOver = false;  // Track if game is over
 
     public bool IsPlayerTurn => currentPhase == TurnPhase.PlayerInput;
     public bool IsInputLocked => currentPhase != TurnPhase.PlayerInput;
@@ -45,10 +44,6 @@ public class TurnManager : Script
             Initialize();
             return;
         }
-
-        // Stop processing if game is over
-        if (gameOver)
-            return;
 
         if (Conductor.Instance == null)
             return;
@@ -95,15 +90,8 @@ public class TurnManager : Script
                 break;
 
             case TurnPhase.Resolution:
-                // Move to next enemy turn after resolution (if enemy still alive)
-                if (EnemyRhythmController.Instance != null && EnemyRhythmController.Instance.IsDead())
-                {
-                    EndGame(true); // Player wins!
-                }
-                else
-                {
-                    StartEnemyDisplay();
-                }
+                // Move to next enemy turn after resolution
+                StartEnemyDisplay();
                 break;
         }
     }
@@ -136,20 +124,16 @@ public class TurnManager : Script
     // =========================
     private void StartEnemyDisplay()
     {
-        // Check if enemy is already dead
-        if (EnemyRhythmController.Instance != null && EnemyRhythmController.Instance.IsDead())
-        {
-            Console.WriteLine("[TurnManager] Enemy is dead, not starting new turn");
-            EndGame(true);
-            return;
-        }
-
         currentPhase = TurnPhase.EnemyDisplay;
         phaseStartBeat = Conductor.Instance.GetCurrentBeat();
 
         Console.WriteLine("[TurnManager] === ENEMY TURN ===");
         Console.WriteLine($"[TurnManager] Displaying combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input LOCKED");
+
+        // DON'T PAUSE THE GAME!
+        // Just set IsInputLocked = true (which is automatic based on currentPhase)
+        // The InputBridge checks this flag before processing keys
 
         // Reset combo system for new attempt
         if (ComboSystem.Instance != null)
@@ -172,6 +156,8 @@ public class TurnManager : Script
         Console.WriteLine("[TurnManager] === PLAYER TURN ===");
         Console.WriteLine($"[TurnManager] Input the combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input UNLOCKED");
+
+        // Enemy freezes during player input (handled in EnemyRhythmController.HandleBeat)
     }
 
     private void ResolvePlayerInput()
@@ -195,13 +181,6 @@ public class TurnManager : Script
             if (EnemyRhythmController.Instance != null)
             {
                 EnemyRhythmController.Instance.TakeDamage(10f);
-
-                // Check if enemy died from this damage
-                if (EnemyRhythmController.Instance.IsDead())
-                {
-                    Console.WriteLine("[TurnManager] Enemy has been defeated!");
-                    // EndGame will be called in next Update() cycle
-                }
             }
         }
         else
@@ -221,33 +200,6 @@ public class TurnManager : Script
         {
             ComboSystem.Instance.ResetCombo();
         }
-    }
-
-    // End game state
-    private void EndGame(bool playerWon)
-    {
-        gameOver = true;
-
-        Console.WriteLine("\n\n");
-        Console.WriteLine("??????????????????????????????????????????");
-        Console.WriteLine("?                                        ?");
-
-        if (playerWon)
-        {
-            Console.WriteLine("?        ?? VICTORY! ??                  ?");
-            Console.WriteLine("?                                        ?");
-            Console.WriteLine("?     You defeated the enemy!            ?");
-        }
-        else
-        {
-            Console.WriteLine("?        ?? DEFEAT ??                    ?");
-            Console.WriteLine("?                                        ?");
-            Console.WriteLine("?     The enemy has defeated you!        ?");
-        }
-
-        Console.WriteLine("?                                        ?");
-        Console.WriteLine("??????????????????????????????????????????");
-        Console.WriteLine("\n\n");
     }
 
     // =========================
@@ -281,10 +233,5 @@ public class TurnManager : Script
             default:
                 return 0;
         }
-    }
-
-    public bool IsGameOver()
-    {
-        return gameOver;
     }
 }
