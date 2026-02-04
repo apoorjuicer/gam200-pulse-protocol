@@ -437,6 +437,18 @@ CoreEngine::~CoreEngine()
 		glfwDestroyWindow(window);
 		glfwTerminate();
 	}
+
+	//clean upo for c#scripting
+	auto shutdownFunc = GetFunctionPtr<void(*)()>(
+		"ScriptAPI",
+		"ScriptAPI.EngineInterface",
+		"Shutdown"
+	);
+
+	if (shutdownFunc)
+	{
+		shutdownFunc();
+	}
 }
 
 void CoreEngine::Init()

@@ -386,6 +386,23 @@ namespace ScriptAPI
         System::Console::WriteLine("[EngineInterface] Script attachment complete! YIPPEEE\n");
     }
 
+    void EngineInterface::Shutdown()
+    {
+        System::Console::WriteLine("Shutting down EngineInterface...");
+
+        // Clean up vector
+        if (QueuedScript != nullptr)
+        {
+            delete QueuedScript;
+            QueuedScript = nullptr;
+        }
+
+        // Clean up scripts
+        ClearAllScripts();
+
+        System::Console::WriteLine("EngineInterface shutdown complete");
+    }
+
     void EngineInterface::HelloWorld()
     {
         System::Console::WriteLine("Hello Managed World!");
