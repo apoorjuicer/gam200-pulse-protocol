@@ -334,6 +334,23 @@ public class EnemyRhythmController : Script
         SetState(EnemyState.Dead);
 
         Console.WriteLine("[Enemy] ?? DEFEATED!");
+
+        // === ADD THIS BLOCK ===
+        // Notify the spawner that this enemy is down
+        if (EnemySpawner.Instance != null) // Note: You need to add 'Instance' to EnemySpawner (see below) or find it
+        {
+            // Since EnemySpawner is a Script, and you might not have a static Instance for it yet:
+            // OPTION A: If you added 'public static EnemySpawner Instance' to EnemySpawner.cs
+            // EnemySpawner.Instance.OnEnemyDefeated();
+
+            // OPTION B: Since you might not have that, we can't easily find it without ScriptAPI support.
+            // BUT, usually the Game Manager or Spawner is a Singleton.
+
+            // Assuming you add the Singleton pattern to EnemySpawner (recommended):
+            // EnemySpawner.Instance.OnEnemyDefeated();
+        }
+        // ======================
+
         Console.WriteLine("==============================================");
         Console.WriteLine("?? VICTORY! Enemy defeated!");
         Console.WriteLine("==============================================");

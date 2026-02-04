@@ -15,160 +15,69 @@ public class ComboDisplayUI : Script
     // =========================
     // Config
     // =========================
-    public bool ShowDuringEnemyTurn = true;
-    public bool ShowDuringPlayerTurn = false;
-    public float FlashDuration = 0.2f;  // How long each key "flashes"
+    public int maxComboLength = 4;
+
+    // Sprite paths (relative to Assets/Textures/)
+    public string WSprite = "W.png";
+    public string ASprite = "A.png";
+    public string SSpr = "S.png";
+    public string DSprite = "D.png";
+
+    public string PerfectSprite = "perfect.png";
+    public string GreatSprite = "great.png";
+    public string MissSprite = "miss.png";
 
     // =========================
     // State
     // =========================
-    private bool initialized = false;
-    private string currentComboToDisplay = "";
-    private int currentKeyIndex = 0;
-    private float flashTimer = 0f;
-    private bool isFlashing = false;
-    private int lastBeat = -1;
+    private string currentCombo = "";
+    private int currentProgress = 0;
 
-    // =========================
-    // Update Loop
-    // =========================
-    public override void Update()
+    private void Awake()
     {
-        if (!initialized)
-        {
-            Initialize();
-            return;
-        }
-
-        float dt = Time.DeltaTime;
-
-        // Handle flashing animation
-        if (isFlashing)
-        {
-            flashTimer -= dt;
-            if (flashTimer <= 0)
-            {
-                isFlashing = false;
-            }
-        }
-
-        // Check for beat changes during Enemy Display
-        if (Conductor.Instance != null && TurnManager.Instance != null)
-        {
-            int currentBeat = Conductor.Instance.GetCurrentBeat();
-
-            if (currentBeat != lastBeat)
-            {
-                lastBeat = currentBeat;
-                HandleBeatChange();
-            }
-        }
+        Instance = this;
+        Console.WriteLine("[ComboDisplayUI] ? Initialized");
     }
 
-    // =========================
-    // Initialization
-    // =========================
-    private void Initialize()
+    public void DisplayCombo(string comboString)
     {
-        if (Instance == null)
-            Instance = this;
+        currentCombo = comboString;
+        currentProgress = 0;
 
-        Console.WriteLine("[ComboDisplayUI] Initialized");
-        initialized = true;
+        Console.WriteLine($"[ComboDisplayUI] ?? Displaying combo: {comboString}");
+
+        // TODO: Implement actual UI rendering (slots, sprite assignment, visibility)
     }
 
-    // =========================
-    // Display Logic
-    // =========================
-    private void HandleBeatChange()
+    public void UpdateProgress(int progress)
     {
-        if (TurnManager.Instance.GetCurrentPhase() != TurnPhase.EnemyDisplay)
+        currentProgress = progress;
+        Console.WriteLine($"[ComboDisplayUI] Progress: {progress}/{currentCombo.Length}");
+
+        // TODO: Implement UI feedback for progress
+    }
+
+    public void ShowJudgement(string judgement)
+    {
+        string spritePath = GetSpriteForJudgement(judgement);
+
+        Console.WriteLine($"[ComboDisplayUI] ? {judgement} -> {spritePath}");
+
+        // TODO: Assign judgement sprite + show
+    }
+
+    private string GetSpriteForJudgement(string judgement)
+    {
+        if (string.IsNullOrEmpty(judgement)) return MissSprite;
+
+        switch (judgement.ToUpper())
         {
-            // Hide UI when not in enemy display phase
-            HideComboDisplay();
-            return;
+            case "PERFECT": return PerfectSprite;
+            case "GOOD":
+            case "GREAT": return GreatSprite;
+            case "MISS":
+            case "LATE": return MissSprite;
+            default: return MissSprite;
         }
-
-        // During enemy display phase, show one key per beat
-        int beatInPhase = TurnManager.Instance.GetBeatsInCurrentPhase();
-
-        if (EnemyRhythmController.Instance != null)
-        {
-            currentComboToDisplay = EnemyRhythmController.Instance.WeaknessCombo;
-
-            if (beatInPhase < currentComboToDisplay.Length)
-            {
-                // Flash the current key
-                char keyToShow = currentComboToDisplay[beatInPhase];
-                FlashKey(keyToShow);
-            }
-        }
-    }
-
-    private void FlashKey(char key)
-    {
-        isFlashing = true;
-        flashTimer = FlashDuration;
-        currentKeyIndex++;
-
-        Console.WriteLine($"[ComboUI] ?? FLASH: {key} ({currentKeyIndex}/{currentComboToDisplay.Length})");
-
-        // TODO: Update actual UI elements here
-        // For example:
-        // if (key == 'W') highlightWButton.SetActive(true);
-        // if (key == 'A') highlightAButton.SetActive(true);
-        // etc.
-    }
-
-    private void HideComboDisplay()
-    {
-        if (currentKeyIndex > 0)
-        {
-            Console.WriteLine("[ComboUI] Hiding combo display");
-            currentKeyIndex = 0;
-            currentComboToDisplay = "";
-            isFlashing = false;
-        }
-    }
-
-    // =========================
-    // Player Feedback
-    // =========================
-    public void ShowInputFeedback(char key, string timing)
-    {
-        Console.WriteLine($"[ComboUI] Player pressed {key} - {timing}");
-
-        // TODO: Show visual feedback for player input
-        // For example, briefly highlight the pressed key with color based on timing:
-        // - PERFECT = Gold
-        // - GOOD = Green  
-        // - LATE/MISS = Red
-    }
-
-    public void ShowComboResult(bool success)
-    {
-        if (success)
-        {
-            Console.WriteLine("[ComboUI] ? COMBO SUCCESS!");
-            // TODO: Show success animation
-        }
-        else
-        {
-            Console.WriteLine("[ComboUI] ? COMBO FAILED!");
-            // TODO: Show failure animation
-        }
-    }
-
-    // =========================
-    // Public API
-    // =========================
-    public bool IsCurrentlyFlashing()
-    {
-        return isFlashing;
-    }
-
-    public string GetCurrentCombo()
-    {
-        return currentComboToDisplay;
     }
 }

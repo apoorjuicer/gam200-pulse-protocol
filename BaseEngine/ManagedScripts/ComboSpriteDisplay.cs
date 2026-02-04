@@ -15,35 +15,41 @@ public class ComboSpriteDisplay : Script
     public static ComboSpriteDisplay Instance { get; private set; }
 
     // =========================
-    // Configuration
+    // Sprite Paths (relative to Assets/Textures/)
+    // Change these to swap your art files / folder paths
     // =========================
-    // Display positions (adjust these in editor)
-    public float KeyStartX = -300f;
-    public float KeyY = -200f;
-    public float KeySpacing = 120f;
-    public float KeyScale = 100f;
-
-    public float JudgementX = 0f;
-    public float JudgementY = 250f;
-    public float JudgementScale = 150f;
-
-    // Animation timings
-    public float KeyDisplayTime = 0.5f;
-    public float JudgementDisplayTime = 0.6f;
-
-    // Sprite names (relative to Assets/Textures/)
     public string WSprite = "W.png";
     public string ASprite = "A.png";
-    public string SSprite = "S.png";
+    public string SSpr = "S.png";
     public string DSprite = "D.png";
+
     public string PerfectSprite = "perfect.png";
     public string GreatSprite = "great.png";
     public string MissSprite = "miss.png";
 
     // =========================
-    // State
+    // Layout Settings
     // =========================
-    private bool initialized = false;
+    public float StartX = 500f;
+    public float StartY = 300f;
+    public float Spacing = 80f;
+    public float KeyScale = 1.0f;
+
+    public float JudgementX = 500f;
+    public float JudgementY = 450f;
+    public float JudgementScale = 1.2f;
+
+    // =========================
+    // Timing Settings
+    // =========================
+    public float KeyDisplayTime = 2.0f;
+    public float JudgementDisplayTime = 1.0f;
+
+    // =========================
+    // Runtime Data
+    // =========================
+    private List<DisplaySprite> activeSprites = new List<DisplaySprite>();
+    private string lastComboShown = "";
     private int lastComboProgress = 0;
 
     // Track spawned display entities (for cleanup)
@@ -55,121 +61,51 @@ public class ComboSpriteDisplay : Script
         public float Timer;
     }
 
-    private List<DisplaySprite> activeSprites = new List<DisplaySprite>();
-
-    // =========================
-    // Update Loop
-    // =========================
-    public override void Update()
+    private void Awake()
     {
-        if (!initialized)
-        {
-            Initialize();
-            return;
-        }
+        Instance = this;
+        Console.WriteLine("[ComboSpriteDisplay] ✅ Initialized");
+    }
 
-        float dt = Time.DeltaTime;
-
-        // Update timers and remove expired sprites
-        for (int i = activeSprites.Count - 1; i >= 0; i--)
-        {
-            activeSprites[i].Timer -= dt;
-            if (activeSprites[i].Timer <= 0)
-            {
-                // TODO: Destroy the entity
-                // DestroyEntity(activeSprites[i].EntityID);
-                activeSprites.RemoveAt(i);
-            }
-        }
-
-        // Monitor combo progress
-        if (ComboSystem.Instance != null)
-        {
-            int currentProgress = ComboSystem.Instance.GetComboProgress();
-            
-            // New key pressed?
-            if (currentProgress > lastComboProgress)
-            {
-                string combo = ComboSystem.Instance.GetCurrentComboString();
-                if (combo.Length > 0)
-                {
-                    char lastKey = combo[combo.Length - 1];
-                    ShowKeySprite(lastKey, currentProgress - 1);
-                }
-            }
-            // Combo reset?
-            else if (currentProgress < lastComboProgress)
-            {
-                ClearAllSprites();
-            }
-
-            lastComboProgress = currentProgress;
-        }
+    private void Update()
+    {
+        UpdateTimers();
+        UpdateComboProgressDisplay();
     }
 
     // =========================
-    // Initialization
+    // Main Interface
     // =========================
-    private void Initialize()
+    public void DisplayCombo(string comboString)
     {
-        if (Instance == null)
+        if (string.IsNullOrEmpty(comboString))
         {
-            Instance = this;
-        }
-        else if (Instance != this)
-        {
-            Console.WriteLine("[ComboSpriteDisplay] WARNING: Multiple instances!");
+            Console.WriteLine("[ComboSpriteDisplay] ⚠️ Empty combo string, ignoring");
             return;
         }
 
-        Console.WriteLine("[ComboSpriteDisplay] ========================================");
-        Console.WriteLine("[ComboSpriteDisplay] Sprite Display Initialized");
-        Console.WriteLine("[ComboSpriteDisplay] ========================================");
-        Console.WriteLine($"[ComboSpriteDisplay] Key position: ({KeyStartX}, {KeyY})");
-        Console.WriteLine($"[ComboSpriteDisplay] Key spacing: {KeySpacing}");
-        Console.WriteLine($"[ComboSpriteDisplay] Assets: {WSprite}, {ASprite}, {SSprite}, {DSprite}");
-        Console.WriteLine($"[ComboSpriteDisplay] Judgements: {PerfectSprite}, {GreatSprite}, {MissSprite}");
+        Console.WriteLine($"[ComboSpriteDisplay] 🎮 Showing combo: {comboString}");
 
-        initialized = true;
+        ClearAllSprites();
+
+        lastComboShown = comboString;
+        lastComboProgress = 0;
+
+        for (int i = 0; i < comboString.Length; i++)
+        {
+            char key = comboString[i];
+            string spritePath = GetSpriteForKey(key);
+
+            float x = StartX + (i * Spacing);
+            float y = StartY;
+
+            SpawnKeySprite(spritePath, x, y);
+        }
     }
 
-    // =========================
-    // Display Methods
-    // =========================
-    private void ShowKeySprite(char key, int position)
+    public void UpdateProgress(int progress)
     {
-        string spritePath = GetSpriteForKey(key);
-        float x = KeyStartX + (position * KeySpacing);
-        float y = KeyY;
-
-        Console.WriteLine($"[ComboSpriteDisplay] 🎹 {key} at position {position}: ({x:F0}, {y:F0})");
-
-        // WORKAROUND: Since we can't spawn entities from C#, we'll use the transform
-        // of THIS entity to show the feedback. For multiple keys, you'll need
-        // multiple child entities pre-created in your scene.
-        
-        // For now, log the display request
-        DisplaySprite sprite = new DisplaySprite
-        {
-            EntityID = -1, // Would store entity ID if we could spawn
-            SpritePath = spritePath,
-            X = x,
-            Y = y,
-            Scale = KeyScale,
-            Timer = KeyDisplayTime
-        };
-
-        activeSprites.Add(sprite);
-
-        // TODO: Once your engine supports spawning entities from C#:
-        // int entityID = Scene.CreateEntity();
-        // var transform = Scene.GetComponent<TransformComponent>(entityID);
-        // transform.X = x;
-        // transform.Y = y;
-        // transform.ScaleX = KeyScale;
-        // transform.ScaleY = KeyScale;
-        // var sprite = Scene.GetComponent<SpriteComponent>(entityID);
-        // sprite.Texture = spritePath;
+        lastComboProgress = progress;
     }
 
     public void ShowJudgement(string judgement)
@@ -191,38 +127,50 @@ public class ComboSpriteDisplay : Script
         activeSprites.Add(sprite);
     }
 
-    private void ClearAllSprites()
+    // =========================
+    // Internal Helpers
+    // =========================
+    private void SpawnKeySprite(string spritePath, float x, float y)
     {
-        Console.WriteLine("[ComboSpriteDisplay] 🧹 Clearing all sprites");
-        
-        // TODO: Destroy all sprite entities
-        // foreach (var sprite in activeSprites)
-        // {
-        //     DestroyEntity(sprite.EntityID);
-        // }
+        DisplaySprite sprite = new DisplaySprite
+        {
+            EntityID = -1,
+            SpritePath = spritePath,
+            X = x,
+            Y = y,
+            Scale = KeyScale,
+            Timer = KeyDisplayTime
+        };
 
-        activeSprites.Clear();
+        activeSprites.Add(sprite);
+
+        // TODO: Once your engine supports spawning entities from C#:
+        // int entityID = Scene.CreateEntity();
+        // var transform = Scene.GetComponent<TransformComponent>(entityID);
+        // transform.X = x;
+        // transform.Y = y;
+        // transform.ScaleX = KeyScale;
+        // transform.ScaleY = KeyScale;
+        // var sprite = Scene.GetComponent<SpriteComponent>(entityID);
+        // sprite.Texture = spritePath;
     }
 
-    // =========================
-    // Helper Methods
-    // =========================
     private string GetSpriteForKey(char key)
     {
-        switch (key)
+        switch (char.ToUpper(key))
         {
             case 'W': return WSprite;
             case 'A': return ASprite;
-            case 'S': return SSprite;
+            case 'S': return SSpr;
             case 'D': return DSprite;
-            default:
-                Console.WriteLine($"[ComboSpriteDisplay] ⚠️ Unknown key: {key}");
-                return "";
+            default: return "";
         }
     }
 
     private string GetSpriteForJudgement(string judgement)
     {
+        if (string.IsNullOrEmpty(judgement)) return MissSprite;
+
         switch (judgement.ToUpper())
         {
             case "PERFECT": return PerfectSprite;
@@ -230,31 +178,49 @@ public class ComboSpriteDisplay : Script
             case "GREAT": return GreatSprite;
             case "MISS":
             case "LATE": return MissSprite;
-            default:
-                Console.WriteLine($"[ComboSpriteDisplay] ⚠️ Unknown judgement: {judgement}");
-                return MissSprite;
+            default: return MissSprite;
         }
     }
 
-    // =========================
-    // Public API
-    // =========================
-    public void SetKeyPosition(float startX, float y, float spacing)
+    private void UpdateTimers()
     {
-        KeyStartX = startX;
-        KeyY = y;
-        KeySpacing = spacing;
-        Console.WriteLine($"[ComboSpriteDisplay] Key position updated: ({startX}, {y}), spacing: {spacing}");
+        for (int i = activeSprites.Count - 1; i >= 0; i--)
+        {
+            activeSprites[i].Timer -= Time.DeltaTime;
+
+            if (activeSprites[i].Timer <= 0)
+            {
+                // TODO: If EntityID is valid, destroy the entity
+                // if (activeSprites[i].EntityID != -1) Scene.DestroyEntity(activeSprites[i].EntityID);
+
+                activeSprites.RemoveAt(i);
+            }
+        }
     }
 
-    public void SetJudgementPosition(float x, float y)
+    private void UpdateComboProgressDisplay()
     {
-        JudgementX = x;
-        JudgementY = y;
-        Console.WriteLine($"[ComboSpriteDisplay] Judgement position updated: ({x}, {y})");
+        // If you want: fade out keys you've already hit, etc.
+        // This is currently a hook for future polish.
     }
 
-    // For external rendering systems that can read this data
+    private void ClearAllSprites()
+    {
+        Console.WriteLine("[ComboSpriteDisplay] 🧹 Clearing all sprites");
+
+        // TODO: If entities are spawned, destroy them here
+        // foreach (var sprite in activeSprites)
+        // {
+        //     if (sprite.EntityID != -1) Scene.DestroyEntity(sprite.EntityID);
+        // }
+
+        activeSprites.Clear();
+    }
+
+    // =========================
+    // External Access (Renderer)
+    // =========================
+    // Your C++ renderer layer can read this data
     public List<DisplaySprite> GetActiveSprites()
     {
         return new List<DisplaySprite>(activeSprites);

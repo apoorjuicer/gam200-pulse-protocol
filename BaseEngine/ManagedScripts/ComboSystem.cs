@@ -13,203 +13,191 @@ public class ComboSystem : Script
     // =========================
     public int maxComboLength = 4;
 
-    public float perfectWindow = 0.05f;
-    public float goodWindow = 0.10f;
-    public float missWindow = 0.15f;
+    // Timing windows (tune these)
+    public float perfectWindow = 0.12f;
+    public float greatWindow = 0.25f;
 
     // =========================
-    // State
+    // Runtime State
     // =========================
-    private List<char> currentCombo = new List<char>();
-    private List<string> hitResults = new List<string>();
+    private string targetCombo = "";
+    private int progress = 0;
+    private bool acceptingInput = false;
+    private bool comboCompleted = false;
+    private bool lastComboWasSuccessful = false;
+    private string enemyWeakness = "";
 
-    private int perfectStreak = 0;
-
-    public bool PlayerDidSuccessfulCombo { get; private set; }
-    private bool comboFailedEarly = false;
-
-    // =========================
-    // Beat Timing
-    // =========================
-    private int lastBeatIndex = -1;
-    private float timeSinceLastBeat = 0.0f;
-
-    // =========================
-    // Enemy Weakness (injected)
-    // =========================
-    private string currentEnemyWeakness = "";
-
-    // =========================
-    // Initialization tracking
-    // =========================
-    private bool initialized = false;
-
-    // =========================
-    // Update Loop
-    // =========================
-    public override void Update()
+    private void Awake()
     {
-        // Set singleton instance
-        if (Instance == null)
-        {
-            Instance = this;
-            Console.WriteLine("[ComboSystem] Singleton instance set");
-        }
+        Instance = this;
+        Console.WriteLine("[ComboSystem] ? Initialized");
+    }
 
-        // First-time initialization
-        if (!initialized)
-        {
-            Console.WriteLine("[ComboSystem] Initializing...");
-            ResetCombo();
-            initialized = true;
-        }
+    private void Update()
+    {
+        if (!acceptingInput) return;
 
-        float dt = Time.DeltaTime;
-        timeSinceLastBeat += dt;
-
-        if (Conductor.Instance == null)
-            return;
-
-        int currentBeat = Conductor.Instance.GetCurrentBeat();
-        if (currentBeat != lastBeatIndex)
-        {
-            lastBeatIndex = currentBeat;
-            timeSinceLastBeat = 0.0f;
-        }
+        // TODO: Replace with your input system hooks
+        // Example placeholder: if (Input.GetKeyDown(KeyCode.W)) RegisterInput('W');
     }
 
     // =========================
     // Public API
     // =========================
-    public void SetEnemyWeakness(string weaknessCombo)
+    public void BeginCombo(string combo)
     {
-        currentEnemyWeakness = weaknessCombo;
+        if (string.IsNullOrEmpty(combo))
+        {
+            Console.WriteLine("[ComboSystem] ?? BeginCombo called with empty combo");
+            return;
+        }
 
-        // Update max combo length to match the weakness
-        maxComboLength = weaknessCombo.Length;
+        // Reset state for new combo
+        targetCombo = combo;
+        progress = 0;
+        acceptingInput = true;
+        comboCompleted = false;
+        lastComboWasSuccessful = false;
 
-        ResetCombo();
-        Console.WriteLine($"[ComboSystem] Weakness set to: {weaknessCombo} (length: {maxComboLength})");
+        Console.WriteLine($"[ComboSystem] ?? BeginCombo: {combo}");
+
+        // Show the combo visually
+        if (ComboDisplayController.Instance != null)
+            ComboDisplayController.Instance.DisplayCombo(combo);
+
+        if (ComboSpriteDisplay.Instance != null)
+            ComboSpriteDisplay.Instance.DisplayCombo(combo);
+    }
+
+    public void EndCombo()
+    {
+        acceptingInput = false;
+        Console.WriteLine("[ComboSystem] ?? EndCombo");
     }
 
     public void RegisterInput(char key)
     {
-        // Sanity check: don't allow input if no weakness set
-        if (string.IsNullOrEmpty(currentEnemyWeakness))
+        if (!acceptingInput)
         {
-            Console.WriteLine("[ComboSystem] ERROR: No weakness set! Cannot register input.");
+            Console.WriteLine($"[ComboSystem] ?? Input ignored - not accepting input");
             return;
         }
 
-        float delta = Math.Abs(timeSinceLastBeat);
-
-        string judgement;
-        if (delta <= perfectWindow)
-            judgement = "PERFECT";
-        else if (delta <= goodWindow)
-            judgement = "GOOD";
-        else if (delta <= missWindow)
-            judgement = "LATE";
-        else
-            judgement = "MISS";
-
-        hitResults.Add(judgement);
-        currentCombo.Add(key);
-
-        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (?={delta:F3}s)");
-
-        // === VISUAL FEEDBACK ===
-        if (ComboDisplayController.Instance != null)
+        if (progress >= targetCombo.Length)
         {
-            ComboDisplayController.Instance.ShowJudgement(judgement);
+            Console.WriteLine($"[ComboSystem] ?? Input ignored - combo already complete");
+            return;
         }
 
-        // === PERFECT STREAK ===
-        if (judgement == "PERFECT")
+        char expected = targetCombo[progress];
+
+        if (char.ToUpper(key) == char.ToUpper(expected))
         {
-            perfectStreak++;
-            if (perfectStreak >= 5)
+            progress++;
+
+            Console.WriteLine($"[ComboSystem] ? Correct key {key} | Progress {progress}/{targetCombo.Length}");
+
+            if (ComboDisplayController.Instance != null)
+                ComboDisplayController.Instance.UpdateProgress(progress);
+
+            if (ComboSpriteDisplay.Instance != null)
+                ComboSpriteDisplay.Instance.UpdateProgress(progress);
+
+            if (progress >= targetCombo.Length)
             {
-                Console.WriteLine("[ComboSystem] ? PERFECT STREAK x5!");
-                perfectStreak = 0;
+                acceptingInput = false;
+                comboCompleted = true;
+                lastComboWasSuccessful = true;
+                Console.WriteLine("[ComboSystem] ?? COMBO SUCCESS!");
+                ShowJudgement("PERFECT");
             }
         }
         else
         {
-            perfectStreak = 0;
+            Console.WriteLine($"[ComboSystem] ? Wrong key {key} expected {expected}");
+            acceptingInput = false;
+            comboCompleted = true;
+            lastComboWasSuccessful = false;
+            Console.WriteLine("[ComboSystem] ?? COMBO FAILED!");
+            ShowJudgement("MISS");
         }
-
-        if (judgement == "MISS" || judgement == "LATE")
-            comboFailedEarly = true;
-
-        if (currentCombo.Count >= maxComboLength)
-            EvaluateCombo();
     }
 
+    // =========================
+    // Missing Public Methods (Required by other scripts)
+    // =========================
+
+    /// <summary>
+    /// Returns true if the combo has been completed (either successfully or failed)
+    /// </summary>
     public bool HasCompletedCombo()
     {
-        return currentCombo.Count >= maxComboLength;
+        return comboCompleted;
     }
 
-    public void ResetCombo()
+    /// <summary>
+    /// Returns true if the last combo was completed successfully
+    /// </summary>
+    public bool PlayerDidSuccessfulCombo()
     {
-        PlayerDidSuccessfulCombo = false;
-        currentCombo.Clear();
-        hitResults.Clear();
-        comboFailedEarly = false;
-
-        // Don't log every reset, too spammy
-        // Console.WriteLine("[ComboSystem] Combo reset");
+        return lastComboWasSuccessful;
     }
 
-    // =========================
-    // Evaluation
-    // =========================
-    private void EvaluateCombo()
-    {
-        string comboString = new string(currentCombo.ToArray());
-        bool allGood = !comboFailedEarly;
-
-        foreach (string r in hitResults)
-        {
-            if (r != "PERFECT" && r != "GOOD")
-            {
-                allGood = false;
-                break;
-            }
-        }
-
-        Console.WriteLine($"[ComboSystem] Entered: {comboString} | Expected: {currentEnemyWeakness}");
-
-        if (allGood && comboString == currentEnemyWeakness)
-        {
-            Console.WriteLine("[ComboSystem] ? COMBO SUCCESS!");
-            PlayerDidSuccessfulCombo = true;
-        }
-        else
-        {
-            Console.WriteLine("[ComboSystem] ? COMBO FAILED!");
-            PlayerDidSuccessfulCombo = false;
-        }
-
-        // Note: Don't call ResetCombo() here - let TurnManager control when to reset
-    }
-
-    // =========================
-    // Debug/Utility
-    // =========================
-    public string GetCurrentComboString()
-    {
-        return new string(currentCombo.ToArray());
-    }
-
-    public int GetComboProgress()
-    {
-        return currentCombo.Count;
-    }
-
+    /// <summary>
+    /// Gets the current expected combo string
+    /// </summary>
     public string GetExpectedCombo()
     {
-        return currentEnemyWeakness;
+        return targetCombo;
+    }
+
+    /// <summary>
+    /// Gets the current progress through the combo (0 to length)
+    /// </summary>
+    public int GetComboProgress()
+    {
+        return progress;
+    }
+
+    /// <summary>
+    /// Sets the enemy's weakness combo pattern
+    /// </summary>
+    public void SetEnemyWeakness(string weakness)
+    {
+        enemyWeakness = weakness;
+        Console.WriteLine($"[ComboSystem] ?? Enemy weakness set to: {weakness}");
+    }
+
+    /// <summary>
+    /// Gets the enemy's weakness combo pattern
+    /// </summary>
+    public string GetEnemyWeakness()
+    {
+        return enemyWeakness;
+    }
+
+    /// <summary>
+    /// Resets the combo system state - call this before starting a new combo
+    /// </summary>
+    public void Reset()
+    {
+        targetCombo = "";
+        progress = 0;
+        acceptingInput = false;
+        comboCompleted = false;
+        lastComboWasSuccessful = false;
+        Console.WriteLine("[ComboSystem] ?? Reset");
+    }
+
+    // =========================
+    // Judgement Display
+    // =========================
+    private void ShowJudgement(string judgement)
+    {
+        if (ComboDisplayController.Instance != null)
+            ComboDisplayController.Instance.ShowJudgement(judgement);
+
+        if (ComboSpriteDisplay.Instance != null)
+            ComboSpriteDisplay.Instance.ShowJudgement(judgement);
     }
 }
