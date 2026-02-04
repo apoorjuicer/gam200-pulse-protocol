@@ -445,7 +445,7 @@
                 {
                     "audiosource": {
                         "audio_id": "BGM_GENERAL",
-                        "volume": 0.10000000149011612,
+                        "volume": 1.0,
                         "loop": true,
                         "playOnAwake": false
                     }

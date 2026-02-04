@@ -30,76 +30,55 @@ public class OrderSlipCurrentIcon : Script
         if (ui == null) return;
 
         TransformComponent tf = GetTransform();
-        SpriteComponent sprite = GetSprite();
-
-        // Always stay at current slot position
-        tf.X = slotX;
-        tf.Y = slotY;
-        tf.ScaleX = ui.currentScale;
-        tf.ScaleY = ui.currentScale;
 
         if (!ui.Transitioning)
         {
-            // Normal state: fully visible, vibrant sprite
-            if (sprite.HasSprite())
+            if (wasTransitioning)
             {
-                sprite.TintA = 1.0f;
-            }
+                // Transition just ended - stay at current slot with current appearance
+                tf.X = slotX;
+                tf.Y = slotY;
+                tf.RotX = 0.0f;
+                tf.ScaleX = ui.currentScale;
+                tf.ScaleY = ui.currentScale;
 
-            // Only update sprite if UI has been initialized with real enemy types
-            if (ui.CurrentType != EnemyIconType.None)
+                SetSprite(ui.GetVibrantSprite(ui.CurrentType));
+                wasTransitioning = false;
+            }
+            else
             {
+                // Normal state - positioned at current slot, vibrant sprite
+                tf.X = slotX;
+                tf.Y = slotY;
+                tf.RotX = 0.0f;
+                tf.ScaleX = ui.currentScale;
+                tf.ScaleY = ui.currentScale;
+
                 SetSprite(ui.GetVibrantSprite(ui.CurrentType));
             }
-
-            wasTransitioning = false;
             return;
         }
 
-        // During transition: fade out
+        // During transition: fade out by shrinking
         wasTransitioning = true;
 
-        // Fade out: alpha goes from 1.0 to 0.0
-        float alpha = 1.0f - ui.CurrentFadeOut;
-        if (sprite.HasSprite())
-        {
-            sprite.TintA = alpha;
-        }
+        // Keep position stable during fade
+        tf.X = slotX;
+        tf.Y = slotY;
 
-        // Keep showing the old current type sprite (only if initialized)
-        if (ui.CurrentType != EnemyIconType.None)
-        {
-            SetSprite(ui.GetVibrantSprite(ui.CurrentType));
-        }
+        float s = ui.Lerp(ui.currentScale, ui.currentScale * 0.85f, ui.Fade01);
+        tf.ScaleX = s;
+        tf.ScaleY = s;
+
+        SetSprite(ui.GetVibrantSprite(ui.CurrentType));
     }
 
     private void SetSprite(string spriteName)
     {
-        // Safety checks
         if (spriteName == lastSprite) return;
-        if (spriteName == "Icon_None")
-        {
-            Console.WriteLine("[OrderSlipCurrent] WARNING: Attempted to load Icon_None - UI not initialized?");
-            return;
-        }
-
-        SpriteComponent sprite = GetSprite();
-        if (!sprite.HasSprite())
-        {
-            Console.WriteLine("[OrderSlipCurrent] WARNING: Entity has no sprite component");
-            return;
-        }
-
-        try
-        {
-            lastSprite = spriteName;
-            sprite.Texture = spriteName;
-            Console.WriteLine($"[OrderSlipCurrent] Sprite -> {spriteName}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[OrderSlipCurrent] ERROR: Failed to load sprite '{spriteName}': {ex.Message}");
-            Console.WriteLine($"  Make sure this file exists in your Assets/Textures/ folder");
-        }
+        lastSprite = spriteName;
+        Console.WriteLine($"[OrderSlipCurrent] Sprite -> {spriteName}");
+        // TODO: Add actual sprite changing code here based on your engine's API
+        // Example: GetSprite().SetTexture(spriteName); or similar
     }
 }

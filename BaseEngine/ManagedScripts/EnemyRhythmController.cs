@@ -114,6 +114,9 @@ public class EnemyRhythmController : Script
             }
         }
 
+        // REMOVED: Distance check and attack logic from Update()
+        // Attack only happens during Resolution phase now
+
         // Movement logic - only during appropriate phases
         if (Conductor.Instance != null)
         {
@@ -221,6 +224,9 @@ public class EnemyRhythmController : Script
         }
     }
 
+    // ========================================================================
+    // Beat Handling - Core turn-based logic
+    // ========================================================================
     private void HandleBeat(int beat)
     {
         if (TurnManager.Instance == null)
@@ -228,7 +234,10 @@ public class EnemyRhythmController : Script
 
         TurnPhase currentPhase = TurnManager.Instance.GetCurrentPhase();
 
-        // PHASE 1: COUNTDOWN
+        // ============================================================
+        // PHASE 1: COUNTDOWN (First 4 beats)
+        // Enemy stays IDLE, doesn't move
+        // ============================================================
         if (currentPhase == TurnPhase.Countdown)
         {
             SetState(EnemyState.Idle);
@@ -236,9 +245,14 @@ public class EnemyRhythmController : Script
             return;
         }
 
-        // PHASE 2: ENEMY DISPLAY
+        // ============================================================
+        // PHASE 2: ENEMY DISPLAY (Next 4 beats)
+        // Enemy MOVES one step per beat (4 steps total)
+        // Player input is LOCKED
+        // ============================================================
         if (currentPhase == TurnPhase.EnemyDisplay)
         {
+            // Only move if we haven't moved all 4 steps yet
             if (movementStepsTaken < maxMovementSteps)
             {
                 Step();
@@ -248,12 +262,22 @@ public class EnemyRhythmController : Script
             return;
         }
 
-        // PHASE 3: PLAYER INPUT
+        // ============================================================
+        // PHASE 3: PLAYER INPUT (Next 4 beats)
+        // Enemy FREEZES (doesn't move)
+        // Player can now input combo
+        // ============================================================
         if (currentPhase == TurnPhase.PlayerInput)
         {
             SetState(EnemyState.Idle);
+            // Don't log every beat, TurnManager already does
             return;
         }
+
+        // ============================================================
+        // PHASE 4: RESOLUTION
+        // Handled by TurnManager calling our public methods
+        // ============================================================
     }
 
     private void Step()
@@ -261,7 +285,7 @@ public class EnemyRhythmController : Script
         SetState(EnemyState.Moving);
 
         TransformComponent myTf = GetTransform();
-        myTf.X -= StepDistance;
+        myTf.X -= StepDistance;  // Move LEFT towards player
 
         float distanceToPlayer = Math.Abs(myTf.X - PlayerX);
         Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}, Distance to player: {distanceToPlayer:F1}");
@@ -271,62 +295,16 @@ public class EnemyRhythmController : Script
     {
         if (isDead) return;
 
-        Console.WriteLine($"[Enemy] ?? ATTACKING PLAYER for {AttackDamage} damage!");
+        Console.WriteLine($"[Enemy] ??? ATTACKING PLAYER for {AttackDamage} damage!");
         SetState(EnemyState.Attacking);
 
         attackCooldownTimer = AttackFrames / AnimationSpeed;
 
         // TODO: Apply damage to player
-        // if (PlayerHealth.Instance != null)
+        // if (PlayerHealthSystem.Instance != null)
         // {
-        //     PlayerHealth.Instance.TakeDamage((int)AttackDamage);
+        //     PlayerHealthSystem.Instance.TakeDamage(AttackDamage);
         // }
-    }
-
-    // ========================================================================
-    // PUBLIC API - Called by EnemySpawner
-    // ========================================================================
-
-    public void ConfigureEnemy(EnemySpawner.EnemyData data)
-    {
-        Console.WriteLine($"[Enemy] Configuring as {data.IconType}...");
-
-        // Update all properties from data
-        WeaknessCombo = data.WeaknessCombo;
-        Health = data.Health;
-        AttackDamage = data.AttackDamage;
-        StepDistance = data.StepDistance;
-
-        IdleSpriteSheet = data.IdleSpriteSheet;
-        WalkSpriteSheet = data.WalkSpriteSheet;
-        AttackSpriteSheet = data.AttackSpriteSheet;
-        HurtSpriteSheet = data.HurtSpriteSheet;
-
-        // Reset state
-        isDead = false;
-        waitingToDie = false;
-        deathTimer = 0f;
-        attackCooldownTimer = 0f;
-        movementStepsTaken = 0;
-
-        // Reset weakness flag so we update ComboSystem
-        weaknessSet = false;
-        weaknessRetryCount = 0;
-
-        // Make visible and reset position
-        TransformComponent tf = GetTransform();
-        tf.IsVisible = true;
-        tf.X = 1200f; // Starting X position (right side of screen)
-        tf.Y = PlayerY; // Same Y as player
-
-        // Set initial sprite
-        SetScaleForSprite(IdleSpriteSheet, 220, 432);
-        SetState(EnemyState.Idle);
-
-        // Try to set weakness immediately
-        TrySetWeakness();
-
-        Console.WriteLine($"[Enemy] ? Configured! HP={Health}, Combo={WeaknessCombo}");
     }
 
     // ========================================================================
@@ -359,17 +337,6 @@ public class EnemyRhythmController : Script
         Console.WriteLine("==============================================");
         Console.WriteLine("?? VICTORY! Enemy defeated!");
         Console.WriteLine("==============================================");
-
-        // Notify the spawner that this enemy was defeated
-        if (EnemySpawner.Instance != null)
-        {
-            EnemySpawner.Instance.OnEnemyDefeated();
-            Console.WriteLine("[Enemy] ?? Notified spawner - UI should advance to next enemy");
-        }
-        else
-        {
-            Console.WriteLine("[Enemy] ?? WARNING: EnemySpawner.Instance is null - UI won't update!");
-        }
     }
 
     // Called by TurnManager when player FAILS combo
@@ -377,14 +344,18 @@ public class EnemyRhythmController : Script
     {
         Console.WriteLine("[Enemy] ExecuteFailurePunishment() called");
 
+        // Calculate how many steps we DIDN'T move during enemy display
         int remainingSteps = maxMovementSteps - movementStepsTaken;
+
         Console.WriteLine($"[Enemy] Player failed! Moving {remainingSteps} remaining steps");
 
+        // Move those remaining steps NOW
         for (int i = 0; i < remainingSteps; i++)
         {
             Step();
         }
 
+        // Check if we're in attack range after moving
         TransformComponent myTf = GetTransform();
         float distanceToPlayer = Math.Abs(myTf.X - PlayerX);
 
@@ -405,6 +376,7 @@ public class EnemyRhythmController : Script
         Console.WriteLine("[Enemy] ResetMovementForNewTurn() - resetting step counter");
         movementStepsTaken = 0;
 
+        // CRITICAL FIX: Reset weakness flag for new game sessions
         if (!weaknessSet)
         {
             weaknessRetryCount = 0;

@@ -85,7 +85,7 @@
                     "transform": {
                         "position": {
                             "x": -970.0,
-                            "y": -171.20941162109375
+                            "y": -236.12451171875
                         },
                         "scale": {
                             "x": 300.0,
@@ -127,8 +127,8 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "PlayerHealth",
-                            "PlayerAnimationController"
+                            "PlayerAnimationController",
+                            "PlayerHealth"
                         ]
                     }
                 },
@@ -1434,8 +1434,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1096.4034423828125,
-                            "y": -234.8232879638672
+                            "x": 1181.8182373046875,
+                            "y": -370.1049499511719
                         },
                         "scale": {
                             "x": 150.0,
@@ -1617,13 +1617,13 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "EnemySpawner"
+                            "GameManager"
                         ]
                     }
                 },
                 {
                     "name": {
-                        "name": "EnemySpawner"
+                        "name": "GameManager"
                     }
                 },
                 {
@@ -1683,15 +1683,8 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": [
-                            "ComboDisplayUI"
-                        ]
-                    }
-                },
-                {
                     "name": {
-                        "name": "ComboDisplay"
+                        "name": "EnemySpawner"
                     }
                 },
                 {
@@ -1701,347 +1694,6 @@
                         "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
-                    }
-                },
-                {
-                    "Children": {
-                        "children": [
-                            22,
-                            23,
-                            24,
-                            25,
-                            26
-                        ]
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 565.6890869140625,
-                            "y": -702.4375
-                        },
-                        "scale": {
-                            "x": 100.0,
-                            "y": 100.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/W.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "KeySlot0"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "Parent": {
-                        "parent": 21
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 820.0955200195313,
-                            "y": -697.312744140625
-                        },
-                        "scale": {
-                            "x": 100.0,
-                            "y": 100.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/A.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "KeySlot1"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "Parent": {
-                        "parent": 21
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 1068.9105224609375,
-                            "y": -698.0845947265625
-                        },
-                        "scale": {
-                            "x": 100.0,
-                            "y": 100.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/S.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "KeySlot2"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "Parent": {
-                        "parent": 21
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 1322.064453125,
-                            "y": -693.124267578125
-                        },
-                        "scale": {
-                            "x": 100.0,
-                            "y": 100.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/D.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "KeySlot3"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "Parent": {
-                        "parent": 21
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 718.8777465820313,
-                            "y": 623.0545043945313
-                        },
-                        "scale": {
-                            "x": 200.0,
-                            "y": 200.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/perfect.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "ComboCheck"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "Parent": {
-                        "parent": 21
                     }
                 }
             ]
