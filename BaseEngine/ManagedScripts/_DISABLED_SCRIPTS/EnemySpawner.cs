@@ -27,8 +27,6 @@ public class EnemySpawner : Script
     private float timeSinceLastSpawn = 0f;
     private bool waveComplete = false;
 
-    public static EnemySpawner Instance { get; private set; }
-
     public override void Update()
     {
         if (!initialized)
@@ -38,39 +36,41 @@ public class EnemySpawner : Script
             return;
         }
 
-        // ... [Keep your existing UI initialization code here] ...
+        // Wait a few frames before trying to initialize UI
+        // This gives the icon entities time to fully initialize
         framesSinceStart++;
+
         if (!uiInitialized && framesSinceStart >= WAIT_FRAMES)
         {
-            // ... [Keep UI init code] ...
-            if (OrderSlipUIController.Instance != null) { InitializeOrderSlipUI(); uiInitialized = true; }
+            if (OrderSlipUIController.Instance != null)
+            {
+                Console.WriteLine($"[EnemySpawner] Attempting UI initialization (frame {framesSinceStart})...");
+                InitializeOrderSlipUI();
+                uiInitialized = true;
+            }
+            else
+            {
+                Console.WriteLine($"[EnemySpawner] UI Controller not ready yet (frame {framesSinceStart})");
+            }
         }
 
         if (waveComplete) return;
 
-        // === FIXED LOGIC ===
-        // Only spawn if we haven't finished the batch AND the field is clear
+        // Spawn enemies over time
         if (enemiesSpawned < EnemiesToSpawn)
         {
-            // Check if the current number of spawned enemies equals the number defeated.
-            // This implies 0 enemies are currently alive.
-            if (enemiesSpawned == enemiesDefeated)
-            {
-                // Optional: Keep the delay so they don't appear INSTANTLY after death
-                timeSinceLastSpawn += Time.DeltaTime;
+            timeSinceLastSpawn += Time.DeltaTime;
 
-                if (timeSinceLastSpawn >= SpawnInterval)
-                {
-                    SpawnEnemy();
-                    timeSinceLastSpawn = 0f;
-                }
+            if (timeSinceLastSpawn >= SpawnInterval)
+            {
+                SpawnEnemy();
+                timeSinceLastSpawn = 0f;
             }
         }
-        else if (!waveComplete && enemiesSpawned == enemiesDefeated)
+        else if (!waveComplete)
         {
-            // Wave is only complete when all enemies are spawned AND defeated
             waveComplete = true;
-            Console.WriteLine($"[EnemySpawner] Wave complete! Defeated all {enemiesSpawned} enemies");
+            Console.WriteLine($"[EnemySpawner] Wave complete! Spawned {enemiesSpawned} enemies");
         }
     }
 
