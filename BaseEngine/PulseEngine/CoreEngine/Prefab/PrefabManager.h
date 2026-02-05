@@ -2,7 +2,9 @@
 /**
  * @file        PrefabManager.h
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En (primary) - 98%
+ * @author		Ban Kai Wei Benjamin (secondary) - 2%
+ * 
  * @brief       Declares the PrefabManager class for managing reusable entity templates.
  *              - Added CanSaveAsPrefab() - checks if entity can be saved
  *              - Added GetBlockReason() - returns reason why entity cannot be saved

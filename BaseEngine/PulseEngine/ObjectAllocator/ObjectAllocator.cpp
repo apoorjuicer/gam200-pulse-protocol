@@ -3,7 +3,8 @@
  * @file        ObjectAllocator.cpp
  * @project     Pulse Protocol
  * @author      Ban Kai Wei Benjamin
- * @brief       TBF
+ * @brief       Implements the ObjectAllocator class, providing fixed-size
+ *              memory pool allocation using page and free-list management.
  *
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

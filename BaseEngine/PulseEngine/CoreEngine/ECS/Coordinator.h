@@ -2,8 +2,8 @@
 /**
  * @file        Coordinator.h
  * @project     Pulse Protocol
- * @author      Chia Wei Xuan Rachael (primary) - 97%
- * @author		Ban Kai Wei Benjamin (secondary) - 3%
+ * @author      Chia Wei Xuan Rachael (primary) - 95%
+ * @author		Ban Kai Wei Benjamin (secondary) - 5%
  * 
  * @brief      Central coordinator class implementing the Singleton pattern that
  *             acts as a unified interface for the ECS architecture. Manages
