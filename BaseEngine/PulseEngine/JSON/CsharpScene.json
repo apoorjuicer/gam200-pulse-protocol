@@ -384,18 +384,25 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "EnemySpawner"
+                            "TestFSM"
                         ]
                     }
                 },
                 {
                     "State": {
-                        "CurrentState": 4
+                        "CurrentState": 0
                     }
                 },
                 {
                     "name": {
                         "name": "CheeseStealer"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 100,
+                        "damage": 0,
+                        "isAlive": true
                     }
                 },
                 {
