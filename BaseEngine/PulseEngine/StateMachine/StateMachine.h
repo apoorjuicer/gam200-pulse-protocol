@@ -15,6 +15,7 @@
 #pragma once
 #include <pch/pch_temp.h>
 #include <cstdint>
+#include <stdexcept>
 
 //Serialize
 #pragma warning(push, 0)
@@ -30,6 +31,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 
+// -------------------- FSM State --------------------
 enum class FSMState : uint8_t
 {
     Idle = 0,
@@ -39,46 +41,28 @@ enum class FSMState : uint8_t
     Death
 };
 
-// “Context” is the information the FSM needs to decide transitions.
-// You can expand this later as your gameplay grows.
+// -------------------- FSM Context (NOT a component) --------------------
+// This is per-entity runtime context used by the FSM logic.
+// We DO NOT store this inside the ECS component (FSM) because you want FSM
+// to remain minimal for JSON (CurrentState only).
 struct FSMContext
 {
-    bool wantsMove = false;      // e.g. input indicates movement
-    bool wantsAttack = false;    // e.g. rhythm input success
-    bool tookDamage = false;     // set by collision/damage pipeline
-    bool isDead = false;         // hp <= 0
+    bool wantsMove = false;  // set continuously while input indicates movement
+    bool wantsAttack = false;  // one-frame request
+    bool tookDamage = false;  // one-frame request
+    bool isDead = false;  // derived from Health
 
-    // Timers (owned by FSM)
-    float attackTimer = 0.0f;
-    float damageTimer = 0.0f;
+    float attackTimer = 0.0f;  // owned by FSM
+    float damageTimer = 0.0f;  // owned by FSM
 };
 
-class StateMachine
-{
-public:
-    void SetState(FSMState s);
-    FSMState GetState() const { return m_state; }
-
-    // Call once per frame
-    void Update(FSMContext& ctx, float dt);
-
-private:
-    FSMState m_state = FSMState::Idle;
-
-    // helpers for transitions
-    void EnterState(FSMState next, FSMContext& ctx);
-    void UpdateIdle(FSMContext& ctx, float dt);
-    void UpdateMoving(FSMContext& ctx, float dt);
-    void UpdateAttack(FSMContext& ctx, float dt);
-    void UpdateDamage(FSMContext& ctx, float dt);
-    void UpdateDeath(FSMContext& ctx, float dt);
-};
-
-
-
+// -------------------- ECS Component: FSM --------------------
+// This IS the ECS component that you register in CoreEngine.cpp:
+//   g_coordinator->RegisterComponent<FSM>();
+// JSON stores CurrentState.
 struct DLL_API FSM
 {
-    FSMState CurrentState;
+    FSMState CurrentState = FSMState::Idle;
 
     void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
     {
@@ -92,5 +76,32 @@ struct DLL_API FSM
         {
             CurrentState = static_cast<FSMState>(in["CurrentState"].GetUint());
         }
+        else
+        {
+            // If JSON doesn't contain it, keep default Idle
+            CurrentState = FSMState::Idle;
+        }
     }
 };
+
+// -------------------- FSM Logic --------------------
+// StateMachine is a stateless helper that updates (CurrentState + Context).
+class StateMachine
+{
+public:
+    // Updates the current state based on the context each frame.
+    // - state lives in ECS component: FSM.CurrentState
+    // - ctx lives in GameplayFSMSystem (per entity)
+    static void Update(FSMState& state, FSMContext& ctx, float dt);
+
+private:
+    static void EnterState(FSMState next, FSMState& state, FSMContext& ctx);
+
+    static void UpdateIdle(FSMState& state, FSMContext& ctx, float dt);
+    static void UpdateMoving(FSMState& state, FSMContext& ctx, float dt);
+    static void UpdateAttack(FSMState& state, FSMContext& ctx, float dt);
+    static void UpdateDamage(FSMState& state, FSMContext& ctx, float dt);
+    static void UpdateDeath(FSMState& state, FSMContext& ctx, float dt);
+};
+
+#pragma warning(pop)

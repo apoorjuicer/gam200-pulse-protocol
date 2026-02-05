@@ -771,7 +771,7 @@ void CoreEngine::Setup()
 	g_coordinator->SetSystemSignature<CollisionManager>(collisionSig);
 
 	Signature fsmSig;
-	fsmSig.set(g_coordinator->GetComponentType<FSMComponent>());
+	//fsmSig.set(g_coordinator->GetComponentType<FSMComponent>());
 	fsmSig.set(g_coordinator->GetComponentType<FSM>());
 	fsmSig.set(g_coordinator->GetComponentType<Health>());
 	fsmSig.set(g_coordinator->GetComponentType<Framework::Transform>());

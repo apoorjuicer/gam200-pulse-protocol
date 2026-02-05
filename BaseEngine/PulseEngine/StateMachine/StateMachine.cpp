@@ -14,19 +14,48 @@
 
 #include "StateMachine.h"
 
-static constexpr float ATTACK_DURATION = 0.25f; // tune later
-static constexpr float DAMAGE_STUN = 0.35f; // tune later
+// Tune these later to match your rhythm windows / hit-stun feel
+static constexpr float ATTACK_DURATION = 0.25f;
+static constexpr float DAMAGE_STUN = 0.35f;
 
-void StateMachine::SetState(FSMState s)
+void StateMachine::Update(FSMState& state, FSMContext& ctx, float dt)
 {
-    m_state = s;
+    // Highest priority: Death overrides everything
+    if (ctx.isDead)
+    {
+        if (state != FSMState::Death)
+            EnterState(FSMState::Death, state, ctx);
+
+        UpdateDeath(state, ctx, dt);
+        return;
+    }
+
+    // Damage can override most states (except Death)
+    if (ctx.tookDamage && state != FSMState::Damage)
+    {
+        EnterState(FSMState::Damage, state, ctx);
+        // Continue into damage update this frame
+    }
+
+    switch (state)
+    {
+    case FSMState::Idle:   UpdateIdle(state, ctx, dt);   break;
+    case FSMState::Moving: UpdateMoving(state, ctx, dt); break;
+    case FSMState::Attack: UpdateAttack(state, ctx, dt); break;
+    case FSMState::Damage: UpdateDamage(state, ctx, dt); break;
+    case FSMState::Death:  UpdateDeath(state, ctx, dt);  break;
+    default:
+        // Safety fallback
+        EnterState(FSMState::Idle, state, ctx);
+        break;
+    }
 }
 
-void StateMachine::EnterState(FSMState next, FSMContext& ctx)
+void StateMachine::EnterState(FSMState next, FSMState& state, FSMContext& ctx)
 {
-    m_state = next;
+    state = next;
 
-    // Initialize timers on enter
+    // Reset timers on entering timed states
     if (next == FSMState::Attack)
         ctx.attackTimer = ATTACK_DURATION;
 
@@ -34,99 +63,78 @@ void StateMachine::EnterState(FSMState next, FSMContext& ctx)
         ctx.damageTimer = DAMAGE_STUN;
 }
 
-void StateMachine::Update(FSMContext& ctx, float dt)
+void StateMachine::UpdateIdle(FSMState& state, FSMContext& ctx, float /*dt*/)
 {
-    // Global priority transitions (these override everything)
-    if (ctx.isDead && m_state != FSMState::Death)
+    if (ctx.tookDamage)
     {
-        EnterState(FSMState::Death, ctx);
+        EnterState(FSMState::Damage, state, ctx);
         return;
     }
 
-    if (ctx.tookDamage && m_state != FSMState::Damage && m_state != FSMState::Death)
-    {
-        EnterState(FSMState::Damage, ctx);
-        return;
-    }
-
-    // State-specific updates
-    switch (m_state)
-    {
-    case FSMState::Idle:   UpdateIdle(ctx, dt);   break;
-    case FSMState::Moving: UpdateMoving(ctx, dt); break;
-    case FSMState::Attack: UpdateAttack(ctx, dt); break;
-    case FSMState::Damage: UpdateDamage(ctx, dt); break;
-    case FSMState::Death:  UpdateDeath(ctx, dt);  break;
-    default: break;
-    }
-
-    // Important: one-frame flags should be cleared AFTER update,
-    // so they don’t keep triggering forever.
-    ctx.wantsAttack = false;
-    ctx.tookDamage = false;
-}
-
-void StateMachine::UpdateIdle(FSMContext& ctx, float /*dt*/)
-{
     if (ctx.wantsAttack)
     {
-        EnterState(FSMState::Attack, ctx);
+        EnterState(FSMState::Attack, state, ctx);
         return;
     }
 
     if (ctx.wantsMove)
     {
-        EnterState(FSMState::Moving, ctx);
+        EnterState(FSMState::Moving, state, ctx);
+        return;
+    }
+}
+
+void StateMachine::UpdateMoving(FSMState& state, FSMContext& ctx, float /*dt*/)
+{
+    if (ctx.tookDamage)
+    {
+        EnterState(FSMState::Damage, state, ctx);
         return;
     }
 
-    // Otherwise stay Idle
-}
-
-void StateMachine::UpdateMoving(FSMContext& ctx, float /*dt*/)
-{
     if (ctx.wantsAttack)
     {
-        EnterState(FSMState::Attack, ctx);
+        EnterState(FSMState::Attack, state, ctx);
         return;
     }
 
     if (!ctx.wantsMove)
     {
-        EnterState(FSMState::Idle, ctx);
+        EnterState(FSMState::Idle, state, ctx);
+        return;
+    }
+}
+
+void StateMachine::UpdateAttack(FSMState& state, FSMContext& ctx, float dt)
+{
+    // Optional: allow damage to interrupt attack
+    if (ctx.tookDamage)
+    {
+        EnterState(FSMState::Damage, state, ctx);
         return;
     }
 
-    // Otherwise stay Moving
-}
-
-void StateMachine::UpdateAttack(FSMContext& ctx, float dt)
-{
     ctx.attackTimer -= dt;
     if (ctx.attackTimer <= 0.0f)
     {
-        // After attacking, return based on whether movement is held
-        EnterState(ctx.wantsMove ? FSMState::Moving : FSMState::Idle, ctx);
+        // Return to Moving if still moving, else Idle
+        EnterState(ctx.wantsMove ? FSMState::Moving : FSMState::Idle, state, ctx);
         return;
     }
-
-    // Otherwise stay Attack until timer ends
 }
 
-void StateMachine::UpdateDamage(FSMContext& ctx, float dt)
+void StateMachine::UpdateDamage(FSMState& state, FSMContext& ctx, float dt)
 {
     ctx.damageTimer -= dt;
     if (ctx.damageTimer <= 0.0f)
     {
-        // Recover based on whether movement is held
-        EnterState(ctx.wantsMove ? FSMState::Moving : FSMState::Idle, ctx);
+        // Return to Moving if still moving, else Idle
+        EnterState(ctx.wantsMove ? FSMState::Moving : FSMState::Idle, state, ctx);
         return;
     }
-
-    // Otherwise stay Damage until stun ends
 }
 
-void StateMachine::UpdateDeath(FSMContext& /*ctx*/, float /*dt*/)
+void StateMachine::UpdateDeath(FSMState& /*state*/, FSMContext& /*ctx*/, float /*dt*/)
 {
-    // No outgoing transitions
+    // Remain in Death until gameplay respawn logic changes it.
 }
