@@ -6,16 +6,18 @@ using ScriptAPI;
 /// Each slot manages its own display independently
 /// 
 /// IMPORTANT: Set SlotIndex in editor (0-3)
+/// FIXED: Uses correct texture paths
 /// </summary>
 public class ComboKeySlot : Script
 {
     // Configuration
     public int SlotIndex = 0; // SET THIS IN EDITOR: 0 for KeySlot0, 1 for KeySlot1, etc.
 
-    public string WSprite = "W.png";
-    public string ASprite = "A.png";
-    public string SSprite = "S.png";
-    public string DSprite = "D.png";
+    // FIXED PATHS
+    public string WSprite = "../../PulseEngine/Assets/Textures/UI/W.png";
+    public string ASprite = "../../PulseEngine/Assets/Textures/UI/A.png";
+    public string SSprite = "../../PulseEngine/Assets/Textures/UI/S.png";
+    public string DSprite = "../../PulseEngine/Assets/Textures/UI/D.png";
 
     public float DisplayDuration = 0.5f;
 

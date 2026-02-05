@@ -1432,8 +1432,8 @@
                             "y": -260.7333984375
                         },
                         "scale": {
-                            "x": 150.0,
-                            "y": 250.0
+                            "x": 110.0,
+                            "y": 216.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1543,7 +1543,8 @@
                             "TurnManager",
                             "ComboSystem",
                             "InputBridge",
-                            "InitializationDiagnostic"
+                            "InitializationDiagnostic",
+                            "MasterDiagnostic"
                         ]
                     }
                 },
@@ -1744,7 +1745,9 @@
                 },
                 {
                     "script": {
-                        "ScriptName": []
+                        "ScriptName": [
+                            "ComboDisplayManager"
+                        ]
                     }
                 },
                 {
@@ -1821,7 +1824,9 @@
                 },
                 {
                     "script": {
-                        "ScriptName": []
+                        "ScriptName": [
+                            "ComboKeySlot"
+                        ]
                     }
                 },
                 {
@@ -1891,6 +1896,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "ComboKeySlot"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "KeySlot1"
                     }
@@ -1954,6 +1966,13 @@
                         "columns": 1,
                         "rows": 1,
                         "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "ComboKeySlot"
+                        ]
                     }
                 },
                 {
@@ -2023,6 +2042,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "ComboKeySlot"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "KeySlot3"
                     }
@@ -2086,6 +2112,13 @@
                         "columns": 1,
                         "rows": 1,
                         "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "ComboJudgementDisplay"
+                        ]
                     }
                 },
                 {

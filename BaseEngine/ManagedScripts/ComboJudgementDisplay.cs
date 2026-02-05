@@ -4,13 +4,15 @@ using ScriptAPI;
 /// <summary>
 /// Attach this script to the JudgementDisplay entity
 /// Shows PERFECT/GREAT/MISS feedback
+/// 
+/// FIXED: Uses correct texture paths
 /// </summary>
 public class ComboJudgementDisplay : Script
 {
-    // Configuration
-    public string PerfectSprite = "perfect.png";
-    public string GreatSprite = "great.png";
-    public string MissSprite = "miss.png";
+    // Configuration - FIXED PATHS
+    public string PerfectSprite = "../../PulseEngine/Assets/Textures/UI/perfect.png";
+    public string GreatSprite = "../../PulseEngine/Assets/Textures/UI/great.png";
+    public string MissSprite = "../../PulseEngine/Assets/Textures/UI/miss.png";
 
     public float DisplayDuration = 0.6f;
 

@@ -55,7 +55,7 @@ public class HealthBarController : Script
         if (playerHealth != null)
         {
             int currentHP = playerHealth.GetCurrentHP();
-            
+
             if (currentHP != lastKnownHP)
             {
                 UpdateHealthBar(currentHP, playerHealth.maxHP);
@@ -71,7 +71,7 @@ public class HealthBarController : Script
         // Try to find the player entity by name
         // Note: You might need to adapt this based on how your engine finds entities
         // This assumes you have a way to get PlayerHealth component
-        
+
         // For now, we'll try to get it directly (you may need to adjust this)
         playerHealth = GetPlayerHealthComponent();
 
@@ -98,11 +98,11 @@ public class HealthBarController : Script
         // Determine which sprite to show (9 stages)
         string newSprite = GetSpriteForHealth(healthPercent);
 
-        // Update the render component
-        RenderComponent render = GetRender();
-        if (render != null)
+        // Update the sprite component
+        SpriteComponent sprite = GetSprite();
+        if (sprite.HasSprite())
         {
-            render.spriteName = newSprite;
+            sprite.Texture = newSprite;
             Console.WriteLine($"[HealthBarController] HP: {currentHP}/{maxHP} ({healthPercent:P0}) - Sprite: {newSprite}");
         }
     }
@@ -145,13 +145,13 @@ public class HealthBarController : Script
         // OPTION 2: If you need to search for it
         // This is a placeholder - you'll need to implement entity search
         // based on your engine's capabilities
-        
+
         // For now, return null and you'll need to manually wire this up
         // or implement entity search functionality
         Console.WriteLine("[HealthBarController] You need to implement GetPlayerHealthComponent()");
         Console.WriteLine("  Option A: Add 'public static PlayerHealth Instance' to PlayerHealth.cs");
         Console.WriteLine("  Option B: Implement entity search in your engine");
-        
+
         return null;
     }
 
@@ -163,7 +163,7 @@ public class HealthBarController : Script
     {
         playerHealth = health;
         Console.WriteLine("[HealthBarController] Player health reference manually set");
-        
+
         if (health != null)
         {
             lastKnownHP = health.GetCurrentHP();
