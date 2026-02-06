@@ -131,27 +131,27 @@ namespace PulseEditor
             }
         }
 
-        //// Health
-        //if (!coord->HasComponent<Health>(entity))
-        //{
-        //    if (ImGui::MenuItem("Health"))
-        //    {
-        //        Health h{};  // Uses defaults: hp=10, damage=1, isAlive=true
-        //        coord->AddComponent<Health>(entity, h);
-        //    }
-        //}
+        // Health
+        if (!coord->HasComponent<Health>(entity))
+        {
+            if (ImGui::MenuItem("Health"))
+            {
+                Health h{};  // Uses defaults: hp=10, damage=1, isAlive=true
+                coord->AddComponent<Health>(entity, h);
+            }
+        }
 
-        //// AABB
-        //if (!coord->HasComponent<AABB>(entity))
-        //{
-        //    if (ImGui::MenuItem("AABB"))
-        //    {
-        //        AABB a{};
-        //        a.min = { -0.5f, -0.5f };
-        //        a.max = { 0.5f, 0.5f };
-        //        coord->AddComponent<AABB>(entity, a);
-        //    }
-        //}
+        // AABB
+        if (!coord->HasComponent<AABB>(entity))
+        {
+            if (ImGui::MenuItem("AABB"))
+            {
+                AABB a{};
+                a.min = { -0.5f, -0.5f };
+                a.max = { 0.5f, 0.5f };
+                coord->AddComponent<AABB>(entity, a);
+            }
+        }
 
         // AudioSource
         if (!coord->HasComponent<AudioSource>(entity))
@@ -515,6 +515,16 @@ namespace PulseEditor
         // Text component
         // ---------------------------------------------------------------------
         Inspector_TextComponentUI(g);
+
+        // ---------------------------------------------------------------------
+        // Health component
+        // ---------------------------------------------------------------------
+        Inspector_HealthComponent(g);
+
+        // ---------------------------------------------------------------------
+        // AABB component
+        // ---------------------------------------------------------------------
+        Inspector_AABBComponent(g);
 
         // =====================================================================
         // "add component" button
@@ -1642,6 +1652,91 @@ namespace PulseEditor
                 ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Preview:");
                 ImGui::TextWrapped("%s", txt.text.c_str());
             }
+
+            ImGui::Unindent();
+        }
+
+        ImGui::Separator();
+    }
+
+    void Inspector_HealthComponent(Coordinator* g)
+    {
+        if (!g->HasComponent<Health>(selectedEntity))
+            return;
+
+        auto& health = g->GetComponent<Health>(selectedEntity);
+
+        bool removeHealth = false;
+        bool healthOpen = ImGui::CollapsingHeader("Health", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
+        removeHealth = DrawInlineRemoveButton("Health");
+
+        if (removeHealth)
+        {
+            g->RemoveComponent<Health>(selectedEntity);
+        }
+        else if (healthOpen)
+        {
+            ImGui::Indent();
+
+            ImGui::Text("HP:");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(150.0f);
+            ImGui::DragInt("##HP", &health.hp, 1.0f, 0, 10000);
+
+            ImGui::Text("Damage:");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(150.0f);
+            ImGui::DragInt("##Damage", &health.damage, 1.0f, 0, 1000);
+
+            ImGui::Checkbox("Is Alive", &health.isAlive);
+
+            ImGui::Unindent();
+        }
+
+        ImGui::Separator();
+    }
+
+    void Inspector_AABBComponent(Coordinator* g)
+    {
+        if (!g->HasComponent<AABB>(selectedEntity))
+            return;
+
+        auto& aabb = g->GetComponent<AABB>(selectedEntity);
+
+        bool removeAABB = false;
+        bool aabbOpen = ImGui::CollapsingHeader("AABB", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
+        removeAABB = DrawInlineRemoveButton("AABB");
+
+        if (removeAABB)
+        {
+            g->RemoveComponent<AABB>(selectedEntity);
+        }
+        else if (aabbOpen)
+        {
+            ImGui::Indent();
+
+            ImGui::Text("Min:");
+            ImGui::SameLine();
+            float min[2] = { aabb.min.x, aabb.min.y };
+            ImGui::SetNextItemWidth(200.0f);
+            if (ImGui::DragFloat2("##AABBMin", min, 0.1f))
+            {
+                aabb.min = { min[0], min[1] };
+            }
+
+            ImGui::Text("Max:");
+            ImGui::SameLine();
+            float max[2] = { aabb.max.x, aabb.max.y };
+            ImGui::SetNextItemWidth(200.0f);
+            if (ImGui::DragFloat2("##AABBMax", max, 0.1f))
+            {
+                aabb.max = { max[0], max[1] };
+            }
+
+            // Display calculated width/height for convenience
+            ImGui::Spacing();
+            ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Size: %.2f x %.2f",
+                aabb.max.x - aabb.min.x, aabb.max.y - aabb.min.y);
 
             ImGui::Unindent();
         }
