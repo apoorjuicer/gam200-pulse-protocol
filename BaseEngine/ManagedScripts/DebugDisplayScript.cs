@@ -5,9 +5,23 @@ public class DebugDisplayScript : Script
 {
     private float updateTimer = 0f;
     private const float UPDATE_INTERVAL = 0.1f;  // Update every 0.1 seconds
+    private bool initialized = false;
     
     public override void Update()
     {
+        // On first frame, hide in Release mode
+        if (!initialized)
+        {
+            initialized = true;
+            
+#if !DEBUG
+            // Hide in Release mode
+            TransformComponent t = GetTransform();
+            t.IsVisible = false;
+            Console.WriteLine("[DebugDisplay] Release mode detected - hiding by default");
+#endif
+        }
+
         var text = GetTextComponent();
         
         float dt = Time.DeltaTime;
