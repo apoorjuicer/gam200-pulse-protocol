@@ -5,46 +5,40 @@ public class DebugDisplayScript : Script
 {
     private float updateTimer = 0f;
     private const float UPDATE_INTERVAL = 0.1f;
-    private bool hasSetInitialVisibility = false;
+    private static int s_instanceCount = 0;
+    private int myInstanceNumber;
+    private bool firstFrame = true;
     
-    // Static variables persist across scene changes
-    private static bool s_hasBeenToggled = false;
-    private static bool s_userVisibilitySetting = false;
-    
-    // Track if this is first instance ever (application start)
-    private static bool s_isFirstInstanceEver = true;
+    public DebugDisplayScript()
+    {
+        s_instanceCount++;
+        myInstanceNumber = s_instanceCount;
+    }
     
     public override void Update()
     {
-        // On very first instance (app start), reset toggle state
-        if (s_isFirstInstanceEver)
-        {
-            s_isFirstInstanceEver = false;
-            s_hasBeenToggled = false;
-            s_userVisibilitySetting = false;
-        }
+        var textComp = GetTextComponent();
         
-        // We can't directly access TextComponent.visible from C#
-        // The C++ F8 toggle handles visibility via the C++ TextComponent
-        // We just need to update the text content
-        
-        // Set initial visibility only once per entity using Transform
-        if (!hasSetInitialVisibility)
+        // On first frame, show build mode info
+        if (firstFrame)
         {
-            hasSetInitialVisibility = true;
+            firstFrame = false;
             
-            // Note: We can't control TextComponent.visible from C#
-            // But we can track if user has toggled via other means
-            // For now, just set initial state and let C++ F8 handle it
+            string buildInfo = "";
+#if DEBUG
+            buildInfo = "DEBUG BUILD";
+#else
+            buildInfo = "RELEASE BUILD";
+#endif
+            
+            textComp.SetText($"Instance #{myInstanceNumber} | {buildInfo}");
+            return;
         }
-        
-        // Always update text content
-        var text = GetTextComponent();
         
         float dt = Time.DeltaTime;
         updateTimer += dt;
         
-        if (updateTimer >= UPDATE_INTERVAL)
+        if (updateTimer >= UPDATE_INTERVAL || updateTimer == dt)
         {
             float fps = ProfilingAPI.GetFPS();
             var displayProfiles = ProfilingAPI.GetDisplayProfiles();
@@ -61,8 +55,15 @@ public class DebugDisplayScript : Script
                 }
             }
             
-            string combinedText = $"FPS: {fps:F1} | {topSystem}: {topPercentage:F2}%";
-            text.SetText(combinedText);
+            string buildMode = "";
+#if DEBUG
+            buildMode = " [DEBUG]";
+#else
+            buildMode = " [RELEASE]";
+#endif
+            
+            string combinedText = $"FPS: {fps:F1} | {topSystem}: {topPercentage:F2}%{buildMode}";
+            textComp.SetText(combinedText);
             
             updateTimer = 0f;
         }

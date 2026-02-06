@@ -89,6 +89,15 @@ public class CutsceneManager : Script
         if (cutsceneFinished)
             return;
 
+        InputComponent input = GetInput();
+        if (input.IsKeyTriggered(32)) // SPACE=32
+        {
+            Console.WriteLine("[Cutscene] Skipped!");
+            cutsceneFinished = true;
+            OnCutsceneComplete();
+            return;
+        }
+
         float dt = Time.DeltaTime;
         elapsedTime += dt;
 
