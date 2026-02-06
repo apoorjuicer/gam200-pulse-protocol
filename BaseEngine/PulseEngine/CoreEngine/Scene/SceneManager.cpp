@@ -51,12 +51,44 @@ SceneManager::SceneManager()
 
 void SceneManager::Init()
 {
+	std::cout << "[CoreEngine] Init START" << std::endl;
+
+	// Get exe directory
+	char exePath[MAX_PATH];
+	GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+	std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
+
+	std::filesystem::path scenePath;
+
+	std::cout << "[CoreEngine] GOING IN" << std::endl;
+
+	// RELEASE BUILD
+	if (std::filesystem::exists(currentDir / "PulseEngine" / "JSON"))
+	{
+		scenePath = currentDir / "PulseEngine" / "JSON" / "MainMenu.json";
+		std::cout << "[SceneManager] Using release path (next to exe)" << std::endl;
+	}
+	// Debug BUILD
+	else
+	{
+		auto baseEngineDir = currentDir;
+		while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+		{
+			baseEngineDir = baseEngineDir.parent_path();
+		}
+		scenePath = baseEngineDir / "PulseEngine" / "JSON" / "MainMenu.json";
+		std::cout << "[SceneManager] Using dev path (BaseEngine folder)" << std::endl;
+	}
+
+	std::cout << "[CoreEngine] OUT" << std::endl;
+
 	// Starting scene will be main menu
-	LoadSceneFromJson(StartingScene);
-#ifdef _DEBUG
-	std::cout << std::filesystem::absolute(StartingScene) << std::endl;
-	std::cout << std::filesystem::current_path() << std::endl;
-#endif
+	LoadSceneFromJson(scenePath.string());
+	//LoadSceneFromJson(StartingScene);
+
+	//std::cout << std::filesystem::absolute(StartingScene) << std::endl;
+	//std::cout << std::filesystem::current_path() << std::endl;
+
 	PreviousScene = CurrentScene;
 
 	// testing for it it works 

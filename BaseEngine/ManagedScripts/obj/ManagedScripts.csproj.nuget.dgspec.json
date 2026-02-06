@@ -1,23 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Reginald Lew\\Documents\\GitHub\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj": {}
+    "C:\\Users\\racha\\School\\Yr2_Tri1\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Reginald Lew\\Documents\\GitHub\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj": {
+    "C:\\Users\\racha\\School\\Yr2_Tri1\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Reginald Lew\\Documents\\GitHub\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+        "projectUniqueName": "C:\\Users\\racha\\School\\Yr2_Tri1\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
         "projectName": "ManagedScripts",
-        "projectPath": "C:\\Users\\Reginald Lew\\Documents\\GitHub\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
-        "packagesPath": "C:\\Users\\Reginald Lew\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Reginald Lew\\Documents\\GitHub\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\obj\\",
+        "projectPath": "C:\\Users\\racha\\School\\Yr2_Tri1\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+        "packagesPath": "C:\\Users\\racha\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\racha\\School\\Yr2_Tri1\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Reginald Lew\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\racha\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -43,7 +40,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
@@ -64,7 +61,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.308/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.309/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

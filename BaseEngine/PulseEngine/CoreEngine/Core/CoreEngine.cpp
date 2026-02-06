@@ -693,7 +693,11 @@ void CoreEngine::Init()
 	GameRunning = true;	 // 3.. 2.. 1.. GAME START
 	startScriptEngine(); // 3.. 2.. 1.. DLL SCRIPT! START ROLLINGGGGGGGGGGGGGGGGGG
 
+#ifdef DEBUG
 	CompileScriptAssembly();
+#endif // DEBUG
+
+
 
 	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
 	// Step 1. Get the function ptrs
@@ -838,6 +842,8 @@ void CoreEngine::Update(float dt)
 	//--- Start of script/hot reload ---//
 	// Press R to reload the script changes 
 	static bool wasRPressed = false;
+
+#ifndef _DEBUG
 	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
 	{
 		if (!wasRPressed)
@@ -902,6 +908,7 @@ void CoreEngine::Update(float dt)
 		//std::cout << "back to normal\n";
 		wasRPressed = false;
 	}
+#endif // !_DEBUG
 
 	//move it to gamelogic.cpp
 	/*auto executeUpdate = GetFunctionPtr<void(*)(void)>
