@@ -4,24 +4,41 @@ using ScriptAPI;
 public class DebugDisplayScript : Script
 {
     private float updateTimer = 0f;
-    private const float UPDATE_INTERVAL = 0.1f;  // Update every 0.1 seconds
-    private bool initialized = false;
+    private const float UPDATE_INTERVAL = 0.1f;
+    private bool hasSetInitialVisibility = false;
+    
+    // Static variables persist across scene changes
+    private static bool s_hasBeenToggled = false;
+    private static bool s_userVisibilitySetting = false;
+    
+    // Track if this is first instance ever (application start)
+    private static bool s_isFirstInstanceEver = true;
     
     public override void Update()
     {
-        // On first frame, hide in Release mode
-        if (!initialized)
+        // On very first instance (app start), reset toggle state
+        if (s_isFirstInstanceEver)
         {
-            initialized = true;
-            
-#if !DEBUG
-            // Hide in Release mode
-            TransformComponent t = GetTransform();
-            t.IsVisible = false;
-            Console.WriteLine("[DebugDisplay] Release mode detected - hiding by default");
-#endif
+            s_isFirstInstanceEver = false;
+            s_hasBeenToggled = false;
+            s_userVisibilitySetting = false;
         }
-
+        
+        // We can't directly access TextComponent.visible from C#
+        // The C++ F8 toggle handles visibility via the C++ TextComponent
+        // We just need to update the text content
+        
+        // Set initial visibility only once per entity using Transform
+        if (!hasSetInitialVisibility)
+        {
+            hasSetInitialVisibility = true;
+            
+            // Note: We can't control TextComponent.visible from C#
+            // But we can track if user has toggled via other means
+            // For now, just set initial state and let C++ F8 handle it
+        }
+        
+        // Always update text content
         var text = GetTextComponent();
         
         float dt = Time.DeltaTime;
@@ -29,13 +46,9 @@ public class DebugDisplayScript : Script
         
         if (updateTimer >= UPDATE_INTERVAL)
         {
-            // Get FPS using ProfilingAPI
             float fps = ProfilingAPI.GetFPS();
-            
-            // Get profiler data using ProfilingAPI
             var displayProfiles = ProfilingAPI.GetDisplayProfiles();
             
-            // Find the system with highest percentage
             string topSystem = "None";
             double topPercentage = 0.0;
             
@@ -48,7 +61,6 @@ public class DebugDisplayScript : Script
                 }
             }
             
-            // Combine both on one line: "FPS: 95.8 | SystemName: 51.93%"
             string combinedText = $"FPS: {fps:F1} | {topSystem}: {topPercentage:F2}%";
             text.SetText(combinedText);
             

@@ -735,12 +735,6 @@
                     }
                 },
                 {
-                    "prefabInstance": {
-                        "prefabName": "Debug Display Text",
-                        "isLinked": false
-                    }
-                },
-                {
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,

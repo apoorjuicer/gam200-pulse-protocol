@@ -169,7 +169,7 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 50,
+                        "orderInLayer": 2,
                         "z": 0.0
                     }
                 },
@@ -772,7 +772,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -815,10 +815,10 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
+                        "layerName": "UI",
+                        "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 98,
+                        "orderInLayer": 5,
                         "z": 0.0
                     }
                 },
@@ -849,7 +849,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -923,7 +923,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -997,7 +997,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1044,7 +1044,7 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 5,
+                        "orderInLayer": 7,
                         "z": 0.0
                     }
                 },
@@ -1293,7 +1293,7 @@
                         "layerName": "World",
                         "mask": 2,
                         "sortingLayer": 2,
-                        "orderInLayer": 5,
+                        "orderInLayer": 3,
                         "z": 0.0
                     }
                 }
