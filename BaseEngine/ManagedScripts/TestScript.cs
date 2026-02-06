@@ -26,8 +26,7 @@ public class TestScript : Script
     float gayshitttt = 120.0f;
     public override void Update()
     {
-        Console.Write("gay 1\n");
-        //Console.WriteLine("[Testing CSHARP]: Hello from ManagedScripts! \n ");
+        //Console.Write("gay 1\n");
 
         TransformComponent TFC = GetTransform();
         CollisionComponent CC = GetCollision();
@@ -72,7 +71,7 @@ public class TestScript : Script
         {
             enemy = Factory.Instantiate("TestPrefab");
             hasSpawned = true; // Set the flag so it only happens once
-            Console.WriteLine("Timer Finished: Monster Spawned!");
+            //Console.WriteLine("Timer Finished: Monster Spawned!");
             startdeathtimer = true;
         }
 
@@ -89,7 +88,7 @@ public class TestScript : Script
             Factory.Destroy(enemy);
             enemy = -1;
             Console.WriteLine("ENTITY IS DELETED!\n\n\n\n\n\n\n");
-            Console.WriteLine($"Current Animation: {AM.GetCurrentAnimation()}");
+            //Console.WriteLine($"Current Animation: {AM.GetCurrentAnimation()}");
             deadalready = true;
         }
 
@@ -97,7 +96,7 @@ public class TestScript : Script
         {
             //Scene.LoadScene("GameLose");
             Scene.RestartScene();
-            Console.WriteLine("New Scene Loaded!\n\n\n\n\n\n\n");
+            //Console.WriteLine("New Scene Loaded!\n\n\n\n\n\n\n");
             return;
         }
        
@@ -106,15 +105,15 @@ public class TestScript : Script
         TFC.X -= 20.0f * dt ;
         TFC.Y -= 20.0f *dt;
 
-        Console.WriteLine($"Frams: {Time.FrameCount}, Time: {Time.GameTime}\n\n\n\n\n\n\n");
-        Console.WriteLine($"Current Animation: {AM.GetCurrentAnimation()}");
+        //Console.WriteLine($"Frams: {Time.FrameCount}, Time: {Time.GameTime}\n\n\n\n\n\n\n");
+        //Console.WriteLine($"Current Animation: {AM.GetCurrentAnimation()}");
 
 
         // scuff way I tested VFX API Lmao, IT PRINTS BUT I NO CLUE IF ANYTHING ELSE
         VFXAPI.SetBPM(gayshitttt);
         VFXAPI.BeatPulse();
-        VFXAPI.PlayHit(HitResult.Perfect, 50.0f, 50.0f);
-        VFXAPI.PlayHit(HitResult.Good, 400, 300);
+        //VFXAPI.PlayHit(HitResult.Perfect, 50.0f, 50.0f);
+        //VFXAPI.PlayHit(HitResult.Good, 400, 300);
 
     }
 }
@@ -126,6 +125,58 @@ public class TestScript2 : Script
         TransformComponent TFC = GetTransform();
         TFC.ScaleX -= 2.5f;
         TFC.ScaleY -= 2.5f;
+
+        // Ben vc2 testing 
+        Vector2 v = new Vector2(3.0f, 4.0f);
+        Console.WriteLine($"Test 1: ({v.X}, {v.Y}) vs (3, 4)\n");
+        Console.WriteLine($"Test 2, magnitude: {v.magnitude} vs a 5\n");
+        
+        Vector2 norm = v.normalized;
+        Console.WriteLine($"Normalized: ({norm.X}, {norm.Y}) vs (0.6, 0.8)\n");
+
+        Vector2 zero = Vector2.zero;
+        Console.WriteLine($"Zero: ({zero.X}, {zero.Y}) vs (0, 0)\n");
+
+        Vector2 a = new Vector2(1, 2);
+        Vector2 b = new Vector2(3, 4);
+        Vector2 sum = a + b;
+        Console.WriteLine($"Sum: ({sum.X}, {sum.Y}) vs (4, 6)\n");
+
+        Vector2 Min = b - a;
+        Console.WriteLine($"Min: ({Min.X}, {Min.Y}) vs (2, 2)\n");
+
+        Vector2 multi = v * 2.0f;
+        Console.WriteLine($"multi: ({multi.X}, {multi.Y}) vs (6, 8)\n");
+
+        Vector2 xAxis = new Vector2(1, 0);
+        Vector2 yAxis = new Vector2(0, 1);
+        float angle = Vector2.Angle(xAxis, yAxis);
+        Console.WriteLine($"Angle: {angle} vs 90 drgree\n");
+
+        Vector2 min = Vector2.Min(a, b);
+        Vector2 max = Vector2.Max(a, b);
+        Console.WriteLine($"Min: ({min.X}, {min.Y}) vs (1, 2)\n");
+        Console.WriteLine($"Max: ({max.X}, {max.Y}) vs (3, 4)\n");
+        FSMComponentAPI fsm = GetFSM();
+        //Console.WriteLine($" State: {fsm.GetState()}");
+        fsm.RequestMove(true);
+        fsm.RequestAttack();
+        fsm.NotifyDamage();
+        fsm.ClearRequests();
+
+    }
+}
+
+public class TestScript3 : Script
+{
+    public override void Update()
+    {
+        FSMComponentAPI fsm = GetFSM();
+        //Console.WriteLine($" State: {fsm.GetState()}");
+        fsm.RequestMove(true);
+        fsm.RequestAttack();
+        fsm.NotifyDamage();
+        fsm.ClearRequests();
 
     }
 }

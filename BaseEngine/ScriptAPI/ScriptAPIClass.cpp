@@ -19,6 +19,7 @@
 #include "Animation.h"
 #include "ScriptName.h"
 #include "Collision.h"
+#include "FSM.h"
 #include "InputAPI.h"
 #include "Sprite.h"
 #include "TextAPI.h"
@@ -44,6 +45,11 @@ namespace ScriptAPI
     CollisionComponent Script::GetCollision()
     {
         return CollisionComponent(EntityID);
+    }
+
+    FSMComponentAPI Script::GetFSM()
+    {
+        return FSMComponentAPI(EntityID);
     }
 
     InputComponent Script::GetInput()

@@ -19,6 +19,8 @@
 #include "pch/pch_temp.h"
 // for .net
 #include "CoreEngine/Core/ImportExport.h"
+#include "../PulseEngine/ObjectAllocator/ObjectAllocator.h"
+
 #pragma warning(push)
 #pragma warning(disable: 4251) // stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
 

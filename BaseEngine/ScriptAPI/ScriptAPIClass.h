@@ -17,6 +17,7 @@
 #include "DeltaTime.h"
 #include "InputAPI.h"
 #include "Collision.h"
+#include "FSM.h"
 #include "AudioAPI.h"
 #include "Sprite.h"
 #include "Application.h"
@@ -29,6 +30,7 @@ namespace ScriptAPI
     value struct Animation;
     value struct TextComponentAPI;
     value struct CollisionComponent;
+    value struct FSMController;
     value struct AudioComponent;
     value struct SpriteComponent;
 
@@ -42,7 +44,8 @@ namespace ScriptAPI
         HealthComponent GetHealth();
         Animation GetAnimation();
         InputComponent GetInput();
-        CollisionComponent GetCollision();
+        CollisionComponent GetCollision(); 
+        FSMComponentAPI GetFSM();
         AudioComponent GetAudio();
         SpriteComponent GetSprite();
         TextComponentAPI GetTextComponent();

@@ -24,6 +24,7 @@ namespace ScriptAPI
     {
     public:
         static void Init(CoreEngine* coreEngine);
+        static void Shutdown();
         static void HelloWorld();
         static bool AddScriptViaName(int entityID, System::String^ scriptName); 
         // ^ = A "handle" to something the garbage collector owns and will clean up for you

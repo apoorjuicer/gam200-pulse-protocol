@@ -74,35 +74,40 @@ void Config::Deserialize(const rapidjson::Value &in)
 bool SaveConfig(Config const &cfg, std::string const &path, bool pretty)
 {
     // {"config": { ... }}
-   rapidjson::Document d = JSONUtils::MakeObjDocument(cfg, "config");
-   return JSONUtils::WriteJSONToFile(d, path, pretty);
+   //rapidjson::Document d = JSONUtils::MakeObjDocument(cfg, "config");
+   //return JSONUtils::WriteJSONToFile(d, path, pretty);
+   return JSONUtils::SaveObject(cfg, path, "config", pretty);
 }
+
+
 bool LoadConfig(Config &cfg, std::string const &path)
 {
-    std::ifstream ifs(path);
-    if (!ifs.is_open())
-    {
-        std::cerr << "Error: Cannot open file for reading: " << path << "\n";
-        return false;
-    }
-    rapidjson::IStreamWrapper isw(ifs);
-    rapidjson::Document d;
-    d.ParseStream(isw);
+    //std::ifstream ifs(path);
+    //if (!ifs.is_open())
+    //{
+    //    std::cerr << "Error: Cannot open file for reading: " << path << "\n";
+    //    return false;
+    //}
+    //rapidjson::IStreamWrapper isw(ifs);
+    //rapidjson::Document d;
+    //d.ParseStream(isw);
 
-    if (d.HasParseError())
-    {
-        std::cerr << "Error: Failed to parse JSON in file: " << path << "\n";
-        return false;
-    }
+    //if (d.HasParseError())
+    //{
+    //    std::cerr << "Error: Failed to parse JSON in file: " << path << "\n";
+    //    return false;
+    //}
 
-    if (!d.HasMember("config"))
-    {
-        std::cerr << "Error: No -config- field in file : " << path << "\n";
-        return false;
-    }
+    //if (!d.HasMember("config"))
+    //{
+    //    std::cerr << "Error: No -config- field in file : " << path << "\n";
+    //    return false;
+    //}
 
-    cfg.Deserialize(d["config"]);
-    return true;
+    //cfg.Deserialize(d["config"]);
+    //return true;
+
+    return JSONUtils::LoadObject(cfg, path, "config");
 }
 
 namespace JSONUtils {
@@ -135,7 +140,7 @@ namespace JSONUtils {
         //error code so dont throw exception
         fs::create_directories(path.parent_path(), ec);
 
-        std::ofstream ofs(path);
+        std::ofstream ofs(path, std::ios::binary);
         if (!ofs) {
             std::cerr << "Error: Cannot open file for writing: " << path << "\n";
             return false;
@@ -182,5 +187,27 @@ namespace JSONUtils {
     }
 
     /*loading/parsing*/
+    bool ReadJSONFromFile(Document& outDoc,
+        std::filesystem::path const& path)
+    {
+        std::ifstream ifs(path, std::ios::binary);
+        if (!ifs)
+        {
+            std::cerr << "Error: Cannot open file for reading: " << path << "\n";
+            return false;
+        }
+
+        IStreamWrapper isw(ifs);
+        outDoc.ParseStream(isw);
+
+        if (outDoc.HasParseError())
+        {
+            std::cerr << "Error: JSON parse error in " << path
+                << " : " << GetParseError_En(outDoc.GetParseError())
+                << " (offset " << outDoc.GetErrorOffset() << ")\n";
+            return false;
+        }
+        return true;
+    }
 
 }//end of namespace JSONUtils

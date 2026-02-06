@@ -81,14 +81,6 @@ public:
 
 private:
     AssetRegistry mRegistry; // owned
-    // AudioManager mAudio;
-    // GraphicsManager mGraphics;
-    // Asset Manager owns AudioManager and GraphicsManager
-    // use unique_ptr for automatic clean up
-    // single-ownership cannot be copied only moved
-    // more safety
-   //std::unique_ptr<AudioManager> mAudio;       // owned
-   // std::unique_ptr<GraphicsManager> mGraphics; // owned
     AudioManager* mAudio = nullptr;    // non-owning
     GraphicsManager* mGraphics = nullptr;   // non-owning
 };

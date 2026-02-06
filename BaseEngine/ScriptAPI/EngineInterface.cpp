@@ -40,6 +40,10 @@ namespace ScriptAPI
 
         coreEngine = p_coreEngine;
 
+        if (QueuedScript != nullptr)
+        {
+            delete QueuedScript;
+        }
         QueuedScript = new std::vector<int>();
         
         // Create unloadable assembly context
@@ -384,6 +388,23 @@ namespace ScriptAPI
         // clear for next loop
         QueuedScript->clear();
         System::Console::WriteLine("[EngineInterface] Script attachment complete! YIPPEEE\n");
+    }
+
+    void EngineInterface::Shutdown()
+    {
+        System::Console::WriteLine("Shutting down EngineInterface...");
+
+        // Clean up vector
+        if (QueuedScript != nullptr)
+        {
+            delete QueuedScript;
+            QueuedScript = nullptr;
+        }
+
+        // Clean up scripts
+        ClearAllScripts();
+
+        System::Console::WriteLine("EngineInterface shutdown complete");
     }
 
     void EngineInterface::HelloWorld()

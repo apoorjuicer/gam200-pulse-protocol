@@ -40,6 +40,9 @@ public class NavigationButtons : Script
     private bool isPauseButton = false;
     private float hoverScaleBoost = 1.05f;
 
+    // for tracking if hover sound is alr played this hover session
+    private bool hasPlayedHoverSound = false;
+
     public override void Update()
     {
         // Reset history when a new Play session starts (frame count resets to 0)
@@ -169,6 +172,9 @@ public class NavigationButtons : Script
             transform.ScaleX = currentScaleX * hoverScaleBoost;
             transform.ScaleY = currentScaleY * hoverScaleBoost;
             isCurrentlyHovered = true;
+
+            PlayHoverSound();
+            hasPlayedHoverSound = true;
         }
         else if (!isHovered && isCurrentlyHovered)
         {
@@ -178,10 +184,14 @@ public class NavigationButtons : Script
             transform.ScaleX = currentScaleX / hoverScaleBoost;
             transform.ScaleY = currentScaleY / hoverScaleBoost;
             isCurrentlyHovered = false;
+            
+            hasPlayedHoverSound = false;
         }
         
         if (isHovered && input.IsMouseButtonTriggered(0))
         {
+            PlayClickSound();
+
             OnClick();
         }
     }
@@ -241,6 +251,28 @@ public class NavigationButtons : Script
         Scene.LoadScene("MainMenu");
     }
     
+    private void PlayHoverSound()
+    {
+        // Don't play hover sound for overlay buttons when overlays are hidden
+        string texLower = defaultTexture.ToLower();
+        bool isQuitOverlayButton = texLower.Contains("quit yes") || texLower.Contains("quit no");
+        bool isPauseOverlayButton = texLower.Contains("pause") || texLower.Contains("exit");
+        
+        if ((ShowQuitOverlay && !isQuitOverlayButton) || (ShowPauseOverlay && !isPauseOverlayButton))
+            return;
+        
+        Console.WriteLine("[Button] Attempting to play SFX_Button_Hover");
+        AudioComponent audio = GetAudio();
+        audio.PlaySFX("SFX_Button_Hover");
+        Console.WriteLine("[Button] PlaySFX called!");
+    }
+    
+    private void PlayClickSound()
+    {
+        AudioComponent audio = GetAudio();
+        audio.PlaySFX("SFX_Button_Select");
+    }
+
     private void OnClick()
     {
         string tex = defaultTexture.ToLower();

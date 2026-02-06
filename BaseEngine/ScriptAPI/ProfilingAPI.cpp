@@ -90,13 +90,8 @@ namespace ScriptAPI
 	{
 		try
 		{
-			// Calculate FPS from frame time
-			double frameTime = ProfilingManager::GetInstance()->GetCachedFrameTime();
-			if (frameTime > 0.0)
-			{
-				return static_cast<float>(1.0 / frameTime);
-			}
-			return 0.0f;
+			// Calculate FPS
+			return ::GLHelper::fps;
 		}
 		catch (System::Exception^ ex)
 		{

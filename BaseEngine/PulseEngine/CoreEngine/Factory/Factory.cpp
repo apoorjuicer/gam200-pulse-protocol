@@ -54,6 +54,7 @@
 #include "CoreEngine/Assets.h"
 #include "Components/DisplayName.h"
 #include "Components/ParentChild.h"
+#include "StateMachine/StateMachine.h"
 
 
 using namespace rapidjson;
@@ -127,6 +128,13 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, boo
 			LogicComponent l;
 			l.Deserialize(component["script"]);
 			g_coordinator->AddComponent<LogicComponent>(entity, l);
+		}
+
+		if (component.HasMember("State") && component["State"].IsObject())
+		{
+			FSM f;
+			f.Deserialize(component["State"]);
+			g_coordinator->AddComponent<FSM>(entity, f);
 		}
 
 		if (component.HasMember("name") && component["name"].IsObject())
@@ -353,6 +361,18 @@ bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const &path)
 		script.Serialize(ScriptVal, alloc);
 
 		ComponentObj.AddMember("script", ScriptVal, alloc);
+		componentsArray.PushBack(ComponentObj, alloc);
+	}
+
+	if (g_coordinator->HasComponent<FSM>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value FSMVal;
+
+		auto& fsm = g_coordinator->GetComponent<FSM>(entity);
+		fsm.Serialize(FSMVal, alloc);
+
+		ComponentObj.AddMember("State", FSMVal, alloc);
 		componentsArray.PushBack(ComponentObj, alloc);
 	}
 

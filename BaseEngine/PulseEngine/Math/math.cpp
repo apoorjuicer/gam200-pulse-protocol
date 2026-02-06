@@ -128,6 +128,25 @@ bool Vector2::operator==(Vector2 const& other) const {
 bool Vector2::operator!=(Vector2 const& other) const {
     return !(*this == other);
 }
+
+float& Vector2::setX() { 
+    return m[0]; 
+}
+float& Vector2::setY() { 
+    return m[1]; 
+}
+float  Vector2::getX() const { 
+    return m[0]; 
+}
+float  Vector2::getY() const { 
+    return m[1]; 
+}
+Vector2& Vector2::Set(float x_, float y_)
+{
+    m[0] = x_;
+    m[1] = y_;
+    return *this;
+}
 //non-member functions
 float distance(Vector2 v0, Vector2 v1)
 {
@@ -178,6 +197,8 @@ Vector2 operator/(Vector2 v, float s)
     Vector2 tmp{v};
     return tmp /= s;
 }
+
+
 
 std::ostream &operator<<(std::ostream &os, Vector2 const &vec)
 {
