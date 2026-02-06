@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using ScriptAPI;
 
 /// <summary>
-/// MINIMAL VERSION: Input bridge without audio calls
-/// Use this if the audio version causes compilation errors
+/// FIXED INPUT BRIDGE
+/// Properly forwards input to ComboSystem
 /// </summary>
 public class InputBridge : Script
 {
@@ -66,7 +66,8 @@ public class InputBridge : Script
     // =========================
     private void Initialize()
     {
-        Console.WriteLine("[InputBridge] Initialized (Minimal Version - No Audio)");
+        Console.WriteLine("[InputBridge] ===== FIXED VERSION =====");
+        Console.WriteLine("[InputBridge] Will forward inputs to ComboSystem.Instance");
         initialized = true;
     }
 
@@ -88,9 +89,9 @@ public class InputBridge : Script
 
     private void OnKeyPressed(char key)
     {
-        Console.WriteLine($"[InputBridge] Key {key} pressed!");
+        Console.WriteLine($"[InputBridge] 🎹 Key {key} pressed!");
 
-        // Forward to ComboSystem
+        // Forward to ComboSystem using singleton
         if (ComboSystem.Instance != null)
         {
             ComboSystem.Instance.RegisterInput(key);
@@ -98,21 +99,21 @@ public class InputBridge : Script
             // Check if combo is complete
             if (ComboSystem.Instance.HasCompletedCombo())
             {
-                Console.WriteLine("[InputBridge] Combo sequence complete!");
+                Console.WriteLine("[InputBridge] ✅ Combo sequence complete!");
 
                 if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
                 {
-                    Console.WriteLine("[InputBridge] SUCCESS!");
+                    Console.WriteLine("[InputBridge] 🎉 SUCCESS!");
                 }
                 else
                 {
-                    Console.WriteLine("[InputBridge] FAILED!");
+                    Console.WriteLine("[InputBridge] ❌ FAILED!");
                 }
             }
         }
         else
         {
-            Console.WriteLine("[InputBridge] ERROR: ComboSystem.Instance is null!");
+            Console.WriteLine("[InputBridge] ⚠️ ERROR: ComboSystem.Instance is null!");
         }
     }
 }
