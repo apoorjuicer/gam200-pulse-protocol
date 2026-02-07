@@ -53,10 +53,16 @@ public class NavigationButtons : Script
             ShowQuitOverlay = false;
             ShowPauseOverlay = false;
         }
+
         lastFrameCount = currentFrame;
 
         InputComponent input = GetInput();
         TransformComponent t = GetTransform();
+
+        if (!t.IsVisible)
+        {
+            return;
+        }
         
         if (!buttonInitialized)
         {
@@ -236,9 +242,15 @@ public class NavigationButtons : Script
     {
         string texLower = defaultTexture.ToLower();
         bool isQuitOverlayButton = texLower.Contains("quit yes") || texLower.Contains("quit no");
-        bool isPauseOverlayButton = texLower.Contains("pause") || texLower.Contains("exit");
+        bool isPauseOverlayButton = texLower.Contains("pause") || texLower.Contains("exit") ||
+                                    texLower.Contains("pausequit") || texLower.Contains("pauserestart") || 
+                                    texLower.Contains("pausesettings");
         
-        if ((ShowQuitOverlay && !isQuitOverlayButton) || (ShowPauseOverlay && !isPauseOverlayButton))
+        // Only block if there's an overlay showing AND this button doesn't belong to that overlay
+        if (ShowQuitOverlay && !isQuitOverlayButton)
+            return;
+        
+        if (ShowPauseOverlay && !isPauseOverlayButton)
             return;
         
         AudioComponent audio = GetAudio();
