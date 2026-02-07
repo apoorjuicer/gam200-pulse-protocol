@@ -298,7 +298,9 @@ bool AudioManager::LoadBGM(std::string const &id)
         // FMOD_RESULT result = mSystem->createSound(bgm->path.c_str(), mode, nullptr, &mBGM);
 
         FMOD::Sound *s = nullptr;
-        FMOD_RESULT result = mSystem->createStream(bgm->path.c_str(), mode, nullptr, &s);
+        //FMOD_RESULT result = mSystem->createStream(bgm->path.c_str(), mode, nullptr, &s);
+        std::string resolvedPath = mRegistry->GetAudioItemPath(id);
+        FMOD_RESULT result = mSystem->createStream(resolvedPath.c_str(), mode, nullptr, &s);
 
         if (!FMOD_CHECK(result, ("createStream(" + id + ")").c_str()))
         {
@@ -474,7 +476,11 @@ bool AudioManager::LoadSFX(std::string const &id)
         // Create sound (reusable sound, not looping)
         FMOD_MODE mode = FMOD_DEFAULT | (soundefx->loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF);
         FMOD::Sound *sound = nullptr; // destroyed after function call
-        FMOD_RESULT result = mSystem->createSound(soundefx->path.c_str(), mode, nullptr, &sound);
+        
+        //FMOD_RESULT result = mSystem->createSound(soundefx->path.c_str(), mode, nullptr, &sound);
+        std::string resolvedPath = mRegistry->GetAudioItemPath(id);
+        FMOD_RESULT result = mSystem->createSound(resolvedPath.c_str(), mode, nullptr, &sound);
+        
         if (!FMOD_CHECK(result, ("createSound(" + id + ")").c_str()) || !sound)
         {
             return false;
