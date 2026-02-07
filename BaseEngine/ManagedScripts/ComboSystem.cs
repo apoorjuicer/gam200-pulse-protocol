@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using ScriptAPI;
 
 public class ComboSystem : Script
@@ -13,9 +14,9 @@ public class ComboSystem : Script
     // =========================
     public int maxComboLength = 4;
 
-    public float perfectWindow = 0.05f;
-    public float goodWindow = 0.10f;
-    public float missWindow = 0.15f;
+    // Timing windows (seconds)
+    public float perfectWindow = 0.5f;
+    public float greatWindow = 1.0f;   // <= 1.0 => GREAT, > 1.0 => MISS
 
     // =========================
     // State
@@ -84,8 +85,12 @@ public class ComboSystem : Script
     public void SetEnemyWeakness(string weaknessCombo)
     {
         currentEnemyWeakness = weaknessCombo;
+
+        // Update max combo length to match the weakness
+        maxComboLength = weaknessCombo.Length;
+
         ResetCombo();
-        Console.WriteLine($"[ComboSystem] Weakness set to: {weaknessCombo}");
+        Console.WriteLine($"[ComboSystem] Weakness set to: {weaknessCombo} (length: {maxComboLength})");
     }
 
     public void RegisterInput(char key)
@@ -99,20 +104,34 @@ public class ComboSystem : Script
 
         float delta = Math.Abs(timeSinceLastBeat);
 
+        // =========================
+        // Judgement Rules
+        // PERFECT: <= 0.5
+        // GREAT:   <= 1.0
+        // MISS:     > 1.0
+        // =========================
         string judgement;
         if (delta <= perfectWindow)
             judgement = "PERFECT";
-        else if (delta <= goodWindow)
-            judgement = "GOOD";
-        else if (delta <= missWindow)
-            judgement = "LATE";
+        else if (delta <= greatWindow)
+            judgement = "GREAT";
         else
             judgement = "MISS";
 
         hitResults.Add(judgement);
         currentCombo.Add(key);
 
-        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (?={delta:F3}s)");
+        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s)");
+
+        // === VISUAL FEEDBACK - UPDATED TO USE NEW MANAGER ===
+        if (ComboDisplayManager.Instance != null)
+        {
+            ComboDisplayManager.Instance.ShowJudgement(judgement);
+        }
+        else
+        {
+            Console.WriteLine("[ComboSystem] WARNING: ComboDisplayManager not found!");
+        }
 
         // === PERFECT STREAK ===
         if (judgement == "PERFECT")
@@ -120,7 +139,7 @@ public class ComboSystem : Script
             perfectStreak++;
             if (perfectStreak >= 5)
             {
-                Console.WriteLine("[ComboSystem] ? PERFECT STREAK x5!");
+                Console.WriteLine("[ComboSystem] 🔥 PERFECT STREAK x5!");
                 perfectStreak = 0;
             }
         }
@@ -129,7 +148,8 @@ public class ComboSystem : Script
             perfectStreak = 0;
         }
 
-        if (judgement == "MISS" || judgement == "LATE")
+        // Any MISS causes failure
+        if (judgement == "MISS")
             comboFailedEarly = true;
 
         if (currentCombo.Count >= maxComboLength)
@@ -160,9 +180,10 @@ public class ComboSystem : Script
         string comboString = new string(currentCombo.ToArray());
         bool allGood = !comboFailedEarly;
 
+        // Only PERFECT or GREAT are acceptable.
         foreach (string r in hitResults)
         {
-            if (r != "PERFECT" && r != "GOOD")
+            if (r != "PERFECT" && r != "GREAT")
             {
                 allGood = false;
                 break;
@@ -173,12 +194,12 @@ public class ComboSystem : Script
 
         if (allGood && comboString == currentEnemyWeakness)
         {
-            Console.WriteLine("[ComboSystem] ? COMBO SUCCESS!");
+            Console.WriteLine("[ComboSystem] ✅ COMBO SUCCESS!");
             PlayerDidSuccessfulCombo = true;
         }
         else
         {
-            Console.WriteLine("[ComboSystem] ? COMBO FAILED!");
+            Console.WriteLine("[ComboSystem] ❌ COMBO FAILED!");
             PlayerDidSuccessfulCombo = false;
         }
 

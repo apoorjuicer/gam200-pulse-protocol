@@ -227,7 +227,6 @@ void InputManager::processDebugToggles() {
 	// ========================================================================
 	// F8: Toggle Debug Display Text visibility
 	// ========================================================================
-#ifdef _DEBUG
 	if (isKeyTriggered(GLFW_KEY_F8)) {
 		auto* coord = Coordinator::GetInstance();
 		auto sceneManager = coord->GetSystem<SceneManager>();
@@ -252,7 +251,6 @@ void InputManager::processDebugToggles() {
 			}
 		}
 	}
-#endif
 	// ========================================================================
 }
 

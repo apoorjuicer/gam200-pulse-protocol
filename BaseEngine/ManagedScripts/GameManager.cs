@@ -146,8 +146,7 @@ public class GameManager : Script
 
         Console.WriteLine($"[GameManager] Key {key} detected, but can't forward to ComboSystem (no reference)");
 
-        // TODO: Once you add script discovery, uncomment:
-        // if (comboSystem != null)
-        //     comboSystem.RegisterInput(key);
+        if (comboSystem != null)
+        comboSystem.RegisterInput(key);
     }
 }

@@ -26,9 +26,9 @@ pulses on screen every 0.5 seconds (120 BPM), accompanied by a sound effect,
 to help players stay on rhythm.
 
 The system evaluates timing accuracy and provides feedback:
-- PERFECT : Within 0.05s of the beat
-- GOOD    : Within 0.15s of the beat
-- MISS    : More than 0.15s off the beat
+- PERFECT : Within 0.5s of the beat
+- GOOD    : Within 1.0s of the beat
+- MISS    : More than 1.0s off the beat
 
 
 [ 2. CUSTOM DEMO INPUT & USAGE ]
@@ -41,7 +41,7 @@ Gameplay:
 - Watch for on-screen feedback showing timing accuracy (PERFECT/GOOD/MISS)
 
 Attack Combo:
-W → A (press in rhythm with the beat)
+W → A → W → A (press in rhythm with the beat)
 
 Editor Controls:
 ----------------
@@ -82,8 +82,8 @@ Match each enemy’s rhythm and perform their weapon combo at the right beats to
  
 - 'W' Key : SFX_W_Key.mp3
 - 'A' Key : SFX_A_Key.mp3
-- 'S' Key : SFX_S_Key.mp3 (Not Implemented)
-- 'D' Key : SFX_D_Key.mp3 (Not Implemented)
+- 'S' Key : SFX_S_Key.mp3 
+- 'D' Key : SFX_D_Key.mp3 
 
 
 [ 5. FEATURES ]

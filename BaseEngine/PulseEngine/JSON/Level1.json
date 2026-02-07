@@ -84,8 +84,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -970.0,
-                            "y": -236.12451171875
+                            "x": -902.9657592773438,
+                            "y": -151.44973754882813
                         },
                         "scale": {
                             "x": 300.0,
@@ -434,7 +434,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -869,9 +869,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "OrderSlipCurrentIcon"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -942,9 +940,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "OrderSlipNextIcon"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -1400,9 +1396,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "OrderSlipUIController"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -1434,12 +1428,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1181.8182373046875,
-                            "y": -370.1049499511719
+                            "x": 853.7035522460938,
+                            "y": -260.7333984375
                         },
                         "scale": {
-                            "x": 150.0,
-                            "y": 250.0
+                            "x": 110.0,
+                            "y": 216.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1563,7 +1557,8 @@
                             "TurnManager",
                             "ComboSystem",
                             "InputBridge",
-                            "InitializationDiagnostic"
+                            "InitializationDiagnostic",
+                            "MasterDiagnostic"
                         ]
                     }
                 },
@@ -1697,8 +1692,529 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": []
+                    }
+                },
+                {
                     "name": {
                         "name": "EnemySpawner"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": true,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "ComboDisplayManager"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "ComboDisplay"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Children": {
+                        "children": [
+                            23,
+                            24,
+                            25,
+                            26,
+                            27
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -700.0,
+                            "y": -702.094970703125
+                        },
+                        "scale": {
+                            "x": 100.0,
+                            "y": 100.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 2.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/W.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "ComboKeySlot",
+                            "KeyVisual"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "KeySlot0"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 22
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -236.92312622070313,
+                            "y": -702.0947265625
+                        },
+                        "scale": {
+                            "x": 100.0,
+                            "y": 100.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/A.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "ComboKeySlot",
+                            "KeyVisual"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "KeySlot1"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 22
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 195.38461303710938,
+                            "y": -695.03857421875
+                        },
+                        "scale": {
+                            "x": 100.0,
+                            "y": 100.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/S.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "ComboKeySlot",
+                            "KeyVisual"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "KeySlot2"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 22
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 700.0,
+                            "y": -691.5104370117188
+                        },
+                        "scale": {
+                            "x": 100.0,
+                            "y": 100.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/D.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "ComboKeySlot",
+                            "KeyVisual"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "KeySlot3"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 22
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 694.05615234375,
+                            "y": 594.0612182617188
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/perfect.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "ComboJudgementDisplay"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "JudgementDisplay"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 22
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": true,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "LevelBGM"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "BGMManager"
                     }
                 },
                 {
