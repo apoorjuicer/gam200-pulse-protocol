@@ -3,7 +3,7 @@ using ScriptAPI;
 
 /// <summary>
 /// FIXED INPUT BRIDGE
-/// Properly forwards input to ComboSystem
+/// Properly forwards input to ComboSystem using IsKeyTriggered for reliable detection
 /// </summary>
 public class InputBridge : Script
 {
@@ -19,10 +19,6 @@ public class InputBridge : Script
     // State
     // =========================
     private bool initialized = false;
-    private bool lastWState = false;
-    private bool lastAState = false;
-    private bool lastSState = false;
-    private bool lastDState = false;
 
     // =========================
     // Update Loop
@@ -38,11 +34,6 @@ public class InputBridge : Script
         // Check if input is locked by turn system
         if (TurnManager.Instance != null && TurnManager.Instance.IsInputLocked)
         {
-            // Reset key states so we don't register inputs during locked phase
-            lastWState = false;
-            lastAState = false;
-            lastSState = false;
-            lastDState = false;
             return;
         }
 
@@ -52,13 +43,16 @@ public class InputBridge : Script
             return;
         }
 
-        // Check for key presses
+        // Check for key presses using IsKeyTriggered (engine handles edge detection)
         var input = GetInput();
 
-        CheckKey(input, KeyW, ref lastWState, 'W');
-        CheckKey(input, KeyA, ref lastAState, 'A');
-        CheckKey(input, KeyS, ref lastSState, 'S');
-        CheckKey(input, KeyD, ref lastDState, 'D');
+        if (input.IsKeyTriggered(KeyW)) OnKeyPressed('W');
+        if (input.IsKeyTriggered(KeyA)) OnKeyPressed('A');
+        if (input.IsKeyTriggered(KeyS)) OnKeyPressed('S');
+        if (input.IsKeyTriggered(KeyD)) OnKeyPressed('D');
+        
+        // Check for invalid keys
+        CheckInvalidKeys(input);
     }
 
     // =========================
@@ -67,29 +61,20 @@ public class InputBridge : Script
     private void Initialize()
     {
         Console.WriteLine("[InputBridge] ===== FIXED VERSION =====");
-        Console.WriteLine("[InputBridge] Will forward inputs to ComboSystem.Instance");
+        Console.WriteLine("[InputBridge] Using IsKeyTriggered for reliable input detection");
         initialized = true;
     }
 
     // =========================
-    // Input Detection
+    // Input Handling
     // =========================
-    private void CheckKey(InputComponent input, int keyCode, ref bool lastState, char keyChar)
-    {
-        bool currentState = input.IsKeyPressed(keyCode);
-
-        // Detect rising edge (key just pressed)
-        if (currentState && !lastState)
-        {
-            OnKeyPressed(keyChar);
-        }
-
-        lastState = currentState;
-    }
-
     private void OnKeyPressed(char key)
     {
         Console.WriteLine($"[InputBridge] 🎹 Key {key} pressed!");
+        
+        // PLAY KEY PRESS SFX
+        AudioComponent audio = GetAudio();
+        audio.PlaySFX($"SFX_{key}_Key");
 
         // Forward to ComboSystem using singleton
         if (ComboSystem.Instance != null)
@@ -114,6 +99,49 @@ public class InputBridge : Script
         else
         {
             Console.WriteLine("[InputBridge] ⚠️ ERROR: ComboSystem.Instance is null!");
+        }
+    }
+
+    // Check for invalid key presses (non-WASD keys)
+    private void CheckInvalidKeys(InputComponent input)
+    {
+        // Check common keys that players might accidentally press
+        int[] invalidKeys = {
+            32,  // Space
+            81,  // Q
+            69,  // E
+            82,  // R
+            84,  // T
+            89,  // Y
+            85,  // U
+            73,  // I
+            79,  // O
+            80,  // P
+            70,  // F
+            71,  // G
+            72,  // H
+            74,  // J
+            75,  // K
+            76,  // L
+            90,  // Z
+            88,  // X
+            67,  // C
+            86,  // V
+            66,  // B
+            78,  // N
+            77   // M
+        };
+
+        foreach (int keyCode in invalidKeys)
+        {
+            if (input.IsKeyTriggered(keyCode))
+            {
+                // Play invalid key sound
+                AudioComponent audio = GetAudio();
+                audio.PlaySFX("SFX_Invalid_Key");
+                Console.WriteLine($"[InputBridge] ⚠️ Invalid key pressed (code: {keyCode})");
+                return; // Only play once per frame
+            }
         }
     }
 }

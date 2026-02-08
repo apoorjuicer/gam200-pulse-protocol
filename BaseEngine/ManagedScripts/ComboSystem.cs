@@ -123,7 +123,18 @@ public class ComboSystem : Script
 
         Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s)");
 
-        // === VISUAL FEEDBACK - UPDATED TO USE NEW MANAGER ===
+        // // === AUDIO FEEDBACK - TIMING JUDGMENT SFX === UNCOMMENT ONCE SCORING SYSTEM IS STABLE
+        // AudioComponent audio = GetAudio();
+        // if (judgement == "PERFECT" || judgement == "GREAT")
+        // {
+        //     audio.PlaySFX("SFX_ComboEstablished_1");  // Success sound
+        // }
+        // else // MISS
+        // {
+        //     audio.PlaySFX("SFX_WrongInput");  // Miss sound
+        // }
+
+        // === VISUAL FEEDBACK ===
         if (ComboDisplayManager.Instance != null)
         {
             ComboDisplayManager.Instance.ShowJudgement(judgement);
