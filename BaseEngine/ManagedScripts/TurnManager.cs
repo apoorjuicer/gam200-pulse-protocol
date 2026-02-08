@@ -177,6 +177,12 @@ public class TurnManager : Script
             Console.WriteLine("[TurnManager] ? Player succeeded!");
             Console.WriteLine("[TurnManager] Enemy takes damage!");
 
+            // // PLAY SUCCESS SOUND
+            // AudioComponent audio = GetAudio();
+            // audio.PlaySFX("SFX_ComboEstablished_1");  // Combo complete sound!
+
+
+
             // Enemy takes damage and might die
             if (EnemyRhythmController.Instance != null)
             {
@@ -187,6 +193,11 @@ public class TurnManager : Script
         {
             Console.WriteLine("[TurnManager] ? Player failed!");
             Console.WriteLine("[TurnManager] Enemy attacks and moves remaining steps!");
+            
+            // // PLAY FAILURE SOUND
+            // AudioComponent audio = GetAudio();
+            // audio.PlaySFX("SFX_ComboStreakBroken");  // Failure sound!
+
 
             // Enemy executes punishment
             if (EnemyRhythmController.Instance != null)

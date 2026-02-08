@@ -1625,9 +1625,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "GameManager"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -1839,8 +1837,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "ComboKeySlot",
-                            "KeyVisual"
+                            "ComboKeySlot"
                         ]
                     }
                 },
@@ -1913,8 +1910,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "ComboKeySlot",
-                            "KeyVisual"
+                            "ComboKeySlot"
                         ]
                     }
                 },
@@ -1987,8 +1983,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "ComboKeySlot",
-                            "KeyVisual"
+                            "ComboKeySlot"
                         ]
                     }
                 },
@@ -2061,8 +2056,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "ComboKeySlot",
-                            "KeyVisual"
+                            "ComboKeySlot"
                         ]
                     }
                 },

@@ -72,14 +72,25 @@ public class ComboDisplayManager : Script
         {
             int currentProgress = ComboSystem.Instance.GetComboProgress();
             
+            // DEBUG: Always log progress
+            if (currentProgress != lastComboProgress)
+            {
+                Console.WriteLine($"[ComboDisplayManager] Progress changed: {lastComboProgress} → {currentProgress}");
+            }
+            
             // New key pressed?
             if (currentProgress > lastComboProgress)
             {
                 string combo = ComboSystem.Instance.GetCurrentComboString();
+                Console.WriteLine($"[ComboDisplayManager] Combo string: '{combo}', length: {combo.Length}");
+                
                 if (combo.Length > 0)
                 {
                     char lastKey = combo[combo.Length - 1];
-                    ShowKey(lastKey, currentProgress - 1);
+                    int slotIndex = currentProgress - 1;
+                    
+                    Console.WriteLine($"[ComboDisplayManager] Calling ShowKey('{lastKey}', {slotIndex})");
+                    ShowKey(lastKey, slotIndex);
                 }
             }
             // Combo reset?
@@ -89,6 +100,14 @@ public class ComboDisplayManager : Script
             }
 
             lastComboProgress = currentProgress;
+        }
+        else
+        {
+            // DEBUG: Warn if ComboSystem missing
+            if (Time.FrameCount % 60 == 0)  // Log once per second
+            {
+                Console.WriteLine("[ComboDisplayManager] WARNING: ComboSystem.Instance is null!");
+            }
         }
     }
 
@@ -120,14 +139,19 @@ public class ComboDisplayManager : Script
     // =========================
     public void ShowKey(char key, int slotIndex)
     {
+        Console.WriteLine($"[ComboDisplayManager] ShowKey called: key='{key}', slotIndex={slotIndex}");
+        
         if (slotIndex < 0 || slotIndex > 3)
         {
             Console.WriteLine($"[ComboDisplayManager] ⚠️ Invalid slot index: {slotIndex}");
             return;
         }
 
+        Console.WriteLine($"[ComboDisplayManager] Registered slots: {string.Join(", ", keySlotScripts.Keys)}");
+        
         if (keySlotScripts.ContainsKey(slotIndex))
         {
+            Console.WriteLine($"[ComboDisplayManager] Found slot {slotIndex}, calling ShowKey()");
             keySlotScripts[slotIndex].ShowKey(key);
         }
         else
@@ -135,7 +159,6 @@ public class ComboDisplayManager : Script
             Console.WriteLine($"[ComboDisplayManager] ⚠️ KeySlot {slotIndex} not registered yet!");
         }
     }
-
     public void ShowJudgement(string judgement)
     {
         if (judgementScript != null)
@@ -147,6 +170,7 @@ public class ComboDisplayManager : Script
             Console.WriteLine("[ComboDisplayManager] ⚠️ Judgement display not registered yet!");
         }
     }
+
 
     private void ClearAllKeys()
     {

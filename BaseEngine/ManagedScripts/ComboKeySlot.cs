@@ -5,15 +5,15 @@ using ScriptAPI;
 /// Attach this script to EACH KeySlot entity (KeySlot0, KeySlot1, KeySlot2, KeySlot3)
 /// Each slot manages its own display independently
 /// 
-/// IMPORTANT: Set SlotIndex in editor (0-3)
-/// FIXED: Uses correct texture paths
+/// SlotIndex is auto-detected from sprite filename (W.png, A.png, S.png, D.png)
+/// RELEASE-SAFE: Proper checks for component existence and texture loading
 /// </summary>
 public class ComboKeySlot : Script
 {
-    // Configuration
-    public int SlotIndex = 0; // SET THIS IN EDITOR: 0 for KeySlot0, 1 for KeySlot1, etc.
+    // Configuration - auto-detected from sprite
+    public int SlotIndex = 0;
 
-    // FIXED PATHS
+    // Sprite paths
     public string WSprite = "../../PulseEngine/Assets/Textures/UI/W.png";
     public string ASprite = "../../PulseEngine/Assets/Textures/UI/A.png";
     public string SSprite = "../../PulseEngine/Assets/Textures/UI/S.png";
@@ -31,16 +31,62 @@ public class ComboKeySlot : Script
         // Register with manager on first update
         if (!hasRegistered)
         {
+            // Get sprite component
+            var sprite = GetSprite();
+            
+            // SAFETY CHECK: Make sure sprite component exists
+            if (!sprite.HasSprite())
+            {
+                // Component doesn't exist yet - retry next frame
+                return;
+            }
+            
+            // SAFETY CHECK: Make sure texture is loaded
+            string texturePath = sprite.Texture;
+            
+            if (string.IsNullOrEmpty(texturePath))
+            {
+                // Texture not loaded yet - retry next frame
+                return;
+            }
+            
+            // Auto-detect SlotIndex from sprite filename
+            string texturePathLower = texturePath.ToLower();
+            
+            if (texturePathLower.Contains("w.png"))
+            {
+                SlotIndex = 0;
+            }
+            else if (texturePathLower.Contains("a.png"))
+            {
+                SlotIndex = 1;
+            }
+            else if (texturePathLower.Contains("s.png"))
+            {
+                SlotIndex = 2;
+            }
+            else if (texturePathLower.Contains("d.png"))
+            {
+                SlotIndex = 3;
+            }
+            else
+            {
+                Console.WriteLine($"[ComboKeySlot] ⚠️ Could not detect SlotIndex from '{texturePath}'");
+                SlotIndex = 0; // Default fallback
+            }
+            
+            // Register with manager
             ComboDisplayManager.RegisterKeySlot(SlotIndex, this);
 
             // Hide initially
             Hide();
 
+            // Mark as registered
             hasRegistered = true;
-            Console.WriteLine($"[ComboKeySlot] Slot {SlotIndex} initialized and hidden");
+            Console.WriteLine($"[ComboKeySlot] ✓ Slot {SlotIndex} registered");
         }
 
-        // Continue with normal update
+        // Update display timer
         if (isShowing)
         {
             displayTimer -= Time.DeltaTime;
@@ -54,8 +100,9 @@ public class ComboKeySlot : Script
 
     public void ShowKey(char key)
     {
-        // Get the sprite component attached to THIS entity
+        // Get sprite component
         var sprite = GetSprite();
+        
         if (!sprite.HasSprite())
         {
             Console.WriteLine("[ComboKeySlot] ERROR: No sprite component!");
@@ -74,7 +121,7 @@ public class ComboKeySlot : Script
         isShowing = true;
         displayTimer = DisplayDuration;
 
-        Console.WriteLine($"[ComboKeySlot] Showing {key} sprite: {texturePath}");
+        Console.WriteLine($"[ComboKeySlot] Slot {SlotIndex} showing {key}");
     }
 
     public void Hide()
@@ -82,8 +129,6 @@ public class ComboKeySlot : Script
         var transform = GetTransform();
         transform.IsVisible = false;
         isShowing = false;
-
-        Console.WriteLine("[ComboKeySlot] Hidden");
     }
 
     private string GetSpriteForKey(char key)
