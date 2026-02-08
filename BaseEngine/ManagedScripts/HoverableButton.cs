@@ -11,9 +11,10 @@
 *
 /******************************************************************************/
 
+using ScriptAPI;
 using System;
 using System.Collections.Generic;
-using ScriptAPI;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 public class NavigationButtons : Script
 {
@@ -42,6 +43,8 @@ public class NavigationButtons : Script
 
     private bool hasPlayedHoverSound = false;
 
+    private static bool wasEscPressed = false;
+
     public override void Update()
     {
         // Reset history when a new Play session starts (frame count resets to 0)
@@ -52,12 +55,41 @@ public class NavigationButtons : Script
             currentScene = "";
             ShowQuitOverlay = false;
             ShowPauseOverlay = false;
+            wasEscPressed = false;
+        }
+
+        if (currentFrame != lastFrameCount)
+        {
+            wasEscPressed = false;
         }
 
         lastFrameCount = currentFrame;
 
         InputComponent input = GetInput();
         TransformComponent t = GetTransform();
+
+        //Console.WriteLine($"Current Scene: '{currentScene}'");
+        string RealCurrentScene = Scene.GetCurrentScene();
+        //Console.WriteLine($"Current Scene: '{RealCurrentScene}'");
+
+        // Make it so that you can only press "ESC" key to pause game when in level. Update as we add more level ogay?!
+        if(input.IsKeyTriggered(256) && !wasEscPressed) //256 IS ESC KEY, We using GLFW not ASC >:/
+        {
+            wasEscPressed = true;
+            Console.WriteLine("ESC pressed!");
+            Console.WriteLine($"Current Scene: '{RealCurrentScene}'");
+
+            // Only allow pause in gameplay scenes
+            if (!string.IsNullOrEmpty(RealCurrentScene) &&
+                !RealCurrentScene.Equals("MainMenu") &&
+                !RealCurrentScene.Equals("Settings") &&
+                !RealCurrentScene.Equals("Cutscene") &&
+                !RealCurrentScene.Equals("HowToPlay"))
+            {
+                ShowPauseOverlay = !ShowPauseOverlay;
+                Console.WriteLine($"Pause overlay toggled: {ShowPauseOverlay}");
+            }
+        }
 
         if (!t.IsVisible)
         {

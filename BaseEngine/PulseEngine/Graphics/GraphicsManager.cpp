@@ -105,7 +105,7 @@ void GraphicsManager::Initialize()
     }
     else
     {
-        std::cout << "[GraphicsManager] Successfully loaded fonts from  asset registry.\n";
+        //std::cout << "[GraphicsManager] Successfully loaded fonts from  asset registry.\n";
     }
 
     // Subscribe to combo messages - DONT REMOVE, TEST FOR MESSAGE SYSTEM
@@ -337,7 +337,7 @@ GLuint GraphicsManager::LoadTextureFile(const std::string &path)
 
     std::string resolvedPath = path;
 
-    std::cout << "[DEBUG LoadTextureFile] Original path: " << path << std::endl;
+    //std::cout << "[DEBUG LoadTextureFile] Original path: " << path << std::endl;
 
     if (path.find("../../") == 0)
     {
@@ -346,13 +346,13 @@ GLuint GraphicsManager::LoadTextureFile(const std::string &path)
         GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
         std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
 
-        std::cout << "[DEBUG LoadTextureFile] currentDir: " << currentDir << std::endl;
+        //std::cout << "[DEBUG LoadTextureFile] currentDir: " << currentDir << std::endl;
 
         std::filesystem::path basePath;
         if (std::filesystem::exists(currentDir / "PulseEngine"))
         {
             basePath = currentDir / "PulseEngine";  // Release
-            std::cout << "[DEBUG LoadTextureFile] Using release path" << std::endl;
+            //std::cout << "[DEBUG LoadTextureFile] Using release path" << std::endl;
         }
         else
         {
@@ -362,14 +362,14 @@ GLuint GraphicsManager::LoadTextureFile(const std::string &path)
                 baseEngineDir = baseEngineDir.parent_path();
             }
             basePath = baseEngineDir / "PulseEngine";  // Dev
-            std::cout << "[DEBUG LoadTextureFile] Using dev path" << std::endl;
+            //std::cout << "[DEBUG LoadTextureFile] Using dev path" << std::endl;
         }
 
         // Strip ../../PulseEngine/ and use basePath
         std::string relativePath = path.substr(std::string("../../PulseEngine/").length());
         resolvedPath = (basePath / relativePath).make_preferred().string(); 
 
-        std::cout << "[DEBUG LoadTextureFile] Resolved to: " << resolvedPath << std::endl;
+        //std::cout << "[DEBUG LoadTextureFile] Resolved to: " << resolvedPath << std::endl;
     }
 
     if (!std::filesystem::exists(resolvedPath))
@@ -379,8 +379,8 @@ GLuint GraphicsManager::LoadTextureFile(const std::string &path)
     }
     else
     {
-        std::cout << "[DEBUG LoadTextureFile] FILE EXISTS! Size: "
-            << std::filesystem::file_size(resolvedPath) << " bytes\n";
+        //std::cout << "[DEBUG LoadTextureFile] FILE EXISTS! Size: "
+          //  << std::filesystem::file_size(resolvedPath) << " bytes\n";
     }
 
     int w = 0, h = 0, n = 0;
@@ -437,8 +437,8 @@ bool GraphicsManager::LoadTexturesFromRegistry()
         texHandle_key[tr.tex_name] = tex_id;
         // s_idToPath[id] = tr.path;
 
-        std::cout << "[Texture] Loaded: id='" << name << "' path='" << tr.path
-                  << "' -> GL#" << tex_id << "\n";
+        //std::cout << "[Texture] Loaded: id='" << name << "' path='" << tr.path
+        //          << "' -> GL#" << tex_id << "\n";
     }
 
     return ok;
@@ -599,9 +599,9 @@ bool GraphicsManager::LoadFontsFromRegistry()
         }
         else
         {
-            std::cout << "[Font] Loaded: id='" << fr.font_id
-                      << "' path='" << fr.path
-                      << "' px=" << fr.pixelHeight << "\n";
+           // std::cout << "[Font] Loaded: id='" << fr.font_id
+           //           << "' path='" << fr.path
+           //           << "' px=" << fr.pixelHeight << "\n";
         }
     }
     return ok;

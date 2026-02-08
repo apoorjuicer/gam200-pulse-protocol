@@ -539,14 +539,14 @@
 			return "";
 		}
 
-		std::cout << "[DEBUG] GetTextureItemPath('" << id << "'):\n";
-		std::cout << "  basePath: " << basePath << "\n";
-		std::cout << "  res->path: " << res->path << "\n";
+		//std::cout << "[DEBUG] GetTextureItemPath('" << id << "'):\n";
+		//std::cout << "  basePath: " << basePath << "\n";
+		//std::cout << "  res->path: " << res->path << "\n";
 
 		if (res->path.find("../../") == 0) {
 			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
 			std::string resolved = (basePath / relativePath).string();
-			std::cout << "  resolved: " << resolved << "\n";
+			//std::cout << "  resolved: " << resolved << "\n";
 			return resolved;
 		}
 
@@ -560,9 +560,9 @@
 			return "";
 		}
 
-		std::cout << "[DEBUG] GetFontItemPath('" << id << "'):\n";
-		std::cout << "  basePath: " << basePath << "\n";
-		std::cout << "  res->path: " << res->path << "\n";	
+		//std::cout << "[DEBUG] GetFontItemPath('" << id << "'):\n";
+		//std::cout << "  basePath: " << basePath << "\n";
+		//std::cout << "  res->path: " << res->path << "\n";	
 
 		if (res->path.find("../../") == 0) {
 			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());

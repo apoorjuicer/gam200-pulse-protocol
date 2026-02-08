@@ -905,7 +905,7 @@ void CoreEngine::Update(float dt)
 	// Press R to reload the script changes 
 	static bool wasRPressed = false;
 
-#ifndef _DEBUG
+#ifdef _DEBUG
 	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
 	{
 		if (!wasRPressed)
