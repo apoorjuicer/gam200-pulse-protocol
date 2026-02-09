@@ -48,16 +48,21 @@
 /******************************************************************************/
 #pragma once
 #include "Factory.h"
+#include "Graphics/Text.h"
+#include "Graphics/Animation.h"
+#include "Graphics/Renderable.h"
 #include "CoreEngine/Assets.h"
 #include "Components/DisplayName.h"
 #include "Components/ParentChild.h"
+#include "StateMachine/StateMachine.h"
+
 
 using namespace rapidjson;
 
 // change to optional for bool(if loaded succeessfully) and entity ID(for chloe)
 // added file path that will be given from either scene manager/ImGui
 // Read from file, loop thru a check if have type and component. Add component base on type.
-std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path)
+std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, bool attachScripts)
 {
 	auto *g_coordinator = Coordinator::GetInstance();
 
@@ -123,6 +128,13 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path)
 			LogicComponent l;
 			l.Deserialize(component["script"]);
 			g_coordinator->AddComponent<LogicComponent>(entity, l);
+		}
+
+		if (component.HasMember("State") && component["State"].IsObject())
+		{
+			FSM f;
+			f.Deserialize(component["State"]);
+			g_coordinator->AddComponent<FSM>(entity, f);
 		}
 
 		if (component.HasMember("name") && component["name"].IsObject())
@@ -196,8 +208,8 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path)
 	
 
 	
-	// Add them to C# script container 
-	if (g_coordinator->HasComponent<LogicComponent>(entity))
+	// Add them to C# script container AND ONLY IF IT NOT ITERATING THRU THE SCRIPTS 
+	if (attachScripts && g_coordinator->HasComponent<LogicComponent>(entity))
 	{
 		auto addScriptFunc = m_coreEngine->GetFunctionPtr<bool(*)(int, const char*)>(
 			"ScriptAPI",
@@ -349,6 +361,18 @@ bool Factory::SaveEntityToJson(Entity entity, std::filesystem::path const &path)
 		script.Serialize(ScriptVal, alloc);
 
 		ComponentObj.AddMember("script", ScriptVal, alloc);
+		componentsArray.PushBack(ComponentObj, alloc);
+	}
+
+	if (g_coordinator->HasComponent<FSM>(entity))
+	{
+		Value ComponentObj(rapidjson::kObjectType);
+		Value FSMVal;
+
+		auto& fsm = g_coordinator->GetComponent<FSM>(entity);
+		fsm.Serialize(FSMVal, alloc);
+
+		ComponentObj.AddMember("State", FSMVal, alloc);
 		componentsArray.PushBack(ComponentObj, alloc);
 	}
 

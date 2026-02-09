@@ -17,6 +17,7 @@
 #include "DeltaTime.h"
 #include "InputAPI.h"
 #include "Collision.h"
+#include "FSM.h"
 #include "AudioAPI.h"
 #include "Sprite.h"
 #include "Application.h"
@@ -26,15 +27,12 @@ namespace ScriptAPI
     //forward delcaration
     value struct TransformComponent;
     value struct HealthComponent;
-    value struct Factory;
     value struct Animation;
     value struct TextComponentAPI;
-    // value struct DeltaTime 
     value struct CollisionComponent;
+    value struct FSMController;
     value struct AudioComponent;
     value struct SpriteComponent;
-   // value struct DeltaTime 
-    //value struct LogicComponent;
 
     public ref class Script abstract
     {
@@ -46,7 +44,8 @@ namespace ScriptAPI
         HealthComponent GetHealth();
         Animation GetAnimation();
         InputComponent GetInput();
-        CollisionComponent GetCollision();
+        CollisionComponent GetCollision(); 
+        FSMComponentAPI GetFSM();
         AudioComponent GetAudio();
         SpriteComponent GetSprite();
         TextComponentAPI GetTextComponent();

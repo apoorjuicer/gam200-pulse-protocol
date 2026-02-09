@@ -500,7 +500,8 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "QuitOverlay"
+                            "QuitOverlay",
+                            "SfxKnob"
                         ]
                     }
                 },
@@ -537,8 +538,8 @@
                             "y": -300.0
                         },
                         "scale": {
-                            "x": 200.0,
-                            "y": 200.0
+                            "x": 250.0,
+                            "y": 133.3333282470703
                         },
                         "rotation": {
                             "x": 0.0,
@@ -611,8 +612,8 @@
                             "y": -300.0
                         },
                         "scale": {
-                            "x": 200.0,
-                            "y": 200.0
+                            "x": 250.0,
+                            "y": 133.3300018310547
                         },
                         "rotation": {
                             "x": 0.0,
@@ -681,12 +682,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -884.6515502929688,
-                            "y": -820.6863403320313
+                            "x": -888.7865600585938,
+                            "y": -485.9311218261719
                         },
                         "scale": {
                             "x": 200.0,
-                            "y": 48.0
+                            "y": 200.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -734,12 +735,6 @@
                     }
                 },
                 {
-                    "prefabInstance": {
-                        "prefabName": "Debug Display Text",
-                        "isLinked": false
-                    }
-                },
-                {
                     "layerTag": {
                         "layerName": "World",
                         "mask": 2,
@@ -753,17 +748,17 @@
                         "text": "New Text",
                         "font_id": "PatrickHand_font",
                         "offset": {
-                            "x": 483.0,
-                            "y": -312.0
+                            "x": 0.0,
+                            "y": 0.0
                         },
                         "font_size": 40.0,
                         "color": [
-                            0.0,
-                            1.0,
-                            0.7352938652038574
+                            0.4019607901573181,
+                            0.912053108215332,
+                            1.0
                         ],
                         "visible": true,
-                        "alignment": 2
+                        "alignment": 0
                     }
                 }
             ]

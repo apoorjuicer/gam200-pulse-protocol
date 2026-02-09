@@ -1,17 +1,22 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using ScriptAPI;
 
 public class ComboSystem : Script
 {
     // =========================
+    // Global Access (Singleton)
+    // =========================
+    public static ComboSystem Instance { get; private set; }
+
+    // =========================
     // Config
     // =========================
     public int maxComboLength = 4;
 
-    public float perfectWindow = 0.05f;
-    public float goodWindow = 0.10f;
-    public float missWindow = 0.15f;
+    // Timing windows (seconds)
+    public float perfectWindow = 0.5f;
+    public float greatWindow = 1.0f;   // <= 1.0 => GREAT, > 1.0 => MISS
 
     // =========================
     // State
@@ -36,18 +41,37 @@ public class ComboSystem : Script
     private string currentEnemyWeakness = "";
 
     // =========================
+    // Initialization tracking
+    // =========================
+    private bool initialized = false;
+
+    // =========================
     // Update Loop
     // =========================
     public override void Update()
     {
+        // Set singleton instance
+        if (Instance == null)
+        {
+            Instance = this;
+            Console.WriteLine("[ComboSystem] Singleton instance set");
+        }
+
+        // First-time initialization
+        if (!initialized)
+        {
+            Console.WriteLine("[ComboSystem] Initializing...");
+            ResetCombo();
+            initialized = true;
+        }
+
         float dt = Time.DeltaTime;
         timeSinceLastBeat += dt;
 
-        Conductor conductor = GetConductor();
-        if (conductor == null)
+        if (Conductor.Instance == null)
             return;
 
-        int currentBeat = conductor.GetCurrentBeat();
+        int currentBeat = Conductor.Instance.GetCurrentBeat();
         if (currentBeat != lastBeatIndex)
         {
             lastBeatIndex = currentBeat;
@@ -61,27 +85,64 @@ public class ComboSystem : Script
     public void SetEnemyWeakness(string weaknessCombo)
     {
         currentEnemyWeakness = weaknessCombo;
+
+        // Update max combo length to match the weakness
+        maxComboLength = weaknessCombo.Length;
+
         ResetCombo();
+        Console.WriteLine($"[ComboSystem] Weakness set to: {weaknessCombo} (length: {maxComboLength})");
     }
 
     public void RegisterInput(char key)
     {
+        // Sanity check: don't allow input if no weakness set
+        if (string.IsNullOrEmpty(currentEnemyWeakness))
+        {
+            Console.WriteLine("[ComboSystem] ERROR: No weakness set! Cannot register input.");
+            return;
+        }
+
         float delta = Math.Abs(timeSinceLastBeat);
 
+        // =========================
+        // Judgement Rules
+        // PERFECT: <= 0.5
+        // GREAT:   <= 1.0
+        // MISS:     > 1.0
+        // =========================
         string judgement;
         if (delta <= perfectWindow)
             judgement = "PERFECT";
-        else if (delta <= goodWindow)
-            judgement = "GOOD";
-        else if (delta <= missWindow)
-            judgement = "LATE";
+        else if (delta <= greatWindow)
+            judgement = "GREAT";
         else
             judgement = "MISS";
 
         hitResults.Add(judgement);
         currentCombo.Add(key);
 
-        Console.WriteLine($"[{key}] Timing: {judgement} (?={delta:F3}s)");
+        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s)");
+
+        // // === AUDIO FEEDBACK - TIMING JUDGMENT SFX === UNCOMMENT ONCE SCORING SYSTEM IS STABLE
+        // AudioComponent audio = GetAudio();
+        // if (judgement == "PERFECT" || judgement == "GREAT")
+        // {
+        //     audio.PlaySFX("SFX_ComboEstablished_1");  // Success sound
+        // }
+        // else // MISS
+        // {
+        //     audio.PlaySFX("SFX_WrongInput");  // Miss sound
+        // }
+
+        // === VISUAL FEEDBACK ===
+        if (ComboDisplayManager.Instance != null)
+        {
+            ComboDisplayManager.Instance.ShowJudgement(judgement);
+        }
+        else
+        {
+            Console.WriteLine("[ComboSystem] WARNING: ComboDisplayManager not found!");
+        }
 
         // === PERFECT STREAK ===
         if (judgement == "PERFECT")
@@ -89,7 +150,7 @@ public class ComboSystem : Script
             perfectStreak++;
             if (perfectStreak >= 5)
             {
-                Console.WriteLine("Perfect streak reached!");
+                Console.WriteLine("[ComboSystem] 🔥 PERFECT STREAK x5!");
                 perfectStreak = 0;
             }
         }
@@ -98,7 +159,8 @@ public class ComboSystem : Script
             perfectStreak = 0;
         }
 
-        if (judgement == "MISS" || judgement == "LATE")
+        // Any MISS causes failure
+        if (judgement == "MISS")
             comboFailedEarly = true;
 
         if (currentCombo.Count >= maxComboLength)
@@ -116,6 +178,9 @@ public class ComboSystem : Script
         currentCombo.Clear();
         hitResults.Clear();
         comboFailedEarly = false;
+
+        // Don't log every reset, too spammy
+        // Console.WriteLine("[ComboSystem] Combo reset");
     }
 
     // =========================
@@ -126,41 +191,47 @@ public class ComboSystem : Script
         string comboString = new string(currentCombo.ToArray());
         bool allGood = !comboFailedEarly;
 
+        // Only PERFECT or GREAT are acceptable.
         foreach (string r in hitResults)
         {
-            if (r != "PERFECT" && r != "GOOD")
+            if (r != "PERFECT" && r != "GREAT")
             {
                 allGood = false;
                 break;
             }
         }
 
+        Console.WriteLine($"[ComboSystem] Entered: {comboString} | Expected: {currentEnemyWeakness}");
+
         if (allGood && comboString == currentEnemyWeakness)
         {
-            Console.WriteLine("Combo success!");
+            Console.WriteLine("[ComboSystem] ✅ COMBO SUCCESS!");
             PlayerDidSuccessfulCombo = true;
         }
         else
         {
-            Console.WriteLine("Combo failed!");
+            Console.WriteLine("[ComboSystem] ❌ COMBO FAILED!");
             PlayerDidSuccessfulCombo = false;
         }
 
-        ResetCombo();
+        // Note: Don't call ResetCombo() here - let TurnManager control when to reset
     }
 
     // =========================
-    // Helpers
+    // Debug/Utility
     // =========================
-    private Conductor GetConductor()
+    public string GetCurrentComboString()
     {
-        // TEMP: assume ComboSystem lives on same entity as Conductor
-        return GetScriptLike<Conductor>();
+        return new string(currentCombo.ToArray());
     }
 
-    // Placeholder until engine supports script lookup
-    private T GetScriptLike<T>() where T : Script
+    public int GetComboProgress()
     {
-        return default;
+        return currentCombo.Count;
+    }
+
+    public string GetExpectedCombo()
+    {
+        return currentEnemyWeakness;
     }
 }

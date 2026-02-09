@@ -16,10 +16,21 @@
 #using <System.Runtime.Loader.dll>
 #pragma warning(disable: 4945)  // Suppress assembly conflict warnings for dotnet System.Runtime.CoreLib and Loader :p
 
-#include "EngineInterface.h"
+// dumb "error" that shows even tho it compiles and is a valid thing??!?!??!
+#ifdef __INTELLISENSE__
+#pragma diag_suppress 289
+#pragma diag_suppress 2242
+#endif
+
+#define generic generic_workaround
+#include "EngineInterface.h" 
+#include "../CoreEngine/ECS/Coordinator.h"
 #include "CoreEngine/Core/ScriptingBridge.h"
 #include <string>
 #pragma comment(lib, "PulseEngine.lib")
+#undef generic
+
+
 
 namespace ScriptAPI
 {
@@ -29,9 +40,11 @@ namespace ScriptAPI
 
         coreEngine = p_coreEngine;
 
-
-        // Load assembly (old method) 
-        //System::Reflection::Assembly::LoadFrom("ManagedScripts.dll");
+        if (QueuedScript != nullptr)
+        {
+            delete QueuedScript;
+        }
+        QueuedScript = new std::vector<int>();
         
         // Create unloadable assembly context
         loadContext = gcnew System::Runtime::Loader::AssemblyLoadContext(nullptr, true);
@@ -316,6 +329,82 @@ namespace ScriptAPI
                   }
             }
         }
+
+        // add the scripts that was in queue
+        ProcessQueuedScript();
+    }
+
+    void EngineInterface::InQueueScripts(int entityID)
+    {
+        System::Console::WriteLine("[EngineInterface] Queued script attachment for entity {0}", entityID);
+        QueuedScript->push_back(entityID);
+    }
+
+    void EngineInterface::ProcessQueuedScript()
+    {
+        if (QueuedScript->empty())
+        {
+            return;
+        }
+
+        System::Console::WriteLine("[EngineInterface] Attaching scripts to {0} queued entities", QueuedScript->size());
+
+        auto g_coordinator = Coordinator::GetInstance();
+
+        //add those in the quqeue
+        for (int entityID : *QueuedScript)
+        {
+            try  
+            {
+                if (!g_coordinator->HasComponent<LogicComponent>(entityID))
+                {
+                    continue;
+                }
+
+                auto& logic = g_coordinator->GetComponent<LogicComponent>(entityID);
+                System::Console::WriteLine("  Found {0} scripts to attach", logic.ScriptName.size());
+
+                // add the array of scripts
+                for (const auto& scriptName : logic.ScriptName)
+                {
+                    if (!scriptName.empty())
+                    {
+                        System::Console::WriteLine("  Attempting to attach: '{0}'", gcnew System::String(scriptName.c_str()));
+
+                        System::String^ managedName = gcnew System::String(scriptName.c_str());
+                        bool success = AddScriptViaName(entityID, managedName);
+                    }
+                }
+            }
+
+            //just incase no got error cos i cant fking breakpoint :/
+            catch (System::Exception^ ex)  
+            {
+                System::Console::WriteLine("EXCEPTION processing entity {0}: {1}", entityID, ex->Message);
+                System::Console::WriteLine("Stack trace: {0}", ex->StackTrace);
+            }
+        }
+
+        // clear for next loop
+        QueuedScript->clear();
+        System::Console::WriteLine("[EngineInterface] Script attachment complete! YIPPEEE\n");
+    }
+
+    void EngineInterface::Shutdown()
+    {
+        System::Console::WriteLine("Shutting down EngineInterface...");
+
+        // Clean up vector
+        if (QueuedScript != nullptr)
+        {
+            delete QueuedScript;
+            QueuedScript = nullptr;
+        }
+
+        // Clean up scripts
+        ClearAllScripts();
+
+        System::Console::WriteLine("EngineInterface shutdown complete");
     }
 
     void EngineInterface::HelloWorld()

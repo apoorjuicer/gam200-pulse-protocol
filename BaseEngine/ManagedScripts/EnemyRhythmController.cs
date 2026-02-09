@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using ScriptAPI;
 
 public enum EnemyState { Idle, Moving, Attacking, Dead }
@@ -6,18 +6,22 @@ public enum RhythmType { OneBeat, TwoBeat, Syncopated, FourBeat }
 
 public class EnemyRhythmController : Script
 {
+    // =========================
+    // Global Access (Singleton)
+    // =========================
+    public static EnemyRhythmController Instance { get; private set; }
+
     // === SPRITE SHEET SETTINGS ===
     public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_220x432";
     public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_322x433";
     public string AttackSpriteSheet = "../Enemies/Rattack_spritesheet_634x431";
     public string HurtSpriteSheet = "../Enemies/Rat_Hurt_spritesheet_515x428";
 
-    // === SPRITE SHEET FRAME DATA (CORRECTED) ===
-    public int IdleFrames = 16;
+    public int IdleFrames = 15;
     public int IdleColumns = 4;
     public int IdleRows = 4;
 
-    public int WalkFrames = 16;
+    public int WalkFrames = 15;
     public int WalkColumns = 4;
     public int WalkRows = 4;
 
@@ -26,37 +30,52 @@ public class EnemyRhythmController : Script
     public int AttackRows = 4;
 
     public int HurtFrames = 15;
-    public int HurtColumns = 5;
-    public int HurtRows = 3;
+    public int HurtColumns = 4;
+    public int HurtRows = 4;
 
     public float AnimationSpeed = 12f;
 
+    // FIXED: Don't force sprite scale - let the sprite sheet use its native size
+    // If you need to resize, use MULTIPLIERS not absolute values
+    public float SizeMultiplier = 2.0f; // 0.5 = half size, 1.0 = full size, 2.0 = double size
+
     // === RHYTHM SETTINGS ===
-    public RhythmType RhythmType = RhythmType.OneBeat;
-    public float StepDistance = 1f;
-    public float MoveSpeed = 4f;
+    public RhythmType RhythmType = RhythmType.Syncopated;
+    public float StepDistance = 50f;
 
     // === COMBAT SETTINGS ===
-    public float AttackRange = 3.0f;
-    public float AttackDamage = 10f;
-    public float Health = 10f;
+    public float AttackRange = 25f;
+    public int AttackDamage = 12;
+    public float Health = 15f;
 
-    // === POSITIONING ===
-    public float StopOffset = 1.0f;
-    public float AttackTriggerRange = 1.5f;
+    // === PLAYER DETECTION ===
+    public float PlayerX = -902f;
+    public float PlayerY = -151f;
 
     // === WEAKNESS ===
     public string WeaknessCombo = "WAWA";
-    public string WeaknessWeapon = "Spear";
 
     // === INTERNAL STATE ===
     private bool initialized = false;
+    private int lastBeat = -1;
+    private bool isDead = false;
     private EnemyState currentState = EnemyState.Idle;
 
-    // === UPDATE ===
+    private float attackCooldownTimer = 0f;
+    private float deathTimer = 0f;
+    private bool waitingToDie = false;
+
+    // Track movement during enemy turn
+    private int movementStepsTaken = 0;
+    private int maxMovementSteps = 4;
+
+    // Track if we've tried to set weakness
+    private bool weaknessSet = false;
+    private int weaknessRetryCount = 0;
+    private const int maxWeaknessRetries = 100;
+
     public override void Update()
     {
-        // First frame initialization
         if (!initialized)
         {
             Initialize();
@@ -64,108 +83,269 @@ public class EnemyRhythmController : Script
             return;
         }
 
-        // TESTING: Keyboard controls to test sprite switching
-        InputComponent input = GetInput();
-
-        // Press 1 for Idle
-        if (input.IsKeyTriggered(49)) // Key '1'
+        // Keep trying to set weakness until ComboSystem is ready
+        if (!weaknessSet && weaknessRetryCount < maxWeaknessRetries)
         {
-            Console.WriteLine("[TEST] Switching to IDLE");
-            SetStateVisuals(EnemyState.Idle);
+            TrySetWeakness();
+            weaknessRetryCount++;
         }
 
-        // Press 2 for Walk
-        if (input.IsKeyTriggered(50)) // Key '2'
+        if (isDead)
         {
-            Console.WriteLine("[TEST] Switching to WALK");
-            SetStateVisuals(EnemyState.Moving);
+            if (waitingToDie)
+            {
+                deathTimer += Time.DeltaTime;
+                if (deathTimer >= 2.5f)
+                {
+                    TransformComponent tf = GetTransform();
+                    tf.IsVisible = false;
+                }
+            }
+            return;
         }
 
-        // Press 3 for Attack
-        if (input.IsKeyTriggered(51)) // Key '3'
+        if (attackCooldownTimer > 0f)
         {
-            Console.WriteLine("[TEST] Switching to ATTACK");
-            SetStateVisuals(EnemyState.Attacking);
+            attackCooldownTimer -= Time.DeltaTime;
+            if (attackCooldownTimer <= 0f)
+            {
+                if (currentState == EnemyState.Attacking)
+                    SetState(EnemyState.Idle);
+            }
         }
 
-        // Press 4 for Hurt
-        if (input.IsKeyTriggered(52)) // Key '4'
+        // Movement logic
+        if (Conductor.Instance != null)
         {
-            Console.WriteLine("[TEST] Switching to HURT");
-            SetStateVisuals(EnemyState.Dead);
+            int currentBeat = Conductor.Instance.GetCurrentBeat();
+            if (currentBeat != lastBeat)
+            {
+                lastBeat = currentBeat;
+                HandleBeat(currentBeat);
+            }
         }
     }
 
     private void Initialize()
     {
-        // Set initial scale
+        // Set singleton
+        if (Instance == null)
+            Instance = this;
+
+        Console.WriteLine("[Enemy] Initializing...");
+
         TransformComponent tf = GetTransform();
-        tf.ScaleX = 200f;
-        tf.ScaleY = 200f;
 
-        // Set initial sprite
-        SetStateVisuals(EnemyState.Idle);
+        // FIXED: Don't override scale if it's already set properly in scene
+        // Only set scale if it's at default (1.0) or if SizeMultiplier is specified
+        if (SizeMultiplier != 1.0f && (tf.ScaleX == 1.0f || tf.ScaleY == 1.0f))
+        {
+            // Apply multiplier to native sprite size
+            tf.ScaleX = 220f * SizeMultiplier;  // Rat idle width
+            tf.ScaleY = 432f * SizeMultiplier;  // Rat idle height
+            Console.WriteLine($"[Enemy] Applied size multiplier {SizeMultiplier}x → Scale: ({tf.ScaleX}, {tf.ScaleY})");
+        }
+        else
+        {
+            Console.WriteLine($"[Enemy] Using scene-configured scale: ({tf.ScaleX}, {tf.ScaleY})");
+        }
 
-        Console.WriteLine("[EnemyRhythmController] INITIALIZED! Press 1-4 to test animations:");
-        Console.WriteLine("  1 = Idle (16 frames)");
-        Console.WriteLine("  2 = Walk (16 frames)");
-        Console.WriteLine("  3 = Attack (20 frames)");
-        Console.WriteLine("  4 = Hurt (15 frames)");
+        SetState(EnemyState.Idle);
+
+        if (Conductor.Instance != null)
+        {
+            lastBeat = Conductor.Instance.GetCurrentBeat();
+            Console.WriteLine("[Enemy] Conductor connected");
+        }
+
+        // Try to set weakness immediately
+        TrySetWeakness();
+
+        Console.WriteLine($"[Enemy] Initialized at ({tf.X}, {tf.Y}) | Health: {Health}");
     }
 
-    private void SetStateVisuals(EnemyState state)
+    private void TrySetWeakness()
     {
-        currentState = state;
+        if (weaknessSet)
+            return;
 
+        if (ComboSystem.Instance != null)
+        {
+            ComboSystem.Instance.SetEnemyWeakness(WeaknessCombo);
+            weaknessSet = true;
+            Console.WriteLine($"[Enemy] ✓ Weakness successfully set to: {WeaknessCombo}");
+        }
+        else if (weaknessRetryCount == 0)
+        {
+            Console.WriteLine("[Enemy] ⚠️ ComboSystem.Instance is null - will retry...");
+        }
+        else if (weaknessRetryCount == maxWeaknessRetries - 1)
+        {
+            Console.WriteLine("[Enemy] ❌ ERROR: ComboSystem never initialized!");
+        }
+    }
+
+    private void SetState(EnemyState newState)
+    {
+        if (currentState == newState) return;
+
+        Console.WriteLine($"[Enemy] State: {currentState} → {newState}");
+        currentState = newState;
+        UpdateSpriteSheet(newState);
+    }
+
+    private void UpdateSpriteSheet(EnemyState state)
+    {
         Animation anim = GetAnimation();
 
         switch (state)
         {
             case EnemyState.Idle:
                 anim.SetAnimation(IdleSpriteSheet, IdleRows, IdleColumns, IdleFrames, AnimationSpeed);
-                Console.WriteLine($"[Rat] ? IDLE: {IdleFrames} frames ({IdleColumns}x{IdleRows})");
                 break;
 
             case EnemyState.Moving:
                 anim.SetAnimation(WalkSpriteSheet, WalkRows, WalkColumns, WalkFrames, AnimationSpeed);
-                Console.WriteLine($"[Rat] ? WALK: {WalkFrames} frames ({WalkColumns}x{WalkRows})");
                 break;
 
             case EnemyState.Attacking:
                 anim.SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, AnimationSpeed);
-                Console.WriteLine($"[Rat] ? ATTACK: {AttackFrames} frames ({AttackColumns}x{AttackRows})");
                 break;
 
             case EnemyState.Dead:
                 anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, AnimationSpeed / 2f);
-                Console.WriteLine($"[Rat] ? HURT: {HurtFrames} frames ({HurtColumns}x{HurtRows})");
                 break;
         }
     }
 
-    // === PUBLIC METHODS FOR EXTERNAL CONTROL ===
-    public void StartMoving()
+    private void HandleBeat(int beat)
     {
-        SetStateVisuals(EnemyState.Moving);
+        if (TurnManager.Instance == null)
+            return;
+
+        TurnPhase currentPhase = TurnManager.Instance.GetCurrentPhase();
+
+        if (currentPhase == TurnPhase.Countdown)
+        {
+            SetState(EnemyState.Idle);
+            return;
+        }
+
+        if (currentPhase == TurnPhase.EnemyDisplay)
+        {
+            if (movementStepsTaken < maxMovementSteps)
+            {
+                Step();
+                movementStepsTaken++;
+                Console.WriteLine($"[Enemy] Enemy Display - moved step {movementStepsTaken}/{maxMovementSteps}");
+            }
+            return;
+        }
+
+        if (currentPhase == TurnPhase.PlayerInput)
+        {
+            SetState(EnemyState.Idle);
+            return;
+        }
     }
 
-    public void StartAttacking()
+    private void Step()
     {
-        SetStateVisuals(EnemyState.Attacking);
+        SetState(EnemyState.Moving);
+
+        TransformComponent myTf = GetTransform();
+        myTf.X -= StepDistance;
+
+        float distanceToPlayer = Math.Abs(myTf.X - PlayerX);
+        Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}, Distance to player: {distanceToPlayer:F1}");
+    }
+
+    private void AttackPlayer()
+    {
+        if (isDead) return;
+
+        Console.WriteLine($"[Enemy] ⚔️⚔️ ATTACKING PLAYER for {AttackDamage} damage!");
+        SetState(EnemyState.Attacking);
+
+        attackCooldownTimer = AttackFrames / AnimationSpeed;
+
+        if (PlayerHealth.Instance != null)
+        {
+            PlayerHealth.Instance.TakeDamage(AttackDamage);
+            Console.WriteLine($"[Enemy] ✓ Successfully damaged player");
+        }
+        else
+        {
+            Console.WriteLine($"[Enemy] ⚠️ WARNING: PlayerHealth.Instance is null!");
+        }
     }
 
     public void TakeDamage(float dmg)
     {
+        if (isDead) return;
+
         Health -= dmg;
-        SetStateVisuals(EnemyState.Dead);
+        Console.WriteLine($"[Enemy] Took {dmg} damage! HP: {Health}/{Health + dmg}");
 
         if (Health <= 0)
+        {
             Die();
+        }
     }
 
     private void Die()
     {
-        SetStateVisuals(EnemyState.Dead);
-        Console.WriteLine("[EnemyRhythmController] Enemy defeated!");
+        if (isDead) return;
+
+        isDead = true;
+        waitingToDie = true;
+        deathTimer = 0f;
+        SetState(EnemyState.Dead);
+
+        Console.WriteLine("[Enemy] ☠️ DEFEATED!");
+        Console.WriteLine("==============================================");
+        Console.WriteLine("🏆 VICTORY! Enemy defeated!");
+        Console.WriteLine("==============================================");
+    }
+
+    public void ExecuteFailurePunishment()
+    {
+        Console.WriteLine("[Enemy] ExecuteFailurePunishment() called");
+
+        int remainingSteps = maxMovementSteps - movementStepsTaken;
+
+        Console.WriteLine($"[Enemy] Player failed! Moving {remainingSteps} remaining steps");
+
+        for (int i = 0; i < remainingSteps; i++)
+        {
+            Step();
+        }
+
+        TransformComponent myTf = GetTransform();
+        float distanceToPlayer = Math.Abs(myTf.X - PlayerX);
+
+        if (distanceToPlayer <= AttackRange)
+        {
+            Console.WriteLine($"[Enemy] In range ({distanceToPlayer:F1} <= {AttackRange}) - attacking!");
+            AttackPlayer();
+        }
+        else
+        {
+            Console.WriteLine($"[Enemy] Not in range yet ({distanceToPlayer:F1} > {AttackRange}) - waiting...");
+        }
+    }
+
+    public void ResetMovementForNewTurn()
+    {
+        Console.WriteLine("[Enemy] ResetMovementForNewTurn() - resetting step counter");
+        movementStepsTaken = 0;
+
+        if (!weaknessSet)
+        {
+            weaknessRetryCount = 0;
+            TrySetWeakness();
+        }
+
+        SetState(EnemyState.Idle);
     }
 }
