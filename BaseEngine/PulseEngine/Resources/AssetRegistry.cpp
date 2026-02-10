@@ -530,7 +530,7 @@
 			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
 			return (basePath / relativePath).string();
 		}
-		return FindAudio(id)->path;
+		return res->path;
 	}
 	std::string AssetRegistry::GetTextureItemPath(std::string const& id) const {
 		auto* res = FindTexture(id);
@@ -583,7 +583,7 @@
 			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
 			return (basePath / relativePath).string();
 		}
-		return FindScene(id)->path;
+		return res->path;
 	}
 	std::string AssetRegistry::GetAnimationItemPath(std::string const& id)   const {
 		auto* res = FindAnimation(id);
@@ -594,7 +594,7 @@
 			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
 			return (basePath / relativePath).string();
 		}
-		return FindAnimation(id)->path;
+		return res->path;
 	}
 
 
