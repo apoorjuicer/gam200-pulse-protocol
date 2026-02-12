@@ -2209,7 +2209,9 @@
                 },
                 {
                     "script": {
-                        "ScriptName": []
+                        "ScriptName": [
+                            "HealthBGController"
+                        ]
                     }
                 },
                 {
