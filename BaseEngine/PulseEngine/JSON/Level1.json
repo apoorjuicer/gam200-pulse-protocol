@@ -128,7 +128,8 @@
                     "script": {
                         "ScriptName": [
                             "PlayerAnimationController",
-                            "PlayerHealth"
+                            "PlayerHealth",
+                            "DamageTestScript"
                         ]
                     }
                 },
@@ -362,12 +363,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -1041.50146484375,
-                            "y": 601.0
+                            "x": -1009.8905639648438,
+                            "y": 567.58349609375
                         },
                         "scale": {
                             "x": 400.0,
-                            "y": 175.4789276123047
+                            "y": 184.2528839111328
                         },
                         "rotation": {
                             "x": 0.0,
@@ -383,7 +384,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/health bar.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/health_bar_528x248_going down.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -394,17 +395,17 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
+                        "currentFrame": 5,
+                        "elapsedTime": 0.43348750472068787,
+                        "totalFrames": 11,
+                        "columns": 4,
+                        "rows": 3,
                         "animationSpeed": 2.0
                     }
                 },
                 {
                     "name": {
-                        "name": "HealthContainer"
+                        "name": "Heatlh"
                     }
                 },
                 {
@@ -412,8 +413,13 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": -10,
+                        "orderInLayer": 5,
                         "z": 100.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 29
                     }
                 }
             ]
@@ -442,7 +448,7 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "../../PulseEngine/Assets/Textures/UI/border_transparent.png",
                         "tintColor": {
@@ -488,72 +494,6 @@
                         "volume": 0.18000000715255737,
                         "loop": false,
                         "playOnAwake": false
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -951.0045166015625,
-                            "y": 568.8645629882813
-                        },
-                        "scale": {
-                            "x": 290.0,
-                            "y": 48.078948974609375
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/green bar.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": []
-                    }
-                },
-                {
-                    "name": {
-                        "name": "HealthBar"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": -9,
-                        "z": 100.0
                     }
                 }
             ]
@@ -888,7 +828,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 14
+                        "parent": 13
                     }
                 }
             ]
@@ -959,7 +899,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 14
+                        "parent": 13
                     }
                 }
             ]
@@ -1033,9 +973,9 @@
                 {
                     "Children": {
                         "children": [
+                            12,
                             13,
-                            14,
-                            15
+                            14
                         ]
                     }
                 }
@@ -1110,7 +1050,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 12
+                        "parent": 11
                     }
                 }
             ]
@@ -1184,7 +1124,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 12
+                        "parent": 11
                     }
                 }
             ]
@@ -1258,7 +1198,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 12
+                        "parent": 11
                     }
                 }
             ]
@@ -1279,7 +1219,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1331,7 +1271,7 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "New Text",
+                        "text": "FPS: 72.2 | Graphics System: 41.86% [DEBUG]",
                         "font_id": "PatrickHand_font",
                         "offset": {
                             "x": 0.0,
@@ -1416,8 +1356,8 @@
                 {
                     "Children": {
                         "children": [
-                            10,
-                            11
+                            9,
+                            10
                         ]
                     }
                 }
@@ -1460,8 +1400,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
+                        "currentFrame": 5,
+                        "elapsedTime": 0.016817331314086914,
                         "totalFrames": 15,
                         "columns": 4,
                         "rows": 4,
@@ -1779,11 +1719,11 @@
                 {
                     "Children": {
                         "children": [
+                            22,
                             23,
                             24,
                             25,
-                            26,
-                            27
+                            26
                         ]
                     }
                 }
@@ -1857,7 +1797,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 21
                     }
                 }
             ]
@@ -1930,7 +1870,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 21
                     }
                 }
             ]
@@ -2003,7 +1943,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 21
                     }
                 }
             ]
@@ -2076,7 +2016,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 21
                     }
                 }
             ]
@@ -2149,7 +2089,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 21
                     }
                 }
             ]
@@ -2218,6 +2158,151 @@
                         "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -1107.9107666015625,
+                            "y": 517.0291748046875
+                        },
+                        "scale": {
+                            "x": 300.0,
+                            "y": 104.47500610351563
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 2.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/back glow blue.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": []
+                    }
+                },
+                {
+                    "name": {
+                        "name": "HealthBG"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 29
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": true,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": []
+                    }
+                },
+                {
+                    "name": {
+                        "name": "HealthBar"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Children": {
+                        "children": [
+                            28,
+                            4
+                        ]
                     }
                 }
             ]

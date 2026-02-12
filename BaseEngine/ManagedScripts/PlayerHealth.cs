@@ -1,10 +1,7 @@
 ﻿using System;
 using ScriptAPI;
 
-/// <summary>
-/// Manages player health and death
-/// IMPORTANT: Attach this to your Player entity
-/// </summary>
+
 public class PlayerHealth : Script
 {
     // =========================
@@ -16,7 +13,7 @@ public class PlayerHealth : Script
     // Config
     // =========================
     public int maxHP = 100;
-
+   
     // =========================
     // State
     // =========================
@@ -63,13 +60,6 @@ public class PlayerHealth : Script
 
         Console.WriteLine($"[PlayerHealth] Initialized with {maxHP} HP");
 
-        // Register with HealthBarController if it exists
-        if (HealthBarController.Instance != null)
-        {
-            HealthBarController.Instance.SetPlayerHealthReference(this);
-            Console.WriteLine("[PlayerHealth] Registered with HealthBarController");
-        }
-
         initialized = true;
     }
 
@@ -77,9 +67,6 @@ public class PlayerHealth : Script
     // Public API
     // =========================
 
-    /// <summary>
-    /// Apply damage to the player
-    /// </summary>
     public void TakeDamage(int damage)
     {
         if (isDead) return;
@@ -92,15 +79,11 @@ public class PlayerHealth : Script
         // Trigger visual feedback
         if (currentHP > 0)
         {
-            // TODO: Play hurt animation/sound
             FlashRed();
         }
     }
 
-    /// <summary>
-    /// Heal the player
-    /// </summary>
-    public void Heal(int amount)
+    /*public void Heal(int amount)
     {
         if (isDead) return;
 
@@ -108,35 +91,27 @@ public class PlayerHealth : Script
         if (currentHP > maxHP) currentHP = maxHP;
 
         Console.WriteLine($"[PlayerHealth] Healed {amount}! HP: {currentHP}/{maxHP}");
-    }
+    }*/
 
-    /// <summary>
-    /// Get current HP
-    /// </summary>
+    
     public int GetCurrentHP()
     {
         return currentHP;
     }
 
-    /// <summary>
-    /// Get max HP
-    /// </summary>
+    
     public int GetMaxHP()
     {
         return maxHP;
     }
 
-    /// <summary>
-    /// Check if player is alive
-    /// </summary>
+   
     public bool IsAlive()
     {
         return !isDead;
     }
 
-    /// <summary>
-    /// Get health as percentage (0.0 to 1.0)
-    /// </summary>
+   
     public float GetHealthPercent()
     {
         return (float)currentHP / (float)maxHP;
@@ -158,7 +133,7 @@ public class PlayerHealth : Script
         // TODO: Trigger game over screen
         // Scene.LoadScene("GameOver");
 
-        // For now, just pause
+        // Pause
         Application.SetPaused(true);
     }
 
@@ -167,13 +142,9 @@ public class PlayerHealth : Script
     // =========================
     private void FlashRed()
     {
-        // Flash the player sprite red briefly
-        var sprite = GetSprite();
-        if (sprite.HasSprite())
+        if (HealthBGController.Instance != null)
         {
-            // TODO: Implement tween/coroutine to flash red then fade back
-            // For now, just log
-            Console.WriteLine("[PlayerHealth] 🩸 Player hurt - flashing red");
+            HealthBGController.Instance.TriggerDamageFlash();
         }
     }
 
