@@ -368,7 +368,7 @@
                         },
                         "scale": {
                             "x": 400.0,
-                            "y": 184.2528839111328
+                            "y": 184.2530059814453
                         },
                         "rotation": {
                             "x": 0.0,
@@ -382,9 +382,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/health_bar_528x248_going down.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/tile012.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -395,12 +395,19 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 5,
-                        "elapsedTime": 0.43348750472068787,
-                        "totalFrames": 11,
-                        "columns": 4,
-                        "rows": 3,
-                        "animationSpeed": 2.0
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 0.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "HealthBarController"
+                        ]
                     }
                 },
                 {
@@ -1271,7 +1278,7 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "FPS: 72.2 | Graphics System: 41.86% [DEBUG]",
+                        "text": "FPS: 75.4 | Graphics System: 37.98% [DEBUG]",
                         "font_id": "PatrickHand_font",
                         "offset": {
                             "x": 0.0,
@@ -1400,8 +1407,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 5,
-                        "elapsedTime": 0.016817331314086914,
+                        "currentFrame": 3,
+                        "elapsedTime": 0.019366677850484848,
                         "totalFrames": 15,
                         "columns": 4,
                         "rows": 4,
@@ -2172,7 +2179,7 @@
                         },
                         "scale": {
                             "x": 300.0,
-                            "y": 104.47500610351563
+                            "y": 104.4749984741211
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2259,7 +2266,7 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "",
                         "tintColor": {
