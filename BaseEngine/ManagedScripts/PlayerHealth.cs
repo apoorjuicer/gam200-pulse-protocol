@@ -58,7 +58,6 @@ public class PlayerHealth : Script
             return;
         }
 
-        // 'entityID' is a protected property from the Script base class
         PlayerEntityID = entityID;
         Console.WriteLine($"[PlayerHealth] Entity ID exposed: {PlayerEntityID}");
 
@@ -84,6 +83,12 @@ public class PlayerHealth : Script
         if (currentHP > 0)
         {
             FlashRed();
+
+            // Trigger hurt animation on the player
+            if (PlayerAnimationController.Instance != null)
+            {
+                PlayerAnimationController.Instance.PlayHurt();
+            }
         }
     }
 

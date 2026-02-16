@@ -84,12 +84,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -902.9657592773438,
-                            "y": -151.44973754882813
+                            "x": -731.8119506835938,
+                            "y": -159.14208984375
                         },
                         "scale": {
-                            "x": 300.0,
-                            "y": 755.3286743164063
+                            "x": 800.0,
+                            "y": 849.7409057617188
                         },
                         "rotation": {
                             "x": 0.0,
@@ -103,9 +103,9 @@
                 {
                     "render": {
                         "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/hero.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/../Characters/Dorian_Hurt_579x615.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -116,12 +116,12 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 1.5
+                        "currentFrame": 13,
+                        "elapsedTime": 0.023902833461761475,
+                        "totalFrames": 15,
+                        "columns": 4,
+                        "rows": 4,
+                        "animationSpeed": 12.0
                     }
                 },
                 {
@@ -129,7 +129,8 @@
                         "ScriptName": [
                             "PlayerAnimationController",
                             "PlayerHealth",
-                            "DamageTestScript"
+                            "DamageTestScript",
+                            "PlayerAnimTest"
                         ]
                     }
                 },
@@ -384,7 +385,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/tile012.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/tile007.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1278,7 +1279,7 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "FPS: 75.4 | Graphics System: 37.98% [DEBUG]",
+                        "text": "FPS: 100.3 | Graphics System: 33.87% [DEBUG]",
                         "font_id": "PatrickHand_font",
                         "offset": {
                             "x": 0.0,
@@ -1375,8 +1376,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 853.7039794921875,
-                            "y": -260.7330017089844
+                            "x": -446.2960205078125,
+                            "y": -308.80987548828125
                         },
                         "scale": {
                             "x": 110.0,
@@ -1396,7 +1397,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_fixed_220x432.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/../Enemies/Rat_Idle_spritesheet_220x432.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1407,8 +1408,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 3,
-                        "elapsedTime": 0.019366677850484848,
+                        "currentFrame": 7,
+                        "elapsedTime": 0.037418656051158905,
                         "totalFrames": 15,
                         "columns": 4,
                         "rows": 4,
