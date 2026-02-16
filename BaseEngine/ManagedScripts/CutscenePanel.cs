@@ -2,61 +2,79 @@ using System;
 using ScriptAPI;
 
 /// <summary>
-/// Cutscene Panel Controller
-/// ===========================
-/// Attach this SINGLE script to EVERY panel entity (Panel1 through Panel14).
-/// Each panel auto-detects its index from its entity name.
+/// Cutscene Panel Controller (Paired + Staggered)
+/// =================================================
+/// Attach this script to EVERY panel entity (Panel1 through Panel14).
 /// 
-/// Panels share a static timer so they stay synchronized.
-/// Each panel slides in from alternating sides, holds, then fades/slides out.
+/// Pairs: (1+2), (3+4), (5+6), (7+8), (9+10), (11+12), (13+14)
 /// 
-/// Flow per panel:
-///   1. Start off-screen and invisible
-///   2. When it's this panel's turn: become visible, slide in from left or right
-///   3. Hold in center for a moment
-///   4. Fade out (via alpha) while next panel slides in
-///   5. Become invisible, stay off-screen
+/// Entry: Left panel slides in first, then right panel follows after a short stagger.
+/// Exit:  Both panels slide upward together simultaneously.
+/// 
+/// POSITIONING:
+///   Set 'targetX' on each panel entity in the inspector to control where it sits.
+///   - Left panels (1,3,5...): use negative values like -700
+///   - Right panels (2,4,6...): use positive values like 700
+///   - Adjust per panel to account for different panel sizes
+///   If targetX is left at 0, it will use the defaults (-700 / 700).
 ///
-/// Press SPACE to skip the entire cutscene.
-/// After all panels, loads Level1.
+/// Press SPACE to skip. Loads Level1 when done.
 /// </summary>
 public class CutscenePanel : Script
 {
     // =========================
-    // Configuration (shared across all panels)
+    // Timing Configuration
     // =========================
-    public float panelHoldDuration = 1.5f;   // How long panel stays fully visible in center
-    public float slideInDuration = 0.8f;     // How long the slide-in takes
-    public float fadeOutDuration = 0.6f;     // How long the fade-out takes
-    public float slideDistance = 1600.0f;    // How far off-screen panels start
+    public float slideInDuration = 0.8f;     // Time for one panel to slide into view
+    public float staggerDelay = 0.3f;        // Delay before the second panel in a pair starts sliding in
+    public float holdDuration = 2.0f;        // Time pair stays fully visible (after both are in)
+    public float slideOutDuration = 0.8f;    // Time for both to slide out together
+    public float overlapDuration = 0.6f;     // Overlap between current pair exiting and next pair entering
 
     // =========================
-    // Static Shared State (all panels share this)
+    // Position Configuration (per-panel)
+    // =========================
+    // Set this in the inspector for each panel entity.
+    // Left panels should be negative (e.g. -700), right panels positive (e.g. 700).
+    // If left at 0, defaults will be used.
+    public float targetX = 0f;
+
+    // Defaults used when targetX is not set (left at 0)
+    public float defaultLeftX = -700f;
+    public float defaultRightX = 700f;
+
+    public float centerY = 0f;
+    public float offScreenBelow = -900f;
+    public float offScreenAbove = 900f;
+
+    // =========================
+    // Static Shared State
     // =========================
     private static float sharedElapsedTime = 0f;
-    private static int sharedCurrentPanel = 0;
     private static bool sharedCutsceneFinished = false;
-    private static bool sharedTimerStarted = false;
     private static int sharedInitCount = 0;
-    private static int totalPanels = 14;
+    private static int totalPairs = 7;
 
-    // Per-panel duration = slideIn + hold + fadeOut
-    private static float panelTotalDuration = 0f;
+    // Cached timing values (set once during init)
+    private static float sPairTotalDuration = 0f;
+    private static float sStaggerDelay = 0f;
+    private static float sSlideInDuration = 0f;
+    private static float sHoldDuration = 0f;
+    private static float sSlideOutDuration = 0f;
+    private static float sOverlapDuration = 0f;
+    private static float sOffScreenBelow = 0f;
+    private static float sOffScreenAbove = 0f;
+    private static float sCenterY = 0f;
 
     // =========================
     // Per-Instance State
     // =========================
-    private int myPanelIndex = -1;    // 0-based (Panel1 = 0, Panel14 = 13)
+    private int myPanelIndex = -1;
+    private int myPairIndex = -1;
+    private bool isLeftPanel = true;
     private bool initialized = false;
-    private bool isTimerOwner = false; // Only one panel advances the shared timer
-
-    // Positions
-    private float targetX = 0f;       // Center position (where panel displays)
-    private float targetY = 0f;
-    private float offScreenX = 0f;    // Starting off-screen position
-
-    // Slide direction: true = comes from left, false = comes from right
-    private bool slidesFromLeft = true;
+    private bool isTimerOwner = false;
+    private float myTargetX = 0f;
 
     public override void Update()
     {
@@ -69,10 +87,8 @@ public class CutscenePanel : Script
         if (sharedCutsceneFinished)
             return;
 
-        // Only the timer owner advances time and checks for skip
         if (isTimerOwner)
         {
-            // Check for skip (SPACE key)
             InputComponent input = GetInput();
             if (input.IsKeyTriggered(32))
             {
@@ -82,19 +98,10 @@ public class CutscenePanel : Script
                 return;
             }
 
-            // Advance shared timer
             sharedElapsedTime += Time.DeltaTime;
 
-            // Update which panel should be active
-            int newPanel = (int)(sharedElapsedTime / panelTotalDuration);
-            if (newPanel != sharedCurrentPanel && newPanel < totalPanels)
-            {
-                sharedCurrentPanel = newPanel;
-                Console.WriteLine($"[Cutscene] Panel {newPanel + 1}/{totalPanels}");
-            }
-
-            // Check if cutscene is complete
-            if (sharedElapsedTime >= totalPanels * panelTotalDuration)
+            float totalDuration = (totalPairs - 1) * (sPairTotalDuration - sOverlapDuration) + sPairTotalDuration;
+            if (sharedElapsedTime >= totalDuration)
             {
                 sharedCutsceneFinished = true;
                 Console.WriteLine("[Cutscene] Complete! Loading Level1...");
@@ -103,7 +110,6 @@ public class CutscenePanel : Script
             }
         }
 
-        // Animate this panel
         AnimatePanel();
     }
 
@@ -112,80 +118,70 @@ public class CutscenePanel : Script
     // =========================
     private void Initialize()
     {
-        // Auto-detect panel index from entity name
-        // Try to find this panel's name by checking known panel patterns
-        myPanelIndex = DetectPanelIndex();
-
-        if (myPanelIndex < 0)
-        {
-            Console.WriteLine("[CutscenePanel] ERROR: Could not determine panel index!");
-            initialized = true;
-            return;
-        }
-
-        // Compute per-panel total duration
-        panelTotalDuration = slideInDuration + panelHoldDuration + fadeOutDuration;
-
-        // The first panel to initialize becomes the timer owner
+        myPanelIndex = sharedInitCount;
         sharedInitCount++;
-        if (sharedInitCount == 1)
+
+        // Pair info
+        myPairIndex = myPanelIndex / 2;
+        isLeftPanel = (myPanelIndex % 2) == 0;
+
+        // Determine this panel's X position
+        if (targetX != 0f)
         {
-            // Reset all shared state (in case of scene restart)
-            sharedElapsedTime = 0f;
-            sharedCurrentPanel = 0;
-            sharedCutsceneFinished = false;
-            sharedTimerStarted = true;
-            isTimerOwner = true;
-            Console.WriteLine($"[Cutscene] Timer owner: Panel {myPanelIndex + 1}");
-            Console.WriteLine($"[Cutscene] Per-panel duration: {panelTotalDuration}s (slide:{slideInDuration} + hold:{panelHoldDuration} + fade:{fadeOutDuration})");
-            Console.WriteLine($"[Cutscene] Total duration: {totalPanels * panelTotalDuration}s");
+            // Use the value set in the inspector
+            myTargetX = targetX;
+        }
+        else
+        {
+            // Use defaults
+            myTargetX = isLeftPanel ? defaultLeftX : defaultRightX;
         }
 
-        // Store the target (center) position from where the panel is placed in the editor
-        // We want all panels to display at screen center
-        targetX = 0f;   // Center of screen
-        targetY = 0f;
+        // First panel sets up shared state
+        if (myPanelIndex == 0)
+        {
+            sharedElapsedTime = 0f;
+            sharedCutsceneFinished = false;
+            isTimerOwner = true;
 
-        // Odd panels (1,3,5...) slide from left, even (2,4,6...) from right
-        int panelNumber = myPanelIndex + 1;
-        slidesFromLeft = (panelNumber % 2) == 1;
+            // Cache timing values from this panel's config (all panels should have the same timing)
+            sSlideInDuration = slideInDuration;
+            sStaggerDelay = staggerDelay;
+            sHoldDuration = holdDuration;
+            sSlideOutDuration = slideOutDuration;
+            sOverlapDuration = overlapDuration;
+            sOffScreenBelow = offScreenBelow;
+            sOffScreenAbove = offScreenAbove;
+            sCenterY = centerY;
 
-        if (slidesFromLeft)
-            offScreenX = -slideDistance;
-        else
-            offScreenX = slideDistance;
+            // Pair total = stagger + slideIn + hold + slideOut
+            // The pair "starts" when the LEFT panel begins sliding in.
+            // RIGHT panel starts sliding in after staggerDelay.
+            // Hold begins after BOTH panels are in (i.e. after stagger + slideIn).
+            // Both exit together after hold.
+            sPairTotalDuration = sStaggerDelay + sSlideInDuration + sHoldDuration + sSlideOutDuration;
+
+            float totalDuration = (totalPairs - 1) * (sPairTotalDuration - sOverlapDuration) + sPairTotalDuration;
+            Console.WriteLine($"[Cutscene] Timer owner: Panel 1");
+            Console.WriteLine($"[Cutscene] Pair duration: {sPairTotalDuration}s (stagger:{sStaggerDelay} + in:{sSlideInDuration} + hold:{sHoldDuration} + out:{sSlideOutDuration})");
+            Console.WriteLine($"[Cutscene] Overlap: {sOverlapDuration}s | Pairs: {totalPairs}");
+            Console.WriteLine($"[Cutscene] Total: {totalDuration:F1}s");
+        }
 
         // Start off-screen and invisible
         TransformComponent tf = GetTransform();
-        tf.X = offScreenX;
-        tf.Y = targetY;
+        tf.X = myTargetX;
+        tf.Y = offScreenBelow;
         tf.IsVisible = false;
 
-        string dir = slidesFromLeft ? "LEFT" : "RIGHT";
-        Console.WriteLine($"[CutscenePanel] Panel {myPanelIndex + 1} initialized - slides from {dir}");
+        string side = isLeftPanel ? "LEFT" : "RIGHT";
+        Console.WriteLine($"[CutscenePanel] Panel {myPanelIndex + 1} -> Pair {myPairIndex + 1} ({side}) X={myTargetX}");
 
         initialized = true;
     }
 
     // =========================
-    // Panel Index Detection
-    // =========================
-    private int DetectPanelIndex()
-    {
-        // Since we can't easily get entity name from script,
-        // use the initialization order combined with static counter.
-        // Panels are processed in hierarchy order (Panel1 first, Panel14 last).
-        // We use a simple static counter that increments per initialization.
-        
-        // Actually, let's use a smarter approach:
-        // The sharedInitCount tells us which panel we are (1st to init = Panel1, etc.)
-        // This works because the engine processes entities in hierarchy order.
-        return sharedInitCount; // This will be 0 for first, 1 for second, etc.
-                                // (incremented AFTER this call in Initialize())
-    }
-
-    // =========================
-    // Animation Logic
+    // Animation
     // =========================
     private void AnimatePanel()
     {
@@ -194,93 +190,102 @@ public class CutscenePanel : Script
         TransformComponent tf = GetTransform();
         SpriteComponent sprite = GetSprite();
 
-        // Calculate this panel's local time
-        float panelStartTime = myPanelIndex * panelTotalDuration;
-        float localTime = sharedElapsedTime - panelStartTime;
+        // When does this pair start?
+        float pairStartTime = myPairIndex * (sPairTotalDuration - sOverlapDuration);
+        float localTime = sharedElapsedTime - pairStartTime;
 
-        // Phase boundaries
-        float slideInEnd = slideInDuration;
-        float holdEnd = slideInDuration + panelHoldDuration;
-        float fadeOutEnd = panelTotalDuration;
+        // Timeline for a pair:
+        //
+        //  0.0                        stagger   stagger+slideIn   stagger+slideIn+hold   pairTotal
+        //  |--- LEFT slides in ---------|-----------|                    |                    |
+        //                               |--- RIGHT slides in ---|       |                    |
+        //                                                               |--- BOTH slide out -|
+        //
+        // LEFT  starts sliding at localTime = 0
+        // RIGHT starts sliding at localTime = staggerDelay
+        // Hold starts at localTime = staggerDelay + slideInDuration (both are in)
+        // Both exit at localTime = staggerDelay + slideInDuration + holdDuration
 
-        // Before this panel's turn
+        float mySlideStart;
+        if (isLeftPanel)
+            mySlideStart = 0f;                 // Left panel enters immediately
+        else
+            mySlideStart = sStaggerDelay;       // Right panel enters after stagger
+
+        float mySlideEnd = mySlideStart + sSlideInDuration;
+        float holdStart = sStaggerDelay + sSlideInDuration;  // Both are in after this
+        float holdEnd = holdStart + sHoldDuration;
+        float exitEnd = sPairTotalDuration;
+
+        // Before this pair starts
         if (localTime < 0f)
         {
             tf.IsVisible = false;
-            tf.X = offScreenX;
-            ResetAlpha(sprite);
+            tf.X = myTargetX;
+            tf.Y = sOffScreenBelow;
+            SetAlpha(sprite, 0f);
             return;
         }
 
-        // After this panel is done
-        if (localTime >= fadeOutEnd)
+        // After this pair is done
+        if (localTime >= exitEnd)
         {
             tf.IsVisible = false;
-            tf.X = offScreenX;
-            ResetAlpha(sprite);
+            tf.X = myTargetX;
+            tf.Y = sOffScreenAbove;
+            SetAlpha(sprite, 0f);
             return;
         }
 
-        // Panel is active
-        tf.IsVisible = true;
-
-        if (localTime < slideInEnd)
+        // === BEFORE MY SLIDE STARTS (only applies to right panel during stagger) ===
+        if (localTime < mySlideStart)
         {
-            // === PHASE 1: SLIDE IN ===
-            float t = localTime / slideInDuration;
+            tf.IsVisible = false;
+            tf.X = myTargetX;
+            tf.Y = sOffScreenBelow;
+            SetAlpha(sprite, 0f);
+            return;
+        }
+
+        // === Panel is active from here ===
+        tf.IsVisible = true;
+        tf.X = myTargetX;
+
+        if (localTime < mySlideEnd)
+        {
+            // === SLIDING IN ===
+            float t = (localTime - mySlideStart) / sSlideInDuration;
             float eased = EaseOutCubic(t);
 
-            tf.X = Lerp(offScreenX, targetX, eased);
-            tf.Y = targetY;
-
-            // Fade in during slide
-            float alpha = Lerp(0f, 1f, eased);
-            SetAlpha(sprite, alpha);
+            tf.Y = Lerp(sOffScreenBelow, sCenterY, eased);
+            SetAlpha(sprite, Lerp(0.2f, 1f, eased));
         }
         else if (localTime < holdEnd)
         {
-            // === PHASE 2: HOLD (fully visible, centered) ===
-            tf.X = targetX;
-            tf.Y = targetY;
+            // === HOLDING (or waiting for other panel to finish sliding in) ===
+            tf.Y = sCenterY;
             SetAlpha(sprite, 1f);
         }
         else
         {
-            // === PHASE 3: FADE OUT ===
-            float t = (localTime - holdEnd) / fadeOutDuration;
-            float eased = EaseInQuad(t);
+            // === SLIDING OUT (both panels exit together) ===
+            float t = (localTime - holdEnd) / sSlideOutDuration;
+            float eased = EaseInCubic(t);
 
-            // Stay in place but fade out
-            tf.X = targetX;
-            tf.Y = targetY;
-
-            float alpha = Lerp(1f, 0f, eased);
-            SetAlpha(sprite, alpha);
+            tf.Y = Lerp(sCenterY, sOffScreenAbove, eased);
+            SetAlpha(sprite, Lerp(1f, 0f, eased));
         }
     }
 
     // =========================
-    // Alpha / Tint Helpers
+    // Helpers
     // =========================
     private void SetAlpha(SpriteComponent sprite, float alpha)
     {
         if (sprite.HasSprite())
-        {
             sprite.TintA = alpha;
-        }
     }
 
-    private void ResetAlpha(SpriteComponent sprite)
-    {
-        if (sprite.HasSprite())
-        {
-            sprite.TintA = 1f;
-        }
-    }
-
-    // =========================
-    // Math Helpers
-    // =========================
     private float Lerp(float a, float b, float t)
     {
         if (t < 0f) t = 0f;
@@ -294,13 +299,8 @@ public class CutscenePanel : Script
         return 1f - f * f * f;
     }
 
-    private float EaseInQuad(float t)
+    private float EaseInCubic(float t)
     {
-        return t * t;
-    }
-
-    private float EaseOutQuad(float t)
-    {
-        return 1f - (1f - t) * (1f - t);
+        return t * t * t;
     }
 }
