@@ -84,7 +84,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -731.8119506835938,
+                            "x": -867.1965942382813,
                             "y": -159.14208984375
                         },
                         "scale": {
@@ -105,7 +105,7 @@
                         "mdl_ref": 1.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/../Characters/Dorian_Hurt_579x615.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/../Characters/Dorian_Idle2_579x615.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -116,8 +116,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 13,
-                        "elapsedTime": 0.023902833461761475,
+                        "currentFrame": 8,
+                        "elapsedTime": 0.02952820062637329,
                         "totalFrames": 15,
                         "columns": 4,
                         "rows": 4,
@@ -385,7 +385,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/tile007.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/tile005.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1279,7 +1279,7 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "FPS: 100.3 | Graphics System: 33.87% [DEBUG]",
+                        "text": "FPS: 96.8 | Graphics System: 37.66% [DEBUG]",
                         "font_id": "PatrickHand_font",
                         "offset": {
                             "x": 0.0,
@@ -1376,7 +1376,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -446.2960205078125,
+                            "x": 793.703857421875,
                             "y": -308.80987548828125
                         },
                         "scale": {
@@ -1408,8 +1408,8 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 7,
-                        "elapsedTime": 0.037418656051158905,
+                        "currentFrame": 0,
+                        "elapsedTime": 0.06694692373275757,
                         "totalFrames": 15,
                         "columns": 4,
                         "rows": 4,
