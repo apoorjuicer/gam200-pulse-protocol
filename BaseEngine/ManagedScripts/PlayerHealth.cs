@@ -13,13 +13,18 @@ public class PlayerHealth : Script
     // Config
     // =========================
     public int maxHP = 100;
-   
+
     // =========================
     // State
     // =========================
     private int currentHP;
     private bool initialized = false;
     private bool isDead = false;
+
+    // =========================
+    // Public Entity ID (for collision checks by other scripts)
+    // =========================
+    public int PlayerEntityID { get; private set; }
 
     // =========================
     // Update Loop
@@ -32,7 +37,6 @@ public class PlayerHealth : Script
             return;
         }
 
-        // Check for death
         if (currentHP <= 0 && !isDead)
         {
             Die();
@@ -44,7 +48,6 @@ public class PlayerHealth : Script
     // =========================
     private void Initialize()
     {
-        // Set singleton
         if (Instance == null)
         {
             Instance = this;
@@ -55,9 +58,11 @@ public class PlayerHealth : Script
             return;
         }
 
-        // Initialize health
-        currentHP = maxHP;
+        // 'entityID' is a protected property from the Script base class
+        PlayerEntityID = entityID;
+        Console.WriteLine($"[PlayerHealth] Entity ID exposed: {PlayerEntityID}");
 
+        currentHP = maxHP;
         Console.WriteLine($"[PlayerHealth] Initialized with {maxHP} HP");
 
         initialized = true;
@@ -76,42 +81,27 @@ public class PlayerHealth : Script
 
         Console.WriteLine($"[PlayerHealth] Took {damage} damage! HP: {currentHP}/{maxHP}");
 
-        // Trigger visual feedback
         if (currentHP > 0)
         {
             FlashRed();
         }
     }
 
-    /*public void Heal(int amount)
-    {
-        if (isDead) return;
-
-        currentHP += amount;
-        if (currentHP > maxHP) currentHP = maxHP;
-
-        Console.WriteLine($"[PlayerHealth] Healed {amount}! HP: {currentHP}/{maxHP}");
-    }*/
-
-    
     public int GetCurrentHP()
     {
         return currentHP;
     }
 
-    
     public int GetMaxHP()
     {
         return maxHP;
     }
 
-   
     public bool IsAlive()
     {
         return !isDead;
     }
 
-   
     public float GetHealthPercent()
     {
         return (float)currentHP / (float)maxHP;
@@ -125,15 +115,11 @@ public class PlayerHealth : Script
         if (isDead) return;
 
         isDead = true;
-        Console.WriteLine("[PlayerHealth] ☠️ PLAYER DIED!");
+        Console.WriteLine("[PlayerHealth] PLAYER DIED!");
         Console.WriteLine("==============================================");
-        Console.WriteLine("💀 GAME OVER");
+        Console.WriteLine("GAME OVER");
         Console.WriteLine("==============================================");
 
-        // TODO: Trigger game over screen
-        // Scene.LoadScene("GameOver");
-
-        // Pause
         Application.SetPaused(true);
     }
 
