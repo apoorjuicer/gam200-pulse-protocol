@@ -14,14 +14,15 @@
 using System;
 using System.Collections.Generic;
 using ScriptAPI;
+using System.Reflection;
+
 
 public class NavigationButtons : Script
 {
     // === STATIC SCENE HISTORY (shared across all buttons) ===
     private static Stack<string> sceneHistory = new Stack<string>();
-    private static string currentScene = "";
-    public static string LastGameplayScene { get; private set; } = "";
-
+    public static string currentScene = "";
+    public static string LastGameplayScene = "";
     
     // Track if we've set the initial scene THIS play session
     private static int lastFrameCount = -1;
@@ -227,11 +228,6 @@ public class NavigationButtons : Script
         }
     }
 
-    public static void SetLastGameplayScene(string sceneName)
-    {
-        LastGameplayScene = sceneName;
-    }
-
 
     private void GoToMainMenu()
     {
@@ -271,6 +267,29 @@ public class NavigationButtons : Script
         audio.PlaySFX("SFX_Button_Select");
     }
 
+    public static void LoadGameplayScene(string sceneName)
+    {
+        string previous = string.IsNullOrEmpty(currentScene) ? "MainMenu" : currentScene;
+        LastGameplayScene = previous;
+        currentScene = sceneName;
+
+        Scene.LoadScene(sceneName);
+    }
+
+    public static void GoToGameLose()
+    {
+        // Save the current gameplay level so RestartYes knows what to reload
+        if (!string.IsNullOrEmpty(currentScene))
+            LastGameplayScene = currentScene;
+        else
+            LastGameplayScene = "MainMenu";
+
+        currentScene = "GameLose";
+        Console.WriteLine("[Nav] GoToGameLose | restartTarget=" + LastGameplayScene);
+
+        Scene.LoadScene("GameLose");
+    }
+
     private void OnClick()
     {
         string tex = defaultTexture.ToLower();
@@ -307,13 +326,20 @@ public class NavigationButtons : Script
 
         if (tex.Contains("restartyes"))
         {
+            Console.WriteLine("[RestartYes] LastGameplayScene = '" + LastGameplayScene + "'");
+
             if (!string.IsNullOrEmpty(LastGameplayScene))
-                Scene.LoadScene(LastGameplayScene);
+            {
+                currentScene = LastGameplayScene;      
+                Scene.LoadScene(LastGameplayScene);  
+            }
             else
+            {
+                currentScene = "MainMenu";
                 Scene.LoadScene("MainMenu");
+            }
             return;
         }
-
 
         
         if (tex.Contains("restartno"))
