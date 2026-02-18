@@ -76,7 +76,7 @@ public class MasterDiagnostic : Script
             Console.WriteLine($"║ KeySlot {i}: (check console for registration msg)  ║");
         }
         
-        CheckSystem("HealthBarController", HealthBarController.Instance != null, () => "");
+        CheckSystem("HealthBGController", HealthBGController.Instance != null, () => "");
         
         // Application State
         Console.WriteLine("╠════════════════════════════════════════════╣");
