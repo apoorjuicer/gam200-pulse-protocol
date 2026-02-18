@@ -6,142 +6,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -402.5,
-                            "y": 116.0
+                            "x": 0.0,
+                            "y": 0.0
                         },
                         "scale": {
-                            "x": 1.0,
-                            "y": 1.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Text"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "TextComponent": {
-                        "text": "YOU LOSE!",
-                        "font_id": "PatrickHand_font",
-                        "offset": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "font_size": 200.0,
-                        "color": [
-                            1.0,
-                            1.0,
-                            0.0
-                        ],
-                        "visible": true,
-                        "alignment": 0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -447.5,
-                            "y": -109.5
-                        },
-                        "scale": {
-                            "x": 1.0,
-                            "y": 1.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "RestartText"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "TextComponent": {
-                        "text": "Restart:",
-                        "font_id": "",
-                        "offset": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "font_size": 80.0,
-                        "color": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true,
-                        "alignment": 0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -745.8461303710938,
-                            "y": -462.769287109375
-                        },
-                        "scale": {
-                            "x": 150.0,
-                            "y": 150.0
+                            "x": 1600.0,
+                            "y": 900.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -157,7 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/restart.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/Lose screen.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -177,22 +47,17 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": []
-                    }
-                },
-                {
                     "name": {
-                        "name": "RestartBtn"
+                        "name": "StageFail BG"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
-                        "z": 100.0
+                        "z": 0.0
                     }
                 }
             ]
@@ -202,74 +67,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 797.5386352539063,
-                            "y": -502.15380859375
-                        },
-                        "scale": {
-                            "x": 331.360595703125,
-                            "y": 146.29217529296875
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/quit.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": []
-                    }
-                },
-                {
-                    "name": {
-                        "name": "QuitBtn"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 909,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 314.65399169921875,
-                            "y": -91.19200134277344
+                            "x": 400.0,
+                            "y": -300.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -285,6 +84,20 @@
                     }
                 },
                 {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/RestartNo.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
                     "animation": {
                         "currentFrame": 0,
                         "elapsedTime": 0.0,
@@ -295,35 +108,92 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "NavigationButtons"
+                        ]
+                    }
+                },
+                {
                     "name": {
-                        "name": "QuitText"
+                        "name": "No"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
-                },
+                }
+            ]
+        },
+        {
+            "components": [
                 {
-                    "TextComponent": {
-                        "text": "Quit:",
-                        "font_id": "",
-                        "offset": {
+                    "transform": {
+                        "position": {
+                            "x": -400.0,
+                            "y": -300.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "font_size": 80.0,
-                        "color": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true,
-                        "alignment": 0
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/RestartYes.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "NavigationButtons"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Yes"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 0,
+                        "z": 0.0
                     }
                 }
             ]

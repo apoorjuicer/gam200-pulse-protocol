@@ -20,6 +20,8 @@ public class NavigationButtons : Script
     // === STATIC SCENE HISTORY (shared across all buttons) ===
     private static Stack<string> sceneHistory = new Stack<string>();
     private static string currentScene = "";
+    public static string LastGameplayScene { get; private set; } = "";
+
     
     // Track if we've set the initial scene THIS play session
     private static int lastFrameCount = -1;
@@ -225,6 +227,12 @@ public class NavigationButtons : Script
         }
     }
 
+    public static void SetLastGameplayScene(string sceneName)
+    {
+        LastGameplayScene = sceneName;
+    }
+
+
     private void GoToMainMenu()
     {
         sceneHistory.Clear();
@@ -296,6 +304,23 @@ public class NavigationButtons : Script
             ShowPauseOverlay = false;
             return;
         }
+
+        if (tex.Contains("restartyes"))
+        {
+            if (!string.IsNullOrEmpty(LastGameplayScene))
+                Scene.LoadScene(LastGameplayScene);
+            else
+                Scene.LoadScene("MainMenu");
+            return;
+        }
+
+
+        
+        if (tex.Contains("restartno"))
+        {
+            GoToMainMenu();
+            return;
+        }
         
         if (tex.Contains("quit yes"))
         {
@@ -344,6 +369,22 @@ public class NavigationButtons : Script
             ShowPauseOverlay = true;
             return;
         }
+
+        if (tex.Contains("home"))
+        {
+            StageClearElement.ResetStageClear();
+            GoToMainMenu();
+            return;
+        }
+
+        if (tex.Contains("nextstage"))
+        {
+            Console.WriteLine("NOT IMPLEMENTED YET!");
+            return;
+        }
+
+
+
     }
 }
 
