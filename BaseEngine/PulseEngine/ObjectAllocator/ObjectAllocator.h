@@ -84,7 +84,7 @@ struct OAConfig
                                      HeaderBlocks_(HeaderBlocks),
                                      Alignment_(Alignment)
   {
-      std::cout << "[OAConfig] Constructed\n";
+     // std::cout << "[OAConfig] Constructed\n";
     LeftAlignSize_ = 0;
     InterAlignSize_ = 0;
   }
@@ -128,7 +128,7 @@ struct OAStats
 {
   OAStats(void) : ObjectSize_(0), FreeObjects_(0), ObjectsInUse_(0), PagesInUse_(0),
                   PageSize_(0), MostObjects_(0), Allocations_(0), Deallocations_(0) {
-      std::cout << "[OAStats] Constructed\n";
+     // std::cout << "[OAStats] Constructed\n";
   };
 
   unsigned ObjectSize_;    // size of each object

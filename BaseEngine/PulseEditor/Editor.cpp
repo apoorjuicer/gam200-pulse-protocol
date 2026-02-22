@@ -20,23 +20,7 @@
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "Input/InputManager.h"
 
-//Vector2 v2{};
-//    OAConfig cfg(
-//        false,                     // UseCPPMemManager_
-//        64,            // ObjectsPerPage_
-//        0,                  // MaxPages_ (0 = unlimited)
-//        false,                   // DebugOn_
-//        0,                         // PadBytes_
-//        0,                         // HeaderBlocks_
-//        alignof(std::max_align_t)  // Alignment_
-//    );
-//
-//   ObjectAllocator oa(sizeof(Benchmark::Student), cfg);
-
-
 // ==========================================================================
-//Benchmark::OABenchmarkResult test;
-
 namespace PulseEditor
 {
     // --------------------------------------------------------------------

@@ -82,7 +82,7 @@ ObjectAllocator::ObjectAllocator(unsigned ObjectSize, OAConfig const& config)
     OAStats_.Allocations_ = 0;
     OAStats_.Deallocations_ = 0;
 
-    std::cout << "[ObjectAllocator] Constructed!!!\n";
+    //std::cout << "[ObjectAllocator] Constructed!!!\n";
 }// end of default ctor
 
 

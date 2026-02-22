@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\carri\\Desktop\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj": {}
+    "C:\\Users\\nanor\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj": {}
   },
   "projects": {
-    "C:\\Users\\carri\\Desktop\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj": {
+    "C:\\Users\\nanor\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\carri\\Desktop\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+        "projectUniqueName": "C:\\Users\\nanor\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
         "projectName": "ManagedScripts",
-        "projectPath": "C:\\Users\\carri\\Desktop\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
-        "packagesPath": "C:\\Users\\carri\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\carri\\Desktop\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\obj\\",
+        "projectPath": "C:\\Users\\nanor\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+        "packagesPath": "C:\\Users\\nanor\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\nanor\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\carri\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\nanor\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
