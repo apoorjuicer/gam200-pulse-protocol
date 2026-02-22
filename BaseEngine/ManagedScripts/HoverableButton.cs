@@ -28,6 +28,7 @@ public class NavigationButtons : Script
     // === QUIT & PAUSE OVERLAY STATE ===
     public static bool ShowQuitOverlay = false;
     public static bool ShowPauseOverlay = false;
+    public static bool ShowHowToPlayOverlay = false;
 
     private string pauseTexture = "";  
     private string pauseHoverTexture = "";
@@ -55,6 +56,7 @@ public class NavigationButtons : Script
             currentScene = "";
             ShowQuitOverlay = false;
             ShowPauseOverlay = false;
+            ShowHowToPlayOverlay = false;
             wasEscPressed = false;
         }
 
@@ -376,6 +378,19 @@ public class NavigationButtons : Script
             ShowPauseOverlay = true;
             return;
         }
+
+        // For how to play screen. 
+        if (tex.Contains("how to play"))
+        {
+            ShowHowToPlayOverlay = true;
+            return;
+        }
+
+        if (tex.Contains("temp_close"))
+        {
+            ShowHowToPlayOverlay = false;
+            return;
+        }
     }
 }
 
@@ -394,5 +409,14 @@ public class PauseOverlay : Script
     {
         TransformComponent t = GetTransform();
         t.IsVisible = NavigationButtons.ShowPauseOverlay;
+    }
+}
+
+public class HowToPlayOverlay : Script
+{
+    public override void Update()
+    {
+        TransformComponent t = GetTransform();
+        t.IsVisible = NavigationButtons.ShowHowToPlayOverlay; // Show TEMP_gtp.png
     }
 }
