@@ -1,10 +1,7 @@
 ﻿using System;
 using ScriptAPI;
 
-/// <summary>
-/// FIXED INPUT BRIDGE
-/// Properly forwards input to ComboSystem using IsKeyTriggered for reliable detection
-/// </summary>
+
 public class InputBridge : Script
 {
     // =========================
@@ -84,15 +81,15 @@ public class InputBridge : Script
             // Check if combo is complete
             if (ComboSystem.Instance.HasCompletedCombo())
             {
-                Console.WriteLine("[InputBridge] ✅ Combo sequence complete!");
+                Console.WriteLine("[InputBridge] Combo sequence complete!");
 
                 if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
                 {
-                    Console.WriteLine("[InputBridge] 🎉 SUCCESS!");
+                    Console.WriteLine("[InputBridge] SUCCESS!");
                 }
                 else
                 {
-                    Console.WriteLine("[InputBridge] ❌ FAILED!");
+                    Console.WriteLine("[InputBridge] FAILED!");
                 }
             }
         }
