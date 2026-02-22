@@ -117,6 +117,7 @@ private:
 
 
     void ProcessAudioSources();
+    void ClearAudioSourceChannelsMatching(FMOD::Channel* dead);
 };
 
 /*
