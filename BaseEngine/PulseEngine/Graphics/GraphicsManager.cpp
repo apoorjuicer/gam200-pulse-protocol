@@ -1,4 +1,4 @@
-/******************************************************************************/
+﻿/******************************************************************************/
 /**
  * @file        GraphicsManager.cpp
  * @project     Pulse Protocol
@@ -105,7 +105,7 @@ void GraphicsManager::Initialize()
     }
     else
     {
-        std::cout << "[GraphicsManager] Successfully loaded fonts from  asset registry.\n";
+        //std::cout << "[GraphicsManager] Successfully loaded fonts from  asset registry.\n";
     }
 
     // Subscribe to combo messages - DONT REMOVE, TEST FOR MESSAGE SYSTEM
@@ -335,9 +335,57 @@ GLuint GraphicsManager::LoadTextureFile(const std::string &path)
         return 0;
     }
 
+    std::string resolvedPath = path;
+
+    //std::cout << "[DEBUG LoadTextureFile] Original path: " << path << std::endl;
+
+    if (path.find("../../") == 0)
+    {
+        // Get PulseEngine base path
+        char exePath[MAX_PATH];
+        GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+        std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
+
+        //std::cout << "[DEBUG LoadTextureFile] currentDir: " << currentDir << std::endl;
+
+        std::filesystem::path basePath;
+        if (std::filesystem::exists(currentDir / "PulseEngine"))
+        {
+            basePath = currentDir / "PulseEngine";  // Release
+            //std::cout << "[DEBUG LoadTextureFile] Using release path" << std::endl;
+        }
+        else
+        {
+            auto baseEngineDir = currentDir;
+            while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+            {
+                baseEngineDir = baseEngineDir.parent_path();
+            }
+            basePath = baseEngineDir / "PulseEngine";  // Dev
+            //std::cout << "[DEBUG LoadTextureFile] Using dev path" << std::endl;
+        }
+
+        // Strip ../../PulseEngine/ and use basePath
+        std::string relativePath = path.substr(std::string("../../PulseEngine/").length());
+        resolvedPath = (basePath / relativePath).make_preferred().string(); 
+
+        //std::cout << "[DEBUG LoadTextureFile] Resolved to: " << resolvedPath << std::endl;
+    }
+
+    if (!std::filesystem::exists(resolvedPath))
+    {
+        std::cerr << "[DEBUG LoadTextureFile] FILE DOES NOT EXIST: " << resolvedPath << "\n";
+        return 0;
+    }
+    else
+    {
+        //std::cout << "[DEBUG LoadTextureFile] FILE EXISTS! Size: "
+          //  << std::filesystem::file_size(resolvedPath) << " bytes\n";
+    }
+
     int w = 0, h = 0, n = 0;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *data = stbi_load(path.c_str(), &w, &h, &n, 4);
+    unsigned char *data = stbi_load(resolvedPath.c_str(), &w, &h, &n, 4);
     if (!data)
     {
         std::cerr << "Failed to load texture: " << path
@@ -376,7 +424,8 @@ bool GraphicsManager::LoadTexturesFromRegistry()
         }
 
         // Load from disk to GL
-        GLuint tex_id = LoadTextureFile(tr.path);
+        std::string resolvedPath = mRegistry->GetTextureItemPath(name);
+        GLuint tex_id = LoadTextureFile(resolvedPath);
         if (tex_id == 0)
         {
             std::cerr << "[Texture] Failed: id='" << name << "' path='" << tr.path << "'\n";
@@ -388,8 +437,8 @@ bool GraphicsManager::LoadTexturesFromRegistry()
         texHandle_key[tr.tex_name] = tex_id;
         // s_idToPath[id] = tr.path;
 
-        std::cout << "[Texture] Loaded: id='" << name << "' path='" << tr.path
-                  << "' -> GL#" << tex_id << "\n";
+        //std::cout << "[Texture] Loaded: id='" << name << "' path='" << tr.path
+        //          << "' -> GL#" << tex_id << "\n";
     }
 
     return ok;
@@ -540,7 +589,8 @@ bool GraphicsManager::LoadFontsFromRegistry()
             continue;
         }
 
-        if (!LoadFontFile(fr.path, fr.font_id, fr.pixelHeight))
+        std::string resolvedPath = mRegistry->GetFontItemPath(key);
+        if (!LoadFontFile(resolvedPath, fr.font_id, fr.pixelHeight))
         {
             std::cerr << "[Font] Failed: id='" << fr.font_id
                       << "' path='" << fr.path
@@ -549,9 +599,9 @@ bool GraphicsManager::LoadFontsFromRegistry()
         }
         else
         {
-            std::cout << "[Font] Loaded: id='" << fr.font_id
-                      << "' path='" << fr.path
-                      << "' px=" << fr.pixelHeight << "\n";
+           // std::cout << "[Font] Loaded: id='" << fr.font_id
+           //           << "' path='" << fr.path
+           //           << "' px=" << fr.pixelHeight << "\n";
         }
     }
     return ok;

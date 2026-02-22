@@ -35,7 +35,8 @@ class Config
 private:
 	int WindowWidth = 0;
 	int WindowHeight = 0;
-	std::string ConfigPath = "../../PulseEngine/JSON/config.json";
+	//std::string ConfigPath = "../../PulseEngine/JSON/config.json";
+    std::string ConfigPath = "";
 public:
 	int GetWindowWidth() const;
 	int GetWindowHeight() const;

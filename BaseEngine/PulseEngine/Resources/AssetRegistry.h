@@ -76,6 +76,9 @@
 
 	class DLL_API AssetRegistry {
 	private:
+
+		std::filesystem::path basePath = "";
+
 		//[key,value]
 		std::unordered_map<std::string, AudioResource> audioResources;
 		std::unordered_map<std::string, TextureResource> textureResources;
@@ -84,11 +87,17 @@
 		std::unordered_map<std::string, AnimationResource> animationResources;
 
 		//file paths
-		std::string audiojsonfilepath = "../../PulseEngine/JSON/audio.json";
+		std::string audiojsonfilepath = "";
+		std::string texturejsonfilepath = "";
+		std::string fontjsonfilepath = "";
+		std::string scenejsonfilepath = "";
+		std::string animationjsonfilepath = "";
+
+		/*std::string audiojsonfilepath = "../../PulseEngine/JSON/audio.json";
 		std::string texturejsonfilepath = "../../PulseEngine/JSON/texture.json";
 		std::string fontjsonfilepath = "../../PulseEngine/JSON/font.json";
 		std::string scenejsonfilepath = "../../PulseEngine/JSON/scene.json";
-		std::string animationjsonfilepath = "../../PulseEngine/JSON/animation.json";
+		std::string animationjsonfilepath = "../../PulseEngine/JSON/animation.json";*/
 
 	public:
 		//AssetRegistry(); for debugging shouldn't use. due to Rule of Zero
@@ -103,6 +112,8 @@
 		std::string const& GetFontJSONfilepath() const;
 		std::string const& GetSceneJSONfilepath() const;
 		std::string const& GetAnimationJSONfilepath() const;
+
+		void SetAssetPaths(std::filesystem::path const& pulseEnginePath);
 
 		//findXXX use like this rm.FindXXX(id), e.g. rm.FindAudio("bgm");
 		AudioResource  const* FindAudio(std::string const& id)  const;

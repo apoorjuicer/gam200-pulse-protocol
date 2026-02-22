@@ -28,8 +28,29 @@ namespace fs = std::filesystem;
 
 static std::string LoadFile(const char* relativeToGraphicsShader)
 {
-	fs::path here = fs::path(__FILE__).parent_path(); // ...\PulseEngine\Graphics
-	fs::path full = here / "shader" / relativeToGraphicsShader;
+	// Get DLL location dynamically
+	char exePath[MAX_PATH];
+	GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+	std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
+
+	std::filesystem::path basePath;
+	if (std::filesystem::exists(currentDir / "PulseEngine"))
+	{
+		basePath = currentDir / "PulseEngine";  // Release
+	}
+	else
+	{
+		auto baseEngineDir = currentDir;
+		while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+		{
+			baseEngineDir = baseEngineDir.parent_path();
+		}
+		basePath = baseEngineDir / "PulseEngine";  // Dev
+	}
+
+	// Build full path to shader
+	fs::path full = basePath / "Graphics" / "shader" / relativeToGraphicsShader;
+
 	std::ifstream f(full, std::ios::binary);
 	if (!f)
 	{
