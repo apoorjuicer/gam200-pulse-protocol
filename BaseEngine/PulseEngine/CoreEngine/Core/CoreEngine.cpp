@@ -756,9 +756,9 @@ void CoreEngine::Init()
 	startScriptEngine(); // 3.. 2.. 1.. DLL SCRIPT! START ROLLINGGGGGGGGGGGGGGGGGG
 
 	//remove for game.exe in release cos no hotreload allow but need managescript.dll to be copied
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	CompileScriptAssembly();
-#endif // DEBUG
+//#endif // DEBUG
 
 
 	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
