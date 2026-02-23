@@ -7,7 +7,38 @@
             "columns": 1,
             "rows": 1,
             "animationSpeed": 2.0
+        },
+        {
+            "id": "rat_hurt_ss",
+            "path": "../../PulseEngine/Assets/Textures/Enemies/Rat/Rat_Hurt_spritesheet.jpg",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
+        },
+        {
+            "id": "rat_idle_ss",
+            "path": "../../PulseEngine/Assets/Textures/Enemies/Rat/Rat_Idle_spritesheet.jpg",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
+        },
+        {
+            "id": "rat_walk_ss",
+            "path": "../../PulseEngine/Assets/Textures/Enemies/Rat/Rat_Walk_spritesheet.jpg",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
+        },
+        {
+            "id": "rat_attack_ss",
+            "path": "../../PulseEngine/Assets/Textures/Enemies/Rat/Rat_Attack_spritesheet.jpg",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
         }
     ]
 }
-

@@ -1,13 +1,31 @@
 {
     "textureFilePaths": [
+        /* this are background textures*/
         {
-            "id": "background",
-            "path": "../../PulseEngine/Assets/Textures/Backgrounds/Background1.jpg",
+            "id": "background_mainmenu",
+            "path": "../../PulseEngine/Assets/Textures/Backgrounds/MainMenu.png",
             "vert_shader_path": "shader/bg_vs.vert",
             "frag_shader_path": "shader/bg_fs.frag",
             "mdl_ref": 0,
             "shd_ref": 1
         },
+        {
+            "id": "background_level1",
+            "path": "../../PulseEngine/Assets/Textures/Backgrounds/Background_level1.jpg",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "background_level2",
+            "path": "../../PulseEngine/Assets/Textures/Backgrounds/Background_level2.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        /* this are hero/enemy textures*/
         {
             "id": "hero",
             "path": "../../PulseEngine/Assets/Textures/Characters/hero.png",
@@ -32,6 +50,7 @@
             "mdl_ref": 1,
             "shd_ref": 2
         },
+        /* this are UI textures*/
         {
             "id": "bar_ui",
             "path": "../../PulseEngine/Assets/Textures/UI/bar.png",
@@ -40,9 +59,75 @@
             "mdl_ref": 1,
             "shd_ref": 3
         },
+        //combo UI
         {
             "id": "perfect_ui",
-            "path": "../../PulseEngine/Assets/Textures/UI/perfect.png",
+            "path": "../../PulseEngine/Assets/Textures/UI/combo/perfect.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "great_ui",
+            "path": "../../PulseEngine/Assets/Textures/UI/combo/great.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "miss_ui",
+            "path": "../../PulseEngine/Assets/Textures/UI/combo/miss.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        /*These are button UI*/
+        {
+            "id": "mainmenu_continue_ui",
+            "path": "../../PulseEngine/Assets/Textures/UI/Buttons/mainmenu/continue.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "mainmenu_continue_hover_ui",
+            "path": "../../PulseEngine/Assets/Textures/UI/Buttons/mainmenu/continue_hover.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "mainmenu_newgame_ui",
+            "path": "../../PulseEngine/Assets/Textures/UI/Buttons/mainmenu/newgame.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "mainmenu_newgame_hover_ui",
+            "path": "../../PulseEngine/Assets/Textures/UI/Buttons/mainmenu/newgame_hover.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "mainmenu_quit_ui",
+            "path": "../../PulseEngine/Assets/Textures/UI/Buttons/mainmenu/quit.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "mainmenu_quit_hover_ui",
+            "path": "../../PulseEngine/Assets/Textures/UI/Buttons/mainmenu/quit_hover.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
