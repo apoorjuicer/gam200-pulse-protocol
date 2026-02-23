@@ -49,4 +49,14 @@ namespace ScriptAPI
 
 		SceneSystem->RestartCurrentScene();
 	}
+
+	System::String^ Scene::GetCurrentScene()
+	{
+		auto* g_coordinator = Coordinator::GetInstance();
+		auto SceneSystem = g_coordinator->GetSystem<SceneManager>();
+		
+		auto SceneName = SceneSystem->GrabCurrentScene();
+
+		return msclr::interop::marshal_as<System::String^>(SceneName);
+	}
 }

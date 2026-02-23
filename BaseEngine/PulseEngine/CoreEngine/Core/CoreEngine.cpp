@@ -457,6 +457,31 @@ CoreEngine::~CoreEngine()
 
 void CoreEngine::Init()
 {
+	char exePath[MAX_PATH];
+	GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+	std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
+
+	std::filesystem::path configPath;
+	// Check if PulseEngine is next to exe (RELEASE)
+	if (std::filesystem::exists(currentDir / "PulseEngine" / "JSON"))
+	{
+		configPath = currentDir / "PulseEngine" / "JSON" / "config.json";
+		std::cout << "[Config] Using release path (next to exe)" << std::endl;
+	}
+	// Otherwise find BaseEngine folder (DEV)
+	else
+	{
+		auto baseEngineDir = currentDir;
+		while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+		{
+			baseEngineDir = baseEngineDir.parent_path();
+		}
+		configPath = baseEngineDir / "PulseEngine" / "JSON" / "config.json";
+		std::cout << "[Config] Using dev path (BaseEngine folder)" << std::endl;
+	}
+
+	config.SetConfigPath(configPath.string());
+
 	/*Config load window width and height*/
 	if (!LoadConfig(config, config.GetConfigPath()))
 	{
@@ -644,7 +669,44 @@ void CoreEngine::Init()
 	}
 
 	// Create systems AFTER GL is ready
-	mAssets.Initialize(); //loaded registry inside
+	char eexePath[MAX_PATH];
+	GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), eexePath, MAX_PATH);
+	std::filesystem::path ccurrentDir = std::filesystem::path(eexePath).parent_path();
+
+	std::filesystem::path pulseEnginePath;
+	if (std::filesystem::exists(ccurrentDir / "PulseEngine"))
+	{
+		pulseEnginePath = ccurrentDir / "PulseEngine";  // Release
+	}
+	else
+	{
+		auto baseEngineDir = ccurrentDir;
+		while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+		{
+			baseEngineDir = baseEngineDir.parent_path();
+		}
+		pulseEnginePath = baseEngineDir / "PulseEngine";  // Dev
+	}
+
+	// Set paths BEFORE Initialize
+	std::cout << "[DEBUG] Setting asset paths, pulseEnginePath = " << pulseEnginePath << std::endl;
+	mAssets.getRegistry().SetAssetPaths(pulseEnginePath);
+	
+	std::cout << "[DEBUG] Testing path resolution:" << std::endl;
+	std::cout << "[DEBUG] Base path: " << pulseEnginePath << std::endl;
+
+	// Load manifests
+	mAssets.Initialize();
+
+	// Test if path resolution works
+	if (mAssets.getRegistry().FindTexture("MainMenu_BG")) {
+		std::string rawPath = mAssets.getRegistry().FindTexture("MainMenu_BG")->path;
+		std::string resolvedPath = mAssets.getRegistry().GetTextureItemPath("MainMenu_BG");
+		std::cout << "[DEBUG] MainMenu_BG raw path: " << rawPath << std::endl;
+		std::cout << "[DEBUG] MainMenu_BG resolved path: " << resolvedPath << std::endl;
+	}
+	//mAssets.getRegistry().SetAssetPaths(pulseEnginePath);
+	//mAssets.Initialize(); //loaded registry inside
 	// Singleton for Engine, but once game use EventBus/messaging system
 	// PLEASE CALL THIS EVERY SINGLE U WANT 2 USE SINGLETON
 	auto g_coordinator = Coordinator::GetInstance();
@@ -693,7 +755,11 @@ void CoreEngine::Init()
 	GameRunning = true;	 // 3.. 2.. 1.. GAME START
 	startScriptEngine(); // 3.. 2.. 1.. DLL SCRIPT! START ROLLINGGGGGGGGGGGGGGGGGG
 
+	//remove for game.exe in release cos no hotreload allow but need managescript.dll to be copied
+//#ifdef _DEBUG
 	CompileScriptAssembly();
+//#endif // DEBUG
+
 
 	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
 	// Step 1. Get the function ptrs
@@ -838,6 +904,8 @@ void CoreEngine::Update(float dt)
 	//--- Start of script/hot reload ---//
 	// Press R to reload the script changes 
 	static bool wasRPressed = false;
+
+#ifdef _DEBUG
 	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
 	{
 		if (!wasRPressed)
@@ -902,6 +970,7 @@ void CoreEngine::Update(float dt)
 		//std::cout << "back to normal\n";
 		wasRPressed = false;
 	}
+#endif // !_DEBUG
 
 	//move it to gamelogic.cpp
 	/*auto executeUpdate = GetFunctionPtr<void(*)(void)>
