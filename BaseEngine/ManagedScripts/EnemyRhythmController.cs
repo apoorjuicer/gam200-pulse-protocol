@@ -12,8 +12,8 @@ public class EnemyRhythmController : Script
     public static EnemyRhythmController Instance { get; private set; }
 
     // === SPRITE SHEET SETTINGS ===
-    public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_220x432";
-    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_322x433";
+    public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_fixed_220x432";
+    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_fixed_322x433";
     public string AttackSpriteSheet = "../Enemies/Rattack_spritesheet_634x431";
     public string HurtSpriteSheet = "../Enemies/Rat_Hurt_spritesheet_515x428";
 

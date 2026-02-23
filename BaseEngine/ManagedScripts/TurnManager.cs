@@ -64,6 +64,8 @@ public class TurnManager : Script
                 if (beatsInPhase >= CountdownBeats)
                 {
                     StartEnemyDisplay();
+                    beatsInPhase = currentBeat - phaseStartBeat;
+                    goto case TurnPhase.EnemyDisplay;
                 }
                 break;
 
@@ -71,6 +73,8 @@ public class TurnManager : Script
                 if (beatsInPhase >= EnemyDisplayBeats)
                 {
                     StartPlayerInput();
+                    beatsInPhase = currentBeat - phaseStartBeat;
+                    goto case TurnPhase.PlayerInput;
                 }
                 else
                 {
@@ -92,7 +96,8 @@ public class TurnManager : Script
             case TurnPhase.Resolution:
                 // Move to next enemy turn after resolution
                 StartEnemyDisplay();
-                break;
+                beatsInPhase = currentBeat - phaseStartBeat;
+                goto case TurnPhase.EnemyDisplay;
         }
     }
 
@@ -101,9 +106,12 @@ public class TurnManager : Script
     // =========================
     private void Initialize()
     {
-        // Set singleton
-        if (Instance == null)
-            Instance = this;
+        // Set singleton (handle scene reloads)
+        if (Instance != null && Instance != this)
+        {
+            Console.WriteLine("[TurnManager] Replacing stale singleton instance");
+        }
+        Instance = this;
 
         Console.WriteLine("[TurnManager] Initializing...");
 
@@ -193,7 +201,7 @@ public class TurnManager : Script
         {
             Console.WriteLine("[TurnManager] ? Player failed!");
             Console.WriteLine("[TurnManager] Enemy attacks and moves remaining steps!");
-            
+
             // // PLAY FAILURE SOUND
             // AudioComponent audio = GetAudio();
             // audio.PlaySFX("SFX_ComboStreakBroken");  // Failure sound!
@@ -244,5 +252,11 @@ public class TurnManager : Script
             default:
                 return 0;
         }
+    }
+
+    public void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 }
