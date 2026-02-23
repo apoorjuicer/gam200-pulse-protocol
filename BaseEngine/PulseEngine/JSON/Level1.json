@@ -479,7 +479,9 @@
                 },
                 {
                     "script": {
-                        "ScriptName": []
+                        "ScriptName": [
+                            "VisualBeatSystem"
+                        ]
                     }
                 },
                 {
