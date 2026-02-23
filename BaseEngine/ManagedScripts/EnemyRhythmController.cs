@@ -12,8 +12,8 @@ public class EnemyRhythmController : Script
     public static EnemyRhythmController Instance { get; private set; }
 
     // === SPRITE SHEET SETTINGS ===
-    public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_fixed_220x432";
-    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_fixed_322x433";
+    public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_220x432";
+    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_322x433";
     public string AttackSpriteSheet = "../Enemies/Rattack_spritesheet_634x431";
     public string HurtSpriteSheet = "../Enemies/Rat_Hurt_spritesheet_515x428";
 
@@ -123,10 +123,13 @@ public class EnemyRhythmController : Script
             if (waitingToDie)
             {
                 deathTimer += Time.DeltaTime;
-                if (deathTimer >= 2.5f)
+
+                
+                if (deathTimer >= 0.05f)
                 {
                     TransformComponent tf = GetTransform();
                     tf.IsVisible = false;
+                    waitingToDie = false;
                 }
             }
             return;
@@ -155,12 +158,17 @@ public class EnemyRhythmController : Script
 
     private void Initialize()
     {
-        if (Instance == null)
-            Instance = this;
+        Instance = this;
 
         Console.WriteLine("[Enemy] Initializing...");
 
         TransformComponent tf = GetTransform();
+
+        if (EnemySpawner.Instance != null)
+        {
+            tf.X = EnemySpawner.Instance.SpawnX;
+            tf.Y = EnemySpawner.Instance.SpawnY;
+        }
 
         if (SizeMultiplier != 1.0f && (tf.ScaleX == 1.0f || tf.ScaleY == 1.0f))
         {
@@ -445,6 +453,8 @@ public class EnemyRhythmController : Script
             Die();
     }
 
+    private bool spawnerNotified = false;
+
     private void Die()
     {
         if (isDead) return;
@@ -454,10 +464,25 @@ public class EnemyRhythmController : Script
         deathTimer = 0f;
         SetState(EnemyState.Dead);
 
+        
+        if (Instance == this) Instance = null;
+
         Console.WriteLine("[Enemy] DEFEATED!");
-        Console.WriteLine("==============================================");
-        Console.WriteLine("VICTORY! Enemy defeated!");
-        Console.WriteLine("==============================================");
+
+        
+        if (!spawnerNotified)
+        {
+            spawnerNotified = true;
+            try
+            {
+                if (EnemySpawner.Instance != null)
+                    EnemySpawner.Instance.OnEnemyDefeated();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Enemy] ERROR notifying spawner: {ex.Message}");
+            }
+        }
     }
 
     public void ExecuteFailurePunishment()
