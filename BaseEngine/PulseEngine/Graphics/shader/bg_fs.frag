@@ -1,5 +1,5 @@
 #version 450 core
-	layout (location=0) in vec3 vColor;
+	layout (location=0) in vec4 vColor;
     	layout (location=1) in vec2 vTex;
 
 	layout (location=0) out vec4 color;
@@ -7,7 +7,7 @@
 
 	void main () {
         vec4 texColor = texture(uTex, vTex);
-        if(texColor.a < 0.1)
+        color = texColor * vColor;
+        if(color.a < 0.01)
             discard;
-        color = texColor;
 	}

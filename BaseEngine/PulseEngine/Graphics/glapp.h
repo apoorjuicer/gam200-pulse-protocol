@@ -59,7 +59,7 @@ public:
 	void DrawAABB_NDC(const glm::mat3& modelToNDC, const AABB& box, const glm::vec3& color);
 
 	struct BatchRender {
-		struct Vtx { glm::vec2 pos; glm::vec2 uv; };
+		struct Vtx { glm::vec2 pos; glm::vec2 uv; glm::vec4 color; };
 
 		// Add drawOrder to the Key
 		struct Key {
@@ -119,13 +119,19 @@ public:
 			glEnableVertexArrayAttrib(vao, 2);
 			glVertexArrayAttribFormat(vao, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vtx, uv));
 			glVertexArrayAttribBinding(vao, 2, 0);
+
+			// layout: location 1 = vec4 tint color
+			glEnableVertexArrayAttrib(vao, 1);
+			glVertexArrayAttribFormat(vao, 1, 4, GL_FLOAT, GL_FALSE, offsetof(Vtx, color));
+			glVertexArrayAttribBinding(vao, 1, 0);
 		}
 
 		void Begin() { buckets.clear(); }
 
 		// shd_ref & mdl_ref come from Framework::Renderable
 		void Push(uint16_t shd_ref, uint16_t mdl_ref, GLuint tex, int drawOrder,
-			const glm::mat3& modelToNDC, float u0, float v0, float u1, float v1)
+			const glm::mat3& modelToNDC, float u0, float v0, float u1, float v1,
+			const glm::vec4& color = glm::vec4(1.0f))
 		{
 			// Choose model-space corners based on model type.
 			// mdl_ref==0 is your background (full-screen), others are sprite quads.
@@ -153,10 +159,10 @@ public:
 			buf.reserve(buf.size() + 4);
 
 			// UVs after v-fix (above)
-			buf.push_back({ toNDC(a), glm::vec2(u0, v0) }); // BL
-			buf.push_back({ toNDC(b), glm::vec2(u1, v0) }); // BR
-			buf.push_back({ toNDC(c), glm::vec2(u1, v1) }); // TR
-			buf.push_back({ toNDC(d), glm::vec2(u0, v1) }); // TL
+			buf.push_back({ toNDC(a), glm::vec2(u0, v0), color }); // BL
+			buf.push_back({ toNDC(b), glm::vec2(u1, v0), color }); // BR
+			buf.push_back({ toNDC(c), glm::vec2(u1, v1), color }); // TR
+			buf.push_back({ toNDC(d), glm::vec2(u0, v1), color }); // TL
 		}
 
 		void Flush(std::vector<GLSLShader>& shaderPrograms) {

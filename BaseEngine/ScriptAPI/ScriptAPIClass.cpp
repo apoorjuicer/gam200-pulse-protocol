@@ -23,6 +23,7 @@
 #include "InputAPI.h"
 #include "Sprite.h"
 #include "TextAPI.h"
+#include "FadeComponent.h"
 
 namespace ScriptAPI
 {
@@ -70,6 +71,11 @@ namespace ScriptAPI
     TextComponentAPI Script::GetTextComponent()
     {
         return TextComponentAPI(EntityID);
+    }
+
+    FadeComponent Script::GetFade()
+    {
+        return FadeComponent(EntityID);
     }
 
 }
