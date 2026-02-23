@@ -49,14 +49,82 @@ SceneManager::SceneManager()
 
 }
 
+std::filesystem::path GetScenePath(const std::string& sceneNameOrPath) {
+	// Get PulseEngine base path
+	char exePath[MAX_PATH];
+	GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+	std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
+
+	std::filesystem::path basePath;
+	if (std::filesystem::exists(currentDir / "PulseEngine"))
+	{
+		basePath = currentDir / "PulseEngine";  // Release
+	}
+	else
+	{
+		auto baseEngineDir = currentDir;
+		while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+		{
+			baseEngineDir = baseEngineDir.parent_path();
+		}
+		basePath = baseEngineDir / "PulseEngine";  // Dev
+	}
+
+	// If it's a full path starting with ../../, resolve it
+	if (sceneNameOrPath.find("../../") == 0) {
+		std::string relativePath = sceneNameOrPath.substr(std::string("../../PulseEngine/").length());
+		return (basePath / relativePath).make_preferred();
+	}
+
+	// If it's just a scene name (e.g., "Level1"), build the full path
+	if (sceneNameOrPath.find(".json") == std::string::npos) {
+		return (basePath / "JSON" / (sceneNameOrPath + ".json")).make_preferred();
+	}
+
+	// Otherwise assume it's already a relative path from PulseEngine
+	return (basePath / sceneNameOrPath).make_preferred();
+}
+
 void SceneManager::Init()
 {
+	std::cout << "[CoreEngine] Init START" << std::endl;
+
+	// Get exe directory
+	char exePath[MAX_PATH];
+	GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+	std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
+
+	std::filesystem::path scenePath;
+
+	std::cout << "[CoreEngine] GOING IN" << std::endl;
+
+	// RELEASE BUILD
+	if (std::filesystem::exists(currentDir / "PulseEngine" / "JSON"))
+	{
+		scenePath = currentDir / "PulseEngine" / "JSON" / "MainMenu.json";
+		std::cout << "[SceneManager] Using release path (next to exe)" << std::endl;
+	}
+	// Debug BUILD
+	else
+	{
+		auto baseEngineDir = currentDir;
+		while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+		{
+			baseEngineDir = baseEngineDir.parent_path();
+		}
+		scenePath = baseEngineDir / "PulseEngine" / "JSON" / "MainMenu.json";
+		std::cout << "[SceneManager] Using dev path (BaseEngine folder)" << std::endl;
+	}
+
+	std::cout << "[CoreEngine] OUT" << std::endl;
+
 	// Starting scene will be main menu
-	LoadSceneFromJson(StartingScene);
-#ifdef _DEBUG
-	std::cout << std::filesystem::absolute(StartingScene) << std::endl;
-	std::cout << std::filesystem::current_path() << std::endl;
-#endif
+	LoadSceneFromJson(scenePath.string());
+	//LoadSceneFromJson(StartingScene);
+
+	//std::cout << std::filesystem::absolute(StartingScene) << std::endl;
+	//std::cout << std::filesystem::current_path() << std::endl;
+
 	PreviousScene = CurrentScene;
 
 	// testing for it it works 
@@ -73,8 +141,8 @@ void SceneManager::Update(float dt)
 		// Save the scene we're LEAVING for ESC navigation
 		LastScene = PreviousScene;
 
-		std::string NewScenePath = "../../PulseEngine/JSON/" + CurrentScene + ".json";
-		LoadSceneFromJson(NewScenePath);
+		std::filesystem::path scenePath = GetScenePath(CurrentScene);
+		LoadSceneFromJson(scenePath.string());
 
 		// Update PreviousScene for change detection next frame
 		PreviousScene = CurrentScene;
@@ -536,6 +604,11 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 	UnloadCurrentScene();
 
+	std::string resolvedPath = path;
+	if (path.find("../../") == 0) {
+		resolvedPath = GetScenePath(path).string();
+	}
+
 #ifdef _DEBUG
 	std::cout << "\n================================================" << std::endl;
 	std::cout << "       [SceneManager] Loading in progress!" << std::endl;
@@ -547,11 +620,11 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	using namespace rapidjson;
 	Factory factory;
 
-	std::ifstream ifs(path);
+	std::ifstream ifs(resolvedPath);
 	
 	if (!ifs.is_open())
 	{
-		std::cerr << "Error: Cannot open file for reading: " << path << "\n";
+		std::cerr << "Error: Cannot open file for reading: " << resolvedPath << "\n";
 		return;
 	}
 
@@ -1057,8 +1130,8 @@ void SceneManager::RestartCurrentScene()
 	// Reload the scene without unloading the assets, 
 	std::string sceneToRestart = CurrentScene;
 	UnloadCurrentScene();
-	std::string ScenePath = "../../PulseEngine/JSON/" + sceneToRestart + ".json";
-	LoadSceneFromJson(ScenePath);
+	std::filesystem::path scenePath = GetScenePath(sceneToRestart);
+	LoadSceneFromJson(scenePath.string());
 
 #ifdef _DEBUG
 	std::cout << "\n================================================" << std::endl;
@@ -1384,7 +1457,7 @@ void SceneManager::LoadFromString(const std::string& jsonString)
 	// Write JSON string to a temporary file
 	// We use a temp file so we can reuse the existing LoadSceneFromJson() logic
 	// ─────────────────────────────────────────────────────────────────────────
-	std::string tempPath = "../../PulseEngine/JSON/_temp_editor_restore.json";
+	std::string tempPath = GetScenePath("JSON/_temp_editor_restore.json").string();
 
 	std::ofstream ofs(tempPath);
 	if (!ofs.is_open())

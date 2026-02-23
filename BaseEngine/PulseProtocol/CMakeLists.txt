@@ -88,6 +88,30 @@ add_custom_command(TARGET ${GAME_NAME} POST_BUILD
     COMMENT "Copying Assets to PulseProtocol"
 )
 
+# Copy JSON to shared build/PulseEngine folder
+#add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E copy_directory
+#        ${CMAKE_SOURCE_DIR}/PulseEngine/JSON
+#        $<TARGET_FILE_DIR:${GAME_NAME}>/../../PulseEngine/JSON
+#    COMMENT "Copying JSON files to shared PulseEngine folder"
+#)
+
+# Copy Assets to shared build/PulseEngine folder
+#add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E copy_directory
+#        ${CMAKE_SOURCE_DIR}/PulseEngine/Assets
+#        $<TARGET_FILE_DIR:${GAME_NAME}>/../../PulseEngine/Assets
+#    COMMENT "Copying Assets to shared PulseEngine folder"
+#)
+
+# Copy ManagedScripts.dll
+#add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#        "${CMAKE_SOURCE_DIR}/build/.bin/$<CONFIG>-x64/ManagedScripts.dll"
+#        "$<TARGET_FILE_DIR:${GAME_NAME}>"
+#    COMMENT "Copying ManagedScripts.dll"
+#)
+
 # Enables multi-processor parallel compilation in Visual Studio
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")

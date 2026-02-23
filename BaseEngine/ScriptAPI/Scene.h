@@ -22,5 +22,7 @@ namespace ScriptAPI
 		static void LoadScene(System::String^ Filename);
 
 		static void RestartScene();
+
+		static System::String^ GetCurrentScene();
 	};
 }

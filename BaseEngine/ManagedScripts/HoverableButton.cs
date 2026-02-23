@@ -11,11 +11,10 @@
 *
 /******************************************************************************/
 
+using ScriptAPI;
 using System;
 using System.Collections.Generic;
-using ScriptAPI;
-using System.Reflection;
-
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 public class NavigationButtons : Script
 {
@@ -30,6 +29,7 @@ public class NavigationButtons : Script
     // === QUIT & PAUSE OVERLAY STATE ===
     public static bool ShowQuitOverlay = false;
     public static bool ShowPauseOverlay = false;
+    public static bool ShowHowToPlayOverlay = false;
 
     private string pauseTexture = "";  
     private string pauseHoverTexture = "";
@@ -45,6 +45,8 @@ public class NavigationButtons : Script
 
     private bool hasPlayedHoverSound = false;
 
+    private static bool wasEscPressed = false;
+
     public override void Update()
     {
         // Reset history when a new Play session starts (frame count resets to 0)
@@ -55,12 +57,42 @@ public class NavigationButtons : Script
             currentScene = "";
             ShowQuitOverlay = false;
             ShowPauseOverlay = false;
+            ShowHowToPlayOverlay = false;
+            wasEscPressed = false;
+        }
+
+        if (currentFrame != lastFrameCount)
+        {
+            wasEscPressed = false;
         }
 
         lastFrameCount = currentFrame;
 
         InputComponent input = GetInput();
         TransformComponent t = GetTransform();
+
+        //Console.WriteLine($"Current Scene: '{currentScene}'");
+        string RealCurrentScene = Scene.GetCurrentScene();
+        //Console.WriteLine($"Current Scene: '{RealCurrentScene}'");
+
+        // Make it so that you can only press "ESC" key to pause game when in level. Update as we add more level ogay?!
+        if(input.IsKeyTriggered(256) && !wasEscPressed) //256 IS ESC KEY, We using GLFW not ASC >:/
+        {
+            wasEscPressed = true;
+            Console.WriteLine("ESC pressed!");
+            Console.WriteLine($"Current Scene: '{RealCurrentScene}'");
+
+            // Only allow pause in gameplay scenes
+            if (!string.IsNullOrEmpty(RealCurrentScene) &&
+                !RealCurrentScene.Equals("MainMenu") &&
+                !RealCurrentScene.Equals("Settings") &&
+                !RealCurrentScene.Equals("Cutscene") &&
+                !RealCurrentScene.Equals("HowToPlay"))
+            {
+                ShowPauseOverlay = !ShowPauseOverlay;
+                Console.WriteLine($"Pause overlay toggled: {ShowPauseOverlay}");
+            }
+        }
 
         if (!t.IsVisible)
         {
@@ -411,6 +443,18 @@ public class NavigationButtons : Script
 
 
 
+        // For how to play screen. 
+        if (tex.Contains("how to play"))
+        {
+            ShowHowToPlayOverlay = true;
+            return;
+        }
+
+        if (tex.Contains("temp_close"))
+        {
+            ShowHowToPlayOverlay = false;
+            return;
+        }
     }
 }
 
@@ -429,5 +473,14 @@ public class PauseOverlay : Script
     {
         TransformComponent t = GetTransform();
         t.IsVisible = NavigationButtons.ShowPauseOverlay;
+    }
+}
+
+public class HowToPlayOverlay : Script
+{
+    public override void Update()
+    {
+        TransformComponent t = GetTransform();
+        t.IsVisible = NavigationButtons.ShowHowToPlayOverlay; // Show TEMP_gtp.png
     }
 }

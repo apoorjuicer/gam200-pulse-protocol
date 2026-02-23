@@ -168,6 +168,17 @@
 		return animationjsonfilepath;
 	}
 
+	void AssetRegistry::SetAssetPaths(std::filesystem::path const& pulseEnginePath)
+	{
+		basePath = pulseEnginePath;
+
+		audiojsonfilepath = (pulseEnginePath / "JSON" / "audio.json").string();
+		texturejsonfilepath = (pulseEnginePath / "JSON" / "texture.json").string();
+		fontjsonfilepath = (pulseEnginePath / "JSON" / "font.json").string();
+		scenejsonfilepath = (pulseEnginePath / "JSON" / "scene.json").string();
+		animationjsonfilepath = (pulseEnginePath / "JSON" / "animation.json").string();
+	}
+
 	AudioResource  const* AssetRegistry::FindAudio(std::string const& id)  const {
 		if (auto it = audioResources.find(id); it != audioResources.end()) {
 			return &it->second;
@@ -509,19 +520,81 @@
 
 
 	std::string AssetRegistry::GetAudioItemPath(std::string const& id)  const {
-		return FindAudio(id)->path;
+		auto* res = FindAudio(id);
+		if (!res) return "";
+
+		//  If path starts with ../.. use basePath, otherwise use as-is
+		std::filesystem::path resPath(res->path);
+		if (res->path.find("../../") == 0) {
+			// Strip ../../PulseEngine/ and use basePath instead
+			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
+			return (basePath / relativePath).string();
+		}
+		return res->path;
 	}
 	std::string AssetRegistry::GetTextureItemPath(std::string const& id) const {
-		return FindTexture(id)->path;
+		auto* res = FindTexture(id);
+		if (!res) {
+			std::cout << "[DEBUG] GetTextureItemPath('" << id << "'): NOT FOUND in registry!\n";
+			return "";
+		}
+
+		//std::cout << "[DEBUG] GetTextureItemPath('" << id << "'):\n";
+		//std::cout << "  basePath: " << basePath << "\n";
+		//std::cout << "  res->path: " << res->path << "\n";
+
+		if (res->path.find("../../") == 0) {
+			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
+			std::string resolved = (basePath / relativePath).string();
+			//std::cout << "  resolved: " << resolved << "\n";
+			return resolved;
+		}
+
+		std::cout << "  (no ../../ prefix, using as-is)\n";
+		return res->path;
 	}
 	std::string AssetRegistry::GetFontItemPath(std::string const& id)   const {
-		return FindFont(id)->path;
+		auto* res = FindFont(id);
+		if (!res) {
+			std::cout << "[DEBUG] GetFontItemPath('" << id << "'): NOT FOUND in registry!\n";
+			return "";
+		}
+
+		//std::cout << "[DEBUG] GetFontItemPath('" << id << "'):\n";
+		//std::cout << "  basePath: " << basePath << "\n";
+		//std::cout << "  res->path: " << res->path << "\n";	
+
+		if (res->path.find("../../") == 0) {
+			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
+			std::string resolved = (basePath / relativePath).string();
+			std::cout << "  resolved: " << resolved << "\n";
+			return resolved;
+		}
+
+		std::cout << "  (no ../../ prefix, using as-is)\n";
+		return res->path;
 	}
 	std::string AssetRegistry::GetSceneItemPath(std::string const& id)   const {
-		return FindScene(id)->path;
+		auto* res = FindScene(id);
+		if (!res) return "";
+
+		std::filesystem::path resPath(res->path);
+		if (res->path.find("../../") == 0) {
+			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
+			return (basePath / relativePath).string();
+		}
+		return res->path;
 	}
 	std::string AssetRegistry::GetAnimationItemPath(std::string const& id)   const {
-		return FindAnimation(id)->path;
+		auto* res = FindAnimation(id);
+		if (!res) return "";
+
+		std::filesystem::path resPath(res->path);
+		if (res->path.find("../../") == 0) {
+			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
+			return (basePath / relativePath).string();
+		}
+		return res->path;
 	}
 
 
