@@ -13,9 +13,9 @@ public class EnemyRhythmController : Script
 
     // === SPRITE SHEET SETTINGS ===
     public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_220x432";
-    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_322x433";
-    public string AttackSpriteSheet = "../Enemies/Rattack_spritesheet_634x431";
-    public string HurtSpriteSheet = "../Enemies/Rat_Hurt_spritesheet_515x428";
+    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_220x432";
+    public string AttackSpriteSheet = "../Enemies/Rat_Walk_spritesheet_220x432";
+    public string HurtSpriteSheet = "../Enemies/Rat_Hurt_spritesheet_220x432";
 
     public int IdleFrames = 15;
     public int IdleColumns = 4;
@@ -25,8 +25,12 @@ public class EnemyRhythmController : Script
     public int WalkColumns = 4;
     public int WalkRows = 4;
 
-    public int AttackFrames = 20;
-    public int AttackColumns = 5;
+    // public int AttackFrames = 20;
+    // public int AttackColumns = 5;
+    // public int AttackRows = 4;
+
+    public int AttackFrames = 15;
+    public int AttackColumns = 4;
     public int AttackRows = 4;
 
     public int HurtFrames = 15;
@@ -161,17 +165,6 @@ public class EnemyRhythmController : Script
         Console.WriteLine("[Enemy] Initializing...");
 
         TransformComponent tf = GetTransform();
-
-        if (SizeMultiplier != 1.0f && (tf.ScaleX == 1.0f || tf.ScaleY == 1.0f))
-        {
-            tf.ScaleX = 220f * SizeMultiplier;
-            tf.ScaleY = 432f * SizeMultiplier;
-            Console.WriteLine($"[Enemy] Applied size multiplier {SizeMultiplier}x -> Scale: ({tf.ScaleX}, {tf.ScaleY})");
-        }
-        else
-        {
-            Console.WriteLine($"[Enemy] Using scene-configured scale: ({tf.ScaleX}, {tf.ScaleY})");
-        }
 
         SetState(EnemyState.Idle);
 
