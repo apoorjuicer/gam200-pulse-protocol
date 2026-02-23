@@ -88,7 +88,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Volume_.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/settings/Volume_.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -189,9 +189,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -335,9 +335,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 100.0
                     }
@@ -375,7 +375,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Music_.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/settings/Music_.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -401,9 +401,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -657,7 +657,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Screen_.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/settings/Screen_.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -683,9 +683,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -730,7 +730,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Brightness_.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/settings/Brightness_.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -756,9 +756,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -800,7 +800,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/back.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Buttons/back.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1344,7 +1344,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/SFX_.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/settings/SFX_.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1487,7 +1487,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/windowed.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/settings/windowed hover.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1633,7 +1633,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Full screen.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/settings/Full screen hover.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1706,7 +1706,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/windowed.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/settings/windowed hover.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1779,7 +1779,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Full screen.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/settings/Full screen hover.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,

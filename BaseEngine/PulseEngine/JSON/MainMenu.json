@@ -86,9 +86,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/new game.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Buttons/main_menu/newgame.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -167,9 +167,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/continue.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Buttons/main_menu/continue.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -248,9 +248,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/settings.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Buttons/main_menu/settings.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -331,7 +331,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/quit.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Buttons/main_menu/quit.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -555,7 +555,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/quit yes.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Buttons/quit yes.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -629,7 +629,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/quit no.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Buttons/quit no.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,

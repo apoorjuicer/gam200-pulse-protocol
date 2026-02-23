@@ -46,6 +46,25 @@ public class NavigationButtons : Script
 
     private static bool wasEscPressed = false;
 
+    public enum ButtonAction
+    {
+        None,
+        NewGame,
+        Continue,
+        Settings,
+        Back,
+        QuitPrompt,     // show quit overlay
+        QuitYes,
+        QuitNo,
+        PausePrompt,    // show pause overlay
+        ExitPause,      // close pause overlay
+        PauseQuit,
+        PauseRestart,
+        PauseSettings,
+        HowToPlayOpen,
+        HowToPlayClose
+    }
+public ButtonAction Action = ButtonAction.None;
     public override void Update()
     {
         // Reset history when a new Play session starts (frame count resets to 0)
@@ -224,7 +243,7 @@ public class NavigationButtons : Script
     {
         string tex = defaultTexture.ToLower();
         
-        if (tex.Contains("new game") || tex.Contains("new_game") || tex.Contains("settings") || tex.Contains("continue") || tex.Contains("quit"))
+        if (tex.Contains("new game") || tex.Contains("new_game") || tex.Contains("newgame") || tex.Contains("settings") || tex.Contains("continue") || tex.Contains("quit"))
             return "MainMenu";
         
         if (tex.Contains("back"))
@@ -235,6 +254,7 @@ public class NavigationButtons : Script
 
     private void NavigateTo(string newScene)
     {
+        Console.WriteLine("new scene is " + newScene);
         if (!string.IsNullOrEmpty(currentScene))
         {
             sceneHistory.Push(currentScene);
@@ -343,7 +363,7 @@ public class NavigationButtons : Script
             return;
         }
         
-        if (tex.Contains("new game") || tex.Contains("new_game") || tex.Contains("start"))
+        if (tex.Contains("new game") || tex.Contains("new_game") || tex.Contains("newgame") || tex.Contains("start"))
         {
             NavigateTo("Cutscene");
             return;
@@ -380,7 +400,7 @@ public class NavigationButtons : Script
         }
 
         // For how to play screen. 
-        if (tex.Contains("how to play"))
+        if (tex.Contains("howtoplay"))
         {
             ShowHowToPlayOverlay = true;
             return;

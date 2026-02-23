@@ -7,17 +7,17 @@ public class HealthBarController : Script
 
     private string[] healthFrames = new string[]
     {
-        "../../PulseEngine/Assets/Textures/UI/tile001.png",
-        "../../PulseEngine/Assets/Textures/UI/tile002.png",
-        "../../PulseEngine/Assets/Textures/UI/tile003.png",
-        "../../PulseEngine/Assets/Textures/UI/tile004.png",
-        "../../PulseEngine/Assets/Textures/UI/tile005.png",
-        "../../PulseEngine/Assets/Textures/UI/tile006.png",
-        "../../PulseEngine/Assets/Textures/UI/tile007.png",
-        "../../PulseEngine/Assets/Textures/UI/tile008.png",
-        "../../PulseEngine/Assets/Textures/UI/tile009.png",
-        "../../PulseEngine/Assets/Textures/UI/tile010.png",
-        "../../PulseEngine/Assets/Textures/UI/tile012.png"
+        "../../PulseEngine/Assets/Textures/UI/healthbars/tile001.png",
+        "../../PulseEngine/Assets/Textures/UI/healthbars/tile002.png",
+        "../../PulseEngine/Assets/Textures/UI/healthbars/tile003.png",
+        "../../PulseEngine/Assets/Textures/UI/healthbars/tile004.png",
+        "../../PulseEngine/Assets/Textures/UI/healthbars/tile005.png",
+        "../../PulseEngine/Assets/Textures/UI/healthbars/tile006.png",
+        "../../PulseEngine/Assets/Textures/UI/healthbars/tile007.png",
+        "../../PulseEngine/Assets/Textures/UI/healthbars/tile008.png",
+        "../../PulseEngine/Assets/Textures/UI/healthbars/tile009.png",
+        "../../PulseEngine/Assets/Textures/UI/healthbars/tile010.png",
+        "../../PulseEngine/Assets/Textures/UI/healthbars/tile012.png"
     };
 
     // Match the inspector values

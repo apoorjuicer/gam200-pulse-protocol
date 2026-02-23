@@ -32,7 +32,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/Background1.jpg",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/Background_level1.jpg",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -65,9 +65,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "Background",
-                        "mask": 1,
-                        "sortingLayer": 0,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -383,9 +383,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/tile007.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/healthbars/tile007.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2194,7 +2194,7 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
                         "spriteName": "../../PulseEngine/Assets/Textures/UI/back glow blue.png",
                         "tintColor": {
