@@ -779,8 +779,8 @@
                             "y": 482.3045654296875
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 200.0,
+                            "y": 200.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -848,12 +848,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1273.9866943359375,
-                            "y": 375.8576354980469
+                            "x": 1311.0018310546875,
+                            "y": 386.9479675292969
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 120.0,
+                            "y": 120.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -867,7 +867,7 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon bat greyed.png",
                         "tintColor": {
