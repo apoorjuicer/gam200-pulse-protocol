@@ -62,14 +62,16 @@ static std::string LoadFile(const char* relativeToGraphicsShader)
 	return ss.str();
 }
 
-const std::string test_vs = LoadFile("test_vs.vert");
-const std::string test_fs = LoadFile("test_fs.frag");
-const std::string bg_vs = LoadFile("bg_vs.vert");
-const std::string bg_fs = LoadFile("bg_fs.frag");
-const std::string sprite_vs = LoadFile("sprite_vs.vert");
-const std::string sprite_fs = LoadFile("sprite_fs.frag");
-const std::string font_vs = LoadFile("font_vs.vert");
-const std::string font_fs = LoadFile("font_fs.frag");
+const std::string test_vs    = LoadFile("test_vs.vert");
+const std::string test_fs    = LoadFile("test_fs.frag");
+const std::string bg_vs      = LoadFile("bg_vs.vert");
+const std::string bg_fs      = LoadFile("bg_fs.frag");
+const std::string sprite_vs  = LoadFile("sprite_vs.vert");
+const std::string sprite_fs  = LoadFile("sprite_fs.frag");
+const std::string font_vs    = LoadFile("font_vs.vert");
+const std::string font_fs    = LoadFile("font_fs.frag");
+const std::string overlay_vs = LoadFile("overlay_vs.vert");
+const std::string overlay_fs = LoadFile("overlay_fs.frag");
 
 double random()
 {
@@ -84,10 +86,12 @@ void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/)
 	gBatch.Init(/*maxSprites*/ 10000);
 	
 	GLApp::VPSS shdr_strs{
-		std::make_pair(test_vs, test_fs),
-		std::make_pair(bg_vs, bg_fs),
-		std::make_pair(sprite_vs, sprite_fs),
-		std::make_pair(font_vs, font_fs) };
+		std::make_pair(test_vs,    test_fs),    // 0 - test
+		std::make_pair(bg_vs,      bg_fs),      // 1 - background
+		std::make_pair(sprite_vs,  sprite_fs),  // 2 - sprites (supports tint)
+		std::make_pair(font_vs,    font_fs),    // 3 - text
+		std::make_pair(overlay_vs, overlay_fs)  // 4 - screen fade overlay
+	};
 	GLApp::init_shdrpgms_cont(shdr_strs);
 }
 
@@ -178,7 +182,8 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 		static_cast<uint16_t>(x.mdl_ref),
 		x.textureID,
 		drawOrder,
-		modelNDC, u0, v0, u1, v1);
+		modelNDC, u0, v0, u1, v1,
+		glm::vec4(x.tintColor.r, x.tintColor.g, x.tintColor.b, x.tintColor.a));
 }
 
 void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {

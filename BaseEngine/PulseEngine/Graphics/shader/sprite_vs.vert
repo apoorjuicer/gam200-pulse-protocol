@@ -1,10 +1,10 @@
 #version 450 core
 
 layout(location = 0) in vec2 aVertexPosition; // Vertex position
-layout(location = 1) in vec3 aVertexColor;    // Vertex color
+layout(location = 1) in vec4 aVertexColor;    // Tint color (RGBA)
 layout(location = 2) in vec2 aTexture;        // Texture coordinates
 
-layout(location = 0) out vec3 vColor;         // Output color
+layout(location = 0) out vec4 vColor;         // Output tint color
 layout(location = 1) out vec2 vTex;           // Output texture coordinates
 
 uniform mat3 uModel_to_NDC;                  // Model-to-NDC matrix
