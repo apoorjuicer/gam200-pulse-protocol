@@ -76,6 +76,12 @@ public class FadeTestScript : Script
 
         if (input.IsKeyTriggered(52))   // '4'
         {
+            Console.WriteLine("[FadeTest] >> FadeIn to Red (1.5s)");
+            FadeAPI.FadeIn(1.5f, 1.0f, 0.0f, 0.0f);
+        }
+
+        if (input.IsKeyTriggered(53))   // '5'
+        {
             Console.WriteLine("[FadeTest] >> Stop screen overlay");
             FadeAPI.Stop();
         }
