@@ -65,12 +65,22 @@ public class ScriptName : Script
 
         // 6. Game State API
         Application.Quit();               // close the game
+        Application.IsPlaying();          // returns bool, check if game is currently playing
         Application.SetPaused(false);     // paused means set DeltaTime to = 0, so it no move if u apply dt 2 movement
-        Application.IsPlaying();          
-        Application.IsPaused();
+        Application.IsPaused();           // returns bool, check if game is currently paused
 
-        // 7. Sprite texture
-        s.Texture = "";                     // returns string, get/set texture path, not sure who did it 
+        // 7. Sprite API
+        s.Texture = "texturePath";          // set texture path
+        string texPath = s.Texture;         // get current texture path
+
+        s.TintR = 1.0f;                     // set red tint (0.0 - 1.0)
+        s.TintG = 1.0f;                     // set green tint (0.0 - 1.0)
+        s.TintB = 1.0f;                     // set blue tint (0.0 - 1.0)
+        s.TintA = 1.0f;                     // set alpha/opacity (0.0 - 1.0)
+        s.SetTint(1.0f, 1.0f, 1.0f, 1.0f); // set all tint values at once (r, g, b, a)
+
+        s.UseTexture = true;                // true = use texture, false = use tint color only
+        bool hasSprite = s.HasSprite();     // returns bool, check if entity has a sprite component
 
         // 8. Audio API
         audio.Play();                       // play this entity's own audiosource component
@@ -112,12 +122,12 @@ public class ScriptName : Script
         PosY = input.WorldMouseY;               // world space Y
         bool OnScreen = input.InGameViewport;   // check if mouse is inside game window
 
-        // Mouse buttons — 0=left, 1=right, 2=middle
+        // Mouse buttons 0=left, 1=right, 2=middle
         input.IsMouseButtonPressed(0);    // held down
         input.IsMouseButtonTriggered(0);  // just clicked this frame
         input.IsMouseButtonReleased(0);  // just released this frame
 
-        // Keyboard — GLFW key codes (NOT ASCII)
+        // Keyboard GLFW key codes (NOT ASCII)
         input.IsKeyPressed(32);    // held down
         input.IsKeyTriggered(32);  // just pressed this frame
         input.IsKeyReleased(32);   // just released this frame
@@ -129,5 +139,17 @@ public class ScriptName : Script
         anim.SetAnimation("SpriteName", row, col, totalFrames, speed);  // Set current entity animation 2 smth else
         string current = anim.GetCurrentAnimation();                    // Get current sprite name (returns full path string)
         anim.SetAnimationSpeed(speed);                                  // Change speed of animation
+
+        // 13. Text API
+        text.SetText("Hello World");        // set the text string
+        string currentText = text.GetText(); // get the current text string
+
+        text.SetColor(1.0f, 1.0f, 1.0f);   // set text color (r, g, b) 0.0 - 1.0
+        text.SetFontSize(24.0f);            // set font size
+        text.SetVisible(true);              // show/hide text
+        bool isVisible = text.IsVisible();  // returns bool, check if text is visible
+
+        // Alignment: 0 = left, 1 = center, 2 = right (check TextAlignment enum)
+        text.SetAlignment(0);         
     }
 }
