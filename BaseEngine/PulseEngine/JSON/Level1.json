@@ -53,9 +53,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "Conductor"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -480,7 +478,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "VisualBeatSystem"
+                            "LevelCountdown"
                         ]
                     }
                 },
@@ -661,12 +659,14 @@
                 },
                 {
                     "script": {
-                        "ScriptName": []
+                        "ScriptName": [
+                            "LevelCountdown"
+                        ]
                     }
                 },
                 {
                     "name": {
-                        "name": "Countdown"
+                        "name": "Countdown text"
                     }
                 },
                 {
@@ -688,7 +688,7 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "New Text",
+                        "text": "3",
                         "font_id": "",
                         "offset": {
                             "x": 0.0,
