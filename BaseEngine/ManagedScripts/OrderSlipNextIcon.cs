@@ -25,11 +25,17 @@ public class OrderSlipNextIcon : Script
             {
                 OrderSlipUIController.Instance.RegisterNextSlot(slotX, slotY);
                 initialized = true;
+
+                //Console.WriteLine($"IsVisible={tf0.IsVisible}");
+                //Console.WriteLine($"Pos: ({slotX}, {slotY})");
+                //Console.WriteLine($"Srite: '{lastSprite}'");
             }
             return;
         }
 
         var ui = OrderSlipUIController.Instance;
+        //TransformComponent t = GetTransform();
+        //Console.WriteLine($"CurrentType={ui?.CurrentType}, IsVisible={t.IsVisible}, Pos=({slotX}, {slotY}) ,lastSprite='{lastSprite}', Scale='{t.ScaleX},{t.ScaleY}.'");
         if (ui == null) return;
 
         TransformComponent tf = GetTransform();
@@ -102,13 +108,15 @@ public class OrderSlipNextIcon : Script
 
     private void SetSprite(string spriteName)
     {
+        if (string.IsNullOrEmpty(spriteName)) return; // RETURN IF NO NEW ICON, COS WHY CHANGE 
         if (spriteName == lastSprite) return;
         lastSprite = spriteName;
 
         SpriteComponent spr = GetSprite();
         if (spr.HasSprite())
         {
-            spr.Texture = spriteName;
+            // who made sprite compoennt and why is this not in the API
+            spr.Texture = "../../PulseEngine/Assets/Textures/UI/" + spriteName;
             Console.WriteLine($"[OrderSlipNext] Sprite -> {spriteName}");
         }
         else

@@ -8,9 +8,11 @@ public class OrderSlipUIController : Script
     public static OrderSlipUIController Instance;
 
     // Tunables
-    public float currentScale = 1.0f;
-    public float nextScale = 0.75f;
-    public float transitionDuration = 0.35f;
+    //public float currentScale = 1.0f; //NO SHIT IT DISAPEAR ITS 1
+    //public float nextScale = 0.75f;   //NO SHIT IT DISAPEAR ITS 0.75
+    public float currentScale = 100f;
+    public float nextScale = 100f;
+    public float transitionDuration = 0.35f;    
     public float fadeDuration = 0.25f;
     public float rotateDegrees = 90.0f;
     public float arcHeight = 30.0f;
@@ -151,7 +153,7 @@ public class OrderSlipUIController : Script
             case EnemyIconType.Rat: return "enemy icon rat.png";
             case EnemyIconType.Bat: return "enemy icon bat.png";
             case EnemyIconType.Gorilla: return "enemy icon gorilla.png";
-            default: return "Icon_None";
+            default: return "";//"Icon_None";
         }
     }
 
@@ -162,7 +164,7 @@ public class OrderSlipUIController : Script
             case EnemyIconType.Rat: return "enemy icon rat greyed.png";
             case EnemyIconType.Bat: return "enemy icon bat greyed.png";
             case EnemyIconType.Gorilla: return "enemy icon gorilla greyed.png";
-            default: return "Icon_None";
+            default: return "";//"Icon_None";
         }
     }
 }

@@ -58,14 +58,16 @@ public class OrderSlipCurrentIcon : Script
 
     private void SetSprite(string spriteName)
     {
+        if (string.IsNullOrEmpty(spriteName)) return; // RETURN IF NO ICON, COS WHY CHANGE 
+
         if (spriteName == lastSprite) return;
         lastSprite = spriteName;
 
         SpriteComponent spr = GetSprite();
         if (spr.HasSprite())
         {
-            spr.Texture = spriteName;
-            Console.WriteLine($"[OrderSlipCurrent] Sprite -> {spriteName}");
+            spr.Texture = "../../PulseEngine/Assets/Textures/UI/" + spriteName;
+            Console.WriteLine($"[OrderSlipCurrent] Sprite -> {spriteName}\n");
         }
         else
         {
