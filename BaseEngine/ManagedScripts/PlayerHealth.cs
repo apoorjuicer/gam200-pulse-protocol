@@ -128,6 +128,8 @@ public class PlayerHealth : Script
         Console.WriteLine("GAME OVER");
         Console.WriteLine("==============================================");
 
+        NavigationButtons.GoToGameLose(); // go to gamelose scene/overlap?? idk why its diff from the win.
+        
         Application.SetPaused(true);
     }
 

@@ -180,7 +180,8 @@ public class EnemySpawner : Script
         // all enemies are dead. Yippeee
         if (enemyQueue.Count == 0)
         {
-            Scene.LoadScene("GameWin");
+            //Scene.LoadScene("GameWin");
+            StageClearElement.StageClear(); // bring up winner overlay
             return;
         }
 
