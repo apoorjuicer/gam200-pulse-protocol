@@ -48,16 +48,19 @@ public class PlayerHealth : Script
     // =========================
     private void Initialize()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else if (Instance != this)
-        {
-            Console.WriteLine("[PlayerHealth] WARNING: Multiple PlayerHealth instances!");
-            return;
-        }
+        //if (Instance == null)
+        //{
+        //    Instance = this;
+        //}
+        //else if (Instance != this)
+        //{
+        //    Console.WriteLine("[PlayerHealth] WARNING: Multiple PlayerHealth instances!");
+        //    return;
+        //}
 
+        // ALWAYS MAKE A NEW ONE IN INIT
+        Instance = this;
+        isDead = false;
         PlayerEntityID = entityID;
         Console.WriteLine($"[PlayerHealth] Entity ID exposed: {PlayerEntityID}");
 
@@ -125,6 +128,8 @@ public class PlayerHealth : Script
         Console.WriteLine("GAME OVER");
         Console.WriteLine("==============================================");
 
+        NavigationButtons.GoToGameLose(); // go to gamelose scene/overlap?? idk why its diff from the win.
+        
         Application.SetPaused(true);
     }
 

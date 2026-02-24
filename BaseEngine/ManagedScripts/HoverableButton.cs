@@ -29,6 +29,7 @@ public class NavigationButtons : Script
     public static bool ShowQuitOverlay = false;
     public static bool ShowPauseOverlay = false;
     public static bool ShowHowToPlayOverlay = false;
+    private static bool openedSettingsFromPause  = false;
 
     // === SETTINGS OVERLAY (inside MainMenu scene) ===
     public static bool ShowSettingsOverlay = false;
@@ -84,7 +85,8 @@ public class NavigationButtons : Script
         {
             wasEscPressed = true;
 
-            if (!string.IsNullOrEmpty(realScene) &&
+            if (!openedSettingsFromPause &&
+                !string.IsNullOrEmpty(realScene) &&
                 !realScene.Equals("MainMenu") &&
                 !realScene.Equals("Settings") &&
                 !realScene.Equals("Cutscene") &&
@@ -189,29 +191,32 @@ public class NavigationButtons : Script
         // =========================================================
         if (isPauseButton)
         {
-            bool isPauseShowing = ShowPauseOverlay;
+            bool isPauseMenuOpen = ShowPauseOverlay;
+            bool isPauseSettingsOpen = ShowSettingsOverlay && openedSettingsFromPause;
+            bool shouldGameBePaused = isPauseMenuOpen || isPauseSettingsOpen;
 
-            if (isPauseShowing != lastPauseState)
+            if (isPauseMenuOpen != lastPauseState)
             {
                 SpriteComponent sprite = GetSprite();
-                if (isPauseShowing)
-                {
-                    Application.SetPaused(true);
 
+                if (isPauseMenuOpen)
+                {
                     sprite.Texture = exitTexture;
                     defaultTexture = exitTexture;
                     hoverTexture = exitHoverTexture;
                 }
                 else
                 {
-                    Application.SetPaused(false);
-
                     sprite.Texture = pauseTexture;
                     defaultTexture = pauseTexture;
                     hoverTexture = pauseHoverTexture;
                 }
-                lastPauseState = isPauseShowing;
+
+                lastPauseState = isPauseMenuOpen;
             }
+
+            // Apply actual pause state once
+            Application.SetPaused(shouldGameBePaused);
         }
 
         string texLower = defaultTexture.ToLower();
@@ -405,6 +410,13 @@ public class NavigationButtons : Script
     private static void HideSettings()
     {
         ShowSettingsOverlay = false;
+
+        if (openedSettingsFromPause)
+        {
+            ShowPauseOverlay = true;      // return to pause menu
+            Application.SetPaused(true);  // keep game paused
+            openedSettingsFromPause = false;
+        }
     }
 
     private bool TryGetNextLevelSceneName(string sceneName, out string nextScene)
@@ -494,11 +506,10 @@ public class NavigationButtons : Script
 
         if (tex.Contains("pausesettings"))
         {
-            // Open settings overlay from pause by jumping back to MainMenu
+            openedSettingsFromPause = true;
             ShowPauseOverlay = false;
             Application.SetPaused(false);
             ShowSettingsOverlay = true;
-            Scene.LoadScene("MainMenu");
             return;
         }
 

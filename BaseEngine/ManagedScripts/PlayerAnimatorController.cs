@@ -82,8 +82,8 @@ public class PlayerAnimationController : Script
 
     private void Initialize()
     {
-        if (Instance == null)
-            Instance = this;
+
+        Instance = this;
 
         Console.WriteLine("[PlayerAnim] Initializing...");
         Console.WriteLine($"[PlayerAnim] Entity ID: {entityID}");

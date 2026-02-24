@@ -109,7 +109,9 @@ public class EnemyRhythmController : Script
             Initialize();
             initialized = true;
             return;
-        }
+        }   
+
+        //Console.WriteLine($"[Enemy] Conductor={Conductor.Instance != null}, TurnManager={TurnManager.Instance != null}, Beat={Conductor.Instance?.GetCurrentBeat()}\n\n\n\n\n");
 
         InputComponent input = GetInput();
         if (input.IsKeyTriggered(32)) // press space 2 do smth
@@ -166,8 +168,7 @@ public class EnemyRhythmController : Script
 
     private void Initialize()
     {
-        if (Instance == null)
-            Instance = this;
+        Instance = this;
 
         Console.WriteLine("[Enemy] Initializing...");
 

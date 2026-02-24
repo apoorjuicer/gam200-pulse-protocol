@@ -3,7 +3,7 @@ using ScriptAPI;
 
 public class OrderSlipNextIcon : Script
 {
-    private bool initialized = false;
+    private OrderSlipUIController registeredWith = null;
 
     private float slotX, slotY;
     private bool wasTransitioning = false;
@@ -15,28 +15,19 @@ public class OrderSlipNextIcon : Script
 
     public override void Update()
     {
-        if (!initialized)
+        var ui = OrderSlipUIController.Instance;
+        if (ui == null) return;
+
+        // Registers on first load AND re-registers on reload automatically. Cos json parent-child hieracy is not letting me change it in json
+        if (registeredWith != ui)
         {
             TransformComponent tf0 = GetTransform();
             slotX = tf0.X;
             slotY = tf0.Y;
-
-            if (OrderSlipUIController.Instance != null)
-            {
-                OrderSlipUIController.Instance.RegisterNextSlot(slotX, slotY);
-                initialized = true;
-
-                //Console.WriteLine($"IsVisible={tf0.IsVisible}");
-                //Console.WriteLine($"Pos: ({slotX}, {slotY})");
-                //Console.WriteLine($"Srite: '{lastSprite}'");
-            }
+            ui.RegisterNextSlot(slotX, slotY); 
+            registeredWith = ui;
             return;
         }
-
-        var ui = OrderSlipUIController.Instance;
-        //TransformComponent t = GetTransform();
-        //Console.WriteLine($"CurrentType={ui?.CurrentType}, IsVisible={t.IsVisible}, Pos=({slotX}, {slotY}) ,lastSprite='{lastSprite}', Scale='{t.ScaleX},{t.ScaleY}.'");
-        if (ui == null) return;
 
         TransformComponent tf = GetTransform();
 
@@ -67,7 +58,19 @@ public class OrderSlipNextIcon : Script
                 tf.ScaleX = ui.nextScale;
                 tf.ScaleY = ui.nextScale;
 
-                SetSprite(ui.GetDimSprite(ui.NextType));
+                // IF THERE IS NOTHING LEFT IN THE CONTAINER, JUST SHOW NOTHING(make invise) Yes i am so smart(not) :>
+                if (ui.NextType == EnemyIconType.None)
+                {
+                    TransformComponent t = GetTransform();
+                    t.IsVisible = false;
+                }
+                else
+                {
+                    // else just show. Booooo! Imagine showing urself
+                    TransformComponent t = GetTransform();
+                    t.IsVisible = true;
+                    SetSprite(ui.GetDimSprite(ui.NextType));
+                }
             }
             return;
         }
@@ -108,7 +111,7 @@ public class OrderSlipNextIcon : Script
 
     private void SetSprite(string spriteName)
     {
-        if (string.IsNullOrEmpty(spriteName)) return; // RETURN IF NO NEW ICON, COS WHY CHANGE 
+        if (string.IsNullOrEmpty(spriteName)) return;
         if (spriteName == lastSprite) return;
         lastSprite = spriteName;
 
