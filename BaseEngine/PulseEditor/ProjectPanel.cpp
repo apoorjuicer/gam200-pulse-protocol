@@ -241,9 +241,6 @@ namespace PulseEditor
     // ── Main panel UI ──────────────────────────────────────────
     void ProjectPanel()
     {
-        // Disable all editing when playing
-        bool isPlaying = IsPlaying();
-
         // ──────────────────────────────────────────────────────────
         // HEADER: Refresh button and path display
         // ──────────────────────────────────────────────────────────
