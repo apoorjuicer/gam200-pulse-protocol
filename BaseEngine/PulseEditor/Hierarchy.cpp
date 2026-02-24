@@ -513,11 +513,6 @@ namespace PulseEditor
             lastSceneDuringPlay = "";
         }
 
-        if (isPlaying)
-        {
-            ImGui::BeginDisabled();
-        }
-
         // [+] Create Empty Entity at end
         // Undo
         if (ImGui::Button("+"))
@@ -704,11 +699,6 @@ namespace PulseEditor
         }
 
         ImGui::EndChild();
-
-        if (isPlaying)
-        {
-            ImGui::EndDisabled();
-        }
 
         ImGui::End();
     }
