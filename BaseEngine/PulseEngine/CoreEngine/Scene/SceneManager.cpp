@@ -1054,33 +1054,25 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	}
 
 
-	// Initialize all scripts for entities with LogicComponent
-	//auto logicSystem = g_coordinator->GetSystem<LogicSystem>();
-	//if (logicSystem) {
-	//	//std::cout << "[SceneManager] Initializing scripts for loaded entities..." << std::endl;
-	//	//std::cout << "[SceneManager] Total entities in SceneEntityList: " << SceneEntityList.size() << std::endl;
+	// Force Debug Display Text visibility based on build mode
+	for (auto entity : SceneEntityList)
+	{
+		if (g_coordinator->HasComponent<TextComponent>(entity) && g_coordinator->HasComponent<Name>(entity))
+		{
+			auto& name = g_coordinator->GetComponent<Name>(entity).name;
+			if (name == "Debug Display Text")
+			{
+				auto& txt = g_coordinator->GetComponent<TextComponent>(entity);
+#ifdef _DEBUG
+				txt.visible = true;
+#else
+				txt.visible = false;
+#endif
+				break;
+			}
+		}
+	}
 
-	//	// DEBUG: Show ALL entities in list
-	//	for (Entity entity : SceneEntityList) {
-	//		std::string name = "Unnamed";
-	//		if (g_coordinator->HasComponent<Name>(entity)) {
-	//			name = g_coordinator->GetComponent<Name>(entity).name;
-	//		}
-	//		/*bool hasScript = g_coordinator->HasComponent<LogicComponent>(entity);*/
-	//	}
-
-	//	int scriptCount = 0;
-	//	for (Entity entity : SceneEntityList) {
-	//		if (g_coordinator->HasComponent<LogicComponent>(entity)) {
-	//			auto& logic = g_coordinator->GetComponent<LogicComponent>(entity);
-	//			auto script = logicSystem->GrabScript(logic.ScriptName);
-	//			if (script) {
-	//				script->Init(entity);
-	//				scriptCount++;
-	//			}
-	//		}
-	//	}
-	//}
 
 	PreviousScene = CurrentScene;
 
