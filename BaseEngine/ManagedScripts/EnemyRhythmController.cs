@@ -448,7 +448,8 @@ public class EnemyRhythmController : Script
         if (isDead) return;
 
         isDead = true;
-        GetHealth().isAlive = false;
+        HealthComponent hDie = GetHealth();
+        hDie.isAlive = false;
         waitingToDie = true;
         deathTimer = 0f;
         SetState(EnemyState.Dead);

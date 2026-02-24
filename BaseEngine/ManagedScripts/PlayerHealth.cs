@@ -125,7 +125,8 @@ public class PlayerHealth : Script
         if (isDead) return;
 
         isDead = true;
-        GetHealth().isAlive = false;
+        HealthComponent hDie = GetHealth();
+        hDie.isAlive = false;
         Console.WriteLine("[PlayerHealth] PLAYER DIED!");
         Console.WriteLine("==============================================");
         Console.WriteLine("GAME OVER");
