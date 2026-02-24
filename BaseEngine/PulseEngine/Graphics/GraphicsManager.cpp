@@ -423,6 +423,10 @@ bool GraphicsManager::LoadTexturesFromRegistry()
             continue;
         }
 
+        std::cout << "Registry key(name/id)=" << name
+            << " tr.tex_name=" << tr.tex_name
+            << " tr.path=" << tr.path << "\n";
+
         // Load from disk to GL
         std::string resolvedPath = mRegistry->GetTextureItemPath(name);
         GLuint tex_id = LoadTextureFile(resolvedPath);
@@ -448,6 +452,7 @@ GLuint GraphicsManager::GetOrLoad(const std::string &tex_name)
 {
     if (auto it = texHandle_key.find(tex_name); it != texHandle_key.end())
         return it->second;
+   // std::string path = (mRegistry ? mRegistry->GetTextureItemPath(tex_name) : tex_name);
     GLuint tex_id = LoadTextureFile(tex_name);
     if (tex_id)
     {

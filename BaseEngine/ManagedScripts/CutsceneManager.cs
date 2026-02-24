@@ -47,7 +47,7 @@ public class CutsceneManager : Script
     // =========================
     // Initialization
     // =========================
-    public void OnCreate()
+    public virtual void OnCreate()
     {
         // Set singleton
         if (Instance == null)
@@ -300,6 +300,12 @@ public class PanelSlider : Script
     // =========================
     // Initialization
     // =========================
+
+    protected bool configured = false;
+
+    protected virtual void ConfigureOnce() { configured = true; }
+
+
     private void Initialize()
     {
         if (CutsceneManager.Instance == null)
@@ -320,6 +326,7 @@ public class PanelSlider : Script
 
         if (slidesFromLeft)
         {
+            Console.WriteLine("Panel sliding from left yes\n");
             // Odd panels: Start off-screen left, slide in, then exit to left
             startX = targetX - slideDistance;
             endX = targetX - slideDistance;
@@ -355,6 +362,7 @@ public class PanelSlider : Script
             Initialize();
             return;
         }
+        if (!configured) ConfigureOnce();
 
         TransformComponent transform = GetTransform();
 
@@ -408,140 +416,243 @@ public class PanelSlider : Script
 
 public class Panel1Slider : PanelSlider
 {
-    public void OnCreate()
+    //public override  void OnCreate()
+    //{
+    //    panelIndex = 0;
+    //    targetX = -679.232f;
+    //    targetY = -40.305f;
+    //}
+    protected override void ConfigureOnce()
     {
         panelIndex = 0;
         targetX = -679.232f;
         targetY = -40.305f;
+        configured = true;
     }
 }
 
 public class Panel2Slider : PanelSlider
 {
-    public void OnCreate()
+    //public void OnCreate()
+    //{
+    //    panelIndex = 1;
+    //    targetX = 674.928f;
+    //    targetY = -50.000f;
+    //}
+    protected override void ConfigureOnce()
     {
         panelIndex = 1;
         targetX = 674.928f;
         targetY = -50.000f;
+        configured = true;
     }
 }
 
 public class Panel3Slider : PanelSlider
 {
-    public void OnCreate()
+    //public void OnCreate()
+    //{
+    //    panelIndex = 2;
+    //    targetX = -679.232f;
+    //    targetY = -40.305f;
+    //}
+    protected override void ConfigureOnce()
     {
         panelIndex = 2;
         targetX = -679.232f;
         targetY = -40.305f;
+        configured = true;
     }
 }
 
 public class Panel4Slider : PanelSlider
 {
-    public void OnCreate()
+    //public void OnCreate()
+    //{
+    //    panelIndex = 3;
+    //    targetX = 674.928f;
+    //    targetY = -50.000f;
+    //}
+    protected override void ConfigureOnce()
     {
         panelIndex = 3;
         targetX = 674.928f;
         targetY = -50.000f;
+        configured = true;
     }
 }
 
 public class Panel5Slider : PanelSlider
 {
-    public void OnCreate()
+    //public void OnCreate()
+    //{
+    //    panelIndex = 4;
+    //    targetX = -679.232f;
+    //    targetY = -40.305f;
+    //}
+    protected override void ConfigureOnce()
     {
         panelIndex = 4;
         targetX = -679.232f;
         targetY = -40.305f;
+        configured = true;
     }
 }
 
 public class Panel6Slider : PanelSlider
 {
-    public void OnCreate()
+    //public void OnCreate()
+    //{
+    //    panelIndex = 5;
+    //    targetX = 674.928f;
+    //    targetY = -50.000f;
+    //}
+    protected override void ConfigureOnce()
     {
         panelIndex = 5;
         targetX = 674.928f;
         targetY = -50.000f;
+        configured = true;
     }
 }
 
 public class Panel7Slider : PanelSlider
 {
-    public void OnCreate()
+    //public void OnCreate()
+    //{
+    //    panelIndex = 6;
+    //    targetX = -679.232f;
+    //    targetY = -40.305f;
+    //}
+    protected override void ConfigureOnce()
     {
         panelIndex = 6;
         targetX = -679.232f;
         targetY = -40.305f;
+        configured = true;
     }
 }
 
 public class Panel8Slider : PanelSlider
 {
-    public void OnCreate()
+    //public void OnCreate()
+    //{
+    //    panelIndex = 7;
+    //    targetX = 674.928f;
+    //    targetY = -50.000f;
+    //}
+    protected override void ConfigureOnce()
     {
         panelIndex = 7;
         targetX = 674.928f;
         targetY = -50.000f;
+        configured = true;
     }
 }
 
 public class Panel9Slider : PanelSlider
 {
-    public void OnCreate()
+    //public void OnCreate()
+    //{
+    //    panelIndex = 8;
+    //    targetX = -679.232f;
+    //    targetY = -40.305f;
+    //}
+
+    protected override void ConfigureOnce()
     {
         panelIndex = 8;
         targetX = -679.232f;
         targetY = -40.305f;
+        configured = true;
     }
 }
 
 public class Panel10Slider : PanelSlider
 {
-    public void OnCreate()
+    //public void OnCreate()
+    //{
+    //    panelIndex = 9;
+    //    targetX = 674.928f;
+    //    targetY = -50.000f;
+    //}
+    protected override void ConfigureOnce()
     {
         panelIndex = 9;
         targetX = 674.928f;
         targetY = -50.000f;
+        configured = true;
     }
 }
 
 public class Panel11Slider : PanelSlider
 {
-    public void OnCreate()
+    //public void OnCreate()
+    //{
+    //    panelIndex = 10;
+    //    targetX = -679.232f;
+    //    targetY = -40.305f;
+    //}
+
+    protected override void ConfigureOnce()
     {
         panelIndex = 10;
         targetX = -679.232f;
         targetY = -40.305f;
+        configured = true;
     }
 }
 
 public class Panel12Slider : PanelSlider
 {
-    public void OnCreate()
+    //public void OnCreate()
+    //{
+    //    panelIndex = 11;
+    //    targetX = 674.928f;
+    //    targetY = -50.000f;
+    //}
+
+    protected override void ConfigureOnce()
     {
         panelIndex = 11;
         targetX = 674.928f;
         targetY = -50.000f;
+        configured = true;
     }
 }
 
 public class Panel13Slider : PanelSlider
 {
-    public void OnCreate()
+    //public void OnCreate()
+    //{
+    //    panelIndex = 12;
+    //    targetX = -679.232f;
+    //    targetY = -40.305f;
+    //}
+
+    protected override void ConfigureOnce()
     {
         panelIndex = 12;
         targetX = -679.232f;
         targetY = -40.305f;
+        configured = true;
     }
 }
 
 public class Panel14Slider : PanelSlider
 {
-    public void OnCreate()
+    //public void OnCreate()
+    //{
+    //    panelIndex = 13;
+    //    targetX = 674.928f;
+    //    targetY = -50.000f;
+    //}
+
+    protected override void ConfigureOnce()
     {
         panelIndex = 13;
         targetX = 674.928f;
         targetY = -50.000f;
+        configured = true;
     }
 }
