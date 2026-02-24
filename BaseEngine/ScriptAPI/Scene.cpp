@@ -17,6 +17,7 @@
 #include "../CoreEngine/ECS/Coordinator.h"
 #include "../CoreEngine/Scene/SceneManager.h"
 #include "CoreEngine/Core/ScriptingBridge.h"
+#include <filesystem>
 #undef generic
 
 namespace ScriptAPI
@@ -59,4 +60,19 @@ namespace ScriptAPI
 
 		return msclr::interop::marshal_as<System::String^>(SceneName);
 	}
+
+	bool Scene::SceneExists(System::String^ Filename)
+	{
+		if (System::String::IsNullOrEmpty(Filename))
+			return false;
+
+		msclr::interop::marshal_context context;
+		std::string filePath = "../../PulseEngine/JSON/" +
+			context.marshal_as<std::string>(Filename) + ".json";
+
+		std::error_code ec;
+		return std::filesystem::exists(filePath, ec) &&
+			std::filesystem::is_regular_file(filePath, ec);
+	}
+
 }

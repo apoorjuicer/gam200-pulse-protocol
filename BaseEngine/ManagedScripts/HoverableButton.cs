@@ -80,6 +80,12 @@ public class NavigationButtons : Script
 
         string realScene = Scene.GetCurrentScene();
 
+        // Keep tracked scene in sync with the actual loaded scene (fixes Cutscene -> Level1 issue)
+        if (!string.IsNullOrEmpty(realScene) && currentScene != realScene)
+        {
+            currentScene = realScene;
+        }
+
         // ESC pause toggle (only in gameplay scenes)
         if (input.IsKeyTriggered(256) && !wasEscPressed) // 256 = ESC (GLFW)
         {
@@ -446,36 +452,44 @@ public class NavigationButtons : Script
     }
 
     private void ContinueToNextLevel()
-{
-    if (string.IsNullOrEmpty(currentScene))
     {
-        GoToMainMenu();
-        return;
-    }
+        // Re-sync just in case (extra safety)
+        string realScene = Scene.GetCurrentScene();
+        if (!string.IsNullOrEmpty(realScene))
+            currentScene = realScene;
 
-    string nextScene;
-    if (!TryGetNextLevelSceneName(currentScene, out nextScene))
-    {
-        GoToMainMenu();
-        return;
-    }
+        if (string.IsNullOrEmpty(currentScene))
+        {
+            GoToMainMenu();
+            return;
+        }
 
-    ShowQuitOverlay = false;
-    ShowPauseOverlay = false;
-    ShowHowToPlayOverlay = false;
-    ShowSettingsOverlay = false;
-    Application.SetPaused(false);
+        string nextScene;
+        if (!TryGetNextLevelSceneName(currentScene, out nextScene))
+        {
+            GoToMainMenu();
+            return;
+        }
 
-    try
-    {
+        // ✅ Proper check: only load if the next scene file exists
+        if (!Scene.SceneExists(nextScene))
+        {
+            Console.WriteLine("Next scene does not exist: " + nextScene + " -> going MainMenu");
+            GoToMainMenu();
+            return;
+        }
+
+        // Clear overlays / pause states before changing scene
+        ShowQuitOverlay = false;
+        ShowPauseOverlay = false;
+        ShowHowToPlayOverlay = false;
+        ShowSettingsOverlay = false;
+        openedSettingsFromPause = false;
+        Application.SetPaused(false);
+
         currentScene = nextScene;
         Scene.LoadScene(nextScene);
     }
-    catch
-    {
-        GoToMainMenu();
-    }
-}
 
 
     private void OnClick()
@@ -591,6 +605,7 @@ public class NavigationButtons : Script
 
         if (tex.Contains("nextstage"))
         {
+            StageClearElement.ResetStageClear();
             ContinueToNextLevel();
             return;
         }
