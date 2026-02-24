@@ -2558,7 +2558,8 @@
                     "script": {
                         "ScriptName": [
                             "DropdownOptionWindowed",
-                            "SettingsOverlay"
+                            "SettingsOverlay",
+                            "NavigationButtons"
                         ]
                     }
                 },
@@ -2572,7 +2573,7 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "orderInLayer": 20,
                         "z": 0.0
                     }
                 },
@@ -2632,8 +2633,7 @@
                     "script": {
                         "ScriptName": [
                             "DropdownOpenFollower",
-                            "SettingsOverlay",
-                            "NavigationButtons"
+                            "SettingsOverlay"
                         ]
                     }
                 },
