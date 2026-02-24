@@ -38,6 +38,7 @@ public class EnemyRhythmController : Script
     public int HurtRows = 4;
 
     public float AnimationSpeed = 12f;
+    public float SizeMultiplier = 2.0f;
 
     // === RHYTHM SETTINGS ===
     public RhythmType RhythmType = RhythmType.Syncopated;

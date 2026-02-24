@@ -48,7 +48,15 @@ public class PlayerHealth : Script
     // =========================
     private void Initialize()
     {
-        Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else if (Instance != this)
+        {
+            Console.WriteLine("[PlayerHealth] WARNING: Multiple PlayerHealth instances!");
+            return;
+        }
 
         PlayerEntityID = entityID;
         Console.WriteLine($"[PlayerHealth] Entity ID exposed: {PlayerEntityID}");
@@ -110,14 +118,14 @@ public class PlayerHealth : Script
     private void Die()
     {
         if (isDead) return;
-        isDead = true;
-        waitingToDie = true;
-        deathTimer = 0f;
-        Instance = null;
-        SetState(EnemyState.Dead);
 
-        Console.WriteLine("[Enemy] DEFEATED!");
-        EnemySpawner.Instance?.OnEnemyDefeated();
+        isDead = true;
+        Console.WriteLine("[PlayerHealth] PLAYER DIED!");
+        Console.WriteLine("==============================================");
+        Console.WriteLine("GAME OVER");
+        Console.WriteLine("==============================================");
+
+        Application.SetPaused(true);
     }
 
     // =========================
