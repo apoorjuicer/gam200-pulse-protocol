@@ -407,6 +407,65 @@ public class NavigationButtons : Script
         ShowSettingsOverlay = false;
     }
 
+    private bool TryGetNextLevelSceneName(string sceneName, out string nextScene)
+    {
+        nextScene = "";
+
+        if (string.IsNullOrEmpty(sceneName))
+            return false;
+
+        int i = sceneName.Length - 1;
+        while (i >= 0 && char.IsDigit(sceneName[i]))
+            i--;
+
+        // no trailing number
+        if (i == sceneName.Length - 1)
+            return false;
+
+        string prefix = sceneName.Substring(0, i + 1);
+        string numberPart = sceneName.Substring(i + 1);
+
+        int levelNumber;
+        if (!int.TryParse(numberPart, out levelNumber))
+            return false;
+
+        nextScene = prefix + (levelNumber + 1).ToString();
+        return true;
+    }
+
+    private void ContinueToNextLevel()
+{
+    if (string.IsNullOrEmpty(currentScene))
+    {
+        GoToMainMenu();
+        return;
+    }
+
+    string nextScene;
+    if (!TryGetNextLevelSceneName(currentScene, out nextScene))
+    {
+        GoToMainMenu();
+        return;
+    }
+
+    ShowQuitOverlay = false;
+    ShowPauseOverlay = false;
+    ShowHowToPlayOverlay = false;
+    ShowSettingsOverlay = false;
+    Application.SetPaused(false);
+
+    try
+    {
+        currentScene = nextScene;
+        Scene.LoadScene(nextScene);
+    }
+    catch
+    {
+        GoToMainMenu();
+    }
+}
+
+
     private void OnClick()
     {
         string tex = defaultTexture.ToLower();
@@ -521,7 +580,7 @@ public class NavigationButtons : Script
 
         if (tex.Contains("nextstage"))
         {
-            Console.WriteLine("NOT IMPLEMENTED YET!");
+            ContinueToNextLevel();
             return;
         }
 
