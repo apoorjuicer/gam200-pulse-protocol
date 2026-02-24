@@ -33,6 +33,15 @@
 
 ## 
 
+## SUPERSEDED SCRIPTS (kept in repo but no longer wired up — safe to delete):
+
+|Script|What It Does|Superseded By|
+|-|-|-|
+|GameStateManager.cs|Defines GameState enum (Tutorial/Countdown/Playing/Win/Lose/Paused) and a countdown timer — not called by any other script|TurnManager.cs handles phases; NavigationButtons handles win/lose scene transitions|
+|TextSample.cs|Standalone 3-2-1-GO! countdown demo|CountdownUI.cs|
+
+## 
+
 ## DEBUG SCRIPTS:
 
 |Script|What It Does|
@@ -41,7 +50,7 @@
 |ConductorBeatTester.cs|Tests beat timing with console output|
 |DamageTestScript.cs|Press T to deal damage to the player (tests PlayerHealth)|
 |DebugEnemyCheats.cs|Press K to instantly kill the current enemy (9999 DMG)|
-|FadeTestScript.cs|Tests fade in/out effects |
+|FadeTestScript.cs|Tests fade in/out effects|
 |FSM.cs|TestFSM: Tests FSM API (Space = attack, W = move)|
 |InitializationDiagnostic.cs|Checks all singletons (Conductor, TurnManager, ComboSystem, Enemy) exists during first 10 frames|
 |MasterDiagnostic.cs|Prints a full system health report to console every 60 frames|
