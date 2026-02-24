@@ -1,0 +1,68 @@
+
+using System;
+using ScriptAPI;
+
+public static class GameStart
+{
+    public static bool Ready = false;
+}
+
+public class LevelCountdown : Script
+{
+    private bool started = false;
+    private float t = 0f;
+    private int step = 3; // 3,2,1,0(GO),-1(done)
+   // private TextComponentAPI text;
+
+    public float StepSeconds = 1.0f;
+    public float GoSeconds = 0.6f;
+
+    public override void Update()
+    {
+
+        var text = GetTextComponent();
+        if (!started)
+        {
+            started = true;
+            GameStart.Ready = false;
+
+
+            //if (text != null)
+            // {
+            text.SetVisible(true);
+            text.SetText("3");
+           // }
+
+            t = 0f;
+            step = 3;
+            return; // IMPORTANT: don't advance timer on the same frame
+        }
+
+        float dt = Time.DeltaTime;
+        if (dt == 0f) dt = 0.016f; // keep ticking even if engine paused
+        t += dt;
+
+        float limit = (step == 0) ? GoSeconds : StepSeconds;
+        if (t < limit) return;
+
+        t = 0f;
+        step--;
+
+        if (step > 0)
+        {
+            Console.WriteLine("TEXT VISBILE OR NOT : " + text.IsVisible());
+            Console.WriteLine("TEXT data  : " + text.GetText());
+            text.SetText(step.ToString());
+        }
+        else if (step == 0)
+        {
+             text.SetText("GO!");
+        }
+        else
+        {
+           text.SetVisible(false);
+           GameStart.Ready = true;
+            Console.WriteLine("GameStart.Ready is true");
+        }
+    }
+}

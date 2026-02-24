@@ -6,7 +6,7 @@ public class Conductor : Script
     // =========================
     // Global Access
     // =========================
-    public static Conductor Instance { get; private set; }
+    public static Conductor? Instance { get; private set; }
 
     // =========================
     // Tunables
@@ -21,6 +21,7 @@ public class Conductor : Script
     private float nextHalfBeat;
     private int lastBeat = -1;
     private bool initialized = false;
+    private float counter = 3.0f;
 
     public float GetBeatDuration()
     {
@@ -29,18 +30,28 @@ public class Conductor : Script
 
     public override void Update()
     {
+        //if (Instance == null) { Instance = this; }
+        //else if (Instance != this)
+        //{
+        //    Console.WriteLine("[Conductor] WARNING: Duplicate Conductor detected, disabling this one.");
+        //    return;
+        //}
+
+
+        // just re init ah
+        Instance = this;
+        if (Instance == null)
+            Instance = this;
+        else if (Instance != this)
+        {
+            Console.WriteLine("[Conductor] WARNING: Duplicate Conductor detected, disabling this one.");
+            initialized = true;
+            return;
+        }
+
+
         if (!initialized)
         {
-            // just re init ah
-            Instance = this;
-            if (Instance == null)
-                Instance = this;
-            else if (Instance != this)
-            {
-                Console.WriteLine("[Conductor] WARNING: Duplicate Conductor detected, disabling this one.");
-                initialized = true;
-                return;
-            }
 
             secondsPerBeat = 60.0f / BPM;
             songTime = 0.0f;
@@ -53,8 +64,7 @@ public class Conductor : Script
             return;
         }
 
-        if (Instance != this)
-            return;
+        if (!GameStart.Ready) return;
 
         // delta time usage
         float dt = Time.DeltaTime;

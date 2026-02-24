@@ -32,6 +32,9 @@ public class LevelBGM : Script
 
     public override void Update()
     {
+
+        if (!GameStart.Ready) return;
+
         if (!started)
         {
             AudioComponent audio = GetAudio();

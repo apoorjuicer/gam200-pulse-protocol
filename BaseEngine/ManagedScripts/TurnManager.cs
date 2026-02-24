@@ -39,6 +39,7 @@ public class TurnManager : Script
     // =========================
     public override void Update()
     {
+
         if (!initialized)
         {
             Initialize();
@@ -53,6 +54,8 @@ public class TurnManager : Script
         // Only process on new beats
         if (currentBeat == lastBeat)
             return;
+
+        if (!GameStart.Ready) return;
 
         lastBeat = currentBeat;
         int beatsInPhase = currentBeat - phaseStartBeat;

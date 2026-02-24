@@ -13,13 +13,23 @@ public enum GameState
 
 public class GameStateManager : Script
 {
+    //create the instance
+    public static GameStateManager? Instance { get; private set; }
+    private bool _init = false;
+    private void EnsureInit()
+    {
+        if (_init) return;
+        _init = true;
+        if (Instance == null) Instance = this;
+    }
+
     // =========================
     // State
     // =========================
-    private GameState currentState = GameState.Playing;
+    private GameState currentState = GameState.Paused;
 
-    private float countdownTimer = 0.0f;
-    private bool countingDown = false;
+    private float countdownTimer = 3.0f;
+    private bool countingDown = true;
 
     // =========================
     // Public API
@@ -66,14 +76,24 @@ public class GameStateManager : Script
     // =========================
     // Update Loop
     // =========================
+
+    private bool firstFrame = true;
+
     public override void Update()
     {
+
+
+        float time = Time.GameTime;
+        Console.WriteLine("Time is : " + time);
+
+        EnsureInit();
         float dt = Time.DeltaTime;
 
         if (countingDown)
         {
             countdownTimer -= dt;
-
+            Console.WriteLine("GET STATE " + GetState());
+            Console.WriteLine("COUNTING DOWN" + countdownTimer);
             if (countdownTimer <= 0.0f)
             {
                 countingDown = false;
