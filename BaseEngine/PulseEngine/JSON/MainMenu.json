@@ -723,6 +723,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "DebugDisplayScript"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "Debug Display Text"
                     }
@@ -750,7 +757,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": true,
+                        "visible": false,
                         "alignment": 0
                     }
                 }
