@@ -536,6 +536,16 @@ public class NavigationButtons : Script
             ShowHowToPlayOverlay = false;
             return;
         }
+
+        if (tex.Contains("windowed"))
+        {
+            return;
+        }
+
+        if (tex.Contains("full screen"))
+        {
+            return;
+        }
     }
 }
 
