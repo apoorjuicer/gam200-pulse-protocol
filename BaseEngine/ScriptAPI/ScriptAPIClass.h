@@ -21,6 +21,7 @@
 #include "AudioAPI.h"
 #include "Sprite.h"
 #include "Application.h"
+#include "FadeComponent.h"
 
 namespace ScriptAPI
 {
@@ -33,6 +34,7 @@ namespace ScriptAPI
     value struct FSMController;
     value struct AudioComponent;
     value struct SpriteComponent;
+    value struct FadeComponent;
 
     public ref class Script abstract
     {
@@ -49,6 +51,7 @@ namespace ScriptAPI
         AudioComponent GetAudio();
         SpriteComponent GetSprite();
         TextComponentAPI GetTextComponent();
+        FadeComponent GetFade();
         //DeltaTime GetDeltaTime();
         //LogicComponent GetScriptName();
 
