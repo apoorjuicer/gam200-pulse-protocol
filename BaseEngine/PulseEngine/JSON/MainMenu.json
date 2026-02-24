@@ -723,13 +723,6 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": [
-                            "DebugDisplayScript"
-                        ]
-                    }
-                },
-                {
                     "name": {
                         "name": "Debug Display Text"
                     }

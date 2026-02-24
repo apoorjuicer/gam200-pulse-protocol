@@ -52,13 +52,6 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": [
-                            "TestScript"
-                        ]
-                    }
-                },
-                {
                     "name": {
                         "name": "Jeff"
                     }
@@ -149,13 +142,6 @@
                         "columns": 1,
                         "rows": 1,
                         "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "TestScript2"
-                        ]
                     }
                 },
                 {
@@ -379,13 +365,6 @@
                         "columns": 5,
                         "rows": 4,
                         "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "TestFSM"
-                        ]
                     }
                 },
                 {
