@@ -1,18 +1,14 @@
 using System;
 using ScriptAPI;
 
-/// <summary>
-/// Test script for verifying player animation state changes.
-/// Attach to the Player entity alongside PlayerAnimationController.
-/// 
+
 /// Controls:
 ///   1 = Force Idle
 ///   2 = Trigger Attack animation
 ///   3 = Trigger Hurt animation
 ///   4 = Toggle auto-cycle (Idle1 -> Idle2 -> Attack -> Hurt -> repeat)
 ///
-/// Remove this script once testing is complete.
-/// </summary>
+
 public class PlayerAnimTest : Script
 {
     private const int KEY_1 = 49;

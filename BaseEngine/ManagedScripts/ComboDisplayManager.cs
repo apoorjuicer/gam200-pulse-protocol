@@ -2,16 +2,6 @@ using System;
 using System.Collections.Generic;
 using ScriptAPI;
 
-/// <summary>
-/// NEW COMBO DISPLAY MANAGER
-/// Attach this to the parent ComboDisplay entity
-/// 
-/// SETUP:
-/// 1. Attach ComboKeySlot script to each KeySlot0-3 entity
-/// 2. Attach ComboJudgementDisplay script to JudgementDisplay entity
-/// 3. Attach THIS script to the parent ComboDisplay entity
-/// 4. Set the entity IDs in the editor for this script
-/// </summary>
 public class ComboDisplayManager : Script
 {
     // =========================
@@ -20,14 +10,9 @@ public class ComboDisplayManager : Script
     public static ComboDisplayManager Instance { get; private set; }
 
     // =========================
-    // Configuration - Set in editor
+    // Configuration
     // =========================
-    // Note: These need to be set manually in your scene editor
-    public int KeySlot0_EntityID = 0;
-    public int KeySlot1_EntityID = 0;
-    public int KeySlot2_EntityID = 0;
-    public int KeySlot3_EntityID = 0;
-    public int JudgementDisplay_EntityID = 0;
+    public bool DebugLogging = false;
 
     // =========================
     // Internal State
@@ -35,14 +20,11 @@ public class ComboDisplayManager : Script
     private bool initialized = false;
     private int lastComboProgress = 0;
 
-    // Cache references to child scripts
-    // NOTE: We can't actually get these via entity ID with current API
-    // So we'll use a workaround with static dictionaries
     private static Dictionary<int, ComboKeySlot> keySlotScripts = new Dictionary<int, ComboKeySlot>();
     private static ComboJudgementDisplay judgementScript = null;
 
     // =========================
-    // Registration (Called by child scripts)
+    // Registration
     // =========================
     public static void RegisterKeySlot(int slotIndex, ComboKeySlot script)
     {
@@ -50,10 +32,23 @@ public class ComboDisplayManager : Script
         Console.WriteLine($"[ComboDisplayManager] Registered KeySlot {slotIndex}");
     }
 
+    public static void UnregisterKeySlot(int slotIndex)
+    {
+        if (keySlotScripts.ContainsKey(slotIndex))
+        {
+            keySlotScripts.Remove(slotIndex);
+        }
+    }
+
     public static void RegisterJudgement(ComboJudgementDisplay script)
     {
         judgementScript = script;
         Console.WriteLine("[ComboDisplayManager] Registered Judgement Display");
+    }
+
+    public static void UnregisterJudgement()
+    {
+        judgementScript = null;
     }
 
     // =========================
@@ -67,48 +62,28 @@ public class ComboDisplayManager : Script
             return;
         }
 
-        // Monitor combo progress
-        if (ComboSystem.Instance != null)
-        {
-            int currentProgress = ComboSystem.Instance.GetComboProgress();
-            
-            // DEBUG: Always log progress
-            if (currentProgress != lastComboProgress)
-            {
-                Console.WriteLine($"[ComboDisplayManager] Progress changed: {lastComboProgress} → {currentProgress}");
-            }
-            
-            // New key pressed?
-            if (currentProgress > lastComboProgress)
-            {
-                string combo = ComboSystem.Instance.GetCurrentComboString();
-                Console.WriteLine($"[ComboDisplayManager] Combo string: '{combo}', length: {combo.Length}");
-                
-                if (combo.Length > 0)
-                {
-                    char lastKey = combo[combo.Length - 1];
-                    int slotIndex = currentProgress - 1;
-                    
-                    Console.WriteLine($"[ComboDisplayManager] Calling ShowKey('{lastKey}', {slotIndex})");
-                    ShowKey(lastKey, slotIndex);
-                }
-            }
-            // Combo reset?
-            else if (currentProgress < lastComboProgress)
-            {
-                ClearAllKeys();
-            }
+        if (ComboSystem.Instance == null)
+            return;
 
-            lastComboProgress = currentProgress;
-        }
-        else
+        int currentProgress = ComboSystem.Instance.GetComboProgress();
+
+        if (currentProgress > lastComboProgress)
         {
-            // DEBUG: Warn if ComboSystem missing
-            if (Time.FrameCount % 60 == 0)  // Log once per second
+            string combo = ComboSystem.Instance.GetCurrentComboString();
+
+            if (combo.Length > 0)
             {
-                Console.WriteLine("[ComboDisplayManager] WARNING: ComboSystem.Instance is null!");
+                char lastKey = combo[combo.Length - 1];
+                int slotIndex = currentProgress - 1;
+                ShowKey(lastKey, slotIndex);
             }
         }
+        else if (currentProgress < lastComboProgress)
+        {
+            ClearAllKeys();
+        }
+
+        lastComboProgress = currentProgress;
     }
 
     // =========================
@@ -116,15 +91,15 @@ public class ComboDisplayManager : Script
     // =========================
     private void Initialize()
     {
-        if (Instance == null)
+        if (Instance != null && Instance != this)
         {
-            Instance = this;
+            Console.WriteLine("[ComboDisplayManager] Replacing stale singleton, clearing registrations");
+            keySlotScripts.Clear();
+            judgementScript = null;
         }
-        else if (Instance != this)
-        {
-            Console.WriteLine("[ComboDisplayManager] WARNING: Multiple instances!");
-            return;
-        }
+
+        Instance = this;
+        lastComboProgress = 0;
 
         Console.WriteLine("[ComboDisplayManager] ========================================");
         Console.WriteLine("[ComboDisplayManager] Manager Initialized");
@@ -139,26 +114,25 @@ public class ComboDisplayManager : Script
     // =========================
     public void ShowKey(char key, int slotIndex)
     {
-        Console.WriteLine($"[ComboDisplayManager] ShowKey called: key='{key}', slotIndex={slotIndex}");
-        
         if (slotIndex < 0 || slotIndex > 3)
         {
             Console.WriteLine($"[ComboDisplayManager] ⚠️ Invalid slot index: {slotIndex}");
             return;
         }
 
-        Console.WriteLine($"[ComboDisplayManager] Registered slots: {string.Join(", ", keySlotScripts.Keys)}");
-        
         if (keySlotScripts.ContainsKey(slotIndex))
         {
-            Console.WriteLine($"[ComboDisplayManager] Found slot {slotIndex}, calling ShowKey()");
             keySlotScripts[slotIndex].ShowKey(key);
+
+            if (DebugLogging)
+                Console.WriteLine($"[ComboDisplayManager] Showed '{key}' in slot {slotIndex}");
         }
         else
         {
-            Console.WriteLine($"[ComboDisplayManager] ⚠️ KeySlot {slotIndex} not registered yet!");
+            Console.WriteLine($"[ComboDisplayManager] ⚠️ KeySlot {slotIndex} not registered!");
         }
     }
+
     public void ShowJudgement(string judgement)
     {
         if (judgementScript != null)
@@ -167,21 +141,31 @@ public class ComboDisplayManager : Script
         }
         else
         {
-            Console.WriteLine("[ComboDisplayManager] ⚠️ Judgement display not registered yet!");
+            Console.WriteLine("[ComboDisplayManager] ⚠️ Judgement display not registered!");
         }
     }
 
-
     private void ClearAllKeys()
     {
-        Console.WriteLine("[ComboDisplayManager] 🧹 Clearing all keys");
-        
+        if (DebugLogging)
+            Console.WriteLine("[ComboDisplayManager] Clearing all keys");
+
         for (int i = 0; i < 4; i++)
         {
             if (keySlotScripts.ContainsKey(i))
             {
                 keySlotScripts[i].Hide();
             }
+        }
+    }
+
+    public void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+            keySlotScripts.Clear();
+            judgementScript = null;
         }
     }
 }
