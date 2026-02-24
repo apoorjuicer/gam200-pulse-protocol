@@ -79,6 +79,16 @@ public class Conductor : Script
     public float GetSongTime() => songTime;
     public float SecondsPerBeat => secondsPerBeat;
 
+    // Call this the same frame PlayBGM fires so the beat clock starts
+    // at t=0 in sync with audio rather than when this script initialised.
+    public void ResetClock()
+    {
+        songTime = 0.0f;
+        lastBeat = -1;
+        nextHalfBeat = secondsPerBeat * 0.5f;
+        Console.WriteLine("[Conductor] Clock reset — syncing to audio start");
+    }
+
     public void OnDestroy()
     {
         if (Instance == this)

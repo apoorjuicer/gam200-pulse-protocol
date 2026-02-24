@@ -76,16 +76,11 @@ public class ComboSystem : Script
         // First-time initialization
         if (!initialized)
         {
-            if (!initialized)
-            {
-                Instance = this;
-                this.DebugTestMode = true;
-                this.SetEnemyWeakness("WASD");
-
-                initialized = true;
-                Console.WriteLine("[ComboSystem] Custom Engine Init: Debug Mode FORCED ON");
-                return;
-            }
+            Instance = this;
+            SetEnemyWeakness("WASD");
+            initialized = true;
+            Console.WriteLine("[ComboSystem] Initialized");
+            return;
         }
 
         if (Conductor.Instance == null)

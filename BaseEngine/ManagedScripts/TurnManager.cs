@@ -27,7 +27,7 @@ public class TurnManager : Script
     // State
     // =========================
     private TurnPhase currentPhase = TurnPhase.Countdown;
-    private int phaseStartBeat = 0;
+    private int phaseStartBeat = -1;
     private int lastBeat = -1;
     private bool initialized = false;
 

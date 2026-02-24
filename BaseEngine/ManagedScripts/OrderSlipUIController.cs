@@ -159,7 +159,7 @@ public class OrderSlipUIController : Script
     {
         switch (type)
         {
-            case EnemyIconType.Rat: return "enemy icon rat greyed (1).png";
+            case EnemyIconType.Rat: return "enemy icon rat greyed.png";
             case EnemyIconType.Bat: return "enemy icon bat greyed.png";
             case EnemyIconType.Gorilla: return "enemy icon gorilla greyed.png";
             default: return "Icon_None";
