@@ -3016,7 +3016,7 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "Quit",
+                        "text": "Home",
                         "font_id": "PatrickHand_font",
                         "offset": {
                             "x": 0.0,
