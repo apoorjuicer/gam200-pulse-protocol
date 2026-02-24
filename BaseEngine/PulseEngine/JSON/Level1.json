@@ -421,7 +421,7 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 5,
+                        "orderInLayer": -5,
                         "z": 100.0
                     }
                 },
@@ -796,9 +796,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "enemy icon rat.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -869,9 +869,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "enemy icon rat greyed (1).png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat greyed.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -934,7 +934,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1011,7 +1011,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1085,7 +1085,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1159,7 +1159,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1233,7 +1233,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1271,7 +1271,7 @@
                 },
                 {
                     "name": {
-                        "name": "DebugDisplayText"
+                        "name": "Debug Display Text"
                     }
                 },
                 {
@@ -1297,7 +1297,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": true,
+                        "visible": false,
                         "alignment": 0
                     }
                 }
@@ -2177,7 +2177,7 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 0,
+                        "orderInLayer": -10,
                         "z": 0.0
                     }
                 },
