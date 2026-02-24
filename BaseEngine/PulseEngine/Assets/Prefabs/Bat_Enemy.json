@@ -47,6 +47,13 @@
       }
     },
     {
+      "Health": {
+        "hp": 15,
+        "damage": 5,
+        "isAlive": true
+      }
+    },
+    {
       "LayerTag": {
         "layerName": "World",
         "mask": 2,

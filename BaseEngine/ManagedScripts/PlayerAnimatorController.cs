@@ -37,7 +37,7 @@ public class PlayerAnimationController : Script
     public int HurtColumns = 4;
     public int HurtFrames = 15;
 
-    public float AnimationSpeed = 12f;
+    public float AnimationSpeed = 24f;
 
     // =========================
     // Internal State

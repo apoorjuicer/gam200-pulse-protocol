@@ -97,7 +97,14 @@ public class TurnManager : Script
                 break;
 
             case TurnPhase.Resolution:
-                // Move to next enemy turn after resolution
+                // Wait for the next enemy to be ready before starting EnemyDisplay.
+                // If the previous enemy just died, Instance is null until the spawner
+                // creates the new enemy and its Initialize() runs (usually 1-2 frames).
+                if (EnemyRhythmController.Instance == null)
+                {
+                    Console.WriteLine("[TurnManager] Resolution: waiting for next enemy...");
+                    break;
+                }
                 StartEnemyDisplay();
                 beatsInPhase = currentBeat - phaseStartBeat;
                 goto case TurnPhase.EnemyDisplay;

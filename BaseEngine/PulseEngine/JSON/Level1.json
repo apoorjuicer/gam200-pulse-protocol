@@ -114,12 +114,12 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 5,
-                        "elapsedTime": 0.0063476040959358215,
+                        "currentFrame": 4,
+                        "elapsedTime": 0.0017463450785726309,
                         "totalFrames": 15,
                         "columns": 4,
                         "rows": 4,
-                        "animationSpeed": 12.0
+                        "animationSpeed": 36.0
                     }
                 },
                 {
@@ -381,7 +381,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/tile001.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/tile005.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -409,7 +409,7 @@
                 },
                 {
                     "name": {
-                        "name": "Heatlh"
+                        "name": "Health"
                     }
                 },
                 {
@@ -437,8 +437,8 @@
                             "y": 0.0
                         },
                         "scale": {
-                            "x": 1650.0,
-                            "y": 950.0
+                            "x": 1654.6219482421875,
+                            "y": 952.6611328125
                         },
                         "rotation": {
                             "x": 0.0,
@@ -459,7 +459,7 @@
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
-                            "a": 1.0
+                            "a": 0.9253015518188477
                         }
                     }
                 },
@@ -470,13 +470,12 @@
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
-                        "animationSpeed": 2.0
+                        "animationSpeed": 2.9999990463256836
                     }
                 },
                 {
                     "script": {
                         "ScriptName": [
-                            "LevelCountdown",
                             "VisualBeatSystem"
                         ]
                     }
@@ -687,7 +686,7 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "3",
+                        "text": "GO!",
                         "font_id": "",
                         "offset": {
                             "x": 0.0,
@@ -776,12 +775,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1030.3013916015625,
+                            "x": 1024.1475830078125,
                             "y": 482.3045654296875
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 200.0,
+                            "y": 200.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -849,12 +848,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 1273.9866943359375,
-                            "y": 375.8576354980469
+                            "x": 1326.29443359375,
+                            "y": 388.1653137207031
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 120.0,
+                            "y": 120.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1387,7 +1386,7 @@
                     "transform": {
                         "position": {
                             "x": 977.0,
-                            "y": -377.0
+                            "y": -315.4615478515625
                         },
                         "scale": {
                             "x": 230.0,
@@ -1407,7 +1406,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_634x433.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Characters/../Enemies/Rat_Idle_spritesheet_634x433.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1418,12 +1417,12 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.11230500042438507,
+                        "currentFrame": 4,
+                        "elapsedTime": 0.07539133727550507,
                         "totalFrames": 15,
                         "columns": 4,
                         "rows": 4,
-                        "animationSpeed": 6.0
+                        "animationSpeed": 12.0
                     }
                 },
                 {
@@ -1436,6 +1435,13 @@
                 {
                     "name": {
                         "name": "Enemy"
+                    }
+                },
+                {
+                    "Health": {
+                        "hp": 15,
+                        "damage": 5,
+                        "isAlive": true
                     }
                 },
                 {
@@ -3557,9 +3563,12 @@
                 {
                     "Children": {
                         "children": [
+                            55,
+                            56,
+                            57,
                             58,
-                            60,
-                            59
+                            59,
+                            60
                         ]
                     }
                 }
@@ -4299,7 +4308,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 48
+                        "parent": 45
                     }
                 }
             ]
@@ -4374,7 +4383,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 48
+                        "parent": 45
                     }
                 }
             ]
@@ -4448,7 +4457,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 48
+                        "parent": 45
                     }
                 }
             ]
@@ -4523,7 +4532,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 48
+                        "parent": 45
                     }
                 }
             ]
@@ -4597,7 +4606,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 48
+                        "parent": 45
                     }
                 }
             ]
@@ -4671,7 +4680,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 48
+                        "parent": 45
                     }
                 }
             ]

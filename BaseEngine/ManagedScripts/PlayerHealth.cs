@@ -17,7 +17,6 @@ public class PlayerHealth : Script
     // =========================
     // State
     // =========================
-    private int currentHP;
     private bool initialized = false;
     private bool isDead = false;
 
@@ -37,7 +36,7 @@ public class PlayerHealth : Script
             return;
         }
 
-        if (currentHP <= 0 && !isDead)
+        if (GetHealth().hp <= 0 && !isDead)
         {
             Die();
         }
@@ -64,7 +63,9 @@ public class PlayerHealth : Script
         PlayerEntityID = entityID;
         Console.WriteLine($"[PlayerHealth] Entity ID exposed: {PlayerEntityID}");
 
-        currentHP = maxHP;
+        HealthComponent h = GetHealth();
+        h.hp = maxHP;
+        h.isAlive = true;
         Console.WriteLine($"[PlayerHealth] Initialized with {maxHP} HP");
 
         initialized = true;
@@ -78,12 +79,13 @@ public class PlayerHealth : Script
     {
         if (isDead) return;
 
-        currentHP -= damage;
-        if (currentHP < 0) currentHP = 0;
+        HealthComponent h = GetHealth();
+        h.hp -= damage;
+        if (h.hp < 0) h.hp = 0;
 
-        Console.WriteLine($"[PlayerHealth] Took {damage} damage! HP: {currentHP}/{maxHP}");
+        Console.WriteLine($"[PlayerHealth] Took {damage} damage! HP: {h.hp}/{maxHP}");
 
-        if (currentHP > 0)
+        if (h.hp > 0)
         {
             FlashRed();
 
@@ -97,7 +99,7 @@ public class PlayerHealth : Script
 
     public int GetCurrentHP()
     {
-        return currentHP;
+        return GetHealth().hp;
     }
 
     public int GetMaxHP()
@@ -107,12 +109,12 @@ public class PlayerHealth : Script
 
     public bool IsAlive()
     {
-        return !isDead;
+        return GetHealth().isAlive;
     }
 
     public float GetHealthPercent()
     {
-        return (float)currentHP / (float)maxHP;
+        return (float)GetHealth().hp / (float)maxHP;
     }
 
     // =========================
@@ -123,6 +125,8 @@ public class PlayerHealth : Script
         if (isDead) return;
 
         isDead = true;
+        HealthComponent hDie = GetHealth();
+        hDie.isAlive = false;
         Console.WriteLine("[PlayerHealth] PLAYER DIED!");
         Console.WriteLine("==============================================");
         Console.WriteLine("GAME OVER");
@@ -149,9 +153,10 @@ public class PlayerHealth : Script
     // =========================
     public void DebugSetHP(int hp)
     {
-        currentHP = hp;
-        if (currentHP > maxHP) currentHP = maxHP;
-        if (currentHP < 0) currentHP = 0;
-        Console.WriteLine($"[PlayerHealth] DEBUG: HP set to {currentHP}");
+        HealthComponent h = GetHealth();
+        h.hp = hp;
+        if (h.hp > maxHP) h.hp = maxHP;
+        if (h.hp < 0) h.hp = 0;
+        Console.WriteLine($"[PlayerHealth] DEBUG: HP set to {h.hp}");
     }
 }

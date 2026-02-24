@@ -10,8 +10,8 @@ public class OrderSlipUIController : Script
     // Tunables
     //public float currentScale = 1.0f; //NO SHIT IT DISAPEAR ITS 1
     //public float nextScale = 0.75f;   //NO SHIT IT DISAPEAR ITS 0.75
-    public float currentScale = 100f;
-    public float nextScale = 100f;
+    public float currentScale = 200f;
+    public float nextScale = 120f;
     public float transitionDuration = 0.35f;    
     public float fadeDuration = 0.25f;
     public float rotateDegrees = 90.0f;
