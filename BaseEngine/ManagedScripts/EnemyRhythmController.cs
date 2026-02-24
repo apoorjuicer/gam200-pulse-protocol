@@ -111,6 +111,13 @@ public class EnemyRhythmController : Script
             return;
         }
 
+        InputComponent input = GetInput();
+        if (input.IsKeyTriggered(32)) // press space 2 do smth
+        {
+            TakeDamage(5f);
+            Console.WriteLine($"TESTING!!!!!!! DO 5 damage! HP remaining: {Health}\n\n\n\n\n\n\n\n\n\n\n\n\n");
+        }
+
         if (!playerFound)
         {
             TryFindPlayer();
@@ -446,6 +453,10 @@ public class EnemyRhythmController : Script
         waitingToDie = true;
         deathTimer = 0f;
         SetState(EnemyState.Dead);
+
+        // Update the EnemySpawner.cs to first create a new enemy from the container, update the current and next UI icon
+        Instance = null;                              // clear singleton so spawner isn't blocked
+        EnemySpawner.Instance?.OnEnemyDefeated();
 
         Console.WriteLine("[Enemy] DEFEATED!");
         Console.WriteLine("==============================================");

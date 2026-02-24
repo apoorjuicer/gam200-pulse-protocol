@@ -24,7 +24,8 @@ public class EnemySpawner : Script
     // =========================
     // UI / Queue
     // =========================
-    private Queue<EnemyIconType> enemyQueue = new Queue<EnemyIconType>();
+    private Queue<EnemyIconType> enemyQueue = new Queue<EnemyIconType>(); // public enum EnemyIconType { None, Rat, Bat, Gorilla }
+    public static int enemyQueueID = 0;
     private bool uiInitialized = false;
     private int framesSinceStart = 0;
     private const int WAIT_FRAMES = 5;
@@ -37,8 +38,8 @@ public class EnemySpawner : Script
     private int enemiesDefeated = 0;
     private float timeSinceLastSpawn = 0f;
     private bool waveComplete = false;
-
     private bool pendingSpawn = false;
+    private bool EnemySpawnedAlr = false; // Stop spawning as soon as u spawn an enemy
 
     public override void Update()
     {
@@ -70,9 +71,22 @@ public class EnemySpawner : Script
             return;
         }
 
-        // ONLY spawn when there is no active enemy
-        if (EnemyRhythmController.Instance != null)
+        // This ensures that it will spawn in only one enemy at a time
+        if (EnemySpawnedAlr)
+        {
+            // Wait until the new enemy finish setup of its EnemyRhythmController script
+            if (EnemyRhythmController.Instance != null)
+            {
+                EnemySpawnedAlr = false;
+                Console.WriteLine("New enemy spawned!!!\n\n\n");
+            }
             return;
+        }
+
+        if (EnemyRhythmController.Instance != null)
+        {
+            return;
+        }
 
         timeSinceLastSpawn += Time.DeltaTime;
 
@@ -80,6 +94,7 @@ public class EnemySpawner : Script
         if (pendingSpawn || intervalReady)
         {
             SpawnEnemy();
+        
             pendingSpawn = false;
             timeSinceLastSpawn = 0f;
         }
@@ -92,6 +107,8 @@ public class EnemySpawner : Script
 
         Instance = this;
 
+
+        // WHY IS ALL THIS HARD CODED WHEN U HAVE A CONTAINER ALR??????
         Console.WriteLine("[EnemySpawner] Initialized");
         Console.WriteLine($"  Will spawn {EnemiesToSpawn} enemies");
         Console.WriteLine($"  Prefab: {EnemyPrefabName}");
@@ -109,8 +126,9 @@ public class EnemySpawner : Script
         // Ensure Current + Next always exist for UI
         int totalIcons = Math.Max(EnemiesToSpawn + 2, 2);
 
+        //HARD CODED AGAIN????????????????????????
         for (int i = 0; i < totalIcons; i++)
-            enemyQueue.Enqueue(EnemyIconType.Rat);
+            enemyQueue.Enqueue(EnemyIconType.Rat);//enemyQueue.Enqueue(EnemyIconType.Rat);
 
         Console.WriteLine($"[EnemySpawner] Enemy queue setup with {enemyQueue.Count} enemies");
     }
@@ -148,6 +166,17 @@ public class EnemySpawner : Script
 
         enemiesSpawned++;
         Console.WriteLine($"[EnemySpawner] Spawned enemy {enemiesSpawned}/{EnemiesToSpawn} (ID: {enemyID})");
+    }
+
+    public string EnumtoString(EnemyIconType type)
+    {
+        switch (type)
+        {
+            case EnemyIconType.Rat: return "Rat_Enemy";
+            case EnemyIconType.Bat: return "enemy icon bat.png";
+            case EnemyIconType.Gorilla: return "enemy icon gorilla.png";
+            default: return "";//"Icon_None";
+        }
     }
 
     public void OnEnemyDefeated()

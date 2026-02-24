@@ -171,13 +171,13 @@ public class TestScript3 : Script
 {
     public override void Update()
     {
-        FSMComponentAPI fsm = GetFSM();
-        //Console.WriteLine($" State: {fsm.GetState()}");
-        fsm.RequestMove(true);
-        fsm.RequestAttack();
-        fsm.NotifyDamage();
-        fsm.ClearRequests();
+        HealthComponent HC = GetHealth();
+        if(HC.hp != 0)
+        {
+            HC.hp -= 1;
+        }
 
+        //Console.WriteLine($"HP: {HC.hp}");
     }
 }
 
