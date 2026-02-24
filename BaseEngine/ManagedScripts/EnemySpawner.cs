@@ -62,7 +62,7 @@ public class EnemySpawner : Script
 
         if (waveComplete) return;
 
-        // Stop when we’re done
+        // Stop when done
         if (enemiesSpawned >= EnemiesToSpawn)
         {
             waveComplete = true;
