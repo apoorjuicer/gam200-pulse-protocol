@@ -65,6 +65,30 @@ class AssetRegistry; // fwd
 class GLApp;         // fwd
 
 /**************************************************************************
+ * Fade system data types
+ **************************************************************************/
+struct EntityFadeState
+{
+    float startAlpha  = 1.0f;
+    float targetAlpha = 0.0f;
+    float duration    = 1.0f;
+    float elapsed     = 0.0f;
+};
+
+struct ScreenFadeState
+{
+    float r            = 0.0f;
+    float g            = 0.0f;
+    float b            = 0.0f;
+    float startAlpha   = 0.0f;
+    float currentAlpha = 0.0f;
+    float targetAlpha  = 0.0f;
+    float duration     = 1.0f;
+    float elapsed      = 0.0f;
+    bool  active       = false;
+};
+
+/**************************************************************************
  * Font rendering data types
  **************************************************************************/
 // cache of all glyphs(characters) loaded in a font
@@ -137,6 +161,20 @@ public:
     );
 
     void Update2DTextComponent();
+
+    // --- Per-entity fade ---
+    void StartEntityFade(Entity e, float toAlpha, float duration);
+    bool IsEntityFadeDone(Entity e) const;
+
+    // --- Screen-wide fade ---
+    // FadeOut: overlay alpha goes from 0 -> 1 (screen fills with color)
+    // FadeIn:  overlay alpha goes from 1 -> 0 (screen clears from color)
+    void StartScreenFade(float fromAlpha, float toAlpha,
+                         float r, float g, float b, float duration);
+    void StopScreenFade();
+    bool  IsScreenFadeDone()  const;
+    float GetScreenAlpha()    const;
+
 private:
     // Draw text (world overlay / debug text etc.)
     TextRenderer m_textRenderer;
@@ -194,6 +232,17 @@ private:
     std::unordered_map<std::string, FontData> m_fontMap;
 
     LayerMask m_editorLayerFilter = LAYER_ALL;
+
+    // --- Entity fade state map ---
+    std::unordered_map<Entity, EntityFadeState> m_entityFades;
+
+    // --- Screen-wide fade overlay ---
+    ScreenFadeState m_screenFade;
+    GLuint m_overlayVAO = 0;
+    GLuint m_overlayVBO = 0;
+    void UpdateEntityFades(float dt);
+    void UpdateScreenFade(float dt);
+    void RenderScreenOverlay();
 
     // Debug overlay toggle - shown in Debug builds, hidden in Release builds
 #ifdef _DEBUG

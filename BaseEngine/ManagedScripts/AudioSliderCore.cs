@@ -79,6 +79,21 @@ public abstract class AudioSliderKnobBase : Script
         InputComponent input = GetInput();
         TransformComponent t = GetTransform();
 
+        // =========================================================
+        // IMPORTANT: When the settings UI is hidden, these slider
+        // scripts must NOT respond to mouse input.
+        //
+        // In this project, the sliders live on the Settings overlay
+        // inside MainMenu, so we also gate on ShowSettingsOverlay.
+        // =========================================================
+        if (!t.IsVisible || (Scene.GetCurrentScene() == "MainMenu" && !NavigationButtons.ShowSettingsOverlay))
+        {
+            // Cancel any in-progress drag so it can't keep moving while hidden.
+            dragging = false;
+            dragJustStarted = false;
+            return;
+        }
+
         BindHeldIfNeeded(input);
 
         if (!initialized)
@@ -387,6 +402,10 @@ public abstract class AudioSliderFillBase : Script
     public override void Update()
     {
         TransformComponent t = GetTransform();
+
+        // If the settings overlay is hidden, keep fill from updating.
+        if (!t.IsVisible || (Scene.GetCurrentScene() == "MainMenu" && !NavigationButtons.ShowSettingsOverlay))
+            return;
 
         if (!initialized)
         {
