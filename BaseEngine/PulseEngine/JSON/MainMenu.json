@@ -1020,6 +1020,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "SettingsOverlay"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "BG_PlaceholderImg"
                     }
@@ -1031,13 +1038,6 @@
                         "sortingLayer": 2,
                         "orderInLayer": 15,
                         "z": 0.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
                     }
                 }
             ]
@@ -1088,6 +1088,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "SettingsOverlay"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "Volume"
                     }
@@ -1107,13 +1114,6 @@
                             15,
                             16,
                             17
-                        ]
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
                         ]
                     }
                 }
@@ -1386,6 +1386,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "SettingsOverlay"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "Music"
                     }
@@ -1405,13 +1412,6 @@
                             19,
                             20,
                             21
-                        ]
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
                         ]
                     }
                 }
@@ -1463,6 +1463,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "SettingsOverlay"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "MEmpty"
                     }
@@ -1479,13 +1486,6 @@
                 {
                     "Parent": {
                         "parent": 18
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
                     }
                 }
             ]
@@ -1643,7 +1643,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -942.3076782226562,
+                            "x": -942.3076782226563,
                             "y": 641.7880249023438
                         },
                         "scale": {
@@ -1684,6 +1684,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "SettingsOverlay"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "Screen"
                     }
@@ -1706,13 +1713,6 @@
                             36,
                             37,
                             38
-                        ]
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
                         ]
                     }
                 }
@@ -1764,6 +1764,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "SettingsOverlay"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "Brightness"
                     }
@@ -1783,13 +1790,6 @@
                             29,
                             28,
                             30
-                        ]
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
                         ]
                     }
                 }
@@ -1910,6 +1910,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "SettingsOverlay"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "SEmpty"
                     }
@@ -1926,13 +1933,6 @@
                 {
                     "Parent": {
                         "parent": 32
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
                     }
                 }
             ]
@@ -2131,6 +2131,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "SettingsOverlay"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "BEmpty"
                     }
@@ -2147,13 +2154,6 @@
                 {
                     "Parent": {
                         "parent": 23
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
                     }
                 }
             ]
@@ -2404,6 +2404,13 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "SettingsOverlay"
+                        ]
+                    }
+                },
+                {
                     "name": {
                         "name": "SFX"
                     }
@@ -2423,13 +2430,6 @@
                             25,
                             26,
                             27
-                        ]
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
                         ]
                     }
                 }
@@ -2632,7 +2632,8 @@
                     "script": {
                         "ScriptName": [
                             "DropdownOpenFollower",
-                            "SettingsOverlay"
+                            "SettingsOverlay",
+                            "NavigationButtons"
                         ]
                     }
                 },
@@ -2663,7 +2664,7 @@
                     "transform": {
                         "position": {
                             "x": -231.79489135742188,
-                            "y": 557.9487915039062
+                            "y": 557.9487915039063
                         },
                         "scale": {
                             "x": 251.0,
@@ -2706,7 +2707,8 @@
                     "script": {
                         "ScriptName": [
                             "DropdownOptionFullscreen",
-                            "SettingsOverlay"
+                            "SettingsOverlay",
+                            "NavigationButtons"
                         ]
                     }
                 },
@@ -2737,7 +2739,7 @@
                     "transform": {
                         "position": {
                             "x": -232.57635498046875,
-                            "y": 654.1206665039062
+                            "y": 654.1206665039063
                         },
                         "scale": {
                             "x": 200.0,
