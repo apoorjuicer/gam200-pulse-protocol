@@ -1,16 +1,8 @@
 using System;
 using ScriptAPI;
 
-/// <summary>
-/// Attach this script to EACH KeySlot entity (KeySlot0, KeySlot1, KeySlot2, KeySlot3)
-/// Each slot manages its own display independently
-/// 
-/// SlotIndex is auto-detected from sprite filename (W.png, A.png, S.png, D.png)
-/// RELEASE-SAFE: Proper checks for component existence and texture loading
-/// </summary>
 public class ComboKeySlot : Script
 {
-    // Configuration - auto-detected from sprite
     public int SlotIndex = 0;
 
     // Sprite paths
@@ -28,29 +20,22 @@ public class ComboKeySlot : Script
 
     public override void Update()
     {
-        // Register with manager on first update
         if (!hasRegistered)
         {
-            // Get sprite component
             var sprite = GetSprite();
-            
-            // SAFETY CHECK: Make sure sprite component exists
+           
             if (!sprite.HasSprite())
             {
-                // Component doesn't exist yet - retry next frame
-                return;
+              return;
             }
             
-            // SAFETY CHECK: Make sure texture is loaded
             string texturePath = sprite.Texture;
             
             if (string.IsNullOrEmpty(texturePath))
             {
-                // Texture not loaded yet - retry next frame
                 return;
             }
             
-            // Auto-detect SlotIndex from sprite filename
             string texturePathLower = texturePath.ToLower();
             
             if (texturePathLower.Contains("w.png"))

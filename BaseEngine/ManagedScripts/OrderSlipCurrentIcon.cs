@@ -3,7 +3,7 @@ using ScriptAPI;
 
 public class OrderSlipCurrentIcon : Script
 {
-    private bool initialized = false;
+    private OrderSlipUIController registeredWith = null;
 
     private float slotX, slotY;
     private bool wasTransitioning = false;
@@ -11,58 +11,38 @@ public class OrderSlipCurrentIcon : Script
 
     public override void Update()
     {
-        if (!initialized)
+        var ui = OrderSlipUIController.Instance;
+        if (ui == null) return;
+
+        // Registers on first load AND re-registers on reload automatically. Cos json parent-child hieracy is not letting me change it in json
+        if (registeredWith != ui)
         {
             TransformComponent tf0 = GetTransform();
             slotX = tf0.X;
             slotY = tf0.Y;
-
-            // Wait for controller to exist before registering
-            if (OrderSlipUIController.Instance != null)
-            {
-                OrderSlipUIController.Instance.RegisterCurrentSlot(slotX, slotY);
-                initialized = true;
-            }
+            ui.RegisterCurrentSlot(slotX, slotY); // or RegisterNextSlot for NextIcon
+            registeredWith = ui;
             return;
         }
-
-        var ui = OrderSlipUIController.Instance;
-        if (ui == null) return;
 
         TransformComponent tf = GetTransform();
 
         if (!ui.Transitioning)
         {
-            if (wasTransitioning)
-            {
-                // Transition just ended - stay at current slot with current appearance
-                tf.X = slotX;
-                tf.Y = slotY;
-                tf.RotX = 0.0f;
-                tf.ScaleX = ui.currentScale;
-                tf.ScaleY = ui.currentScale;
+            tf.X = slotX;
+            tf.Y = slotY;
+            tf.RotX = 0.0f;
+            tf.ScaleX = ui.currentScale;
+            tf.ScaleY = ui.currentScale;
 
-                SetSprite(ui.GetVibrantSprite(ui.CurrentType));
-                wasTransitioning = false;
-            }
-            else
-            {
-                // Normal state - positioned at current slot, vibrant sprite
-                tf.X = slotX;
-                tf.Y = slotY;
-                tf.RotX = 0.0f;
-                tf.ScaleX = ui.currentScale;
-                tf.ScaleY = ui.currentScale;
-
-                SetSprite(ui.GetVibrantSprite(ui.CurrentType));
-            }
+            SetSprite(ui.GetVibrantSprite(ui.CurrentType));
+            wasTransitioning = false;
             return;
         }
 
         // During transition: fade out by shrinking
         wasTransitioning = true;
 
-        // Keep position stable during fade
         tf.X = slotX;
         tf.Y = slotY;
 
@@ -75,10 +55,20 @@ public class OrderSlipCurrentIcon : Script
 
     private void SetSprite(string spriteName)
     {
+        if (string.IsNullOrEmpty(spriteName)) return; // RETURN IF NO ICON, COS WHY CHANGE 
+
         if (spriteName == lastSprite) return;
         lastSprite = spriteName;
-        Console.WriteLine($"[OrderSlipCurrent] Sprite -> {spriteName}");
-        // TODO: Add actual sprite changing code here based on your engine's API
-        // Example: GetSprite().SetTexture(spriteName); or similar
+
+        SpriteComponent spr = GetSprite();
+        if (spr.HasSprite())
+        {
+            spr.Texture = "../../PulseEngine/Assets/Textures/UI/" + spriteName;
+            Console.WriteLine($"[OrderSlipCurrent] Sprite -> {spriteName}\n");
+        }
+        else
+        {
+            Console.WriteLine("[OrderSlipCurrent] WARNING: No Renderable/Sprite component on this entity");
+        }
     }
 }

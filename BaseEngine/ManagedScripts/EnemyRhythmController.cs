@@ -12,10 +12,10 @@ public class EnemyRhythmController : Script
     public static EnemyRhythmController Instance { get; private set; }
 
     // === SPRITE SHEET SETTINGS ===
-    public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_220x432";
-    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_220x432";
-    public string AttackSpriteSheet = "../Enemies/Rat_Walk_spritesheet_220x432";
-    public string HurtSpriteSheet = "../Enemies/Rat_Hurt_spritesheet_220x432";
+    public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_634x433";
+    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_634x433";
+    public string AttackSpriteSheet = "../Enemies/Rat_Attack_spritesheet_634x433";
+    public string HurtSpriteSheet = "../Enemies/Rat_Hurt_spritesheet_634x433";
 
     public int IdleFrames = 15;
     public int IdleColumns = 4;
@@ -109,6 +109,15 @@ public class EnemyRhythmController : Script
             Initialize();
             initialized = true;
             return;
+        }   
+
+        //Console.WriteLine($"[Enemy] Conductor={Conductor.Instance != null}, TurnManager={TurnManager.Instance != null}, Beat={Conductor.Instance?.GetCurrentBeat()}\n\n\n\n\n");
+
+        InputComponent input = GetInput();
+        if (input.IsKeyTriggered(32)) // press space 2 do smth
+        {
+            TakeDamage(5f);
+            Console.WriteLine($"TESTING!!!!!!! DO 5 damage! HP remaining: {Health}\n\n\n\n\n\n\n\n\n\n\n\n\n");
         }
 
         if (!playerFound)
@@ -159,8 +168,7 @@ public class EnemyRhythmController : Script
 
     private void Initialize()
     {
-        if (Instance == null)
-            Instance = this;
+        Instance = this;
 
         Console.WriteLine("[Enemy] Initializing...");
 
@@ -446,6 +454,10 @@ public class EnemyRhythmController : Script
         waitingToDie = true;
         deathTimer = 0f;
         SetState(EnemyState.Dead);
+
+        // Update the EnemySpawner.cs to first create a new enemy from the container, update the current and next UI icon
+        Instance = null;                              // clear singleton so spawner isn't blocked
+        EnemySpawner.Instance?.OnEnemyDefeated();
 
         Console.WriteLine("[Enemy] DEFEATED!");
         Console.WriteLine("==============================================");

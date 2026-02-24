@@ -261,6 +261,7 @@ public class CutsceneManager : Script
     private void OnCutsceneComplete()
     {
         Console.WriteLine("[CutsceneManager] All panels shown. Ready to transition.");
+        NavigationButtons.LoadGameplayScene("Level1");
         Scene.LoadScene("Level1");
     }
 

@@ -3,8 +3,8 @@
     {
       "transform": {
         "position": {
-          "x": 800.0,
-          "y": 300.0
+          "x": 977.0,
+          "y": -377.0
         },
         "scale": {
           "x": 200.0,
@@ -22,7 +22,7 @@
         "mdl_ref": 0.0,
         "shd_ref": 2.0,
         "useTexture": true,
-        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_220x432.png",
+        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_634x433.png",
         "tintColor": {
           "r": 1.0,
           "g": 1.0,
@@ -55,9 +55,9 @@
       }
     },
     {
-      "script": {
+      "script": { 
         "ScriptName": [
-          "TestScript2"
+          "EnemyRhythmController"
         ]
       }
     }

@@ -216,6 +216,33 @@ void GraphicsManager::Initialize()
 
     // create white texture for colored quads
     InitWhiteTexture();
+
+    // Create fullscreen quad VAO/VBO for the screen-wide fade overlay
+    // 2 triangles covering NDC [-1,1]x[-1,1], position only (vec2)
+    {
+        float overlayVerts[] = {
+            -1.0f,  1.0f,   // top-left
+            -1.0f, -1.0f,   // bottom-left
+             1.0f, -1.0f,   // bottom-right
+
+            -1.0f,  1.0f,   // top-left
+             1.0f, -1.0f,   // bottom-right
+             1.0f,  1.0f    // top-right
+        };
+
+        glGenVertexArrays(1, &m_overlayVAO);
+        glGenBuffers(1, &m_overlayVBO);
+
+        glBindVertexArray(m_overlayVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, m_overlayVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(overlayVerts), overlayVerts, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
 }
 
 void GraphicsManager::Update()
@@ -229,11 +256,21 @@ void GraphicsManager::Update()
     glClear(GL_COLOR_BUFFER_BIT);  // Don't clear depth
     glDisable(GL_DEPTH_TEST);      // Disable depth test for 2D
 
+    // Update entity alpha fades before drawing (modifies Renderable.tintColor.a)
+    UpdateEntityFades(static_cast<float>(GLHelper::delta_time));
+
     //--- Rendering passes ---
     glapp->draw(EntityMember, m_editorLayerFilter);
 
     // Render ALL TextComponent entities (including FPS text objects)
     Update2DTextComponent();
+
+    // Render screen-wide fade overlay on top of everything
+    if (m_screenFade.active)
+    {
+        UpdateScreenFade(static_cast<float>(GLHelper::delta_time));
+        RenderScreenOverlay();
+    }
 }
 
 void GraphicsManager::Shutdown()
@@ -271,6 +308,10 @@ void GraphicsManager::Shutdown()
         glDeleteTextures(1, &whiteTexture);
         whiteTexture = 0;
     }
+
+    // Clean up screen-fade overlay
+    if (m_overlayVAO) { glDeleteVertexArrays(1, &m_overlayVAO); m_overlayVAO = 0; }
+    if (m_overlayVBO) { glDeleteBuffers(1, &m_overlayVBO);      m_overlayVBO = 0; }
 
     // Realease fonts
     ShutdownFonts();
@@ -859,4 +900,124 @@ void GraphicsManager::Update2DTextComponent() {
             txt.alignment
         );
     }
+}
+
+// ============================================================
+//  Per-entity fade
+// ============================================================
+
+void GraphicsManager::StartEntityFade(Entity e, float toAlpha, float duration)
+{
+    auto* coord = Coordinator::GetInstance();
+    if (!coord || !coord->HasComponent<Framework::Renderable>(e)) return;
+
+    float fromAlpha = coord->GetComponent<Framework::Renderable>(e).tintColor.a;
+    m_entityFades[e] = EntityFadeState{ fromAlpha, toAlpha,
+                                        std::max(duration, 0.0001f), 0.0f };
+}
+
+bool GraphicsManager::IsEntityFadeDone(Entity e) const
+{
+    return m_entityFades.find(e) == m_entityFades.end();
+}
+
+void GraphicsManager::UpdateEntityFades(float dt)
+{
+    auto* coord = Coordinator::GetInstance();
+    if (!coord) return;
+
+    for (auto it = m_entityFades.begin(); it != m_entityFades.end(); )
+    {
+        Entity e = it->first;
+        EntityFadeState& s = it->second;
+
+        s.elapsed += dt;
+        float t = std::min(s.elapsed / s.duration, 1.0f);
+        float alpha = s.startAlpha + t * (s.targetAlpha - s.startAlpha);
+
+        if (coord->HasComponent<Framework::Renderable>(e))
+        {
+            coord->GetComponent<Framework::Renderable>(e).tintColor.a = alpha;
+        }
+
+        if (t >= 1.0f)
+            it = m_entityFades.erase(it);
+        else
+            ++it;
+    }
+}
+
+// ============================================================
+//  Screen-wide fade overlay
+// ============================================================
+
+void GraphicsManager::StartScreenFade(float fromAlpha, float toAlpha,
+                                      float r, float g, float b, float duration)
+{
+    m_screenFade.r            = r;
+    m_screenFade.g            = g;
+    m_screenFade.b            = b;
+    m_screenFade.startAlpha   = fromAlpha;
+    m_screenFade.currentAlpha = fromAlpha;
+    m_screenFade.targetAlpha  = toAlpha;
+    m_screenFade.duration     = std::max(duration, 0.0001f);
+    m_screenFade.elapsed      = 0.0f;
+    m_screenFade.active       = true;
+}
+
+void GraphicsManager::StopScreenFade()
+{
+    m_screenFade.active = false;
+}
+
+bool GraphicsManager::IsScreenFadeDone() const
+{
+    return !m_screenFade.active;
+}
+
+float GraphicsManager::GetScreenAlpha() const
+{
+    return m_screenFade.currentAlpha;
+}
+
+void GraphicsManager::UpdateScreenFade(float dt)
+{
+    if (!m_screenFade.active) return;
+
+    m_screenFade.elapsed += dt;
+    float t = std::min(m_screenFade.elapsed / m_screenFade.duration, 1.0f);
+    // Linear interpolation from startAlpha to targetAlpha
+    m_screenFade.currentAlpha = m_screenFade.startAlpha +
+        t * (m_screenFade.targetAlpha - m_screenFade.startAlpha);
+
+    if (t >= 1.0f)
+    {
+        m_screenFade.currentAlpha = m_screenFade.targetAlpha;
+        m_screenFade.active       = false;
+    }
+}
+
+void GraphicsManager::RenderScreenOverlay()
+{
+    if (m_screenFade.currentAlpha <= 0.0f) return;
+    if (!m_overlayVAO || GLApp::shdrpgms.size() < 5) return;
+
+    GLSLShader& overlayShader = GLApp::shdrpgms[4];
+    overlayShader.Use();
+
+    GLint loc = glGetUniformLocation(overlayShader.GetHandle(), "uOverlayColor");
+    if (loc >= 0)
+    {
+        glUniform4f(loc,
+            m_screenFade.r,
+            m_screenFade.g,
+            m_screenFade.b,
+            m_screenFade.currentAlpha);
+    }
+
+    glBindVertexArray(m_overlayVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    overlayShader.UnUse();
 }

@@ -3,7 +3,7 @@ using ScriptAPI;
 
 public class OrderSlipNextIcon : Script
 {
-    private bool initialized = false;
+    private OrderSlipUIController registeredWith = null;
 
     private float slotX, slotY;
     private bool wasTransitioning = false;
@@ -15,23 +15,19 @@ public class OrderSlipNextIcon : Script
 
     public override void Update()
     {
-        if (!initialized)
+        var ui = OrderSlipUIController.Instance;
+        if (ui == null) return;
+
+        // Registers on first load AND re-registers on reload automatically. Cos json parent-child hieracy is not letting me change it in json
+        if (registeredWith != ui)
         {
             TransformComponent tf0 = GetTransform();
             slotX = tf0.X;
             slotY = tf0.Y;
-
-            // Wait for controller to exist before registering
-            if (OrderSlipUIController.Instance != null)
-            {
-                OrderSlipUIController.Instance.RegisterNextSlot(slotX, slotY);
-                initialized = true;
-            }
+            ui.RegisterNextSlot(slotX, slotY); 
+            registeredWith = ui;
             return;
         }
-
-        var ui = OrderSlipUIController.Instance;
-        if (ui == null) return;
 
         TransformComponent tf = GetTransform();
 
@@ -39,7 +35,6 @@ public class OrderSlipNextIcon : Script
         {
             if (wasTransitioning)
             {
-                // Transition just ended - snap to current slot with vibrant appearance
                 if (ui.SlotsReady())
                 {
                     tf.X = ui.CurrentSlotX;
@@ -57,14 +52,25 @@ public class OrderSlipNextIcon : Script
             }
             else
             {
-                // Normal state - positioned at next slot, dim sprite
                 tf.X = slotX;
                 tf.Y = slotY;
                 tf.RotX = 0.0f;
                 tf.ScaleX = ui.nextScale;
                 tf.ScaleY = ui.nextScale;
 
-                SetSprite(ui.GetDimSprite(ui.NextType));
+                // IF THERE IS NOTHING LEFT IN THE CONTAINER, JUST SHOW NOTHING(make invise) Yes i am so smart(not) :>
+                if (ui.NextType == EnemyIconType.None)
+                {
+                    TransformComponent t = GetTransform();
+                    t.IsVisible = false;
+                }
+                else
+                {
+                    // else just show. Booooo! Imagine showing urself
+                    TransformComponent t = GetTransform();
+                    t.IsVisible = true;
+                    SetSprite(ui.GetDimSprite(ui.NextType));
+                }
             }
             return;
         }
@@ -82,26 +88,21 @@ public class OrderSlipNextIcon : Script
 
         float eased = ui.EaseSmooth(ui.Move01);
 
-        // Interpolate position
         float x = ui.Lerp(startX, ui.CurrentSlotX, eased);
         float y = ui.Lerp(startY, ui.CurrentSlotY, eased);
 
-        // Add parabolic arc
         float arc = ui.arcHeight * 4f * eased * (1f - eased);
         y += arc;
 
         tf.X = x;
         tf.Y = y;
 
-        // Rotate during transition
         tf.RotX = ui.Lerp(startRotX, startRotX + ui.rotateDegrees, eased);
 
-        // Scale from next size to current size
         float sc = ui.Lerp(ui.nextScale, ui.currentScale, eased);
         tf.ScaleX = sc;
         tf.ScaleY = sc;
 
-        // Switch to vibrant sprite partway through transition
         if (eased > 0.6f)
             SetSprite(ui.GetVibrantSprite(ui.CurrentType));
         else
@@ -110,10 +111,20 @@ public class OrderSlipNextIcon : Script
 
     private void SetSprite(string spriteName)
     {
+        if (string.IsNullOrEmpty(spriteName)) return;
         if (spriteName == lastSprite) return;
         lastSprite = spriteName;
-        Console.WriteLine($"[OrderSlipNext] Sprite -> {spriteName}");
-        // TODO: Add actual sprite changing code here based on your engine's API
-        // Example: GetSprite().SetTexture(spriteName); or similar
+
+        SpriteComponent spr = GetSprite();
+        if (spr.HasSprite())
+        {
+            // who made sprite compoennt and why is this not in the API
+            spr.Texture = "../../PulseEngine/Assets/Textures/UI/" + spriteName;
+            Console.WriteLine($"[OrderSlipNext] Sprite -> {spriteName}");
+        }
+        else
+        {
+            Console.WriteLine("[OrderSlipNext] WARNING: No Renderable/Sprite component on this entity");
+        }
     }
 }

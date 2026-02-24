@@ -6,7 +6,7 @@ public enum PlayerAnimState { Idle1, Idle2, Attack, Hurt }
 public class PlayerAnimationController : Script
 {
     // =========================
-    // Singleton (so other scripts can trigger animations)
+    // Singleton
     // =========================
     public static PlayerAnimationController Instance { get; private set; }
 
@@ -82,8 +82,8 @@ public class PlayerAnimationController : Script
 
     private void Initialize()
     {
-        if (Instance == null)
-            Instance = this;
+
+        Instance = this;
 
         Console.WriteLine("[PlayerAnim] Initializing...");
         Console.WriteLine($"[PlayerAnim] Entity ID: {entityID}");
@@ -119,10 +119,6 @@ public class PlayerAnimationController : Script
     // Public API
     // =========================
 
-    /// <summary>
-    /// Play the attack animation. Called by ComboSystem on successful combo.
-    /// After this, idle switches to Idle1 (armed stance).
-    /// </summary>
     public void PlayAttack()
     {
         // Don't interrupt an ongoing attack
@@ -141,11 +137,6 @@ public class PlayerAnimationController : Script
         stateDuration = AttackFrames / AnimationSpeed;
     }
 
-    /// <summary>
-    /// Play the hurt animation. Called by PlayerHealth when taking damage.
-    /// After this, idle reverts to Idle2 (unarmed stance).
-    /// Hurt can interrupt Attack.
-    /// </summary>
     public void PlayHurt()
     {
         Console.WriteLine("[PlayerAnim] Playing Hurt");
@@ -157,18 +148,13 @@ public class PlayerAnimationController : Script
         stateDuration = HurtFrames / AnimationSpeed;
     }
 
-    /// <summary>
-    /// Force back to idle immediately.
-    /// </summary>
+ 
     public void ForceIdle()
     {
         waitingForStateEnd = false;
         GoToIdle();
     }
 
-    /// <summary>
-    /// Get the current animation state.
-    /// </summary>
     public PlayerAnimState GetCurrentState()
     {
         return currentState;

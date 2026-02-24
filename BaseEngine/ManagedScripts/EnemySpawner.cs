@@ -4,28 +4,51 @@ using ScriptAPI;
 
 public class EnemySpawner : Script
 {
-    // === SPAWN SETTINGS ===
+    // =========================
+    // Singleton
+    // =========================
+    public static EnemySpawner Instance { get; private set; }
+
+    // =========================
+    // Spawn Settings
+    // =========================
     public string EnemyPrefabName = "Rat_Enemy";
     public float SpawnX = 800f;
     public float SpawnY = 300f;
 
-    // === WAVE SETTINGS ===
     public int EnemiesToSpawn = 3;
-    public float SpawnInterval = 2f;
+    public float SpawnInterval = 0.5f; // keep small for testing
 
-    // === UI INTEGRATION ===
-    private Queue<EnemyIconType> enemyQueue = new Queue<EnemyIconType>();
+    public bool SpawnImmediatelyOnStart = true;
+
+    // =========================
+    // UI / Queue
+    // =========================
+    private Queue<EnemyIconType> enemyQueue = new Queue<EnemyIconType>(); // public enum EnemyIconType { None, Rat, Bat, Gorilla }
+    public static int enemyQueueID = 0;
     private bool uiInitialized = false;
     private int framesSinceStart = 0;
-    private const int WAIT_FRAMES = 5; // Wait 5 frames before initializing UI
+    private const int WAIT_FRAMES = 5;
 
-    // === INTERNAL STATE ===
+    // =========================
+    // State
+    // =========================
     private bool initialized = false;
-    private List<int> spawnedEnemies = new List<int>();
     private int enemiesSpawned = 0;
     private int enemiesDefeated = 0;
     private float timeSinceLastSpawn = 0f;
     private bool waveComplete = false;
+    private bool pendingSpawn = false;
+    private bool EnemySpawnedAlr = false; // Stop spawning as soon as u spawn an enemy
+
+    //Container of enemy 2 spawn. 
+    private List<EnemyIconType> EnemyContainer = new List<EnemyIconType>
+    {
+        EnemyIconType.Rat,
+        EnemyIconType.Bat,
+        EnemyIconType.Gorilla,
+        EnemyIconType.Rat
+    };
 
     public override void Update()
     {
@@ -36,64 +59,97 @@ public class EnemySpawner : Script
             return;
         }
 
-        // Wait a few frames before trying to initialize UI
-        // This gives the icon entities time to fully initialize
+        // UI init after a few frames
         framesSinceStart++;
-
         if (!uiInitialized && framesSinceStart >= WAIT_FRAMES)
         {
             if (OrderSlipUIController.Instance != null)
             {
-                Console.WriteLine($"[EnemySpawner] Attempting UI initialization (frame {framesSinceStart})...");
-                InitializeOrderSlipUI();
-                uiInitialized = true;
-            }
-            else
-            {
-                Console.WriteLine($"[EnemySpawner] UI Controller not ready yet (frame {framesSinceStart})");
+                if (OrderSlipUIController.Instance.SlotsReady()) // WAIT UR TURN
+                {
+                    InitializeOrderSlipUI();
+                    uiInitialized = true;
+                }
             }
         }
 
         if (waveComplete) return;
 
-        // Spawn enemies over time
-        if (enemiesSpawned < EnemiesToSpawn)
-        {
-            timeSinceLastSpawn += Time.DeltaTime;
-
-            if (timeSinceLastSpawn >= SpawnInterval)
-            {
-                SpawnEnemy();
-                timeSinceLastSpawn = 0f;
-            }
-        }
-        else if (!waveComplete)
+        // Stop when we’re done
+        if (enemiesSpawned >= EnemiesToSpawn)
         {
             waveComplete = true;
             Console.WriteLine($"[EnemySpawner] Wave complete! Spawned {enemiesSpawned} enemies");
+            return;
+        }
+
+        // This ensures that it will spawn in only one enemy at a time
+        if (EnemySpawnedAlr)
+        {
+            // Wait until the new enemy finish setup of its EnemyRhythmController script
+            if (EnemyRhythmController.Instance != null)
+            {
+                EnemySpawnedAlr = false;
+                Console.WriteLine("New enemy spawned!!!\n\n\n");
+            }
+            return;
+        }
+
+        if (EnemyRhythmController.Instance != null)
+        {
+            return;
+        }
+
+        timeSinceLastSpawn += Time.DeltaTime;
+
+        bool intervalReady = (timeSinceLastSpawn >= SpawnInterval);
+        if (pendingSpawn || intervalReady)
+        {
+            SpawnEnemy();
+        
+            pendingSpawn = false;
+            timeSinceLastSpawn = 0f;
         }
     }
 
     private void Initialize()
     {
+        if (Instance != null && Instance != this)
+            Console.WriteLine("[EnemySpawner] WARNING: Multiple spawners detected - replacing Instance");
+
+        Instance = this;
+
+
+        // WHY IS ALL THIS HARD CODED WHEN U HAVE A CONTAINER ALR??????
         Console.WriteLine("[EnemySpawner] Initialized");
         Console.WriteLine($"  Will spawn {EnemiesToSpawn} enemies");
         Console.WriteLine($"  Prefab: {EnemyPrefabName}");
         Console.WriteLine($"  Spawn position: ({SpawnX}, {SpawnY})");
 
         SetupEnemyQueue();
+
+        pendingSpawn = SpawnImmediatelyOnStart;
     }
 
     private void SetupEnemyQueue()
     {
         enemyQueue.Clear();
 
-        // Setup enemy sequence
-        enemyQueue.Enqueue(EnemyIconType.Rat);
-        enemyQueue.Enqueue(EnemyIconType.Rat);
-        enemyQueue.Enqueue(EnemyIconType.Rat);
-        enemyQueue.Enqueue(EnemyIconType.Rat);
-        enemyQueue.Enqueue(EnemyIconType.Rat);
+        //// Ensure Current + Next always exist for UI
+        //int totalIcons = Math.Max(EnemiesToSpawn + 2, 2);
+
+        ////HARD CODED AGAIN????????????????????????
+        //for (int i = 0; i < totalIcons; i++)
+        //    enemyQueue.Enqueue(EnemyIconType.Rat);
+
+
+
+        // use my container for the enemyQueue UI instead,cos the queue is a fking enum of int when factory takes in string
+        foreach (EnemyIconType type in EnemyContainer)
+        {
+            enemyQueue.Enqueue(type);
+        }
+        EnemiesToSpawn = EnemyContainer.Count;
 
         Console.WriteLine($"[EnemySpawner] Enemy queue setup with {enemyQueue.Count} enemies");
     }
@@ -101,35 +157,17 @@ public class EnemySpawner : Script
     private void InitializeOrderSlipUI()
     {
         var ui = OrderSlipUIController.Instance;
-        if (ui == null)
-        {
-            Console.WriteLine("[EnemySpawner] ERROR: UI Controller is null!");
-            return;
-        }
+        if (ui == null) return;
 
-        if (enemyQueue.Count < 2)
-        {
-            Console.WriteLine("[EnemySpawner] ERROR: Not enough enemies in queue");
-            return;
-        }
-
-        // Check if slots are ready
-        if (!ui.SlotsReady())
-        {
-            Console.WriteLine("[EnemySpawner] WARNING: UI slots not registered yet - icon scripts may not be initialized");
-            Console.WriteLine($"  Slots ready: {ui.SlotsReady()}");
-            // Still try to initialize, it might work
-        }
+        if (enemyQueue.Count < 2) return;
 
         EnemyIconType current = PeekAtIndex(0);
         EnemyIconType next = PeekAtIndex(1);
 
-        Console.WriteLine($"[EnemySpawner] Initializing UI with Current={current}, Next={next}");
-
         try
         {
             ui.Init(current, next);
-            Console.WriteLine("[EnemySpawner] UI initialization successful!");
+            Console.WriteLine($"[EnemySpawner] UI init -> Current={current}, Next={next}");
         }
         catch (Exception ex)
         {
@@ -139,20 +177,43 @@ public class EnemySpawner : Script
 
     private void SpawnEnemy()
     {
-        //int enemyID = Factory.Instantiate("TestPrefab");
-        int enemyID = Factory.Instantiate("Rat_Enemy");
-
-        if (enemyID < 0)
+        // all enemies are dead. Yippeee
+        if (enemyQueue.Count == 0)
         {
-            Console.WriteLine($"[EnemySpawner] Failed to spawn enemy! Prefab '{EnemyPrefabName}' not found");
-            Console.WriteLine($"  Make sure {EnemyPrefabName}.json exists in PulseEngine/Assets/Prefabs/");
+            Scene.LoadScene("GameWin");
             return;
         }
 
-        spawnedEnemies.Add(enemyID);
-        enemiesSpawned++;
+        string FactoryString = EnumtoString(enemyQueue.Peek());
 
+        // if it returns ""
+        if (string.IsNullOrEmpty(FactoryString))
+        {
+            return;
+        }
+
+        int enemyID = Factory.Instantiate(FactoryString);
+
+        if (enemyID < 0)
+        {
+            Console.WriteLine($"[EnemySpawner] Failed to spawn enemy! Prefab '{FactoryString}' not found");
+            return;
+        }
+
+        EnemySpawnedAlr = true;
+        enemiesSpawned++;
         Console.WriteLine($"[EnemySpawner] Spawned enemy {enemiesSpawned}/{EnemiesToSpawn} (ID: {enemyID})");
+    }
+
+    public string EnumtoString(EnemyIconType type)
+    {
+        switch (type)
+        {
+            case EnemyIconType.Rat: return "Rat_Enemy";
+            case EnemyIconType.Bat: return "Bat_Enemy";
+            case EnemyIconType.Gorilla: return "Gorilla_Enemy";
+            default: return "";
+        }
     }
 
     public void OnEnemyDefeated()
@@ -160,27 +221,31 @@ public class EnemySpawner : Script
         enemiesDefeated++;
         Console.WriteLine($"[EnemySpawner] Enemy defeated! ({enemiesDefeated} total)");
 
+        // Shift queue (remove current)
+        if (enemyQueue.Count > 0)
+            enemyQueue.Dequeue();
+
+        // The newUpcoming is what should appear as "Next" after shifting
+        EnemyIconType newUpcoming = EnemyIconType.None;
+        if (enemyQueue.Count > 1)
+            newUpcoming = PeekAtIndex(1);
+
         var ui = OrderSlipUIController.Instance;
-        if (ui != null && enemyQueue.Count > 2)
+        if (ui != null)
         {
-            if (enemyQueue.Count > 0)
-                enemyQueue.Dequeue();
-
-            if (enemyQueue.Count > 1)
+            try
             {
-                EnemyIconType newNext = PeekAtIndex(1);
-
-                try
-                {
-                    ui.AdvanceQueue(newNext);
-                    Console.WriteLine($"[EnemySpawner] UI advanced to show next enemy: {newNext}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[EnemySpawner] ERROR during AdvanceQueue: {ex.Message}");
-                }
+                ui.AdvanceQueue(newUpcoming);
+                Console.WriteLine($"[EnemySpawner] UI advanced -> Upcoming={newUpcoming}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[EnemySpawner] ERROR during AdvanceQueue: {ex.Message}");
             }
         }
+
+        // Request the next enemy spawn (next Update, safe)
+        pendingSpawn = true;
     }
 
     private EnemyIconType PeekAtIndex(int index)
@@ -190,27 +255,5 @@ public class EnemySpawner : Script
 
         EnemyIconType[] temp = enemyQueue.ToArray();
         return temp[index];
-    }
-
-    public void SpawnWave(int count)
-    {
-        EnemiesToSpawn = count;
-        enemiesSpawned = 0;
-        enemiesDefeated = 0;
-        timeSinceLastSpawn = 0f;
-        waveComplete = false;
-        spawnedEnemies.Clear();
-
-        Console.WriteLine($"[EnemySpawner] Starting new wave: {count} enemies");
-    }
-
-    public int GetSpawnedCount()
-    {
-        return spawnedEnemies.Count;
-    }
-
-    public int GetDefeatedCount()
-    {
-        return enemiesDefeated;
     }
 }

@@ -15,8 +15,14 @@ public class ComboSystem : Script
     public int maxComboLength = 4;
 
     // Timing windows (seconds)
-    public float perfectWindow = 0.5f;
-    public float greatWindow = 1.0f;   // <= 1.0 => GREAT, > 1.0 => MISS
+    // At 120 BPM (0.5s/beat), max delta is 0.25s. Player data shows most presses land 0.08-0.25s.
+    // PERFECT ≤ 0.08s | GREAT ≤ 0.20s | MISS > 0.20s
+    public float perfectWindow = 0.08f;
+    public float greatWindow = 0.20f;
+
+    // DEBUG: Set to true to auto-set a test weakness and accept all input regardless of turn state
+    public bool DebugTestMode = false;
+    public string DebugTestWeakness = "WASD";
 
     // =========================
     // State
@@ -28,12 +34,16 @@ public class ComboSystem : Script
 
     public bool PlayerDidSuccessfulCombo { get; private set; }
     private bool comboFailedEarly = false;
+    private bool comboCompleted = false;  // Lock out further input after combo is evaluated
 
     // =========================
     // Beat Timing
     // =========================
     private int lastBeatIndex = -1;
     private float timeSinceLastBeat = 0.0f;
+
+    // Cache beat duration so we can measure distance to NEXT beat
+    private float cachedBeatDuration = 0.5f; // fallback default (~120 BPM)
 
     // =========================
     // Enemy Weakness (injected)
@@ -50,8 +60,14 @@ public class ComboSystem : Script
     // =========================
     public override void Update()
     {
-        // Set singleton instance
-        if (Instance == null)
+        // ---- Singleton setup with proper cleanup on scene reload ----
+        if (Instance != null && Instance != this)
+        {
+            // A stale instance from a previous scene load exists — replace it.
+            Console.WriteLine("[ComboSystem] Replacing stale singleton instance");
+            Instance = this;
+        }
+        else if (Instance == null)
         {
             Instance = this;
             Console.WriteLine("[ComboSystem] Singleton instance set");
@@ -60,18 +76,31 @@ public class ComboSystem : Script
         // First-time initialization
         if (!initialized)
         {
-            Console.WriteLine("[ComboSystem] Initializing...");
-            ResetCombo();
-            initialized = true;
-        }
+            if (!initialized)
+            {
+                Instance = this;
+                this.DebugTestMode = true;
+                this.SetEnemyWeakness("WASD");
 
-        float dt = Time.DeltaTime;
-        timeSinceLastBeat += dt;
+                initialized = true;
+                Console.WriteLine("[ComboSystem] Custom Engine Init: Debug Mode FORCED ON");
+                return;
+            }
+        }
 
         if (Conductor.Instance == null)
             return;
 
+
+        cachedBeatDuration = Conductor.Instance.GetBeatDuration();
+
+        float dt = Time.DeltaTime;
+        timeSinceLastBeat += dt;
+
         int currentBeat = Conductor.Instance.GetCurrentBeat();
+
+        // ---- Guard against duplicate beat events ----
+        // Only reset the timer if the beat index actually advanced.
         if (currentBeat != lastBeatIndex)
         {
             lastBeatIndex = currentBeat;
@@ -85,30 +114,38 @@ public class ComboSystem : Script
     public void SetEnemyWeakness(string weaknessCombo)
     {
         currentEnemyWeakness = weaknessCombo;
-
-        // Update max combo length to match the weakness
         maxComboLength = weaknessCombo.Length;
-
         ResetCombo();
         Console.WriteLine($"[ComboSystem] Weakness set to: {weaknessCombo} (length: {maxComboLength})");
     }
 
     public void RegisterInput(char key)
     {
-        // Sanity check: don't allow input if no weakness set
+        // Block input if combo already completed (waiting for TurnManager to reset)
+        if (comboCompleted)
+        {
+            Console.WriteLine($"[ComboSystem] [{key}] IGNORED — combo already completed, waiting for reset");
+            return;
+        }
+
         if (string.IsNullOrEmpty(currentEnemyWeakness))
         {
             Console.WriteLine("[ComboSystem] ERROR: No weakness set! Cannot register input.");
             return;
         }
 
-        float delta = Math.Abs(timeSinceLastBeat);
+        float currentSongTime = Conductor.Instance.GetSongTime();
+        float beatDuration = Conductor.Instance.GetBeatDuration();
+    
+        float timeSince = currentSongTime % beatDuration;
+        float timeUntilNext = beatDuration - timeSince;
+        float delta = Math.Min(timeSince, timeUntilNext);
+
+        // Clamp to zero in case of floating-point drift
+        if (delta < 0f) delta = 0f;
 
         // =========================
-        // Judgement Rules
-        // PERFECT: <= 0.5
-        // GREAT:   <= 1.0
-        // MISS:     > 1.0
+        // Judgement
         // =========================
         string judgement;
         if (delta <= perfectWindow)
@@ -121,18 +158,8 @@ public class ComboSystem : Script
         hitResults.Add(judgement);
         currentCombo.Add(key);
 
-        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s)");
-
-        // // === AUDIO FEEDBACK - TIMING JUDGMENT SFX === UNCOMMENT ONCE SCORING SYSTEM IS STABLE
-        // AudioComponent audio = GetAudio();
-        // if (judgement == "PERFECT" || judgement == "GREAT")
-        // {
-        //     audio.PlaySFX("SFX_ComboEstablished_1");  // Success sound
-        // }
-        // else // MISS
-        // {
-        //     audio.PlaySFX("SFX_WrongInput");  // Miss sound
-        // }
+        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s, sinceBeat={timeSince:F3}s, untilNext={timeUntilNext:F3}s)");
+        Console.WriteLine($"[ComboSystem]   Progress: {currentCombo.Count}/{maxComboLength} | Expected: {(currentCombo.Count <= currentEnemyWeakness.Length ? currentEnemyWeakness[currentCombo.Count - 1].ToString() : "?")} | Got: {key}");
 
         // === VISUAL FEEDBACK ===
         if (ComboDisplayManager.Instance != null)
@@ -169,7 +196,7 @@ public class ComboSystem : Script
 
     public bool HasCompletedCombo()
     {
-        return currentCombo.Count >= maxComboLength;
+        return comboCompleted;
     }
 
     public void ResetCombo()
@@ -178,9 +205,7 @@ public class ComboSystem : Script
         currentCombo.Clear();
         hitResults.Clear();
         comboFailedEarly = false;
-
-        // Don't log every reset, too spammy
-        // Console.WriteLine("[ComboSystem] Combo reset");
+        comboCompleted = false;
     }
 
     // =========================
@@ -191,7 +216,6 @@ public class ComboSystem : Script
         string comboString = new string(currentCombo.ToArray());
         bool allGood = !comboFailedEarly;
 
-        // Only PERFECT or GREAT are acceptable.
         foreach (string r in hitResults)
         {
             if (r != "PERFECT" && r != "GREAT")
@@ -211,14 +235,23 @@ public class ComboSystem : Script
         else
         {
             Console.WriteLine("[ComboSystem] ❌ COMBO FAILED!");
+            Console.WriteLine($"[ComboSystem] Sequence match: {comboString == currentEnemyWeakness}, Timing OK: {!comboFailedEarly}");
             PlayerDidSuccessfulCombo = false;
         }
 
-        // Note: Don't call ResetCombo() here - let TurnManager control when to reset
+        // Lock out further input until TurnManager calls ResetCombo()
+        comboCompleted = true;
+
+        // In debug test mode, auto-reset so we can test again immediately
+        if (DebugTestMode)
+        {
+            Console.WriteLine("[ComboSystem] [DEBUG] Auto-resetting combo for next test...");
+            ResetCombo();
+        }
     }
 
     // =========================
-    // Debug/Utility
+    // Debug / Utility
     // =========================
     public string GetCurrentComboString()
     {
@@ -233,5 +266,12 @@ public class ComboSystem : Script
     public string GetExpectedCombo()
     {
         return currentEnemyWeakness;
+    }
+
+
+    public void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 }
