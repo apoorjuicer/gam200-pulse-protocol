@@ -241,9 +241,6 @@ namespace PulseEditor
     // ── Main panel UI ──────────────────────────────────────────
     void ProjectPanel()
     {
-        // Disable all editing when playing
-        bool isPlaying = IsPlaying();
-
         // ──────────────────────────────────────────────────────────
         // HEADER: Refresh button and path display
         // ──────────────────────────────────────────────────────────
@@ -263,11 +260,6 @@ namespace PulseEditor
         ImGui::SameLine();
         ImGui::SetNextItemWidth(100.0f);
         ImGui::SliderFloat("##ThumbSize", &s_thumbSize, 48.0f, 128.0f, "%.0f");
-
-        if (isPlaying)
-        {
-            ImGui::BeginDisabled();
-        }
 
         // ──────────────────────────────────────────────────────────
         // HANDLE OS FILE DROPS
@@ -317,7 +309,6 @@ namespace PulseEditor
                     ImGui::PopID();
                     ImGui::EndGroup();
                     ImGui::EndChild();
-                    if (isPlaying) ImGui::EndDisabled();
                     return;
                 }
 
@@ -671,9 +662,6 @@ namespace PulseEditor
         // ──────────────────────────────────────────────────────────
         DrawEngineManagedWarningPopup(s_showEngineManagedWarning, s_blockedEntityName);
         DrawImportErrorPopup(s_showImportError, s_invalidFileName, s_targetFolderName, s_targetFolderType);
-
-        if (isPlaying)
-            ImGui::EndDisabled();
     }
 
 }  // namespace PulseEditor

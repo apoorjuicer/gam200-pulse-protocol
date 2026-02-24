@@ -44,13 +44,8 @@ public class OrderSlipUIController : Script
         // First-frame setup - establish singleton immediately
         if (!initialized)
         {
-            if (Instance != null && Instance != this)
-            {
-                Console.WriteLine("[OrderSlipUI] WARNING: Multiple OrderSlipUIController instances detected!");
-            }
             Instance = this;
             initialized = true;
-            Console.WriteLine("[OrderSlipUI] Controller initialized");
             return;
         }
 

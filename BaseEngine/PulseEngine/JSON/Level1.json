@@ -871,7 +871,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat greyed.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon bat greyed.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -934,7 +934,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -989,7 +989,10 @@
                         "children": [
                             12,
                             13,
-                            14
+                            14,
+                            33,
+                            34,
+                            35
                         ]
                     }
                 }
@@ -1011,7 +1014,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1085,7 +1088,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1159,7 +1162,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1297,7 +1300,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": false,
+                        "visible": true,
                         "alignment": 0
                     }
                 }
@@ -1388,8 +1391,8 @@
                             "y": -377.0
                         },
                         "scale": {
-                            "x": 110.0,
-                            "y": 216.0
+                            "x": 230.0,
+                            "y": 230.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1405,7 +1408,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_220x432.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_634x433.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2564,18 +2567,18 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 800.0,
-                            "y": 300.0
+                            "x": -470.4551086425781,
+                            "y": -215.0
                         },
                         "scale": {
-                            "x": -832.5,
-                            "y": -832.5
+                            "x": 200.0,
+                            "y": 200.0
                         },
                         "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2583,9 +2586,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 0.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_220x432.png",
+                        "spriteName": "",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2598,22 +2601,22 @@
                     "animation": {
                         "currentFrame": 0,
                         "elapsedTime": 0.0,
-                        "totalFrames": 16,
-                        "columns": 4,
-                        "rows": 4,
-                        "animationSpeed": 12.0
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
                     }
                 },
                 {
                     "script": {
                         "ScriptName": [
-                            "TestScript2"
+                            "PauseLabels"
                         ]
                     }
                 },
                 {
                     "name": {
-                        "name": "Rat_enemy"
+                        "name": "SettingsBtnLabel"
                     }
                 },
                 {
@@ -2621,8 +2624,31 @@
                         "layerName": "World",
                         "mask": 2,
                         "sortingLayer": 1,
-                        "orderInLayer": 5,
+                        "orderInLayer": 0,
                         "z": 0.0
+                    }
+                },
+                {
+                    "TextComponent": {
+                        "text": "Settings",
+                        "font_id": "PatrickHand_font",
+                        "offset": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "font_size": 63.0,
+                        "color": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true,
+                        "alignment": 1
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 11
                     }
                 }
             ]
@@ -2632,12 +2658,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 800.0,
-                            "y": 300.0
+                            "x": 0.0,
+                            "y": -215.0
                         },
                         "scale": {
-                            "x": -787.5,
-                            "y": -787.5
+                            "x": 200.0,
+                            "y": 200.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2651,9 +2677,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 0.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_220x432.png",
+                        "spriteName": "",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2666,22 +2692,22 @@
                     "animation": {
                         "currentFrame": 0,
                         "elapsedTime": 0.0,
-                        "totalFrames": 16,
-                        "columns": 4,
-                        "rows": 4,
-                        "animationSpeed": 12.0
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
                     }
                 },
                 {
                     "script": {
                         "ScriptName": [
-                            "TestScript2"
+                            "PauseLabels"
                         ]
                     }
                 },
                 {
                     "name": {
-                        "name": "Rat_enemy"
+                        "name": "RestartBtnLabel"
                     }
                 },
                 {
@@ -2689,8 +2715,31 @@
                         "layerName": "World",
                         "mask": 2,
                         "sortingLayer": 1,
-                        "orderInLayer": 5,
+                        "orderInLayer": 0,
                         "z": 0.0
+                    }
+                },
+                {
+                    "TextComponent": {
+                        "text": "Restart",
+                        "font_id": "PatrickHand_font",
+                        "offset": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "font_size": 63.0,
+                        "color": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true,
+                        "alignment": 1
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 11
                     }
                 }
             ]
@@ -2700,12 +2749,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 800.0,
-                            "y": 300.0
+                            "x": 381.1306457519531,
+                            "y": -215.0
                         },
                         "scale": {
-                            "x": -732.5,
-                            "y": -732.5
+                            "x": 200.0,
+                            "y": 200.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2719,9 +2768,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 0.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_220x432.png",
+                        "spriteName": "",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2734,22 +2783,22 @@
                     "animation": {
                         "currentFrame": 0,
                         "elapsedTime": 0.0,
-                        "totalFrames": 16,
-                        "columns": 4,
-                        "rows": 4,
-                        "animationSpeed": 12.0
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
                     }
                 },
                 {
                     "script": {
                         "ScriptName": [
-                            "TestScript2"
+                            "PauseLabels"
                         ]
                     }
                 },
                 {
                     "name": {
-                        "name": "Rat_Enemy"
+                        "name": "QuitBtnLabel"
                     }
                 },
                 {
@@ -2757,11 +2806,1303 @@
                         "layerName": "World",
                         "mask": 2,
                         "sortingLayer": 1,
-                        "orderInLayer": 5,
+                        "orderInLayer": 0,
                         "z": 0.0
+                    }
+                },
+                {
+                    "TextComponent": {
+                        "text": "Home",
+                        "font_id": "PatrickHand_font",
+                        "offset": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "font_size": 63.0,
+                        "color": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true,
+                        "alignment": 0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 11
                     }
                 }
             ]
+        },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": 0.0, "y": 0.0 },
+          "scale": { "x": 1600.0, "y": 900.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
         }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/Settings0000.jpg",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "BG_PlaceholderImg" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -934.0042724609375, "y": 365.6153259277344 },
+          "scale": { "x": 300.0, "y": 40.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/Volume_.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "Volume" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Children": { "children": [41, 42, 43] }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": 5.692194938659668, "y": 250.0 },
+          "scale": { "x": 1140.0, "y": 30.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar bottom.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "VEmpty" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 40 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": 1088.5072021484375, "y": 250.0 },
+          "scale": { "x": 50.0, "y": 30.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/slider.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["VolumeKnob", "SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "VKnob" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 100.0
+        }
+      },
+      {
+        "Parent": { "parent": 40 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -574.864013671875, "y": 250.0 },
+          "scale": { "x": 542.4365234375, "y": 20.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar fill.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["VolumeFill", "SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "VFilled" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 100.0
+        }
+      },
+      {
+        "Parent": { "parent": 40 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -991.763916015625, "y": 97.24113464355469 },
+          "scale": { "x": 230.0, "y": 40.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/Music_.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "Music" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Children": { "children": [45, 46, 47] }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": 5.692070960998535, "y": -50.0 },
+          "scale": { "x": 1140.0, "y": 30.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar bottom.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "MEmpty" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 44 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": 1092.57763671875, "y": -50.0 },
+          "scale": { "x": 56.0, "y": 30.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/slider.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["MusicKnob", "SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "MKnob" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 44 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": 3.3775634765625, "y": -50.0 },
+          "scale": { "x": 1117.2000732421875, "y": 20.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar fill.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["MusicFill", "SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "MFilled" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 44 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -942.3076782226563, "y": 641.7880249023438 },
+          "scale": { "x": 300.0, "y": 40.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/Screen_.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "Screen" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Children": { "children": [58, 60, 59, 61, 62, 63] }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -824.3192749023438, "y": -500.3079528808594 },
+          "scale": { "x": 400.0, "y": 40.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/Brightness_.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "Brightness" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Children": { "children": [55, 54, 56] }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -1378.4959716796875, "y": 683.5651245117188 },
+          "scale": { "x": 100.0, "y": 100.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/back.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["NavigationButtons", "SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "BackButton" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": 5.691999912261963, "y": -350.0 },
+          "scale": { "x": 1140.0, "y": 30.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar bottom.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "SEmpty" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 57 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": 1089.568603515625, "y": -350.0 },
+          "scale": { "x": 56.0, "y": 30.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/slider.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["SfxKnob", "SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "SKnob" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 57 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": 0.3685302734375, "y": -350.0 },
+          "scale": { "x": 1117.2000732421875, "y": 20.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar fill.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["SfxFill", "SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "SFilled" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 57 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": 5.691999912261963, "y": -650.0 },
+          "scale": { "x": 1140.0, "y": 30.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar bottom.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "BEmpty" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 49 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": 1086.5181884765625, "y": -650.0 },
+          "scale": { "x": 56.0, "y": 30.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/slider.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["BrightnessKnob", "SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "BKnob" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 49 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -2.681884765625, "y": -650.0 },
+          "scale": { "x": 1117.2000732421875, "y": 20.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar fill.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["BrightnessFill", "SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "BFilled" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 49 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -1051.9228515625, "y": -207.69235229492188 },
+          "scale": { "x": 200.0, "y": 40.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/SFX_.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "SFX" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Children": { "children": [51, 52, 53] }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -228.8460693359375, "y": 648.0768432617188 },
+          "scale": { "x": 380.0, "y": 58.89337158203125 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/dropdown close.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["DropdownToggle", "SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "DropdownBox(Closed)" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 48 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -229.81077575683594, "y": 557.34912109375 },
+          "scale": { "x": 200.0, "y": 31.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/windowed.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["DropdownOptionWindowed", "SettingsOverlay", "NavigationButtons"] }
+      },
+      {
+        "name": { "name": "Windowed (Open)" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 20,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 48 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -228.0, "y": 585.5438232421875 },
+          "scale": { "x": 381.0, "y": 120.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/dropdown open.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["DropdownOpenFollower", "SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "Dropdownbox(Open)" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 48 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -231.79489135742188, "y": 557.9487915039063 },
+          "scale": { "x": 251.0, "y": 31.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/Full screen.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["DropdownOptionFullscreen", "SettingsOverlay", "NavigationButtons"] }
+      },
+      {
+        "name": { "name": "Fullscreen (Open)" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 48 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -232.57635498046875, "y": 654.1206665039063 },
+          "scale": { "x": 200.0, "y": 31.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/windowed.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["DropdownClosedLabelWindowed", "SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "Windowed (Closed)" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 48 }
+      }
+    ]
+  },
+  {
+    "components": [
+      {
+        "transform": {
+          "position": { "x": -234.6527862548828, "y": 654.1207275390625 },
+          "scale": { "x": 254.0, "y": 31.0 },
+          "rotation": { "x": 0.0, "y": 0.0 },
+          "isVisible": false,
+          "visibilityTimer": 0.0,
+          "autoHide": false
+        }
+      },
+      {
+        "render": {
+          "mdl_ref": 0.0,
+          "shd_ref": 1.0,
+          "useTexture": true,
+          "spriteName": "../../PulseEngine/Assets/Textures/UI/Full screen.png",
+          "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+        }
+      },
+      {
+        "animation": {
+          "currentFrame": 0,
+          "elapsedTime": 0.0,
+          "totalFrames": 1,
+          "columns": 1,
+          "rows": 1,
+          "animationSpeed": 2.0
+        }
+      },
+      {
+        "script": { "ScriptName": ["DropdownClosedLabelFullscreen", "SettingsOverlay"] }
+      },
+      {
+        "name": { "name": "FullScreen (Closed)" }
+      },
+      {
+        "layerTag": {
+          "layerName": "UI",
+          "mask": 4,
+          "sortingLayer": 2,
+          "orderInLayer": 15,
+          "z": 0.0
+        }
+      },
+      {
+        "Parent": { "parent": 48 }
+      }
+    ]
+  }
     ]
 }

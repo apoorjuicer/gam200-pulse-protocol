@@ -296,13 +296,6 @@ namespace PulseEditor
             return;
         }
 
-        // Disable all editing when playing
-        bool isPlaying = IsPlaying();
-        if (isPlaying)
-        {
-            ImGui::BeginDisabled();
-        }
-
         ImGui::Text("Entity ID: %d", (int)selectedEntity);
 
         ImGui::SameLine();
@@ -544,12 +537,6 @@ namespace PulseEditor
         }
 
         ImGui::Spacing();
-
-        // Re-enable if we disabled for play mode
-        if (isPlaying)
-        {
-            ImGui::EndDisabled();
-        }
 
         ImGui::End();
 

@@ -29,6 +29,7 @@ public class NavigationButtons : Script
     public static bool ShowQuitOverlay = false;
     public static bool ShowPauseOverlay = false;
     public static bool ShowHowToPlayOverlay = false;
+    private static bool openedSettingsFromPause  = false;
 
     // === SETTINGS OVERLAY (inside MainMenu scene) ===
     public static bool ShowSettingsOverlay = false;
@@ -79,12 +80,19 @@ public class NavigationButtons : Script
 
         string realScene = Scene.GetCurrentScene();
 
+        // Keep tracked scene in sync with the actual loaded scene (fixes Cutscene -> Level1 issue)
+        if (!string.IsNullOrEmpty(realScene) && currentScene != realScene)
+        {
+            currentScene = realScene;
+        }
+
         // ESC pause toggle (only in gameplay scenes)
         if (input.IsKeyTriggered(256) && !wasEscPressed) // 256 = ESC (GLFW)
         {
             wasEscPressed = true;
 
-            if (!string.IsNullOrEmpty(realScene) &&
+            if (!openedSettingsFromPause &&
+                !string.IsNullOrEmpty(realScene) &&
                 !realScene.Equals("MainMenu") &&
                 !realScene.Equals("Settings") &&
                 !realScene.Equals("Cutscene") &&
@@ -189,29 +197,32 @@ public class NavigationButtons : Script
         // =========================================================
         if (isPauseButton)
         {
-            bool isPauseShowing = ShowPauseOverlay;
+            bool isPauseMenuOpen = ShowPauseOverlay;
+            bool isPauseSettingsOpen = ShowSettingsOverlay && openedSettingsFromPause;
+            bool shouldGameBePaused = isPauseMenuOpen || isPauseSettingsOpen;
 
-            if (isPauseShowing != lastPauseState)
+            if (isPauseMenuOpen != lastPauseState)
             {
                 SpriteComponent sprite = GetSprite();
-                if (isPauseShowing)
-                {
-                    Application.SetPaused(true);
 
+                if (isPauseMenuOpen)
+                {
                     sprite.Texture = exitTexture;
                     defaultTexture = exitTexture;
                     hoverTexture = exitHoverTexture;
                 }
                 else
                 {
-                    Application.SetPaused(false);
-
                     sprite.Texture = pauseTexture;
                     defaultTexture = pauseTexture;
                     hoverTexture = pauseHoverTexture;
                 }
-                lastPauseState = isPauseShowing;
+
+                lastPauseState = isPauseMenuOpen;
             }
+
+            // Apply actual pause state once
+            Application.SetPaused(shouldGameBePaused);
         }
 
         string texLower = defaultTexture.ToLower();
@@ -405,7 +416,81 @@ public class NavigationButtons : Script
     private static void HideSettings()
     {
         ShowSettingsOverlay = false;
+
+        if (openedSettingsFromPause)
+        {
+            ShowPauseOverlay = true;      // return to pause menu
+            Application.SetPaused(true);  // keep game paused
+            openedSettingsFromPause = false;
+        }
     }
+
+    private bool TryGetNextLevelSceneName(string sceneName, out string nextScene)
+    {
+        nextScene = "";
+
+        if (string.IsNullOrEmpty(sceneName))
+            return false;
+
+        int i = sceneName.Length - 1;
+        while (i >= 0 && char.IsDigit(sceneName[i]))
+            i--;
+
+        // no trailing number
+        if (i == sceneName.Length - 1)
+            return false;
+
+        string prefix = sceneName.Substring(0, i + 1);
+        string numberPart = sceneName.Substring(i + 1);
+
+        int levelNumber;
+        if (!int.TryParse(numberPart, out levelNumber))
+            return false;
+
+        nextScene = prefix + (levelNumber + 1).ToString();
+        return true;
+    }
+
+    private void ContinueToNextLevel()
+    {
+        // Re-sync just in case (extra safety)
+        string realScene = Scene.GetCurrentScene();
+        if (!string.IsNullOrEmpty(realScene))
+            currentScene = realScene;
+
+        if (string.IsNullOrEmpty(currentScene))
+        {
+            GoToMainMenu();
+            return;
+        }
+
+        string nextScene;
+        if (!TryGetNextLevelSceneName(currentScene, out nextScene))
+        {
+            GoToMainMenu();
+            return;
+        }
+
+        // ✅ Proper check: only load if the next scene file exists
+        if (!Scene.SceneExists(nextScene))
+        {
+            Console.WriteLine("Next scene does not exist: " + nextScene + " -> going MainMenu");
+            GoToMainMenu();
+            return;
+        }
+
+        // Clear overlays / pause states before changing scene
+        ShowQuitOverlay = false;
+        ShowPauseOverlay = false;
+        ShowHowToPlayOverlay = false;
+        ShowSettingsOverlay = false;
+        openedSettingsFromPause = false;
+        Application.SetPaused(false);
+
+        currentScene = nextScene;
+        Scene.LoadScene(nextScene);
+    }
+
 
     private void OnClick()
     {
@@ -435,11 +520,10 @@ public class NavigationButtons : Script
 
         if (tex.Contains("pausesettings"))
         {
-            // Open settings overlay from pause by jumping back to MainMenu
+            openedSettingsFromPause = true;
             ShowPauseOverlay = false;
             Application.SetPaused(false);
             ShowSettingsOverlay = true;
-            Scene.LoadScene("MainMenu");
             return;
         }
 
@@ -521,7 +605,8 @@ public class NavigationButtons : Script
 
         if (tex.Contains("nextstage"))
         {
-            Console.WriteLine("NOT IMPLEMENTED YET!");
+            StageClearElement.ResetStageClear();
+            ContinueToNextLevel();
             return;
         }
 

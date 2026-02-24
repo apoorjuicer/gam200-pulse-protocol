@@ -41,6 +41,15 @@ public class EnemySpawner : Script
     private bool pendingSpawn = false;
     private bool EnemySpawnedAlr = false; // Stop spawning as soon as u spawn an enemy
 
+    //Container of enemy 2 spawn. 
+    private List<EnemyIconType> EnemyContainer = new List<EnemyIconType>
+    {
+        EnemyIconType.Rat,
+        EnemyIconType.Bat,
+        EnemyIconType.Gorilla,
+        EnemyIconType.Rat
+    };
+
     public override void Update()
     {
         if (!initialized)
@@ -56,8 +65,11 @@ public class EnemySpawner : Script
         {
             if (OrderSlipUIController.Instance != null)
             {
-                InitializeOrderSlipUI();
-                uiInitialized = true;
+                if (OrderSlipUIController.Instance.SlotsReady()) // WAIT UR TURN
+                {
+                    InitializeOrderSlipUI();
+                    uiInitialized = true;
+                }
             }
         }
 
@@ -123,12 +135,21 @@ public class EnemySpawner : Script
     {
         enemyQueue.Clear();
 
-        // Ensure Current + Next always exist for UI
-        int totalIcons = Math.Max(EnemiesToSpawn + 2, 2);
+        //// Ensure Current + Next always exist for UI
+        //int totalIcons = Math.Max(EnemiesToSpawn + 2, 2);
 
-        //HARD CODED AGAIN????????????????????????
-        for (int i = 0; i < totalIcons; i++)
-            enemyQueue.Enqueue(EnemyIconType.Rat);//enemyQueue.Enqueue(EnemyIconType.Rat);
+        ////HARD CODED AGAIN????????????????????????
+        //for (int i = 0; i < totalIcons; i++)
+        //    enemyQueue.Enqueue(EnemyIconType.Rat);
+
+
+
+        // use my container for the enemyQueue UI instead,cos the queue is a fking enum of int when factory takes in string
+        foreach (EnemyIconType type in EnemyContainer)
+        {
+            enemyQueue.Enqueue(type);
+        }
+        EnemiesToSpawn = EnemyContainer.Count;
 
         Console.WriteLine($"[EnemySpawner] Enemy queue setup with {enemyQueue.Count} enemies");
     }
@@ -156,14 +177,31 @@ public class EnemySpawner : Script
 
     private void SpawnEnemy()
     {
-        int enemyID = Factory.Instantiate(EnemyPrefabName);
-
-        if (enemyID < 0)
+        // all enemies are dead. Yippeee
+        if (enemyQueue.Count == 0)
         {
-            Console.WriteLine($"[EnemySpawner] Failed to spawn enemy! Prefab '{EnemyPrefabName}' not found");
+            //Scene.LoadScene("GameWin");
+            StageClearElement.StageClear(); // bring up winner overlay
             return;
         }
 
+        string FactoryString = EnumtoString(enemyQueue.Peek());
+
+        // if it returns ""
+        if (string.IsNullOrEmpty(FactoryString))
+        {
+            return;
+        }
+
+        int enemyID = Factory.Instantiate(FactoryString);
+
+        if (enemyID < 0)
+        {
+            Console.WriteLine($"[EnemySpawner] Failed to spawn enemy! Prefab '{FactoryString}' not found");
+            return;
+        }
+
+        EnemySpawnedAlr = true;
         enemiesSpawned++;
         Console.WriteLine($"[EnemySpawner] Spawned enemy {enemiesSpawned}/{EnemiesToSpawn} (ID: {enemyID})");
     }
@@ -173,9 +211,9 @@ public class EnemySpawner : Script
         switch (type)
         {
             case EnemyIconType.Rat: return "Rat_Enemy";
-            case EnemyIconType.Bat: return "enemy icon bat.png";
-            case EnemyIconType.Gorilla: return "enemy icon gorilla.png";
-            default: return "";//"Icon_None";
+            case EnemyIconType.Bat: return "Bat_Enemy";
+            case EnemyIconType.Gorilla: return "Gorilla_Enemy";
+            default: return "";
         }
     }
 

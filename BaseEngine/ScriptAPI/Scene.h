@@ -24,5 +24,7 @@ namespace ScriptAPI
 		static void RestartScene();
 
 		static System::String^ GetCurrentScene();
+
+		static bool SceneExists(System::String^ Filename);
 	};
 }

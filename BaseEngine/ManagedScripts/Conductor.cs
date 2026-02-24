@@ -31,6 +31,8 @@ public class Conductor : Script
     {
         if (!initialized)
         {
+            // just re init ah
+            Instance = this;
             if (Instance == null)
                 Instance = this;
             else if (Instance != this)
