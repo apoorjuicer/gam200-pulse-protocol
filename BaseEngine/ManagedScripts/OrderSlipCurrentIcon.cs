@@ -17,7 +17,6 @@ public class OrderSlipCurrentIcon : Script
             slotX = tf0.X;
             slotY = tf0.Y;
 
-            // Wait for controller to exist before registering
             if (OrderSlipUIController.Instance != null)
             {
                 OrderSlipUIController.Instance.RegisterCurrentSlot(slotX, slotY);
@@ -33,36 +32,20 @@ public class OrderSlipCurrentIcon : Script
 
         if (!ui.Transitioning)
         {
-            if (wasTransitioning)
-            {
-                // Transition just ended - stay at current slot with current appearance
-                tf.X = slotX;
-                tf.Y = slotY;
-                tf.RotX = 0.0f;
-                tf.ScaleX = ui.currentScale;
-                tf.ScaleY = ui.currentScale;
+            tf.X = slotX;
+            tf.Y = slotY;
+            tf.RotX = 0.0f;
+            tf.ScaleX = ui.currentScale;
+            tf.ScaleY = ui.currentScale;
 
-                SetSprite(ui.GetVibrantSprite(ui.CurrentType));
-                wasTransitioning = false;
-            }
-            else
-            {
-                // Normal state - positioned at current slot, vibrant sprite
-                tf.X = slotX;
-                tf.Y = slotY;
-                tf.RotX = 0.0f;
-                tf.ScaleX = ui.currentScale;
-                tf.ScaleY = ui.currentScale;
-
-                SetSprite(ui.GetVibrantSprite(ui.CurrentType));
-            }
+            SetSprite(ui.GetVibrantSprite(ui.CurrentType));
+            wasTransitioning = false;
             return;
         }
 
         // During transition: fade out by shrinking
         wasTransitioning = true;
 
-        // Keep position stable during fade
         tf.X = slotX;
         tf.Y = slotY;
 
@@ -77,8 +60,16 @@ public class OrderSlipCurrentIcon : Script
     {
         if (spriteName == lastSprite) return;
         lastSprite = spriteName;
-        Console.WriteLine($"[OrderSlipCurrent] Sprite -> {spriteName}");
-        // TODO: Add actual sprite changing code here based on your engine's API
-        // Example: GetSprite().SetTexture(spriteName); or similar
+
+        SpriteComponent spr = GetSprite();
+        if (spr.HasSprite())
+        {
+            spr.Texture = spriteName;
+            Console.WriteLine($"[OrderSlipCurrent] Sprite -> {spriteName}");
+        }
+        else
+        {
+            Console.WriteLine("[OrderSlipCurrent] WARNING: No Renderable/Sprite component on this entity");
+        }
     }
 }

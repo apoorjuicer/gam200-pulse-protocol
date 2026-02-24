@@ -22,12 +22,23 @@ public class Conductor : Script
     private int lastBeat = -1;
     private bool initialized = false;
 
+    public float GetBeatDuration()
+    {
+        return 60.0f / BPM;
+    }
+
     public override void Update()
     {
-        // Lazy init
         if (!initialized)
         {
-            if (Instance == null) Instance = this;
+            if (Instance == null)
+                Instance = this;
+            else if (Instance != this)
+            {
+                Console.WriteLine("[Conductor] WARNING: Duplicate Conductor detected, disabling this one.");
+                initialized = true;
+                return;
+            }
 
             secondsPerBeat = 60.0f / BPM;
             songTime = 0.0f;
@@ -36,10 +47,12 @@ public class Conductor : Script
 
             initialized = true;
 
-            // CMD proof that it started
             Console.WriteLine($"[Conductor] Init | BPM={BPM} | SPB={secondsPerBeat:F3}");
             return;
         }
+
+        if (Instance != this)
+            return;
 
         // delta time usage
         float dt = Time.DeltaTime;
@@ -65,5 +78,10 @@ public class Conductor : Script
     public int GetCurrentBeat() => lastBeat;
     public float GetSongTime() => songTime;
     public float SecondsPerBeat => secondsPerBeat;
-}
 
+    public void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+}

@@ -1,15 +1,9 @@
 using System;
 using ScriptAPI;
 
-/// <summary>
-/// Attach this script to the JudgementDisplay entity
-/// Shows PERFECT/GREAT/MISS feedback
-/// 
-/// FIXED: Uses correct texture paths
-/// </summary>
 public class ComboJudgementDisplay : Script
 {
-    // Configuration - FIXED PATHS
+    // Configuration
     public string PerfectSprite = "../../PulseEngine/Assets/Textures/UI/perfect.png";
     public string GreatSprite = "../../PulseEngine/Assets/Textures/UI/great.png";
     public string MissSprite = "../../PulseEngine/Assets/Textures/UI/miss.png";
@@ -23,19 +17,14 @@ public class ComboJudgementDisplay : Script
 
     public override void Update()
     {
-        // Register with manager on first update
         if (!hasRegistered)
         {
             ComboDisplayManager.RegisterJudgement(this);
-
-            // Hide initially
             Hide();
-
             hasRegistered = true;
             Console.WriteLine("[JudgementDisplay] Initialized and hidden");
         }
 
-        // Continue with normal update
         if (isShowing)
         {
             displayTimer -= Time.DeltaTime;
@@ -56,19 +45,14 @@ public class ComboJudgementDisplay : Script
             return;
         }
 
-        // Set the appropriate texture
         string texturePath = GetSpriteForJudgement(judgement);
         sprite.Texture = texturePath;
 
-        // Make visible
         var transform = GetTransform();
         transform.IsVisible = true;
 
-        // Start timer
         isShowing = true;
         displayTimer = DisplayDuration;
-
-        Console.WriteLine($"[JudgementDisplay] ⭐ Showing {judgement}: {texturePath}");
     }
 
     public void Hide()
@@ -87,9 +71,12 @@ public class ComboJudgementDisplay : Script
             case "GREAT": return GreatSprite;
             case "MISS":
             case "LATE": return MissSprite;
-            default:
-                Console.WriteLine($"[JudgementDisplay] Unknown judgement: {judgement}");
-                return MissSprite;
+            default: return MissSprite;
         }
+    }
+
+    public void OnDestroy()
+    {
+        ComboDisplayManager.UnregisterJudgement();
     }
 }
