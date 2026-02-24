@@ -17,6 +17,7 @@ public class ScriptName : Script
         HealthComponent health = GetHealth();
         CollisionComponent c = GetCollision();
         TransformComponent t = GetTransform();
+        var text = GetTextComponent();
 
 
         // 1. TransformComponent:
