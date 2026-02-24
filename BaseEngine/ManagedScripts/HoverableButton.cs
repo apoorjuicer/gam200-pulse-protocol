@@ -513,8 +513,9 @@ public class NavigationButtons : Script
 
         if (tex.Contains("pauserestart"))
         {
-            Scene.LoadScene(currentScene);
             ShowPauseOverlay = false;
+            Application.SetPaused(false);
+            Scene.RestartScene();
             return;
         }
 

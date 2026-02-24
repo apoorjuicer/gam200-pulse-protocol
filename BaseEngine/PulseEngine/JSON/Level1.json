@@ -696,8 +696,8 @@
                         "font_size": 97.0,
                         "color": [
                             1.0,
-                            1.0,
-                            1.0
+                            0.6470587849617004,
+                            0.0
                         ],
                         "visible": false,
                         "alignment": 1
@@ -1299,7 +1299,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": false,
+                        "visible": true,
                         "alignment": 0
                     }
                 }
