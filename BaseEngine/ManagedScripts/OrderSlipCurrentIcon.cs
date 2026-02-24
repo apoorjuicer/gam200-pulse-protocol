@@ -3,7 +3,7 @@ using ScriptAPI;
 
 public class OrderSlipCurrentIcon : Script
 {
-    private bool initialized = false;
+    private OrderSlipUIController registeredWith = null;
 
     private float slotX, slotY;
     private bool wasTransitioning = false;
@@ -11,22 +11,19 @@ public class OrderSlipCurrentIcon : Script
 
     public override void Update()
     {
-        if (!initialized)
+        var ui = OrderSlipUIController.Instance;
+        if (ui == null) return;
+
+        // Registers on first load AND re-registers on reload automatically. Cos json parent-child hieracy is not letting me change it in json
+        if (registeredWith != ui)
         {
             TransformComponent tf0 = GetTransform();
             slotX = tf0.X;
             slotY = tf0.Y;
-
-            if (OrderSlipUIController.Instance != null)
-            {
-                OrderSlipUIController.Instance.RegisterCurrentSlot(slotX, slotY);
-                initialized = true;
-            }
+            ui.RegisterCurrentSlot(slotX, slotY); // or RegisterNextSlot for NextIcon
+            registeredWith = ui;
             return;
         }
-
-        var ui = OrderSlipUIController.Instance;
-        if (ui == null) return;
 
         TransformComponent tf = GetTransform();
 
