@@ -13,9 +13,9 @@ public class EnemyRhythmController : Script
 
     // === SPRITE SHEET SETTINGS ===
     public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_220x432";
-    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_322x433";
-    public string AttackSpriteSheet = "../Enemies/Rattack_spritesheet_634x431";
-    public string HurtSpriteSheet = "../Enemies/Rat_Hurt_spritesheet_515x428";
+    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_220x432";
+    public string AttackSpriteSheet = "../Enemies/Rat_Walk_spritesheet_220x432";
+    public string HurtSpriteSheet = "../Enemies/Rat_Hurt_spritesheet_220x432";
 
     public int IdleFrames = 15;
     public int IdleColumns = 4;
@@ -25,8 +25,12 @@ public class EnemyRhythmController : Script
     public int WalkColumns = 4;
     public int WalkRows = 4;
 
-    public int AttackFrames = 20;
-    public int AttackColumns = 5;
+    // public int AttackFrames = 20;
+    // public int AttackColumns = 5;
+    // public int AttackRows = 4;
+
+    public int AttackFrames = 15;
+    public int AttackColumns = 4;
     public int AttackRows = 4;
 
     public int HurtFrames = 15;
@@ -123,13 +127,10 @@ public class EnemyRhythmController : Script
             if (waitingToDie)
             {
                 deathTimer += Time.DeltaTime;
-
-                
-                if (deathTimer >= 0.05f)
+                if (deathTimer >= 2.5f)
                 {
                     TransformComponent tf = GetTransform();
                     tf.IsVisible = false;
-                    waitingToDie = false;
                 }
             }
             return;
@@ -158,28 +159,12 @@ public class EnemyRhythmController : Script
 
     private void Initialize()
     {
-        Instance = this;
+        if (Instance == null)
+            Instance = this;
 
         Console.WriteLine("[Enemy] Initializing...");
 
         TransformComponent tf = GetTransform();
-
-        if (EnemySpawner.Instance != null)
-        {
-            tf.X = EnemySpawner.Instance.SpawnX;
-            tf.Y = EnemySpawner.Instance.SpawnY;
-        }
-
-        if (SizeMultiplier != 1.0f && (tf.ScaleX == 1.0f || tf.ScaleY == 1.0f))
-        {
-            tf.ScaleX = 220f * SizeMultiplier;
-            tf.ScaleY = 432f * SizeMultiplier;
-            Console.WriteLine($"[Enemy] Applied size multiplier {SizeMultiplier}x -> Scale: ({tf.ScaleX}, {tf.ScaleY})");
-        }
-        else
-        {
-            Console.WriteLine($"[Enemy] Using scene-configured scale: ({tf.ScaleX}, {tf.ScaleY})");
-        }
 
         SetState(EnemyState.Idle);
 
@@ -453,8 +438,6 @@ public class EnemyRhythmController : Script
             Die();
     }
 
-    private bool spawnerNotified = false;
-
     private void Die()
     {
         if (isDead) return;
@@ -464,25 +447,10 @@ public class EnemyRhythmController : Script
         deathTimer = 0f;
         SetState(EnemyState.Dead);
 
-        
-        if (Instance == this) Instance = null;
-
         Console.WriteLine("[Enemy] DEFEATED!");
-
-        
-        if (!spawnerNotified)
-        {
-            spawnerNotified = true;
-            try
-            {
-                if (EnemySpawner.Instance != null)
-                    EnemySpawner.Instance.OnEnemyDefeated();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Enemy] ERROR notifying spawner: {ex.Message}");
-            }
-        }
+        Console.WriteLine("==============================================");
+        Console.WriteLine("VICTORY! Enemy defeated!");
+        Console.WriteLine("==============================================");
     }
 
     public void ExecuteFailurePunishment()
