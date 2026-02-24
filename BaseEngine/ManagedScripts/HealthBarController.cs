@@ -32,8 +32,11 @@ public class HealthBarController : Script
     {
         if (!initialized)
         {
-            if (Instance == null)
-                Instance = this;
+            if (Instance != null && Instance != this)
+            {
+                Console.WriteLine("[HealthBGController] Replacing stale singleton instance");
+            }
+            Instance = this;
 
             var anim = GetAnimation();
             anim.SetAnimationSpeed(0f);

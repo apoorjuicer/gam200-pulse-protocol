@@ -19,10 +19,11 @@ public class HealthBGController : Script
     {
         if (!initialized)
         {
-            if (Instance == null)
+            if (Instance != null && Instance != this)
             {
-                Instance = this;
+                Console.WriteLine("[HealthBGController] Replacing stale singleton instance");
             }
+            Instance = this;
 
             // Force dimensions
             var transform = GetTransform();

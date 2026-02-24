@@ -25,12 +25,8 @@ public class EnemyRhythmController : Script
     public int WalkColumns = 4;
     public int WalkRows = 4;
 
-    // public int AttackFrames = 20;
-    // public int AttackColumns = 5;
-    // public int AttackRows = 4;
-
-    public int AttackFrames = 15;
-    public int AttackColumns = 4;
+    public int AttackFrames = 20;
+    public int AttackColumns = 5;
     public int AttackRows = 4;
 
     public int HurtFrames = 15;
@@ -111,15 +107,6 @@ public class EnemyRhythmController : Script
             return;
         }   
 
-        //Console.WriteLine($"[Enemy] Conductor={Conductor.Instance != null}, TurnManager={TurnManager.Instance != null}, Beat={Conductor.Instance?.GetCurrentBeat()}\n\n\n\n\n");
-
-        InputComponent input = GetInput();
-        if (input.IsKeyTriggered(32)) // press space 2 do smth
-        {
-            TakeDamage(5f);
-            Console.WriteLine($"TESTING!!!!!!! DO 5 damage! HP remaining: {Health}\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        }
-
         if (!playerFound)
         {
             TryFindPlayer();
@@ -170,6 +157,10 @@ public class EnemyRhythmController : Script
     {
         Instance = this;
 
+        // Reset weakness retry state so each new enemy gets a fresh attempt
+        weaknessSet = false;
+        weaknessRetryCount = 0;
+
         Console.WriteLine("[Enemy] Initializing...");
 
         TransformComponent tf = GetTransform();
@@ -185,7 +176,10 @@ public class EnemyRhythmController : Script
         TryFindPlayer();
         TrySetWeakness();
 
-        Console.WriteLine($"[Enemy] Initialized at ({tf.X:F1}, {tf.Y:F1}) | Health: {Health}");
+        HealthComponent eh = GetHealth();
+        eh.hp = (int)Health;
+        eh.isAlive = true;
+        Console.WriteLine($"[Enemy] Initialized at ({tf.X:F1}, {tf.Y:F1}) | Health: {eh.hp}");
         Console.WriteLine($"[Enemy] Collision mode: {CollisionMode} | ManualAttackRange: {ManualAttackRange}");
         Console.WriteLine($"[Enemy] AttackDamage: {AttackDamage}");
         Console.WriteLine($"[Enemy] Own entity ID: {entityID}");
@@ -439,10 +433,13 @@ public class EnemyRhythmController : Script
     {
         if (isDead) return;
 
-        Health -= dmg;
-        Console.WriteLine($"[Enemy] Took {dmg} damage! HP: {Health}/{Health + dmg}");
+        HealthComponent h = GetHealth();
+        int prev = h.hp;
+        h.hp -= (int)dmg;
+        if (h.hp < 0) h.hp = 0;
+        Console.WriteLine($"[Enemy] Took {dmg} damage! HP: {h.hp}/{prev}");
 
-        if (Health <= 0)
+        if (h.hp <= 0)
             Die();
     }
 
@@ -451,6 +448,7 @@ public class EnemyRhythmController : Script
         if (isDead) return;
 
         isDead = true;
+        GetHealth().isAlive = false;
         waitingToDie = true;
         deathTimer = 0f;
         SetState(EnemyState.Dead);
