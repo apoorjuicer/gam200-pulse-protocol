@@ -8,7 +8,6 @@ public class StageClearElement : Script
     // =========================
     public static bool IsCleared { get; private set; } = false;
 
-    // Function name you wanted
     public static void StageClear()
     {
         NavigationButtons.SetStageClearPaused(true);
