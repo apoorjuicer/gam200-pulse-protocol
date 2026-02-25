@@ -75,6 +75,7 @@ public class EnemyRhythmController : Script
 
     // === INTERNAL STATE ===
     private bool initialized = false;
+    private int initializedForEntityID = -1; // Guards against C# object reuse across sessions
     private int lastBeat = -1;
     private bool animPaused = false;
     private bool isDead = false;
@@ -107,12 +108,19 @@ public class EnemyRhythmController : Script
 
     public override void Update()
     {
+        // Detect if this C# object has been reused for a new entity 
+        if (initialized && entityID != initializedForEntityID)
+        {
+            Console.WriteLine($"[Enemy] Entity ID changed ({initializedForEntityID} -> {entityID}), re-initializing...");
+            initialized = false;
+        }
+
         if (!initialized)
         {
             Initialize();
             initialized = true;
             return;
-        }   
+        }
 
         if (!playerFound)
         {
@@ -154,8 +162,6 @@ public class EnemyRhythmController : Script
                     tf.IsVisible = false;
 
                     // Only notify the spawner once, AFTER the death animation has played out.
-                    // Previously this was called immediately in Die(), which caused the next
-                    // enemy to spawn before the animation finished.
                     if (!deathNotified)
                     {
                         deathNotified = true;
@@ -191,9 +197,9 @@ public class EnemyRhythmController : Script
     private void Initialize()
     {
         Instance = this;
+        initializedForEntityID = entityID; // Stamp the entity this init belongs to
 
-        // Full state reset — needed even on reused instances (engine may not recreate
-        // C# Script objects between play sessions, so stale isDead/etc. must be cleared).
+        // Full state reset
         isDead = false;
         waitingToDie = false;
         deathTimer = 0f;
@@ -217,9 +223,6 @@ public class EnemyRhythmController : Script
         TransformComponent tf = GetTransform();
 
         // Force the idle spritesheet to load regardless of the previous currentState.
-        // Without this, SetState(Idle) silently returns early (currentState already == Idle
-        // as the C# default), so the animation component keeps whatever sheet was active
-        // on the old entity (e.g. the hurt sheet from the previous enemy's death).
         currentState = EnemyState.Dead;
         SetState(EnemyState.Idle);
 
@@ -355,9 +358,6 @@ public class EnemyRhythmController : Script
 
     private void TrySetWeakness()
     {
-        //Console.WriteLine($"[Enemy:DEBUG] TrySetWeakness called. weaknessSet={weaknessSet}, retryCount={weaknessRetryCount}, ComboInstance null={ComboSystem.Instance == null}, sameInstance={ComboSystem.Instance == weaknessSetOnInstance}");
-
-        // If ComboSystem replaced its instance (new session), we must re-set on the new one.
         if (weaknessSet && ComboSystem.Instance != weaknessSetOnInstance)
         {
             weaknessSet = false;
@@ -522,9 +522,6 @@ public class EnemyRhythmController : Script
         deathNotified = false;
         SetState(EnemyState.Dead);
 
-        // NOTE: Instance is NOT cleared here any more. It is cleared after the 2.5s
-        // death animation finishes (in the Update timer block above), so the spawner
-        // and TurnManager both wait for the animation before continuing.
 
         Console.WriteLine("[Enemy] DEFEATED!");
         Console.WriteLine("==============================================");

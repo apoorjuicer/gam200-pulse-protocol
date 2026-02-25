@@ -1,7 +1,7 @@
 using System;
 using ScriptAPI;
 
-public enum PlayerAnimState { Idle1, Idle2, Attack, Hurt }
+public enum PlayerAnimState { /*Idle1,*/ Idle2, Attack, Hurt }
 
 public class PlayerAnimationController : Script
 {
@@ -13,7 +13,7 @@ public class PlayerAnimationController : Script
     // =========================
     // Sprite Sheet Paths
     // =========================
-    public string Idle1SpriteSheet = "../Characters/Dorian_Idle1_579x615";
+    // public string Idle1SpriteSheet = "../Characters/Dorian_Idle1_579x615";
     public string Idle2SpriteSheet = "../Characters/Dorian_Idle2_579x615";
     public string AttackSpriteSheet = "../Characters/Dorian_Sword_579x615";
     public string HurtSpriteSheet = "../Characters/Dorian_Hurt_579x615";
@@ -21,9 +21,9 @@ public class PlayerAnimationController : Script
     // =========================
     // Sprite Sheet Dimensions
     // =========================
-    public int Idle1Rows = 4;
-    public int Idle1Columns = 5;
-    public int Idle1Frames = 18;
+    // public int Idle1Rows = 4;
+    // public int Idle1Columns = 5;
+    // public int Idle1Frames = 18;
 
     public int Idle2Rows = 4;
     public int Idle2Columns = 4;
@@ -37,18 +37,18 @@ public class PlayerAnimationController : Script
     public int HurtColumns = 4;
     public int HurtFrames = 15;
 
-    public float AnimationSpeed = 12f;
+    public float AnimationSpeed = 30f;
 
     // =========================
     // Internal State
     // =========================
     private bool initialized = false;
-    private PlayerAnimState currentState = PlayerAnimState.Idle1;
+    private PlayerAnimState currentState = PlayerAnimState.Idle2;
 
     // Determines which idle to return to after Attack/Hurt finishes
     // false = Idle2 (default, unarmed stance)
     // true  = Idle1 (armed stance, after attacking)
-    private bool hasAttacked = false;
+    // private bool hasAttacked = false;
 
     // Timer for non-idle states to auto-return to idle
     private float stateTimer = 0f;
@@ -75,9 +75,9 @@ public class PlayerAnimationController : Script
             {
                 animPaused = true;
                 Animation anim = GetAnimation();
-                if (currentState == PlayerAnimState.Idle1)
-                    anim.SetAnimation(Idle1SpriteSheet, Idle1Rows, Idle1Columns, Idle1Frames, 0f);
-                else
+                // if (currentState == PlayerAnimState.Idle1)
+                //     anim.SetAnimation(Idle1SpriteSheet, Idle1Rows, Idle1Columns, Idle1Frames, 0f);
+                // else
                     anim.SetAnimation(Idle2SpriteSheet, Idle2Rows, Idle2Columns, Idle2Frames, 0f);
             }
             return;
@@ -111,7 +111,7 @@ public class PlayerAnimationController : Script
         Console.WriteLine($"[PlayerAnim] Entity ID: {entityID}");
 
         // Start in Idle2 (default unarmed stance)
-        hasAttacked = false;
+        // hasAttacked = false;
         animPaused = false;
         SetAnimState(PlayerAnimState.Idle2);
 
@@ -126,16 +126,16 @@ public class PlayerAnimationController : Script
     // Taking damage reverts to Idle2 (dropped guard)
     private void GoToIdle()
     {
-        if (hasAttacked)
-        {
-            SetAnimState(PlayerAnimState.Idle1);
-            Console.WriteLine("[PlayerAnim] -> Idle1 (armed stance)");
-        }
-        else
-        {
+        // if (hasAttacked)
+        // {
+        //     SetAnimState(PlayerAnimState.Idle1);
+        //     Console.WriteLine("[PlayerAnim] -> Idle1 (armed stance)");
+        // }
+        // else
+        // {
             SetAnimState(PlayerAnimState.Idle2);
             Console.WriteLine("[PlayerAnim] -> Idle2 (unarmed stance)");
-        }
+        // }
     }
 
     // =========================
@@ -152,7 +152,7 @@ public class PlayerAnimationController : Script
         }
 
         Console.WriteLine("[PlayerAnim] Playing Attack");
-        hasAttacked = true; // From now on, idle = Idle2
+        // hasAttacked = true; // From now on, idle = Idle2
         SetAnimState(PlayerAnimState.Attack);
 
         waitingForStateEnd = true;
@@ -163,7 +163,7 @@ public class PlayerAnimationController : Script
     public void PlayHurt()
     {
         Console.WriteLine("[PlayerAnim] Playing Hurt");
-        hasAttacked = false; // Revert to Idle1 after hurt
+        // hasAttacked = false; // Revert to Idle1 after hurt
         SetAnimState(PlayerAnimState.Hurt);
 
         waitingForStateEnd = true;
@@ -171,7 +171,7 @@ public class PlayerAnimationController : Script
         stateDuration = HurtFrames / AnimationSpeed;
     }
 
- 
+
     public void ForceIdle()
     {
         waitingForStateEnd = false;
@@ -183,13 +183,13 @@ public class PlayerAnimationController : Script
         return currentState;
     }
 
-   
-    private float GetIdleAnimSpeed(int frameCount)
-    {
-        if (Conductor.Instance == null || Conductor.Instance.SecondsPerBeat <= 0f)
-            return AnimationSpeed;
-        return frameCount / Conductor.Instance.SecondsPerBeat;
-    }
+
+    // private float GetIdleAnimSpeed(int frameCount)
+    // {
+    //     if (Conductor.Instance == null || Conductor.Instance.SecondsPerBeat <= 0f)
+    //         return AnimationSpeed;
+    //     return frameCount / Conductor.Instance.SecondsPerBeat;
+    // }
 
     // private float GetHurtAnimSpeed(int frameCount)
     // {
@@ -220,12 +220,12 @@ public class PlayerAnimationController : Script
 
         switch (newState)
         {
-            case PlayerAnimState.Idle1:
-                anim.SetAnimation(Idle1SpriteSheet, Idle1Rows, Idle1Columns, Idle1Frames, GetIdleAnimSpeed(Idle1Frames));
-                break;
+            // case PlayerAnimState.Idle1:
+            //     anim.SetAnimation(Idle1SpriteSheet, Idle1Rows, Idle1Columns, Idle1Frames, AnimationSpeed);
+            //     break;
 
             case PlayerAnimState.Idle2:
-                anim.SetAnimation(Idle2SpriteSheet, Idle2Rows, Idle2Columns, Idle2Frames, GetIdleAnimSpeed(Idle2Frames));
+                anim.SetAnimation(Idle2SpriteSheet, Idle2Rows, Idle2Columns, Idle2Frames, AnimationSpeed);
                 break;
 
             case PlayerAnimState.Attack:

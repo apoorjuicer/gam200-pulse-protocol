@@ -106,11 +106,10 @@ public class ComboDisplayManager : Script
             return;
         }
 
-        // Stagger fade out after reveal completes, before player input
+        // Stagger fade out after reveal completes — runs in parallel with player input
         if (isFadingOut)
         {
             HandleStaggerFade();
-            return;
         }
 
         // Player input phase: show keys on bottom row as they're pressed
