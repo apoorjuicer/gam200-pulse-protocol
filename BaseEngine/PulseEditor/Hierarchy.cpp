@@ -21,7 +21,7 @@
 #include "HierarchyHelpers.h"
 #include "Editor.h"   // selectedEntity, INVALID_ENTITY, entityDisplayOrder, Game/ECS helpers
 #include "TopBarPanel.h"
-
+#include <unordered_map>
 #include "CoreEngine/Prefab/PrefabInstance.h"
 #include "Components/ParentChild.h"
 
@@ -197,6 +197,48 @@ namespace PulseEditor
         s_renameState.justStartedRenaming = false;
     }
 
+    // =====================================================
+    // Prefab parent/child numbering (EDITOR-ONLY UI)
+    //  - First instance of a prefab in entityDisplayOrder => [P]
+    //  - Next ones => [C1], [C2], ...
+    // =====================================================
+    static std::unordered_map<Entity, int> s_prefabChildNumber; // 0 = parent, 1.. = child index
+
+    static void RebuildPrefabChildNumbers(const std::vector<Entity>& entityDisplayOrder)
+    {
+        s_prefabChildNumber.clear();
+
+        auto* coord = Coordinator::GetInstance();
+        if (!coord) return;
+
+        std::unordered_map<std::string, Entity> parentOfPrefab; // prefabName -> entity
+        std::unordered_map<std::string, int> childCount;        // prefabName -> count
+
+        for (Entity e : entityDisplayOrder)
+        {
+            if (!coord->HasComponent<PrefabInstance>(e))
+                continue;
+
+            const auto& inst = coord->GetComponent<PrefabInstance>(e);
+            if (inst.prefabName.empty())
+                continue;
+
+            auto it = parentOfPrefab.find(inst.prefabName);
+            if (it == parentOfPrefab.end())
+            {
+                // First instance encountered becomes the parent
+                parentOfPrefab[inst.prefabName] = e;
+                s_prefabChildNumber[e] = 0; // parent
+            }
+            else
+            {
+                // Subsequent ones are children, numbered from 1
+                int next = ++childCount[inst.prefabName];
+                s_prefabChildNumber[e] = next; // C1, C2...
+            }
+        }
+    }
+
     // -------------------------------------------------------------------------
     // RECURSIVE TREE NODE DRAWING
     // -------------------------------------------------------------------------
@@ -227,7 +269,20 @@ namespace PulseEditor
 
         if (isPrefabInstance)
         {
-            display = isPrefabLinked ? "[P] " + display : "[P-] " + display;
+            int num = 0;
+            auto it = s_prefabChildNumber.find(entity);
+            if (it != s_prefabChildNumber.end())
+                num = it->second;
+
+            std::string tag;
+            if (num == 0) tag = "[P]";
+            else tag = "[C" + std::to_string(num) + "]";
+
+            // Optional: preserve your linked/unlinked visual
+            if (!isPrefabLinked)
+                tag.insert(tag.size() - 1, "-"); // [P] -> [P-], [C1] -> [C1-]
+
+            display = tag + " " + display;
         }
 
         // Check if has children
@@ -648,6 +703,9 @@ namespace PulseEditor
                 entityDisplayOrder.push_back(entity);
             }
         }
+
+        // NEW: rebuild prefab parent/child numbering for UI tags
+        RebuildPrefabChildNumbers(entityDisplayOrder);
 
         // Display entities as tree view
         static int draggedIndex = -1;
