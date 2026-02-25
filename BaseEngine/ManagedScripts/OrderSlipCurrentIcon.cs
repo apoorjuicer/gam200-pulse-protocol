@@ -31,7 +31,6 @@ public class OrderSlipCurrentIcon : Script
         {
             tf.X = slotX;
             tf.Y = slotY;
-            tf.RotX = 0.0f;
             tf.ScaleX = ui.currentScale;
             tf.ScaleY = ui.currentScale;
 

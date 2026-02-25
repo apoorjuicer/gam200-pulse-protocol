@@ -12,10 +12,7 @@ public class OrderSlipUIController : Script
     //public float nextScale = 0.75f;   //NO SHIT IT DISAPEAR ITS 0.75
     public float currentScale = 200f;
     public float nextScale = 120f;
-    public float transitionDuration = 0.35f;    
     public float fadeDuration = 0.5f;
-    public float rotateDegrees = 90.0f;
-    public float arcHeight = 30.0f;
 
     // State
     // State
@@ -23,7 +20,6 @@ public class OrderSlipUIController : Script
     public EnemyIconType NextType { get; private set; } = EnemyIconType.None;
 
     public bool Transitioning { get; private set; } = false;
-    public float Move01 { get; private set; } = 0.0f;
     public float Fade01 { get; private set; } = 0.0f;
 
     public float CurrentFadeOut => 1.0f - Fade01;  // Current icon fades out
@@ -57,12 +53,8 @@ public class OrderSlipUIController : Script
         Fade01 = (fadeDuration <= 0.0001f) ? 1.0f : (Fade01 + dt / fadeDuration);
         if (Fade01 > 1.0f) Fade01 = 1.0f;
 
-        // Update movement progress
-        Move01 = (transitionDuration <= 0.0001f) ? 1.0f : (Move01 + dt / transitionDuration);
-        if (Move01 > 1.0f) Move01 = 1.0f;
-
-        // End transition when both animations complete
-        if (Move01 >= 1.0f && Fade01 >= 1.0f)
+        // End transition when fade completes
+        if (Fade01 >= 1.0f)
         {
             Transitioning = false;
             Console.WriteLine("[OrderSlipUI] Transition complete");
@@ -82,7 +74,6 @@ public class OrderSlipUIController : Script
         NextType = upcoming;
 
         Transitioning = false;
-        Move01 = 0.0f;
         Fade01 = 0.0f;
 
         Console.WriteLine($"[OrderSlipUI] Init Current={CurrentType}, Next={NextType}");
@@ -108,7 +99,6 @@ public class OrderSlipUIController : Script
 
         // Start transition
         Transitioning = true;
-        Move01 = 0.0f;
         Fade01 = 0.0f;
 
         Console.WriteLine($"[OrderSlipUI] Advance -> Current={CurrentType}, Next={NextType}");
@@ -134,12 +124,6 @@ public class OrderSlipUIController : Script
     {
         return hasCurrentSlot && hasNextSlot;
     }
-
-    // Easing function for smooth animation
-    public float EaseSmooth(float t) => t * t * (3f - 2f * t);
-
-    // Linear interpolation
-    public float Lerp(float a, float b, float t) => a + (b - a) * t;
 
     public string GetVibrantSprite(EnemyIconType type)
     {
