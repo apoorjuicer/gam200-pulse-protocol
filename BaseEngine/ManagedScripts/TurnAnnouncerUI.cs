@@ -3,7 +3,7 @@ using ScriptAPI;
 
 public class TurnAnnouncerUI : Script
 {
-    public static TurnAnnouncerUI Instance { get; private set; }
+    public static TurnAnnouncerUI? Instance { get; private set; }
 
     public float FontSize = 80f;
 
@@ -15,6 +15,9 @@ public class TurnAnnouncerUI : Script
 
     public override void Update()
     {
+        //yes it is
+        //Console.WriteLine("IS THIS EVEN WORKING?");
+
         if (!initialized)
         {
             Initialize();
@@ -29,7 +32,8 @@ public class TurnAnnouncerUI : Script
         // Only act on phase transitions
         if (phase == lastPhase)
             return;
-
+        var text = GetTextComponent();
+   
         lastPhase = phase;
         OnPhaseChanged(phase);
     }
@@ -44,7 +48,7 @@ public class TurnAnnouncerUI : Script
         var text = GetTextComponent();
         text.SetFontSize(FontSize);
         text.SetAlignment(1); // center
-        text.SetColor(1.0f, 1.0f, 1.0f); // white
+        text.SetColor(1.0f, 0.0f, 0.0f); // red
 
         Hide();
 
@@ -60,10 +64,10 @@ public class TurnAnnouncerUI : Script
         switch (phase)
         {
             case TurnPhase.EnemyDisplay:
-                Show("Enemy's Turn!");
+                ShowEnemy("Enemy's Turn!");
                 break;
             case TurnPhase.PlayerInput:
-                Show("Your Turn!");
+                ShowPlayer("Your Turn!");
                 break;
             default:
                 Hide();
@@ -74,11 +78,26 @@ public class TurnAnnouncerUI : Script
     // =========================
     // Show / Hide
     // =========================
-    private void Show(string message)
+    private void ShowPlayer(string message)
     {
         var text = GetTextComponent();
         text.SetText(message);
-        text.SetColor(1.0f, 1.0f, 1.0f); // always white
+       text.SetColor(0.1333f, 0.8275f, 0.9333f); 
+
+        text.SetVisible(true);
+        Console.WriteLine($"[TurnAnnouncerUI] >> {message}");
+    }
+
+    private void ShowEnemy(string message)
+    {
+        var text = GetTextComponent();
+        text.SetText(message);
+        // = (0.4863, 0.2275, 0.9294)
+        // = (0.4275, 0.1569, 0.8510)
+        // = (0.6549, 0.5451, 0.9804)
+        // = (0.7529, 0.1490, 0.8275)
+        text.SetColor(0.7529f, 0.5176f, 0.9882f); 
+
         text.SetVisible(true);
         Console.WriteLine($"[TurnAnnouncerUI] >> {message}");
     }

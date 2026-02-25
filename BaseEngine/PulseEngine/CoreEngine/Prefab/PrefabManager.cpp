@@ -379,7 +379,8 @@ void PrefabManager::UpdatePrefabInAllScenes(std::string const& prefabName)
     namespace fs = std::filesystem;
 
     // Scene directory - matches your SceneManager path
-    std::string sceneDirectory = "../../PulseEngine/JSON/";
+    //std::string sceneDirectory = "../../PulseEngine/JSON/";
+	std::filesystem::path sceneDirectory = assetRoot.parent_path() / "JSON";
 
     if (!fs::exists(sceneDirectory)) {
         std::cerr << "[PrefabManager] Scene directory not found: " << sceneDirectory << std::endl;

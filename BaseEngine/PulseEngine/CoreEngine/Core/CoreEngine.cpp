@@ -1500,20 +1500,105 @@ void CoreEngine::ToggleFullscreen()
 	SetFullscreen(!m_isFullscreen);
 }
 
+//std::filesystem::path CoreEngine::GetAssetRoot()
+//{
+//	// Find directory of PulseEngine.dll
+//	std::string runtimePath(MAX_PATH, '\0');
+//	HMODULE hEngine = GetModuleHandleA("PulseEngine.dll");
+//	if (!hEngine) return std::filesystem::current_path(); // fallback
+//
+//	GetModuleFileNameA(hEngine, runtimePath.data(), MAX_PATH);
+//	PathRemoveFileSpecA(runtimePath.data());
+//	runtimePath.resize(std::strlen(runtimePath.data()));
+//
+//	// If your Assets folder is next to the dll:
+//	// return std::filesystem::path(runtimePath) / "Assets";
+//
+//	// If Assets is inside BaseEngine/PulseEngine/Assets, adapt accordingly:
+//	return std::filesystem::path(runtimePath) / "Assets";
+//}
+
+static std::filesystem::path FindUpwardsForDir(
+	std::filesystem::path startDir,
+	const std::filesystem::path& relativeTarget,
+	int maxLevels = 12)
+{
+	namespace fs = std::filesystem;
+	fs::path cur = startDir;
+
+	for (int i = 0; i < maxLevels; ++i)
+	{
+		fs::path candidate = cur / relativeTarget;
+		if (fs::exists(candidate) && fs::is_directory(candidate))
+			return fs::canonical(candidate);
+
+		if (!cur.has_parent_path())
+			break;
+
+		cur = cur.parent_path();
+	}
+	return {};
+}
+
 std::filesystem::path CoreEngine::GetAssetRoot()
 {
+	namespace fs = std::filesystem;
+
 	// Find directory of PulseEngine.dll
 	std::string runtimePath(MAX_PATH, '\0');
 	HMODULE hEngine = GetModuleHandleA("PulseEngine.dll");
-	if (!hEngine) return std::filesystem::current_path(); // fallback
+	if (!hEngine)
+	{
+		std::cerr << "[CoreEngine] ERROR: PulseEngine.dll not loaded. "
+			"Falling back to current_path().\n";
+		return fs::current_path();
+	}
 
 	GetModuleFileNameA(hEngine, runtimePath.data(), MAX_PATH);
 	PathRemoveFileSpecA(runtimePath.data());
 	runtimePath.resize(std::strlen(runtimePath.data()));
+	fs::path dllDir = fs::path(runtimePath);
 
-	// If your Assets folder is next to the dll:
-	// return std::filesystem::path(runtimePath) / "Assets";
+	std::cout << "[CoreEngine] dllDir = " << dllDir << "\n";
 
-	// If Assets is inside BaseEngine/PulseEngine/Assets, adapt accordingly:
-	return std::filesystem::path(runtimePath) / "Assets";
+	// Walk upwards and search for the *source* Assets folder:
+	//   BaseEngine/PulseEngine/Assets
+	// while skipping build output:
+	//   BaseEngine/build/PulseEngine/Assets
+	fs::path cur = dllDir;
+	for (int i = 0; i < 30; ++i)
+	{
+		fs::path candidate = cur / "PulseEngine" / "Assets";
+		if (fs::exists(candidate) && fs::is_directory(candidate))
+		{
+			fs::path resolved = fs::weakly_canonical(candidate);
+			std::string s = resolved.string();
+
+			// Skip build output assets
+			const bool isBuild =
+				(s.find("\\build\\") != std::string::npos) ||
+				(s.find("/build/") != std::string::npos);
+
+			if (!isBuild)
+			{
+				std::cout << "[CoreEngine] AssetRoot resolved to: " << resolved << "\n";
+				return resolved;
+			}
+			else
+			{
+				std::cout << "[CoreEngine] Skipping build AssetRoot candidate: " << resolved << "\n";
+			}
+		}
+
+		if (!cur.has_parent_path())
+			break;
+
+		cur = cur.parent_path();
+	}
+
+	// Final fallback (DLL-local Assets). This is usually build output.
+	fs::path fallback = dllDir / "Assets";
+	std::cerr << "[CoreEngine] WARNING: Could not find source AssetRoot. "
+		"Using DLL-local Assets folder: " << fallback << "\n";
+	return fallback;
 }
