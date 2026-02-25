@@ -118,7 +118,7 @@ public class EnemySpawner : Script
             Console.WriteLine("[EnemySpawner] WARNING: Multiple spawners detected - replacing Instance");
 
         Instance = this;
-
+        StageClearElement.ResetStageClear();
 
         // WHY IS ALL THIS HARD CODED WHEN U HAVE A CONTAINER ALR??????
         Console.WriteLine("[EnemySpawner] Initialized");
