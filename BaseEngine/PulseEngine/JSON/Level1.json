@@ -698,7 +698,7 @@
                             1.0,
                             1.0
                         ],
-                        "visible": true,
+                        "visible": false,
                         "alignment": 1
                     }
                 }
@@ -4752,10 +4752,10 @@
                         "font_size": 150.0,
                         "color": [
                             1.0,
-                            0.0,
-                            0.0
+                            1.0,
+                            1.0
                         ],
-                        "visible": true,
+                        "visible": false,
                         "alignment": 1
                     }
                 }
