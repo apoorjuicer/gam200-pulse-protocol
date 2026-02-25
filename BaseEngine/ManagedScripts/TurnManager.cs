@@ -5,7 +5,7 @@ public enum TurnPhase
 {
     Countdown,      // First 4 beats - enemy idle
     EnemyDisplay,   // Next 4 beats - show combo, player locked
-    PlayerInput,    // 4 beats - player inputs combo
+    PlayerInput,    // 5 effective beats - player inputs combo
     Resolution      // Resolve success/failure
 }
 
@@ -21,7 +21,9 @@ public class TurnManager : Script
     // =========================
     public int CountdownBeats = 4;
     public int EnemyDisplayBeats = 4;
-    public int PlayerInputBeats = 5;
+    public int PlayerInputBeats = 6;  // 6 because StartPlayerInput() back-dates phaseStartBeat by -1,
+                                      // so beatsInPhase starts at 1 instead of 0.
+                                      // Effective beat slots = PlayerInputBeats - 1 = 5.
 
     // =========================
     // State
@@ -31,6 +33,7 @@ public class TurnManager : Script
     private int lastBeat = -1;
     private bool initialized = false;
     private bool gameStarted = false;
+    private bool prevGameReady = false; // used to detect new play sessions on reused script objects
 
     public bool IsPlayerTurn => currentPhase == TurnPhase.PlayerInput;
     public bool IsInputLocked => currentPhase != TurnPhase.PlayerInput;
@@ -40,6 +43,16 @@ public class TurnManager : Script
     // =========================
     public override void Update()
     {
+        // Session restart detection for reused script objects (engine does not always
+        // recreate C# Script instances on Stop→Play). GameStart.Ready flips from true
+        // (end of last session) to false (LevelCountdown resets it at start of new session).
+        // That flip means a new play session has begun and we must re-initialize.
+        if (initialized && prevGameReady && !GameStart.Ready)
+        {
+            Console.WriteLine("[TurnManager] New play session detected — resetting state");
+            initialized = false;
+        }
+        prevGameReady = GameStart.Ready;
 
         if (!initialized)
         {
