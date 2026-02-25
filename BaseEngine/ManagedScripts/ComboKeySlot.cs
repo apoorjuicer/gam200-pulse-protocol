@@ -3,9 +3,11 @@ using ScriptAPI;
 
 public class ComboKeySlot : Script
 {
+    // =========================
+    // Configuration
+    // =========================
     public int SlotIndex = 0;
 
-    // Sprite paths
     public string WSprite = "../../PulseEngine/Assets/Textures/UI/W.png";
     public string ASprite = "../../PulseEngine/Assets/Textures/UI/A.png";
     public string SSprite = "../../PulseEngine/Assets/Textures/UI/S.png";
@@ -13,11 +15,17 @@ public class ComboKeySlot : Script
 
     public float DisplayDuration = 0.5f;
 
-    // State
+    // =========================
+    // Internal State
+    // =========================
     private float displayTimer = 0f;
     private bool isShowing = false;
     private bool hasRegistered = false;
+    private bool IsEnemySlot = false;
 
+    // =========================
+    // Update Loop
+    // =========================
     public override void Update()
     {
         if (hasRegistered && !ComboDisplayManager.IsSlotRegistered(SlotIndex, this))
@@ -28,92 +36,143 @@ public class ComboKeySlot : Script
         if (!hasRegistered)
         {
             var sprite = GetSprite();
-           
+
             if (!sprite.HasSprite())
-            {
-              return;
-            }
-            
-            string texturePath = sprite.Texture;
-            
-            if (string.IsNullOrEmpty(texturePath))
-            {
                 return;
-            }
-            
+
+            string texturePath = sprite.Texture;
+
+            if (string.IsNullOrEmpty(texturePath))
+                return;
+
+            // =========================
+            // Auto-Detect Slot Index and Row
+            // =========================
             string texturePathLower = texturePath.ToLower();
-            
-            if (texturePathLower.Contains("w.png"))
-            {
-                SlotIndex = 0;
-            }
-            else if (texturePathLower.Contains("a.png"))
-            {
-                SlotIndex = 1;
-            }
-            else if (texturePathLower.Contains("s.png"))
-            {
-                SlotIndex = 2;
-            }
-            else if (texturePathLower.Contains("d.png"))
-            {
-                SlotIndex = 3;
-            }
+
+            // Isolate just the filename (e.g. "w.png" or "ekeyw.png")
+            string fileName = System.IO.Path.GetFileName(texturePathLower);
+
+            // Detect which row — must check enemy BEFORE single letter
+            // so "ekeyw.png" doesn't also match the "w" check below
+            if (fileName == "ekeyw.png") { IsEnemySlot = true; SlotIndex = 0; }
+            else if (fileName == "ekeya.png") { IsEnemySlot = true; SlotIndex = 1; }
+            else if (fileName == "ekeys.png") { IsEnemySlot = true; SlotIndex = 2; }
+            else if (fileName == "ekeyd.png") { IsEnemySlot = true; SlotIndex = 3; }
+            else if (fileName == "w.png") { IsEnemySlot = false; SlotIndex = 0; }
+            else if (fileName == "a.png") { IsEnemySlot = false; SlotIndex = 1; }
+            else if (fileName == "s.png") { IsEnemySlot = false; SlotIndex = 2; }
+            else if (fileName == "d.png") { IsEnemySlot = false; SlotIndex = 3; }
             else
             {
-                Console.WriteLine($"[ComboKeySlot] ⚠️ Could not detect SlotIndex from '{texturePath}'");
-                SlotIndex = 0; // Default fallback
+                Console.WriteLine($"[ComboKeySlot] ⚠️ Could not detect slot from '{fileName}'");
+                IsEnemySlot = false;
+                SlotIndex = 0;
             }
-            
-            // Register with manager
+
+            // Register with manager (routes to enemy or player dict based on IsEnemySlot)
             ComboDisplayManager.RegisterKeySlot(SlotIndex, this);
 
             // Hide initially
-            Hide();
+            HideInstant();
 
-            // Mark as registered
             hasRegistered = true;
-            Console.WriteLine($"[ComboKeySlot] ✓ Slot {SlotIndex} registered");
+            Console.WriteLine($"[ComboKeySlot] ✓ Slot {SlotIndex} registered as {(IsEnemySlot ? "Enemy" : "Player")} slot");
         }
 
-        // Update display timer
+        // =========================
+        // Display Timer
+        // =========================
         if (isShowing)
         {
             displayTimer -= Time.DeltaTime;
 
             if (displayTimer <= 0)
-            {
                 Hide();
-            }
         }
     }
 
+    // =========================
+    // Display Control
+    // =========================
+
+    // Shows key with auto-hide timer — used during player input phase
     public void ShowKey(char key)
     {
-        // Get sprite component
         var sprite = GetSprite();
-        
+
         if (!sprite.HasSprite())
         {
             Console.WriteLine("[ComboKeySlot] ERROR: No sprite component!");
             return;
         }
 
-        // Set the appropriate texture based on key
-        string texturePath = GetSpriteForKey(key);
-        sprite.Texture = texturePath;
+        sprite.Texture = GetSpriteForKey(key);
 
-        // Make visible
+        var fade = GetFade();
+        fade.SetAlpha(1.0f);
+
         var transform = GetTransform();
         transform.IsVisible = true;
 
-        // Start timer
         isShowing = true;
         displayTimer = DisplayDuration;
 
-        Console.WriteLine($"[ComboKeySlot] Slot {SlotIndex} showing {key}");
+        Console.WriteLine($"[ComboKeySlot] Slot {SlotIndex} ({(IsEnemySlot ? "Enemy" : "Player")}) showing {key}");
     }
 
+    // Shows key and stays visible — used during beat reveal sequence
+    public void ShowKeyPersistent(char key)
+    {
+        var sprite = GetSprite();
+
+        if (!sprite.HasSprite())
+        {
+            Console.WriteLine("[ComboKeySlot] ERROR: No sprite component!");
+            return;
+        }
+
+        sprite.Texture = GetSpriteForKey(key);
+
+        // Reset alpha to full in case it was previously faded
+        var fade = GetFade();
+        fade.SetAlpha(1.0f);
+
+        var transform = GetTransform();
+        transform.IsVisible = true;
+
+        // No timer — stays visible until explicitly hidden
+        isShowing = false;
+        displayTimer = 0f;
+
+        Console.WriteLine($"[ComboKeySlot] Slot {SlotIndex} ({(IsEnemySlot ? "Enemy" : "Player")}) showing {key} (persistent)");
+    }
+
+    // Fades out over duration then hides via display timer
+    public void FadeOutAndHide(float duration)
+    {
+        var fade = GetFade();
+        fade.FadeOut(duration);
+
+        // Timer matches fade duration so Hide() fires once fade completes
+        isShowing = true;
+        displayTimer = duration;
+
+        Console.WriteLine($"[ComboKeySlot] Slot {SlotIndex} ({(IsEnemySlot ? "Enemy" : "Player")}) fading out over {duration}s");
+    }
+
+    // Hides immediately and resets alpha — used at start of reveal
+    public void HideInstant()
+    {
+        var fade = GetFade();
+        fade.SetAlpha(1.0f);
+
+        var transform = GetTransform();
+        transform.IsVisible = false;
+        isShowing = false;
+    }
+
+    // Hides without alpha reset — used by display timer expiry
     public void Hide()
     {
         var transform = GetTransform();
@@ -121,6 +180,11 @@ public class ComboKeySlot : Script
         isShowing = false;
     }
 
+    // =========================
+    // Helper Funcs
+    // =========================
+    public bool GetIsEnemySlot() => IsEnemySlot;
+    
     private string GetSpriteForKey(char key)
     {
         switch (key)
