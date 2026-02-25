@@ -150,6 +150,9 @@ public class InputBridge : Script
                 {
                     Console.WriteLine("[InputBridge] SUCCESS! Applying damage immediately.");
                     EnemyRhythmController.Instance?.TakeDamage(10f);
+                    
+                    // I forgot to add the attack anim call erm 
+                    PlayerAnimationController.Instance?.PlayAttack();
                 }
                 else
                 {

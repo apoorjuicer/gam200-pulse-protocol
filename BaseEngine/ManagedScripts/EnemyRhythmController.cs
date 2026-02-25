@@ -76,6 +76,7 @@ public class EnemyRhythmController : Script
     // === INTERNAL STATE ===
     private bool initialized = false;
     private int lastBeat = -1;
+    private bool animPaused = false;
     private bool isDead = false;
     public bool IsDying => isDead;  // True from Die() until Instance is cleared after animation
     private EnemyState currentState = EnemyState.Idle;
@@ -122,6 +123,24 @@ public class EnemyRhythmController : Script
         {
             TrySetWeakness();
             weaknessRetryCount++;
+        }
+
+        // Freeze animation during countdown; resume when GO! fires
+        if (!GameStart.Ready)
+        {
+            if (!animPaused)
+            {
+                animPaused = true;
+                Animation anim = GetAnimation();
+                anim.SetAnimation(IdleSpriteSheet, IdleRows, IdleColumns, IdleFrames, 0f);
+            }
+            return;
+        }
+        if (animPaused)
+        {
+            animPaused = false;
+            Animation anim = GetAnimation();
+            anim.SetAnimation(IdleSpriteSheet, IdleRows, IdleColumns, IdleFrames, AnimationSpeed);
         }
 
         if (isDead)
@@ -186,6 +205,7 @@ public class EnemyRhythmController : Script
         playerFound = false;
         playerEntityID = -1;
         lastBeat = -1;
+        animPaused = false;
 
         // Reset weakness retry state so each new enemy gets a fresh attempt
         weaknessSet = false;
