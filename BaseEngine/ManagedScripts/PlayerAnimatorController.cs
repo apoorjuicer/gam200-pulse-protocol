@@ -37,7 +37,7 @@ public class PlayerAnimationController : Script
     public int HurtColumns = 4;
     public int HurtFrames = 15;
 
-    public float AnimationSpeed = 24f;
+    public float AnimationSpeed = 12f;
 
     // =========================
     // Internal State
@@ -54,6 +54,7 @@ public class PlayerAnimationController : Script
     private float stateTimer = 0f;
     private float stateDuration = 0f;
     private bool waitingForStateEnd = false;
+    private bool animPaused = false;
 
     public override void Update()
     {
@@ -66,6 +67,27 @@ public class PlayerAnimationController : Script
 
         if (Application.IsPaused())
             return;
+
+        // Freeze animations during countdown; resume when GO! fires
+        if (!GameStart.Ready)
+        {
+            if (!animPaused)
+            {
+                animPaused = true;
+                Animation anim = GetAnimation();
+                if (currentState == PlayerAnimState.Idle1)
+                    anim.SetAnimation(Idle1SpriteSheet, Idle1Rows, Idle1Columns, Idle1Frames, 0f);
+                else
+                    anim.SetAnimation(Idle2SpriteSheet, Idle2Rows, Idle2Columns, Idle2Frames, 0f);
+            }
+            return;
+        }
+        if (animPaused)
+        {
+            animPaused = false;
+            currentState = PlayerAnimState.Attack; // bypass same-state guard in SetAnimState
+            GoToIdle();
+        }
 
         // Handle timed states (Attack, Hurt) returning to Idle
         if (waitingForStateEnd)
@@ -90,6 +112,7 @@ public class PlayerAnimationController : Script
 
         // Start in Idle2 (default unarmed stance)
         hasAttacked = false;
+        animPaused = false;
         SetAnimState(PlayerAnimState.Idle2);
 
         Console.WriteLine("[PlayerAnim] Initialized - Idle2 (unarmed)");
@@ -160,6 +183,28 @@ public class PlayerAnimationController : Script
         return currentState;
     }
 
+   
+    private float GetIdleAnimSpeed(int frameCount)
+    {
+        if (Conductor.Instance == null || Conductor.Instance.SecondsPerBeat <= 0f)
+            return AnimationSpeed;
+        return frameCount / Conductor.Instance.SecondsPerBeat;
+    }
+
+    private float GetHurtAnimSpeed(int frameCount)
+    {
+        if (Conductor.Instance == null || Conductor.Instance.SecondsPerBeat <= 0f)
+            return AnimationSpeed;
+        return frameCount / Conductor.Instance.SecondsPerBeat;
+    }
+
+    private float GetAttackAnimSpeed(int frameCount)
+    {
+        if (Conductor.Instance == null || Conductor.Instance.SecondsPerBeat <= 0f)
+            return AnimationSpeed;
+        return frameCount / Conductor.Instance.SecondsPerBeat;
+    }
+
     // =========================
     // Internal: Set Animation
     // =========================
@@ -176,19 +221,19 @@ public class PlayerAnimationController : Script
         switch (newState)
         {
             case PlayerAnimState.Idle1:
-                anim.SetAnimation(Idle1SpriteSheet, Idle1Rows, Idle1Columns, Idle1Frames, AnimationSpeed);
+                anim.SetAnimation(Idle1SpriteSheet, Idle1Rows, Idle1Columns, Idle1Frames, GetIdleAnimSpeed(Idle1Frames));
                 break;
 
             case PlayerAnimState.Idle2:
-                anim.SetAnimation(Idle2SpriteSheet, Idle2Rows, Idle2Columns, Idle2Frames, AnimationSpeed);
+                anim.SetAnimation(Idle2SpriteSheet, Idle2Rows, Idle2Columns, Idle2Frames, GetIdleAnimSpeed(Idle2Frames));
                 break;
 
             case PlayerAnimState.Attack:
-                anim.SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, AnimationSpeed);
+                anim.SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, GetAttackAnimSpeed(AnimationSpeed));
                 break;
 
             case PlayerAnimState.Hurt:
-                anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, AnimationSpeed);
+                anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, GetHurtAnimSpeed(AnimationSpeed));
                 break;
         }
     }

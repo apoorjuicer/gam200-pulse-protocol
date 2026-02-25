@@ -155,6 +155,10 @@ public class TurnManager : Script
         lastBeat = -1;
         gameStarted = false;
 
+        // Clear ComboSystem state so lastInputBeat (from a previous session) can't
+        // accidentally match a beat in the new session and block the first key press.
+        ComboSystem.Instance?.ResetCombo();
+
         Console.WriteLine("[TurnManager] Initializing...");
 
         if (Conductor.Instance != null)
