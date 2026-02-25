@@ -20,6 +20,11 @@ public class ComboKeySlot : Script
 
     public override void Update()
     {
+        if (hasRegistered && !ComboDisplayManager.IsSlotRegistered(SlotIndex, this))
+        {
+            hasRegistered = false;
+        }
+
         if (!hasRegistered)
         {
             var sprite = GetSprite();

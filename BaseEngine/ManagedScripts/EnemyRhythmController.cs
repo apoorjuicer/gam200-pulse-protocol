@@ -335,11 +335,14 @@ public class EnemyRhythmController : Script
 
     private void TrySetWeakness()
     {
+        //Console.WriteLine($"[Enemy:DEBUG] TrySetWeakness called. weaknessSet={weaknessSet}, retryCount={weaknessRetryCount}, ComboInstance null={ComboSystem.Instance == null}, sameInstance={ComboSystem.Instance == weaknessSetOnInstance}");
+
         // If ComboSystem replaced its instance (new session), we must re-set on the new one.
         if (weaknessSet && ComboSystem.Instance != weaknessSetOnInstance)
         {
             weaknessSet = false;
             weaknessSetOnInstance = null;
+            weaknessRetryCount = 0;
         }
 
         if (weaknessSet) return;

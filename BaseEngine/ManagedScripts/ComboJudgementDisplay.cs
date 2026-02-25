@@ -17,6 +17,11 @@ public class ComboJudgementDisplay : Script
 
     public override void Update()
     {
+        if (hasRegistered && !ComboDisplayManager.IsJudgementRegistered(this))
+        {
+            hasRegistered = false;
+        }
+
         if (!hasRegistered)
         {
             ComboDisplayManager.RegisterJudgement(this);

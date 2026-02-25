@@ -59,32 +59,64 @@ public class ComboSystem : Script
     // =========================
     public override void Update()
     {
-        // ---- Singleton setup with proper cleanup on scene reload ----
-        if (Instance != null && Instance != this)
+        // // ---- Singleton setup with proper cleanup on scene reload ----
+        // if (Instance != null && Instance != this)
+        // {
+        //     // A stale instance from a previous scene load exists — replace it.
+        //     Console.WriteLine("[ComboSystem] Replacing stale singleton instance");
+        //     Instance = this;
+        // }
+        // else if (Instance == null)
+        // {
+        //     Instance = this;
+        //     Console.WriteLine("[ComboSystem] Singleton instance set");
+        // }
+
+        // // First-time initialization
+        // if (!initialized)
+        // {
+        //     Instance = this;
+        //     // Do NOT call SetEnemyWeakness here — EnemyRhythmController will set the
+        //     // real weakness once it initialises. Calling it here with a hardcoded default
+        //     // caused a session-2 race: EnemyRhythmController set weakness on the STALE
+        //     // ComboSystem instance from session 1, then this Init ran on the NEW instance
+        //     // overwriting it back to "WASD", breaking combo matching.
+        //     initialized = true;
+        //     Console.WriteLine("[ComboSystem] Initialized");
+        //     return;
+        // }
+
+        Console.WriteLine($"[CS:DEBUG] initialized={initialized}, Instance==this:{Instance == this}, weakness='{currentEnemyWeakness}'");
+
+        if (Instance != null && Instance != this && !initialized)
         {
-            // A stale instance from a previous scene load exists — replace it.
-            Console.WriteLine("[ComboSystem] Replacing stale singleton instance");
+            // Copy weakness from old instance before taking over
+            string preservedWeakness = Instance.currentEnemyWeakness;
             Instance = this;
+            if (!string.IsNullOrEmpty(preservedWeakness))
+            {
+                currentEnemyWeakness = preservedWeakness;
+                maxComboLength = preservedWeakness.Length;
+                Console.WriteLine($"[ComboSystem] Preserved weakness from old instance: {preservedWeakness}");
+            }
         }
-        else if (Instance == null)
+
+        if (Instance == null)
         {
             Instance = this;
             Console.WriteLine("[ComboSystem] Singleton instance set");
         }
 
-        // First-time initialization
         if (!initialized)
         {
             Instance = this;
-            // Do NOT call SetEnemyWeakness here — EnemyRhythmController will set the
-            // real weakness once it initialises. Calling it here with a hardcoded default
-            // caused a session-2 race: EnemyRhythmController set weakness on the STALE
-            // ComboSystem instance from session 1, then this Init ran on the NEW instance
-            // overwriting it back to "WASD", breaking combo matching.
             initialized = true;
             Console.WriteLine("[ComboSystem] Initialized");
             return;
         }
+
+        if (Instance != this)
+            return;
 
         if (Conductor.Instance == null)
             return;

@@ -91,15 +91,19 @@ public class ComboDisplayManager : Script
     // =========================
     private void Initialize()
     {
-        if (Instance != null && Instance != this)
-        {
-            Console.WriteLine("[ComboDisplayManager] Replacing stale singleton, clearing registrations");
-            keySlotScripts.Clear();
-            judgementScript = null;
-        }
-
         Instance = this;
         lastComboProgress = 0;
+
+        // if (Instance != null && Instance != this)
+        // {
+        //     Console.WriteLine("[ComboDisplayManager] Replacing stale singleton, clearing registrations");
+        //     keySlotScripts.Clear();
+        //     judgementScript = null;
+        // }
+
+        // Always clear — stale static refs from previous scene load will break registration since all IDs will get refreshed
+        keySlotScripts.Clear();
+        judgementScript = null;
 
         Console.WriteLine("[ComboDisplayManager] ========================================");
         Console.WriteLine("[ComboDisplayManager] Manager Initialized");
@@ -107,6 +111,19 @@ public class ComboDisplayManager : Script
         Console.WriteLine("[ComboDisplayManager] ========================================");
 
         initialized = true;
+    }
+
+    // =========================
+    // Helper Funcs
+    // =========================
+    public static bool IsSlotRegistered(int slotIndex, ComboKeySlot slot)
+    {
+        return keySlotScripts.ContainsKey(slotIndex) && keySlotScripts[slotIndex] == slot;
+    }
+
+    public static bool IsJudgementRegistered(ComboJudgementDisplay script)
+    {
+        return judgementScript == script;
     }
 
     // =========================
