@@ -199,19 +199,16 @@ void AudioManager::Initialize()
 
 void AudioManager::Update()
 {
-   // std::cout << "Processing AudioManager Update\n";
-    if (!mSystem)
-        return;
-    // ecs, audio component
-    // Audio Component -> Audio Source
-    if (!Engine || !Engine->IsPlaying()) {
-        if (!Engine || !Engine->IsPlaying()) return;
-    }
-    else {
-        ProcessAudioSources(); // 
-        mSystem->update();
-    }
+    if (!mSystem) return;
 
+    // Always update FMOD so UI SFX / one-shot playSound works even when paused
+    mSystem->update();
+
+    // Only process AudioSource ECS components when actually playing
+    if (Engine && Engine->IsPlaying())
+    {
+        ProcessAudioSources();
+    }
 }
 
 void AudioManager::Shutdown()
@@ -425,6 +422,12 @@ bool AudioManager::IsBGMPlaying(bool *outPlaying) const
         *outPlaying = playing;
     }
     return playing;
+}
+
+void AudioManager::SetMusicPaused(bool paused)
+{
+    if (mMusicGroup)
+        mMusicGroup->setPaused(paused);
 }
 
 // pause
