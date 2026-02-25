@@ -118,8 +118,20 @@ public class CutscenePanel : Script
     // =========================
     private void Initialize()
     {
+        // reset the count back 2 0 if u finish the cutscene. Pressing space also make it true soooooo, yeah das all folks :>
+        if (sharedCutsceneFinished)
+        {
+            sharedInitCount = 0;
+            sharedCutsceneFinished = false;
+        }
+
+        //Console.WriteLine($"[DAS PRETTY GAY IF U ASK ME] sharedInitCount: {sharedInitCount}, sharedCutsceneFinished: {sharedCutsceneFinished}\n\n\n\n\n\n\n");
+
         myPanelIndex = sharedInitCount;
         sharedInitCount++;
+
+        //Console.WriteLine($"[PEEPEEPOOPOO] Panel: {myPanelIndex} | Pair: {myPanelIndex / 2}\n\n\n\n\n\n");
+
 
         // Pair info
         myPairIndex = myPanelIndex / 2;
