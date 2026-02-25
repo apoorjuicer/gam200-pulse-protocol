@@ -215,7 +215,7 @@ namespace ScriptAPI
                 // Clear all the script for this entity
                 entityScripts->Clear();
 
-                System::Console::WriteLine("1 Script cleared!\n");
+                //System::Console::WriteLine("1 Script cleared!\n");
             }
         }
 

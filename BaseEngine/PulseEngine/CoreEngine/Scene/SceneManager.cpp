@@ -506,8 +506,8 @@ void SceneManager::UnloadCurrentScene()
 
 	auto* g_coordinator = Coordinator::GetInstance();
 #ifdef _DEBUG
-	std::cout << "[SceneManager::UnloadCurrentScene] Got coordinator: " << (g_coordinator ? "YES" : "NO") << std::endl;
-	std::cout << "[SceneManager::UnloadCurrentScene] SceneEntityList size: " << SceneEntityList.size() << std::endl;
+	//std::cout << "[SceneManager::UnloadCurrentScene] Got coordinator: " << (g_coordinator ? "YES" : "NO") << std::endl;
+	//std::cout << "[SceneManager::UnloadCurrentScene] SceneEntityList size: " << SceneEntityList.size() << std::endl;
 #endif
 
 	//// Call Exit() on all scripts BEFORE destroying entities
@@ -858,9 +858,9 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 							g_coordinator->GetComponent<Name>(entity).name : "Unknown";
 						std::string parentName = g_coordinator->HasComponent<Name>(p.parent) ?
 							g_coordinator->GetComponent<Name>(p.parent).name : "Unknown";
-						std::cout << "[LOAD] " << childName << " (Entity " << entity
+						/*std::cout << "[LOAD] " << childName << " (Entity " << entity
 							<< ") parent index " << parentIndex << " -> " << parentName
-							<< " (Entity " << p.parent << ")" << std::endl;
+							<< " (Entity " << p.parent << ")" << std::endl;*/
 #endif
 					}
 				}
@@ -878,7 +878,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 #ifdef _DEBUG
 					std::string parentName = g_coordinator->HasComponent<Name>(entity) ?
 						g_coordinator->GetComponent<Name>(entity).name : "Unknown";
-					std::cout << "[LOAD] " << parentName << " (Entity " << entity << ") children: ";
+					/*std::cout << "[LOAD] " << parentName << " (Entity " << entity << ") children: ";*/
 #endif
 
 					for (rapidjson::SizeType k = 0; k < childArray.Size(); ++k)
@@ -893,15 +893,15 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 #ifdef _DEBUG
 								std::string childName = g_coordinator->HasComponent<Name>(SceneEntityList[childIndex]) ?
 									g_coordinator->GetComponent<Name>(SceneEntityList[childIndex]).name : "Unknown";
-								std::cout << childName << " (index " << childIndex << " -> Entity "
-									<< SceneEntityList[childIndex] << "), ";
+								/*std::cout << childName << " (index " << childIndex << " -> Entity "
+									<< SceneEntityList[childIndex] << "), ";*/
 #endif
 							}
 						}
 					}
 
 #ifdef _DEBUG
-					std::cout << std::endl;
+					/*std::cout << std::endl;*/
 #endif
 
 					if (!c.children.empty())
@@ -917,7 +917,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	// DEBUG: Print loaded parent-child relationships
 	// ═══════════════════════════════════════════════════════════════════════════
 #ifdef _DEBUG
-	std::cout << "\n[SceneManager] === Parent/Children Debug ===" << std::endl;
+	/*std::cout << "\n[SceneManager] === Parent/Children Debug ===" << std::endl;*/
 	for (Entity e : SceneEntityList)
 	{
 		std::string name = "Unknown";
@@ -927,7 +927,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 		bool hasParent = g_coordinator->HasComponent<Parent>(e);
 		bool hasChildren = g_coordinator->HasComponent<Children>(e);
 
-		std::cout << "Entity " << e << " (" << name << "): ";
+		/*std::cout << "Entity " << e << " (" << name << "): ";*/
 
 		if (hasParent)
 		{
@@ -935,29 +935,29 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			std::string parentName = "Unknown";
 			if (g_coordinator->HasComponent<Name>(parent))
 				parentName = g_coordinator->GetComponent<Name>(parent).name;
-			std::cout << "Parent=" << parent << " (" << parentName << ") ";
+			/*std::cout << "Parent=" << parent << " (" << parentName << ") ";*/
 		}
 
 		if (hasChildren)
 		{
 			auto& children = g_coordinator->GetComponent<Children>(e).children;
-			std::cout << "Children=[";
+			/*std::cout << "Children=[";*/
 			for (Entity c : children)
 			{
 				std::string childName = "Unknown";
 				if (g_coordinator->HasComponent<Name>(c))
 					childName = g_coordinator->GetComponent<Name>(c).name;
-				std::cout << c << " (" << childName << "), ";
+				/*std::cout << c << " (" << childName << "), ";*/
 			}
-			std::cout << "]";
+			/*std::cout << "]";*/
 		}
 
-		if (!hasParent && !hasChildren)
-			std::cout << "(no parent/children)";
+		//if (!hasParent && !hasChildren)
+		//	std::cout << "(no parent/children)";
 
-		std::cout << std::endl;
+		/*std::cout << std::endl;*/
 	}
-	std::cout << "==========================================\n" << std::endl;
+	/*std::cout << "==========================================\n" << std::endl;*/
 #endif
 
 
@@ -972,8 +972,8 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	);
 
 #ifdef _DEBUG
-	std::cout << "[SceneManager] addScriptFunc = " << (addScriptFunc ? "FOUND" : "NULL") << "\n";
-	std::cout << "[SceneManager] SceneEntityList.size() = " << SceneEntityList.size() << "\n";
+	//std::cout << "[SceneManager] addScriptFunc = " << (addScriptFunc ? "FOUND" : "NULL") << "\n";
+	//std::cout << "[SceneManager] SceneEntityList.size() = " << SceneEntityList.size() << "\n";
 #endif
 
 	/*for (Entity entity : SceneEntityList)
@@ -1003,26 +1003,26 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 		for (Entity entity : SceneEntityList)
 		{
-			std::cout << "[SceneManager] Checking entity " << entity << "\n";
+			/*std::cout << "[SceneManager] Checking entity " << entity << "\n";*/
 
 			if (g_coordinator->HasComponent<LogicComponent>(entity))
 			{
 				auto& logic = g_coordinator->GetComponent<LogicComponent>(entity);
-				std::cout << "  -> Has LogicComponent\n";
-				std::cout << "  -> ScriptName.size() = " << logic.ScriptName.size() << "\n";
+				/*std::cout << "  -> Has LogicComponent\n";
+				std::cout << "  -> ScriptName.size() = " << logic.ScriptName.size() << "\n";*/
 
 				for (size_t i = 0; i < logic.ScriptName.size(); ++i)
 				{
 					const auto& scriptName = logic.ScriptName[i];
-					std::cout << "  -> ScriptName[" << i << "] = '" << scriptName << "'\n";
+					/*std::cout << "  -> ScriptName[" << i << "] = '" << scriptName << "'\n";*/
 
 					if (!scriptName.empty())
 					{
-						std::cout << "  -> Calling AddScriptViaName(" << entity << ", '" << scriptName << "')\n";
+						/*std::cout << "  -> Calling AddScriptViaName(" << entity << ", '" << scriptName << "')\n";*/
 
 						bool success = addScriptFunc(entity, scriptName.c_str());
 
-						std::cout << "  -> Result: " << (success ? "SUCCESS" : "FAILED") << "\n";
+						/*std::cout << "  -> Result: " << (success ? "SUCCESS" : "FAILED") << "\n";*/
 
 						if (success)
 						{
@@ -1041,7 +1041,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 			}
 			else
 			{
-				std::cout << "  -> No LogicComponent\n";
+				//std::cout << "  -> No LogicComponent\n";
 			}
 		}
 
