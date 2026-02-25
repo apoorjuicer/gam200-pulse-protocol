@@ -63,7 +63,8 @@ public class TurnManager : Script
         if (!gameStarted)
         {
             gameStarted = true;
-            phaseStartBeat = currentBeat;
+            StartEnemyDisplay();
+            return;
         }
 
         lastBeat = currentBeat;

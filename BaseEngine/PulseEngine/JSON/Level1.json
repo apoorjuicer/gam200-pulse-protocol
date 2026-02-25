@@ -615,8 +615,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 17.23040771484375,
-                            "y": -98.46154022216797
+                            "x": 0.0,
+                            "y": 320.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -626,7 +626,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -692,13 +692,13 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "font_size": 97.0,
+                        "font_size": 150.0,
                         "color": [
                             1.0,
-                            0.6470587849617004,
-                            0.0
+                            1.0,
+                            1.0
                         ],
-                        "visible": false,
+                        "visible": true,
                         "alignment": 1
                     }
                 }
@@ -1386,7 +1386,7 @@
                     "transform": {
                         "position": {
                             "x": 977.0,
-                            "y": -299.010
+                            "y": -299.010009765625
                         },
                         "scale": {
                             "x": 350.0,
@@ -4691,7 +4691,7 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": 220.0
+                            "y": 320.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -4743,19 +4743,19 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "",
+                        "text": "POS",
                         "font_id": "",
                         "offset": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "font_size": 80.0,
+                        "font_size": 150.0,
                         "color": [
                             1.0,
-                            1.0,
-                            1.0
+                            0.0,
+                            0.0
                         ],
-                        "visible": false,
+                        "visible": true,
                         "alignment": 1
                     }
                 }

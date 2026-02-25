@@ -31,6 +31,7 @@ public class LevelCountdown : Script
             // {
             text.SetVisible(true);
             text.SetText("3");
+            text.SetColor(1f, 0.3f, 0.3f);
            // }
 
             t = 0f;
@@ -54,10 +55,14 @@ public class LevelCountdown : Script
             Console.WriteLine("TEXT VISBILE OR NOT : " + text.IsVisible());
             Console.WriteLine("TEXT data  : " + text.GetText());
             text.SetText(step.ToString());
+            if (step == 3) text.SetColor(1f, 0.3f, 0.3f); // red
+            else if (step == 2) text.SetColor(1f, 0.6f, 0.2f); // orange
+            else if (step == 1) text.SetColor(1f, 1f, 0.2f);   // yellow
         }
         else if (step == 0)
         {
-             text.SetText("GO!");
+            text.SetText("GO!");
+            text.SetColor(0.3f, 1f, 0.3f); // green
         }
         else
         {
