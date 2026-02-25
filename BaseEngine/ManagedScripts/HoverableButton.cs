@@ -30,6 +30,7 @@ public class NavigationButtons : Script
     public static bool ShowPauseOverlay = false;
     public static bool ShowHowToPlayOverlay = false;
     private static bool openedSettingsFromPause  = false;
+    private static bool stageClearPaused = false;
 
     // === SETTINGS OVERLAY (inside MainMenu scene) ===
     public static bool ShowSettingsOverlay = false;
@@ -199,7 +200,7 @@ public class NavigationButtons : Script
         {
             bool isPauseMenuOpen = ShowPauseOverlay;
             bool isPauseSettingsOpen = ShowSettingsOverlay && openedSettingsFromPause;
-            bool shouldGameBePaused = isPauseMenuOpen || isPauseSettingsOpen;
+            bool shouldGameBePaused = isPauseMenuOpen || isPauseSettingsOpen || stageClearPaused;
 
             if (isPauseMenuOpen != lastPauseState)
             {
@@ -425,6 +426,11 @@ public class NavigationButtons : Script
         }
     }
 
+    public static void SetStageClearPaused(bool value)
+    {
+        stageClearPaused = value;
+    }
+
     private bool TryGetNextLevelSceneName(string sceneName, out string nextScene)
     {
         nextScene = "";
@@ -453,33 +459,39 @@ public class NavigationButtons : Script
 
     private void ContinueToNextLevel()
     {
-        // Re-sync just in case (extra safety)
-        string realScene = Scene.GetCurrentScene();
-        if (!string.IsNullOrEmpty(realScene))
-            currentScene = realScene;
+    // Sync with actual loaded scene first (important for Cutscene -> Level1 flow)
+    string realScene = Scene.GetCurrentScene();
+    if (!string.IsNullOrEmpty(realScene))
+        currentScene = realScene;
 
-        if (string.IsNullOrEmpty(currentScene))
-        {
-            GoToMainMenu();
-            return;
-        }
+    if (string.IsNullOrEmpty(currentScene))
+    {
+        Application.SetPaused(false);
+        GoToMainMenu();
+        return;
+    }
 
-        string nextScene;
-        if (!TryGetNextLevelSceneName(currentScene, out nextScene))
-        {
-            GoToMainMenu();
-            return;
-        }
+    string nextScene;
+    if (!TryGetNextLevelSceneName(currentScene, out nextScene))
+    {
+        Application.SetPaused(false);
+        GoToMainMenu();
+        return;
+    }
 
-        // ✅ Proper check: only load if the next scene file exists
-        if (!Scene.SceneExists(nextScene))
-        {
-            Console.WriteLine("Next scene does not exist: " + nextScene + " -> going MainMenu");
-            GoToMainMenu();
-            return;
-        }
+    // Check once only (avoid duplicate checks / duplicate debug prints)
+    bool nextSceneExists = Scene.SceneExists(nextScene);
 
-        // Clear overlays / pause states before changing scene
+    Console.WriteLine("ContinueToNextLevel -> currentScene: " + currentScene);
+    Console.WriteLine("ContinueToNextLevel -> realScene: " + realScene);
+    Console.WriteLine("ContinueToNextLevel -> nextScene: " + nextScene);
+    Console.WriteLine("ContinueToNextLevel -> exists?: " + nextSceneExists);
+
+    if (!nextSceneExists)
+    {
+        Console.WriteLine("Next scene does not exist: " + nextScene + " -> going MainMenu");
+
+        // Make sure game is not stuck paused when falling back
         ShowQuitOverlay = false;
         ShowPauseOverlay = false;
         ShowHowToPlayOverlay = false;
@@ -487,9 +499,23 @@ public class NavigationButtons : Script
         openedSettingsFromPause = false;
         Application.SetPaused(false);
 
-        currentScene = nextScene;
-        Scene.LoadScene(nextScene);
+        GoToMainMenu();
+        return;
     }
+
+    // Clear UI/overlay states before changing scene
+    ShowQuitOverlay = false;
+    ShowPauseOverlay = false;
+    ShowHowToPlayOverlay = false;
+    ShowSettingsOverlay = false;
+    openedSettingsFromPause = false;
+
+    // Make sure stage clear / gameplay freeze is removed before next scene
+    Application.SetPaused(false);
+
+    currentScene = nextScene;
+    Scene.LoadScene(nextScene);
+}
 
 
     private void OnClick()

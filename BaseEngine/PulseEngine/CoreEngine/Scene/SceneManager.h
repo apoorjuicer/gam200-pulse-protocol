@@ -116,6 +116,9 @@ public:
 		}
 	}
 
+	bool SceneExists(std::string const& sceneNameOrPath) const;
+	
+
 	// to get a hold of coreengine instance for clearing scripts
 	void SetCoreEngine(CoreEngine* engine) { m_coreEngine = engine; }
 

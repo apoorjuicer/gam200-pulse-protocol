@@ -1422,6 +1422,19 @@ std::string SceneManager::SerializeToString()
 	return buffer.GetString();
 }
 
+bool SceneManager::SceneExists(std::string const& sceneNameOrPath) const
+{
+    // Reuse the exact same path resolver used by scene loading
+    std::filesystem::path scenePath = GetScenePath(sceneNameOrPath);
+
+#ifdef _DEBUG
+    std::cout << "SceneExists check path: " << scenePath.string() << std::endl;
+#endif
+
+    return std::filesystem::exists(scenePath) &&
+           std::filesystem::is_regular_file(scenePath);
+}
+
 
 /**
  * @brief Loads a scene from a JSON string in memory

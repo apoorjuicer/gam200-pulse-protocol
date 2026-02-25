@@ -11,12 +11,14 @@ public class StageClearElement : Script
     // Function name you wanted
     public static void StageClear()
     {
+        NavigationButtons.SetStageClearPaused(true);
         IsCleared = true;
         Console.WriteLine("[StageClear]  StageClear() called");
     }
 
     public static void ResetStageClear()
     {
+        NavigationButtons.SetStageClearPaused(false);
         IsCleared = false;
         Console.WriteLine("[StageClear]  ResetStageClear()");
     }
