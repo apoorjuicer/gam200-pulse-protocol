@@ -31,6 +31,7 @@ public class NavigationButtons : Script
     public static bool ShowHowToPlayOverlay = false;
     private static bool openedSettingsFromPause  = false;
     private static bool stageClearPaused = false;
+    private static bool s_appliedGamePause = false;
 
     // === SETTINGS OVERLAY (inside MainMenu scene) ===
     public static bool ShowSettingsOverlay = false;
@@ -67,6 +68,7 @@ public class NavigationButtons : Script
             ShowSettingsOverlay = false;
 
             wasEscPressed = false;
+            s_appliedGamePause = false;
         }
 
         if (currentFrame != lastFrameCount)
