@@ -1,14 +1,6 @@
 using System;
 using ScriptAPI;
 
-/// <summary>
-/// Shows "Enemy's Turn!" for the entire EnemyDisplay phase and
-/// "Your Turn!" for the entire PlayerInput phase.
-/// Text stays visible until the phase ends — no flash/auto-hide.
-///
-/// SETUP:
-/// - Attached to the "Turn Announcer" entity in Level1.json (has a TextComponent).
-/// </summary>
 public class TurnAnnouncerUI : Script
 {
     public static TurnAnnouncerUI Instance { get; private set; }

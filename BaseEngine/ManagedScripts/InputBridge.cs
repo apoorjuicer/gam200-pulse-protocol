@@ -11,13 +11,13 @@ public class InputBridge : Script
     public int KeyS = 83;  // GLFW_KEY_S
     public int KeyD = 68;  // GLFW_KEY_D
 
-    // Optional: if you're using a kill-cheat on K, this prevents "invalid key" SFX
+    
     public int DebugAllowedExtraKey = 75; // K
     public bool DebugTreatExtraKeyAsValid = true;
 
-    // DEBUG: Set true to bypass TurnManager lock and test raw input
+    
     public bool DebugBypassTurnLock = false;
-    // DEBUG: Set true to log triggered input (spammy, use briefly)
+    
     public bool DebugLogEveryFrame = false;
 
     // =========================
@@ -27,12 +27,7 @@ public class InputBridge : Script
 
     // C# edge detection: previous-frame held state for each gameplay key.
     //
-    // WHY: The C++ InputManager.Update() is currently called AFTER
-    // UpdateAllSystems() in CoreEngine::Update(), and it is called TWICE per
-    // frame when not paused. Both bugs mean IsKeyTriggered() always returns
-    // false from C#. Using IsKeyPressed() + tracking the previous state here
-    // in C# produces a reliable "just pressed this frame" signal without
-    // needing any C++ changes.
+    
     private bool prevW = false;
     private bool prevA = false;
     private bool prevS = false;

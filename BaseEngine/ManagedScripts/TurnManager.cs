@@ -166,11 +166,7 @@ public class TurnManager : Script
         Console.WriteLine($"[TurnManager] Displaying combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input LOCKED");
 
-        // DON'T PAUSE THE GAME!
-        // Just set IsInputLocked = true (which is automatic based on currentPhase)
-        // The InputBridge checks this flag before processing keys
-
-        // Reset combo system for new attempt
+       
         if (ComboSystem.Instance != null)
         {
             ComboSystem.Instance.ResetCombo();
