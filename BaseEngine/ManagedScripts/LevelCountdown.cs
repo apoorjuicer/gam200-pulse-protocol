@@ -39,6 +39,7 @@ public class LevelCountdown : Script
         }
 
         float dt = Time.DeltaTime;
+        if (NavigationButtons.ShowPauseOverlay) return;
         if (dt == 0f) dt = 0.016f; // keep ticking even if engine paused
         t += dt;
 
