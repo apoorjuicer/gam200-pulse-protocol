@@ -197,24 +197,35 @@ public class ComboDisplayManager : Script
         if (Conductor.Instance == null) return;
 
         int currentBeat = Conductor.Instance.GetCurrentBeat();
-        if (currentBeat <= lastRevealBeat) return;
+        
+        // Show first key immediately on the same frame StartComboReveal is called
+        if (revealIndex == 0)
+        {
+            lastRevealBeat = currentBeat;
+            char key = revealCombo[0];
+            if (enemySlots.ContainsKey(0))
+            {
+                enemySlots[0].ShowKeyPersistent(key);
+                Console.WriteLine($"[ComboDisplayManager] Reveal immediate: enemy slot 0 = '{key}'");
+            }
+            revealIndex = 1;
+            return;
+        }
 
+        if (currentBeat <= lastRevealBeat) return;
         lastRevealBeat = currentBeat;
 
         if (revealIndex < revealCombo.Length)
         {
             char key = revealCombo[revealIndex];
-
             if (enemySlots.ContainsKey(revealIndex))
             {
                 enemySlots[revealIndex].ShowKeyPersistent(key);
                 Console.WriteLine($"[ComboDisplayManager] Reveal beat {currentBeat}: enemy slot {revealIndex} = '{key}'");
             }
-
             revealIndex++;
         }
 
-        // All keys revealed; wait for TurnManager to call StopComboReveal()
         if (revealIndex >= revealCombo.Length)
         {
             isRevealing = false;

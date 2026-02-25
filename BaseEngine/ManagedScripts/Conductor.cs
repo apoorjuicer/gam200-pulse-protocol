@@ -99,6 +99,7 @@ public class Conductor : Script
         lastBeat = -1;
         nextHalfBeat = secondsPerBeat * 0.5f;
         Console.WriteLine("[Conductor] Clock reset — syncing to audio start");
+        Console.WriteLine("[Conductor] ResetClock called from: " + Environment.StackTrace);
     }
 
     public void OnDestroy()

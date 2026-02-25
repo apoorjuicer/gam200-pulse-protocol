@@ -52,6 +52,7 @@ public class TurnManager : Script
             Console.WriteLine("[TurnManager] New play session detected — resetting state");
             initialized = false;
         }
+
         prevGameReady = GameStart.Ready;
 
         if (!initialized)
@@ -76,6 +77,7 @@ public class TurnManager : Script
         if (!gameStarted)
         {
             gameStarted = true;
+            lastBeat = currentBeat;
             StartEnemyDisplay();
             return;
         }

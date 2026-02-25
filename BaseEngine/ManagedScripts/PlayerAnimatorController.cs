@@ -191,19 +191,19 @@ public class PlayerAnimationController : Script
         return frameCount / Conductor.Instance.SecondsPerBeat;
     }
 
-    private float GetHurtAnimSpeed(int frameCount)
-    {
-        if (Conductor.Instance == null || Conductor.Instance.SecondsPerBeat <= 0f)
-            return AnimationSpeed;
-        return frameCount / Conductor.Instance.SecondsPerBeat;
-    }
+    // private float GetHurtAnimSpeed(int frameCount)
+    // {
+    //     if (Conductor.Instance == null || Conductor.Instance.SecondsPerBeat <= 0f)
+    //         return AnimationSpeed;
+    //     return frameCount / Conductor.Instance.SecondsPerBeat;
+    // }
 
-    private float GetAttackAnimSpeed(int frameCount)
-    {
-        if (Conductor.Instance == null || Conductor.Instance.SecondsPerBeat <= 0f)
-            return AnimationSpeed;
-        return frameCount / Conductor.Instance.SecondsPerBeat;
-    }
+    // private float GetAttackAnimSpeed(int frameCount)
+    // {
+    //     if (Conductor.Instance == null || Conductor.Instance.SecondsPerBeat <= 0f)
+    //         return AnimationSpeed;
+    //     return frameCount / Conductor.Instance.SecondsPerBeat;
+    // }
 
     // =========================
     // Internal: Set Animation
@@ -229,11 +229,11 @@ public class PlayerAnimationController : Script
                 break;
 
             case PlayerAnimState.Attack:
-                anim.SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, GetAttackAnimSpeed(AnimationSpeed));
+                anim.SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, AnimationSpeed);
                 break;
 
             case PlayerAnimState.Hurt:
-                anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, GetHurtAnimSpeed(AnimationSpeed));
+                anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, AnimationSpeed);
                 break;
         }
     }
