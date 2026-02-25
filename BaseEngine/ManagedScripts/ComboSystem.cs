@@ -15,10 +15,10 @@ public class ComboSystem : Script
     public int maxComboLength = 4;
 
     // Timing windows (seconds)
-    // At 120 BPM (0.5s/beat), max delta is 0.25s. Player data shows most presses land 0.08-0.25s.
-    // PERFECT ≤ 0.08s | GREAT ≤ 0.20s | MISS > 0.20s
-    public float perfectWindow = 0.08f;
-    public float greatWindow = 0.20f;
+    // At 120 BPM (0.5s/beat), max delta is 0.25s.
+    // PERFECT ≤ 0.12s (~7 frames @ 60fps) | GREAT ≤ 0.25s (no dead zone) | MISS > 0.25s
+    public float perfectWindow = 0.12f;
+    public float greatWindow = 0.25f;
 
     // DEBUG: Set to true to auto-set a test weakness and accept all input regardless of turn state
     public bool DebugTestMode = false;
@@ -33,7 +33,6 @@ public class ComboSystem : Script
     private int perfectStreak = 0;
 
     public bool PlayerDidSuccessfulCombo { get; private set; }
-    private bool comboFailedEarly = false;
     private bool comboCompleted = false;  // Lock out further input after combo is evaluated
 
     // =========================
@@ -77,7 +76,11 @@ public class ComboSystem : Script
         if (!initialized)
         {
             Instance = this;
-            SetEnemyWeakness("WASD");
+            // Do NOT call SetEnemyWeakness here — EnemyRhythmController will set the
+            // real weakness once it initialises. Calling it here with a hardcoded default
+            // caused a session-2 race: EnemyRhythmController set weakness on the STALE
+            // ComboSystem instance from session 1, then this Init ran on the NEW instance
+            // overwriting it back to "WASD", breaking combo matching.
             initialized = true;
             Console.WriteLine("[ComboSystem] Initialized");
             return;
@@ -181,10 +184,6 @@ public class ComboSystem : Script
             perfectStreak = 0;
         }
 
-        // Any MISS causes failure
-        if (judgement == "MISS")
-            comboFailedEarly = true;
-
         if (currentCombo.Count >= maxComboLength)
             EvaluateCombo();
     }
@@ -199,7 +198,6 @@ public class ComboSystem : Script
         PlayerDidSuccessfulCombo = false;
         currentCombo.Clear();
         hitResults.Clear();
-        comboFailedEarly = false;
         comboCompleted = false;
     }
 
@@ -209,20 +207,21 @@ public class ComboSystem : Script
     private void EvaluateCombo()
     {
         string comboString = new string(currentCombo.ToArray());
-        bool allGood = !comboFailedEarly;
+        bool sequenceCorrect = (comboString == currentEnemyWeakness);
+        bool timingOk = true;
 
         foreach (string r in hitResults)
         {
-            if (r != "PERFECT" && r != "GREAT")
+            if (r == "MISS")
             {
-                allGood = false;
+                timingOk = false;
                 break;
             }
         }
 
         Console.WriteLine($"[ComboSystem] Entered: {comboString} | Expected: {currentEnemyWeakness}");
 
-        if (allGood && comboString == currentEnemyWeakness)
+        if (sequenceCorrect && timingOk)
         {
             Console.WriteLine("[ComboSystem] ✅ COMBO SUCCESS!");
             PlayerDidSuccessfulCombo = true;
@@ -230,7 +229,7 @@ public class ComboSystem : Script
         else
         {
             Console.WriteLine("[ComboSystem] ❌ COMBO FAILED!");
-            Console.WriteLine($"[ComboSystem] Sequence match: {comboString == currentEnemyWeakness}, Timing OK: {!comboFailedEarly}");
+            Console.WriteLine($"[ComboSystem] Sequence match: {sequenceCorrect}, Timing OK: {timingOk}");
             PlayerDidSuccessfulCombo = false;
         }
 

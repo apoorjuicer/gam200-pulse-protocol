@@ -13,7 +13,7 @@ public class OrderSlipUIController : Script
     public float currentScale = 200f;
     public float nextScale = 120f;
     public float transitionDuration = 0.35f;    
-    public float fadeDuration = 0.25f;
+    public float fadeDuration = 0.5f;
     public float rotateDegrees = 90.0f;
     public float arcHeight = 30.0f;
 

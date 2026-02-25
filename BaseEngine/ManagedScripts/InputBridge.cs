@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ScriptAPI;
 
 public class InputBridge : Script
@@ -11,7 +11,7 @@ public class InputBridge : Script
     public int KeyS = 83;  // GLFW_KEY_S
     public int KeyD = 68;  // GLFW_KEY_D
 
-    // Optional: if you’re using a kill-cheat on K, this prevents “invalid key” SFX
+    // Optional: if you're using a kill-cheat on K, this prevents "invalid key" SFX
     public int DebugAllowedExtraKey = 75; // K
     public bool DebugTreatExtraKeyAsValid = true;
 
@@ -25,6 +25,23 @@ public class InputBridge : Script
     // =========================
     private bool initialized = false;
 
+    // C# edge detection: previous-frame held state for each gameplay key.
+    //
+    // WHY: The C++ InputManager.Update() is currently called AFTER
+    // UpdateAllSystems() in CoreEngine::Update(), and it is called TWICE per
+    // frame when not paused. Both bugs mean IsKeyTriggered() always returns
+    // false from C#. Using IsKeyPressed() + tracking the previous state here
+    // in C# produces a reliable "just pressed this frame" signal without
+    // needing any C++ changes.
+    private bool prevW = false;
+    private bool prevA = false;
+    private bool prevS = false;
+    private bool prevD = false;
+
+    // Same edge-detection for invalid keys so we don't fire the SFX every
+    // frame while a wrong key is held.
+    private bool prevInvalidKeyDown = false;
+
     // =========================
     // Update Loop
     // =========================
@@ -36,50 +53,56 @@ public class InputBridge : Script
             return;
         }
 
-        // Always grab input ONCE (fixes CS0136)
+        // Always grab input ONCE
         InputComponent input = GetInput();
 
-        // If paused, don't process anything (unless you explicitly want debug while paused)
+        // If paused, don't process anything
         if (!DebugBypassTurnLock && Application.IsPaused())
             return;
 
-        // If input is locked by turn system, do NOT forward inputs
+        // TurnManager lock — only accept input during PlayerInput phase
         if (!DebugBypassTurnLock)
         {
             if (TurnManager.Instance != null && TurnManager.Instance.IsInputLocked)
             {
-                // Optional: still log what the player is pressing while locked
-                if (DebugLogEveryFrame)
-                {
-                    bool wL = input.IsKeyTriggered(KeyW);
-                    bool aL = input.IsKeyTriggered(KeyA);
-                    bool sL = input.IsKeyTriggered(KeyS);
-                    bool dL = input.IsKeyTriggered(KeyD);
-                    if (wL || aL || sL || dL)
-                        Console.WriteLine($"[InputBridge:DEBUG] INPUT LOCKED | Frame={Time.FrameCount} Triggered: W={wL} A={aL} S={sL} D={dL}");
-                }
+                // Update prev states so edge detection is accurate when lock lifts
+                prevW = input.IsKeyPressed(KeyW);
+                prevA = input.IsKeyPressed(KeyA);
+                prevS = input.IsKeyPressed(KeyS);
+                prevD = input.IsKeyPressed(KeyD);
                 return;
             }
         }
 
+        // Sample current held state
+        bool curW = input.IsKeyPressed(KeyW);
+        bool curA = input.IsKeyPressed(KeyA);
+        bool curS = input.IsKeyPressed(KeyS);
+        bool curD = input.IsKeyPressed(KeyD);
+
+        // Derive "just pressed this frame" via C# edge detection
+        bool tapW = curW && !prevW;
+        bool tapA = curA && !prevA;
+        bool tapS = curS && !prevS;
+        bool tapD = curD && !prevD;
+
         // DEBUG: Log raw input state
-        if (DebugLogEveryFrame)
-        {
-            bool w = input.IsKeyTriggered(KeyW);
-            bool a = input.IsKeyTriggered(KeyA);
-            bool s = input.IsKeyTriggered(KeyS);
-            bool d = input.IsKeyTriggered(KeyD);
-            if (w || a || s || d)
-                Console.WriteLine($"[InputBridge:DEBUG] Frame={Time.FrameCount} Triggered: W={w} A={a} S={s} D={d}");
-        }
+        if (DebugLogEveryFrame && (tapW || tapA || tapS || tapD))
+            Console.WriteLine($"[InputBridge:DEBUG] Frame={Time.FrameCount} Tap: W={tapW} A={tapA} S={tapS} D={tapD}");
 
-        // Forward valid keys
-        if (input.IsKeyTriggered(KeyW)) OnKeyPressed('W');
-        if (input.IsKeyTriggered(KeyA)) OnKeyPressed('A');
-        if (input.IsKeyTriggered(KeyS)) OnKeyPressed('S');
-        if (input.IsKeyTriggered(KeyD)) OnKeyPressed('D');
+        // Forward tapped keys to combo system
+        if (tapW) OnKeyPressed('W');
+        if (tapA) OnKeyPressed('A');
+        if (tapS) OnKeyPressed('S');
+        if (tapD) OnKeyPressed('D');
 
-        // Invalid keys
+        // Store current state for next frame's edge detection
+        prevW = curW;
+        prevA = curA;
+        prevS = curS;
+        prevD = curD;
+
+        // Invalid keys (edge-detected to avoid SFX spamming while held)
         CheckInvalidKeys(input);
     }
 
@@ -89,7 +112,8 @@ public class InputBridge : Script
     private void Initialize()
     {
         Console.WriteLine("[InputBridge] ===== INITIALIZED =====");
-        Console.WriteLine("[InputBridge] Using IsKeyTriggered for reliable input detection");
+        Console.WriteLine("[InputBridge] Using C# edge detection (IsKeyPressed + prev state)");
+        Console.WriteLine("[InputBridge] TurnManager lock is ACTIVE");
 
         if (DebugBypassTurnLock)
             Console.WriteLine("[InputBridge] ⚠️ DEBUG MODE: TurnManager lock BYPASSED — all input accepted");
@@ -113,7 +137,7 @@ public class InputBridge : Script
         if (ComboSystem.Instance != null && ComboSystem.Instance.GetExpectedCombo() != null)
             expectedLen = ComboSystem.Instance.GetExpectedCombo().Length;
 
-        Console.WriteLine($"[InputBridge] 🎹 Key {key} pressed! (Phase={phase}, Beat={beat}, ComboProgress={progress}/{expectedLen})");
+        Console.WriteLine($"[InputBridge] Key {key} pressed! (Phase={phase}, Beat={beat}, ComboProgress={progress}/{expectedLen})");
 
         // Play key press SFX
         AudioComponent audio = GetAudio();
@@ -127,12 +151,20 @@ public class InputBridge : Script
             if (ComboSystem.Instance.HasCompletedCombo())
             {
                 Console.WriteLine("[InputBridge] Combo sequence complete!");
-                Console.WriteLine(ComboSystem.Instance.PlayerDidSuccessfulCombo ? "[InputBridge] SUCCESS!" : "[InputBridge] FAILED!");
+                if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
+                {
+                    Console.WriteLine("[InputBridge] SUCCESS! Applying damage immediately.");
+                    EnemyRhythmController.Instance?.TakeDamage(10f);
+                }
+                else
+                {
+                    Console.WriteLine("[InputBridge] FAILED!");
+                }
             }
         }
         else
         {
-            Console.WriteLine("[InputBridge] ⚠️ ERROR: ComboSystem.Instance is null!");
+            Console.WriteLine("[InputBridge] WARNING: ComboSystem.Instance is null!");
         }
     }
 
@@ -168,18 +200,27 @@ public class InputBridge : Script
             77   // M
         };
 
+        bool anyInvalidDown = false;
         foreach (int keyCode in invalidKeys)
         {
             if (DebugTreatExtraKeyAsValid && keyCode == DebugAllowedExtraKey)
                 continue;
 
-            if (input.IsKeyTriggered(keyCode))
+            if (input.IsKeyPressed(keyCode))
             {
-                AudioComponent audio = GetAudio();
-                audio.PlaySFX("SFX_Invalid_Key");
-                Console.WriteLine($"[InputBridge] ⚠️ Invalid key pressed (code: {keyCode})");
-                return;
+                anyInvalidDown = true;
+                break;
             }
         }
+
+        // Only fire SFX on the frame the invalid key is first pressed (edge detection)
+        if (anyInvalidDown && !prevInvalidKeyDown)
+        {
+            AudioComponent audio = GetAudio();
+            audio.PlaySFX("SFX_Invalid_Key");
+            Console.WriteLine("[InputBridge] Invalid key pressed");
+        }
+
+        prevInvalidKeyDown = anyInvalidDown;
     }
 }

@@ -45,6 +45,10 @@ public class OrderSlipNextIcon : Script
                 tf.ScaleX = ui.currentScale;
                 tf.ScaleY = ui.currentScale;
 
+                // Restore full opacity once settled into current slot
+                SpriteComponent sprDone = GetSprite();
+                sprDone.TintA = 1.0f;
+
                 SetSprite(ui.GetVibrantSprite(ui.CurrentType));
 
                 wasTransitioning = false;
@@ -58,7 +62,6 @@ public class OrderSlipNextIcon : Script
                 tf.ScaleX = ui.nextScale;
                 tf.ScaleY = ui.nextScale;
 
-                // IF THERE IS NOTHING LEFT IN THE CONTAINER, JUST SHOW NOTHING(make invise) Yes i am so smart(not) :>
                 if (ui.NextType == EnemyIconType.None)
                 {
                     TransformComponent t = GetTransform();
@@ -66,16 +69,19 @@ public class OrderSlipNextIcon : Script
                 }
                 else
                 {
-                    // else just show. Booooo! Imagine showing urself
                     TransformComponent t = GetTransform();
                     t.IsVisible = true;
+
+                    SpriteComponent sprIdle = GetSprite();
+                    sprIdle.TintA = 1.0f;
+
                     SetSprite(ui.GetDimSprite(ui.NextType));
                 }
             }
             return;
         }
 
-        // During transition: move from next slot to current slot with arc and rotation
+        // During transition: move from next slot to current slot with arc, rotation, and fade in
         wasTransitioning = true;
 
         if (!capturedStart)
@@ -102,6 +108,10 @@ public class OrderSlipNextIcon : Script
         float sc = ui.Lerp(ui.nextScale, ui.currentScale, eased);
         tf.ScaleX = sc;
         tf.ScaleY = sc;
+
+        // Fade in via alpha (0 → 1 over fadeDuration)
+        SpriteComponent spr = GetSprite();
+        spr.TintA = ui.Fade01;
 
         if (eased > 0.6f)
             SetSprite(ui.GetVibrantSprite(ui.CurrentType));

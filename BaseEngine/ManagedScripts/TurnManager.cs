@@ -21,7 +21,7 @@ public class TurnManager : Script
     // =========================
     public int CountdownBeats = 4;
     public int EnemyDisplayBeats = 4;
-    public int PlayerInputBeats = 4;
+    public int PlayerInputBeats = 5;
 
     // =========================
     // State
@@ -30,6 +30,7 @@ public class TurnManager : Script
     private int phaseStartBeat = -1;
     private int lastBeat = -1;
     private bool initialized = false;
+    private bool gameStarted = false;
 
     public bool IsPlayerTurn => currentPhase == TurnPhase.PlayerInput;
     public bool IsInputLocked => currentPhase != TurnPhase.PlayerInput;
@@ -56,6 +57,14 @@ public class TurnManager : Script
             return;
 
         if (!GameStart.Ready) return;
+
+        // Anchor the phase start to the first beat the game actually becomes ready,
+        // so beatsInPhase doesn't inherit stale counts from before GameStart.
+        if (!gameStarted)
+        {
+            gameStarted = true;
+            phaseStartBeat = currentBeat;
+        }
 
         lastBeat = currentBeat;
         int beatsInPhase = currentBeat - phaseStartBeat;
@@ -97,12 +106,12 @@ public class TurnManager : Script
                 break;
 
             case TurnPhase.Resolution:
-                // Wait for the next enemy to be ready before starting EnemyDisplay.
-                // If the previous enemy just died, Instance is null until the spawner
-                // creates the new enemy and its Initialize() runs (usually 1-2 frames).
-                if (EnemyRhythmController.Instance == null)
+                // Wait for the death animation to finish before advancing.
+                // IsDying stays true for 2.5s after Die() fires; only becomes null
+                // once the animation completes and the spawner is notified.
+                if (EnemyRhythmController.Instance == null || EnemyRhythmController.Instance.IsDying)
                 {
-                    Console.WriteLine("[TurnManager] Resolution: waiting for next enemy...");
+                    Console.WriteLine("[TurnManager] Resolution: waiting for death animation / next enemy...");
                     break;
                 }
                 StartEnemyDisplay();
@@ -123,6 +132,15 @@ public class TurnManager : Script
         }
         Instance = this;
 
+        // Full state reset — GameStart.Ready is a static bool that persists between
+        // play sessions. If it's stale-true, TurnManager would skip the countdown.
+        // Resetting it here forces LevelCountdown to re-run its 3-2-1-GO sequence.
+        GameStart.Ready = false;
+        currentPhase = TurnPhase.Countdown;
+        phaseStartBeat = -1;
+        lastBeat = -1;
+        gameStarted = false;
+
         Console.WriteLine("[TurnManager] Initializing...");
 
         if (Conductor.Instance != null)
@@ -131,7 +149,6 @@ public class TurnManager : Script
             lastBeat = phaseStartBeat;
         }
 
-        currentPhase = TurnPhase.Countdown;
         Console.WriteLine("[TurnManager] Starting countdown phase (4 beats)");
 
         initialized = true;
@@ -169,7 +186,10 @@ public class TurnManager : Script
     private void StartPlayerInput()
     {
         currentPhase = TurnPhase.PlayerInput;
-        phaseStartBeat = Conductor.Instance.GetCurrentBeat();
+        // Subtract 1 so the transition beat counts as beat 1 of the input window.
+        // This guarantees the player can press on the same beat the phase opens,
+        // regardless of whether InputBridge or TurnManager updates first.
+        phaseStartBeat = Conductor.Instance.GetCurrentBeat() - 1;
 
         Console.WriteLine("[TurnManager] === PLAYER TURN ===");
         Console.WriteLine($"[TurnManager] Input the combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
@@ -192,20 +212,13 @@ public class TurnManager : Script
 
         if (success)
         {
-            Console.WriteLine("[TurnManager] ? Player succeeded!");
-            Console.WriteLine("[TurnManager] Enemy takes damage!");
+            // Damage was already applied immediately in InputBridge.OnKeyPressed()
+            // when the combo was completed — no need to apply it again here.
+            Console.WriteLine("[TurnManager] Player succeeded! (damage applied at combo completion)");
 
             // // PLAY SUCCESS SOUND
             // AudioComponent audio = GetAudio();
-            // audio.PlaySFX("SFX_ComboEstablished_1");  // Combo complete sound!
-
-
-
-            // Enemy takes damage and might die
-            if (EnemyRhythmController.Instance != null)
-            {
-                EnemyRhythmController.Instance.TakeDamage(10f);
-            }
+            // audio.PlaySFX("SFX_ComboEstablished_1");
         }
         else
         {

@@ -35,20 +35,25 @@ public class OrderSlipCurrentIcon : Script
             tf.ScaleX = ui.currentScale;
             tf.ScaleY = ui.currentScale;
 
+            // Restore full opacity when idle
+            SpriteComponent sprIdle = GetSprite();
+            sprIdle.TintA = 1.0f;
+
             SetSprite(ui.GetVibrantSprite(ui.CurrentType));
             wasTransitioning = false;
             return;
         }
 
-        // During transition: fade out by shrinking
+        // During transition: fade out via alpha (1 → 0 over fadeDuration)
         wasTransitioning = true;
 
         tf.X = slotX;
         tf.Y = slotY;
+        tf.ScaleX = ui.currentScale;
+        tf.ScaleY = ui.currentScale;
 
-        float s = ui.Lerp(ui.currentScale, ui.currentScale * 0.85f, ui.Fade01);
-        tf.ScaleX = s;
-        tf.ScaleY = s;
+        SpriteComponent spr = GetSprite();
+        spr.TintA = 1.0f - ui.Fade01;  // fades out as Fade01 goes 0 → 1
 
         SetSprite(ui.GetVibrantSprite(ui.CurrentType));
     }

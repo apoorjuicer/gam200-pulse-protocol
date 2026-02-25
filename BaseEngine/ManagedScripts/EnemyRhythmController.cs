@@ -77,11 +77,13 @@ public class EnemyRhythmController : Script
     private bool initialized = false;
     private int lastBeat = -1;
     private bool isDead = false;
+    public bool IsDying => isDead;  // True from Die() until Instance is cleared after animation
     private EnemyState currentState = EnemyState.Idle;
 
     private float attackCooldownTimer = 0f;
     private float deathTimer = 0f;
     private bool waitingToDie = false;
+    private bool deathNotified = false;  // true once spawner has been told to continue
 
     // Track movement during enemy turn
     private int movementStepsTaken = 0;
@@ -94,6 +96,10 @@ public class EnemyRhythmController : Script
     private bool weaknessSet = false;
     private int weaknessRetryCount = 0;
     private const int maxWeaknessRetries = 100;
+    // Track which ComboSystem instance the weakness was set on.
+    // If ComboSystem.Instance changes (new play session), we re-set so we never
+    // leave the weakness pinned to a stale ComboSystem from a previous session.
+    private ComboSystem weaknessSetOnInstance = null;
 
     // Debug
     private int collisionCheckCount = 0;
@@ -127,6 +133,16 @@ public class EnemyRhythmController : Script
                 {
                     TransformComponent tf = GetTransform();
                     tf.IsVisible = false;
+
+                    // Only notify the spawner once, AFTER the death animation has played out.
+                    // Previously this was called immediately in Die(), which caused the next
+                    // enemy to spawn before the animation finished.
+                    if (!deathNotified)
+                    {
+                        deathNotified = true;
+                        Instance = null;                           // clear singleton now that animation is done
+                        EnemySpawner.Instance?.OnEnemyDefeated(); // tell spawner it's safe to continue
+                    }
                 }
             }
             return;
@@ -157,14 +173,34 @@ public class EnemyRhythmController : Script
     {
         Instance = this;
 
+        // Full state reset — needed even on reused instances (engine may not recreate
+        // C# Script objects between play sessions, so stale isDead/etc. must be cleared).
+        isDead = false;
+        waitingToDie = false;
+        deathTimer = 0f;
+        deathNotified = false;
+        hasReachedPlayer = false;
+        movementStepsTaken = 0;
+        attackCooldownTimer = 0f;
+        collisionCheckCount = 0;
+        playerFound = false;
+        playerEntityID = -1;
+        lastBeat = -1;
+
         // Reset weakness retry state so each new enemy gets a fresh attempt
         weaknessSet = false;
         weaknessRetryCount = 0;
+        weaknessSetOnInstance = null;
 
         Console.WriteLine("[Enemy] Initializing...");
 
         TransformComponent tf = GetTransform();
 
+        // Force the idle spritesheet to load regardless of the previous currentState.
+        // Without this, SetState(Idle) silently returns early (currentState already == Idle
+        // as the C# default), so the animation component keeps whatever sheet was active
+        // on the old entity (e.g. the hurt sheet from the previous enemy's death).
+        currentState = EnemyState.Dead;
         SetState(EnemyState.Idle);
 
         if (Conductor.Instance != null)
@@ -299,12 +335,20 @@ public class EnemyRhythmController : Script
 
     private void TrySetWeakness()
     {
+        // If ComboSystem replaced its instance (new session), we must re-set on the new one.
+        if (weaknessSet && ComboSystem.Instance != weaknessSetOnInstance)
+        {
+            weaknessSet = false;
+            weaknessSetOnInstance = null;
+        }
+
         if (weaknessSet) return;
 
         if (ComboSystem.Instance != null)
         {
             ComboSystem.Instance.SetEnemyWeakness(WeaknessCombo);
             weaknessSet = true;
+            weaknessSetOnInstance = ComboSystem.Instance;
             Console.WriteLine($"[Enemy] Weakness successfully set to: {WeaknessCombo}");
         }
         else if (weaknessRetryCount == 0)
@@ -341,7 +385,7 @@ public class EnemyRhythmController : Script
                 anim.SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, AnimationSpeed);
                 break;
             case EnemyState.Dead:
-                anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, AnimationSpeed / 2f);
+                anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, AnimationSpeed);
                 break;
         }
     }
@@ -452,11 +496,12 @@ public class EnemyRhythmController : Script
         hDie.isAlive = false;
         waitingToDie = true;
         deathTimer = 0f;
+        deathNotified = false;
         SetState(EnemyState.Dead);
 
-        // Update the EnemySpawner.cs to first create a new enemy from the container, update the current and next UI icon
-        Instance = null;                              // clear singleton so spawner isn't blocked
-        EnemySpawner.Instance?.OnEnemyDefeated();
+        // NOTE: Instance is NOT cleared here any more. It is cleared after the 2.5s
+        // death animation finishes (in the Update timer block above), so the spawner
+        // and TurnManager both wait for the animation before continuing.
 
         Console.WriteLine("[Enemy] DEFEATED!");
         Console.WriteLine("==============================================");
@@ -517,6 +562,9 @@ public class EnemyRhythmController : Script
 
     public void ResetMovementForNewTurn()
     {
+        // Don't clobber the death animation state if this enemy is already dying
+        if (isDead) return;
+
         Console.WriteLine("[Enemy] ResetMovementForNewTurn() - resetting step counter");
         movementStepsTaken = 0;
 

@@ -1386,7 +1386,7 @@
                     "transform": {
                         "position": {
                             "x": 977.0,
-                            "y": -315.4615478515625
+                            "y": -299.010
                         },
                         "scale": {
                             "x": 350.0,
@@ -4681,6 +4681,82 @@
                 {
                     "Parent": {
                         "parent": 45
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 220.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": false,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 0.0
+                        }
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "TurnAnnouncerUI"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Turn Announcer"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 10,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "TextComponent": {
+                        "text": "",
+                        "font_id": "",
+                        "offset": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "font_size": 80.0,
+                        "color": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "visible": false,
+                        "alignment": 1
                     }
                 }
             ]
