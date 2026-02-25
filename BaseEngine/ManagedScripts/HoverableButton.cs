@@ -240,6 +240,9 @@ public class NavigationButtons : Script
         string texLower = defaultTexture.ToLower();
         bool isQuitOverlayButton = texLower.Contains("quit yes") || texLower.Contains("quit no");
         bool isPauseOverlayButton = texLower.Contains("pause") || texLower.Contains("exit");
+        
+        bool isHowToPlayOverlayButton = texLower.Contains("temp_close") || texLower.Contains("close_htp");
+
         bool isOverlayButton = isQuitOverlayButton || isPauseOverlayButton;
 
         if ((ShowQuitOverlay || ShowPauseOverlay) && !isOverlayButton)
@@ -258,6 +261,7 @@ public class NavigationButtons : Script
 
         if (ShowQuitOverlay && isPauseOverlayButton && !isQuitOverlayButton) return;
         if (ShowPauseOverlay && isQuitOverlayButton && !isPauseOverlayButton) return;
+        if (ShowHowToPlayOverlay && !isHowToPlayOverlayButton) return;
 
         float currentScaleX = t.ScaleX;
         float currentScaleY = t.ScaleY;
