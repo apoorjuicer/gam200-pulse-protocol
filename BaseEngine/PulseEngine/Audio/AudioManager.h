@@ -58,6 +58,7 @@ public:
     void SetBGMVolume(float volume); // 0..1
     bool IsBGMPlaying(bool *outPlaying = nullptr) const;
     void RestartBGM();
+    void SetMusicPaused(bool paused);
 
     void PauseBGM();   // Pause the current BGM
     void ResumeBGM();  // Resume paused BGM

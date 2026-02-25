@@ -44,6 +44,8 @@ public:
 	CoreEngine();
 	~CoreEngine();
 
+	enum class PauseSource { Game, Editor };
+
 	// Engine 3 states
 	void Init();
 	void Setup();
@@ -65,6 +67,7 @@ public:
 	bool IsGameRunning() const { return GameRunning; }	// for controlling main game loop
 	bool IsPlaying() const { return m_isPlaying; }		// for controlling scripts
 	void SetPaused(bool p);
+	void SetPaused(bool p, PauseSource source);
 	void TogglePaused();
 	bool IsPaused() const { return m_paused; }
 
