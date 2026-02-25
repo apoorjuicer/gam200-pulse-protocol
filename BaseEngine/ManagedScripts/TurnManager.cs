@@ -52,6 +52,7 @@ public class TurnManager : Script
             Console.WriteLine("[TurnManager] New play session detected — resetting state");
             initialized = false;
         }
+
         prevGameReady = GameStart.Ready;
 
         if (!initialized)
@@ -76,6 +77,7 @@ public class TurnManager : Script
         if (!gameStarted)
         {
             gameStarted = true;
+            lastBeat = currentBeat;
             StartEnemyDisplay();
             return;
         }
@@ -195,6 +197,10 @@ public class TurnManager : Script
         {
             EnemyRhythmController.Instance.ResetMovementForNewTurn();
         }
+
+        // BEAT REVEAL!
+        if (ComboDisplayManager.Instance != null && EnemyRhythmController.Instance != null)
+            ComboDisplayManager.Instance.StartComboReveal(EnemyRhythmController.Instance.WeaknessCombo);
     }
 
     private void StartPlayerInput()
@@ -210,6 +216,10 @@ public class TurnManager : Script
         Console.WriteLine("[TurnManager] Player input UNLOCKED");
 
         // Enemy freezes during player input (handled in EnemyRhythmController.HandleBeat)
+
+        // this will trigger the fade out, and then clear for player input phase
+        if (ComboDisplayManager.Instance != null)
+            ComboDisplayManager.Instance.StopComboReveal();
     }
 
     private void ResolvePlayerInput()

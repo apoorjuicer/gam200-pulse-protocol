@@ -66,8 +66,8 @@ public class LevelCountdown : Script
         }
         else
         {
-           text.SetVisible(false);
-           GameStart.Ready = true;
+            text.SetVisible(false);
+            GameStart.Ready = true;
             Console.WriteLine("GameStart.Ready is true");
         }
     }

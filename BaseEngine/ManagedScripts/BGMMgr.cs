@@ -63,7 +63,7 @@ public class LevelBGM : Script
             Console.WriteLine("BGM: Playing Level music");
 
             // Reset Conductor clock so beat tracking starts at t=0
-            Conductor.Instance?.ResetClock();
+            // Conductor.Instance?.ResetClock();
 
             started = true;
         }
