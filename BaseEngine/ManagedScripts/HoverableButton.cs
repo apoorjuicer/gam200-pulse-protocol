@@ -243,9 +243,11 @@ public class NavigationButtons : Script
         
         bool isHowToPlayOverlayButton = texLower.Contains("temp_close") || texLower.Contains("close_htp");
 
-        bool isOverlayButton = isQuitOverlayButton || isPauseOverlayButton;
+        //vvv Add the buttons that can be clicked, when there is an overlay
+        bool isOverlayButton = isQuitOverlayButton || isPauseOverlayButton || isHowToPlayOverlayButton;
 
-        if ((ShowQuitOverlay || ShowPauseOverlay) && !isOverlayButton)
+        // Add for when you have overlay and dont want buttons below em to be clicked. 
+        if ((ShowQuitOverlay || ShowPauseOverlay || ShowHowToPlayOverlay) && !isOverlayButton)
         {
             if (isCurrentlyHovered)
             {
