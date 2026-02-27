@@ -23,7 +23,7 @@ public class TestScript : Script
     float sceneCoolDown = 10.0f;
     bool hasSpawned = false;
     bool said = false;
-    float gayshitttt = 120.0f;
+    //float gayshitttt = 120.0f;
     public override void Update()
     {
         //Console.Write("gay 1\n");
