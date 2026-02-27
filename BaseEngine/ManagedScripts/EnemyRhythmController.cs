@@ -122,6 +122,14 @@ public class EnemyRhythmController : Script
             return;
         }
 
+        // ONLY FOR BEN TO TEST 
+        InputComponent input = GetInput();
+        if (input.IsKeyTriggered(32)) 
+        {
+            TakeDamage(10f);
+            Console.WriteLine($"TESTING!!!!!!! DO 5 damage! HP remaining: {Health}\n\n\n\n\n\n\n\n\n\n\n\n\n");
+        }
+
         if (!playerFound)
         {
             TryFindPlayer();
@@ -166,7 +174,7 @@ public class EnemyRhythmController : Script
                     {
                         deathNotified = true;
                         Instance = null;                           // clear singleton now that animation is done
-                        EnemySpawner.Instance?.OnEnemyDefeated(); // tell spawner it's safe to continue
+                        EnemySpawner.Instance?.OnEnemyDefeated();  // tell spawner it's safe to continue
                     }
                 }
             }
