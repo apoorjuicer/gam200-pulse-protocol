@@ -48,8 +48,6 @@ public class NavigationButtons : Script
     private bool isPauseButton = false;
     private float hoverScaleBoost = 1.05f;
 
-    private bool hasPlayedHoverSound = false;
-
     private static bool wasEscPressed = false;
 
     public override void Update()
@@ -184,7 +182,6 @@ public class NavigationButtons : Script
                     t.ScaleY = t.ScaleY / hoverScaleBoost;
 
                     isCurrentlyHovered = false;
-                    hasPlayedHoverSound = false;
                 }
 
                 t.IsVisible = shouldBeVisible;
@@ -286,7 +283,6 @@ public class NavigationButtons : Script
             isCurrentlyHovered = true;
 
             PlayHoverSound();
-            hasPlayedHoverSound = true;
         }
         else if (!isHovered && isCurrentlyHovered)
         {
@@ -296,8 +292,6 @@ public class NavigationButtons : Script
             transform.ScaleX = currentScaleX / hoverScaleBoost;
             transform.ScaleY = currentScaleY / hoverScaleBoost;
             isCurrentlyHovered = false;
-
-            hasPlayedHoverSound = false;
         }
 
         if (isHovered && input.IsMouseButtonTriggered(0))

@@ -109,12 +109,6 @@ public class TestScript : Script
         //Console.WriteLine($"Current Animation: {AM.GetCurrentAnimation()}");
 
 
-        // scuff way I tested VFX API Lmao, IT PRINTS BUT I NO CLUE IF ANYTHING ELSE
-        VFXAPI.SetBPM(gayshitttt);
-        VFXAPI.BeatPulse();
-        //VFXAPI.PlayHit(HitResult.Perfect, 50.0f, 50.0f);
-        //VFXAPI.PlayHit(HitResult.Good, 400, 300);
-
     }
 }
 

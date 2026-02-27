@@ -20,7 +20,7 @@ public class DebugEnemyCheats : Script
                 }
 
                 Console.WriteLine("[Cheat] Forcing enemy death...");
-                EnemyRhythmController.Instance.TakeDamage(999999f);
+                EnemyRhythmController.Instance!.TakeDamage(999999f);
             }
         }
         catch (Exception ex)

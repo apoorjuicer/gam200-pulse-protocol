@@ -9,7 +9,7 @@ public class EnemyRhythmController : Script
     // =========================
     // Global Access (Singleton)
     // =========================
-    public static EnemyRhythmController Instance { get; private set; }
+    public static EnemyRhythmController? Instance { get; private set; }
 
     // === SPRITE SHEET SETTINGS ===
     public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_634x433";
@@ -101,7 +101,7 @@ public class EnemyRhythmController : Script
     // Track which ComboSystem instance the weakness was set on.
     // If ComboSystem.Instance changes (new play session), we re-set so we never
     // leave the weakness pinned to a stale ComboSystem from a previous session.
-    private ComboSystem weaknessSetOnInstance = null;
+    private ComboSystem? weaknessSetOnInstance = null;
 
     // Debug
     private int collisionCheckCount = 0;
@@ -425,7 +425,7 @@ public class EnemyRhythmController : Script
     {
         if (TurnManager.Instance == null) return;
 
-        TurnPhase currentPhase = TurnManager.Instance.GetCurrentPhase();
+        TurnPhase currentPhase = TurnManager.Instance!.GetCurrentPhase();
 
         if (currentPhase == TurnPhase.Countdown)
         {

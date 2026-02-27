@@ -24,6 +24,7 @@
 #include "Physics/collision.h" 
 #include "DebugDraw.h"
 #include "Layer.h"
+#include "GameLogic/VFX/ParticleSystem.h"
 
 // for .net
 #include "CoreEngine/Core/ImportExport.h"
@@ -215,6 +216,10 @@ public:
 
 	static Camera2D gEditorCamera;   // used only in editor
 	static Camera2D gGameCamera;     // used only during Play
+
+	// Set each frame before draw() to render textured VFX particles through gBatch
+	static void SetVFXParticles(const std::vector<Particle>* particles) { sVFXParticles = particles; }
+	static const std::vector<Particle>* sVFXParticles;
 
 
 	static glm::vec2 ScreenToNDC(double x, double y);

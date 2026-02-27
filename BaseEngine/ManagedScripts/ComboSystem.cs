@@ -7,7 +7,7 @@ public class ComboSystem : Script
     // =========================
     // Global Access (Singleton)
     // =========================
-    public static ComboSystem Instance { get; private set; }
+    public static ComboSystem? Instance { get; private set; }
 
     // =========================
     // Config
@@ -113,12 +113,12 @@ public class ComboSystem : Script
             return;
 
 
-        cachedBeatDuration = Conductor.Instance.GetBeatDuration();
+        cachedBeatDuration = Conductor.Instance!.GetBeatDuration();
 
         float dt = Time.DeltaTime;
         timeSinceLastBeat += dt;
 
-        int currentBeat = Conductor.Instance.GetCurrentBeat();
+        int currentBeat = Conductor.Instance!.GetCurrentBeat();
 
         // ---- Guard against duplicate beat events ----
         // Only reset the timer if the beat index actually advanced.
@@ -155,8 +155,8 @@ public class ComboSystem : Script
             return;
         }
 
-        float currentSongTime = Conductor.Instance.GetSongTime();
-        float beatDuration = Conductor.Instance.GetBeatDuration();
+        float currentSongTime = Conductor.Instance!.GetSongTime();
+        float beatDuration = Conductor.Instance!.GetBeatDuration();
 
         float timeSince = currentSongTime % beatDuration;
         float timeUntilNext = beatDuration - timeSince;
@@ -172,8 +172,8 @@ public class ComboSystem : Script
         // timeSince <= timeUntilNext means the player is in the first half of the beat interval
         // and is closer to the beat that just fired; otherwise closer to the next beat.
         int targetBeat = (timeSince <= timeUntilNext)
-            ? Conductor.Instance.GetCurrentBeat()
-            : Conductor.Instance.GetCurrentBeat() + 1;
+            ? Conductor.Instance!.GetCurrentBeat()
+            : Conductor.Instance!.GetCurrentBeat() + 1;
 
         if (targetBeat == lastInputBeat)
         {
@@ -205,6 +205,7 @@ public class ComboSystem : Script
             lastInputBeat = -1; // free the slot so they can retry on the same beat window
             if (ComboDisplayManager.Instance != null)
                 ComboDisplayManager.Instance.ShowJudgement("MISS");
+            // Camera shake feedback for a bad press can be added here via VFXAPI.ShakeCamera / VFXAPI.SpawnParticles
             return;
         }
 

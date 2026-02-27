@@ -8,7 +8,7 @@ public class PlayerAnimationController : Script
     // =========================
     // Singleton
     // =========================
-    public static PlayerAnimationController Instance { get; private set; }
+    public static PlayerAnimationController? Instance { get; private set; }
 
     // =========================
     // Sprite Sheet Paths

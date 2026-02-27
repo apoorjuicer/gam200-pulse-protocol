@@ -70,9 +70,9 @@ public abstract class AudioSliderKnobBase : Script
     private float dragOffsetX = 0.0f;
 
     // Robust held binding (click uses IsMouseButtonTriggered like your hover buttons)
-    private object cachedInputObj;
-    private System.Reflection.MethodInfo heldMI = null;
-    private Type heldParamType = null;
+    private object? cachedInputObj;
+    private System.Reflection.MethodInfo? heldMI = null;
+    private Type? heldParamType = null;
 
     public override void Update()
     {
@@ -319,15 +319,15 @@ public abstract class AudioSliderKnobBase : Script
             out heldParamType);
     }
 
-    private System.Reflection.MethodInfo FindBool1ParamMethod(object obj, string[] names, out Type paramType)
+    private System.Reflection.MethodInfo? FindBool1ParamMethod(object obj, string[] names, out Type? paramType)
     {
         paramType = null;
         Type tp = obj.GetType();
 
         foreach (string name in names)
         {
-            System.Reflection.MethodInfo best = null;
-            Type bestParam = null;
+            System.Reflection.MethodInfo? best = null;
+            Type? bestParam = null;
 
             foreach (var mi in tp.GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
             {
@@ -347,7 +347,7 @@ public abstract class AudioSliderKnobBase : Script
                 {
                     if (pt == typeof(int) && bestParam != typeof(int)) { best = mi; bestParam = pt; }
                     else if (pt == typeof(uint) && bestParam != typeof(int) && bestParam != typeof(uint)) { best = mi; bestParam = pt; }
-                    else if (pt.IsEnum && !(bestParam == typeof(int) || bestParam == typeof(uint) || bestParam.IsEnum)) { best = mi; bestParam = pt; }
+                    else if (pt.IsEnum && !(bestParam == typeof(int) || bestParam == typeof(uint) || bestParam!.IsEnum)) { best = mi; bestParam = pt; }
                 }
             }
 
@@ -363,12 +363,14 @@ public abstract class AudioSliderKnobBase : Script
 
     private bool MouseHeld(InputComponent input, int button)
     {
-        if (heldMI == null || heldParamType == null)
+        var mi = heldMI;
+        var pt = heldParamType;
+        if (mi == null || pt == null)
             return dragging; // fallback: keep dragging
 
-        object arg = ConvertButtonArg(heldParamType, button);
+        object arg = ConvertButtonArg(pt, button);
 
-        try { return (bool)heldMI.Invoke(input, new object[] { arg }); }
+        try { return (bool?)mi.Invoke(input, new object[] { arg }) ?? dragging; }
         catch { return dragging; }
     }
 

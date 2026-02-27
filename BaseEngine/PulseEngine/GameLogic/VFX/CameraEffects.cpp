@@ -14,6 +14,7 @@
 
 #include "CameraEffects.h"
 #include <cstdlib>
+#include <cmath>
 
 float CameraEffects::Rand01()
 {
@@ -22,7 +23,7 @@ float CameraEffects::Rand01()
 
 void CameraEffects::AddBeatPunch(const PunchDesc& d)
 {
-    // “Punch” just sets the target amount; Update() eases it back
+    // ï¿½Punchï¿½ just sets the target amount; Update() eases it back
     mPunchZoom01 = (mPunchZoom01 < d.zoomAmount) ? d.zoomAmount : mPunchZoom01;
     mPunchReturnSpeed = d.zoomReturnSpeed;
 }
@@ -43,22 +44,17 @@ void CameraEffects::Update(float dt)
         if (mPunchZoom01 < 0.0f) mPunchZoom01 = 0.0f;
     }
 
-    // Shake decay
-    if (mShakeStrength > 0.0f)
+    // Shake decay (exponential so small amplitudes persist across frames)
+    if (mShakeStrength > 0.0001f)
     {
-        mShakeStrength -= mShakeDecay * dt;
-        if (mShakeStrength < 0.0f) mShakeStrength = 0.0f;
-    }
-
-    // Random offset each frame while shaking
-    if (mShakeStrength > 0.0f)
-    {
+        mShakeStrength *= std::exp(-mShakeDecay * dt);
         float ox = (Rand01() * 2.0f - 1.0f) * mShakeStrength;
         float oy = (Rand01() * 2.0f - 1.0f) * mShakeStrength;
         mShakeOffset = { ox, oy };
     }
     else
     {
+        mShakeStrength = 0.0f;
         mShakeOffset = { 0.0f, 0.0f };
     }
 }

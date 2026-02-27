@@ -46,16 +46,17 @@ void ParticleSystem::SpawnBurst(const ParticleSpawnDesc& d)
         Particle* p = FindFree();
         if (!p) break;
 
-        p->active = true;
-        p->pos = d.position;
+        p->active    = true;
+        p->pos       = d.position;
+        p->textureID = d.textureID;
+        p->size      = d.sizeMin + (d.sizeMax - d.sizeMin) * Rand01();
 
         float a = Rand01() * 6.2831853f;
         float s = d.speedMin + (d.speedMax - d.speedMin) * Rand01();
         p->vel = glm::vec2(std::cos(a), std::sin(a)) * s;
 
         p->lifeMax = d.lifeMin + (d.lifeMax - d.lifeMin) * Rand01();
-        p->life = p->lifeMax;
-        p->size = 1.0f;
+        p->life    = p->lifeMax;
     }
 }
 

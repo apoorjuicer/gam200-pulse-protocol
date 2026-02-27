@@ -3,10 +3,9 @@ using ScriptAPI;
 
 public class OrderSlipCurrentIcon : Script
 {
-    private OrderSlipUIController registeredWith = null;
+    private OrderSlipUIController? registeredWith = null;
 
     private float slotX, slotY;
-    private bool wasTransitioning = false;
     private string lastSprite = "";
 
     public override void Update()
@@ -39,13 +38,10 @@ public class OrderSlipCurrentIcon : Script
             sprIdle.TintA = 1.0f;
 
             SetSprite(ui.GetVibrantSprite(ui.CurrentType));
-            wasTransitioning = false;
             return;
         }
 
         // During transition: fade out via alpha (1 → 0 over fadeDuration)
-        wasTransitioning = true;
-
         tf.X = slotX;
         tf.Y = slotY;
         tf.ScaleX = ui.currentScale;

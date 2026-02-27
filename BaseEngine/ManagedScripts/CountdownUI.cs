@@ -14,7 +14,7 @@ public class CountdownUI : Script
     // =========================
     // Global Access
     // =========================
-    public static CountdownUI Instance { get; private set; }
+    public static CountdownUI? Instance { get; private set; }
 
     // =========================
     // Config
@@ -54,8 +54,8 @@ public class CountdownUI : Script
         if (TurnManager.Instance == null || Conductor.Instance == null)
             return;
 
-        TurnPhase currentPhase = TurnManager.Instance.GetCurrentPhase();
-        int currentBeat = Conductor.Instance.GetCurrentBeat();
+        TurnPhase currentPhase = TurnManager.Instance!.GetCurrentPhase();
+        int currentBeat = Conductor.Instance!.GetCurrentBeat();
 
         // Only show during countdown phase
         if (currentPhase == TurnPhase.Countdown)
@@ -113,8 +113,8 @@ public class CountdownUI : Script
         if (TurnManager.Instance == null)
             return;
 
-        int beatsInPhase = TurnManager.Instance.GetBeatsInCurrentPhase();
-        int beatsRemaining = TurnManager.Instance.GetBeatsRemainingInPhase();
+        int beatsInPhase = TurnManager.Instance!.GetBeatsInCurrentPhase();
+        int beatsRemaining = TurnManager.Instance!.GetBeatsRemainingInPhase();
 
         // Map beats to countdown numbers
         // Beat 0 = "3"

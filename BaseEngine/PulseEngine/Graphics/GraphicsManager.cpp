@@ -42,6 +42,7 @@
 //ECS
 #include "CoreEngine/ECS/Coordinator.h"
 #include "CoreEngine/ECS/Types.h"
+#include "GameLogic/GameLogic.h"  // for LogicSystem VFX access
 
 // These are the asset keys we expect to exist after AssetsManager::LoadAllFonts()
 // namespace {
@@ -258,6 +259,24 @@ void GraphicsManager::Update()
 
     // Update entity alpha fades before drawing (modifies Renderable.tintColor.a)
     UpdateEntityFades(static_cast<float>(GLHelper::delta_time));
+
+    // Apply VFX camera punch and shake to the game camera each frame,
+    // and supply the particle list for textured particle rendering.
+    if (Framework::GameState::IsPlaying())
+    {
+        if (auto logic = Coordinator::GetInstance()->GetSystem<LogicSystem>())
+        {
+            constexpr float BASE_GAME_ZOOM = 0.6f;
+            auto& vfx = logic->GetVfx();
+            GLApp::gGameCamera.zoom   = BASE_GAME_ZOOM * (1.0f + vfx.GetPunchZoom01());
+            GLApp::gGameCamera.center = vfx.GetShakeOffset();
+            GLApp::SetVFXParticles(&vfx.GetParticles());
+        }
+    }
+    else
+    {
+        GLApp::SetVFXParticles(nullptr);
+    }
 
     //--- Rendering passes ---
     glapp->draw(EntityMember, m_editorLayerFilter);
@@ -487,13 +506,32 @@ bool GraphicsManager::LoadTexturesFromRegistry()
 
 GLuint GraphicsManager::GetOrLoad(const std::string &tex_name)
 {
+    // 1. Fast path: already in cache
     if (auto it = texHandle_key.find(tex_name); it != texHandle_key.end())
         return it->second;
+
+    // 2. Try resolving via registry (tex_name may be a logical ID like "particle")
+    if (mRegistry)
+    {
+        std::string resolvedPath = mRegistry->GetTextureItemPath(tex_name);
+        if (!resolvedPath.empty())
+        {
+            GLuint tex_id = LoadTextureFile(resolvedPath);
+            if (tex_id)
+            {
+                texHandle_key[tex_name] = tex_id;
+                texHandle_id[tex_id]    = tex_name;
+                return tex_id;
+            }
+        }
+    }
+
+    // 3. Last resort: treat tex_name as a raw file path
     GLuint tex_id = LoadTextureFile(tex_name);
     if (tex_id)
     {
         texHandle_key[tex_name] = tex_id;
-        texHandle_id[tex_id] = tex_name;
+        texHandle_id[tex_id]    = tex_name;
     }
     return tex_id;
 }

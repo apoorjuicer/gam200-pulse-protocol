@@ -1126,6 +1126,25 @@ void CoreEngine::RenderDebugDraw()
 		-worldH * 0.5f, worldH * 0.5f);
 	DebugDraw::Begin(projection);
 
+	// --- VFX Particles ---
+	// Render active particles from the VFX system as small shrinking dots.
+	// Particles carry world-space positions, which match the DebugDraw projection.
+	if (Framework::GameState::IsPlaying())
+	{
+		if (auto logic = g_coordinator->GetSystem<LogicSystem>())
+		{
+			for (const auto& p : logic->GetVfx().GetParticles())
+			{
+				if (!p.active) continue;
+				if (p.textureID != 0) continue; // textured particles rendered via gBatch in glapp
+				float lifeRatio = (p.lifeMax > 0.0f) ? (p.life / p.lifeMax) : 0.0f;
+				float radius    = p.size * lifeRatio; // shrinks to 0 as particle expires
+				glm::vec3 color = { 1.0f, 0.75f + 0.25f * lifeRatio, 0.2f * lifeRatio };
+				DebugDraw::DrawCircleFilled({ p.pos.x, p.pos.y }, radius, color, 6);
+			}
+		}
+	}
+
 	// F1 - DrawRect
 	if (g_inputSystem->isDebugRectsEnabled())
 	{

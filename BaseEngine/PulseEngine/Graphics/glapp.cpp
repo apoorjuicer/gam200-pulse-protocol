@@ -80,6 +80,7 @@ double random()
 
 GLApp::Camera2D GLApp::gEditorCamera{};
 GLApp::Camera2D GLApp::gGameCamera{};
+const std::vector<Particle>* GLApp::sVFXParticles = nullptr;
 
 void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/)
 {
@@ -188,10 +189,8 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 
 void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 
-	glm::mat3 PanZoom = BuildPanZoomNDC(gEditorCamera);
-
-	// Build final camera matrix from the active camera
-	//glm::mat3 PanZoom = BuildPanZoomNDC(activeCam);
+	// Use game camera during play, editor camera in edit mode
+	glm::mat3 PanZoom = BuildPanZoomNDC(Framework::GameState::IsPlaying() ? gGameCamera : gEditorCamera);
 
 	// ========================== REST OF YOUR DRAW ===========================
 	auto* g_coordinator = Coordinator::GetInstance();
@@ -360,6 +359,37 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 
 		drawTrans(re, an, tr, PanZoom, drawOrder);
 		drawOrder++;
+	}
+
+	// --- Textured VFX particles ---
+	// Render particles that carry a texture ID as sprite quads in the world.
+	// Uses sprite shader (shd_ref=2) and sprite quad model (mdl_ref=1).
+	// Position and size are in VIRTUAL_W/H (1920x1080) world-pixel space.
+	if (sVFXParticles)
+	{
+		for (const auto& p : *sVFXParticles)
+		{
+			if (!p.active || p.textureID == 0) continue;
+			float lifeRatio = (p.lifeMax > 0.0f) ? (p.life / p.lifeMax) : 0.0f;
+			float s = p.size * lifeRatio; // shrink with life
+			if (s <= 0.0f) continue;
+
+			// Build model-to-NDC (matches Transform.cpp: ScreenToNDC * T * S)
+			float sNDCx = s / float(VIRTUAL_W);
+			float sNDCy = s / float(VIRTUAL_H);
+			float tx    = p.pos.x * 2.0f / float(VIRTUAL_W);
+			float ty    = p.pos.y * 2.0f / float(VIRTUAL_H);
+			glm::mat3 M(
+				sNDCx,  0.0f,  0.0f,
+				0.0f,   sNDCy, 0.0f,
+				tx,     ty,    1.0f
+			);
+			glm::mat3 modelNDC = PanZoom * M;
+
+			gBatch.Push(2, 1, p.textureID, 5000, modelNDC,
+				0.0f, 0.0f, 1.0f, 1.0f,
+				glm::vec4(1.0f, 1.0f, 1.0f, lifeRatio));
+		}
 	}
 
 	gBatch.Flush(shdrpgms);

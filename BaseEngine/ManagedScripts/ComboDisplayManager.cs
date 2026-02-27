@@ -7,7 +7,7 @@ public class ComboDisplayManager : Script
     // =========================
     // Global Access (Singleton)
     // =========================
-    public static ComboDisplayManager Instance { get; private set; }
+    public static ComboDisplayManager? Instance { get; private set; }
 
     // =========================
     // Configuration
@@ -29,7 +29,7 @@ public class ComboDisplayManager : Script
     // =========================
     private static Dictionary<int, ComboKeySlot> enemySlots = new Dictionary<int, ComboKeySlot>();
     private static Dictionary<int, ComboKeySlot> playerSlots = new Dictionary<int, ComboKeySlot>();
-    private static ComboJudgementDisplay judgementScript = null;
+    private static ComboJudgementDisplay? judgementScript = null;
 
     // =========================
     // Beat Reveal State
@@ -116,11 +116,11 @@ public class ComboDisplayManager : Script
         if (ComboSystem.Instance == null)
             return;
 
-        int currentProgress = ComboSystem.Instance.GetComboProgress();
+        int currentProgress = ComboSystem.Instance!.GetComboProgress();
 
         if (currentProgress > lastComboProgress)
         {
-            string combo = ComboSystem.Instance.GetCurrentComboString();
+            string combo = ComboSystem.Instance!.GetCurrentComboString();
 
             if (combo.Length > 0)
             {
@@ -195,7 +195,7 @@ public class ComboDisplayManager : Script
     {
         if (Conductor.Instance == null) return;
 
-        int currentBeat = Conductor.Instance.GetCurrentBeat();
+        int currentBeat = Conductor.Instance!.GetCurrentBeat();
         
         // Show first key immediately on the same frame StartComboReveal is called
         if (revealIndex == 0)

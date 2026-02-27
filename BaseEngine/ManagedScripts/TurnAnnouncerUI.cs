@@ -34,7 +34,7 @@ public class TurnAnnouncerUI : Script
         if (TurnManager.Instance == null)
             return;
 
-        TurnPhase phase = TurnManager.Instance.GetCurrentPhase();
+        TurnPhase phase = TurnManager.Instance!.GetCurrentPhase();
 
         // Only act on phase transitions
         if (phase == lastPhase)

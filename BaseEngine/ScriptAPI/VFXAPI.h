@@ -4,8 +4,11 @@
  * @author		Goh Pin Kai
  *
  * @brief       C++/CLI bridge API for triggering gameplay VFX from managed code.
- *              Exposes static functions to notify the engine of hit judgements and
- *              beat/BPM events, forwarding calls to the LogicSystem's VFX controller.
+ *              All effects are explicitly opt-in — nothing fires automatically.
+ *
+ *  VFXAPI.BeatPulse()               — camera zoom punch
+ *  VFXAPI.ShakeCamera(amp, decay)   — camera shake only
+ *  VFXAPI.SpawnParticles(...)       — particle burst only (colored or textured)
  *
  * @copyright   Copyright (C) 2026
  *              DigiPen Institute of Technology.
@@ -15,22 +18,26 @@
 
 #pragma once
 
-//using namespace System;
-
 namespace ScriptAPI
 {
-    public enum class HitResult
-    {
-        Miss = 0,
-        Good = 1,
-        Perfect = 2
-    };
-
     public ref class VFXAPI abstract sealed
     {
     public:
-        static void PlayHit(HitResult result, float x, float y);
-        static void SetBPM(float bpm);
-        static void BeatPulse(); //opt
+        // Camera zoom punch (e.g. call from Conductor.cs on each beat)
+        static void BeatPulse();
+
+        // Camera shake only.
+        // amplitude: NDC displacement strength (0.02 = subtle, 0.06 = strong)
+        // decay: exponential falloff rate (higher = stops faster, ~8-14 is typical)
+        static void ShakeCamera(float amplitude, float decay);
+
+        // Particle burst only — colored circles (no texture).
+        // x, y: world-space spawn position (same coordinate system as entity transforms)
+        static void SpawnParticles(float x, float y, int count);
+
+        // Particle burst only — textured quads.
+        // textureName: asset ID registered in texture.json (e.g. "particle_star")
+        // size: world-pixel size of each particle (e.g. 64 = about 64px at default zoom)
+        static void SpawnParticles(float x, float y, int count, System::String^ textureName, float size);
     };
 }

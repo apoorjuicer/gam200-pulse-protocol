@@ -4,9 +4,6 @@
  * @author		Goh Pin Kai
  *
  * @brief       Implements the VFXAPI managed-to-native forwarding layer.
- *              Resolves the engine Coordinator and LogicSystem at runtime and
- *              invokes VFX callbacks (judgement, beat pulse, BPM updates). Also
- *              converts HitResult values into judgement strings used by the VFX system.
  *
  * @copyright   Copyright (C) 2026
  *              DigiPen Institute of Technology.
@@ -16,60 +13,64 @@
 #pragma once
 #define generic generic_workaround
 #include "VFXAPI.h"
-#include "../GameLogic/GameLogic.h"          // LogicSystem
-#include "../CoreEngine/ECS/Coordinator.h"        // Coordinator::GetInstance()
-#include <msclr/marshal_cppstd.h>   // for converting C# to C++ string
+#include "../GameLogic/GameLogic.h"
+#include "../CoreEngine/ECS/Coordinator.h"
+#include <msclr/marshal_cppstd.h>
 #undef generic
-
 
 namespace ScriptAPI
 {
-    static System::String^ ToJudgementString(HitResult r)
-    {
-        switch (r)
-        {
-        case HitResult::Perfect: return L"PERFECT";
-        case HitResult::Good:    return L"GOOD";
-        default:                 return L"MISS";
-        }
-
-    }
-
-    void VFXAPI::PlayHit(HitResult result, float x, float y)
-    {
-        // ITS BEING CALLED YIPPEEEEEEEEEEEEEEEEEEEEEE
-        System::Console::WriteLine("VFXAPI: PlayHit called with Result {0} at {1},{2}", result, x, y);
-
-        auto* c = Coordinator::GetInstance();
-        if (!c) return;
-
-        auto logic = c->GetSystem<LogicSystem>();
-        if (!logic) return;
-
-        
-        std::string judgement = msclr::interop::marshal_as<std::string>(ToJudgementString(result));
-        logic->GetVfx().OnJudgement(judgement, glm::vec2{x, y});
-    }
-
     void VFXAPI::BeatPulse()
     {
         auto* c = Coordinator::GetInstance();
         if (!c) return;
-
         auto logic = c->GetSystem<LogicSystem>();
         if (!logic) return;
 
         logic->GetVfx().OnBeat();
     }
 
-    void VFXAPI::SetBPM(float bpm)  //opt
+    void VFXAPI::ShakeCamera(float amplitude, float decay)
     {
         auto* c = Coordinator::GetInstance();
         if (!c) return;
-
         auto logic = c->GetSystem<LogicSystem>();
         if (!logic) return;
 
-        logic->GetVfx().SetBpm(bpm);
+        logic->GetVfx().ShakeCamera(amplitude, decay);
+    }
+
+    void VFXAPI::SpawnParticles(float x, float y, int count)
+    {
+        auto* c = Coordinator::GetInstance();
+        if (!c) return;
+        auto logic = c->GetSystem<LogicSystem>();
+        if (!logic) return;
+
+        ParticleSpawnDesc d;
+        d.position  = glm::vec2{ x, y };
+        d.count     = count;
+        d.speedMin  = 80.0f;
+        d.speedMax  = 300.0f;
+        d.lifeMin   = 0.25f;
+        d.lifeMax   = 0.55f;
+        d.sizeMin   = 8.0f;
+        d.sizeMax   = 16.0f;
+        d.textureID = 0;  // rendered as colored circle
+        logic->GetVfx().SpawnParticles(d);
+    }
+
+    void VFXAPI::SpawnParticles(float x, float y, int count, System::String^ textureName, float size)
+    {
+        auto* c = Coordinator::GetInstance();
+        if (!c) return;
+        auto logic = c->GetSystem<LogicSystem>();
+        if (!logic) return;
+
+        // Texture resolution happens natively in VFXManager using mAssets (no C++/CLI boundary issues)
+        std::string name = System::String::IsNullOrEmpty(textureName)
+            ? ""
+            : msclr::interop::marshal_as<std::string>(textureName);
+        logic->GetVfx().SpawnParticles(x, y, count, name, size);
     }
 }

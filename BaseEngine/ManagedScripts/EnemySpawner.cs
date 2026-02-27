@@ -7,7 +7,7 @@ public class EnemySpawner : Script
     // =========================
     // Singleton
     // =========================
-    public static EnemySpawner Instance { get; private set; }
+    public static EnemySpawner? Instance { get; private set; }
 
     // =========================
     // Spawn Settings

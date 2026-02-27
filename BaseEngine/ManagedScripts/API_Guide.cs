@@ -151,6 +151,85 @@ public class ScriptName : Script
         bool isVisible = text.IsVisible();  // returns bool, check if text is visible
 
         // Alignment: 0 = left, 1 = center, 2 = right (check TextAlignment enum)
-        text.SetAlignment(0);         
+        text.SetAlignment(0);
+
+        // 14. VFX API - all effects are explicitly opt-in, nothing fires automatically.
+
+        // --- Camera shake only ---
+        // BeatPulse: camera zoom-in punch (call from Conductor.cs on each beat)
+        VFXAPI.BeatPulse();
+
+        // ShakeCamera: camera shake
+        VFXAPI.ShakeCamera(0.08f, 10.0f); // MISS-grade  - strong
+        VFXAPI.ShakeCamera(0.05f, 8.0f);  // GOOD-grade  - moderate
+        VFXAPI.ShakeCamera(0.02f, 6.0f);  // PERFECT-grade - subtle
+
+        // --- Particles only ---
+        // Colored circles at a world position (no texture):
+        VFXAPI.SpawnParticles(0f, 0f, 10);   // MISS-grade   burst (10)
+        VFXAPI.SpawnParticles(0f, 0f, 18);   // GOOD-grade   burst (18)
+        VFXAPI.SpawnParticles(0f, 0f, 26);   // PERFECT-grade burst (26)
+
+        // Textured quads at a world position:
+        //   textureName = asset ID registered in texture.json
+        //   size        = world-pixel size of each particle
+        //   textureName(3rd parameter) of SpawnParticles must match the id inside texture.json 
+        //   id is created in this manner inside of texture.json:
+        //   { 
+        //     "id": "particle", "path": "../../PulseEngine/Assets/Textures/VFX/star.png",
+        //     "vert_shader_path": "shader/sprite_vs.vert", "frag_shader_path": "shader/sprite_fs.frag",
+        //     "mdl_ref": 1, "shd_ref": 2 
+        //   }
+        VFXAPI.SpawnParticles(0f, 0f, 12, "particle", 64f);
+
+
+        // 15. FadeAPI - SCREEN-WIDE fullscreen overlay fade.
+        //     Renders a colored overlay on top of ALL game content.
+        //     Use this for scene transitions (e.g. fade to black between scenes).
+        //     This is a STATIC class - no entity or component needed.
+        //
+        //   FadeOut: overlay alpha 0 - 1 (screen fills with color, game hidden)
+        //   FadeIn:  overlay alpha 1 - 0 (color clears, game becomes visible)
+        //
+        // Black fade (default color):
+        FadeAPI.FadeOut(1.0f);              // fade screen to black over 1 second
+        FadeAPI.FadeIn(1.0f);               // fade screen in from black over 1 second
+
+        // Colored fade (r, g, b in 0.0-1.0):
+        FadeAPI.FadeOut(0.5f, 1f, 0f, 0f); // fade to red over 0.5 s
+        FadeAPI.FadeIn(0.5f, 1f, 0f, 0f);  // fade in from red over 0.5 s
+
+        // Control & query:
+        FadeAPI.Stop();                     // immediately kill overlay (alpha to 0)
+        bool screenDone  = FadeAPI.IsFadeDone(); // true once interpolation finishes
+        float screenAlpha = FadeAPI.GetAlpha(); // current overlay alpha (0 = clear, 1 = opaque)
+        FadeAPI.SetAlpha(0.5f);             // jump to alpha instantly (no interpolation)
+
+        // example of a scene-transition:
+        //   FadeAPI.FadeOut(0.5f);
+        //   ... wait for IsFadeDone() ...
+        //   Scene.LoadScene("NextScene");
+        //   FadeAPI.FadeIn(0.5f);
+
+
+        // 16. FadeComponent - PER-ENTITY alpha fade.
+        //     Tweens the alpha (opacity) of THIS entity's sprite only.
+        //     Use this to fade individual sprites in or out independently.
+        //     Accessed via GetFade() - bound to the script's own entity.
+        //
+        FadeComponent entityFade = GetFade();
+
+        entityFade.FadeOut(1.0f);           // fade THIS entity to 0 alpha over 1 second
+        entityFade.FadeIn(1.0f);            // fade THIS entity to 1 alpha over 1 second
+        entityFade.FadeTo(0.5f, 1.0f);      // tween alpha to any target (0.0–1.0) over duration
+        entityFade.SetAlpha(1.0f);          // set alpha instantly (no tween)
+
+        float entityAlpha = entityFade.GetAlpha();   // current sprite alpha
+        bool  entityDone  = entityFade.IsDone();     // true when no tween is running
+
+        // example of a blink/flash an entity:
+        //   GetFade().FadeOut(0.1f);
+        //   ... wait for IsDone() ...
+        //   GetFade().FadeIn(0.1f);
     }
 }

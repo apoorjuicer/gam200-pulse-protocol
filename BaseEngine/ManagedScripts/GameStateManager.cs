@@ -77,8 +77,6 @@ public class GameStateManager : Script
     // Update Loop
     // =========================
 
-    private bool firstFrame = true;
-
     public override void Update()
     {
 

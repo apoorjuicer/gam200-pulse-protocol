@@ -11,7 +11,7 @@ public class ConductorBeatTester : Script
         float dt = Time.DeltaTime;
         timeSinceLastBeat += dt;
 
-        Conductor c = Conductor.Instance;
+        Conductor? c = Conductor.Instance;
         if (c == null)
         {
             if (Time.FrameCount % 60 == 0)

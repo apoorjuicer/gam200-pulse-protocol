@@ -27,7 +27,7 @@ public class VisualBeatSystem : Script
     {
         if (Conductor.Instance == null) return;
 
-        float spb = Conductor.Instance.SecondsPerBeat;
+        float spb = Conductor.Instance!.SecondsPerBeat;
         if (spb <= 0.0001f) return;
 
         TransformComponent t = GetTransform();
@@ -44,7 +44,7 @@ public class VisualBeatSystem : Script
         // =========================
         // Beat phase (0..1)
         // =========================
-        float songTime = Conductor.Instance.GetSongTime();
+        float songTime = Conductor.Instance!.GetSongTime();
 
         int ppb = Math.Max(1, pulsesPerBeat);
         float subBeat = spb / ppb;

@@ -3,8 +3,6 @@ using ScriptAPI;
 
 public class TestFSM : ScriptAPI.Script
 {
-    private int frame = 0;
-
     public override void Update()
     {
         var fsm = GetFSM();

@@ -69,7 +69,6 @@ public class MasterDiagnostic : Script
         CheckSystem("ComboDisplayManager", ComboDisplayManager.Instance != null, () => "");
         
         // Check if key slots are registered
-        bool allSlotsRegistered = true;
         for (int i = 0; i < 4; i++)
         {
             // We can't check the private dictionary, so just note it

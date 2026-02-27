@@ -3,9 +3,11 @@
  * @project     Pulse Protocol
  * @author		Goh Pin Kai
  *
- * @brief       Central VFX controller combining beat tracking, camera feedback, and
- *              particle bursts. Reacts to beat events and hit judgements (MISS/GOOD/
- *              PERFECT), producing camera punch/shake outputs and particle data for rendering.
+ * @brief       Central VFX controller for camera feedback and particle bursts.
+ *              All effects are triggered explicitly via the VFXAPI - there is no
+ *              automatic beat tracking. Reacts to hit judgements (MISS/GOOD/PERFECT)
+ *              and manual beat pulses, producing camera punch/shake outputs and
+ *              particle data for rendering.
  *
  * @copyright  Copyright (C) 2026 DigiPen Institute of Technology.
  *             Reproduction or disclosure of this file or its contents without the
@@ -17,11 +19,9 @@
 #include <glm/vec2.hpp>
 #include "ParticleSystem.h"
 #include "CameraEffects.h"
-#include "BeatTracker.h"
 
  //for .NET
 #include "CoreEngine/Core/ImportExport.h" // for DLL_API
-// stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
 #pragma warning(push)
 #pragma warning(disable: 4251)
 
@@ -29,30 +29,35 @@
 class DLL_API VFXManager
 {
 public:
-    void Init(float bpm, size_t maxParticles);
+    void Init(size_t maxParticles);
 
-    void SetBpm(float bpm);
-    void Update(float dt, float songTimeSec);
-    void Update(float dt) { Update(dt, -1.0f); }    //function overload for update
+    void Update(float dt);
 
-    // call this when beat occurs (or when BeatTracker says “beat”)
+    // Call explicitly to trigger a camera zoom punch (e.g. from Conductor.cs on each beat)
     void OnBeat();
 
-    // call this when judgement occurs ("MISS", "GOOD", "PERFECT")
+    // Call with judgement string ("MISS", "GOOD", "PERFECT") to spawn particles + shake
     void OnJudgement(const std::string& judgement, const glm::vec2& worldPos);
 
-    // camera outputs (apply to your camera each frame)
+    // --- Separate designer APIs ---
+    // Trigger camera shake only (amplitude = NDC displacement strength, ~0.02-0.08)
+    void ShakeCamera(float amplitude, float decay);
+
+    // Spawn particles only (no shake). Fill desc with position, count, texture, size, speed.
+    void SpawnParticles(const ParticleSpawnDesc& desc);
+
+    // Convenience overload: resolves texture name to GL ID via mAssets on the native side.
+    void SpawnParticles(float x, float y, int count, const std::string& textureName, float size);
+
+    // Camera outputs (read by GraphicsManager each frame)
     float GetPunchZoom01() const { return mCamFx.GetPunchZoom01(); }
     glm::vec2 GetShakeOffset() const { return mCamFx.GetShakeOffset(); }
 
     const std::vector<Particle>& GetParticles() const { return mParticles.GetParticles(); }
 
 private:
-    float mBpm = 120.0f;
-
     ParticleSystem mParticles;
     CameraEffects  mCamFx;
-    BeatTracker    mBeat;
 
     // Tuning per judgement
     void SpawnForMiss(const glm::vec2& p);

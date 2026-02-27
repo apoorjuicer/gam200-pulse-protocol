@@ -3,7 +3,7 @@ using ScriptAPI;
 
 public class OrderSlipNextIcon : Script
 {
-    private OrderSlipUIController registeredWith = null;
+    private OrderSlipUIController? registeredWith = null;
 
     private float slotX, slotY;
     private bool wasTransitioning = false;

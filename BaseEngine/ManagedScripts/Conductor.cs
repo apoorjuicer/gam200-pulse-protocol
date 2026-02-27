@@ -21,8 +21,6 @@ public class Conductor : Script
     private float nextHalfBeat;
     private int lastBeat = -1;
     private bool initialized = false;
-    private float counter = 3.0f;
-
     public float GetBeatDuration()
     {
         return 60.0f / BPM;

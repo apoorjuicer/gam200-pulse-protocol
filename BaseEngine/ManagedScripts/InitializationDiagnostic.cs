@@ -8,7 +8,6 @@ using ScriptAPI;
 /// </summary>
 public class InitializationDiagnostic : Script
 {
-    private bool hasRun = false;
     private int frameCount = 0;
     private const int checkUntilFrame = 10; // Check for first 10 frames
 
@@ -91,8 +90,8 @@ public class InitializationDiagnostic : Script
             if (allGood)
             {
                 Console.WriteLine("[Diagnostic] ✅ ALL SYSTEMS INITIALIZED CORRECTLY!");
-                Console.WriteLine($"[Diagnostic] Expected combo: {ComboSystem.Instance.GetExpectedCombo()}");
-                Console.WriteLine($"[Diagnostic] Current phase: {TurnManager.Instance.GetCurrentPhase()}");
+                Console.WriteLine($"[Diagnostic] Expected combo: {ComboSystem.Instance!.GetExpectedCombo()}");
+                Console.WriteLine($"[Diagnostic] Current phase: {TurnManager.Instance!.GetCurrentPhase()}");
             }
 
             Console.WriteLine("==========================================\n");

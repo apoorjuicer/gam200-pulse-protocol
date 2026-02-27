@@ -3,7 +3,7 @@ using ScriptAPI;
 
 public class HealthBGController : Script
 {
-    public static HealthBGController Instance { get; private set; }
+    public static HealthBGController? Instance { get; private set; }
 
     // Back Glow Sprites
     public string blueGlowSprite = "../../PulseEngine/Assets/Textures/UI/back glow blue.png";

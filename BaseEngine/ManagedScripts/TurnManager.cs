@@ -14,7 +14,7 @@ public class TurnManager : Script
     // =========================
     // Global Access (Singleton)
     // =========================
-    public static TurnManager Instance { get; private set; }
+    public static TurnManager? Instance { get; private set; }
 
     // =========================
     // Config
@@ -64,7 +64,7 @@ public class TurnManager : Script
         if (Conductor.Instance == null)
             return;
 
-        int currentBeat = Conductor.Instance.GetCurrentBeat();
+        int currentBeat = Conductor.Instance!.GetCurrentBeat();
 
         // Only process on new beats
         if (currentBeat == lastBeat)
@@ -125,7 +125,7 @@ public class TurnManager : Script
                 // Wait for the death animation to finish before advancing.
                 // IsDying stays true for 2.5s after Die() fires; only becomes null
                 // once the animation completes and the spawner is notified.
-                if (EnemyRhythmController.Instance == null || EnemyRhythmController.Instance.IsDying)
+                if (EnemyRhythmController.Instance == null || EnemyRhythmController.Instance!.IsDying)
                 {
                     Console.WriteLine("[TurnManager] Resolution: waiting for death animation / next enemy...");
                     break;
@@ -165,7 +165,7 @@ public class TurnManager : Script
 
         if (Conductor.Instance != null)
         {
-            phaseStartBeat = Conductor.Instance.GetCurrentBeat();
+            phaseStartBeat = Conductor.Instance!.GetCurrentBeat();
             lastBeat = phaseStartBeat;
         }
 
@@ -180,7 +180,7 @@ public class TurnManager : Script
     private void StartEnemyDisplay()
     {
         currentPhase = TurnPhase.EnemyDisplay;
-        phaseStartBeat = Conductor.Instance.GetCurrentBeat();
+        phaseStartBeat = Conductor.Instance!.GetCurrentBeat();
 
         Console.WriteLine("[TurnManager] === ENEMY TURN ===");
         Console.WriteLine($"[TurnManager] Displaying combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
@@ -209,7 +209,7 @@ public class TurnManager : Script
         // Subtract 1 so the transition beat counts as beat 1 of the input window.
         // This guarantees the player can press on the same beat the phase opens,
         // regardless of whether InputBridge or TurnManager updates first.
-        phaseStartBeat = Conductor.Instance.GetCurrentBeat() - 1;
+        phaseStartBeat = Conductor.Instance!.GetCurrentBeat() - 1;
 
         Console.WriteLine("[TurnManager] === PLAYER TURN ===");
         Console.WriteLine($"[TurnManager] Input the combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
@@ -281,7 +281,7 @@ public class TurnManager : Script
         if (Conductor.Instance == null)
             return 0;
 
-        return Conductor.Instance.GetCurrentBeat() - phaseStartBeat;
+        return Conductor.Instance!.GetCurrentBeat() - phaseStartBeat;
     }
 
     public int GetBeatsRemainingInPhase()

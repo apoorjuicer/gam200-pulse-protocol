@@ -92,7 +92,7 @@ void LogicSystem::Init()
     //        });
     //}
 
-    mVfx.Init(/*bpm=*/120.0f, /*maxParticles=*/2000);
+    mVfx.Init(/*maxParticles=*/2000);
 
     /*AddScript("PlayerScript", std::make_shared<PlayerScript>());*/
     AddScript("EnemyScript", std::make_shared<EnemyScript>());
@@ -102,14 +102,7 @@ void LogicSystem::Init()
 
 void LogicSystem::Update(float dt)
 {
-    float songTimeSec = -1.0f;
-    if (auto* c = Coordinator::GetInstance())
-    {
-        if (auto audio = c->GetSystem<AudioManager>())
-            songTimeSec = (float)audio->GetBGMPositionSeconds();
-    }
-
-    mVfx.Update(dt, songTimeSec);
+    mVfx.Update(dt);
     // don't update scripts, if not playing the game
     if (!Engine->IsPlaying()) {
         return;

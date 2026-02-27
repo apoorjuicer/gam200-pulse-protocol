@@ -3,7 +3,7 @@ using ScriptAPI;
 
 public class HealthBarController : Script
 {
-    public static HealthBarController Instance { get; private set; }
+    public static HealthBarController? Instance { get; private set; }
 
     private string[] healthFrames = new string[]
     {

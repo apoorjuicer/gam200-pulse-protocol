@@ -7,7 +7,7 @@ public class PlayerHealth : Script
     // =========================
     // Singleton Access
     // =========================
-    public static PlayerHealth Instance { get; private set; }
+    public static PlayerHealth? Instance { get; private set; }
 
     // =========================
     // Config

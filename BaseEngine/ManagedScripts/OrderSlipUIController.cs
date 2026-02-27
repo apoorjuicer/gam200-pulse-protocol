@@ -5,7 +5,7 @@ public enum EnemyIconType { None, Rat, Bat, Gorilla }
 
 public class OrderSlipUIController : Script
 {
-    public static OrderSlipUIController Instance;
+    public static OrderSlipUIController? Instance;
 
     // Tunables
     //public float currentScale = 1.0f; //NO SHIT IT DISAPEAR ITS 1
