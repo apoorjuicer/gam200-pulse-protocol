@@ -24,6 +24,13 @@ public class TurnAnnouncerUI : Script
             return;
         }
 
+        // Hide during pause overlay
+        if (NavigationButtons.ShowPauseOverlay)
+        {
+            Hide();
+            return;
+        }
+
         if (TurnManager.Instance == null)
             return;
 
@@ -43,12 +50,16 @@ public class TurnAnnouncerUI : Script
     // =========================
     private void Initialize()
     {
+        // Reset old instance if it's stale
         Instance = this;
+
+        // Null out on re-init so stale references don't persist
+        lastPhase = TurnPhase.Countdown;
+        initialized = false; // will be set true at end
 
         var text = GetTextComponent();
         text.SetFontSize(FontSize);
-        text.SetAlignment(1); // center
-        // text.SetColor(1.0f, 0.0f, 0.0f); // red
+        text.SetAlignment(1);
 
         Hide();
 

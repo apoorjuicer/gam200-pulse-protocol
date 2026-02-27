@@ -40,7 +40,20 @@ public class LevelCountdown : Script
         }
 
         float dt = Time.DeltaTime;
-        if (NavigationButtons.ShowPauseOverlay) return;
+
+        // Hide/show countdown text based on pause overlay
+        if (NavigationButtons.ShowPauseOverlay)
+        {
+            text.SetVisible(false);  // hide during pause
+            return;
+        }
+        else
+        {
+            // Only restore visibility if countdown is still running
+            if (step >= 0)
+                text.SetVisible(true);  // show again when unpaused
+        }
+        
         if (dt == 0f) dt = 0.016f; // keep ticking even if engine paused
         t += dt;
 
