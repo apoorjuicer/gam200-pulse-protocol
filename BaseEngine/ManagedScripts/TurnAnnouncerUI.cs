@@ -64,10 +64,10 @@ public class TurnAnnouncerUI : Script
         switch (phase)
         {
             case TurnPhase.EnemyDisplay:
-                ShowEnemy("Enemy's Turn!");
+                ShowEnemy("MEMORIZE!");
                 break;
             case TurnPhase.PlayerInput:
-                ShowPlayer("Your Turn!");
+                ShowPlayer("INPUT NOW!");
                 break;
             default:
                 Hide();
