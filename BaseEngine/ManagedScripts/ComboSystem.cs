@@ -205,6 +205,7 @@ public class ComboSystem : Script
             lastInputBeat = -1; // free the slot so they can retry on the same beat window
             if (ComboDisplayManager.Instance != null)
                 ComboDisplayManager.Instance.ShowJudgement("MISS");
+            VisualBeatSystem.Instance?.FlashJudgement("MISS");
             // Camera shake feedback for a bad press can be added here via VFXAPI.ShakeCamera / VFXAPI.SpawnParticles
             return;
         }
@@ -224,6 +225,7 @@ public class ComboSystem : Script
         {
             Console.WriteLine("[ComboSystem] WARNING: ComboDisplayManager not found!");
         }
+        VisualBeatSystem.Instance?.FlashJudgement(judgement);
 
         // === PERFECT STREAK ===
         if (judgement == "PERFECT")

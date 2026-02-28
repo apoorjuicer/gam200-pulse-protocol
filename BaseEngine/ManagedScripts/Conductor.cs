@@ -81,7 +81,7 @@ public class Conductor : Script
         while (songTime >= nextHalfBeat)
         {
             Console.WriteLine($"[Conductor] HalfBeat near Beat {lastBeat} | GameTime={Time.GameTime:F3}");
-            nextHalfBeat += secondsPerBeat * 0.5f;
+            nextHalfBeat += secondsPerBeat;
         }
     }
 

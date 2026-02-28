@@ -4,6 +4,11 @@ using ScriptAPI;
 public class VisualBeatSystem : Script
 {
     // =========================
+    // Singleton
+    // =========================
+    public static VisualBeatSystem? Instance { get; private set; }
+
+    // =========================
     // Pulse Settings
     // =========================
     public float scaleAmp = 0.03f;      // +3% swell
@@ -11,10 +16,18 @@ public class VisualBeatSystem : Script
     public float width = 0.12f;         // smaller = sharper/snappier pulse
 
     // =========================
-    // Opacity Settings (your request)
+    // Opacity Settings
     // =========================
     public float minOpacity = 0.20f;    // 20% (when "open"/expanded)
     public float maxOpacity = 1.00f;    // 100% (when "closed"/back to base)
+
+    // =========================
+    // Judgement Flash
+    // =========================
+    public float flashDuration = 0.3f;  // seconds the colour flash lasts
+
+    private float _flashTimer = 0f;
+    private float _flashR = 1f, _flashG = 1f, _flashB = 1f;
 
     // =========================
     // Cached base scale
@@ -25,6 +38,8 @@ public class VisualBeatSystem : Script
 
     public override void Update()
     {
+        Instance = this;
+
         if (Conductor.Instance == null) return;
 
         float spb = Conductor.Instance!.SecondsPerBeat;
@@ -66,10 +81,51 @@ public class VisualBeatSystem : Script
         t.ScaleY = _baseScaleY * scale;
 
         // =========================
-        // Opacity: 20% when open, ramps to 100% as it closes
+        // Opacity: 100% on beat, dims as it decays
         // =========================
-        float opacity = minOpacity + (1f - pulse) * (maxOpacity - minOpacity);
+        float opacity = maxOpacity - (1f - pulse) * (maxOpacity - minOpacity);
         s.TintA = Clamp01(opacity);
+
+        // =========================
+        // Judgement colour flash
+        // PERFECT = green, GREAT = blue, MISS = red
+        // Fades back to white over flashDuration seconds
+        // =========================
+        if (_flashTimer > 0f)
+        {
+            _flashTimer -= Time.DeltaTime;
+            float ft = Clamp01(_flashTimer / flashDuration); // 1 at flash start, 0 at end
+            s.TintR = 1f - ft * (1f - _flashR);
+            s.TintG = 1f - ft * (1f - _flashG);
+            s.TintB = 1f - ft * (1f - _flashB);
+        }
+        else
+        {
+            s.TintR = 1f;
+            s.TintG = 1f;
+            s.TintB = 1f;
+        }
+    }
+
+    // Called by ComboSystem whenever a judgement fires
+    public void FlashJudgement(string judgement)
+    {
+        _flashTimer = flashDuration;
+        switch (judgement)
+        {
+            case "PERFECT":
+                _flashR = 0f; _flashG = 1f; _flashB = 0f;   // green
+                break;
+            case "GREAT":
+                _flashR = 0f; _flashG = 0.5f; _flashB = 1f; // blue
+                break;
+            case "MISS":
+                _flashR = 1f; _flashG = 0f; _flashB = 0f;   // red
+                break;
+            default:
+                _flashR = 1f; _flashG = 1f; _flashB = 1f;
+                break;
+        }
     }
 
     private float Clamp01(float v)

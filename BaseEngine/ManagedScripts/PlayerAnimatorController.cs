@@ -157,7 +157,7 @@ public class PlayerAnimationController : Script
 
         waitingForStateEnd = true;
         stateTimer = 0f;
-        stateDuration = AttackFrames / AnimationSpeed;
+        stateDuration = AttackFrames / GetBeatSyncedSpeed(AttackFrames);
     }
 
     public void PlayHurt()
@@ -168,7 +168,7 @@ public class PlayerAnimationController : Script
 
         waitingForStateEnd = true;
         stateTimer = 0f;
-        stateDuration = HurtFrames / AnimationSpeed;
+        stateDuration = HurtFrames / GetBeatSyncedSpeed(HurtFrames);
     }
 
 
@@ -184,26 +184,12 @@ public class PlayerAnimationController : Script
     }
 
 
-    // private float GetIdleAnimSpeed(int frameCount)
-    // {
-    //     if (Conductor.Instance == null || Conductor.Instance.SecondsPerBeat <= 0f)
-    //         return AnimationSpeed;
-    //     return frameCount / Conductor.Instance.SecondsPerBeat;
-    // }
-
-    // private float GetHurtAnimSpeed(int frameCount)
-    // {
-    //     if (Conductor.Instance == null || Conductor.Instance.SecondsPerBeat <= 0f)
-    //         return AnimationSpeed;
-    //     return frameCount / Conductor.Instance.SecondsPerBeat;
-    // }
-
-    // private float GetAttackAnimSpeed(int frameCount)
-    // {
-    //     if (Conductor.Instance == null || Conductor.Instance.SecondsPerBeat <= 0f)
-    //         return AnimationSpeed;
-    //     return frameCount / Conductor.Instance.SecondsPerBeat;
-    // }
+    private float GetBeatSyncedSpeed(int frameCount)
+    {
+        if (Conductor.Instance == null || Conductor.Instance.SecondsPerBeat <= 0f)
+            return AnimationSpeed;
+        return frameCount / Conductor.Instance.SecondsPerBeat * 1.1065f;
+    }
 
     // =========================
     // Internal: Set Animation
@@ -225,15 +211,15 @@ public class PlayerAnimationController : Script
             //     break;
 
             case PlayerAnimState.Idle2:
-                anim.SetAnimation(Idle2SpriteSheet, Idle2Rows, Idle2Columns, Idle2Frames, AnimationSpeed);
+                anim.SetAnimation(Idle2SpriteSheet, Idle2Rows, Idle2Columns, Idle2Frames, GetBeatSyncedSpeed(Idle2Frames));
                 break;
 
             case PlayerAnimState.Attack:
-                anim.SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, AnimationSpeed);
+                anim.SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, GetBeatSyncedSpeed(AttackFrames));
                 break;
 
             case PlayerAnimState.Hurt:
-                anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, AnimationSpeed);
+                anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, GetBeatSyncedSpeed(HurtFrames));
                 break;
         }
     }

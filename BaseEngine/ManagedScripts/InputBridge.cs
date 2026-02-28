@@ -58,7 +58,7 @@ public class InputBridge : Script
         // TurnManager lock — only accept input during PlayerInput phase
         if (!DebugBypassTurnLock)
         {
-            if (TurnManager.Instance != null && TurnManager.Instance.IsInputLocked)
+            if (TurnManager.Instance == null || TurnManager.Instance.IsInputLocked)
             {
                 // Update prev states so edge detection is accurate when lock lifts
                 prevW = input.IsKeyPressed(KeyW);
