@@ -19,10 +19,14 @@
 //#include <unordered_map> 
 //#include <fstream>
 //#include <iostream>
-#include "pch/pch_temp.h"
+
+#include <unordered_map>
+#include <filesystem>
+#include <string>
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
 #include "CoreEngine/Core/ImportExport.h"
+#include "rapidjson/error/en.h"
 
 //enum class AudioType { SFX, BGM };
 
@@ -144,6 +148,9 @@
 		bool LoadFontManifest();
 		bool LoadSceneManifest();
 		bool LoadAnimationManifest();
+		//
+
+		std::filesystem::path const& GetBasePath() const;
 	};
 
 
