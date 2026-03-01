@@ -41,5 +41,8 @@ namespace ScriptAPI
         float GetMasterVolume();
         float GetMusicVolume();
         float GetSfxVolume();
+
+        // for removing the latency completely cos System::setDSPBufferSize is for reducing it ony :/
+        float GetBGMPosition();
     };
 }

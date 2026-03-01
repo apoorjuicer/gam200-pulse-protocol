@@ -151,4 +151,11 @@ namespace ScriptAPI
         if (!mgr) return 1.0f;
         return mgr->mSfxVol;
     }
+
+    float AudioComponent::GetBGMPosition()
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr) return 1.0f;
+        return mgr->GetBGMPositionSeconds();
+    }
 }

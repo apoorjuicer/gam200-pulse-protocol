@@ -8,6 +8,13 @@
             "audiotype": "BGM"
         },
         {
+            "id": "BGM_L1_TESTING",
+            "path": "../../PulseEngine/Assets/Sound/BG & Ambience/BGM_Level_1 _V4.mp3",
+            "loop": true,
+            "volume": 1.0,
+            "audiotype": "BGM"
+        },
+        {
             "id": "BGM_GENERAL",
             "path": "../../PulseEngine/Assets/Sound/BG & Ambience/TEMP_Menu_Demo_V1.mp3",
             "loop": true,
