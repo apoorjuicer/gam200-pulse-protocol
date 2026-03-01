@@ -56,9 +56,9 @@ std::filesystem::path GetScenePath(const std::string& sceneNameOrPath) {
 	std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
 
 	std::filesystem::path basePath;
-	if (std::filesystem::exists(currentDir / "PulseEngine"))
+	if (std::filesystem::exists(currentDir / "JSON"))
 	{
-		basePath = currentDir / "PulseEngine";  // Release
+		basePath = currentDir;  // Release: JSON is flat beside the exe
 	}
 	else
 	{
@@ -67,12 +67,12 @@ std::filesystem::path GetScenePath(const std::string& sceneNameOrPath) {
 		{
 			baseEngineDir = baseEngineDir.parent_path();
 		}
-		basePath = baseEngineDir / "PulseEngine";  // Dev
+		basePath = baseEngineDir / "PulseProtocol";  // Dev
 	}
 
-	// If it's a full path starting with ../../, resolve it
+	// If it's a full path starting with ../../, resolve it (legacy fallback)
 	if (sceneNameOrPath.find("../../") == 0) {
-		std::string relativePath = sceneNameOrPath.substr(std::string("../../PulseEngine/").length());
+		std::string relativePath = sceneNameOrPath.substr(std::string("../../PulseProtocol/").length());
 		return (basePath / relativePath).make_preferred();
 	}
 
@@ -98,13 +98,13 @@ void SceneManager::Init()
 
 	std::cout << "[CoreEngine] GOING IN" << std::endl;
 
-	// RELEASE BUILD
-	if (std::filesystem::exists(currentDir / "PulseEngine" / "JSON"))
+	// RELEASE BUILD: JSON is copied flat beside the exe by CMake
+	if (std::filesystem::exists(currentDir / "JSON"))
 	{
-		scenePath = currentDir / "PulseEngine" / "JSON" / "MainMenu.json";
+		scenePath = currentDir / "JSON" / "MainMenu.json";
 		std::cout << "[SceneManager] Using release path (next to exe)" << std::endl;
 	}
-	// Debug BUILD
+	// DEV BUILD: find BaseEngine/PulseProtocol/JSON/
 	else
 	{
 		auto baseEngineDir = currentDir;
@@ -112,7 +112,7 @@ void SceneManager::Init()
 		{
 			baseEngineDir = baseEngineDir.parent_path();
 		}
-		scenePath = baseEngineDir / "PulseEngine" / "JSON" / "MainMenu.json";
+		scenePath = baseEngineDir / "PulseProtocol" / "JSON" / "MainMenu.json";
 		std::cout << "[SceneManager] Using dev path (BaseEngine folder)" << std::endl;
 	}
 
@@ -178,7 +178,7 @@ void SceneManager::SaveCurrentScene()
 	std::cout << std::filesystem::absolute(basePath.parent_path().parent_path().parent_path()) << std::endl;
 
 	//  ONE MORE parent_path() to get OUT of build folder!
-	std::filesystem::path path = basePath.parent_path().parent_path().parent_path() / "PulseEngine" / "JSON" / (CurrentScene + ".json");
+	std::filesystem::path path = basePath.parent_path().parent_path().parent_path() / "PulseProtocol" / "JSON" / (CurrentScene + ".json");
 	
 
 	// grab scene name for the json file name

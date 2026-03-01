@@ -263,7 +263,7 @@ bool SaveScriptName(LogicComponent const& t, std::string const& path)
 
     // MUST HAVE TO RETURN BACK TO MYENGINE INSTEAD OF BUILD(AKA GETS DELETE WHEN CLEANED)
     namespace fs = std::filesystem;
-    fs::create_directories("../../PulseEngine/JSON");
+    fs::create_directories("../../PulseProtocol/JSON");
 
     std::ofstream ofs(path);
     if (!ofs.is_open()) {

@@ -38,7 +38,7 @@ namespace ScriptAPI
 
 		// change c# string to c++ , and get prefab json pathway
 		msclr::interop::marshal_context context;
-		std::string prefabDirectory =  "../../PulseEngine/Assets/Prefabs/";
+		std::string prefabDirectory =  "../../PulseProtocol/Assets/Prefabs/";
 		std::string prefabPath = prefabDirectory + context.marshal_as<std::string>(scriptname) + ".json";
 
 

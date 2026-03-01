@@ -42,7 +42,7 @@ namespace ScriptAPI
         }
 
         // Convert C# string to C++ string
-        std::string nativeSpriteName = "../../PulseEngine/Assets/Textures/Characters/" +  msclr::interop::marshal_as<std::string>(SpriteName) + ".png";
+        std::string nativeSpriteName = "../../PulseProtocol/Assets/Textures/Characters/" +  msclr::interop::marshal_as<std::string>(SpriteName) + ".png";
 
         if (g_coordinator->HasComponent<Framework::Renderable>(entityID))
         {

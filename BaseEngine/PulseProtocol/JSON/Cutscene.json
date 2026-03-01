@@ -27,7 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 1.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 1.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -95,7 +95,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 2.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 2.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -163,7 +163,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 3.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 3.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -231,7 +231,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 4.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 4.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -299,7 +299,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 5.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 5.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -367,7 +367,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 6.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 6.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -435,7 +435,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 7.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 7.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -503,7 +503,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 8.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 8.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -571,7 +571,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 9.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 9.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -639,7 +639,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 10.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 10.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -707,7 +707,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 11.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 11.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -775,7 +775,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 12.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 12.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -843,7 +843,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 13.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 13.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -911,7 +911,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Draft Cutscene/cutscene panel 14.png",
+                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 14.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,

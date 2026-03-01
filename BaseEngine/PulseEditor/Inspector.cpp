@@ -838,7 +838,7 @@ namespace PulseEditor
                         });
 
                         namespace fs = std::filesystem;
-                        const std::string kTexturesRoot = "../../PulseEngine/Assets/Textures";
+                        const std::string kTexturesRoot = "../../PulseProtocol/Assets/Textures";
 
                         constexpr int SPRITE_SHADER_INDEX = 1;
                         constexpr int SPRITESHEET_SHADER_INDEX = 2;
@@ -859,7 +859,7 @@ namespace PulseEditor
 
                                 const fs::path roots[] = {
                                     fs::path(kTexturesRoot),
-                                    fs::path("../../PulseEngine/Assets")};
+                                    fs::path("../../PulseProtocol/Assets")};
 
                                 std::string resolved;
                                 for (const fs::path &root : roots)
@@ -887,7 +887,7 @@ namespace PulseEditor
                                     std::string pathStr = resolved;
                                     std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
 
-                                    size_t myEnginePos = pathStr.find("PulseEngine/Assets");
+                                    size_t myEnginePos = pathStr.find("PulseProtocol/Assets");
                                     if (myEnginePos != std::string::npos)
                                     {
                                         r.spriteName = "../../" + pathStr.substr(myEnginePos);

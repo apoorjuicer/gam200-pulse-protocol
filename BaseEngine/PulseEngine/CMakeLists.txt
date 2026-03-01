@@ -158,21 +158,7 @@ endif()
         $<TARGET_FILE_DIR:${TARGET_NAME}>
     )
 
-    # Copy JSON config files to build directory (kept same location as your original)
-    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/JSON
-        ${CMAKE_BINARY_DIR}/PulseEngine/JSON
-        COMMENT "Copying JSON config files to build directory"
-    )
-
-    # Copy Assets to build directory (kept same location as your original)
-    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/Assets
-        ${CMAKE_BINARY_DIR}/PulseEngine/Assets
-        COMMENT "Copying Assets to build directory"
-    )
+    # Note: game JSON and Assets now live in PulseProtocol/ and are copied by its CMakeLists.
 
     # Copy .NET Runtime DLLs into the engine output directory (fixed: no hardcoded PulseEngine target)
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD

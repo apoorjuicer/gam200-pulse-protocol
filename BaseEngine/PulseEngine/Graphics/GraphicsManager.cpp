@@ -397,39 +397,36 @@ GLuint GraphicsManager::LoadTextureFile(const std::string &path)
 
     std::string resolvedPath = path;
 
-    //std::cout << "[DEBUG LoadTextureFile] Original path: " << path << std::endl;
-
-    if (path.find("../../") == 0)
+    if (!std::filesystem::path(path).is_absolute())
     {
-        // Get PulseEngine base path
+        // Resolve all relative paths against the game project root (PulseProtocol).
         char exePath[MAX_PATH];
         GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
         std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
 
-        //std::cout << "[DEBUG LoadTextureFile] currentDir: " << currentDir << std::endl;
-
-        std::filesystem::path basePath;
-        if (std::filesystem::exists(currentDir / "PulseEngine"))
+        std::filesystem::path baseGamePath;
+        if (std::filesystem::exists(currentDir / "JSON"))
         {
-            basePath = currentDir / "PulseEngine";  // Release
-            //std::cout << "[DEBUG LoadTextureFile] Using release path" << std::endl;
+            baseGamePath = currentDir;  // Release: JSON/Assets copied flat beside exe
         }
         else
         {
             auto baseEngineDir = currentDir;
             while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
-            {
                 baseEngineDir = baseEngineDir.parent_path();
-            }
-            basePath = baseEngineDir / "PulseEngine";  // Dev
-            //std::cout << "[DEBUG LoadTextureFile] Using dev path" << std::endl;
+            baseGamePath = baseEngineDir / "PulseProtocol";  // Dev
         }
 
-        // Strip ../../PulseEngine/ and use basePath
-        std::string relativePath = path.substr(std::string("../../PulseEngine/").length());
-        resolvedPath = (basePath / relativePath).make_preferred().string(); 
+        // Strip legacy ../../PulseProtocol/ or ../../PulseEngine/ prefix if present
+        std::string relativePath = path;
+        if (path.find("../../PulseProtocol/") == 0)
+            relativePath = path.substr(std::string("../../PulseProtocol/").length());
+        else if (path.find("../../PulseEngine/") == 0)
+            relativePath = path.substr(std::string("../../PulseEngine/").length());
+        else if (path.find("../../") == 0)
+            relativePath = path.substr(6);
 
-        //std::cout << "[DEBUG LoadTextureFile] Resolved to: " << resolvedPath << std::endl;
+        resolvedPath = (baseGamePath / relativePath).make_preferred().string();
     }
 
     if (!std::filesystem::exists(resolvedPath))

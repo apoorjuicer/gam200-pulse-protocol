@@ -1,5 +1,5 @@
 {
-    "scene": "MainMenu",
+    "scene": "Settings",
     "entities": [
         {
             "components": [
@@ -27,68 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/MainMenu.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 12.0
-                    }
-                },
-                {
-                    "name": {
-                        "name": "MainMenuBG"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "Background",
-                        "mask": 1,
-                        "sortingLayer": 0,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -750.0,
-                            "y": 0.0
-                        },
-                        "scale": {
-                            "x": 400.0,
-                            "y": 135.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/new game.png",
+                        "spriteName": "Assets/Textures/Backgrounds/Settings0000.jpg",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -105,925 +44,6 @@
                         "columns": 1,
                         "rows": 1,
                         "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "NavigationButtons"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "NewGameBtn"
-                    }
-                },
-                {
-                    "Health": {
-                        "hp": 100,
-                        "damage": 0,
-                        "isAlive": true
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "Button",
-                        "isLinked": false
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 10,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -750.0,
-                            "y": -230.0
-                        },
-                        "scale": {
-                            "x": 400.0,
-                            "y": 135.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/continue.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "NavigationButtons"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "ContinueBtn"
-                    }
-                },
-                {
-                    "Health": {
-                        "hp": 100,
-                        "damage": 0,
-                        "isAlive": true
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "Button",
-                        "isLinked": false
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 10,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -750.0,
-                            "y": -460.0
-                        },
-                        "scale": {
-                            "x": 400.0,
-                            "y": 135.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/settings.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "NavigationButtons"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "SettingsBtn"
-                    }
-                },
-                {
-                    "Health": {
-                        "hp": 100,
-                        "damage": 0,
-                        "isAlive": true
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "Button",
-                        "isLinked": false
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 10,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -750.0,
-                            "y": -690.0
-                        },
-                        "scale": {
-                            "x": 400.0,
-                            "y": 135.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/quit.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "NavigationButtons"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "QuitBtn"
-                    }
-                },
-                {
-                    "Health": {
-                        "hp": 100,
-                        "damage": 0,
-                        "isAlive": true
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "Button",
-                        "isLinked": false
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 0,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "scale": {
-                            "x": 200.0,
-                            "y": 200.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
-                        "useTexture": true,
-                        "spriteName": "",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "GeneralBGM"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "BGM_Manager"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "audiosource": {
-                        "audio_id": "BGM_GENERAL",
-                        "volume": 1.0,
-                        "loop": true,
-                        "playOnAwake": false
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "scale": {
-                            "x": 1600.0,
-                            "y": 900.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/quit screen.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "QuitOverlay",
-                            "SfxKnob"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "QuitPromptBG"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 2,
-                        "orderInLayer": 10,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "Children": {
-                        "children": [
-                            7,
-                            8
-                        ]
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -548.0,
-                            "y": -300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 133.3333282470703
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/quit yes.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "QuitOverlay",
-                            "NavigationButtons"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "YesBtn"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 11,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "Parent": {
-                        "parent": 6
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 504.4011535644531,
-                            "y": -300.0
-                        },
-                        "scale": {
-                            "x": 250.0,
-                            "y": 133.3300018310547
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/quit no.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "QuitOverlay",
-                            "NavigationButtons"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "NoBtn"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 12,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "Parent": {
-                        "parent": 6
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -888.7865600585938,
-                            "y": -485.9311218261719
-                        },
-                        "scale": {
-                            "x": 200.0,
-                            "y": 200.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
-                        "useTexture": true,
-                        "spriteName": "",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "DebugDisplayScript"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Debug Display Text"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "TextComponent": {
-                        "text": "New Text",
-                        "font_id": "PatrickHand_font",
-                        "offset": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "font_size": 40.0,
-                        "color": [
-                            0.4019607901573181,
-                            0.912053108215332,
-                            1.0
-                        ],
-                        "visible": false,
-                        "alignment": 0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 1458.46142578125,
-                            "y": 766.1538696289063
-                        },
-                        "scale": {
-                            "x": 100.0,
-                            "y": 100.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/How to Play.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "NavigationButtons"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "How_To_Play_Button"
-                    }
-                },
-                {
-                    "prefabInstance": {
-                        "prefabName": "Button",
-                        "isLinked": false
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 4,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "scale": {
-                            "x": 1600.0,
-                            "y": 900.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": false,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/TEMP_HTP.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "HowToPlayOverlay"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "How To Play Screen"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 21,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -1474.9998779296875,
-                            "y": 786.5385131835938
-                        },
-                        "scale": {
-                            "x": 60.0,
-                            "y": 60.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": false,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/TEMP_Close.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "HowToPlayOverlay",
-                            "NavigationButtons"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Close_HTP_Button"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 30,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "scale": {
-                            "x": 1600.0,
-                            "y": 900.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": false,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/Settings0000.jpg",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
                     }
                 },
                 {
@@ -1033,10 +53,10 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "Background",
+                        "mask": 1,
+                        "sortingLayer": 0,
+                        "orderInLayer": 10,
                         "z": 0.0
                     }
                 }
@@ -1058,7 +78,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1068,7 +88,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Volume_.png",
+                        "spriteName": "Assets/Textures/UI/Volume_.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1088,13 +108,6 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
-                    }
-                },
-                {
                     "name": {
                         "name": "Volume"
                     }
@@ -1104,16 +117,16 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "orderInLayer": 2,
                         "z": 0.0
                     }
                 },
                 {
                     "Children": {
                         "children": [
-                            15,
-                            16,
-                            17
+                            2,
+                            3,
+                            4
                         ]
                     }
                 }
@@ -1135,7 +148,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1145,7 +158,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar bottom.png",
+                        "spriteName": "Assets/Textures/UI/slider bar bottom.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1166,9 +179,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -1178,16 +189,16 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 14
+                        "parent": 1
                     }
                 }
             ]
@@ -1208,7 +219,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1218,7 +229,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/slider.png",
+                        "spriteName": "Assets/Textures/UI/slider.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1240,8 +251,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "VolumeKnob",
-                            "SettingsOverlay"
+                            "VolumeKnob"
                         ]
                     }
                 },
@@ -1255,13 +265,13 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "orderInLayer": 0,
                         "z": 100.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 14
+                        "parent": 1
                     }
                 }
             ]
@@ -1282,7 +292,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1292,7 +302,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar fill.png",
+                        "spriteName": "Assets/Textures/UI/slider bar fill.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1314,8 +324,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "VolumeFill",
-                            "SettingsOverlay"
+                            "VolumeFill"
                         ]
                     }
                 },
@@ -1326,16 +335,16 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 100.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 14
+                        "parent": 1
                     }
                 }
             ]
@@ -1356,7 +365,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1366,7 +375,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Music_.png",
+                        "spriteName": "Assets/Textures/UI/Music_.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1386,32 +395,25 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
-                    }
-                },
-                {
                     "name": {
                         "name": "Music"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Children": {
                         "children": [
-                            19,
-                            20,
-                            21
+                            6,
+                            7,
+                            8
                         ]
                     }
                 }
@@ -1433,7 +435,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1443,7 +445,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar bottom.png",
+                        "spriteName": "Assets/Textures/UI/slider bar bottom.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1463,29 +465,22 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
-                    }
-                },
-                {
                     "name": {
                         "name": "MEmpty"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 18
+                        "parent": 5
                     }
                 }
             ]
@@ -1506,7 +501,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1516,7 +511,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/slider.png",
+                        "spriteName": "Assets/Textures/UI/slider.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1538,8 +533,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "MusicKnob",
-                            "SettingsOverlay"
+                            "MusicKnob"
                         ]
                     }
                 },
@@ -1553,13 +547,13 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 18
+                        "parent": 5
                     }
                 }
             ]
@@ -1580,7 +574,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1590,7 +584,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar fill.png",
+                        "spriteName": "Assets/Textures/UI/slider bar fill.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1612,8 +606,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "MusicFill",
-                            "SettingsOverlay"
+                            "MusicFill"
                         ]
                     }
                 },
@@ -1624,16 +617,16 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 18
+                        "parent": 5
                     }
                 }
             ]
@@ -1654,7 +647,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1664,7 +657,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Screen_.png",
+                        "spriteName": "Assets/Textures/UI/Screen_.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1684,35 +677,28 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
-                    }
-                },
-                {
                     "name": {
                         "name": "Screen"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Children": {
                         "children": [
-                            33,
-                            35,
-                            34,
-                            36,
-                            37,
-                            38
+                            20,
+                            22,
+                            21,
+                            23,
+                            24,
+                            25
                         ]
                     }
                 }
@@ -1734,7 +720,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1744,7 +730,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Brightness_.png",
+                        "spriteName": "Assets/Textures/UI/Brightness_.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1764,32 +750,25 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
-                    }
-                },
-                {
                     "name": {
                         "name": "Brightness"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Children": {
                         "children": [
-                            29,
-                            28,
-                            30
+                            16,
+                            15,
+                            17
                         ]
                     }
                 }
@@ -1811,7 +790,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1821,7 +800,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/back.png",
+                        "spriteName": "Assets/Textures/UI/back.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1843,8 +822,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "NavigationButtons",
-                            "SettingsOverlay"
+                            "NavigationButtons"
                         ]
                     }
                 },
@@ -1858,7 +836,7 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "orderInLayer": 5,
                         "z": 0.0
                     }
                 }
@@ -1880,7 +858,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1890,7 +868,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar bottom.png",
+                        "spriteName": "Assets/Textures/UI/slider bar bottom.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1910,29 +888,22 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
-                    }
-                },
-                {
                     "name": {
                         "name": "SEmpty"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 32
+                        "parent": 19
                     }
                 }
             ]
@@ -1953,7 +924,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1963,7 +934,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/slider.png",
+                        "spriteName": "Assets/Textures/UI/slider.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1985,8 +956,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "SfxKnob",
-                            "SettingsOverlay"
+                            "SfxKnob"
                         ]
                     }
                 },
@@ -2000,13 +970,13 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 32
+                        "parent": 19
                     }
                 }
             ]
@@ -2027,7 +997,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2037,7 +1007,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar fill.png",
+                        "spriteName": "Assets/Textures/UI/slider bar fill.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2059,8 +1029,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "SfxFill",
-                            "SettingsOverlay"
+                            "SfxFill"
                         ]
                     }
                 },
@@ -2071,16 +1040,16 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 32
+                        "parent": 19
                     }
                 }
             ]
@@ -2101,7 +1070,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2111,7 +1080,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar bottom.png",
+                        "spriteName": "Assets/Textures/UI/slider bar bottom.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2131,29 +1100,22 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
-                    }
-                },
-                {
                     "name": {
                         "name": "BEmpty"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 23
+                        "parent": 10
                     }
                 }
             ]
@@ -2174,7 +1136,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2184,7 +1146,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/slider.png",
+                        "spriteName": "Assets/Textures/UI/slider.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2206,8 +1168,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "BrightnessKnob",
-                            "SettingsOverlay"
+                            "BrightnessKnob"
                         ]
                     }
                 },
@@ -2221,13 +1182,13 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 23
+                        "parent": 10
                     }
                 }
             ]
@@ -2248,7 +1209,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2258,7 +1219,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/slider bar fill.png",
+                        "spriteName": "Assets/Textures/UI/slider bar fill.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2280,8 +1241,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "BrightnessFill",
-                            "SettingsOverlay"
+                            "BrightnessFill"
                         ]
                     }
                 },
@@ -2292,16 +1252,16 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 23
+                        "parent": 10
                     }
                 }
             ]
@@ -2341,10 +1301,10 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
@@ -2374,7 +1334,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2384,7 +1344,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/SFX_.png",
+                        "spriteName": "Assets/Textures/UI/SFX_.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2404,13 +1364,6 @@
                     }
                 },
                 {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
-                    }
-                },
-                {
                     "name": {
                         "name": "SFX"
                     }
@@ -2420,16 +1373,16 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Children": {
                         "children": [
-                            25,
-                            26,
-                            27
+                            12,
+                            13,
+                            14
                         ]
                     }
                 }
@@ -2451,7 +1404,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2461,7 +1414,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/dropdown close.png",
+                        "spriteName": "Assets/Textures/UI/dropdown close.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2483,8 +1436,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "DropdownToggle",
-                            "SettingsOverlay"
+                            "DropdownToggle"
                         ]
                     }
                 },
@@ -2498,13 +1450,13 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 9
                     }
                 }
             ]
@@ -2525,7 +1477,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2535,7 +1487,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/windowed.png",
+                        "spriteName": "Assets/Textures/UI/windowed.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2557,9 +1509,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "DropdownOptionWindowed",
-                            "SettingsOverlay",
-                            "NavigationButtons"
+                            "DropdownOptionWindowed"
                         ]
                     }
                 },
@@ -2573,13 +1523,13 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 20,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 9
                     }
                 }
             ]
@@ -2600,7 +1550,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2610,7 +1560,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/dropdown open.png",
+                        "spriteName": "Assets/Textures/UI/dropdown open.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2632,8 +1582,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "DropdownOpenFollower",
-                            "SettingsOverlay"
+                            "DropdownOpenFollower"
                         ]
                     }
                 },
@@ -2644,16 +1593,16 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 9
                     }
                 }
             ]
@@ -2674,7 +1623,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2684,7 +1633,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Full screen.png",
+                        "spriteName": "Assets/Textures/UI/Full screen.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2706,9 +1655,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "DropdownOptionFullscreen",
-                            "SettingsOverlay",
-                            "NavigationButtons"
+                            "DropdownOptionFullscreen"
                         ]
                     }
                 },
@@ -2722,13 +1669,13 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 9
                     }
                 }
             ]
@@ -2749,7 +1696,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2759,7 +1706,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/windowed.png",
+                        "spriteName": "Assets/Textures/UI/windowed.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2781,8 +1728,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "DropdownClosedLabelWindowed",
-                            "SettingsOverlay"
+                            "DropdownClosedLabelWindowed"
                         ]
                     }
                 },
@@ -2796,13 +1742,13 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 9
                     }
                 }
             ]
@@ -2823,7 +1769,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2833,7 +1779,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/Full screen.png",
+                        "spriteName": "Assets/Textures/UI/Full screen.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2855,8 +1801,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "DropdownClosedLabelFullscreen",
-                            "SettingsOverlay"
+                            "DropdownClosedLabelFullscreen"
                         ]
                     }
                 },
@@ -2870,13 +1815,13 @@
                         "layerName": "UI",
                         "mask": 4,
                         "sortingLayer": 2,
-                        "orderInLayer": 15,
+                        "orderInLayer": 0,
                         "z": 0.0
                     }
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 9
                     }
                 }
             ]

@@ -101,7 +101,7 @@ namespace PulseEditor
             // Extract substring: everything up to and including "BaseEngine"
             std::string baseEnginePart = cwdStr.substr(0, baseEnginePos + 10);  // "BaseEngine" = 10 chars
             fs::path baseEnginePath(baseEnginePart);
-            fs::path targetPath = baseEnginePath / "PulseEngine" / "Assets";
+            fs::path targetPath = baseEnginePath / "PulseProtocol" / "Assets";
 
             //std::cout << "[ProjectPanel] Constructed path: " << targetPath.string() << std::endl;
 
@@ -148,14 +148,14 @@ namespace PulseEditor
             }
 
             // ─────────────────────────────────────────────────────────
-            // Check for PulseEngine/Assets in current directory
+            // Check for PulseProtocol/Assets in current directory
             // ─────────────────────────────────────────────────────────
-            fs::path pulseEngineAssets = current / "PulseEngine" / "Assets";
+            fs::path pulseProtocolAssets = current / "PulseProtocol" / "Assets";
 
-            if (fs::exists(pulseEngineAssets) && fs::is_directory(pulseEngineAssets))
+            if (fs::exists(pulseProtocolAssets) && fs::is_directory(pulseProtocolAssets))
             {
-                std::cout << "[ProjectPanel] Asset Root: " << pulseEngineAssets.string() << std::endl << std::endl;
-                return pulseEngineAssets.string();
+                std::cout << "[ProjectPanel] Asset Root: " << pulseProtocolAssets.string() << std::endl << std::endl;
+                return pulseProtocolAssets.string();
             }
             else
             {
@@ -176,7 +176,7 @@ namespace PulseEditor
         // ═══════════════════════════════════════════════════════════════
 
         std::cerr << "[ProjectPanel] Working Directory: " << cwd.string() << std::endl;
-        std::cerr << "[ProjectPanel] Expected structure: BaseEngine/PulseEngine/Assets/" << std::endl;
+        std::cerr << "[ProjectPanel] Expected structure: BaseEngine/PulseProtocol/Assets/" << std::endl;
         std::cerr << "[ProjectPanel] Could not find 'BaseEngine' in path" << std::endl;
         std::cerr << "[ProjectPanel] Walked up " << iterations << " directory levels without finding it" << std::endl;
         std::cerr << "\nTEAM BLOOP: Check your project structure and working directory!" << std::endl << std::endl;

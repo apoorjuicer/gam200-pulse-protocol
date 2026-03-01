@@ -27,7 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/Backgrounds/Lose screen.png",
+                        "spriteName": "Assets/Textures/Backgrounds/Lose screen.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -88,7 +88,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/RestartNo.png",
+                        "spriteName": "Assets/Textures/UI/RestartNo.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -156,7 +156,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/RestartYes.png",
+                        "spriteName": "Assets/Textures/UI/RestartYes.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,

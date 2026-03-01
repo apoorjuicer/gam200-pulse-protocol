@@ -2,6 +2,6 @@
     "config": {
         "WindowWidth": 1600,
         "WindowHeight": 900,
-        "ConfigPath": "../../PulseEngine/JSON/config.json"
+        "ConfigPath": "../../PulseProtocol/JSON/config.json"
     }
 }
