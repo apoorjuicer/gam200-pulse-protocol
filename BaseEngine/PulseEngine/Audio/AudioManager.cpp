@@ -643,6 +643,22 @@ void AudioManager::applyMusicVolume()
 {
     if (mMusicGroup)
         mMusicGroup->setVolume(clampto0and1(mMusicVol));
+     
+    // check if there is a BGM playing rn, the issue was that when u reset, the current vloume which is it is 0, will be stuck at 0
+    if (mCurrentBGMCh)
+    {
+        // only for if dh in json
+        float vol = 1.0f;
+
+        if (const auto* ar = mRegistry->FindAudio(mCurrentBGMID))
+        {
+            // grab the value from json and apply it.
+            vol = ar->volume;
+        }
+
+        // apply the changes for track base volume * slider value
+        mCurrentBGMCh->setVolume(clampto0and1(vol * mMusicVol));
+    }
 }
 void AudioManager::applySfxVolume()
 {

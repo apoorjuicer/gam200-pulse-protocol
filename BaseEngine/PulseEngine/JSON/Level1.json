@@ -137,8 +137,8 @@
                 },
                 {
                     "Health": {
-                        "hp": 3,
-                        "damage": 1,
+                        "hp": 100,
+                        "damage": 5,
                         "isAlive": true
                     }
                 },
@@ -1440,7 +1440,7 @@
                 {
                     "Health": {
                         "hp": 15,
-                        "damage": 5,
+                        "damage": 10,
                         "isAlive": true
                     }
                 },
