@@ -22,7 +22,7 @@
         "mdl_ref": 0.0,
         "shd_ref": 2.0,
         "useTexture": true,
-        "spriteName": "../../PulseEngine/Assets/Textures/Enemies/Rat_Idle_spritesheet_634x433.png",
+        "spriteName": "../../PulseProtocol/Assets/Textures/Enemies/Rat_Idle_spritesheet_634x433.png",
         "tintColor": {
           "r": 1.0,
           "g": 1.0,
