@@ -306,8 +306,14 @@ void GraphicsManager::Update()
     glapp->draw(EntityMember, m_editorLayerFilter);
     if (m_postProcess.IsEnabled()) m_postProcess.ApplyBloom();
 
-    // Render ALL TextComponent entities (including FPS text objects)
-    Update2DTextComponent();
+    // Draw text entities on Background or World layer
+    Update2DTextComponent(LAYER_BACKGROUND | LAYER_WORLD | LAYER_TEXT);
+
+    // Draw UI sprites
+    glapp->draw(EntityMember, m_editorLayerFilter & LAYER_UI);
+
+    // Draw text entities on UI layer
+    Update2DTextComponent(LAYER_UI);
 
     // Render screen-wide fade overlay on top of everything
     if (m_screenFade.active)
@@ -897,7 +903,7 @@ void GraphicsManager::DrawText2D(
 }
 
 
-void GraphicsManager::Update2DTextComponent() {
+void GraphicsManager::Update2DTextComponent(LayerMask maskFilter) {
     // --- Draw Text components (screen-space UI text) ---
     auto* g_coordinator = Coordinator::GetInstance();
 
@@ -906,6 +912,13 @@ void GraphicsManager::Update2DTextComponent() {
         if (!g_coordinator->HasComponent<TextComponent>(entity) ||
             !g_coordinator->HasComponent<Framework::Transform>(entity)) {
             continue; //skip game object need transform(offset) and text
+        }
+
+        // Check layer visibility
+        if (g_coordinator->HasComponent<LayerTag>(entity)) {
+            auto& lt = g_coordinator->GetComponent<LayerTag>(entity);
+            if (!(lt.mask & maskFilter)) continue;
+            if (!LayerRegistry::Get().IsLayerVisible(lt.mask)) continue;
         }
            
         auto& txt = g_coordinator->GetComponent<TextComponent>(entity);

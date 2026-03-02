@@ -48,11 +48,12 @@ namespace PulseEditor
     }
 
     // Set visibility for all layers at once (for quick filters like TopBar)
-    inline void SetAllLayersVisibility(bool bg, bool world, bool ui) {
+    inline void SetAllLayersVisibility(bool bg, bool world, bool ui, bool text) {
         auto& reg = LayerRegistry::Get();
         reg.SetLayerVisibility(LAYER_BACKGROUND, bg);
         reg.SetLayerVisibility(LAYER_WORLD, world);
         reg.SetLayerVisibility(LAYER_UI, ui);
+        reg.SetLayerVisibility(LAYER_TEXT, text);
         UpdateGraphicsLayerFilter();
     }
 

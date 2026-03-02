@@ -357,6 +357,7 @@ namespace PulseEditor
                 if (layer.mask == LAYER_BACKGROUND) layer.sortingLayer = 0;
                 else if (layer.mask == LAYER_WORLD) layer.sortingLayer = 1;
                 else if (layer.mask == LAYER_UI) layer.sortingLayer = 2;
+                else if (layer.mask == LAYER_TEXT) layer.sortingLayer = 3;
             }
         }
 
@@ -365,7 +366,7 @@ namespace PulseEditor
         ImGui::SameLine();
         ImGui::SetNextItemWidth(130.0f);
 
-        const char* sortingLayerNames[] = { "Background", "World", "UI" };
+        const char* sortingLayerNames[] = { "Background", "World", "UI", "Text" };
         ImGui::Combo("##SortingLayer", &layer.sortingLayer, sortingLayerNames, IM_ARRAYSIZE(sortingLayerNames));
 
         ImGui::SameLine();

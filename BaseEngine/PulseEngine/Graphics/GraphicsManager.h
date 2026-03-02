@@ -161,7 +161,7 @@ public:
         TextAlignment alignment = TextAlignment::Left // default left aligned
     );
 
-    void Update2DTextComponent();
+    void Update2DTextComponent(LayerMask maskFilter = LAYER_ALL);
 
     // --- Per-entity fade ---
     void StartEntityFade(Entity e, float toAlpha, float duration);

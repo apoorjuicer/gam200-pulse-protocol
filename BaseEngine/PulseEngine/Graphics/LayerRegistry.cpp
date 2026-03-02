@@ -94,6 +94,18 @@ void LayerRegistry::Initialize()
     uiLayer.colorA = 1.0f;
     m_layers.push_back(uiLayer);
 
+    LayerInfo textLayer;
+    textLayer.name = "Text";
+    textLayer.mask = LAYER_TEXT;
+    textLayer.visible = true;
+    textLayer.locked = false;
+    textLayer.isDefault = true;
+    textLayer.colorR = 1.0f;
+    textLayer.colorG = 1.0f;
+    textLayer.colorB = 1.0f;
+    textLayer.colorA = 1.0f;
+    m_layers.push_back(textLayer);
+
     m_initialized = true;
     //std::cout << "[LayerRegistry] Initialized with " << m_layers.size() << " default layers\n";
 }

@@ -63,6 +63,7 @@ struct LayerTag {
             // Backwards compatibility: derive from mask
             if (mask == LAYER_BACKGROUND) sortingLayer = 0;
             else if (mask == LAYER_UI) sortingLayer = 2;
+            else if (mask == LAYER_TEXT) sortingLayer = 3;
             else sortingLayer = 1;  // Default to World
         }
 
