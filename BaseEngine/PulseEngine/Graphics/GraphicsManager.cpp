@@ -244,6 +244,29 @@ void GraphicsManager::Initialize()
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
+
+    // Initialize bloom post-processing pipeline
+    {
+        // Resolve shader directory: same walk-up logic as GLApp::LoadFile
+        char exePath[MAX_PATH];
+        GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+        std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
+
+        std::filesystem::path basePath;
+        if (std::filesystem::exists(currentDir / "PulseEngine"))
+        {
+            basePath = currentDir / "PulseEngine"; // Release layout
+        }
+        else
+        {
+            auto baseEngineDir = currentDir;
+            while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+                baseEngineDir = baseEngineDir.parent_path();
+            basePath = baseEngineDir / "PulseEngine"; // Dev layout
+        }
+        std::string shaderDir = (basePath / "Graphics" / "shader").string();
+        m_postProcess.Init(GLApp::VIRTUAL_W, GLApp::VIRTUAL_H, shaderDir);
+    }
 }
 
 void GraphicsManager::Update()
@@ -279,7 +302,9 @@ void GraphicsManager::Update()
     }
 
     //--- Rendering passes ---
+    if (m_postProcess.IsEnabled()) m_postProcess.BeginCapture();
     glapp->draw(EntityMember, m_editorLayerFilter);
+    if (m_postProcess.IsEnabled()) m_postProcess.ApplyBloom();
 
     // Render ALL TextComponent entities (including FPS text objects)
     Update2DTextComponent();
@@ -331,6 +356,9 @@ void GraphicsManager::Shutdown()
     // Clean up screen-fade overlay
     if (m_overlayVAO) { glDeleteVertexArrays(1, &m_overlayVAO); m_overlayVAO = 0; }
     if (m_overlayVBO) { glDeleteBuffers(1, &m_overlayVBO);      m_overlayVBO = 0; }
+
+    // Shutdown bloom post-processing pipeline
+    m_postProcess.Shutdown();
 
     // Realease fonts
     ShutdownFonts();

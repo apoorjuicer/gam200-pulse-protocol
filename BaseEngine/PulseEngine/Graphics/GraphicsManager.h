@@ -57,6 +57,7 @@
 //#include "UI/UIElement.h"
 
 #include "glapp.h"
+#include "PostProcessing.h"
 #include <ft2build.h>
 #include <memory> // redundant, alr in pch_temp
 #include FT_FREETYPE_H
@@ -175,6 +176,14 @@ public:
     bool  IsScreenFadeDone()  const;
     float GetScreenAlpha()    const;
 
+    // --- Bloom post-processing ---
+    void  SetBloomEnabled(bool v)         { m_postProcess.SetEnabled(v);          }
+    void  SetBloomIntensity(float v)      { m_postProcess.SetBloomIntensity(v);   }
+    void  SetBloomThreshold(float v)      { m_postProcess.SetBloomThreshold(v);   }
+    bool  IsBloomEnabled()         const  { return m_postProcess.IsEnabled();        }
+    float GetBloomIntensity()      const  { return m_postProcess.GetBloomIntensity(); }
+    float GetBloomThreshold()      const  { return m_postProcess.GetBloomThreshold(); }
+
 private:
     // Draw text (world overlay / debug text etc.)
     TextRenderer m_textRenderer;
@@ -243,6 +252,9 @@ private:
     void UpdateEntityFades(float dt);
     void UpdateScreenFade(float dt);
     void RenderScreenOverlay();
+
+    // --- Bloom post-processing pipeline ---
+    PostProcessing m_postProcess;
 
     // Debug overlay toggle - shown in Debug builds, hidden in Release builds
 #ifdef _DEBUG

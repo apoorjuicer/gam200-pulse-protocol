@@ -231,5 +231,50 @@ public class ScriptName : Script
         //   GetFade().FadeOut(0.1f);
         //   ... wait for IsDone() ...
         //   GetFade().FadeIn(0.1f);
+
+
+        // 17. PostProcessAPI - SCREEN-WIDE bloom post-processing.
+        //     Adds a glow halo around bright pixels (sprites, particles, VFX).
+        //     Bloom is OFF by default — you must enable it explicitly.
+        //     This is a STATIC class - no entity or component needed.
+        //
+        //     Pipeline (when enabled, per frame):
+        //       1. Scene renders into an off-screen FBO at virtual resolution
+        //       2. Bright-pass filter extracts pixels above the threshold
+        //       3. 10-pass Gaussian blur creates the soft glow
+        //       4. Composited back: final = scene + bloom * intensity
+        //     Text and screen-overlay entities are NOT bloomed (rendered after).
+
+        // Enable / disable the effect:
+        PostProcessAPI.SetBloomEnabled(true);   // turn bloom on
+        PostProcessAPI.SetBloomEnabled(false);  // turn bloom off (scene renders normally)
+        bool bloomOn = PostProcessAPI.IsBloomEnabled();
+
+        // Intensity — how bright the glow halo is (0.0 = none, 1.2 = default, 3.0 = max):
+        PostProcessAPI.SetBloomIntensity(1.2f);          // default — subtle glow
+        PostProcessAPI.SetBloomIntensity(2.5f);          // beat-flash — strong burst
+        PostProcessAPI.SetBloomIntensity(0.0f);          // effectively off (same as disabled)
+        float intensity = PostProcessAPI.GetBloomIntensity();
+
+        // Threshold — luminance cutoff above which pixels contribute to bloom (0.0–1.0):
+        //   low  threshold (0.2) = almost everything glows (background, sprites, etc.)
+        //   high threshold (0.8) = only the very brightest pixels glow (near-white highlights)
+        PostProcessAPI.SetBloomThreshold(0.5f);          // default — balanced
+        PostProcessAPI.SetBloomThreshold(0.2f);          // low — whole scene glows
+        PostProcessAPI.SetBloomThreshold(0.8f);          // high — only highlights glow
+        float threshold = PostProcessAPI.GetBloomThreshold();
+
+        // Example — beat-flash: spike intensity on beat, ease back over the interval:
+        //   PostProcessAPI.SetBloomEnabled(true);
+        //   PostProcessAPI.SetBloomIntensity(2.5f);   // call from Conductor on beat
+        //   ... lerp back to 1.2 over the beat interval each Update() ...
+
+        // Example — boss-entry dramatic effect:
+        //   PostProcessAPI.SetBloomEnabled(true);
+        //   PostProcessAPI.SetBloomThreshold(0.1f);   // whole scene glows
+        //   PostProcessAPI.SetBloomIntensity(3.0f);   // max intensity
+        //   ... after a few seconds, restore defaults ...
+        //   PostProcessAPI.SetBloomThreshold(0.5f);
+        //   PostProcessAPI.SetBloomIntensity(1.2f);
     }
 }
