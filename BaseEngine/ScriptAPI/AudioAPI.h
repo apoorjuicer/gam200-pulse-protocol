@@ -27,6 +27,7 @@ namespace ScriptAPI
 
         // Existing helpers
         void PlaySFX(String^ name);
+        void PlayBGM(); 
         void PlayBGM(String^ name);
         void StopBGM();
         void PauseBGM();

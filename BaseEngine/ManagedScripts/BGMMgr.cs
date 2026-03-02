@@ -16,7 +16,7 @@ public class GeneralBGM : Script
         if (!started)
         {
             // Don't set volume here - the MusicKnob slider handles it
-            audio.PlayBGM("BGM_GENERAL");
+            audio.PlayBGM();
             BGMManager.CurrentTrack = "General";
             Console.WriteLine("BGM: Playing General music");
             started = true;
@@ -58,7 +58,7 @@ public class LevelBGM : Script
         if (!started)
         {
             // Don't set volume here - the MusicKnob slider handles it
-            audio.PlayBGM("BGM_L1_TESTING");
+            audio.PlayBGM();
             BGMManager.CurrentTrack = "Level";
             Console.WriteLine("BGM: Playing Level music");
 
