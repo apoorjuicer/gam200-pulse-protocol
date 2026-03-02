@@ -93,7 +93,7 @@ void PostProcessing::ApplyBloom()
 
     // ---- 2. Ping-pong Gaussian blur (5 iterations) ----
     // Start with the extract result in the first blur FBO, then alternate.
-    bool horizontal = true;
+    // bool horizontal = true;
     // First pass: extract texture -> blurFBO[0]
     {
         glBindFramebuffer(GL_FRAMEBUFFER, m_blurFBO[0]);

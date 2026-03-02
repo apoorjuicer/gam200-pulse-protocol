@@ -10,20 +10,26 @@
 *              prior written consent of DigiPen Institute of Technology is prohibited.
 *
 /******************************************************************************/
+#pragma managed(push, off)
 #define generic generic_workaround
-#include "Application.h"
 #include "CoreEngine/Core/CoreEngine.h"
 #include <GLFW/glfw3.h>
 #undef generic
+
+static void NativeQuit()
+{
+    if (Engine && Engine->GetWindow())
+        glfwSetWindowShouldClose(Engine->GetWindow(), GLFW_TRUE);
+}
+#pragma managed(pop)
+
+#include "Application.h"
 
 namespace ScriptAPI
 {
     void Application::Quit()
     {
-        if (Engine && Engine->GetWindow())
-        {
-            glfwSetWindowShouldClose(Engine->GetWindow(), GLFW_TRUE);
-        }
+        NativeQuit();
     }
 
     bool Application::IsPlaying()

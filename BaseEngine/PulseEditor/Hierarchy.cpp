@@ -204,7 +204,7 @@ namespace PulseEditor
     // =====================================================
     static std::unordered_map<Entity, int> s_prefabChildNumber; // 0 = parent, 1.. = child index
 
-    static void RebuildPrefabChildNumbers(const std::vector<Entity>& entityDisplayOrder)
+    static void RebuildPrefabChildNumbers(const std::vector<Entity>& displayOrder)
     {
         s_prefabChildNumber.clear();
 
@@ -214,7 +214,7 @@ namespace PulseEditor
         std::unordered_map<std::string, Entity> parentOfPrefab; // prefabName -> entity
         std::unordered_map<std::string, int> childCount;        // prefabName -> count
 
-        for (Entity e : entityDisplayOrder)
+        for (Entity e : displayOrder)
         {
             if (!coord->HasComponent<PrefabInstance>(e))
                 continue;
