@@ -2,7 +2,8 @@
 /**
 * @file        ScriptAPIClass.h
 * @project     Pulse Protocol
-* @author      Chia Wei Xuan Rachael - 100%
+* @author      Chia Wei Xuan Rachael - 95%
+* @author      Goh Pin Kai - 5%
 * @brief       Provides the C++/CLI bridge with Script class that all C# game scripts inherit from, 
                managing entity-script associations and exposing component access methods to managed code.
 *
