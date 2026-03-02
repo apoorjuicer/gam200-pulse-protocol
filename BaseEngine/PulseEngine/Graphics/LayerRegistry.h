@@ -28,6 +28,7 @@ enum : LayerMask {
     LAYER_BACKGROUND = 1u << 0,
     LAYER_WORLD = 1u << 1,
     LAYER_UI = 1u << 2,
+    LAYER_TEXT = 1u << 3,
     LAYER_ALL = 0xFFFFFFFFu
 };
 

@@ -227,6 +227,7 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 			// Has LayerTag - check if it matches the filter
 			auto& lt = g_coordinator->GetComponent<LayerTag>(it);
 			if ((lt.mask & includeMask) == 0) continue;  // Layer filtered out
+			if (lt.mask == LAYER_TEXT) continue; // skip text entities
 		}
 
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);

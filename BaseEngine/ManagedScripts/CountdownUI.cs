@@ -1,14 +1,6 @@
 using System;
 using ScriptAPI;
 
-/// <summary>
-/// Displays countdown text (3... 2... 1... GO!) before game starts
-/// 
-/// SETUP:
-/// - Attach this to a UI text entity
-/// - Position it in the center of the screen
-/// - The text will automatically appear during the Countdown phase
-/// </summary>
 public class CountdownUI : Script
 {
     // =========================
@@ -19,12 +11,9 @@ public class CountdownUI : Script
     // =========================
     // Config
     // =========================
-    public float TextScale = 100f;  // Size of countdown text
-    public bool AnimateScale = true;  // Pulse animation
-    public float PulseAmount = 1.3f;  // How much to scale up during pulse
-
-    // Colors for each number (optional)
-    public bool UseColorGradient = true;
+    public float TextScale = 100f;   // Size of countdown text
+    public bool AnimateScale = true; // Pulse animation on each beat
+    public float PulseAmount = 1.3f; // How much to scale up during pulse
 
     // =========================
     // State
@@ -33,7 +22,7 @@ public class CountdownUI : Script
     private int lastBeat = -1;
     private int lastDisplayedNumber = -1;
     private bool isVisible = false;
-    
+
     // Animation
     private float currentScale = 1.0f;
     private float targetScale = 1.0f;
@@ -50,7 +39,14 @@ public class CountdownUI : Script
             return;
         }
 
-        // Check current phase
+        // Don't change visibility while pause overlay is open
+        // Layer system handles hiding the text visually behind the overlay
+        if (NavigationButtons.ShowPauseOverlay)
+        {
+            Console.WriteLine($"[CountdownUI] Paused, isVisible={isVisible}, text.IsVisible={GetTextComponent().IsVisible()}");
+            return;
+        }
+
         if (TurnManager.Instance == null || Conductor.Instance == null)
             return;
 
@@ -61,9 +57,7 @@ public class CountdownUI : Script
         if (currentPhase == TurnPhase.Countdown)
         {
             if (!isVisible)
-            {
                 Show();
-            }
 
             // Update display on beat change
             if (currentBeat != lastBeat)
@@ -74,16 +68,12 @@ public class CountdownUI : Script
 
             // Animate scale
             if (AnimateScale)
-            {
                 AnimatePulse();
-            }
         }
         else
         {
             if (isVisible)
-            {
                 Hide();
-            }
         }
     }
 
@@ -95,14 +85,11 @@ public class CountdownUI : Script
         if (Instance == null)
             Instance = this;
 
-        Console.WriteLine("[CountdownUI] Initialized");
-        Console.WriteLine($"[CountdownUI] Text scale: {TextScale}");
-        Console.WriteLine($"[CountdownUI] Animation: {(AnimateScale ? "ON" : "OFF")}");
-
         // Start hidden
         Hide();
 
         initialized = true;
+        Console.WriteLine("[CountdownUI] Initialized");
     }
 
     // =========================
@@ -114,60 +101,34 @@ public class CountdownUI : Script
             return;
 
         int beatsInPhase = TurnManager.Instance!.GetBeatsInCurrentPhase();
-        int beatsRemaining = TurnManager.Instance!.GetBeatsRemainingInPhase();
 
         // Map beats to countdown numbers
         // Beat 0 = "3"
         // Beat 1 = "2"
         // Beat 2 = "1"
         // Beat 3 = "GO!"
-        
         string displayText = "";
-        float r = 1.0f, g = 1.0f, b = 1.0f;
-
         switch (beatsInPhase)
         {
-            case 0:
-                displayText = "3";
-                if (UseColorGradient) { r = 1.0f; g = 0.3f; b = 0.3f; } // Red
-                break;
-            case 1:
-                displayText = "2";
-                if (UseColorGradient) { r = 1.0f; g = 0.8f; b = 0.2f; } // Orange
-                break;
-            case 2:
-                displayText = "1";
-                if (UseColorGradient) { r = 1.0f; g = 1.0f; b = 0.2f; } // Yellow
-                break;
-            case 3:
-                displayText = "GO!";
-                if (UseColorGradient) { r = 0.2f; g = 1.0f; b = 0.2f; } // Green
-                break;
+            case 0: displayText = "3";   break;
+            case 1: displayText = "2";   break;
+            case 2: displayText = "1";   break;
+            case 3: displayText = "GO!"; break;
         }
 
         if (beatsInPhase != lastDisplayedNumber)
         {
             lastDisplayedNumber = beatsInPhase;
-            
-            Console.WriteLine($"[CountdownUI] 🎯 Displaying: {displayText}");
 
-            // Update text (if your engine supports text rendering)
-            // For now, we'll just log it
-            // TODO: Implement actual text rendering when available
-            // GetText().SetText(displayText);
+            // Update text
+            var text = GetTextComponent();
+            text.SetText(displayText);
 
-            // Update color
-            SpriteComponent sprite = GetSprite();
-            if (sprite.HasSprite())
-            {
-                sprite.SetTint(r, g, b, 1.0f);
-            }
+            Console.WriteLine($"[CountdownUI] Displaying: {displayText}");
 
-            // Trigger pulse animation
+            // Trigger pulse animation on each new number
             if (AnimateScale)
-            {
                 targetScale = PulseAmount;
-            }
         }
     }
 
@@ -186,9 +147,7 @@ public class CountdownUI : Script
 
         // Reset target scale after reaching it
         if (Math.Abs(currentScale - targetScale) < 0.01f)
-        {
             targetScale = 1.0f;
-        }
     }
 
     // Simple smooth damp implementation
@@ -200,57 +159,49 @@ public class CountdownUI : Script
         float exp = 1.0f / (1.0f + x + 0.48f * x * x + 0.235f * x * x * x);
         float change = current - target;
         float originalTarget = target;
-        
+
         float maxChange = float.MaxValue * smoothTime;
         change = Math.Max(-maxChange, Math.Min(change, maxChange));
         target = current - change;
-        
+
         float temp = (velocity + omega * change) * deltaTime;
         velocity = (velocity - omega * temp) * exp;
         float output = target + (change + temp) * exp;
-        
+
         if (originalTarget - current > 0.0f == output > originalTarget)
         {
             output = originalTarget;
             velocity = (output - originalTarget) / deltaTime;
         }
-        
+
         return output;
     }
 
     // =========================
-    // Show/Hide
+    // Show / Hide
     // =========================
     private void Show()
     {
         isVisible = true;
-        TransformComponent tf = GetTransform();
-        tf.IsVisible = true;
-        
+        var text = GetTextComponent();
+        text.SetVisible(true);
+
         // Reset animation
         currentScale = 1.0f;
         targetScale = PulseAmount;
         scaleVelocity = 0.0f;
 
-        Console.WriteLine("[CountdownUI] 👁 Countdown visible");
+        Console.WriteLine("[CountdownUI] Countdown visible");
     }
 
     private void Hide()
     {
         isVisible = false;
-        TransformComponent tf = GetTransform();
-        tf.IsVisible = false;
+        var text = GetTextComponent();
+        text.SetVisible(false);
 
         lastDisplayedNumber = -1;
 
-        Console.WriteLine("[CountdownUI] 🙈 Countdown hidden");
-    }
-
-    // =========================
-    // Public API
-    // =========================
-    public bool IsCurrentlyVisible()
-    {
-        return isVisible;
+        Console.WriteLine("[CountdownUI] Countdown hidden");
     }
 }

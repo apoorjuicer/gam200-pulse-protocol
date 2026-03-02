@@ -44,7 +44,6 @@ public class LevelCountdown : Script
         // Hide/show countdown text based on pause overlay
         if (NavigationButtons.ShowPauseOverlay)
         {
-            text.SetVisible(false);  // hide during pause
             return;
         }
         else

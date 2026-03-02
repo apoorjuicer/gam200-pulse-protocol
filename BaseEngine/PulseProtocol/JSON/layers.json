@@ -39,6 +39,19 @@
                 "b": 0.6000000238418579,
                 "a": 1.0
             }
+        },
+        {
+            "name": "Text",
+            "mask": 8,
+            "visible": true,
+            "locked": false,
+            "isDefault": true,
+            "color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+            }
         }
     ]
 }
