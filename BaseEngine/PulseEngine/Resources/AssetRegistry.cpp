@@ -16,8 +16,29 @@
  /******************************************************************************/
 
 #include "AssetRegistry.h"
+#include "pch/pch_temp.h"
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#endif
 
-
+// namespace PathUtils {
+// 	std::filesystem::path GetExeDir() {
+// #ifdef _WIN32
+// 		wchar_t buf[MAX_PATH]{};
+// 		GetModuleFileNameW(nullptr, buf, MAX_PATH);
+// 		return std::filesystem::path(buf).parent_path();
+// #elif defined(__linux__)
+// 		// Linux: /proc/self/exe points to the running executable
+// 		std::error_code ec;
+// 		auto p = std::filesystem::read_symlink("/proc/self/exe", ec);
+// 		return ec ? std::filesystem::current_path() : p.parent_path();
+// #else
+// 		return std::filesystem::current_path(); // fallback if you build non-windows
+// #endif
+// 	}
+// }
 
 	namespace {
 		void printSeparator(std::ostream& os) {
@@ -171,7 +192,7 @@
 	void AssetRegistry::SetAssetPaths(std::filesystem::path const& pulseEnginePath)
 	{
 		basePath = pulseEnginePath;
-
+		std::cout << "[AssetRegistry] basePath=" << basePath.string() << "\n";
 		audiojsonfilepath = (pulseEnginePath / "JSON" / "audio.json").string();
 		texturejsonfilepath = (pulseEnginePath / "JSON" / "texture.json").string();
 		fontjsonfilepath = (pulseEnginePath / "JSON" / "font.json").string();
@@ -225,12 +246,16 @@
 		}
 		rapidjson::IStreamWrapper isw(ifs);
 		rapidjson::Document d;
-		d.ParseStream(isw);
+		//d.ParseStream(isw);
+		//this means parse data from JSON file ignore comments 
+		//in areas where, whitespaces. e.g. before or after tokens
+		d.ParseStream<rapidjson::kParseCommentsFlag>(isw);
 		if (d.HasParseError()) {
-			std::cerr << "Error: Failed to parse JSON in file: " << jsonPath << "\n";
-			return false;
+		std::cerr << "Error parsing " << jsonPath << ": "
+					<< rapidjson::GetParseError_En(d.GetParseError())
+					<< " at offset " << d.GetErrorOffset() << "\n";
+		return false;
 		}
-
 		if (!d.HasMember("audioFilePaths")) {
 			std::cerr << "Error: No 'audioFilePaths' field in file: " << jsonPath << "\n";
 			return false;
@@ -288,10 +313,15 @@
 		}
 		rapidjson::IStreamWrapper isw(ifs);
 		rapidjson::Document d;
-		d.ParseStream(isw);
+		//d.ParseStream(isw);
+		//this means parse data from JSON file ignore comments 
+		//in areas where, whitespaces. e.g. before or after tokens
+		d.ParseStream<rapidjson::kParseCommentsFlag>(isw);
 		if (d.HasParseError()) {
-			std::cerr << "Error: Failed to parse JSON in file: " << jsonPath << "\n";
-			return false;
+		std::cerr << "Error parsing " << jsonPath << ": "
+					<< rapidjson::GetParseError_En(d.GetParseError())
+					<< " at offset " << d.GetErrorOffset() << "\n";
+		return false;
 		}
 
 		if (!d.HasMember("textureFilePaths")) {
@@ -343,10 +373,15 @@
 		}
 		rapidjson::IStreamWrapper isw(ifs);
 		rapidjson::Document d;
-		d.ParseStream(isw);
+		//d.ParseStream(isw);
+		//this means parse data from JSON file ignore comments 
+		//in areas where, whitespaces. e.g. before or after tokens
+		d.ParseStream<rapidjson::kParseCommentsFlag>(isw);
 		if (d.HasParseError()) {
-			std::cerr << "Error: Failed to parse JSON in file: " << jsonPath << "\n";
-			return false;
+		std::cerr << "Error parsing " << jsonPath << ": "
+					<< rapidjson::GetParseError_En(d.GetParseError())
+					<< " at offset " << d.GetErrorOffset() << "\n";
+		return false;
 		}
 
 		if (!d.HasMember("fontFilePaths")) {
@@ -401,10 +436,15 @@
 		}
 		rapidjson::IStreamWrapper isw(ifs);
 		rapidjson::Document d;
-		d.ParseStream(isw);
+		//d.ParseStream(isw);
+		//this means parse data from JSON file ignore comments 
+		//in areas where, whitespaces. e.g. before or after tokens
+		d.ParseStream<rapidjson::kParseCommentsFlag>(isw);
 		if (d.HasParseError()) {
-			std::cerr << "Error: Failed to parse JSON in file: " << jsonPath << "\n";
-			return false;
+		std::cerr << "Error parsing " << jsonPath << ": "
+					<< rapidjson::GetParseError_En(d.GetParseError())
+					<< " at offset " << d.GetErrorOffset() << "\n";
+		return false;
 		}
 
 		if (!d.HasMember("sceneFilePaths")) {
@@ -452,10 +492,15 @@
 		}
 		rapidjson::IStreamWrapper isw(ifs);
 		rapidjson::Document d;
-		d.ParseStream(isw);
+		//d.ParseStream(isw);
+		//this means parse data from JSON file ignore comments 
+		//in areas where, whitespaces. e.g. before or after tokens
+		d.ParseStream<rapidjson::kParseCommentsFlag>(isw);
 		if (d.HasParseError()) {
-			std::cerr << "Error: Failed to parse JSON in file: " << jsonPath << "\n";
-			return false;
+		std::cerr << "Error parsing " << jsonPath << ": "
+					<< rapidjson::GetParseError_En(d.GetParseError())
+					<< " at offset " << d.GetErrorOffset() << "\n";
+		return false;
 		}
 
 		if (!d.HasMember("animationFilePaths")) {
@@ -523,9 +568,14 @@
 		auto* res = FindAudio(id);
 		if (!res) return "";
 
-		std::filesystem::path p(res->path);
-		if (p.is_absolute()) return res->path;
-		return (basePath / p).lexically_normal().string();
+		//  If path starts with ../.. use basePath, otherwise use as-is
+		std::filesystem::path resPath(res->path);
+		if (res->path.find("../../") == 0) {
+			// Strip ../../PulseEngine/ and use basePath instead
+			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
+			return (basePath / relativePath).string();
+		}
+		return res->path;
 	}
 	std::string AssetRegistry::GetTextureItemPath(std::string const& id) const {
 		auto* res = FindTexture(id);
@@ -534,9 +584,19 @@
 			return "";
 		}
 
-		std::filesystem::path p(res->path);
-		if (p.is_absolute()) return res->path;
-		return (basePath / p).lexically_normal().string();
+		//std::cout << "[DEBUG] GetTextureItemPath('" << id << "'):\n";
+		//std::cout << "  basePath: " << basePath << "\n";
+		//std::cout << "  res->path: " << res->path << "\n";
+
+		if (res->path.find("../../") == 0) {
+			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
+			std::string resolved = (basePath / relativePath).string();
+			//std::cout << "  resolved: " << resolved << "\n";
+			return resolved;
+		}
+
+		std::cout << "  (no ../../ prefix, using as-is)\n";
+		return res->path;
 	}
 	std::string AssetRegistry::GetFontItemPath(std::string const& id)   const {
 		auto* res = FindFont(id);
@@ -545,25 +605,41 @@
 			return "";
 		}
 
-		std::filesystem::path p(res->path);
-		if (p.is_absolute()) return res->path;
-		return (basePath / p).lexically_normal().string();
+		//std::cout << "[DEBUG] GetFontItemPath('" << id << "'):\n";
+		//std::cout << "  basePath: " << basePath << "\n";
+		//std::cout << "  res->path: " << res->path << "\n";	
+
+		if (res->path.find("../../") == 0) {
+			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
+			std::string resolved = (basePath / relativePath).string();
+			std::cout << "  resolved: " << resolved << "\n";
+			return resolved;
+		}
+
+		std::cout << "  (no ../../ prefix, using as-is)\n";
+		return res->path;
 	}
 	std::string AssetRegistry::GetSceneItemPath(std::string const& id)   const {
 		auto* res = FindScene(id);
 		if (!res) return "";
 
-		std::filesystem::path p(res->path);
-		if (p.is_absolute()) return res->path;
-		return (basePath / p).lexically_normal().string();
+		std::filesystem::path resPath(res->path);
+		if (res->path.find("../../") == 0) {
+			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
+			return (basePath / relativePath).string();
+		}
+		return res->path;
 	}
 	std::string AssetRegistry::GetAnimationItemPath(std::string const& id)   const {
 		auto* res = FindAnimation(id);
 		if (!res) return "";
 
-		std::filesystem::path p(res->path);
-		if (p.is_absolute()) return res->path;
-		return (basePath / p).lexically_normal().string();
+		std::filesystem::path resPath(res->path);
+		if (res->path.find("../../") == 0) {
+			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
+			return (basePath / relativePath).string();
+		}
+		return res->path;
 	}
 
 
@@ -653,3 +729,8 @@
 		return os;
 	}
 
+
+	//
+	std::filesystem::path const& AssetRegistry::GetBasePath() const {
+		return basePath;
+	}
