@@ -569,13 +569,9 @@
 		if (!res) return "";
 
 		//  If path starts with ../.. use basePath, otherwise use as-is
-		std::filesystem::path resPath(res->path);
-		if (res->path.find("../../") == 0) {
-			// Strip ../../PulseEngine/ and use basePath instead
-			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
-			return (basePath / relativePath).string();
-		}
-		return res->path;
+		std::filesystem::path p(res->path);
+		if (p.is_absolute()) return res->path;
+		return (basePath / p).lexically_normal().string();
 	}
 	std::string AssetRegistry::GetTextureItemPath(std::string const& id) const {
 		auto* res = FindTexture(id);
@@ -588,12 +584,9 @@
 		//std::cout << "  basePath: " << basePath << "\n";
 		//std::cout << "  res->path: " << res->path << "\n";
 
-		if (res->path.find("../../") == 0) {
-			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
-			std::string resolved = (basePath / relativePath).string();
-			//std::cout << "  resolved: " << resolved << "\n";
-			return resolved;
-		}
+		std::filesystem::path p(res->path);
+		if (p.is_absolute()) return res->path;
+		return (basePath / p).lexically_normal().string();
 
 		std::cout << "  (no ../../ prefix, using as-is)\n";
 		return res->path;
@@ -609,37 +602,25 @@
 		//std::cout << "  basePath: " << basePath << "\n";
 		//std::cout << "  res->path: " << res->path << "\n";	
 
-		if (res->path.find("../../") == 0) {
-			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
-			std::string resolved = (basePath / relativePath).string();
-			std::cout << "  resolved: " << resolved << "\n";
-			return resolved;
-		}
-
-		std::cout << "  (no ../../ prefix, using as-is)\n";
-		return res->path;
+		std::filesystem::path p(res->path);
+		if (p.is_absolute()) return res->path;
+		return (basePath / p).lexically_normal().string();
 	}
 	std::string AssetRegistry::GetSceneItemPath(std::string const& id)   const {
 		auto* res = FindScene(id);
 		if (!res) return "";
 
-		std::filesystem::path resPath(res->path);
-		if (res->path.find("../../") == 0) {
-			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
-			return (basePath / relativePath).string();
-		}
-		return res->path;
+		std::filesystem::path p(res->path);
+		if (p.is_absolute()) return res->path;
+		return (basePath / p).lexically_normal().string();
 	}
 	std::string AssetRegistry::GetAnimationItemPath(std::string const& id)   const {
 		auto* res = FindAnimation(id);
 		if (!res) return "";
 
-		std::filesystem::path resPath(res->path);
-		if (res->path.find("../../") == 0) {
-			std::string relativePath = res->path.substr(std::string("../../PulseEngine/").length());
-			return (basePath / relativePath).string();
-		}
-		return res->path;
+		std::filesystem::path p(res->path);
+		if (p.is_absolute()) return res->path;
+		return (basePath / p).lexically_normal().string();
 	}
 
 
