@@ -576,7 +576,7 @@
 	std::string AssetRegistry::GetTextureItemPath(std::string const& id) const {
 		auto* res = FindTexture(id);
 		if (!res) {
-			std::cout << "[DEBUG] GetTextureItemPath('" << id << "'): NOT FOUND in registry!\n";
+			//std::cout << "[DEBUG] GetTextureItemPath('" << id << "'): NOT FOUND in registry!\n";
 			return "";
 		}
 
@@ -594,7 +594,7 @@
 	std::string AssetRegistry::GetFontItemPath(std::string const& id)   const {
 		auto* res = FindFont(id);
 		if (!res) {
-			std::cout << "[DEBUG] GetFontItemPath('" << id << "'): NOT FOUND in registry!\n";
+			//std::cout << "[DEBUG] GetFontItemPath('" << id << "'): NOT FOUND in registry!\n";
 			return "";
 		}
 

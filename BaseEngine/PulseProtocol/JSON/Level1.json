@@ -27,7 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/Backgrounds/Background1.jpg",
+                        "spriteName": "Assets/Textures/Backgrounds/Background2.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2100,7 +2100,7 @@
                 },
                 {
                     "audiosource": {
-                        "audio_id": "BGM_L1_TESTING",
+                        "audio_id": "BGM_L2_TESTING",
                         "volume": 1.0,
                         "loop": false,
                         "playOnAwake": false
