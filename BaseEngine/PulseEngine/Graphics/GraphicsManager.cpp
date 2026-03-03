@@ -302,15 +302,18 @@ void GraphicsManager::Update()
     }
 
     //--- Rendering passes ---
+    float dt = static_cast<float>(GLHelper::delta_time);
     if (m_postProcess.IsEnabled()) m_postProcess.BeginCapture();
-    glapp->draw(EntityMember, m_editorLayerFilter);
+
+    glapp->draw(EntityMember, m_editorLayerFilter, dt);
+
     if (m_postProcess.IsEnabled()) m_postProcess.ApplyBloom();
 
     // Draw text entities on Background or World layer
     Update2DTextComponent(LAYER_BACKGROUND | LAYER_WORLD | LAYER_TEXT);
 
     // Draw UI sprites
-    glapp->draw(EntityMember, m_editorLayerFilter & LAYER_UI);
+    glapp->draw(EntityMember, m_editorLayerFilter & LAYER_UI, 0.0f);
 
     // Draw text entities on UI layer
     Update2DTextComponent(LAYER_UI);
@@ -887,7 +890,7 @@ void GraphicsManager::DrawText2D(
     FontData const* fontData = GM_FindFont(fontId);
     if (!fontData)
     {
-        std::cerr << "[GraphicsManager] DrawText2D: font '" << fontId << "' not found\n";
+        //std::cerr << "[GraphicsManager] DrawText2D: font '" << fontId << "' not found\n";
         return;
     }
 

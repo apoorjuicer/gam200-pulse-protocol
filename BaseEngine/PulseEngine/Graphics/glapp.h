@@ -41,7 +41,7 @@ public:
 	void init(/*float inputEditorWidth, float inputEditorHeight*/);
 	//void update(GLFWwindow* window);
 	void update(GLFWwindow* window, std::set<Entity>);
-	void draw(std::set<Entity> entities, LayerMask includeMask);
+	void draw(std::set<Entity> entities, LayerMask includeMask, float deltaTime);
 	void cleanup();
 
 	GLuint vaoid; // handle to VAO
