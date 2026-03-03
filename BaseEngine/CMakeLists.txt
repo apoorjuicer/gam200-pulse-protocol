@@ -72,6 +72,9 @@ target_compile_definitions(imgui_backend PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLEW)
 target_link_libraries(imgui_backend PRIVATE imgui glfw)
 set_property(TARGET imgui_backend PROPERTY FOLDER "3rdparty/ImGui")
 
+# Auto download de .NET DLLs into the folder extern/dotnet/bin/ if its missing
+include(DotnetRuntime)
+
 # -------------------------------
 # Main projects (ONCE each)
 # -------------------------------
