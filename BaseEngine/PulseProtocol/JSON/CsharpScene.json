@@ -4,11 +4,6 @@
         {
             "components": [
                 {
-                    "Typing": {
-                        "Type": "Player"
-                    }
-                },
-                {
                     "transform": {
                         "position": {
                             "x": -1065.0955810546875,
@@ -96,11 +91,6 @@
         },
         {
             "components": [
-                {
-                    "Typing": {
-                        "Type": "Enemy"
-                    }
-                },
                 {
                     "transform": {
                         "position": {
@@ -303,7 +293,9 @@
                 },
                 {
                     "script": {
-                        "ScriptName": []
+                        "ScriptName": [
+                            "TestScript"
+                        ]
                     }
                 },
                 {

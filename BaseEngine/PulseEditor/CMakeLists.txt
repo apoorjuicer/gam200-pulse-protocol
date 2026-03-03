@@ -102,8 +102,8 @@ add_custom_command(TARGET PulseEditor POST_BUILD
 )
 
 
-# Make sure PulseEditor waits for ScriptAPI to build (NO ManagedScripts)
-add_dependencies(PulseEditor ScriptAPI)
+# Make sure PulseEditor waits for ScriptAPI and ManagedScripts to build
+add_dependencies(PulseEditor ScriptAPI ManagedScripts)
 
 # Consolidated POST_BUILD: Copy all DLLs in one command
 add_custom_command(TARGET PulseEditor POST_BUILD
@@ -115,9 +115,11 @@ add_custom_command(TARGET PulseEditor POST_BUILD
     "${CMAKE_SOURCE_DIR}/extern/dotnet/bin" "$<TARGET_FILE_DIR:PulseEditor>"
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<TARGET_RUNTIME_DLLS:PulseEditor> "$<TARGET_FILE_DIR:PulseEditor>"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${CMAKE_BINARY_DIR}/.bin/$<CONFIG>-x64/ManagedScripts.dll" "$<TARGET_FILE_DIR:PulseEditor>"
   COMMAND_EXPAND_LISTS
   VERBATIM
-  COMMENT "Copying PulseEngine/ScriptAPI + .NET runtime to PulseEditor output"
+  COMMENT "Copying PulseEngine/ScriptAPI/ManagedScripts + .NET runtime to PulseEditor output"
 )
 
 

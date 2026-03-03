@@ -4,11 +4,6 @@
         {
             "components": [
                 {
-                    "Typing": {
-                        "Type": "Background"
-                    }
-                },
-                {
                     "transform": {
                         "position": {
                             "x": 0.0,
@@ -74,11 +69,6 @@
         },
         {
             "components": [
-                {
-                    "Typing": {
-                        "Type": "Player"
-                    }
-                },
                 {
                     "transform": {
                         "position": {
@@ -183,11 +173,6 @@
         },
         {
             "components": [
-                {
-                    "Typing": {
-                        "Type": "Enemy"
-                    }
-                },
                 {
                     "transform": {
                         "position": {
@@ -506,11 +491,6 @@
         },
         {
             "components": [
-                {
-                    "Typing": {
-                        "Type": "Enemy"
-                    }
-                },
                 {
                     "transform": {
                         "position": {

@@ -77,8 +77,9 @@ set_property(TARGET imgui_backend PROPERTY FOLDER "3rdparty/ImGui")
 # -------------------------------
 add_subdirectory(PulseEngine)     # defines PulseEngine_Editor / PulseEngine_Game
 add_subdirectory(ScriptAPI)
-add_subdirectory(PulseEditor)
-add_subdirectory(PulseProtocol)
+add_subdirectory(ManagedScripts)  # C# scripts — depends on ScriptAPI
+add_subdirectory(PulseEditor)     # depends on ManagedScripts
+add_subdirectory(PulseProtocol)   # depends on ManagedScripts, LATER MAKE IT GAME NAME, NOT HARDCODED.
 
 # -------------------------------
 # Nice Solution Explorer layout

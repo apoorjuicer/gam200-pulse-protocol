@@ -299,26 +299,26 @@ void CoreEngine::CompileScriptAssembly()
 		std::cout << "[CoreEngine] Scripts compiled successfully!\n";
 #endif
 
-		// Copy the ManageScripts.dll to the PulseEditor and PulseProtocol cos ITS FUCKING STUPID FK CMAKE BS
+		// Copy ManagedScripts.dll next to the currently running executable. And 2 make it not hard coded just do in bin then ask 2 grab if needed
 		std::filesystem::path dllSource = baseEngineDir / "build" / ".bin" / (configuration + "-x64") / "ManagedScripts.dll";
-		std::filesystem::path dllDest1 = baseEngineDir / "build" / "PulseEditor" / configuration / "ManagedScripts.dll";
-		std::filesystem::path dllDest2 = baseEngineDir / "build" / "PulseProtocol" / configuration / "ManagedScripts.dll";
+
+		// Get the directory of the running executable(all exe yippeeeeeeeeeeeeeee)
+		char exePathBuf[MAX_PATH];
+		GetModuleFileNameA(nullptr, exePathBuf, MAX_PATH);
+		std::filesystem::path dllDest = std::filesystem::path(exePathBuf).parent_path() / "ManagedScripts.dll";
 
 		if (!std::filesystem::exists(dllSource))
 		{
-			std::cerr << "[Hot Reload] ERROR: Built DLL not found!" << std::endl;
+			std::cerr << "[Hot Reload] ERROR: Built DLL not found at: " << dllSource << std::endl;
 			return;
 		}
 
 		try
 		{
-			std::filesystem::create_directories(dllDest1.parent_path());
-			std::filesystem::create_directories(dllDest2.parent_path());
-
-			std::filesystem::copy_file(dllSource, dllDest1, std::filesystem::copy_options::overwrite_existing);
-			std::filesystem::copy_file(dllSource, dllDest2, std::filesystem::copy_options::overwrite_existing);
+			// just 1 place and they all copy
+			std::filesystem::copy_file(dllSource, dllDest, std::filesystem::copy_options::overwrite_existing);
 #ifdef _DEBUG
-			std::cout << "[CoreEngine] ManagedScripts.dll copied to both locations!\n";
+			std::cout << "[CoreEngine] ManagedScripts.dll copied to: " << dllDest << "\n";
 #endif
 		}
 
@@ -755,10 +755,8 @@ void CoreEngine::Init()
 	GameRunning = true;	 // 3.. 2.. 1.. GAME START
 	startScriptEngine(); // 3.. 2.. 1.. DLL SCRIPT! START ROLLINGGGGGGGGGGGGGGGGGG
 
-	//remove for game.exe in release cos no hotreload allow but need managescript.dll to be copied
-//#ifdef _DEBUG
-	CompileScriptAssembly();
-//#endif // DEBUG
+	// ManagedScripts.dll is now built and copied by CMake POST_BUILD.
+	// CompileScriptAssembly() is only called at runtime for hot-reload (R key in Debug).
 
 
 	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
