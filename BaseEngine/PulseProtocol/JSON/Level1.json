@@ -2117,6 +2117,14 @@
                         "orderInLayer": 0,
                         "z": 0.0
                     }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "BGM_L1_TESTING",
+                        "volume": 1.0,
+                        "loop": false,
+                        "playOnAwake": false
+                    }
                 }
             ]
         },
