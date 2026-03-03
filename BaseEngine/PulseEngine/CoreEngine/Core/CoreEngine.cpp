@@ -1342,7 +1342,7 @@ void CoreEngine::SetPaused(bool paused, PauseSource source)
 		if (source == PauseSource::Game)
 		{
 			// Pause ONLY music during game pause, keep SFX alive for hover/click
-			audio->SetMusicPaused(paused);
+			//audio->SetMusicPaused(paused);
 		}
 		else
 		{
