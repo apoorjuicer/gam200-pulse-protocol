@@ -444,7 +444,7 @@
                 },
                 {
                     "audiosource": {
-                        "audio_id": "BGM_GENERAL",
+                        "audio_id": "BGM_L2_TESTING",
                         "volume": 1.0,
                         "loop": true,
                         "playOnAwake": false
@@ -517,6 +517,14 @@
                         "sortingLayer": 2,
                         "orderInLayer": 10,
                         "z": 0.0
+                    }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "BGM_GENERAL",
+                        "volume": 1.0,
+                        "loop": true,
+                        "playOnAwake": false
                     }
                 },
                 {

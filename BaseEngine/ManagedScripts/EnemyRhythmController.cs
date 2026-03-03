@@ -124,7 +124,7 @@ public class EnemyRhythmController : Script
 
         // ONLY FOR BEN TO TEST 
         InputComponent input = GetInput();
-        if (input.IsKeyTriggered(32)) 
+        if (input.IsKeyTriggered(32) && TurnManager.Instance != null && !TurnManager.Instance.IsInputLocked)
         {
             TakeDamage(10f);
             Console.WriteLine($"TESTING!!!!!!! DO 5 damage! HP remaining: {Health}\n\n\n\n\n\n\n\n\n\n\n\n\n");
