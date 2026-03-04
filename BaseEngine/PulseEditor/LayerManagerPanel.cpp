@@ -60,12 +60,6 @@ namespace PulseEditor
             return;
         }
 
-        bool isPlaying = IsPlaying();
-        if (isPlaying)
-        {
-            ImGui::BeginDisabled();
-        }
-
         ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Scene Layers");
         ImGui::Separator();
         ImGui::Spacing();
@@ -74,7 +68,6 @@ namespace PulseEditor
         if (!coord)
         {
             ImGui::TextColored(ImVec4(1, 0, 0, 1), "Coordinator not found!");
-            if (isPlaying) ImGui::EndDisabled();
             ImGui::End();
             return;
         }
@@ -286,11 +279,6 @@ namespace PulseEditor
         }
 
         // No more Save/Load buttons - everything auto-saves!
-
-        if (isPlaying)
-        {
-            ImGui::EndDisabled();
-        }
 
         ImGui::End();
     }

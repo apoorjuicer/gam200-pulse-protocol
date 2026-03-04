@@ -23,6 +23,16 @@
 
 namespace PulseEditor
 {
+    auto getSourceConfigPath = []() -> std::filesystem::path {
+        char exePath[MAX_PATH];
+        GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+        std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
+        auto baseEngineDir = currentDir;
+        while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+            baseEngineDir = baseEngineDir.parent_path();
+        return baseEngineDir / "PulseProtocol" / "JSON" / "config.json";
+    };
+
     void DrawConfigPanel()
     {
         bool isPlaying = IsPlaying();
@@ -72,25 +82,19 @@ namespace PulseEditor
             config.SetWindowWidth(s_width);
             config.SetWindowHeight(s_height);
 
-            // Resolve source path the same way CoreEngine::Init() does
-            char exePathBuf[MAX_PATH];
-            GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePathBuf, MAX_PATH);
-            std::filesystem::path currentDir = std::filesystem::path(exePathBuf).parent_path();
+            char exePath[MAX_PATH];
+            GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+            std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
 
-            std::filesystem::path configPath;
-            if (std::filesystem::exists(currentDir / "JSON"))
-            {
-                configPath = currentDir / "JSON" / "config.json";
-            }
-            else
-            {
-                auto baseEngineDir = currentDir;
-                while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
-                    baseEngineDir = baseEngineDir.parent_path();
-                configPath = baseEngineDir / "PulseProtocol" / "JSON" / "config.json";
-            }
+            auto baseEngineDir = currentDir;
+            while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+                baseEngineDir = baseEngineDir.parent_path();
 
-            if (SaveConfig(config, configPath.string()))
+            std::filesystem::path savePath = baseEngineDir / "PulseProtocol" / "JSON" / "config.json";
+
+            std::cout << "[ConfigPanel] Saving to source: " << savePath << std::endl;
+
+            if (SaveConfig(config, savePath.string()))
                 ImGui::OpenPopup("SavedPopup");
         }
 
@@ -98,7 +102,17 @@ namespace PulseEditor
 
         if (ImGui::Button("Reload from File"))
         {
-            LoadConfig(config, config.GetConfigPath());
+            char exePath[MAX_PATH];
+            GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+            std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
+
+            auto baseEngineDir = currentDir;
+            while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+                baseEngineDir = baseEngineDir.parent_path();
+
+            std::filesystem::path sourcePath = baseEngineDir / "PulseProtocol" / "JSON" / "config.json";
+
+            LoadConfig(config, sourcePath.string());
             s_width = config.GetWindowWidth();
             s_height = config.GetWindowHeight();
         }
