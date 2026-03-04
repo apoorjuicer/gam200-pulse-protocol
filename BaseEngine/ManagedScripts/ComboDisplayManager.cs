@@ -1,4 +1,4 @@
-using System;
+    using System;
 using System.Collections.Generic;
 using ScriptAPI;
 
@@ -21,6 +21,12 @@ public class ComboDisplayManager : Script
     private string revealCombo = "";
     private int revealIndex = 0;
     private int lastRevealBeat = -1;
+
+    private bool pendingCountdownStart = false;
+    private float countdownDelay = 0f;
+    private int countdownCurrentSlot = 0;
+    private int lastCountdownBeat = -1;
+    private bool isCountingDown = false;
 
     private bool isFadingOut = false;
     private int fadeOutCount = 0;
@@ -70,6 +76,35 @@ public class ComboDisplayManager : Script
 
         if (isFadingOut) HandleStaggerFade();
 
+        if (pendingCountdownStart)
+        {
+            countdownDelay -= Time.DeltaTime;
+            if (countdownDelay <= 0f)
+            {
+                pendingCountdownStart = false;
+                isCountingDown = true;
+                lastCountdownBeat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() : -1;
+                if (playerSlots.ContainsKey(0) && currentWeakness.Length > 0)
+                    playerSlots[0].StartCountdown(currentWeakness[0]);
+                countdownCurrentSlot = 1;
+            }
+        }
+
+        if (isCountingDown && Conductor.Instance != null)
+        {
+            int currentBeat = Conductor.Instance.GetCurrentBeat();
+            if (currentBeat > lastCountdownBeat && countdownCurrentSlot < currentWeakness.Length)
+            {
+                lastCountdownBeat = currentBeat;
+                if (playerSlots.ContainsKey(countdownCurrentSlot))
+                    playerSlots[countdownCurrentSlot].StartCountdown(currentWeakness[countdownCurrentSlot]);
+                countdownCurrentSlot++;
+
+                if (countdownCurrentSlot >= currentWeakness.Length)
+                    isCountingDown = false;
+            }
+        }
+
         if (ComboSystem.Instance == null) return;
 
         int currentProgress = ComboSystem.Instance!.GetComboProgress();
@@ -95,13 +130,8 @@ public class ComboDisplayManager : Script
                     {
                         char expected = slotIndex < currentWeakness.Length ? currentWeakness[slotIndex] : pressedKey;
                         playerSlots[slotIndex].ShowWrong(pressedKey, expected);
-                        VFXAPI.ShakeCamera(0.08f, 10.0f);
+                        VFXAPI.ShakeCamera(0.01f, 5.0f);
                     }
-
-                    // Start next slot countdown regardless of correct/wrong
-                    int nextSlot = slotIndex + 1;
-                    if (nextSlot < currentWeakness.Length && playerSlots.ContainsKey(nextSlot))
-                        playerSlots[nextSlot].StartCountdown(currentWeakness[nextSlot]);
                 }
             }
         }
@@ -123,6 +153,12 @@ public class ComboDisplayManager : Script
         isRevealing = false;
         isFadingOut = false;
         currentWeakness = "";
+
+        pendingCountdownStart = false;
+        countdownDelay = 0f;
+        countdownCurrentSlot = 0;
+        lastCountdownBeat = -1; 
+        isCountingDown = false;
 
         enemySlots.Clear();
         playerSlots.Clear();
@@ -163,9 +199,11 @@ public class ComboDisplayManager : Script
             Console.WriteLine("[ComboDisplayManager] Starting stagger fade out");
         }
 
-        // Only start slot 0 countdown, not ALL the slots at once
-        if (playerSlots.ContainsKey(0) && currentWeakness.Length > 0)
-            playerSlots[0].StartCountdown(currentWeakness[0]);
+        pendingCountdownStart = true;
+        countdownDelay = 0f;
+        countdownCurrentSlot = 0;
+        isCountingDown = false;
+        countdownDelay = 0f;
     }
 
     private void HandleBeatReveal()
