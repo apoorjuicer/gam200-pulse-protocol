@@ -28,7 +28,7 @@ public class Conductor : Script
     }
 
     // Stupid FMOD has a latency for about 90ms?!?!?!?!??!!
-    public float MusicLatencyOffset = 0.09f;
+    public float MusicLatencyOffset = 0.10f;
 
     public override void Update()
     {
@@ -83,8 +83,10 @@ public class Conductor : Script
             songTime += dt; // fallback if audio not playing yet
         }
 
-        //int currentBeat = (int)Math.Floor(songTime / secondsPerBeat);
-        int currentBeat = (int)Math.Floor((songTime - MusicLatencyOffset) / secondsPerBeat);
+        // Apply MusicLatencyOffset to everything(pls work fuck me la)
+        float adjustedTime = songTime - MusicLatencyOffset; // use this 2 check the hlaf beat instead
+
+        int currentBeat = (int)Math.Floor(adjustedTime / secondsPerBeat);
 
         // Full beat
         if (currentBeat > lastBeat)
@@ -94,7 +96,7 @@ public class Conductor : Script
         }
 
         // Half beat (use while to catch up if a frame skips)
-        while (songTime >= nextHalfBeat)
+        while (adjustedTime >= nextHalfBeat)
         {
             Console.WriteLine($"[Conductor] HalfBeat near Beat {lastBeat} | GameTime={Time.GameTime:F3}");
             nextHalfBeat += secondsPerBeat;
