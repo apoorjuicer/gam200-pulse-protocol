@@ -94,6 +94,7 @@ public class CutscenePanel : Script
             {
                 Console.WriteLine("[Cutscene] Skipped!");
                 sharedCutsceneFinished = true;
+                NavigationButtons.LastEnteredLevel = "Level1";
                 Scene.LoadScene("Level1");
                 return;
             }
@@ -105,6 +106,7 @@ public class CutscenePanel : Script
             {
                 sharedCutsceneFinished = true;
                 Console.WriteLine("[Cutscene] Complete! Loading Level1...");
+                NavigationButtons.LastEnteredLevel = "Level1";
                 Scene.LoadScene("Level1");
                 return;
             }
