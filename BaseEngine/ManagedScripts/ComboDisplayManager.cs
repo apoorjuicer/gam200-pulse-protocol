@@ -23,7 +23,6 @@ public class ComboDisplayManager : Script
     private int lastRevealBeat = -1;
 
     private bool pendingCountdownStart = false;
-    private float countdownDelay = 0f;
     private int countdownCurrentSlot = 0;
     private int lastCountdownBeat = -1;
     private bool isCountingDown = false;
@@ -160,7 +159,6 @@ public class ComboDisplayManager : Script
         currentWeakness = "";
 
         pendingCountdownStart = false;
-        countdownDelay = 0f;
         countdownCurrentSlot = 0;
         lastCountdownBeat = -1; 
         isCountingDown = false;
