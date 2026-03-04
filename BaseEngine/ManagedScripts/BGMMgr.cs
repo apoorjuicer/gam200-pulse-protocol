@@ -58,8 +58,8 @@ public class LevelBGM : Script
         if (!started)
         {
             // Don't set volume here - the MusicKnob slider handles it
-            audio.PlayBGM();
-            //audio.PlayBGM("BGM_L1_TESTING");
+            //audio.PlayBGM();
+            audio.PlayBGM("BGM_L1_TESTING");
             //audio.PlayBGM("LVL 1 BGM 90 MILI OFF TEST"); 
             BGMManager.CurrentTrack = "Level";
             Console.WriteLine("BGM: Playing Level music");
