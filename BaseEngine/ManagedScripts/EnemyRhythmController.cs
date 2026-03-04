@@ -124,7 +124,7 @@ public class EnemyRhythmController : Script
 
         // ONLY FOR BEN TO TEST 
         InputComponent input = GetInput();
-        if (input.IsKeyTriggered(32)) 
+        if (input.IsKeyTriggered(32) && TurnManager.Instance != null && !TurnManager.Instance.IsInputLocked)
         {
             TakeDamage(10f);
             Console.WriteLine($"TESTING!!!!!!! DO 5 damage! HP remaining: {Health}\n\n\n\n\n\n\n\n\n\n\n\n\n");
@@ -244,7 +244,7 @@ public class EnemyRhythmController : Script
         TrySetWeakness();
 
         HealthComponent eh = GetHealth();
-        eh.hp = (int)Health;
+        Health = eh.hp;
         eh.isAlive = true;
         Console.WriteLine($"[Enemy] Initialized at ({tf.X:F1}, {tf.Y:F1}) | Health: {eh.hp}");
         Console.WriteLine($"[Enemy] Collision mode: {CollisionMode} | ManualAttackRange: {ManualAttackRange}");
@@ -488,14 +488,15 @@ public class EnemyRhythmController : Script
     {
         if (isDead) return;
 
-        Console.WriteLine($"[Enemy] ATTACKING PLAYER for {AttackDamage} damage!");
+        int attackDamage = GetHealth().damage;
+        Console.WriteLine($"[Enemy] ATTACKING PLAYER for {attackDamage} damage!");
         SetState(EnemyState.Attacking);
 
         attackCooldownTimer = AttackFrames / AnimationSpeed;
 
         if (PlayerHealth.Instance != null)
         {
-            PlayerHealth.Instance.TakeDamage(AttackDamage);
+            PlayerHealth.Instance.TakeDamage(attackDamage);
             Console.WriteLine("[Enemy] Successfully damaged player");
         }
         else

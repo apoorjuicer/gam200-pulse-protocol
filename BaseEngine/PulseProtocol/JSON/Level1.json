@@ -27,7 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/Backgrounds/Background2.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/Backgrounds/Background1.jpg",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -58,9 +58,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "Background",
-                        "mask": 1,
-                        "sortingLayer": 0,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -1647,9 +1647,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -1661,7 +1661,11 @@
                             22,
                             23,
                             24,
-                            25
+                            25,
+                            67,
+                            68,
+                            69,
+                            70
                         ]
                     }
                 }
@@ -1672,8 +1676,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -700.0,
-                            "y": -702.094970703125
+                            "x": -600.0,
+                            "y": -640.0
                         },
                         "scale": {
                             "x": 100.0,
@@ -1683,7 +1687,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1691,9 +1695,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/W.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1714,22 +1718,20 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "ComboKeySlot"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
                     "name": {
-                        "name": "KeySlot0"
+                        "name": "KeySlot0_outline"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": -1,
                         "z": 0.0
                     }
                 },
@@ -1745,8 +1747,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -236.92312622070313,
-                            "y": -702.0947265625
+                            "x": -200.0,
+                            "y": -640.0
                         },
                         "scale": {
                             "x": 100.0,
@@ -1756,7 +1758,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1766,7 +1768,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/A.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1787,22 +1789,20 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "ComboKeySlot"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
                     "name": {
-                        "name": "KeySlot1"
+                        "name": "KeySlot1_outline"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": -1,
                         "z": 0.0
                     }
                 },
@@ -1818,8 +1818,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 195.38461303710938,
-                            "y": -695.03857421875
+                            "x": 200.0,
+                            "y": -640.0
                         },
                         "scale": {
                             "x": 100.0,
@@ -1829,7 +1829,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1839,7 +1839,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/S.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1860,22 +1860,20 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "ComboKeySlot"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
                     "name": {
-                        "name": "KeySlot2"
+                        "name": "KeySlot2_outline"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": -1,
                         "z": 0.0
                     }
                 },
@@ -1891,8 +1889,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 700.0,
-                            "y": -691.5104370117188
+                            "x": 600.0,
+                            "y": -640.0
                         },
                         "scale": {
                             "x": 100.0,
@@ -1902,7 +1900,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -1912,7 +1910,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/D.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1933,22 +1931,20 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "ComboKeySlot"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
                     "name": {
-                        "name": "KeySlot3"
+                        "name": "KeySlot3_outline"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": -1,
                         "z": 0.0
                     }
                 },
@@ -2100,7 +2096,7 @@
                 },
                 {
                     "audiosource": {
-                        "audio_id": "BGM_L2_TESTING",
+                        "audio_id": "BGM_L1_TESTING",
                         "volume": 1.0,
                         "loop": true,
                         "playOnAwake": false
@@ -4796,9 +4792,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "ComboDisplayManager"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -5115,6 +5109,298 @@
                 {
                     "Parent": {
                         "parent": 62
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -603.6439208984375,
+                            "y": -640.9230346679688
+                        },
+                        "scale": {
+                            "x": 89.57219696044922,
+                            "y": 81.90200805664063
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/Player Input GREEN W.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "ComboKeySlot"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "KeySlot0_fill"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": -2,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 20
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -205.9861297607422,
+                            "y": -640.0
+                        },
+                        "scale": {
+                            "x": 87.78251647949219,
+                            "y": 82.32746124267578
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/Player Input GREEN A.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "ComboKeySlot"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "KeySlot1_fill"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": -2,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 20
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 593.3912963867188,
+                            "y": -641.2968139648438
+                        },
+                        "scale": {
+                            "x": 87.63788604736328,
+                            "y": 80.96159362792969
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/Player Input GREEN D.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "ComboKeySlot"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "KeySlot3_fill"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": -2,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 20
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 194.4175567626953,
+                            "y": -641.296875
+                        },
+                        "scale": {
+                            "x": 87.12000274658203,
+                            "y": 80.95999908447266
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/Player Input GREEN S.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "ComboKeySlot"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "KeySlot2_fill"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": -2,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "Parent": {
+                        "parent": 20
                     }
                 }
             ]

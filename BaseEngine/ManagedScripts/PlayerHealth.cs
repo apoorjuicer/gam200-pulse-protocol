@@ -64,7 +64,7 @@ public class PlayerHealth : Script
         Console.WriteLine($"[PlayerHealth] Entity ID exposed: {PlayerEntityID}");
 
         HealthComponent h = GetHealth();
-        h.hp = maxHP;
+        maxHP = h.hp;
         h.isAlive = true;
         Console.WriteLine($"[PlayerHealth] Initialized with {maxHP} HP");
 

@@ -1,50 +1,38 @@
-using System;
+    using System;
 using System.Collections.Generic;
 using ScriptAPI;
 
 public class ComboDisplayManager : Script
 {
-    // =========================
-    // Global Access (Singleton)
-    // =========================
     public static ComboDisplayManager? Instance { get; private set; }
 
-    // =========================
-    // Configuration
-    // =========================
     public bool DebugLogging = false;
+    public float FadeOutDuration = 0.3f;
+    public float FadeStaggerDelay = 0.1f;
 
-    // can play with these values to get the right feel
-    public float FadeOutDuration = 0.3f;    // How long each key takes to fade out
-    public float FadeStaggerDelay = 0.1f;   // Delay between each key starting its fade
-
-    // =========================
-    // Internal State
-    // =========================
     private bool initialized = false;
-    private int lastComboProgress = 0;
+    private int lastInputProgress = 0;
 
-    // =========================
-    // Slot Registries
-    // =========================
     private static Dictionary<int, ComboKeySlot> enemySlots = new Dictionary<int, ComboKeySlot>();
     private static Dictionary<int, ComboKeySlot> playerSlots = new Dictionary<int, ComboKeySlot>();
     private static ComboJudgementDisplay? judgementScript = null;
 
-    // =========================
-    // Beat Reveal State
-    // =========================
     private bool isRevealing = false;
     private string revealCombo = "";
     private int revealIndex = 0;
     private int lastRevealBeat = -1;
 
-    // =========================
-    // Stagger Fade State
-    // =========================
+    private bool pendingCountdownStart = false;
+    private float countdownDelay = 0f;
+    private int countdownCurrentSlot = 0;
+    private int lastCountdownBeat = -1;
+    private bool isCountingDown = false;
+
     private bool isFadingOut = false;
     private int fadeOutCount = 0;
     private float fadeStaggerTimer = 0f;
+
+    private string currentWeakness = "";
 
     // =========================
     // Registration
@@ -54,87 +42,105 @@ public class ComboDisplayManager : Script
         if (script.GetIsEnemySlot())
         {
             enemySlots[slotIndex] = script;
-            Console.WriteLine($"[ComboDisplayManager] Registered EnemySlot {slotIndex}");
+            // Console.WriteLine($"[ComboDisplayManager] Registered EnemySlot {slotIndex}");
         }
         else
         {
             playerSlots[slotIndex] = script;
-            Console.WriteLine($"[ComboDisplayManager] Registered PlayerSlot {slotIndex}");
+            // Console.WriteLine($"[ComboDisplayManager] Registered PlayerSlot {slotIndex}");
         }
     }
 
     public static void UnregisterKeySlot(int slotIndex, bool isEnemySlot)
     {
-        if (isEnemySlot)
-        {
-            if (enemySlots.ContainsKey(slotIndex))
-                enemySlots.Remove(slotIndex);
-        }
-        else
-        {
-            if (playerSlots.ContainsKey(slotIndex))
-                playerSlots.Remove(slotIndex);
-        }
+        if (isEnemySlot) { if (enemySlots.ContainsKey(slotIndex)) enemySlots.Remove(slotIndex); }
+        else             { if (playerSlots.ContainsKey(slotIndex)) playerSlots.Remove(slotIndex); }
     }
 
     public static void RegisterJudgement(ComboJudgementDisplay script)
     {
         judgementScript = script;
-        Console.WriteLine("[ComboDisplayManager] Registered Judgement Display");
+        // Console.WriteLine("[ComboDisplayManager] Registered Judgement Display");
     }
 
-    public static void UnregisterJudgement()
-    {
-        judgementScript = null;
-    }
+    public static void UnregisterJudgement() { judgementScript = null; }
 
     // =========================
-    // Update Loop
+    // Update
     // =========================
     public override void Update()
     {
-        if (!initialized)
+        if (!initialized) { Initialize(); return; }
+
+        if (isRevealing) { HandleBeatReveal(); return; }
+
+        if (isFadingOut) HandleStaggerFade();
+
+        if (pendingCountdownStart)
         {
-            Initialize();
-            return;
+            countdownDelay -= Time.DeltaTime;
+            if (countdownDelay <= 0f)
+            {
+                pendingCountdownStart = false;
+                isCountingDown = true;
+                lastCountdownBeat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() : -1;
+                if (playerSlots.ContainsKey(0) && currentWeakness.Length > 0)
+                    playerSlots[0].StartCountdown(currentWeakness[0]);
+                countdownCurrentSlot = 1;
+            }
         }
 
-        // Beat reveal during EnemyDisplay phase
-        if (isRevealing)
+        if (isCountingDown && Conductor.Instance != null)
         {
-            HandleBeatReveal();
-            return;
+            int currentBeat = Conductor.Instance.GetCurrentBeat();
+            if (currentBeat > lastCountdownBeat && countdownCurrentSlot < currentWeakness.Length)
+            {
+                lastCountdownBeat = currentBeat;
+                if (playerSlots.ContainsKey(countdownCurrentSlot))
+                    playerSlots[countdownCurrentSlot].StartCountdown(currentWeakness[countdownCurrentSlot]);
+                countdownCurrentSlot++;
+
+                if (countdownCurrentSlot >= currentWeakness.Length)
+                    isCountingDown = false;
+            }
         }
 
-        // Stagger fade out after reveal completes — runs in parallel with player input
-        if (isFadingOut)
-        {
-            HandleStaggerFade();
-        }
-
-        // Player input phase: show keys on bottom row as they're pressed
-        if (ComboSystem.Instance == null)
-            return;
+        if (ComboSystem.Instance == null) return;
 
         int currentProgress = ComboSystem.Instance!.GetComboProgress();
 
-        if (currentProgress > lastComboProgress)
+        if (currentProgress > lastInputProgress)
         {
             string combo = ComboSystem.Instance!.GetCurrentComboString();
-
             if (combo.Length > 0)
             {
-                char lastKey = combo[combo.Length - 1];
                 int slotIndex = currentProgress - 1;
-                ShowPlayerKey(lastKey, slotIndex);
+                char pressedKey = combo[combo.Length - 1];
+
+                bool isCorrect = slotIndex < currentWeakness.Length &&
+                                 pressedKey == currentWeakness[slotIndex];
+
+                if (playerSlots.ContainsKey(slotIndex))
+                {
+                    if (isCorrect)
+                    {
+                        playerSlots[slotIndex].ShowCorrect(pressedKey);
+                    }
+                    else
+                    {
+                        char expected = slotIndex < currentWeakness.Length ? currentWeakness[slotIndex] : pressedKey;
+                        playerSlots[slotIndex].ShowWrong(pressedKey, expected);
+                        VFXAPI.ShakeCamera(0.01f, 5.0f);
+                    }
+                }
             }
         }
-        else if (currentProgress < lastComboProgress)
+        else if (currentProgress < lastInputProgress)
         {
             ClearPlayerSlots();
         }
 
-        lastComboProgress = currentProgress;
+        lastInputProgress = currentProgress;
     }
 
     // =========================
@@ -143,36 +149,39 @@ public class ComboDisplayManager : Script
     private void Initialize()
     {
         Instance = this;
-        lastComboProgress = 0;
+        lastInputProgress = 0;
         isRevealing = false;
         isFadingOut = false;
+        currentWeakness = "";
 
-        // Always clear uif not stale static refs from previous scene load will break
-        // registration since all IDs get refreshed on reload
+        pendingCountdownStart = false;
+        countdownDelay = 0f;
+        countdownCurrentSlot = 0;
+        lastCountdownBeat = -1; 
+        isCountingDown = false;
+
         enemySlots.Clear();
         playerSlots.Clear();
         judgementScript = null;
 
-        Console.WriteLine("[ComboDisplayManager] ========================================");
-        Console.WriteLine("[ComboDisplayManager] Manager Initialized");
-        Console.WriteLine("[ComboDisplayManager] Waiting for child scripts to register...");
-        Console.WriteLine("[ComboDisplayManager] ========================================");
-
+        Console.WriteLine("[ComboDisplayManager] Initialized");
         initialized = true;
     }
 
     // =========================
-    // Beat Reveal
+    // Beat Reveal (Enemy Row)
     // =========================
     public void StartComboReveal(string weakness)
     {
         revealCombo = weakness;
+        currentWeakness = weakness;
         revealIndex = 0;
         isRevealing = true;
         isFadingOut = false;
         lastRevealBeat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() : -1;
 
         ClearEnemySlotsInstant();
+        ClearPlayerSlots();
 
         Console.WriteLine($"[ComboDisplayManager] Starting beat reveal for: {weakness}");
     }
@@ -180,8 +189,8 @@ public class ComboDisplayManager : Script
     public void StopComboReveal()
     {
         isRevealing = false;
+        lastInputProgress = 0;
 
-        // Kick off stagger fade on enemy slots if any were revealed
         if (revealIndex > 0)
         {
             isFadingOut = true;
@@ -189,6 +198,12 @@ public class ComboDisplayManager : Script
             fadeStaggerTimer = 0f;
             Console.WriteLine("[ComboDisplayManager] Starting stagger fade out");
         }
+
+        pendingCountdownStart = true;
+        countdownDelay = 0f;
+        countdownCurrentSlot = 0;
+        isCountingDown = false;
+        countdownDelay = 0f;
     }
 
     private void HandleBeatReveal()
@@ -196,15 +211,14 @@ public class ComboDisplayManager : Script
         if (Conductor.Instance == null) return;
 
         int currentBeat = Conductor.Instance!.GetCurrentBeat();
-        
-        // Show first key immediately on the same frame StartComboReveal is called
+
         if (revealIndex == 0)
         {
             lastRevealBeat = currentBeat;
             char key = revealCombo[0];
             if (enemySlots.ContainsKey(0))
             {
-                enemySlots[0].ShowKeyPersistent(key);
+                enemySlots[0].ShowKeyPop(key);
                 Console.WriteLine($"[ComboDisplayManager] Reveal immediate: enemy slot 0 = '{key}'");
             }
             revealIndex = 1;
@@ -219,7 +233,7 @@ public class ComboDisplayManager : Script
             char key = revealCombo[revealIndex];
             if (enemySlots.ContainsKey(revealIndex))
             {
-                enemySlots[revealIndex].ShowKeyPersistent(key);
+                enemySlots[revealIndex].ShowKeyPop(key);
                 Console.WriteLine($"[ComboDisplayManager] Reveal beat {currentBeat}: enemy slot {revealIndex} = '{key}'");
             }
             revealIndex++;
@@ -233,11 +247,10 @@ public class ComboDisplayManager : Script
     }
 
     // =========================
-    // Stagger Fade
+    // Stagger Fade (Enemy Row)
     // =========================
     private void HandleStaggerFade()
     {
-        // All enemy slots have been kicked off, fade sequence done
         if (fadeOutCount >= revealCombo.Length)
         {
             isFadingOut = false;
@@ -250,13 +263,11 @@ public class ComboDisplayManager : Script
         if (fadeStaggerTimer >= FadeStaggerDelay)
         {
             fadeStaggerTimer = 0f;
-
             if (enemySlots.ContainsKey(fadeOutCount))
             {
                 enemySlots[fadeOutCount].FadeOutAndHide(FadeOutDuration);
                 Console.WriteLine($"[ComboDisplayManager] Fading out enemy slot {fadeOutCount}");
             }
-
             fadeOutCount++;
         }
     }
@@ -264,28 +275,6 @@ public class ComboDisplayManager : Script
     // =========================
     // Display Control
     // =========================
-
-    // Shows key on player bottom row, used during player input phase
-    private void ShowPlayerKey(char key, int slotIndex)
-    {
-        if (slotIndex < 0 || slotIndex > 3)
-        {
-            Console.WriteLine($"[ComboDisplayManager] ⚠️ Invalid slot index: {slotIndex}");
-            return;
-        }
-
-        if (playerSlots.ContainsKey(slotIndex))
-        {
-            playerSlots[slotIndex].ShowKey(key);
-            if (DebugLogging)
-                Console.WriteLine($"[ComboDisplayManager] Player slot {slotIndex} showing '{key}'");
-        }
-        else
-        {
-            Console.WriteLine($"[ComboDisplayManager] ⚠️ PlayerSlot {slotIndex} not registered!");
-        }
-    }
-
     public void ShowJudgement(string judgement)
     {
         if (judgementScript != null)
@@ -294,20 +283,16 @@ public class ComboDisplayManager : Script
             Console.WriteLine("[ComboDisplayManager] ⚠️ Judgement display not registered!");
     }
 
-    // Clears player bottom row
     private void ClearPlayerSlots()
     {
-        if (DebugLogging)
-            Console.WriteLine("[ComboDisplayManager] Clearing player slots");
-
+        if (DebugLogging) Console.WriteLine("[ComboDisplayManager] Clearing player slots");
         for (int i = 0; i < 4; i++)
         {
             if (playerSlots.ContainsKey(i))
-                playerSlots[i].Hide();
+                playerSlots[i].HideInstant();
         }
     }
 
-    // Instantly hides all enemy top row slots, used at start of reveal
     private void ClearEnemySlotsInstant()
     {
         for (int i = 0; i < 4; i++)
@@ -328,14 +313,8 @@ public class ComboDisplayManager : Script
             return playerSlots.ContainsKey(slotIndex) && playerSlots[slotIndex] == slot;
     }
 
-    public static bool IsJudgementRegistered(ComboJudgementDisplay script)
-    {
-        return judgementScript == script;
-    }
+    public static bool IsJudgementRegistered(ComboJudgementDisplay script) => judgementScript == script;
 
-    // =========================
-    // Cleanup
-    // =========================
     public void OnDestroy()
     {
         if (Instance == this)
