@@ -671,7 +671,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": false,
+                        "visible": true,
                         "alignment": 0
                     }
                 }
@@ -2264,8 +2264,8 @@
                 },
                 {
                     "audiosource": {
-                        "audio_id": "BGM_L1",
-                        "volume": 0.20000000298023224,
+                        "audio_id": "BGM_GENERAL",
+                        "volume": 0.5,
                         "loop": true,
                         "playOnAwake": false
                     }
