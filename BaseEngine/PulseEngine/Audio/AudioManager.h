@@ -17,6 +17,7 @@
 #include "pch/pch_temp.h"
 #include "CoreEngine/ECS/System.h"
 #include "CoreEngine/Core/ImportExport.h"
+#include <chrono>
 
 // Forward-declare FMOD types to avoid heavy includes here
 namespace FMOD
@@ -96,6 +97,10 @@ public:
     void PlayFromAudioSource(AudioSource& src);
     void StopPlayingAllAudio();
 
+    // Fade current BGM channel to 0 without changing slider values
+    void FadeOutCurrentBGM(float durationSeconds, bool stopAfterFade = true);
+    void CancelCurrentBGMFade();
+
 private:
     FMOD::System *mSystem = nullptr;
 
@@ -118,6 +123,19 @@ private:
 
     void ProcessAudioSources();
     void ClearAudioSourceChannelsMatching(FMOD::Channel* dead);
+
+    void ResetBGMFade();
+    void UpdateBGMFade(float dt);
+
+    float mBGMFadeMultiplier = 1.0f;  // runtime fade layer, does NOT change slider
+    bool mBGMFadeActive = false;
+    bool mStopBGMAfterFade = true;
+    float mBGMFadeDuration = 0.0f;
+    float mBGMFadeElapsed = 0.0f;
+    float mBGMFadeStart = 1.0f;
+
+    std::chrono::steady_clock::time_point mLastAudioTick;
+    bool mHasLastAudioTick = false;
 };
 
 /*
