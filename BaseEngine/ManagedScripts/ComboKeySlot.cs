@@ -27,7 +27,7 @@ public class ComboKeySlot : Script
     public string RedDSprite = "../../PulseProtocol/Assets/Textures/UI/Player Input RED D.png";
 
     public float DisplayDuration = 0.5f;
-    public float ScaleAnimDuration = 0.25f;
+    public float ScaleAnimDuration = 0.15f;
     public float ResultDisplayDuration = 0.3f;
     public float CorrectHintDuration = 0.3f;
 
@@ -222,6 +222,15 @@ public class ComboKeySlot : Script
     public void StartCountdown(char expectedKey)
     {
         if (IsEnemySlot) return;
+
+            // DEBUG
+        if (Conductor.Instance != null)
+        {
+            float songTime = Conductor.Instance.GetSongTime();
+            float beatDuration = Conductor.Instance.GetBeatDuration();
+            float timeUntilBeat = beatDuration - (songTime % beatDuration);
+            Console.WriteLine($"[ComboKeySlot] Slot {SlotIndex} StartCountdown | timeUntilNextBeat={timeUntilBeat:F3}");
+        }
 
         correctKey = expectedKey;
 
