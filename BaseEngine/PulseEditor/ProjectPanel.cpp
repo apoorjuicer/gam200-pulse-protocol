@@ -542,10 +542,11 @@ namespace PulseEditor
                             // UNDO: Snapshot BEFORE texture change
                             // ═══════════════════════════════════════════════════════════════
                             Entity e = selectedEntity;
+                            // Snapshot BEFORE change
                             EntitySnapshot before = MakeEntitySnapshot(e);
-                            mUndo.Push([e, before]() {
-                                RestoreEntityFromSnapshot(e, before);
-                                });
+                            //mUndo.Push([e, before]() {
+                            //    RestoreEntityFromSnapshot(e, before);
+                            //    });
 
                             auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
 
@@ -601,6 +602,15 @@ namespace PulseEditor
                                     std::cout << "[ProjectPanel] Auto-set Sorting Layer: World (1)" << std::endl;
                                 }
                             }
+
+                            // Snapshot AFTER change
+                            EntitySnapshot after = MakeEntitySnapshot(e);
+
+                            // Push undo/redo action
+                            mUndo.Push(UndoManager::Action{
+                                .undo = [e, before]() { RestoreEntityFromSnapshot(e, before); },
+                                .redo = [e, after]() { RestoreEntityFromSnapshot(e, after);  }
+                                });
 
                             std::cout << "[ProjectPanel] Assigned texture to entity " << selectedEntity << std::endl;
                         }

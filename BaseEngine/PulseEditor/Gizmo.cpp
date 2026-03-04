@@ -1011,8 +1011,11 @@ namespace PulseEditor
                 Entity e = s_gizmoEntity;
                 EntitySnapshot before = s_gizmoBeforeSnapshot;
 
-                mUndo.Push([e, before]() {
-                    RestoreEntityFromSnapshot(e, before);
+                EntitySnapshot after = MakeEntitySnapshot(e);
+
+                mUndo.Push(UndoManager::Action{
+                    .undo = [e, before]() { RestoreEntityFromSnapshot(e, before); },
+                    .redo = [e, after]() { RestoreEntityFromSnapshot(e, after);  }
                     });
 
                 s_gizmoEditing = false;
@@ -1081,39 +1084,76 @@ namespace PulseEditor
 
             selectedEntity = INVALID_ENTITY;
 
-            // --- UNDO: recreate all entities and restore hierarchy ---
-            mUndo.Push([snapshots, indices]()
-                {
-                    // Recreate entities in reverse order (children first, then parent)
-                    std::vector<Entity> restoredEntities;
+            // --- UNDO/REDO: recreate all entities and restore hierarchy ---
+            auto restoredIds = std::make_shared<std::vector<Entity>>(); // filled on undo, used on redo
 
+            mUndo.Push(UndoManager::Action{
+                // UNDO: recreate entities from snapshots and reinsert into hierarchy
+                .undo = [snapshots, indices, restoredIds]() mutable
+                {
+                    restoredIds->clear();
+
+                    // Recreate entities (you can keep your order; just be consistent)
                     for (size_t i = 0; i < snapshots.size(); ++i)
                     {
                         Entity restored = CreateEntityFromEntitySnapshot(snapshots[i]);
-                        if (restored != INVALID_ENTITY)
-                        {
-                            restoredEntities.push_back(restored);
+                        if (restored == INVALID_ENTITY)
+                            continue;
 
-                            // Reinsert into hierarchy
-                            int insertIndex = indices[i];
-                            if (insertIndex < 0 ||
-                                insertIndex > static_cast<int>(entityDisplayOrder.size()))
-                            {
-                                insertIndex = static_cast<int>(entityDisplayOrder.size());
-                            }
-                            entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex, restored);
-                        }
+                        restoredIds->push_back(restored);
+
+                        // Reinsert into hierarchy at the original index (clamped)
+                        int insertIndex = indices[i];
+                        if (insertIndex < 0 || insertIndex > static_cast<int>(entityDisplayOrder.size()))
+                            insertIndex = static_cast<int>(entityDisplayOrder.size());
+
+                        entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex, restored);
                     }
 
-                    // Select the first restored entity (the original parent)
-                    if (!restoredEntities.empty())
+                    // Select the first restored (your comment says original parent)
+                    if (!restoredIds->empty())
+                        selectedEntity = (*restoredIds)[0];
+                },
+
+                // REDO: delete the entities that were recreated by undo
+                .redo = [restoredIds]() mutable
+                {
+                    if (!restoredIds || restoredIds->empty())
+                        return;
+
+                    // Remove all from entityDisplayOrder first
+                    for (Entity e : *restoredIds)
                     {
-                        selectedEntity = restoredEntities[0];
+                        auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), e);
+                        if (it != entityDisplayOrder.end())
+                            entityDisplayOrder.erase(it);
                     }
+
+                    // Delete entities
+                    Factory factory;
+                    for (Entity e : *restoredIds)
+                        factory.DeleteEntity(e);
+
+                    selectedEntity = INVALID_ENTITY;
+
+                    // keep list (or clear it). Clearing prevents double-redo issues.
+                    // If you clear, redo becomes a no-op until undo runs again, which is correct.
+                    restoredIds->clear();
+                }
                 });
         }
 
         dl->PopClipRect();
     }
 
+
+    void CancelGizmoIfEntity(Entity e)
+    {
+        if (g_gizmo.active == e)
+        {
+            g_gizmo.dragging = false;
+            g_gizmo.active = INVALID_ENTITY;
+            g_gizmo.activeHandle = GizmoHandle::None;
+        }
+    }
 } // namespace PulseEditor

@@ -61,13 +61,19 @@ namespace PulseEditor
         {
             if (beforeEdit != tr) // if something actually changed
             {
-                // undo the changes....
-                undo.Push([e, oldData = beforeEdit, g]()
-                          {
-                        if (g->HasComponent<Framework::Transform>(e))
-                        {
-                            g->GetComponent<Framework::Transform>(e) = oldData;
-                        } });
+                Framework::Transform afterEdit = tr;
+                undo.Push(UndoManager::Action{
+                                .undo = [e, oldData = beforeEdit, g]()
+                                {
+                                    if (g && g->HasComponent<Framework::Transform>(e))
+                                        g->GetComponent<Framework::Transform>(e) = oldData;
+                                },
+                                .redo = [e, newData = afterEdit, g]()
+                                {
+                                    if (g && g->HasComponent<Framework::Transform>(e))
+                                        g->GetComponent<Framework::Transform>(e) = newData;
+                                }
+                    });
             }
 
             isEditing = false; // reset edit session
@@ -287,6 +293,12 @@ namespace PulseEditor
             ImGui::TextColored(ImVec4(1, 0, 0, 1), "Coordinator not found!");
             ImGui::End();
             return;
+        }
+
+        static Entity lastSelected = INVALID_ENTITY;
+        if (selectedEntity != lastSelected) {
+            isEditing = false;
+            lastSelected = selectedEntity;
         }
 
         if (selectedEntity == INVALID_ENTITY)
@@ -833,9 +845,9 @@ namespace PulseEditor
                         // ═══════════════════════════════════════════════════════════════
                         Entity e = selectedEntity;
                         EntitySnapshot before = MakeEntitySnapshot(e);
-                        mUndo.Push([e, before]() {
-                            RestoreEntityFromSnapshot(e, before);
-                        });
+                        //mUndo.Push([e, before]() {
+                        //    RestoreEntityFromSnapshot(e, before);
+                        //});
 
                         namespace fs = std::filesystem;
                         const std::string kTexturesRoot = "../../PulseEngine/Assets/Textures";
@@ -931,7 +943,20 @@ namespace PulseEditor
                         }
 
                         r.shd_ref = static_cast<float>(isSheet ? SPRITESHEET_SHADER_INDEX : SPRITE_SHADER_INDEX);
-                    }
+
+                        EntitySnapshot after = MakeEntitySnapshot(e);
+
+                        mUndo.Push(UndoManager::Action{
+                            .undo = [e, before]()
+                            {
+                                RestoreEntityFromSnapshot(e, before);
+                            },
+                            .redo = [e, after]()
+                            {
+                                RestoreEntityFromSnapshot(e, after);
+                            }
+                            });
+                    } // end ofreload clicked 
                 }
 
                 ImGui::Unindent();

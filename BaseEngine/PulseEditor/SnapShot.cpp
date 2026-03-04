@@ -117,144 +117,64 @@ namespace PulseEditor
 
         return snap;
     }
-    Entity CreateEntityFromEntitySnapshot(EntitySnapshot const& snap)
+    Entity CreateEntityFromEntitySnapshot(EntitySnapshot const& snap,
+        bool restoreParenting,
+        bool attachScripts)
     {
         auto* g = Coordinator::GetInstance();
         if (!g)
             return INVALID_ENTITY;
 
-        // Restore using ORIGINAL ID
-        Entity e = g->CreateEntityWithID(snap.originalEntity);
+        Entity e = g->CreateEntity();
+        if (e == INVALID_ENTITY || e >= MaxEntity)
+            return INVALID_ENTITY;
 
-        // If the ID cannot be revived, bail out
-        if (e >= MaxEntity)      // ECS-side "invalid"
-            return INVALID_ENTITY; // editor-side "invalid"
+        // ---- restore components ----
+        if (snap.hasTransform)       g->AddComponent<Framework::Transform>(e, snap.transform_snap);
+        if (snap.hasRenderable)      g->AddComponent<Framework::Renderable>(e, snap.renderable_snap);
+        if (snap.hasAnimation)       g->AddComponent<Framework::Animation>(e, snap.animation_snap);
+        if (snap.hasNPC)             g->AddComponent<NPC>(e, snap.npc_snap);
+        if (snap.hasAABB)            g->AddComponent<AABB>(e, snap.aabb_snap);
+        if (snap.hasHealth)          g->AddComponent<Health>(e, snap.health_snap);
+        if (snap.hasName)            g->AddComponent<Name>(e, snap.name_snap);
+        if (snap.hasNameComponent)   g->AddComponent<NamingComponent>(e, snap.namingcomponent_snap);
+        if (snap.hasLayerTag)        g->AddComponent<LayerTag>(e, snap.layertag_snap);
+        if (snap.hasAudioSource)     g->AddComponent<AudioSource>(e, snap.audiosource_snap);
+        if (snap.hasTextComponent)   g->AddComponent<TextComponent>(e, snap.text_snap);
+        if (snap.hasPrefabInstance)  g->AddComponent<PrefabInstance>(e, snap.prefabinstance_snap);
 
-        // Now overwrite / add components using the snapshot
-        if (snap.hasTransform)
-        {
-            if (g->HasComponent<Framework::Transform>(e))
-                g->GetComponent<Framework::Transform>(e) = snap.transform_snap;
-            else
-                g->AddComponent<Framework::Transform>(e, snap.transform_snap);
-        }
-
-        if (snap.hasRenderable)
-        {
-            if (g->HasComponent<Framework::Renderable>(e))
-                g->GetComponent<Framework::Renderable>(e) = snap.renderable_snap;
-            else
-                g->AddComponent<Framework::Renderable>(e, snap.renderable_snap);
-        }
-
-        if (snap.hasAnimation)
-        {
-            if (g->HasComponent<Framework::Animation>(e))
-                g->GetComponent<Framework::Animation>(e) = snap.animation_snap;
-            else
-                g->AddComponent<Framework::Animation>(e, snap.animation_snap);
-        }
-
-        if (snap.hasNPC)
-        {
-            if (g->HasComponent<NPC>(e))
-                g->GetComponent<NPC>(e) = snap.npc_snap;
-            else
-                g->AddComponent<NPC>(e, snap.npc_snap);
-        }
-
-        if (snap.hasAABB)
-        {
-            if (g->HasComponent<AABB>(e))
-                g->GetComponent<AABB>(e) = snap.aabb_snap;
-            else
-                g->AddComponent<AABB>(e, snap.aabb_snap);
-        }
-
-        if (snap.hasHealth)
-        {
-            if (g->HasComponent<Health>(e))
-                g->GetComponent<Health>(e) = snap.health_snap;
-            else
-                g->AddComponent<Health>(e, snap.health_snap);
-        }
-
-        if (snap.hasName)
-        {
-            if (g->HasComponent<Name>(e))
-                g->GetComponent<Name>(e) = snap.name_snap;
-            else
-                g->AddComponent<Name>(e, snap.name_snap);
-        }
-
-        if (snap.hasNameComponent)
-        {
-            if (g->HasComponent<NamingComponent>(e))
-                g->GetComponent<NamingComponent>(e) = snap.namingcomponent_snap;
-            else
-                g->AddComponent<NamingComponent>(e, snap.namingcomponent_snap);
-        }
-
+        // restore LogicComponent DATA (not just scripts)
         if (snap.hasLogicComponent)
-        {
-            if (g->HasComponent<LogicComponent>(e))
-                g->GetComponent<LogicComponent>(e) = snap.logiccomponent_snap;
-            else
-                g->AddComponent<LogicComponent>(e, snap.logiccomponent_snap);
-        }
+            g->AddComponent<LogicComponent>(e, snap.logiccomponent_snap);
 
-        if (snap.hasLayerTag)
-        {
-            if (g->HasComponent<LayerTag>(e))
-                g->GetComponent<LayerTag>(e) = snap.layertag_snap;
-            else
-                g->AddComponent<LayerTag>(e, snap.layertag_snap);
-        }
-
-        if (snap.hasAudioSource)
-        {
-            if (g->HasComponent<AudioSource>(e))
-                g->GetComponent<AudioSource>(e) = snap.audiosource_snap;
-            else
-                g->AddComponent<AudioSource>(e, snap.audiosource_snap);
-        }
-
-        if (snap.hasTextComponent)
-        {
-            if (g->HasComponent<TextComponent>(e))
-                g->GetComponent<TextComponent>(e) = snap.text_snap;
-            else
-                g->AddComponent<TextComponent>(e, snap.text_snap);
-        }
-
-        if (snap.hasPrefabInstance)
-        {
-            if (g->HasComponent<PrefabInstance>(e))
-                g->GetComponent<PrefabInstance>(e) = snap.prefabinstance_snap;
-            else
-                g->AddComponent<PrefabInstance>(e, snap.prefabinstance_snap);
-        }
-
-        // At end of CreateEntityFromEntitySnapshot(), before return e;
-        auto sceneManager = g->GetSystem<SceneManager>();
-        if (sceneManager) {
+        // Scene bookkeeping (matches Factory::DefaultObj / CreateEntityFromJson)
+        if (auto sceneManager = g->GetSystem<SceneManager>())
             sceneManager->IncrementEntityArray(e);
+
+        // Optional: reattach scripts into ScriptAPI container
+        if (attachScripts && snap.hasLogicComponent)
+        {
+            auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>(
+                "ScriptAPI",
+                "ScriptAPI.EngineInterface",
+                "AddScriptViaName"
+            );
+
+            if (addScriptFunc)
+            {
+                for (const auto& scriptName : snap.logiccomponent_snap.ScriptName)
+                {
+                    if (!scriptName.empty())
+                        addScriptFunc((int)e, scriptName.c_str());
+                }
+            }
         }
 
-        if (snap.hasParent)
+        // Parent/Children: only if caller wants it (multi-entity restore will remap!)
+        if (restoreParenting)
         {
-            if (g->HasComponent<Parent>(e))
-                g->GetComponent<Parent>(e) = snap.parent_snap;
-            else
-                g->AddComponent<Parent>(e, snap.parent_snap);
-        }
-
-        if (snap.hasChildren)
-        {
-            if (g->HasComponent<Children>(e))
-                g->GetComponent<Children>(e) = snap.children_snap;
-            else
-                g->AddComponent<Children>(e, snap.children_snap);
+            if (snap.hasParent)   g->AddComponent<Parent>(e, snap.parent_snap);
+            if (snap.hasChildren) g->AddComponent<Children>(e, snap.children_snap);
         }
 
         return e;
@@ -303,6 +223,12 @@ namespace PulseEditor
 
         if (snap.hasPrefabInstance && g->HasComponent<PrefabInstance>(e))
             g->GetComponent<PrefabInstance>(e) = snap.prefabinstance_snap;
+    }
+
+    Entity CreateEntityFromEntitySnapshot(EntitySnapshot const& snap)
+    {
+        // default behavior: restore parenting=false, attachScripts=true/false up to you
+        return CreateEntityFromEntitySnapshot(snap, /*restoreParenting*/true, /*attachScripts*/true);
     }
 
     //void printsnapshot(EntitySnapshot snap) {

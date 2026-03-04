@@ -72,9 +72,12 @@ namespace PulseEditor
     };
     // make a "snapshot" or "copy" of entity
     EntitySnapshot MakeEntitySnapshot(Entity e);
-    Entity CreateEntityFromEntitySnapshot(EntitySnapshot const &snap);
-    // void printsnapshot(EntitySnapshot snap);
 
+    Entity CreateEntityFromEntitySnapshot(EntitySnapshot const& snap,
+                                            bool restoreParenting,
+                                            bool attachScripts);
+    // void printsnapshot(EntitySnapshot snap);
+    Entity CreateEntityFromEntitySnapshot(EntitySnapshot const& snap);
     // Restore entity to a previous state WITHOUT deleting/recreating
     void RestoreEntityFromSnapshot(Entity e, const EntitySnapshot& snap);
 }

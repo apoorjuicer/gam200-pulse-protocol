@@ -403,18 +403,31 @@ namespace PulseEditor
         bool ctrlDown =
             glfwGetKey(s_Window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
             glfwGetKey(s_Window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
+        bool shiftDown =
+            glfwGetKey(s_Window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ||
+            glfwGetKey(s_Window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS;
 
         static bool prevZ = false;
         bool currZ = (glfwGetKey(s_Window, GLFW_KEY_Z) == GLFW_PRESS);
-
         if (ctrlDown && currZ && !prevZ)
         {
            // std::cout << "[Editor] CTRL+Z pressed in editor\n";
-
-            if (mUndo.CanUndo()) {
-              //  std::cout << "[Editor] CanUndo? :" << mUndo.CanUndo() << "\n";
-                mUndo.Undo();
-            }        
+            if (shiftDown)
+            {
+                // Ctrl+Shift+Z = Redo
+                if (mUndo.CanRedo()) {
+                    std::cout << "[Editor] CanRedo? :" << mUndo.CanRedo() << "\n";
+                    mUndo.Redo();
+                }
+            }
+            else
+            {
+                // Ctrl+Z = Undo
+                if (mUndo.CanUndo()) {
+                    std::cout << "[Editor] CanUndo? :" << mUndo.CanUndo() << "\n";
+                    mUndo.Undo();
+                }  
+            }
         }
         prevZ = currZ;
 
