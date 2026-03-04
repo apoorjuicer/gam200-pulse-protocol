@@ -70,18 +70,7 @@ public class Conductor : Script
 
         // delta time usage
         float dt = Time.DeltaTime;
-        //songTime += dt;
-
-        //
-        float audioPos = (float)GetAudio().GetBGMPosition();
-        if (audioPos > 0f) // only sync when audio is actually playing
-        {
-            songTime = audioPos;
-        }
-        else
-        {
-            songTime += dt; // fallback if audio not playing yet
-        }
+        songTime += dt;
 
         // Apply MusicLatencyOffset to everything(pls work fuck me la)
         float adjustedTime = songTime - MusicLatencyOffset; // use this 2 check the hlaf beat instead

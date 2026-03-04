@@ -211,9 +211,9 @@ void AudioManager::Update()
     //     ProcessAudioSources(); // 
     //     mSystem->update();
     // }
+    mSystem->update(); 
     if (!Engine || !Engine->IsPlaying()) return;
     ProcessAudioSources();
-    mSystem->update();
 }
 
 void AudioManager::Shutdown()
