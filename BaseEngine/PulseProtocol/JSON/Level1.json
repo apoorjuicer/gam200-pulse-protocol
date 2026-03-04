@@ -657,14 +657,6 @@
                     }
                 },
                 {
-                    "audiosource": {
-                        "audio_id": "BGM_L1_TESTING",
-                        "volume": 0.1899999976158142,
-                        "loop": true,
-                        "playOnAwake": false
-                    }
-                },
-                {
                     "TextComponent": {
                         "text": "2",
                         "font_id": "",
@@ -1278,7 +1270,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": true,
+                        "visible": false,
                         "alignment": 0
                     }
                 }
@@ -2868,7 +2860,7 @@
                 },
                 {
                     "name": {
-                        "name": "BG_PlaceholderImg"
+                        "name": "Background_settings"
                     }
                 },
                 {

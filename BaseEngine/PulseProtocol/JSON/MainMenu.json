@@ -395,72 +395,6 @@
                             "y": 0.0
                         },
                         "scale": {
-                            "x": 200.0,
-                            "y": 200.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
-                        "useTexture": true,
-                        "spriteName": "",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "GeneralBGM"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "BGM_Manager"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "audiosource": {
-                        "audio_id": "BGM_L2_TESTING",
-                        "volume": 1.0,
-                        "loop": true,
-                        "playOnAwake": false
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "scale": {
                             "x": 1600.0,
                             "y": 900.0
                         },
@@ -530,8 +464,8 @@
                 {
                     "Children": {
                         "children": [
-                            7,
-                            8
+                            6,
+                            7
                         ]
                     }
                 }
@@ -606,7 +540,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 6
+                        "parent": 5
                     }
                 }
             ]
@@ -680,7 +614,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 6
+                        "parent": 5
                     }
                 }
             ]
@@ -765,7 +699,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": true,
+                        "visible": false,
                         "alignment": 0
                     }
                 }
@@ -1119,9 +1053,9 @@
                 {
                     "Children": {
                         "children": [
+                            14,
                             15,
-                            16,
-                            17
+                            16
                         ]
                     }
                 }
@@ -1195,7 +1129,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 14
+                        "parent": 13
                     }
                 }
             ]
@@ -1269,7 +1203,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 14
+                        "parent": 13
                     }
                 }
             ]
@@ -1343,7 +1277,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 14
+                        "parent": 13
                     }
                 }
             ]
@@ -1417,9 +1351,9 @@
                 {
                     "Children": {
                         "children": [
+                            18,
                             19,
-                            20,
-                            21
+                            20
                         ]
                     }
                 }
@@ -1493,7 +1427,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 18
+                        "parent": 17
                     }
                 }
             ]
@@ -1567,7 +1501,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 18
+                        "parent": 17
                     }
                 }
             ]
@@ -1641,7 +1575,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 18
+                        "parent": 17
                     }
                 }
             ]
@@ -1715,12 +1649,12 @@
                 {
                     "Children": {
                         "children": [
+                            32,
+                            34,
                             33,
                             35,
-                            34,
                             36,
-                            37,
-                            38
+                            37
                         ]
                     }
                 }
@@ -1795,9 +1729,9 @@
                 {
                     "Children": {
                         "children": [
-                            29,
                             28,
-                            30
+                            27,
+                            29
                         ]
                     }
                 }
@@ -1940,7 +1874,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 32
+                        "parent": 31
                     }
                 }
             ]
@@ -2014,7 +1948,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 32
+                        "parent": 31
                     }
                 }
             ]
@@ -2088,7 +2022,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 32
+                        "parent": 31
                     }
                 }
             ]
@@ -2161,7 +2095,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 23
+                        "parent": 22
                     }
                 }
             ]
@@ -2235,7 +2169,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 23
+                        "parent": 22
                     }
                 }
             ]
@@ -2309,7 +2243,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 23
+                        "parent": 22
                     }
                 }
             ]
@@ -2358,7 +2292,7 @@
                 },
                 {
                     "audiosource": {
-                        "audio_id": "BGM_GENERAL",
+                        "audio_id": "BGM_L1",
                         "volume": 0.20000000298023224,
                         "loop": true,
                         "playOnAwake": false
@@ -2435,9 +2369,9 @@
                 {
                     "Children": {
                         "children": [
+                            24,
                             25,
-                            26,
-                            27
+                            26
                         ]
                     }
                 }
@@ -2512,7 +2446,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 21
                     }
                 }
             ]
@@ -2587,7 +2521,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 21
                     }
                 }
             ]
@@ -2661,7 +2595,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 21
                     }
                 }
             ]
@@ -2736,7 +2670,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 21
                     }
                 }
             ]
@@ -2810,7 +2744,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 21
                     }
                 }
             ]
@@ -2884,7 +2818,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 22
+                        "parent": 21
                     }
                 }
             ]
