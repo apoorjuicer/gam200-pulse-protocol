@@ -33,7 +33,7 @@ namespace ScriptAPI
 
 		// change c# string to c++ string
 		msclr::interop::marshal_context context;
-		std::string Filename_pathway = "../../PulseEngine/JSON/"  + context.marshal_as<std::string>(Filename) + ".json";
+		std::string Filename_pathway = "../../PulseProtocol/JSON/"  + context.marshal_as<std::string>(Filename) + ".json";
 
 		auto* coord = Coordinator::GetInstance();
 		auto sceneManager = coord->GetSystem<SceneManager>();

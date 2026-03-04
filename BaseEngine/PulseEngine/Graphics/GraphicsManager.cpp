@@ -244,6 +244,29 @@ void GraphicsManager::Initialize()
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
+
+    // Initialize bloom post-processing pipeline
+    {
+        // Resolve shader directory: same walk-up logic as GLApp::LoadFile
+        char exePath[MAX_PATH];
+        GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+        std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
+
+        std::filesystem::path basePath;
+        if (std::filesystem::exists(currentDir / "PulseEngine"))
+        {
+            basePath = currentDir / "PulseEngine"; // Release layout
+        }
+        else
+        {
+            auto baseEngineDir = currentDir;
+            while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+                baseEngineDir = baseEngineDir.parent_path();
+            basePath = baseEngineDir / "PulseEngine"; // Dev layout
+        }
+        std::string shaderDir = (basePath / "Graphics" / "shader").string();
+        m_postProcess.Init(GLApp::VIRTUAL_W, GLApp::VIRTUAL_H, shaderDir);
+    }
 }
 
 void GraphicsManager::Update()
@@ -279,10 +302,21 @@ void GraphicsManager::Update()
     }
 
     //--- Rendering passes ---
-    glapp->draw(EntityMember, m_editorLayerFilter);
+    float dt = static_cast<float>(GLHelper::delta_time);
+    if (m_postProcess.IsEnabled()) m_postProcess.BeginCapture();
 
-    // Render ALL TextComponent entities (including FPS text objects)
-    Update2DTextComponent();
+    glapp->draw(EntityMember, m_editorLayerFilter, dt);
+
+    if (m_postProcess.IsEnabled()) m_postProcess.ApplyBloom();
+
+    // Draw text entities on Background or World layer
+    Update2DTextComponent(LAYER_BACKGROUND | LAYER_WORLD | LAYER_TEXT);
+
+    // Draw UI sprites
+    glapp->draw(EntityMember, m_editorLayerFilter & LAYER_UI, 0.0f);
+
+    // Draw text entities on UI layer
+    Update2DTextComponent(LAYER_UI);
 
     // Render screen-wide fade overlay on top of everything
     if (m_screenFade.active)
@@ -331,6 +365,9 @@ void GraphicsManager::Shutdown()
     // Clean up screen-fade overlay
     if (m_overlayVAO) { glDeleteVertexArrays(1, &m_overlayVAO); m_overlayVAO = 0; }
     if (m_overlayVBO) { glDeleteBuffers(1, &m_overlayVBO);      m_overlayVBO = 0; }
+
+    // Shutdown bloom post-processing pipeline
+    m_postProcess.Shutdown();
 
     // Realease fonts
     ShutdownFonts();
@@ -397,39 +434,36 @@ GLuint GraphicsManager::LoadTextureFile(const std::string &path)
 
     std::string resolvedPath = path;
 
-    //std::cout << "[DEBUG LoadTextureFile] Original path: " << path << std::endl;
-
-    if (path.find("../../") == 0)
+    if (!std::filesystem::path(path).is_absolute())
     {
-        // Get PulseEngine base path
+        // Resolve all relative paths against the game project root (PulseProtocol).
         char exePath[MAX_PATH];
         GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
         std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
 
-        //std::cout << "[DEBUG LoadTextureFile] currentDir: " << currentDir << std::endl;
-
-        std::filesystem::path basePath;
-        if (std::filesystem::exists(currentDir / "PulseEngine"))
+        std::filesystem::path baseGamePath;
+        if (std::filesystem::exists(currentDir / "JSON"))
         {
-            basePath = currentDir / "PulseEngine";  // Release
-            //std::cout << "[DEBUG LoadTextureFile] Using release path" << std::endl;
+            baseGamePath = currentDir;  // Release: JSON/Assets copied flat beside exe
         }
         else
         {
             auto baseEngineDir = currentDir;
             while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
-            {
                 baseEngineDir = baseEngineDir.parent_path();
-            }
-            basePath = baseEngineDir / "PulseEngine";  // Dev
-            //std::cout << "[DEBUG LoadTextureFile] Using dev path" << std::endl;
+            baseGamePath = baseEngineDir / "PulseProtocol";  // Dev
         }
 
-        // Strip ../../PulseEngine/ and use basePath
-        std::string relativePath = path.substr(std::string("../../PulseEngine/").length());
-        resolvedPath = (basePath / relativePath).make_preferred().string(); 
+        // Strip legacy ../../PulseProtocol/ or ../../PulseEngine/ prefix if present
+        std::string relativePath = path;
+        if (path.find("../../PulseProtocol/") == 0)
+            relativePath = path.substr(std::string("../../PulseProtocol/").length());
+        else if (path.find("../../PulseEngine/") == 0)
+            relativePath = path.substr(std::string("../../PulseEngine/").length());
+        else if (path.find("../../") == 0)
+            relativePath = path.substr(6);
 
-        //std::cout << "[DEBUG LoadTextureFile] Resolved to: " << resolvedPath << std::endl;
+        resolvedPath = (baseGamePath / relativePath).make_preferred().string();
     }
 
     if (!std::filesystem::exists(resolvedPath))
@@ -856,7 +890,7 @@ void GraphicsManager::DrawText2D(
     FontData const* fontData = GM_FindFont(fontId);
     if (!fontData)
     {
-        std::cerr << "[GraphicsManager] DrawText2D: font '" << fontId << "' not found\n";
+        //std::cerr << "[GraphicsManager] DrawText2D: font '" << fontId << "' not found\n";
         return;
     }
 
@@ -872,7 +906,7 @@ void GraphicsManager::DrawText2D(
 }
 
 
-void GraphicsManager::Update2DTextComponent() {
+void GraphicsManager::Update2DTextComponent(LayerMask maskFilter) {
     // --- Draw Text components (screen-space UI text) ---
     auto* g_coordinator = Coordinator::GetInstance();
 
@@ -881,6 +915,13 @@ void GraphicsManager::Update2DTextComponent() {
         if (!g_coordinator->HasComponent<TextComponent>(entity) ||
             !g_coordinator->HasComponent<Framework::Transform>(entity)) {
             continue; //skip game object need transform(offset) and text
+        }
+
+        // Check layer visibility
+        if (g_coordinator->HasComponent<LayerTag>(entity)) {
+            auto& lt = g_coordinator->GetComponent<LayerTag>(entity);
+            if (!(lt.mask & maskFilter)) continue;
+            if (!LayerRegistry::Get().IsLayerVisible(lt.mask)) continue;
         }
            
         auto& txt = g_coordinator->GetComponent<TextComponent>(entity);

@@ -369,6 +369,7 @@ namespace PulseEditor
                 if (layer.mask == LAYER_BACKGROUND) layer.sortingLayer = 0;
                 else if (layer.mask == LAYER_WORLD) layer.sortingLayer = 1;
                 else if (layer.mask == LAYER_UI) layer.sortingLayer = 2;
+                else if (layer.mask == LAYER_TEXT) layer.sortingLayer = 3;
             }
         }
 
@@ -377,7 +378,7 @@ namespace PulseEditor
         ImGui::SameLine();
         ImGui::SetNextItemWidth(130.0f);
 
-        const char* sortingLayerNames[] = { "Background", "World", "UI" };
+        const char* sortingLayerNames[] = { "Background", "World", "UI", "Text" };
         ImGui::Combo("##SortingLayer", &layer.sortingLayer, sortingLayerNames, IM_ARRAYSIZE(sortingLayerNames));
 
         ImGui::SameLine();
@@ -850,7 +851,7 @@ namespace PulseEditor
                         //});
 
                         namespace fs = std::filesystem;
-                        const std::string kTexturesRoot = "../../PulseEngine/Assets/Textures";
+                        const std::string kTexturesRoot = "../../PulseProtocol/Assets/Textures";
 
                         constexpr int SPRITE_SHADER_INDEX = 1;
                         constexpr int SPRITESHEET_SHADER_INDEX = 2;
@@ -871,7 +872,7 @@ namespace PulseEditor
 
                                 const fs::path roots[] = {
                                     fs::path(kTexturesRoot),
-                                    fs::path("../../PulseEngine/Assets")};
+                                    fs::path("../../PulseProtocol/Assets")};
 
                                 std::string resolved;
                                 for (const fs::path &root : roots)
@@ -899,7 +900,7 @@ namespace PulseEditor
                                     std::string pathStr = resolved;
                                     std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
 
-                                    size_t myEnginePos = pathStr.find("PulseEngine/Assets");
+                                    size_t myEnginePos = pathStr.find("PulseProtocol/Assets");
                                     if (myEnginePos != std::string::npos)
                                     {
                                         r.spriteName = "../../" + pathStr.substr(myEnginePos);
@@ -1116,7 +1117,6 @@ namespace PulseEditor
             {
                 ImGui::Indent();
 
-                // ===== GET AVAILABLE SCRIPTS FROM SCRIPTAPI (FACTORY STYLE, NO HARDCODING!) =====
                 static std::vector<std::string> scriptOptions;
                 static bool scriptsLoaded = false;
 
@@ -1130,11 +1130,9 @@ namespace PulseEditor
 
                     if (getScriptsFunc)
                     {
-                        const char* result = getScriptsFunc();  // Simple C++ const char*, no System namespace!
-
+                        const char* result = getScriptsFunc();
                         if (result != nullptr && strlen(result) > 0)
                         {
-                            // Parse comma-separated list
                             std::stringstream ss(result);
                             std::string item;
                             while (std::getline(ss, item, ','))
@@ -1146,24 +1144,18 @@ namespace PulseEditor
                                     scriptOptions.push_back(item);
                                 }
                             }
-
                             scriptsLoaded = true;
-                            std::cout << "[Inspector] Loaded " << scriptOptions.size()
-                                << " available scripts from ScriptAPI\n";
                         }
                     }
                 }
 
-                // Convert to C-style array for ImGui
                 std::vector<const char*> scriptNames;
                 for (auto& s : scriptOptions)
-                {
                     scriptNames.push_back(s.c_str());
-                }
                 int numScripts = (int)scriptNames.size();
 
                 // =========================================================================
-                // Display ALL scripts attached to this entity
+                // Display ALL scripts attached
                 // =========================================================================
                 ImGui::Text("Scripts Attached: %zu", script.ScriptName.size());
                 ImGui::Spacing();
@@ -1171,7 +1163,6 @@ namespace PulseEditor
                 for (size_t i = 0; i < script.ScriptName.size(); ++i)
                 {
                     ImGui::PushID((int)i);
-
                     ImGui::Text("%zu.", i + 1);
                     ImGui::SameLine();
                     ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "%s", script.ScriptName[i].c_str());
@@ -1184,20 +1175,15 @@ namespace PulseEditor
                     if (ImGui::SmallButton("Remove##Script"))
                     {
                         const char* scriptToRemove = script.ScriptName[i].c_str();
-
-                        // Remove from C++ array
                         script.ScriptName.erase(script.ScriptName.begin() + i);
 
-                        // Remove from C# side
                         auto removeScriptFunc = Engine->GetFunctionPtr<void(*)(int, const char*)>(
                             "ScriptAPI",
                             "ScriptAPI.EngineInterface",
                             "RemoveScriptFromEntity"
                         );
                         if (removeScriptFunc)
-                        {
                             removeScriptFunc(selectedEntity, scriptToRemove);
-                        }
 
                         ImGui::PopStyleColor(3);
                         ImGui::PopID();
@@ -1215,61 +1201,90 @@ namespace PulseEditor
                 ImGui::Spacing();
                 ImGui::Separator();
                 ImGui::Spacing();
-
                 ImGui::Text("Add Script:");
                 ImGui::SameLine();
+
+                static char searchBuf[128] = "";
+                std::vector<const char*> filteredNames;
+                for (int i = 0; i < numScripts; i++)
+                {
+                    if (strlen(searchBuf) == 0 ||
+                        std::string(scriptNames[i]).find(searchBuf) != std::string::npos)
+                        filteredNames.push_back(scriptNames[i]);
+                }
+                int numFiltered = (int)filteredNames.size();
 
                 static int selectedScriptIndex = 0;
                 ImGui::SetNextItemWidth(250.0f);
 
                 if (numScripts > 0)
                 {
-                    if (ImGui::Combo("##ScriptDropdown", &selectedScriptIndex, scriptNames.data(), numScripts))
+                    if (selectedScriptIndex >= numFiltered) selectedScriptIndex = 0;
+
+                    const char* previewLabel = (numFiltered > 0 && selectedScriptIndex < numFiltered)
+                        ? filteredNames[selectedScriptIndex] : "Select Script...";
+
+                    if (ImGui::BeginCombo("##ScriptDropdown", previewLabel))
                     {
-                        std::cout << "[Inspector] Selected script: " << scriptNames[selectedScriptIndex] << std::endl;
+                        if (ImGui::IsWindowAppearing())
+                        {
+                            ImGui::SetScrollHereY(0.0f);
+                            ImGui::SetKeyboardFocusHere();
+                        }
+                        ImGui::SetNextItemWidth(-1);
+                        ImGui::InputText("##DropdownSearch", searchBuf, sizeof(searchBuf));
+                        ImGui::Separator();
+
+                        for (int i = 0; i < numFiltered; i++)
+                        {
+                            bool isSelected = (selectedScriptIndex == i);
+                            if (ImGui::Selectable(filteredNames[i], isSelected))
+                                selectedScriptIndex = i;
+                            if (isSelected) ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
                     }
 
                     ImGui::SameLine();
 
                     if (ImGui::SmallButton("Add"))
                     {
-                        const char* selectedScript = scriptNames[selectedScriptIndex];
-
-                        // Check if already attached
-                        bool alreadyExists = false;
-                        for (const auto& s : script.ScriptName)
+                        if (numFiltered > 0)
                         {
-                            if (s == selectedScript)
-                            {
-                                alreadyExists = true;
-                                break;
-                            }
-                        }
+                            const char* selectedScript = filteredNames[selectedScriptIndex];
 
-                        if (!alreadyExists)
-                        {
-                            // Add to C++ array
-                            script.ScriptName.push_back(selectedScript);
-
-                            // Add to C# side
-                            auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>(
-                                "ScriptAPI",
-                                "ScriptAPI.EngineInterface",
-                                "AddScriptViaName"
-                            );
-                            if (addScriptFunc)
+                            bool alreadyExists = false;
+                            for (const auto& s : script.ScriptName)
                             {
-                                bool success = addScriptFunc(selectedEntity, selectedScript);
-                                std::cout << "[Inspector] Added script: " << selectedScript
-                                    << " (Success: " << success << ")" << std::endl;
+                                if (s == selectedScript)
+                                {
+                                    alreadyExists = true;
+                                    break;
+                                }
                             }
 
-                            selectedScriptIndex = 0;
-                        }
-                        else
-                        {
-                            std::cout << "[Inspector] Script already attached: " << selectedScript << std::endl;
-                            ImGui::OpenPopup("ScriptAlreadyExists");
+                            if (!alreadyExists)
+                            {
+                                script.ScriptName.push_back(selectedScript);
+
+                                auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>(
+                                    "ScriptAPI",
+                                    "ScriptAPI.EngineInterface",
+                                    "AddScriptViaName"
+                                );
+                                if (addScriptFunc)
+                                {
+                                    bool success = addScriptFunc(selectedEntity, selectedScript);
+                                    std::cout << "[Inspector] Added script: " << selectedScript
+                                        << " (Success: " << success << ")" << std::endl;
+                                }
+                                selectedScriptIndex = 0;
+                                searchBuf[0] = '\0';
+                            }
+                            else
+                            {
+                                ImGui::OpenPopup("ScriptAlreadyExists");
+                            }
                         }
                     }
                 }
@@ -1283,22 +1298,16 @@ namespace PulseEditor
                     ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "This script is already attached!");
                     ImGui::Spacing();
                     if (ImGui::Button("OK", ImVec2(120, 0)))
-                    {
                         ImGui::CloseCurrentPopup();
-                    }
                     ImGui::EndPopup();
                 }
 
                 ImGui::Spacing();
 
                 if (script.ScriptName.empty())
-                {
                     ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.0f, 1.0f), "No scripts attached");
-                }
                 else
-                {
                     ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Active Scripts: %zu attached", script.ScriptName.size());
-                }
 
                 ImGui::Unindent();
             }
@@ -1331,40 +1340,36 @@ namespace PulseEditor
                 auto& audioResources = mAssets.getAudioRegContainer();
                 std::string preview = audio.audio_id.empty() ? "<None>" : audio.audio_id;
 
-                // ═══════════════════════════════════════════════════════════════
-                // SEARCHABLE AUDIO DROPDOWN
-                // ═══════════════════════════════════════════════════════════════
                 static char audioSearchFilter[128] = "";
 
                 ImGui::SetNextItemWidth(300.0f);
                 if (ImGui::BeginCombo("##AudioFile", preview.c_str()))
                 {
-                    // Search input at top of dropdown
+                    if (ImGui::IsWindowAppearing())
+                    {
+                        ImGui::SetScrollHereY(0.0f);
+                        ImGui::SetKeyboardFocusHere();
+                    }
+
                     ImGui::SetNextItemWidth(-1);
                     ImGui::InputTextWithHint("##AudioSearch", "Search audio...", audioSearchFilter, IM_ARRAYSIZE(audioSearchFilter));
                     ImGui::Separator();
 
-                    // Convert search to lowercase for case-insensitive matching
                     std::string filterLower = audioSearchFilter;
                     for (auto& c : filterLower) c = static_cast<char>(tolower(c));
 
-                    // <None> option (always visible)
                     if (filterLower.empty() || std::string("<none>").find(filterLower) != std::string::npos)
                     {
                         if (ImGui::Selectable("<None>", audio.audio_id.empty()))
                         {
                             audio.audio_id = "";
-                            audioSearchFilter[0] = '\0';  // Clear filter on selection
+                            audioSearchFilter[0] = '\0';
                         }
                     }
 
-                    // ─────────────────────────────────────────────────────────
-                    // Separate by audio type: BGM first, then SFX
-                    // ─────────────────────────────────────────────────────────
                     bool hasBGM = false;
                     bool hasSFX = false;
 
-                    // Check if we have any matching items in each category
                     for (auto const& [id, resource] : audioResources)
                     {
                         std::string labelLower = id;
@@ -1383,9 +1388,6 @@ namespace PulseEditor
                         }
                     }
 
-                    // ─────────────────────────────────────────────────────────
-                    // BGM Section
-                    // ─────────────────────────────────────────────────────────
                     if (hasBGM)
                     {
                         ImGui::Spacing();
@@ -1404,13 +1406,13 @@ namespace PulseEditor
                             if (!matchesFilter) continue;
 
                             bool isSelected = (audio.audio_id == id);
-                            std::string label = "  " + id;  // Indent items under header
+                            std::string label = "  " + id;
 
                             if (ImGui::Selectable(label.c_str(), isSelected))
                             {
                                 audio.audio_id = id;
-                                audioSearchFilter[0] = '\0';  // Clear filter on selection
-                                std::cout << "[Inspector] Selected audio: " << id << "\n";
+                                audioSearchFilter[0] = '\0';
+                                //std::cout << "[Inspector] Selected audio: " << id << "\n";
                             }
 
                             if (isSelected)
@@ -1418,9 +1420,6 @@ namespace PulseEditor
                         }
                     }
 
-                    // ─────────────────────────────────────────────────────────
-                    // SFX Section
-                    // ─────────────────────────────────────────────────────────
                     if (hasSFX)
                     {
                         ImGui::Spacing();
@@ -1428,7 +1427,7 @@ namespace PulseEditor
 
                         for (auto const& [id, resource] : audioResources)
                         {
-                            if (resource.audiotype == "BGM") continue;  // Skip BGM, show everything else as SFX
+                            if (resource.audiotype == "BGM") continue;
 
                             std::string labelLower = id;
                             for (auto& c : labelLower) c = static_cast<char>(tolower(c));
@@ -1442,13 +1441,13 @@ namespace PulseEditor
                             if (!matchesFilter) continue;
 
                             bool isSelected = (audio.audio_id == id);
-                            std::string label = "  " + id;  // Indent items under header
+                            std::string label = "  " + id;
 
                             if (ImGui::Selectable(label.c_str(), isSelected))
                             {
                                 audio.audio_id = id;
-                                audioSearchFilter[0] = '\0';  // Clear filter on selection
-                                std::cout << "[Inspector] Selected audio: " << id << "\n";
+                                audioSearchFilter[0] = '\0';
+                                //std::cout << "[Inspector] Selected audio: " << id << "\n";
                             }
 
                             if (isSelected)
@@ -1496,9 +1495,7 @@ namespace PulseEditor
                             {
                                 auto* resource = mAssets.getRegistry().FindAudio(audio.audio_id);
                                 if (resource)
-                                {
                                     audioManager->PlayFromAudioSource(audio);
-                                }
                             }
                         }
                     }
@@ -1508,9 +1505,7 @@ namespace PulseEditor
                     {
                         auto audioManager = g->GetSystem<AudioManager>();
                         if (audioManager)
-                        {
                             audioManager->StopPlayingAllAudio();
-                        }
                     }
                 }
                 else

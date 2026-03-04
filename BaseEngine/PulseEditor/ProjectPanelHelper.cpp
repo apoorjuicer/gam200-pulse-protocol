@@ -45,7 +45,7 @@ namespace PulseEditor
 
         // Convert absolute path to relative
         // Look for "PulseEngine/Assets/" first (more specific)
-        size_t pulseAssetsPos = pathStr.find("PulseEngine/Assets/");
+        size_t pulseAssetsPos = pathStr.find("PulseProtocol/Assets/");
         if (pulseAssetsPos != std::string::npos)
         {
             std::string result = "../../" + pathStr.substr(pulseAssetsPos);
@@ -57,7 +57,7 @@ namespace PulseEditor
         size_t assetsPos = pathStr.find("Assets/");
         if (assetsPos != std::string::npos)
         {
-            std::string result = "../../PulseEngine/" + pathStr.substr(assetsPos);
+            std::string result = "../../PulseProtocol/" + pathStr.substr(assetsPos);
             // std::cout << "[GetRelativeAssetPath] Output: " << result << std::endl;
             return result;
         }

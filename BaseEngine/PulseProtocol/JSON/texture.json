@@ -1,0 +1,57 @@
+{
+    "textureFilePaths": [
+        {
+            "id": "background",
+            "path": "Assets/Textures/Backgrounds/Background1.jpg",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "hero",
+            "path": "Assets/Textures/Characters/hero.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "BlueGorillaEnemy",
+            "path": "Assets/Textures/Enemies/BlueGorillaEnemy.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "RedGorillaEnemy",
+            "path": "Assets/Textures/Enemies/RedGorillaEnemy.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "bar_ui",
+            "path": "Assets/Textures/UI/bar.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "perfect_ui",
+            "path": "Assets/Textures/UI/perfect.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        { 
+            "id": "particle", "path": "Assets/Textures/VFX/star.png",
+            "vert_shader_path": "shader/sprite_vs.vert", "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1, "shd_ref": 2 
+        }
+    ]
+}

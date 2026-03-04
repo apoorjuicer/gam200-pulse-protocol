@@ -462,10 +462,10 @@ void CoreEngine::Init()
 	std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
 
 	std::filesystem::path configPath;
-	// Check if PulseEngine is next to exe (RELEASE)
-	if (std::filesystem::exists(currentDir / "PulseEngine" / "JSON"))
+	// Check if game JSON is next to exe (RELEASE - copied by CMake)
+	if (std::filesystem::exists(currentDir / "JSON"))
 	{
-		configPath = currentDir / "PulseEngine" / "JSON" / "config.json";
+		configPath = currentDir / "JSON" / "config.json";
 		std::cout << "[Config] Using release path (next to exe)" << std::endl;
 	}
 	// Otherwise find BaseEngine folder (DEV)
@@ -476,7 +476,7 @@ void CoreEngine::Init()
 		{
 			baseEngineDir = baseEngineDir.parent_path();
 		}
-		configPath = baseEngineDir / "PulseEngine" / "JSON" / "config.json";
+		configPath = baseEngineDir / "PulseProtocol" / "JSON" / "config.json";
 		std::cout << "[Config] Using dev path (BaseEngine folder)" << std::endl;
 	}
 
@@ -673,10 +673,10 @@ void CoreEngine::Init()
 	GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), eexePath, MAX_PATH);
 	std::filesystem::path ccurrentDir = std::filesystem::path(eexePath).parent_path();
 
-	std::filesystem::path pulseEnginePath;
-	if (std::filesystem::exists(ccurrentDir / "PulseEngine"))
+	std::filesystem::path gameProjectPath;
+	if (std::filesystem::exists(ccurrentDir / "JSON"))
 	{
-		pulseEnginePath = ccurrentDir / "PulseEngine";  // Release
+		gameProjectPath = ccurrentDir;  // Release: JSON and Assets are flat beside the exe
 	}
 	else
 	{
@@ -685,15 +685,15 @@ void CoreEngine::Init()
 		{
 			baseEngineDir = baseEngineDir.parent_path();
 		}
-		pulseEnginePath = baseEngineDir / "PulseEngine";  // Dev
+		gameProjectPath = baseEngineDir / "PulseProtocol";  // Dev: BaseEngine/PulseProtocol
 	}
 
 	// Set paths BEFORE Initialize
-	std::cout << "[DEBUG] Setting asset paths, pulseEnginePath = " << pulseEnginePath << std::endl;
-	mAssets.getRegistry().SetAssetPaths(pulseEnginePath);
-	
+	std::cout << "[DEBUG] Setting asset paths, gameProjectPath = " << gameProjectPath << std::endl;
+	mAssets.getRegistry().SetAssetPaths(gameProjectPath);
+
 	std::cout << "[DEBUG] Testing path resolution:" << std::endl;
-	std::cout << "[DEBUG] Base path: " << pulseEnginePath << std::endl;
+	std::cout << "[DEBUG] Base path: " << gameProjectPath << std::endl;
 
 	// Load manifests
 	mAssets.Initialize();
@@ -1342,7 +1342,7 @@ void CoreEngine::SetPaused(bool paused, PauseSource source)
 		if (source == PauseSource::Game)
 		{
 			// Pause ONLY music during game pause, keep SFX alive for hover/click
-			audio->SetMusicPaused(paused);
+			//audio->SetMusicPaused(paused);
 		}
 		else
 		{
@@ -1387,7 +1387,7 @@ void CoreEngine::PlayGame()
 		}
 
 		// ALWAYS update this path, even if already set
-		m_originalScenePath = "../../PulseEngine/JSON/" + sceneName + ".json";
+		m_originalScenePath = "../../PulseProtocol/JSON/" + sceneName + ".json";
 
 		std::cout << "[CoreEngine] Original scene path: " << m_originalScenePath << std::endl; // DEBUG
 	}
@@ -1552,27 +1552,6 @@ void CoreEngine::ToggleFullscreen()
 //	return std::filesystem::path(runtimePath) / "Assets";
 //}
 
-static std::filesystem::path FindUpwardsForDir(
-	std::filesystem::path startDir,
-	const std::filesystem::path& relativeTarget,
-	int maxLevels = 12)
-{
-	namespace fs = std::filesystem;
-	fs::path cur = startDir;
-
-	for (int i = 0; i < maxLevels; ++i)
-	{
-		fs::path candidate = cur / relativeTarget;
-		if (fs::exists(candidate) && fs::is_directory(candidate))
-			return fs::canonical(candidate);
-
-		if (!cur.has_parent_path())
-			break;
-
-		cur = cur.parent_path();
-	}
-	return {};
-}
 
 std::filesystem::path CoreEngine::GetAssetRoot()
 {
@@ -1596,13 +1575,13 @@ std::filesystem::path CoreEngine::GetAssetRoot()
 	std::cout << "[CoreEngine] dllDir = " << dllDir << "\n";
 
 	// Walk upwards and search for the *source* Assets folder:
-	//   BaseEngine/PulseEngine/Assets
+	//   BaseEngine/PulseProtocol/Assets
 	// while skipping build output:
-	//   BaseEngine/build/PulseEngine/Assets
+	//   BaseEngine/build/PulseProtocol/Assets
 	fs::path cur = dllDir;
 	for (int i = 0; i < 30; ++i)
 	{
-		fs::path candidate = cur / "PulseEngine" / "Assets";
+		fs::path candidate = cur / "PulseProtocol" / "Assets";
 		if (fs::exists(candidate) && fs::is_directory(candidate))
 		{
 			fs::path resolved = fs::weakly_canonical(candidate);

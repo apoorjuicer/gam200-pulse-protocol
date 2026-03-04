@@ -130,7 +130,7 @@ private:
 	std::string LastScene;			// For ESC navigation - the scene we came FROM
 	std::vector<Entity> SceneEntityList;
 
-	std::string StartingScene = "PulseEngine/JSON/MainMenu.json"; 
+	std::string StartingScene = "PulseProtocol/JSON/MainMenu.json";
 
 	void Deserialize(const rapidjson::Value& in);
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;

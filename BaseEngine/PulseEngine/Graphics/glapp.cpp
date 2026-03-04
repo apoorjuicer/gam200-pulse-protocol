@@ -187,7 +187,7 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 		glm::vec4(x.tintColor.r, x.tintColor.g, x.tintColor.b, x.tintColor.a));
 }
 
-void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
+void GLApp::draw(std::set<Entity> entities, LayerMask includeMask, float deltaTime) {
 
 	// Use game camera during play, editor camera in edit mode
 	glm::mat3 PanZoom = BuildPanZoomNDC(Framework::GameState::IsPlaying() ? gGameCamera : gEditorCamera);
@@ -195,11 +195,11 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	// ========================== REST OF YOUR DRAW ===========================
 	auto* g_coordinator = Coordinator::GetInstance();
 
-	static auto lastTime = std::chrono::high_resolution_clock::now();
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float deltaTime =
-		std::chrono::duration<float>(currentTime - lastTime).count();
-	lastTime = currentTime;
+	//static auto lastTime = std::chrono::high_resolution_clock::now();
+	//auto currentTime = std::chrono::high_resolution_clock::now();
+	//float deltaTime =
+	//	std::chrono::duration<float>(currentTime - lastTime).count();
+	//lastTime = currentTime;
 
 	// Don't advance time if not playing or if paused
 	if (!Framework::GameState::IsPlaying() || (Engine && Engine->IsPaused()))
@@ -227,6 +227,7 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 			// Has LayerTag - check if it matches the filter
 			auto& lt = g_coordinator->GetComponent<LayerTag>(it);
 			if ((lt.mask & includeMask) == 0) continue;  // Layer filtered out
+			if (lt.mask == LAYER_TEXT) continue; // skip text entities
 		}
 
 		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);

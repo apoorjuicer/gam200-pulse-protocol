@@ -59,11 +59,35 @@ namespace ScriptAPI
         mgr->PlayFromAudioSource(*src);
     }
 
+    void AudioComponent::PlayBGM()
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr) return;
+
+        AudioSource* src = ScriptBridge::GetAudioSourceComponent(EntityID);
+        if (!src) return;
+
+        // Play whatever audio source is attached to this entity
+        mgr->PlayFromAudioSource(*src);
+    }
+
     void AudioComponent::PlayBGM(String^ name)
     {
         auto mgr = GetAudioManager();
         if (!mgr) return;
-        mgr->PlayBGM(marshal_as<std::string>(name));
+
+        // If a valid name is given, use the explicit BGM path
+        if (name != nullptr && name->Length > 0)
+        {
+            mgr->PlayBGM(marshal_as<std::string>(name));
+            return;
+        }
+
+        // Otherwise fall back to the entity's attached audio source
+        AudioSource* src = ScriptBridge::GetAudioSourceComponent(EntityID);
+        if (!src) return;
+
+        mgr->PlayFromAudioSource(*src);
     }
 
     void AudioComponent::StopBGM()
@@ -150,5 +174,15 @@ namespace ScriptAPI
         auto mgr = GetAudioManager();
         if (!mgr) return 1.0f;
         return mgr->mSfxVol;
+    }
+
+    float AudioComponent::GetBGMPosition()
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr)   
+        {
+            return 1.0f;
+        }
+        return mgr->GetBGMPositionSeconds();
     }
 }

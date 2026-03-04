@@ -134,8 +134,7 @@ namespace PulseEditor
         ofn.lpstrTitle = "Select scene JSON";
 
         namespace fs = std::filesystem;
-        //std::string dir = (fs::current_path() / "../../PulseEngine/JSON").lexically_normal().string();
-        std::string dir = "../../PulseEngine/JSON";
+        std::string dir = "../../PulseProtocol/JSON";
         ofn.lpstrInitialDir = dir.c_str();
 
 
@@ -149,6 +148,11 @@ namespace PulseEditor
     {
         // Static variable to defer scene loading after dialog closes
         static std::string s_pendingScenePath;
+
+        // New Game popup state
+        static bool s_showNewGamePopup = false;
+        static char s_newGameNameBuf[128] = {};
+        static std::string s_newGameResult;
 
         ImGuiWindowFlags top_flags =
             ImGuiWindowFlags_NoTitleBar |
@@ -194,6 +198,87 @@ namespace PulseEditor
         if (ImGui::Button("Load Scene", loadButtonSize))
         {
             s_pendingScenePath = OpenJsonFileDialog();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("New Game"))
+        {
+            s_showNewGamePopup = true;
+            s_newGameNameBuf[0] = '\0';
+            s_newGameResult.clear();
+            ImGui::OpenPopup("New Game Project");
+        }
+
+        // ── New Game popup ─────────────────────────────────────────
+        if (ImGui::BeginPopupModal("New Game Project", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("Enter a name for the new game project:");
+            ImGui::InputText("##gamename", s_newGameNameBuf, sizeof(s_newGameNameBuf));
+
+            if (!s_newGameResult.empty())
+            {
+                ImGui::TextWrapped("%s", s_newGameResult.c_str());
+            }
+
+            if (ImGui::Button("Create") && s_newGameNameBuf[0] != '\0')
+            {
+                namespace fs = std::filesystem;
+
+                // Find BaseEngine folder by walking up from current path
+                fs::path cur = fs::current_path();
+                while (cur.filename() != "BaseEngine" && cur.has_parent_path())
+                    cur = cur.parent_path();
+
+                std::string gameName(s_newGameNameBuf);
+                fs::path gameRoot = cur / gameName;
+
+                // Create folder structure
+                std::error_code ec;
+                fs::create_directories(gameRoot / "Assets" / "Textures", ec);
+                fs::create_directories(gameRoot / "Assets" / "Sound",    ec);
+                fs::create_directories(gameRoot / "Assets" / "Font",     ec);
+                fs::create_directories(gameRoot / "Assets" / "Prefabs",  ec);
+                fs::create_directories(gameRoot / "JSON",                 ec);
+
+                // Write starter JSON files
+                auto writeFile = [](const fs::path& p, const char* content) {
+                    std::ofstream f(p);
+                    if (f.is_open()) f << content;
+                };
+
+                writeFile(gameRoot / "JSON" / "config.json",
+                    "{\n    \"config\": {\n        \"WindowWidth\": 1600,\n        \"WindowHeight\": 900,\n        \"ConfigPath\": \"\"\n    }\n}\n");
+                writeFile(gameRoot / "JSON" / "texture.json",
+                    "{\n    \"textureFilePaths\": []\n}\n");
+                writeFile(gameRoot / "JSON" / "audio.json",
+                    "{\n    \"audioFilePaths\": []\n}\n");
+                writeFile(gameRoot / "JSON" / "animation.json",
+                    "{\n    \"animationFilePaths\": []\n}\n");
+                writeFile(gameRoot / "JSON" / "font.json",
+                    "{\n    \"fontFilePaths\": []\n}\n");
+                writeFile(gameRoot / "JSON" / "scene.json",
+                    "{\n    \"sceneFilePaths\": []\n}\n");
+
+                if (fs::exists(gameRoot / "JSON"))
+                {
+                    s_newGameResult = "Game project '" + gameName + "' created at:\n" + gameRoot.string()
+                        + "\n\nTo use it: update the game project path in CoreEngine, rebuild, and restart.";
+                }
+                else
+                {
+                    s_newGameResult = "ERROR: Could not create project folder. Check permissions.";
+                }
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Close"))
+            {
+                s_showNewGamePopup = false;
+                s_newGameResult.clear();
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
         }
 
         // ------------------------------------------------------------

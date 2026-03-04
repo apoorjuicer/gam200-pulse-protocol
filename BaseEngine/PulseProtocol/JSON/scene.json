@@ -1,0 +1,20 @@
+{
+    "sceneFilePaths": [
+        {
+            "id": "mainmenu_scene",
+            "path": "JSON/MainMenu.json"
+        },
+        {
+            "id": "level1_scene",
+            "path": "JSON/Level1.json"
+        },
+        {
+            "id": "gamewin_scene",
+            "path": "JSON/GameWin.json"
+        },
+        {
+            "id": "gamelose_scene",
+            "path": "JSON/GameLose.json"
+        }
+    ]
+}

@@ -27,6 +27,7 @@ namespace ScriptAPI
 
         // Existing helpers
         void PlaySFX(String^ name);
+        void PlayBGM(); 
         void PlayBGM(String^ name);
         void StopBGM();
         void PauseBGM();
@@ -41,5 +42,8 @@ namespace ScriptAPI
         float GetMasterVolume();
         float GetMusicVolume();
         float GetSfxVolume();
+
+        // for removing the latency completely cos System::setDSPBufferSize is for reducing it ony :/
+        float GetBGMPosition();
     };
 }

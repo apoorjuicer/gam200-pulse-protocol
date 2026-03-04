@@ -1,6 +1,7 @@
 ﻿using System;
 using ScriptAPI;
 
+
 public class Conductor : Script
 {
     // =========================
@@ -25,6 +26,9 @@ public class Conductor : Script
     {
         return 60.0f / BPM;
     }
+
+    // Stupid FMOD has a latency for about 90ms?!?!?!?!??!!
+    public float MusicLatencyOffset = 0.09f;
 
     public override void Update()
     {
@@ -66,9 +70,21 @@ public class Conductor : Script
 
         // delta time usage
         float dt = Time.DeltaTime;
-        songTime += dt;
+        //songTime += dt;
 
-        int currentBeat = (int)Math.Floor(songTime / secondsPerBeat);
+        //
+        float audioPos = (float)GetAudio().GetBGMPosition();
+        if (audioPos > 0f) // only sync when audio is actually playing
+        {
+            songTime = audioPos;
+        }
+        else
+        {
+            songTime += dt; // fallback if audio not playing yet
+        }
+
+        //int currentBeat = (int)Math.Floor(songTime / secondsPerBeat);
+        int currentBeat = (int)Math.Floor((songTime - MusicLatencyOffset) / secondsPerBeat);
 
         // Full beat
         if (currentBeat > lastBeat)

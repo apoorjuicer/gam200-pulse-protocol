@@ -72,18 +72,18 @@ add_custom_command(TARGET ${GAME_NAME} POST_BUILD
     COMMENT "Copying .NET Runtime DLLs to PulseProtocol output directory"
 )
 
-# Copy JSON
+# Copy JSON (from game project folder, not engine)
 add_custom_command(TARGET ${GAME_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/PulseEngine/JSON
+        ${CMAKE_CURRENT_LIST_DIR}/JSON
         $<TARGET_FILE_DIR:${GAME_NAME}>/JSON
     COMMENT "Copying JSON files to PulseProtocol"
 )
 
-# Copy Assets
+# Copy Assets (from game project folder, not engine)
 add_custom_command(TARGET ${GAME_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/PulseEngine/Assets
+        ${CMAKE_CURRENT_LIST_DIR}/Assets
         $<TARGET_FILE_DIR:${GAME_NAME}>/Assets
     COMMENT "Copying Assets to PulseProtocol"
 )

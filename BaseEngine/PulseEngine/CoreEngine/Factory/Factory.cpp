@@ -71,6 +71,9 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, boo
 	// std::string savefilePath = "../../PulseEngine/JSON/test2.json";
 
 	std::ifstream ifs(path);
+
+	std::cerr << "Trying to open: " << std::filesystem::absolute(path) << "\n";
+
 	if (!ifs.is_open())
 	{
 		std::cerr << "Error: Cannot open file for reading: " << path << "\n";
@@ -211,7 +214,7 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, boo
 	// Add them to C# script container AND ONLY IF IT NOT ITERATING THRU THE SCRIPTS 
 	if (attachScripts && g_coordinator->HasComponent<LogicComponent>(entity))
 	{
-		auto addScriptFunc = m_coreEngine->GetFunctionPtr<bool(*)(int, const char*)>(
+		auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>(
 			"ScriptAPI",
 			"ScriptAPI.EngineInterface",
 			"AddScriptViaName"

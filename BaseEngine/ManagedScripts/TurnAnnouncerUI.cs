@@ -15,21 +15,16 @@ public class TurnAnnouncerUI : Script
 
     public override void Update()
     {
-        //yes it is
-        //Console.WriteLine("IS THIS EVEN WORKING?");
-
         if (!initialized)
         {
             Initialize();
             return;
         }
 
-        // Hide during pause overlay
+        // Don't change visibility while pause overlay is open
+        // Layer system handles hiding the text visually behind the overlay
         if (NavigationButtons.ShowPauseOverlay)
-        {
-            Hide();
             return;
-        }
 
         if (TurnManager.Instance == null)
             return;
@@ -39,8 +34,7 @@ public class TurnAnnouncerUI : Script
         // Only act on phase transitions
         if (phase == lastPhase)
             return;
-        var text = GetTextComponent();
-   
+
         lastPhase = phase;
         OnPhaseChanged(phase);
     }
