@@ -19,7 +19,7 @@
 #include "pch/pch_temp.h"
 
 // Core editor / engine headers
-#include "Editor.h" // for GameViewport, GizmoState, selectedEntity, INVALID_ENTITY
+//#include "Editor.h" // for GameViewport, GizmoState, selectedEntity, INVALID_ENTITY
 #include "Gizmo.h"
 #include "LayerManagerPanel.h"  // for IsLayerVisible, IsLayerLocked
 #include "HierarchyHelpers.h"
@@ -38,9 +38,8 @@
 // #include "../Graphics/Layer.h"
 
 #include "SnapShot.h"
-
-// If you have a dedicated gizmo type, include it here
-// #include "GizmoState.h"
+#include "EditorTypes.h"
+#include "UndoHelper.h"
 
 namespace PulseEditor
 {
@@ -1008,15 +1007,15 @@ namespace PulseEditor
             // Replace the entire if block with:
             if (s_gizmoEditing && s_gizmoEntity != INVALID_ENTITY)
             {
-                Entity e = s_gizmoEntity;
-                EntitySnapshot before = s_gizmoBeforeSnapshot;
+               // Entity e = s_gizmoEntity;
+                //EntitySnapshot before = s_gizmoBeforeSnapshot;
 
-                EntitySnapshot after = MakeEntitySnapshot(e);
+                //EntitySnapshot after = MakeEntitySnapshot(e);
 
-                mUndo.Push(UndoManager::Action{
-                    .undo = [e, before]() { RestoreEntityFromSnapshot(e, before); },
-                    .redo = [e, after]() { RestoreEntityFromSnapshot(e, after);  }
-                    });
+                //mUndo.Push(UndoManager::Action{
+                //    .undo = [e, before]() { RestoreEntityFromSnapshot(e, before); },
+                //    .redo = [e, after]() { RestoreEntityFromSnapshot(e, after);  }
+                //    });
 
                 s_gizmoEditing = false;
                 s_gizmoEntity = INVALID_ENTITY;
@@ -1082,65 +1081,68 @@ namespace PulseEditor
                 factory.DeleteEntity(e);
             }
 
+
+            PushDeleteEntity(mUndo, Editorfactory, entityDisplayOrder, selectedHandle, handleOf);
+            selectedHandle.reset();
             selectedEntity = INVALID_ENTITY;
 
-            // --- UNDO/REDO: recreate all entities and restore hierarchy ---
-            auto restoredIds = std::make_shared<std::vector<Entity>>(); // filled on undo, used on redo
+            //// --- UNDO/REDO: recreate all entities and restore hierarchy ---
+            //auto restoredIds = std::make_shared<std::vector<Entity>>(); // filled on undo, used on redo
 
-            mUndo.Push(UndoManager::Action{
-                // UNDO: recreate entities from snapshots and reinsert into hierarchy
-                .undo = [snapshots, indices, restoredIds]() mutable
-                {
-                    restoredIds->clear();
+            //mUndo.Push(UndoManager::Action{
+            //    // UNDO: recreate entities from snapshots and reinsert into hierarchy
+            //    .undo = [snapshots, indices, restoredIds]() mutable
+            //    {
+            //        restoredIds->clear();
 
-                    // Recreate entities (you can keep your order; just be consistent)
-                    for (size_t i = 0; i < snapshots.size(); ++i)
-                    {
-                        Entity restored = CreateEntityFromEntitySnapshot(snapshots[i]);
-                        if (restored == INVALID_ENTITY)
-                            continue;
+            //        // Recreate entities (you can keep your order; just be consistent)
+            //        for (size_t i = 0; i < snapshots.size(); ++i)
+            //        {
+            //            Entity restored = CreateEntityFromEntitySnapshot(snapshots[i]);
+            //            if (restored == INVALID_ENTITY)
+            //                continue;
 
-                        restoredIds->push_back(restored);
+            //            restoredIds->push_back(restored);
 
-                        // Reinsert into hierarchy at the original index (clamped)
-                        int insertIndex = indices[i];
-                        if (insertIndex < 0 || insertIndex > static_cast<int>(entityDisplayOrder.size()))
-                            insertIndex = static_cast<int>(entityDisplayOrder.size());
+            //            // Reinsert into hierarchy at the original index (clamped)
+            //            int insertIndex = indices[i];
+            //            if (insertIndex < 0 || insertIndex > static_cast<int>(entityDisplayOrder.size()))
+            //                insertIndex = static_cast<int>(entityDisplayOrder.size());
 
-                        entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex, restored);
-                    }
+            //            entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex, restored);
+            //        }
 
-                    // Select the first restored (your comment says original parent)
-                    if (!restoredIds->empty())
-                        selectedEntity = (*restoredIds)[0];
-                },
+            //        // Select the first restored (your comment says original parent)
+            //        if (!restoredIds->empty())
+            //            selectedEntity = (*restoredIds)[0];
+            //    },
 
-                // REDO: delete the entities that were recreated by undo
-                .redo = [restoredIds]() mutable
-                {
-                    if (!restoredIds || restoredIds->empty())
-                        return;
+            //    // REDO: delete the entities that were recreated by undo
+            //    .redo = [restoredIds]() mutable
+            //    {
+            //        if (!restoredIds || restoredIds->empty())
+            //            return;
 
-                    // Remove all from entityDisplayOrder first
-                    for (Entity e : *restoredIds)
-                    {
-                        auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), e);
-                        if (it != entityDisplayOrder.end())
-                            entityDisplayOrder.erase(it);
-                    }
+            //        // Remove all from entityDisplayOrder first
+            //        for (Entity e : *restoredIds)
+            //        {
+            //            auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), e);
+            //            if (it != entityDisplayOrder.end())
+            //                entityDisplayOrder.erase(it);
+            //        }
 
-                    // Delete entities
-                    Factory factory;
-                    for (Entity e : *restoredIds)
-                        factory.DeleteEntity(e);
+            //        // Delete entities
+            //        Factory factory;
+            //        for (Entity e : *restoredIds)
+            //            factory.DeleteEntity(e);
 
-                    selectedEntity = INVALID_ENTITY;
+            //        selectedEntity = INVALID_ENTITY;
 
-                    // keep list (or clear it). Clearing prevents double-redo issues.
-                    // If you clear, redo becomes a no-op until undo runs again, which is correct.
-                    restoredIds->clear();
-                }
-                });
+            //        // keep list (or clear it). Clearing prevents double-redo issues.
+            //        // If you clear, redo becomes a no-op until undo runs again, which is correct.
+            //        restoredIds->clear();
+            //    }
+            //    });
         }
 
         dl->PopClipRect();

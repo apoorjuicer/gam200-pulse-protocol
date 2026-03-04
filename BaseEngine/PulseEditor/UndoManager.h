@@ -39,7 +39,7 @@ public:
 	operator bool() const noexcept;
 	size_t Capacity() const noexcept;
 private:
-	bool m_applying = false;  // ??
+	bool m_applying = false;  // blocks re-entrant Push() calls during undo/redo execution
 	//keep track of history for undo
 	static constexpr size_t MAX_HISTORY = 40;
 	// stack of undo commands (LIFO)
@@ -47,5 +47,6 @@ private:
 	std::vector<Action> undo_stack;
 	std::vector<Action> redo_stack;
 
-	void TrimHistory();
+	void TrimUndoHistory();
+	void TrimRedoHistory();
 };

@@ -30,53 +30,72 @@
 #include "Graphics/Text.h"
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "CoreEngine/Prefab/PrefabInstance.h"
+#include "EditorTypes.h"
+#include "UndoHelper.h"
+
 namespace PulseEditor
 {
     // Definition of singleton undomanager for editor;
     // UNDO Manager
-    UndoManager mUndo;
+
     static Framework::Transform beforeEdit;
     static bool isEditing = false;
 
     // -------------------------------------------------------------------------
     // Function to handle Transform undo
     // -------------------------------------------------------------------------
+    //static void HandleTransformUndo(
+    //    Framework::Transform &currentTransform,
+    //    UndoManager &undo,
+    //    Entity e,
+    //    Coordinator *g)
+    //{
+    //    // If the current ImGui widget became active (user clicked or started dragging)
+    //    if (ImGui::IsItemActivated())
+    //    {
+    //        // "snapshot" the "before" state
+    //        // "save the transform data before editting"
+    //        beforeEdit = currentTransform;
+    //        isEditing = true;
+    //    }
+
+    //    // If editing has ended (mouse released or finalizing text input)
+    //    if (ImGui::IsItemDeactivatedAfterEdit() && isEditing)
+    //    {
+    //        if (beforeEdit != currentTransform) // if something actually changed
+    //        {
+    //            Framework::Transform after = currentTransform;
+    //            PushTransformEdit(mUndo, selectedHandle, beforeEdit, after);
+    //        }
+
+    //        isEditing = false; // reset edit session
+    //    }
+    //}
+
     static void HandleTransformUndo(
-        Framework::Transform &tr,
-        UndoManager &undo,
-        Entity e,
-        Coordinator *g)
+        Framework::Transform& currentTransform,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
     {
-        // If the current ImGui widget became active (user clicked or started dragging)
+        // Started dragging / editing THIS widget
         if (ImGui::IsItemActivated())
         {
-            // "snapshot" the "before" state
-            // "save the transform data before editting"
-            beforeEdit = tr;
+            beforeEdit = currentTransform;
             isEditing = true;
         }
 
-        // If editing has ended (mouse released or finalizing text input)
+        // Finished editing THIS widget
         if (ImGui::IsItemDeactivatedAfterEdit() && isEditing)
         {
-            if (beforeEdit != tr) // if something actually changed
+            Framework::Transform after = currentTransform;
+
+            // Only push if changed ( Transform probably has no operator!=, so compare fields)
+            if (beforeEdit != after)   // adjust to your fields
             {
-                Framework::Transform afterEdit = tr;
-                undo.Push(UndoManager::Action{
-                                .undo = [e, oldData = beforeEdit, g]()
-                                {
-                                    if (g && g->HasComponent<Framework::Transform>(e))
-                                        g->GetComponent<Framework::Transform>(e) = oldData;
-                                },
-                                .redo = [e, newData = afterEdit, g]()
-                                {
-                                    if (g && g->HasComponent<Framework::Transform>(e))
-                                        g->GetComponent<Framework::Transform>(e) = newData;
-                                }
-                    });
+                PushTransformEdit(undo, h, beforeEdit, after);
             }
 
-            isEditing = false; // reset edit session
+            isEditing = false;
         }
     }
 
@@ -616,7 +635,9 @@ namespace PulseEditor
                 ImGui::DragFloat2("Position", pos, 0.5f);
                 tr.Pos.x = pos[0];
                 tr.Pos.y = pos[1];
-                HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                //HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                HandleTransformUndo(tr, mUndo, selectedHandle);
+
 
                 // --- Scale + Keep Aspect Ratio (Option A: changing both updates ratio) ---
                 static std::unordered_map<std::uint32_t, bool>  s_keepAspect;
@@ -673,20 +694,20 @@ namespace PulseEditor
 
                 tr.Scale.x = sc[0];
                 tr.Scale.y = sc[1];
-                HandleTransformUndo(tr, mUndo, selectedEntity, g);
-
+                //HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                HandleTransformUndo(tr, mUndo, selectedHandle);
                 // --- Rotation (deg) ---
                 ImGui::DragFloat("Rotation (deg)", &tr.Rotation.x, 1.0f, -360.f, 360.f);
-                HandleTransformUndo(tr, mUndo, selectedEntity, g);
-
+                //HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                HandleTransformUndo(tr, mUndo, selectedHandle);
                 // --- Rotation Speed ---
                 ImGui::DragFloat("Rotation Speed", &tr.Rotation.y, 0.1f, -10.0f, 10.0f);
-                HandleTransformUndo(tr, mUndo, selectedEntity, g);
-
+                //HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                HandleTransformUndo(tr, mUndo, selectedHandle);
                 // --- Visible ---
                 ImGui::Checkbox("Visible", &tr.isVisible);
-                HandleTransformUndo(tr, mUndo, selectedEntity, g);
-
+               // HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                HandleTransformUndo(tr, mUndo, selectedHandle);
                 ImGui::Unindent();
             }
 
@@ -947,16 +968,16 @@ namespace PulseEditor
 
                         EntitySnapshot after = MakeEntitySnapshot(e);
 
-                        mUndo.Push(UndoManager::Action{
-                            .undo = [e, before]()
-                            {
-                                RestoreEntityFromSnapshot(e, before);
-                            },
-                            .redo = [e, after]()
-                            {
-                                RestoreEntityFromSnapshot(e, after);
-                            }
-                            });
+                        //mUndo.Push(UndoManager::Action{
+                        //    .undo = [e, before]()
+                        //    {
+                        //        RestoreEntityFromSnapshot(e, before);
+                        //    },
+                        //    .redo = [e, after]()
+                        //    {
+                        //        RestoreEntityFromSnapshot(e, after);
+                        //    }
+                        //    });
                     } // end ofreload clicked 
                 }
 

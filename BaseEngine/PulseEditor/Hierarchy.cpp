@@ -25,6 +25,8 @@
 #include "CoreEngine/Prefab/PrefabInstance.h"
 #include "Components/ParentChild.h"
 
+#include "UndoHelper.h"
+#include "EditorTypes.h"
 // ImGui
 #include "imgui.h"
 //
@@ -371,6 +373,9 @@ namespace PulseEditor
             if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
             {
                 selectedEntity = entity;
+                //aaa
+                auto it = handleOf.find(entity);
+                selectedHandle = (it != handleOf.end()) ? it->second : nullptr;
                 anySelectableClicked = true;
             }
 
@@ -552,7 +557,6 @@ namespace PulseEditor
             if (!lastSceneDuringPlay.empty() && currentScene != lastSceneDuringPlay)
             {
                 selectedEntity = INVALID_ENTITY;
-
                 // Also cancel any renaming in progress
                 if (s_renameState.renamingEntity != INVALID_ENTITY)
                 {
@@ -568,61 +572,24 @@ namespace PulseEditor
             lastSceneDuringPlay = "";
         }
 
-        // [+] Create Empty Entity at end
-        // Undo
+        // -----------------------------------------------------------------------------
+        // [+] CREATE EMPTY ENTITY BUTTON
+        // -----------------------------------------------------------------------------
         if (ImGui::Button("+"))
         {
+            Entity prevSelected = selectedEntity;
 
-            // Remember what was selected BEFORE creating the new object
-           Entity prevSelected = selectedEntity;
+            //Factory factory;
+            selectedHandle = PushCreateDefault(mUndo, Editorfactory, entityDisplayOrder, handleOf);
+            selectedEntity = selectedHandle ? selectedHandle->id : INVALID_ENTITY;
+           // Entity newEntity = factory.DefaultObj();
+            //if (newEntity != INVALID_ENTITY)
+            //{
+            //    //entityDisplayOrder.push_back(newEntity);
+            //    //selectedEntity = newEntity;
 
-            Factory factory;
-            Entity newEntity = factory.DefaultObj();
-            if (newEntity == INVALID_ENTITY) return;
-            entityDisplayOrder.push_back(newEntity); // add to hierarchy list
-            selectedEntity = newEntity;  //select the new entity
-            EntitySnapshot createdSnap = MakeEntitySnapshot(newEntity); //save for redo
-            auto liveId = std::make_shared<Entity>(newEntity);
-
-            mUndo.Push(UndoManager::Action{
-                .undo = [liveId, prevSelected]()
-                {
-                    Entity e = *liveId;
-                    if (e == INVALID_ENTITY) return;
-
-                    // stop gizmo if using this entity
-                    //if (g_gizmo.active == e) {
-                    //    g_gizmo.dragging = false;
-                    //    g_gizmo.active = INVALID_ENTITY;
-                    //    g_gizmo.activeHandle = GizmoHandle::None;
-                    //}
-                    CancelGizmoIfEntity(e);
-
-                    entityDisplayOrder.erase(
-                        std::remove(entityDisplayOrder.begin(), entityDisplayOrder.end(), e),
-                        entityDisplayOrder.end());
-
-                    Factory factory;
-                    factory.DeleteEntity(e);
-
-                    *liveId = INVALID_ENTITY;
-                    selectedEntity = prevSelected;
-                },
-
-                .redo = [liveId,createdSnap]() mutable
-                {
-                    if (*liveId != INVALID_ENTITY) return; // already alive, don’t double-create
-
-                    Factory factory;
-                    //Entity e = factory.DefaultObj();
-                    Entity id = CreateEntityFromEntitySnapshot(createdSnap);
-                    if (id == INVALID_ENTITY) return;
-
-                    entityDisplayOrder.push_back(id);
-                    selectedEntity = id;
-                    *liveId = id;
-                }
-        });
+            //    selectedHandle = PushCreateDefault(mUndo, factory, entityDisplayOrder);
+            //}
         }
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("Create Empty GameObject");
@@ -632,72 +599,24 @@ namespace PulseEditor
         // Buttons that require selection
         ImGui::BeginDisabled(selectedEntity == INVALID_ENTITY);
 
-        // [X] Delete Selected Entity
-        // Undo
+
+        // -----------------------------------------------------------------------------
+        // [X] DELETE SELECTED ENTITY BUTTON
+        // -----------------------------------------------------------------------------
         if (ImGui::Button("X"))
         {
-            if (selectedEntity != INVALID_ENTITY)
+            if (selectedHandle && selectedHandle->id != INVALID_ENTITY)
             {
                 Entity toDelete = selectedEntity;
 
-                EntitySnapshot snap = MakeEntitySnapshot(toDelete);
-                int index = -1;
+                // Collect the whole subtree (root + all descendants)
+                std::vector<Entity> entitiesToDelete;
+                HierarchyHelpers::PrepareDeleteWithChildren(toDelete, entitiesToDelete);
 
-                auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), toDelete);
-                if (it != entityDisplayOrder.end())
-                    index = static_cast<int>(it - entityDisplayOrder.begin());
-
-                //delete the entity
-                if (it != entityDisplayOrder.end())
-                    entityDisplayOrder.erase(it);
-
-                Factory factory;
-                factory.DeleteEntity(toDelete);
-
-                selectedEntity = INVALID_ENTITY; //clear entity
-
-                // Shared state: track the current "alive" entity id for redo to delete
-                auto currentId = std::make_shared<Entity>(INVALID_ENTITY);
-
-                // --- UNDO/REDO COMMAND ---
-                mUndo.Push(UndoManager::Action{
-                    // UNDO: recreate entity and reinsert at original index
-                    .undo = [snap, index, currentId]()
-                    {
-                        Entity restored = CreateEntityFromEntitySnapshot(snap);
-                        if (restored == INVALID_ENTITY)
-                            return;
-
-                        *currentId = restored;
-
-                        int insertIndex = index;
-                        if (insertIndex < 0 || insertIndex > static_cast<int>(entityDisplayOrder.size()))
-                            insertIndex = static_cast<int>(entityDisplayOrder.size());
-
-                        entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex, restored);
-                        selectedEntity = restored;
-                    },
-
-                    // REDO: delete the recreated entity again
-                    .redo = [currentId]()
-                    {
-                        Entity e = (currentId ? *currentId : INVALID_ENTITY);
-                        if (e == INVALID_ENTITY) return;
-
-                        // stop gizmo if needed
-                        CancelGizmoIfEntity(e);
-
-                        entityDisplayOrder.erase(
-                            std::remove(entityDisplayOrder.begin(), entityDisplayOrder.end(), e),
-                            entityDisplayOrder.end());
-
-                        Factory factory;
-                        factory.DeleteEntity(e);
-
-                        *currentId = INVALID_ENTITY;
-                        selectedEntity = INVALID_ENTITY;
-                    }
-                    });
+               // Factory factory;
+                PushDeleteEntity(mUndo, Editorfactory, entityDisplayOrder, selectedHandle, handleOf);
+                selectedHandle.reset();
+                selectedEntity = INVALID_ENTITY;
             }
         }
 
@@ -722,9 +641,18 @@ namespace PulseEditor
 
         bool anySelectableClicked = false;
 
+        //aaa
         // Sync display order with actual entities
+        //auto allEntities = g_coordinator->GetAllEntities();
+        //std::set<Entity> entitySet(allEntities.begin(), allEntities.end());
         auto allEntities = g_coordinator->GetAllEntities();
-        std::set<Entity> entitySet(allEntities.begin(), allEntities.end());
+
+        std::set<Entity> entitySet;
+        for (Entity e : allEntities)
+        {
+            if (g_coordinator->IsAlive(e))          // <-- use your alive check function
+                entitySet.insert(e);
+        }
 
         // Remove deleted entities from display order
         entityDisplayOrder.erase(
@@ -734,6 +662,10 @@ namespace PulseEditor
         // Add any new entities not in display order
         for (auto entity : allEntities)
         {
+            //aaa
+            if (!g_coordinator->IsAlive(entity))    // <-- add this line
+                continue;
+
             if (std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), entity) == entityDisplayOrder.end())
             {
                 entityDisplayOrder.push_back(entity);
@@ -784,7 +716,8 @@ namespace PulseEditor
             !anySelectableClicked)
         {
             selectedEntity = INVALID_ENTITY;
-
+            //aaa
+            selectedHandle.reset();
             // Also cancel renaming if clicking empty space
             if (s_renameState.renamingEntity != INVALID_ENTITY)
             {

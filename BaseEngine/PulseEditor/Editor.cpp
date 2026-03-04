@@ -18,7 +18,7 @@
 #include "Graphics/glhelper.h"
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "Input/InputManager.h"
-
+#include "EditorTypes.h"
 //Vector2 v2{};
 //    OAConfig cfg(
 //        false,                     // UseCPPMemManager_
@@ -38,16 +38,26 @@
 
 namespace PulseEditor
 {
+
+
     // --------------------------------------------------------------------
     // CONSTANTS & BASIC STATE
     // --------------------------------------------------------------------
 
-    const Entity INVALID_ENTITY = static_cast<Entity>(-1);
+
+   // selectedEntity 
+    // The key idea:
+    // - The entity ID changes when you undo/redo a deletion. (since new obj)
+    // - So every action must refer to a *shared handle* that always stores
+    //   the CURRENT live entity id for that "conceptual object".
+    UndoManager mUndo;
+   // const Entity INVALID_ENTITY = static_cast<Entity>(-1);
     Entity selectedEntity = INVALID_ENTITY;
-
+    std::shared_ptr<EntityHandle> selectedHandle = nullptr;
+    std::vector<Entity> entityDisplayOrder{};
+    std::unordered_map<Entity, std::shared_ptr<EntityHandle>> handleOf{};
+    Factory Editorfactory;
     // this vector maintains the order entities appear in the hierarchy
-    std::vector<Entity> entityDisplayOrder;
-
     static GLFWwindow* s_Window = nullptr;
     static bool s_restoreNextFrame = false;
     static bool s_prevKeys[GLFW_KEY_LAST + 1] = { false };
@@ -411,9 +421,10 @@ namespace PulseEditor
         bool currZ = (glfwGetKey(s_Window, GLFW_KEY_Z) == GLFW_PRESS);
         if (ctrlDown && currZ && !prevZ)
         {
-           // std::cout << "[Editor] CTRL+Z pressed in editor\n";
+            std::cout << "[Editor] CTRL+Z pressed in editor\n";
             if (shiftDown)
             {
+                std::cout << "[Editor] CTRL+Z+SHIFT pressed in editor\n";
                 // Ctrl+Shift+Z = Redo
                 if (mUndo.CanRedo()) {
                     std::cout << "[Editor] CanRedo? :" << mUndo.CanRedo() << "\n";
@@ -422,6 +433,7 @@ namespace PulseEditor
             }
             else
             {
+                std::cout << "[Editor] ELSE UNDO?\n";
                 // Ctrl+Z = Undo
                 if (mUndo.CanUndo()) {
                     std::cout << "[Editor] CanUndo? :" << mUndo.CanUndo() << "\n";

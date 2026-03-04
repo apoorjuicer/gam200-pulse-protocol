@@ -606,11 +606,11 @@ namespace PulseEditor
                             // Snapshot AFTER change
                             EntitySnapshot after = MakeEntitySnapshot(e);
 
-                            // Push undo/redo action
-                            mUndo.Push(UndoManager::Action{
-                                .undo = [e, before]() { RestoreEntityFromSnapshot(e, before); },
-                                .redo = [e, after]() { RestoreEntityFromSnapshot(e, after);  }
-                                });
+                            //// Push undo/redo action
+                            //mUndo.Push(UndoManager::Action{
+                            //    .undo = [e, before]() { RestoreEntityFromSnapshot(e, before); },
+                            //    .redo = [e, after]() { RestoreEntityFromSnapshot(e, after);  }
+                            //    });
 
                             std::cout << "[ProjectPanel] Assigned texture to entity " << selectedEntity << std::endl;
                         }

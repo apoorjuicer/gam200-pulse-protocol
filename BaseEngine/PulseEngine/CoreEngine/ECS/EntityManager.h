@@ -45,7 +45,8 @@ public:
 		// remove it from queue
 		EntityList.pop_front();
 		++LiveEntityCount;
-
+		//aaa
+		Alive[ID] = true;
 		return ID;
 	}
 
@@ -64,6 +65,8 @@ public:
 		++LiveEntityCount;
 		 //Reset signature (should already be reset by RemoveEntity, but this is safe)
 		SignatureID[id].reset();
+
+		Alive[id] = true;
 		return id;
 	}
 
@@ -78,6 +81,7 @@ public:
 		// make it so the Entity ID is now free for use 
 		EntityList.push_back(entity);
 		--LiveEntityCount;
+		Alive[entity] = false;
 	}
 
 	void SetSignature(Entity entity, Signature signature)
@@ -101,14 +105,20 @@ public:
 		std::deque<Entity> active;
 		for (Entity e = 0; e < MaxEntity; ++e)
 		{
-			Signature sig = SignatureID[e];
-			if (sig.any())
+			//Signature sig = SignatureID[e];
+			//if (sig.any())
+			//	active.push_back(e);
+
+			if (Alive[e])
 				active.push_back(e);
 		}
 		return active;
 	}
 
-
+	bool IsAlive(Entity e) const
+	{
+		return (e < MaxEntity) && Alive[e];
+	}
 
 	// make a function for ben that returns EntityList, link with coordinator cos its not in the ecs. aka not inherite ECS
 
@@ -116,5 +126,5 @@ private:
 	std::deque<Entity> EntityList{}; //EntityList[i]
 	std::array<Signature, MaxEntity> SignatureID{};
 	unsigned int LiveEntityCount{};
-
+	std::array<bool, MaxEntity> Alive{}; // false by default
 };

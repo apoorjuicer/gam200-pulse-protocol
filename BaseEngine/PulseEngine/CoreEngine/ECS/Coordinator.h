@@ -206,6 +206,13 @@ public:
 		if (!HasComponent<T>(entity)) return nullptr;
 		return &CoordComponentManager->GetComponent<T>(entity);
 	}
+
+	//aaa
+	bool IsAlive(Entity e) const
+	{
+		return CoordEnitiyManager->IsAlive(e);
+	}
+
 private:
 	//std::unique_ptr<EntityManager> CoordEnitiyManager;
 	//std::unique_ptr<ComponentManager> CoordComponentManager;
