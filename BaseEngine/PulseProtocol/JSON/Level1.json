@@ -73,7 +73,7 @@
                     "transform": {
                         "position": {
                             "x": -867.1965942382813,
-                            "y": -159.14208984375
+                            "y": -125.29593658447266
                         },
                         "scale": {
                             "x": 800.0,
@@ -104,12 +104,12 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
+                        "currentFrame": 14,
+                        "elapsedTime": 0.018724938854575157,
                         "totalFrames": 15,
                         "columns": 4,
                         "rows": 4,
-                        "animationSpeed": 0.0
+                        "animationSpeed": 33.19499969482422
                     }
                 },
                 {
@@ -444,7 +444,7 @@
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
-                            "a": 1.0
+                            "a": 0.2000001072883606
                         }
                     }
                 },
@@ -595,8 +595,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 0.0,
-                            "y": 315.38458251953125
+                            "x": 9.230613708496094,
+                            "y": 289.6153259277344
                         },
                         "scale": {
                             "x": 200.0,
@@ -658,8 +658,8 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "2",
-                        "font_id": "",
+                        "text": "GO!",
+                        "font_id": "barlow_font",
                         "offset": {
                             "x": 0.0,
                             "y": 0.0
@@ -670,7 +670,7 @@
                             1.0,
                             1.0
                         ],
-                        "visible": true,
+                        "visible": false,
                         "alignment": 1
                     }
                 }
@@ -841,7 +841,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon bat greyed.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat greyed.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1258,7 +1258,7 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "FPS: 1.3 | Graphics System: 82.59% [DEBUG]",
+                        "text": "FPS: 63.0 | Graphics System: 90.39% [DEBUG]",
                         "font_id": "PatrickHand_font",
                         "offset": {
                             "x": 0.0,
@@ -1357,8 +1357,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 977.0,
-                            "y": -299.010009765625
+                            "x": 927.0,
+                            "y": -255.93309020996094
                         },
                         "scale": {
                             "x": 350.0,
@@ -1378,7 +1378,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/Characters/../Enemies/Rat_Idle_spritesheet_634x433.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/Characters/../Enemies/Rat_Walk_spritesheet_634x433.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1389,12 +1389,12 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
+                        "currentFrame": 4,
+                        "elapsedTime": 0.006893843412399292,
                         "totalFrames": 15,
                         "columns": 4,
                         "rows": 4,
-                        "animationSpeed": 0.0
+                        "animationSpeed": 12.0
                     }
                 },
                 {
@@ -4666,7 +4666,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 0.0,
+                            "x": 23.804550170898438,
                             "y": 320.0
                         },
                         "scale": {
@@ -4719,8 +4719,8 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "POS",
-                        "font_id": "",
+                        "text": "MEMORIZE!",
+                        "font_id": "barlow_font",
                         "offset": {
                             "x": 0.0,
                             "y": 0.0
@@ -4731,7 +4731,7 @@
                             1.0,
                             1.0
                         ],
-                        "visible": false,
+                        "visible": true,
                         "alignment": 1
                     }
                 }
@@ -4818,7 +4818,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -700.0,
+                            "x": -600.0,
                             "y": 250.0
                         },
                         "scale": {
@@ -4829,7 +4829,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -4837,7 +4837,7 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/EKeyW.png",
                         "tintColor": {
@@ -4891,7 +4891,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -236.0,
+                            "x": -200.0,
                             "y": 250.0
                         },
                         "scale": {
@@ -4964,7 +4964,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 195.38499450683594,
+                            "x": 200.0,
                             "y": 250.0
                         },
                         "scale": {
@@ -5037,7 +5037,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 700.0,
+                            "x": 600.0,
                             "y": 250.0
                         },
                         "scale": {
@@ -5121,7 +5121,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -5194,7 +5194,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -5267,7 +5267,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -5340,7 +5340,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }

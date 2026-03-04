@@ -59,7 +59,7 @@ public class VisualBeatSystem : Script
         // =========================
         // Beat phase (0..1)
         // =========================
-        float songTime = Conductor.Instance!.GetSongTime();
+        float songTime = Conductor.Instance!.GetAdjustedSongTime();
 
         int ppb = Math.Max(1, pulsesPerBeat);
         float subBeat = spb / ppb;

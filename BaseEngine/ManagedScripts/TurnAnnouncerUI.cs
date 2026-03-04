@@ -5,8 +5,6 @@ public class TurnAnnouncerUI : Script
 {
     public static TurnAnnouncerUI? Instance { get; private set; }
 
-    public float FontSize = 80f;
-
     // =========================
     // State
     // =========================
@@ -21,8 +19,6 @@ public class TurnAnnouncerUI : Script
             return;
         }
 
-        // Don't change visibility while pause overlay is open
-        // Layer system handles hiding the text visually behind the overlay
         if (NavigationButtons.ShowPauseOverlay)
             return;
 
@@ -52,7 +48,6 @@ public class TurnAnnouncerUI : Script
         initialized = false; // will be set true at end
 
         var text = GetTextComponent();
-        text.SetFontSize(FontSize);
         text.SetAlignment(1);
 
         Hide();

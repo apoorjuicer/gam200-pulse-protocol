@@ -9,6 +9,11 @@
             "id": "PatrickHand_font",
             "path": "Assets/Font/PatrickHand-Regular.ttf",
             "pixelHeight": 48
+        },
+        {
+            "id": "barlow_font",
+            "path": "Assets/Font/Barlow-SemiBoldItalic.ttf",
+            "pixelHeight": 256
         }
     ]
 }

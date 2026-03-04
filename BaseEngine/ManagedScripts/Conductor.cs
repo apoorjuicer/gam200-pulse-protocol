@@ -94,6 +94,9 @@ public class Conductor : Script
 
     public int GetCurrentBeat() => lastBeat;
     public float GetSongTime() => songTime;
+    // Returns songTime shifted by MusicLatencyOffset — use this for all beat-phase calculations
+    // so visuals, combo windows, and beat detection all share the same reference.
+    public float GetAdjustedSongTime() => songTime - MusicLatencyOffset;
     public float SecondsPerBeat => secondsPerBeat;
 
     // Call this the same frame PlayBGM fires so the beat clock starts

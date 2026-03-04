@@ -155,7 +155,7 @@ public class ComboSystem : Script
             return;
         }
 
-        float currentSongTime = Conductor.Instance!.GetSongTime();
+        float currentSongTime = Conductor.Instance!.GetAdjustedSongTime();
         float beatDuration = Conductor.Instance!.GetBeatDuration();
 
         float timeSince = currentSongTime % beatDuration;

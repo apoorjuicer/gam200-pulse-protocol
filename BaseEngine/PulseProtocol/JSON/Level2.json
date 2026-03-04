@@ -659,7 +659,7 @@
                 {
                     "TextComponent": {
                         "text": "2",
-                        "font_id": "",
+                        "font_id": "barlow_font",
                         "offset": {
                             "x": 0.0,
                             "y": 0.0
@@ -4720,7 +4720,7 @@
                 {
                     "TextComponent": {
                         "text": "POS",
-                        "font_id": "",
+                        "font_id": "barlow_font",
                         "offset": {
                             "x": 0.0,
                             "y": 0.0
