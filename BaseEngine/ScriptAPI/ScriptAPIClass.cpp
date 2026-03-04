@@ -25,6 +25,7 @@
 #include "Sprite.h"
 #include "TextAPI.h"
 #include "FadeComponent.h"
+#include "GlowAPI.h"
 
 namespace ScriptAPI
 {
@@ -77,6 +78,11 @@ namespace ScriptAPI
     FadeComponent Script::GetFade()
     {
         return FadeComponent(EntityID);
+    }
+
+    GlowComponent Script::GetGlow()
+    {
+        return GlowComponent(EntityID);
     }
 
 }
