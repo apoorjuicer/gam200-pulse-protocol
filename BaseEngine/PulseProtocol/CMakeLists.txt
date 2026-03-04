@@ -104,13 +104,16 @@ add_custom_command(TARGET ${GAME_NAME} POST_BUILD
 #    COMMENT "Copying Assets to shared PulseEngine folder"
 #)
 
-# Copy ManagedScripts.dll
-#add_custom_command(TARGET ${GAME_NAME} POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#        "${CMAKE_SOURCE_DIR}/build/.bin/$<CONFIG>-x64/ManagedScripts.dll"
-#        "$<TARGET_FILE_DIR:${GAME_NAME}>"
-#    COMMENT "Copying ManagedScripts.dll"
-#)
+# Copy ManagedScripts.dll next to the game executable
+add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_BINARY_DIR}/.bin/$<CONFIG>-x64/ManagedScripts.dll"
+        "$<TARGET_FILE_DIR:${GAME_NAME}>"
+    COMMENT "Copying ManagedScripts.dll to ${GAME_NAME}"
+)
+
+# Must build after ManagedScripts is compiled
+add_dependencies(${GAME_NAME} ManagedScripts)
 
 # Enables multi-processor parallel compilation in Visual Studio
 if(MSVC)

@@ -299,26 +299,26 @@ void CoreEngine::CompileScriptAssembly()
 		std::cout << "[CoreEngine] Scripts compiled successfully!\n";
 #endif
 
-		// Copy the ManageScripts.dll to the PulseEditor and PulseProtocol cos ITS FUCKING STUPID FK CMAKE BS
+		// Copy ManagedScripts.dll next to the currently running executable. And 2 make it not hard coded just do in bin then ask 2 grab if needed
 		std::filesystem::path dllSource = baseEngineDir / "build" / ".bin" / (configuration + "-x64") / "ManagedScripts.dll";
-		std::filesystem::path dllDest1 = baseEngineDir / "build" / "PulseEditor" / configuration / "ManagedScripts.dll";
-		std::filesystem::path dllDest2 = baseEngineDir / "build" / "PulseProtocol" / configuration / "ManagedScripts.dll";
+
+		// Get the directory of the running executable(all exe yippeeeeeeeeeeeeeee)
+		char exePathBuf[MAX_PATH];
+		GetModuleFileNameA(nullptr, exePathBuf, MAX_PATH);
+		std::filesystem::path dllDest = std::filesystem::path(exePathBuf).parent_path() / "ManagedScripts.dll";
 
 		if (!std::filesystem::exists(dllSource))
 		{
-			std::cerr << "[Hot Reload] ERROR: Built DLL not found!" << std::endl;
+			std::cerr << "[Hot Reload] ERROR: Built DLL not found at: " << dllSource << std::endl;
 			return;
 		}
 
 		try
 		{
-			std::filesystem::create_directories(dllDest1.parent_path());
-			std::filesystem::create_directories(dllDest2.parent_path());
-
-			std::filesystem::copy_file(dllSource, dllDest1, std::filesystem::copy_options::overwrite_existing);
-			std::filesystem::copy_file(dllSource, dllDest2, std::filesystem::copy_options::overwrite_existing);
+			// just 1 place and they all copy
+			std::filesystem::copy_file(dllSource, dllDest, std::filesystem::copy_options::overwrite_existing);
 #ifdef _DEBUG
-			std::cout << "[CoreEngine] ManagedScripts.dll copied to both locations!\n";
+			std::cout << "[CoreEngine] ManagedScripts.dll copied to: " << dllDest << "\n";
 #endif
 		}
 
@@ -755,10 +755,8 @@ void CoreEngine::Init()
 	GameRunning = true;	 // 3.. 2.. 1.. GAME START
 	startScriptEngine(); // 3.. 2.. 1.. DLL SCRIPT! START ROLLINGGGGGGGGGGGGGGGGGG
 
-	//remove for game.exe in release cos no hotreload allow but need managescript.dll to be copied
-//#ifdef _DEBUG
-	CompileScriptAssembly();
-//#endif // DEBUG
+	// ManagedScripts.dll is now built and copied by CMake POST_BUILD.
+	// CompileScriptAssembly() is only called at runtime for hot-reload (R key in Debug).
 
 
 	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
@@ -815,11 +813,17 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<FSMComponent>();
 	g_coordinator->RegisterComponent<FSM>();
 
-	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
+	// Register your systems here, ORDER = UPDATE ORDER every frame
+	// 1. Input   — read raw input first
+	// 2. FSM     — state machine reacts to input
+	// 3. Audio   — FMOD ticks, fresh position ready for Conductor
+	// 4. Collision
+	// 5. Scene
+	// 6. Logic   — C# scripts run, Conductor reads fresh audio position
+	// 7. Graphics — renders the final game state last
 	g_coordinator->RegisterSystem<InputManager>();
-	//g_coordinator->RegisterSystem<RhythmGameplayInput>();
 	g_coordinator->RegisterSystem<GameplayFSMSystem>();
-	g_coordinator->RegisterSystem<GraphicsManager>();
+	g_coordinator->RegisterSystem<GraphicsManager>();  
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<CollisionManager>();
 	g_coordinator->RegisterSystem<SceneManager>();
@@ -897,9 +901,16 @@ void CoreEngine::Update(float dt)
 	// Always process engine / message stuff
 	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
 
-	profiler->StartSystem("LogicSystem");
+	// update all the system
+	profiler->StartSystem("UpdateAllSystems");
 	g_coordinator->UpdateAllSystems(dt);
-	profiler->EndSystem("LogicSystem");
+	profiler->EndSystem("UpdateAllSystems");
+
+
+	profiler->StartSystem("Graphics System");
+	if (g_graphicsSystem)
+		g_graphicsSystem->Update();
+	profiler->EndSystem("Graphics System");
 
 	//--- Start of script/hot reload ---//
 	// Press R to reload the script changes 
@@ -982,44 +993,10 @@ void CoreEngine::Update(float dt)
 	executeUpdate();*/
 	//--- End of script/hot reload ---//
 
-	profiler->StartSystem("Graphics System");
-	if (g_graphicsSystem)
-		g_graphicsSystem->Update();
-	profiler->EndSystem("Graphics System");
-
-	profiler->StartSystem("Input System");
-	if (g_inputSystem)
-		g_inputSystem->Update(dt);
-	profiler->EndSystem("Input System");
-
-	//profiler->StartSystem("RhythmGameplayInput");
-	//if (g_rhythmSystem)
-	//	g_rhythmSystem->Update(dt);
-	//profiler->EndSystem("RhythmGameplayInput");
-
-	profiler->StartSystem("Audio System");
-	if (g_audioSystem)
-		g_audioSystem->Update();
-	profiler->EndSystem("Audio System");
-
-	profiler->StartSystem("Collision System");
-	// If collision is in UpdateAllSystems, remove this
-	profiler->EndSystem("Collision System");
-	// Test.Update(dt);
-
-	// Always draw/update graphics once per frame
-	if (g_graphicsSystem)
-		g_graphicsSystem->Update();
-
-	// 2) If paused, stop here. no gameplay / input / scene logic
 	if (m_paused)
 	{
 		return;
 	}
-
-	// 3) Normal running path
-	if (g_inputSystem)    g_inputSystem->Update(dt);
-	//if (g_rhythmSystem)   g_rhythmSystem->Update(dt);
 
 }
 

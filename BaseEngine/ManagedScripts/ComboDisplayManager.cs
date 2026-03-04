@@ -1,4 +1,4 @@
-using System;
+    using System;
 using System.Collections.Generic;
 using ScriptAPI;
 
@@ -21,6 +21,11 @@ public class ComboDisplayManager : Script
     private string revealCombo = "";
     private int revealIndex = 0;
     private int lastRevealBeat = -1;
+
+    private bool pendingCountdownStart = false;
+    private int countdownCurrentSlot = 0;
+    private int lastCountdownBeat = -1;
+    private bool isCountingDown = false;
 
     private bool isFadingOut = false;
     private int fadeOutCount = 0;
@@ -66,9 +71,43 @@ public class ComboDisplayManager : Script
     {
         if (!initialized) { Initialize(); return; }
 
-        if (isRevealing) { HandleBeatReveal(); return; }
+        if (isRevealing) { HandleBeatReveal(); }
 
         if (isFadingOut) HandleStaggerFade();
+
+        if (pendingCountdownStart)
+        {
+            pendingCountdownStart = false;
+            isCountingDown = true;
+            lastCountdownBeat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() : -1;
+            if (playerSlots.ContainsKey(0) && currentWeakness.Length > 0)
+                playerSlots[0].StartCountdown(currentWeakness[0]);
+            countdownCurrentSlot = 1;
+        }
+
+        if (isCountingDown && Conductor.Instance != null)
+        {
+            float songTime = Conductor.Instance.GetSongTime();
+            float beatDuration = Conductor.Instance.GetBeatDuration();
+            float timeSinceBeat = songTime % beatDuration;
+            float timeUntilNextBeat = beatDuration - timeSinceBeat;
+
+            // Trigger next slot when we're ScaleAnimDuration away from the next beat
+            if (timeUntilNextBeat <= 0.25f && countdownCurrentSlot < currentWeakness.Length)
+            {
+                int currentBeat = Conductor.Instance.GetCurrentBeat();
+                if (currentBeat > lastCountdownBeat)
+                {
+                    lastCountdownBeat = currentBeat;
+                    if (playerSlots.ContainsKey(countdownCurrentSlot))
+                        playerSlots[countdownCurrentSlot].StartCountdown(currentWeakness[countdownCurrentSlot]);
+                    countdownCurrentSlot++;
+
+                    if (countdownCurrentSlot >= currentWeakness.Length)
+                        isCountingDown = false;
+                }
+            }
+        }
 
         if (ComboSystem.Instance == null) return;
 
@@ -95,13 +134,8 @@ public class ComboDisplayManager : Script
                     {
                         char expected = slotIndex < currentWeakness.Length ? currentWeakness[slotIndex] : pressedKey;
                         playerSlots[slotIndex].ShowWrong(pressedKey, expected);
-                        VFXAPI.ShakeCamera(0.08f, 10.0f);
+                        VFXAPI.ShakeCamera(0.01f, 5.0f);
                     }
-
-                    // Start next slot countdown regardless of correct/wrong
-                    int nextSlot = slotIndex + 1;
-                    if (nextSlot < currentWeakness.Length && playerSlots.ContainsKey(nextSlot))
-                        playerSlots[nextSlot].StartCountdown(currentWeakness[nextSlot]);
                 }
             }
         }
@@ -123,6 +157,11 @@ public class ComboDisplayManager : Script
         isRevealing = false;
         isFadingOut = false;
         currentWeakness = "";
+
+        pendingCountdownStart = false;
+        countdownCurrentSlot = 0;
+        lastCountdownBeat = -1; 
+        isCountingDown = false;
 
         enemySlots.Clear();
         playerSlots.Clear();
@@ -160,20 +199,22 @@ public class ComboDisplayManager : Script
             isFadingOut = true;
             fadeOutCount = 0;
             fadeStaggerTimer = 0f;
-            Console.WriteLine("[ComboDisplayManager] Starting stagger fade out");
         }
 
-        // Only start slot 0 countdown, not ALL the slots at once
-        if (playerSlots.ContainsKey(0) && currentWeakness.Length > 0)
-            playerSlots[0].StartCountdown(currentWeakness[0]);
+        // countdown is now started early via StartPlayerCountdownEarly()
+        pendingCountdownStart = false;
+        countdownCurrentSlot = 0;
+        isCountingDown = false;
     }
 
     private void HandleBeatReveal()
     {
         if (Conductor.Instance == null) return;
 
+
         int currentBeat = Conductor.Instance!.GetCurrentBeat();
 
+        Console.WriteLine($"[HandleBeatReveal] revealIndex={revealIndex}, beat={currentBeat}");
         if (revealIndex == 0)
         {
             lastRevealBeat = currentBeat;
@@ -285,6 +326,32 @@ public class ComboDisplayManager : Script
             enemySlots.Clear();
             playerSlots.Clear();
             judgementScript = null;
+        }
+    }
+
+    public void StartPlayerCountdownEarly()
+    {
+        if (currentWeakness.Length == 0) return;
+
+        // isRevealing = false;
+
+        if (playerSlots.ContainsKey(0))
+            playerSlots[0].StartCountdown(currentWeakness[0]);
+
+        countdownCurrentSlot = 1;
+        isCountingDown = true;
+        lastCountdownBeat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() : -1;
+        pendingCountdownStart = false;
+    }
+
+    public void FadeOutEnemySlots()
+    {
+        lastInputProgress = 0;
+        if (revealIndex > 0)
+        {
+            isFadingOut = true;
+            fadeOutCount = 0;
+            fadeStaggerTimer = 0f;
         }
     }
 }

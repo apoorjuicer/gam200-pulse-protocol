@@ -16,6 +16,7 @@ public class GeneralBGM : Script
         if (!started)
         {
             // Don't set volume here - the MusicKnob slider handles it
+            audio.SetSfxVolume(0.25f); // <-- THIS IS THE DEFAULT VOLUME FOR SFX
             audio.PlayBGM();
             BGMManager.CurrentTrack = "General";
             Console.WriteLine("BGM: Playing General music");
@@ -58,7 +59,10 @@ public class LevelBGM : Script
         if (!started)
         {
             // Don't set volume here - the MusicKnob slider handles it
+            audio.SetSfxVolume(0.25f); // <-- THIS IS THE DEFAULT VOLUME FOR SFX
+
             audio.PlayBGM();
+            //audio.PlayBGM("LVL 1 BGM 90 MILI OFF TEST"); 
             BGMManager.CurrentTrack = "Level";
             Console.WriteLine("BGM: Playing Level music");
 
