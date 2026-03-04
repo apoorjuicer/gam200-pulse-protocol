@@ -15,6 +15,13 @@
             "audiotype": "BGM"
         },
         {
+            "id": "BGM_L2_TESTING",
+            "path": "Assets/Sound/BG & Ambience/BGM_Level_2_V2.mp3",
+            "loop": true,
+            "volume": 1.0,
+            "audiotype": "BGM"
+        },
+        {
             "id": "BGM_GENERAL",
             "path": "Assets/Sound/BG & Ambience/TEMP_Menu_Demo_V1.mp3",
             "loop": true,

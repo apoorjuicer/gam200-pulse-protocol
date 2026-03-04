@@ -71,6 +71,9 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, boo
 	// std::string savefilePath = "../../PulseEngine/JSON/test2.json";
 
 	std::ifstream ifs(path);
+
+	std::cerr << "Trying to open: " << std::filesystem::absolute(path) << "\n";
+
 	if (!ifs.is_open())
 	{
 		std::cerr << "Error: Cannot open file for reading: " << path << "\n";
