@@ -53,7 +53,7 @@ public class EnemySpawner : Script
     private List<EnemyIconType> EnemyContainer = new List<EnemyIconType> // chloe: i just change to rat for now since this is the reason why it wasnt spawning the next enemies
     {
         EnemyIconType.Rat,
-        EnemyIconType.Rat,
+        EnemyIconType.Gorilla,
         EnemyIconType.Rat,
         EnemyIconType.Rat
     };
@@ -220,7 +220,7 @@ public class EnemySpawner : Script
         {
             case EnemyIconType.Rat: return "Rat_Enemy";
             case EnemyIconType.Bat: return "Rat_Enemy";     // temp, to replace after new enemies spritesheet has been added in
-            case EnemyIconType.Gorilla: return "Rat_Enemy"; // temp, to replace after new enemies spritesheet has been added in
+            case EnemyIconType.Gorilla: return "Gorilla_Enemy"; // temp, to replace after new enemies spritesheet has been added in
             default: return "";
         }
     }
