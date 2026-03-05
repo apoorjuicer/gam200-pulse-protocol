@@ -28,9 +28,14 @@ public class Conductor : Script
     {
         return 60.0f / BPM;
     }
-
-    // Stupid FMOD has a latency for about 90ms?!?!?!?!??!!
-    public float MusicLatencyOffset = 0.10f;
+    // Compensates for FMOD output buffer lag (~90ms hardware delay).
+    // Tune this once per machine — it should stay constant across songs.
+    public float MusicLatencyOffset = 0.125f;
+    // Compensates for where beat 1 actually starts in the BGM audio file.
+    // If the file has silence or a pickup note before the first downbeat, set this
+    // to that timestamp (in seconds). Tune this per song.
+    // At 120 BPM (0.5s/beat): 0.25 = half-beat shift to align code boundary with audio beat.
+    public float BeatStartOffset = 0.125f;
 
     public override void Update()
     {
@@ -101,8 +106,8 @@ public class Conductor : Script
             songTime += dt; 
         }
 
-        // Apply MusicLatencyOffset to everything(pls work fuck me la)
-        float adjustedTime = songTime - MusicLatencyOffset; // use this 2 check the hlaf beat instead
+        // Apply both offsets: hardware latency + per-song beat phase
+        float adjustedTime = songTime - MusicLatencyOffset - BeatStartOffset; // use this 2 check the hlaf beat instead
 
         int currentBeat = (int)Math.Floor(adjustedTime / secondsPerBeat);
 
@@ -123,9 +128,7 @@ public class Conductor : Script
 
     public int GetCurrentBeat() => lastBeat;
     public float GetSongTime() => songTime;
-    // Returns songTime shifted by MusicLatencyOffset — use this for all beat-phase calculations
-    // so visuals, combo windows, and beat detection all share the same reference.
-    public float GetAdjustedSongTime() => songTime - MusicLatencyOffset;
+    public float GetAdjustedSongTime() => songTime - MusicLatencyOffset - BeatStartOffset;
     public float SecondsPerBeat => secondsPerBeat;
 
     // Call this the same frame PlayBGM fires so the beat clock starts
