@@ -154,11 +154,6 @@ public class ComboSystem : Script
             Console.WriteLine("[ComboSystem] ERROR: No weakness set! Cannot register input.");
             return;
         }
-
-<<<<<<< Updated upstream
-        float currentSongTime = Conductor.Instance!.GetAdjustedSongTime();
-=======
->>>>>>> Stashed changes
         float beatDuration = Conductor.Instance!.GetBeatDuration();
         float currentSongTime = Conductor.Instance!.GetAdjustedSongTime();
 
