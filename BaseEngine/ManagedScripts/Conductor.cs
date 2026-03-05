@@ -28,9 +28,11 @@ public class Conductor : Script
     {
         return 60.0f / BPM;
     }
+
     // Compensates for FMOD output buffer lag (~90ms hardware delay).
     // Tune this once per machine - it should stay constant across songs.
     public float MusicLatencyOffset = 0.125f;
+
     // Compensates for where beat 1 actually starts in the BGM audio file.
     // If the file has silence or a pickup note before the first downbeat, set this
     // to that timestamp (in seconds). Tune this per song.
