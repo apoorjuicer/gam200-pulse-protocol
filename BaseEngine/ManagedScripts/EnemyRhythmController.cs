@@ -12,10 +12,10 @@ public class EnemyRhythmController : Script
     public static EnemyRhythmController? Instance { get; private set; }
 
     // === SPRITE SHEET SETTINGS ===
-    public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_764x456";
-    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_764x456";
+    public string IdleSpriteSheet   = "../Enemies/Rat_Idle_spritesheet_764x456";
+    public string WalkSpriteSheet   = "../Enemies/Rat_Walk_spritesheet_764x456";
     public string AttackSpriteSheet = "../Enemies/Rat_Attack_spritesheet_764x456";
-    public string HurtSpriteSheet = "../Enemies/Rat_Hurt_spritesheet_764x456";
+    public string HurtSpriteSheet   = "../Enemies/Rat_Hurt_spritesheet_764x456";
 
     public int IdleFrames = 15;
     public int IdleColumns = 4;
@@ -220,6 +220,7 @@ public class EnemyRhythmController : Script
         playerEntityID = -1;
         lastBeat = -1;
         animPaused = false;
+        SetupSprites();
 
         // Reset weakness retry state so each new enemy gets a fresh attempt
         weaknessSet = false;
@@ -605,4 +606,41 @@ public class EnemyRhythmController : Script
 
         SetState(EnemyState.Idle);
     }
+
+    protected virtual void SetupSprites()
+    {
+        //nth cos rat took the parent spot!??!!??! wtv
+    }
+}
+
+
+public class Gorilla: EnemyRhythmController
+{
+    protected override void SetupSprites()
+    {
+        IdleSpriteSheet = "../Enemies/Gorilla_Idle_spritesheet_1459x977";
+        WalkSpriteSheet = "../Enemies/Gorilla_Walk_spritesheet_1459x977";
+        AttackSpriteSheet = "../Enemies/Gorilla_Attack_spritesheet_1459x977";
+        HurtSpriteSheet = "../Enemies/Gorilla_Hurt_spritesheet_1459x977";
+        WeaknessCombo = "WASD";
+
+        IdleFrames = 15;
+        IdleColumns = 4;
+        IdleRows = 4;
+        
+        WalkFrames = 30;
+        WalkColumns = 6;
+        WalkRows = 5;
+        
+        AttackFrames = 30;
+        AttackColumns = 6;
+        AttackRows = 5;
+        
+        HurtFrames = 15;
+        HurtColumns = 4;
+        HurtRows = 4;
+        
+        AnimationSpeed = 12f;
+        SizeMultiplier = 5.0f;
+}
 }

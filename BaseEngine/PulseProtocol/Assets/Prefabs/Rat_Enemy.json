@@ -35,7 +35,7 @@
       "animation": {
         "currentFrame": 0,
         "elapsedTime": 0.0,
-        "totalFrames": 16,
+        "totalFrames": 15,
         "columns": 4,
         "rows": 4,
         "animationSpeed": 12.0
