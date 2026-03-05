@@ -5,12 +5,12 @@
  * @author      Reginald Lew Yee Ren (primary)- 40%
  * @author      Ban Kai Wei Benjamin (secondary) - 60%
  * @brief       Core asset data structures used by the ECS system for collision entity
- * 
+ *
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 
 #pragma once
 
@@ -38,7 +38,7 @@ struct NPC
     int hp;       // Health points (e.g., Hero = 10 HP, Monster = 1 HP)
     bool isAlive; // True if NPC is alive, false if defeated
 
-    void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
+    void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
     {
         out.SetObject();
         out.AddMember("width", width, alloc);
@@ -50,7 +50,7 @@ struct NPC
         out.AddMember("hp", hp, alloc);
         out.AddMember("isAlive", isAlive, alloc);
     }
-    void Deserialize(const rapidjson::Value &in)
+    void Deserialize(const rapidjson::Value& in)
     {
         if (!in.IsObject())
             throw std::runtime_error("Invalid JSON for NPC");
@@ -78,12 +78,15 @@ struct NPC
 // -----------------------------------------------------------------------------
 // Axis-Aligned Bounding Box used for rectangular collision detection.
 // -----------------------------------------------------------------------------
+enum class AABBType { Auto, Normalized, Pixel, Grid };
+
 struct AABB
 {
     Vector2 min;    ///< Bottom-left corner of the box
     Vector2 max;    ///< Top-right corner of the box
     float width;    ///< Box width along X-axis
     float height;   ///< Box height along Y-axis
+    AABBType type = AABBType::Normalized; ///< Type of AABB calculation to use
 
     /**
      * @brief Default constructor initializing all values to zero.
@@ -106,6 +109,7 @@ struct AABB
         out.AddMember("max", maxVal, alloc);
         out.AddMember("width", width, alloc);
         out.AddMember("height", height, alloc);
+        out.AddMember("type", (int)type, alloc);
     }
 
     void Deserialize(const rapidjson::Value& in)
@@ -115,6 +119,8 @@ struct AABB
         if (in.HasMember("max")) max.Deserialize(in["max"]);
         if (in.HasMember("width")) width = in["width"].GetFloat();
         if (in.HasMember("height")) height = in["height"].GetFloat();
+        if (in.HasMember("type")) type = (AABBType)in["type"].GetInt();
+        else type = AABBType::Normalized;
     }
 };
 

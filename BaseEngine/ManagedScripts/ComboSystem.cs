@@ -217,15 +217,25 @@ public class ComboSystem : Script
         Console.WriteLine($"[ComboSystem]   Progress: {currentCombo.Count}/{maxComboLength} | Expected: {(currentCombo.Count <= currentEnemyWeakness.Length ? currentEnemyWeakness[currentCombo.Count - 1].ToString() : "?")} | Got: {key}");
 
         // === VISUAL FEEDBACK ===
+        // If the key is wrong, always show MISS visually regardless of timing, if not might mess up w the timing
+        string visualJudgement = judgement;
+        if (currentCombo.Count <= currentEnemyWeakness.Length)
+        {
+            char expectedKey = currentEnemyWeakness[currentCombo.Count - 1];
+            if (key != expectedKey)
+                visualJudgement = "MISS";
+        }
+
         if (ComboDisplayManager.Instance != null)
         {
-            ComboDisplayManager.Instance.ShowJudgement(judgement);
+            ComboDisplayManager.Instance.ShowJudgement(visualJudgement);
         }
         else
         {
             Console.WriteLine("[ComboSystem] WARNING: ComboDisplayManager not found!");
         }
-        VisualBeatSystem.Instance?.FlashJudgement(judgement);
+
+        VisualBeatSystem.Instance?.FlashJudgement(visualJudgement);
 
         // === PERFECT STREAK ===
         if (judgement == "PERFECT")

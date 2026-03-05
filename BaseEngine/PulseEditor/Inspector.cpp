@@ -6,14 +6,14 @@
  *              Chloe Lau Rey En (secondary) - 20%
  *              Ban Kai Wei Benjamin (secondary) - 20%
  *              Goh Pin Kai (secondary) - 10%
- * 
+ *
  * @brief       Entity inspector panel with component editors and undo support.
  *
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 
 #include "pch/pch_temp.h"
 
@@ -42,10 +42,10 @@ namespace PulseEditor
     // Function to handle Transform undo
     // -------------------------------------------------------------------------
     static void HandleTransformUndo(
-        Framework::Transform &tr,
-        UndoManager &undo,
+        Framework::Transform& tr,
+        UndoManager& undo,
         Entity e,
-        Coordinator *g)
+        Coordinator* g)
     {
         // If the current ImGui widget became active (user clicked or started dragging)
         if (ImGui::IsItemActivated())
@@ -63,7 +63,7 @@ namespace PulseEditor
             {
                 // undo the changes....
                 undo.Push([e, oldData = beforeEdit, g]()
-                          {
+                    {
                         if (g->HasComponent<Framework::Transform>(e))
                         {
                             g->GetComponent<Framework::Transform>(e) = oldData;
@@ -147,8 +147,11 @@ namespace PulseEditor
             if (ImGui::MenuItem("AABB"))
             {
                 AABB a{};
+                a.type = AABBType::Normalized;
                 a.min = { -0.5f, -0.5f };
-                a.max = { 0.5f, 0.5f };
+                a.max = { 0.5f,  0.5f };
+                a.width = a.max.x - a.min.x;
+                a.height = a.max.y - a.min.y;
                 coord->AddComponent<AABB>(entity, a);
             }
         }
@@ -183,7 +186,7 @@ namespace PulseEditor
     // -------------------------------------------------------------------------
     // Local helper: parse "<rows>x<cols>" from filename ("hero_4x3.png")
     // -------------------------------------------------------------------------
-    static bool ParseGridFromFilename(const std::string &full, int &outRows, int &outCols)
+    static bool ParseGridFromFilename(const std::string& full, int& outRows, int& outCols)
     {
         outRows = 1;
         outCols = 1;
@@ -241,7 +244,7 @@ namespace PulseEditor
     // -------------------------------------------------------------------------
     // Helper: Draw inline remove button for component headers
     // -------------------------------------------------------------------------
-    static bool DrawInlineRemoveButton(const char *componentName)
+    static bool DrawInlineRemoveButton(const char* componentName)
     {
         ImGui::SameLine(ImGui::GetWindowWidth() - 60); // Changed from 35 to 60 for wider button
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 0.15f, 0.15f, 1.0f));
@@ -281,7 +284,7 @@ namespace PulseEditor
         ImGui::TextUnformatted("Entity Inspector");
         ImGui::Separator();
 
-        auto *g = Coordinator::GetInstance();
+        auto* g = Coordinator::GetInstance();
         if (!g)
         {
             ImGui::TextColored(ImVec4(1, 0, 0, 1), "Coordinator not found!");
@@ -313,7 +316,7 @@ namespace PulseEditor
             g->AddComponent<LayerTag>(selectedEntity, tag);
         }
 
-        auto &layer = g->GetComponent<LayerTag>(selectedEntity);
+        auto& layer = g->GetComponent<LayerTag>(selectedEntity);
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f)); // Light blue
         ImGui::TextUnformatted("Layer:");
@@ -396,7 +399,7 @@ namespace PulseEditor
         // ---------------------------------------------------------------------
         if (g->HasComponent<PrefabInstance>(selectedEntity))
         {
-            auto &prefabInstance = g->GetComponent<PrefabInstance>(selectedEntity);
+            auto& prefabInstance = g->GetComponent<PrefabInstance>(selectedEntity);
 
             // Show prefab info in a colored header (like Unity)
             ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.4f, 0.7f, 0.8f));
@@ -421,18 +424,18 @@ namespace PulseEditor
                     if (!isLinked)
                     {
                         std::cout << "[Inspector] Unlinked entity " << selectedEntity
-                                  << " from prefab '" << prefabInstance.prefabName << "'" << std::endl;
+                            << " from prefab '" << prefabInstance.prefabName << "'" << std::endl;
                     }
                     else
                     {
                         std::cout << "[Inspector] Linked entity " << selectedEntity
-                                  << " to prefab '" << prefabInstance.prefabName << "'" << std::endl;
+                            << " to prefab '" << prefabInstance.prefabName << "'" << std::endl;
                     }
                 }
                 if (ImGui::IsItemHovered())
                 {
                     ImGui::SetTooltip("Uncheck to make this instance independent from the prefab.\n"
-                                      "When unchecked, this entity won't update when the prefab changes.");
+                        "When unchecked, this entity won't update when the prefab changes.");
                 }
 
                 ImGui::Spacing();
@@ -461,8 +464,8 @@ namespace PulseEditor
                 if (ImGui::IsItemHovered())
                 {
                     ImGui::SetTooltip("Save this entity's current properties as the new prefab definition.\n"
-                                      "All other instances of this prefab will update to match.\n"
-                                      "Transform (position/rotation/scale) is preserved per-instance.");
+                        "All other instances of this prefab will update to match.\n"
+                        "Transform (position/rotation/scale) is preserved per-instance.");
                 }
 
                 ImGui::Unindent();
@@ -546,11 +549,11 @@ namespace PulseEditor
     // -------------------------------------------------------------------------
     // Inspector Components
     // -------------------------------------------------------------------------
-    void Inspector_NameComponent(Coordinator *g)
+    void Inspector_NameComponent(Coordinator* g)
     {
         if (g->HasComponent<Name>(selectedEntity))
         {
-            auto &nm = g->GetComponent<Name>(selectedEntity);
+            auto& nm = g->GetComponent<Name>(selectedEntity);
 
             bool removeName = false;
             bool nameOpen = ImGui::CollapsingHeader("Name", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
@@ -684,12 +687,12 @@ namespace PulseEditor
 
 
 
-   
-    void Inspector_RenderableComponent(Coordinator *g)
+
+    void Inspector_RenderableComponent(Coordinator* g)
     {
         if (g->HasComponent<Framework::Renderable>(selectedEntity))
         {
-            auto &r = g->GetComponent<Framework::Renderable>(selectedEntity);
+            auto& r = g->GetComponent<Framework::Renderable>(selectedEntity);
 
             bool removeRenderable = false;
             bool renderableOpen = ImGui::CollapsingHeader("Renderable", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
@@ -708,7 +711,7 @@ namespace PulseEditor
                     int modelIdx = static_cast<int>(r.mdl_ref);
                     modelIdx = std::clamp(modelIdx, 0, 1);
 
-                    const char *kModelNames[2] = {"Background Quad", "Sprite Quad"};
+                    const char* kModelNames[2] = { "Background Quad", "Sprite Quad" };
 
                     ImGui::Text("Model: %s", kModelNames[modelIdx]);
                     ImGui::SameLine();
@@ -726,22 +729,22 @@ namespace PulseEditor
                     const int maxShaders = static_cast<int>(GLApp::shdrpgms.size());
                     int shaderIdx = std::clamp(static_cast<int>(r.shd_ref), 0, std::max(0, maxShaders - 1));
 
-                    auto ShaderName = [&](int i) -> const char *
-                    {
-                        switch (i)
+                    auto ShaderName = [&](int i) -> const char*
                         {
-                        case 0:
-                            return "Test Shader";
-                        case 1:
-                            return "Background Shader";
-                        case 2:
-                            return "Sprite Shader";
-                        case 3:
-                            return "Font Shader";
-                        default:
-                            return "Shader (unnamed)";
-                        }
-                    };
+                            switch (i)
+                            {
+                            case 0:
+                                return "Test Shader";
+                            case 1:
+                                return "Background Shader";
+                            case 2:
+                                return "Sprite Shader";
+                            case 3:
+                                return "Font Shader";
+                            default:
+                                return "Shader (unnamed)";
+                            }
+                        };
 
                     ImGui::Text("Shader: %s", ShaderName(shaderIdx));
                     ImGui::SameLine();
@@ -759,7 +762,7 @@ namespace PulseEditor
 
                 // --- Sprite filename editing (name only) -------------------------
                 {
-                    const std::string &full = r.spriteName;
+                    const std::string& full = r.spriteName;
                     std::string dir, fileNoExt, ext;
 
                     if (!full.empty())
@@ -836,7 +839,7 @@ namespace PulseEditor
                         EntitySnapshot before = MakeEntitySnapshot(e);
                         mUndo.Push([e, before]() {
                             RestoreEntityFromSnapshot(e, before);
-                        });
+                            });
 
                         namespace fs = std::filesystem;
                         const std::string kTexturesRoot = "../../PulseProtocol/Assets/Textures";
@@ -860,10 +863,10 @@ namespace PulseEditor
 
                                 const fs::path roots[] = {
                                     fs::path(kTexturesRoot),
-                                    fs::path("../../PulseProtocol/Assets")};
+                                    fs::path("../../PulseProtocol/Assets") };
 
                                 std::string resolved;
-                                for (const fs::path &root : roots)
+                                for (const fs::path& root : roots)
                                 {
                                     fs::path rootAbs = fs::weakly_canonical(root, ec);
                                     if (ec || rootAbs.empty() || !fs::exists(rootAbs, ec))
@@ -924,7 +927,7 @@ namespace PulseEditor
                         if (!isSheet)
                         {
                             std::string base = fs::path(r.spriteName).filename().string();
-                            for (auto &c : base)
+                            for (auto& c : base)
                                 c = (char)tolower(c);
                             if (base.find("sheet") != std::string::npos ||
                                 base.find("atlas") != std::string::npos)
@@ -941,11 +944,11 @@ namespace PulseEditor
             ImGui::Separator();
         }
     }
-    void Inspector_AnimationComponent(Coordinator *g)
+    void Inspector_AnimationComponent(Coordinator* g)
     {
         if (g->HasComponent<Framework::Animation>(selectedEntity))
         {
-            auto &a = g->GetComponent<Framework::Animation>(selectedEntity);
+            auto& a = g->GetComponent<Framework::Animation>(selectedEntity);
 
             bool removeAnimation = false;
             bool animationOpen = ImGui::CollapsingHeader("Animation", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
@@ -1092,7 +1095,6 @@ namespace PulseEditor
             {
                 ImGui::Indent();
 
-                // ===== GET AVAILABLE SCRIPTS FROM SCRIPTAPI (FACTORY STYLE, NO HARDCODING!) =====
                 static std::vector<std::string> scriptOptions;
                 static bool scriptsLoaded = false;
 
@@ -1106,11 +1108,9 @@ namespace PulseEditor
 
                     if (getScriptsFunc)
                     {
-                        const char* result = getScriptsFunc();  // Simple C++ const char*, no System namespace!
-
+                        const char* result = getScriptsFunc();
                         if (result != nullptr && strlen(result) > 0)
                         {
-                            // Parse comma-separated list
                             std::stringstream ss(result);
                             std::string item;
                             while (std::getline(ss, item, ','))
@@ -1122,24 +1122,18 @@ namespace PulseEditor
                                     scriptOptions.push_back(item);
                                 }
                             }
-
                             scriptsLoaded = true;
-                            std::cout << "[Inspector] Loaded " << scriptOptions.size()
-                                << " available scripts from ScriptAPI\n";
                         }
                     }
                 }
 
-                // Convert to C-style array for ImGui
                 std::vector<const char*> scriptNames;
                 for (auto& s : scriptOptions)
-                {
                     scriptNames.push_back(s.c_str());
-                }
                 int numScripts = (int)scriptNames.size();
 
                 // =========================================================================
-                // Display ALL scripts attached to this entity
+                // Display ALL scripts attached
                 // =========================================================================
                 ImGui::Text("Scripts Attached: %zu", script.ScriptName.size());
                 ImGui::Spacing();
@@ -1147,7 +1141,6 @@ namespace PulseEditor
                 for (size_t i = 0; i < script.ScriptName.size(); ++i)
                 {
                     ImGui::PushID((int)i);
-
                     ImGui::Text("%zu.", i + 1);
                     ImGui::SameLine();
                     ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "%s", script.ScriptName[i].c_str());
@@ -1160,20 +1153,15 @@ namespace PulseEditor
                     if (ImGui::SmallButton("Remove##Script"))
                     {
                         const char* scriptToRemove = script.ScriptName[i].c_str();
-
-                        // Remove from C++ array
                         script.ScriptName.erase(script.ScriptName.begin() + i);
 
-                        // Remove from C# side
                         auto removeScriptFunc = Engine->GetFunctionPtr<void(*)(int, const char*)>(
                             "ScriptAPI",
                             "ScriptAPI.EngineInterface",
                             "RemoveScriptFromEntity"
                         );
                         if (removeScriptFunc)
-                        {
                             removeScriptFunc(selectedEntity, scriptToRemove);
-                        }
 
                         ImGui::PopStyleColor(3);
                         ImGui::PopID();
@@ -1191,61 +1179,90 @@ namespace PulseEditor
                 ImGui::Spacing();
                 ImGui::Separator();
                 ImGui::Spacing();
-
                 ImGui::Text("Add Script:");
                 ImGui::SameLine();
+
+                static char searchBuf[128] = "";
+                std::vector<const char*> filteredNames;
+                for (int i = 0; i < numScripts; i++)
+                {
+                    if (strlen(searchBuf) == 0 ||
+                        std::string(scriptNames[i]).find(searchBuf) != std::string::npos)
+                        filteredNames.push_back(scriptNames[i]);
+                }
+                int numFiltered = (int)filteredNames.size();
 
                 static int selectedScriptIndex = 0;
                 ImGui::SetNextItemWidth(250.0f);
 
                 if (numScripts > 0)
                 {
-                    if (ImGui::Combo("##ScriptDropdown", &selectedScriptIndex, scriptNames.data(), numScripts))
+                    if (selectedScriptIndex >= numFiltered) selectedScriptIndex = 0;
+
+                    const char* previewLabel = (numFiltered > 0 && selectedScriptIndex < numFiltered)
+                        ? filteredNames[selectedScriptIndex] : "Select Script...";
+
+                    if (ImGui::BeginCombo("##ScriptDropdown", previewLabel))
                     {
-                        std::cout << "[Inspector] Selected script: " << scriptNames[selectedScriptIndex] << std::endl;
+                        if (ImGui::IsWindowAppearing())
+                        {
+                            ImGui::SetScrollHereY(0.0f);
+                            ImGui::SetKeyboardFocusHere();
+                        }
+                        ImGui::SetNextItemWidth(-1);
+                        ImGui::InputText("##DropdownSearch", searchBuf, sizeof(searchBuf));
+                        ImGui::Separator();
+
+                        for (int i = 0; i < numFiltered; i++)
+                        {
+                            bool isSelected = (selectedScriptIndex == i);
+                            if (ImGui::Selectable(filteredNames[i], isSelected))
+                                selectedScriptIndex = i;
+                            if (isSelected) ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
                     }
 
                     ImGui::SameLine();
 
                     if (ImGui::SmallButton("Add"))
                     {
-                        const char* selectedScript = scriptNames[selectedScriptIndex];
-
-                        // Check if already attached
-                        bool alreadyExists = false;
-                        for (const auto& s : script.ScriptName)
+                        if (numFiltered > 0)
                         {
-                            if (s == selectedScript)
-                            {
-                                alreadyExists = true;
-                                break;
-                            }
-                        }
+                            const char* selectedScript = filteredNames[selectedScriptIndex];
 
-                        if (!alreadyExists)
-                        {
-                            // Add to C++ array
-                            script.ScriptName.push_back(selectedScript);
-
-                            // Add to C# side
-                            auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>(
-                                "ScriptAPI",
-                                "ScriptAPI.EngineInterface",
-                                "AddScriptViaName"
-                            );
-                            if (addScriptFunc)
+                            bool alreadyExists = false;
+                            for (const auto& s : script.ScriptName)
                             {
-                                bool success = addScriptFunc(selectedEntity, selectedScript);
-                                std::cout << "[Inspector] Added script: " << selectedScript
-                                    << " (Success: " << success << ")" << std::endl;
+                                if (s == selectedScript)
+                                {
+                                    alreadyExists = true;
+                                    break;
+                                }
                             }
 
-                            selectedScriptIndex = 0;
-                        }
-                        else
-                        {
-                            std::cout << "[Inspector] Script already attached: " << selectedScript << std::endl;
-                            ImGui::OpenPopup("ScriptAlreadyExists");
+                            if (!alreadyExists)
+                            {
+                                script.ScriptName.push_back(selectedScript);
+
+                                auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>(
+                                    "ScriptAPI",
+                                    "ScriptAPI.EngineInterface",
+                                    "AddScriptViaName"
+                                );
+                                if (addScriptFunc)
+                                {
+                                    bool success = addScriptFunc(selectedEntity, selectedScript);
+                                    std::cout << "[Inspector] Added script: " << selectedScript
+                                        << " (Success: " << success << ")" << std::endl;
+                                }
+                                selectedScriptIndex = 0;
+                                searchBuf[0] = '\0';
+                            }
+                            else
+                            {
+                                ImGui::OpenPopup("ScriptAlreadyExists");
+                            }
                         }
                     }
                 }
@@ -1259,22 +1276,16 @@ namespace PulseEditor
                     ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "This script is already attached!");
                     ImGui::Spacing();
                     if (ImGui::Button("OK", ImVec2(120, 0)))
-                    {
                         ImGui::CloseCurrentPopup();
-                    }
                     ImGui::EndPopup();
                 }
 
                 ImGui::Spacing();
 
                 if (script.ScriptName.empty())
-                {
                     ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.0f, 1.0f), "No scripts attached");
-                }
                 else
-                {
                     ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Active Scripts: %zu attached", script.ScriptName.size());
-                }
 
                 ImGui::Unindent();
             }
@@ -1307,40 +1318,36 @@ namespace PulseEditor
                 auto& audioResources = mAssets.getAudioRegContainer();
                 std::string preview = audio.audio_id.empty() ? "<None>" : audio.audio_id;
 
-                // ═══════════════════════════════════════════════════════════════
-                // SEARCHABLE AUDIO DROPDOWN
-                // ═══════════════════════════════════════════════════════════════
                 static char audioSearchFilter[128] = "";
 
                 ImGui::SetNextItemWidth(300.0f);
                 if (ImGui::BeginCombo("##AudioFile", preview.c_str()))
                 {
-                    // Search input at top of dropdown
+                    if (ImGui::IsWindowAppearing())
+                    {
+                        ImGui::SetScrollHereY(0.0f);
+                        ImGui::SetKeyboardFocusHere();
+                    }
+
                     ImGui::SetNextItemWidth(-1);
                     ImGui::InputTextWithHint("##AudioSearch", "Search audio...", audioSearchFilter, IM_ARRAYSIZE(audioSearchFilter));
                     ImGui::Separator();
 
-                    // Convert search to lowercase for case-insensitive matching
                     std::string filterLower = audioSearchFilter;
                     for (auto& c : filterLower) c = static_cast<char>(tolower(c));
 
-                    // <None> option (always visible)
                     if (filterLower.empty() || std::string("<none>").find(filterLower) != std::string::npos)
                     {
                         if (ImGui::Selectable("<None>", audio.audio_id.empty()))
                         {
                             audio.audio_id = "";
-                            audioSearchFilter[0] = '\0';  // Clear filter on selection
+                            audioSearchFilter[0] = '\0';
                         }
                     }
 
-                    // ─────────────────────────────────────────────────────────
-                    // Separate by audio type: BGM first, then SFX
-                    // ─────────────────────────────────────────────────────────
                     bool hasBGM = false;
                     bool hasSFX = false;
 
-                    // Check if we have any matching items in each category
                     for (auto const& [id, resource] : audioResources)
                     {
                         std::string labelLower = id;
@@ -1359,9 +1366,6 @@ namespace PulseEditor
                         }
                     }
 
-                    // ─────────────────────────────────────────────────────────
-                    // BGM Section
-                    // ─────────────────────────────────────────────────────────
                     if (hasBGM)
                     {
                         ImGui::Spacing();
@@ -1380,13 +1384,13 @@ namespace PulseEditor
                             if (!matchesFilter) continue;
 
                             bool isSelected = (audio.audio_id == id);
-                            std::string label = "  " + id;  // Indent items under header
+                            std::string label = "  " + id;
 
                             if (ImGui::Selectable(label.c_str(), isSelected))
                             {
                                 audio.audio_id = id;
-                                audioSearchFilter[0] = '\0';  // Clear filter on selection
-                                std::cout << "[Inspector] Selected audio: " << id << "\n";
+                                audioSearchFilter[0] = '\0';
+                                //std::cout << "[Inspector] Selected audio: " << id << "\n";
                             }
 
                             if (isSelected)
@@ -1394,9 +1398,6 @@ namespace PulseEditor
                         }
                     }
 
-                    // ─────────────────────────────────────────────────────────
-                    // SFX Section
-                    // ─────────────────────────────────────────────────────────
                     if (hasSFX)
                     {
                         ImGui::Spacing();
@@ -1404,7 +1405,7 @@ namespace PulseEditor
 
                         for (auto const& [id, resource] : audioResources)
                         {
-                            if (resource.audiotype == "BGM") continue;  // Skip BGM, show everything else as SFX
+                            if (resource.audiotype == "BGM") continue;
 
                             std::string labelLower = id;
                             for (auto& c : labelLower) c = static_cast<char>(tolower(c));
@@ -1418,13 +1419,13 @@ namespace PulseEditor
                             if (!matchesFilter) continue;
 
                             bool isSelected = (audio.audio_id == id);
-                            std::string label = "  " + id;  // Indent items under header
+                            std::string label = "  " + id;
 
                             if (ImGui::Selectable(label.c_str(), isSelected))
                             {
                                 audio.audio_id = id;
-                                audioSearchFilter[0] = '\0';  // Clear filter on selection
-                                std::cout << "[Inspector] Selected audio: " << id << "\n";
+                                audioSearchFilter[0] = '\0';
+                                //std::cout << "[Inspector] Selected audio: " << id << "\n";
                             }
 
                             if (isSelected)
@@ -1472,9 +1473,7 @@ namespace PulseEditor
                             {
                                 auto* resource = mAssets.getRegistry().FindAudio(audio.audio_id);
                                 if (resource)
-                                {
                                     audioManager->PlayFromAudioSource(audio);
-                                }
                             }
                         }
                     }
@@ -1484,9 +1483,7 @@ namespace PulseEditor
                     {
                         auto audioManager = g->GetSystem<AudioManager>();
                         if (audioManager)
-                        {
                             audioManager->StopPlayingAllAudio();
-                        }
                     }
                 }
                 else
@@ -1507,12 +1504,12 @@ namespace PulseEditor
         }
     }
 
-    void Inspector_TextComponentUI(Coordinator *g)
+    void Inspector_TextComponentUI(Coordinator* g)
     {
         if (!g->HasComponent<TextComponent>(selectedEntity))
             return;
 
-        auto &txt = g->GetComponent<TextComponent>(selectedEntity);
+        auto& txt = g->GetComponent<TextComponent>(selectedEntity);
 
         bool removeText = false;
         bool textOpen = ImGui::CollapsingHeader("TextComponent", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
@@ -1536,7 +1533,7 @@ namespace PulseEditor
 
             ImGui::SetNextItemWidth(300.0f);
             if (ImGui::InputTextMultiline("##TextContent", textBuf, IM_ARRAYSIZE(textBuf),
-                                          ImVec2(300.0f, 60.0f)))
+                ImVec2(300.0f, 60.0f)))
             {
                 txt.text = textBuf;
             }
@@ -1547,7 +1544,7 @@ namespace PulseEditor
             ImGui::Text("Font:");
             ImGui::SameLine();
 
-            auto &fontResources = mAssets.getRegistry().getFontContainer();
+            auto& fontResources = mAssets.getRegistry().getFontContainer();
             std::string fontPreview = txt.font_id.empty() ? "<Default>" : txt.font_id;
 
             ImGui::SetNextItemWidth(250.0f);
@@ -1561,7 +1558,7 @@ namespace PulseEditor
                 }
 
                 // List all registered fonts
-                for (auto const &[id, fontRes] : fontResources)
+                for (auto const& [id, fontRes] : fontResources)
                 {
                     bool isSelected = (txt.font_id == id);
                     std::string label = id + " (" + std::to_string(fontRes.pixelHeight) + "px)";
@@ -1587,20 +1584,20 @@ namespace PulseEditor
             // === Text Color ===
             ImGui::Text("Color:");
             ImGui::SameLine();
-            float col[3] = {txt.color.r, txt.color.g, txt.color.b};
+            float col[3] = { txt.color.r, txt.color.g, txt.color.b };
             if (ImGui::ColorEdit3("##TextColor", col))
             {
-                txt.color = {col[0], col[1], col[2]};
+                txt.color = { col[0], col[1], col[2] };
             }
 
             // === Offset from Transform ===
             ImGui::Text("Offset:");
             ImGui::SameLine();
-            float offset[2] = {txt.offset.x, txt.offset.y};
+            float offset[2] = { txt.offset.x, txt.offset.y };
             ImGui::SetNextItemWidth(200.0f);
             if (ImGui::DragFloat2("##TextOffset", offset, 1.0f))
             {
-                txt.offset = {offset[0], offset[1]};
+                txt.offset = { offset[0], offset[1] };
             }
             ImGui::SameLine();
             ImGui::TextDisabled("(?)");
@@ -1703,6 +1700,26 @@ namespace PulseEditor
         {
             ImGui::Indent();
 
+            // Type Select
+            ImGui::Text("Type:");
+            ImGui::SameLine();
+            const char* typeNames[] = { "Auto", "Normalized", "Pixel", "Grid" };//fyi, usual is auto, but when you want like the manual collider to be set for it, u just switch to normalized, and input, u can use f7 to see change 
+            int currentType = (int)aabb.type;
+            // Validate range just in case
+            if (currentType < 0 || currentType > 3) currentType = 0;
+
+            ImGui::SetNextItemWidth(150.0f);
+            if (ImGui::Combo("##AABBType", &currentType, typeNames, IM_ARRAYSIZE(typeNames)))
+            {
+                aabb.type = (AABBType)currentType;
+            }
+            ImGui::SameLine();
+            ImGui::TextDisabled("(?)");
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::SetTooltip("Auto: Guesses based on values (Default)\nNormalized: Relative to sprite size (0.5 = half width)\nPixel: Local units relative to center\nGrid: Legacy grid units (Scale/50)");
+            }
+
             ImGui::Text("Min:");
             ImGui::SameLine();
             float min[2] = { aabb.min.x, aabb.min.y };
@@ -1710,6 +1727,19 @@ namespace PulseEditor
             if (ImGui::DragFloat2("##AABBMin", min, 0.1f))
             {
                 aabb.min = { min[0], min[1] };
+
+                // If user is manually editing, force manual mode
+                if (aabb.type == AABBType::Auto)
+                {
+                    const float maxAbs =
+                        std::max({ std::fabs(aabb.min.x), std::fabs(aabb.min.y),
+                                   std::fabs(aabb.max.x), std::fabs(aabb.max.y) });
+
+                    // Heuristic:
+                    // Normalized values are usually around [-1..1] (or [-0.5..0.5]).
+                    // If it's bigger than ~2, it's almost certainly pixel/local units.
+                    aabb.type = (maxAbs > 2.0f) ? AABBType::Pixel : AABBType::Normalized;
+                }
             }
 
             ImGui::Text("Max:");
@@ -1719,7 +1749,29 @@ namespace PulseEditor
             if (ImGui::DragFloat2("##AABBMax", max, 0.1f))
             {
                 aabb.max = { max[0], max[1] };
+
+                // If user is manually editing, force manual mode
+                if (aabb.type == AABBType::Auto)
+                {
+                    const float maxAbs =
+                        std::max({ std::fabs(aabb.min.x), std::fabs(aabb.min.y),
+                                   std::fabs(aabb.max.x), std::fabs(aabb.max.y) });
+
+                    // Heuristic:
+                    // Normalized values are usually around [-1..1] (or [-0.5..0.5]).
+                    // If it's bigger than ~2, it's almost certainly pixel/local units.
+                    aabb.type = (maxAbs > 2.0f) ? AABBType::Pixel : AABBType::Normalized;
+                }
             }
+
+            // Keep saved values stable
+            if (aabb.min.x > aabb.max.x) std::swap(aabb.min.x, aabb.max.x);
+            if (aabb.min.y > aabb.max.y) std::swap(aabb.min.y, aabb.max.y);
+
+            // If your AABB struct has width/height members, keep them updated.
+            // If not, delete these two lines.
+            aabb.width = aabb.max.x - aabb.min.x;
+            aabb.height = aabb.max.y - aabb.min.y;
 
             // Display calculated width/height for convenience
             ImGui::Spacing();

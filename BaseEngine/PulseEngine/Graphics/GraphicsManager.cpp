@@ -302,15 +302,27 @@ void GraphicsManager::Update()
     }
 
     //--- Rendering passes ---
+    float dt = static_cast<float>(GLHelper::delta_time);
+    UpdateEntityGlowTweens(dt);
+
     if (m_postProcess.IsEnabled()) m_postProcess.BeginCapture();
-    glapp->draw(EntityMember, m_editorLayerFilter);
+
+    glapp->draw(EntityMember, m_editorLayerFilter, dt);
+
     if (m_postProcess.IsEnabled()) m_postProcess.ApplyBloom();
+
+    // Per-object glow pass (independent of bloom; always available)
+    if (AnyEntityHasGlow()) {
+        m_postProcess.BeginGlowCapture();
+        glapp->drawGlowing(EntityMember, dt);
+        m_postProcess.ApplyGlowBlur(1.0f);
+    }
 
     // Draw text entities on Background or World layer
     Update2DTextComponent(LAYER_BACKGROUND | LAYER_WORLD | LAYER_TEXT);
 
     // Draw UI sprites
-    glapp->draw(EntityMember, m_editorLayerFilter & LAYER_UI);
+    glapp->draw(EntityMember, m_editorLayerFilter & LAYER_UI, 0.0f);
 
     // Draw text entities on UI layer
     Update2DTextComponent(LAYER_UI);
@@ -887,7 +899,7 @@ void GraphicsManager::DrawText2D(
     FontData const* fontData = GM_FindFont(fontId);
     if (!fontData)
     {
-        std::cerr << "[GraphicsManager] DrawText2D: font '" << fontId << "' not found\n";
+        //std::cerr << "[GraphicsManager] DrawText2D: font '" << fontId << "' not found\n";
         return;
     }
 
@@ -1091,4 +1103,84 @@ void GraphicsManager::RenderScreenOverlay()
     glBindVertexArray(0);
 
     overlayShader.UnUse();
+}
+
+// ============================================================
+//  Per-entity glow
+// ============================================================
+
+void GraphicsManager::SetEntityGlowEnabled(Entity e, bool enabled)
+{
+    auto* coord = Coordinator::GetInstance();
+    if (!coord || !coord->HasComponent<Framework::Renderable>(e)) return;
+    coord->GetComponent<Framework::Renderable>(e).glow.enabled = enabled;
+}
+
+void GraphicsManager::SetEntityGlowIntensity(Entity e, float intensity)
+{
+    auto* coord = Coordinator::GetInstance();
+    if (!coord || !coord->HasComponent<Framework::Renderable>(e)) return;
+    coord->GetComponent<Framework::Renderable>(e).glow.intensity = intensity;
+}
+
+void GraphicsManager::SetEntityGlowColor(Entity e, float r, float g, float b)
+{
+    auto* coord = Coordinator::GetInstance();
+    if (!coord || !coord->HasComponent<Framework::Renderable>(e)) return;
+    auto& glow = coord->GetComponent<Framework::Renderable>(e).glow;
+    glow.r = r; glow.g = g; glow.b = b;
+}
+
+void GraphicsManager::GlowTo(Entity e, float toIntensity, float duration)
+{
+    auto* coord = Coordinator::GetInstance();
+    if (!coord || !coord->HasComponent<Framework::Renderable>(e)) return;
+
+    float fromIntensity = coord->GetComponent<Framework::Renderable>(e).glow.intensity;
+    m_entityGlowTweens[e] = EntityGlowTween{ fromIntensity, toIntensity,
+                                              std::max(duration, 0.0001f), 0.0f };
+}
+
+bool GraphicsManager::IsGlowTweenDone(Entity e) const
+{
+    return m_entityGlowTweens.find(e) == m_entityGlowTweens.end();
+}
+
+void GraphicsManager::UpdateEntityGlowTweens(float dt)
+{
+    auto* coord = Coordinator::GetInstance();
+    if (!coord) return;
+
+    for (auto it = m_entityGlowTweens.begin(); it != m_entityGlowTweens.end(); )
+    {
+        Entity e = it->first;
+        EntityGlowTween& s = it->second;
+
+        s.elapsed += dt;
+        float t = std::min(s.elapsed / s.duration, 1.0f);
+        float intensity = s.startIntensity + t * (s.targetIntensity - s.startIntensity);
+
+        if (coord->HasComponent<Framework::Renderable>(e))
+        {
+            coord->GetComponent<Framework::Renderable>(e).glow.intensity = intensity;
+        }
+
+        if (t >= 1.0f)
+            it = m_entityGlowTweens.erase(it);
+        else
+            ++it;
+    }
+}
+
+bool GraphicsManager::AnyEntityHasGlow()
+{
+    auto* coord = Coordinator::GetInstance();
+    if (!coord) return false;
+
+    for (auto e : EntityMember)
+    {
+        if (!coord->HasComponent<Framework::Renderable>(e)) continue;
+        if (coord->GetComponent<Framework::Renderable>(e).glow.enabled) return true;
+    }
+    return false;
 }

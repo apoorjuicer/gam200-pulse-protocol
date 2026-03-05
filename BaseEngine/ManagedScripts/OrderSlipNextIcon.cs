@@ -99,8 +99,7 @@ public class OrderSlipNextIcon : Script
         SpriteComponent spr = GetSprite();
         if (spr.HasSprite())
         {
-            // who made sprite compoennt and why is this not in the API
-            spr.Texture = "../../PulseEngine/Assets/Textures/UI/" + spriteName;
+            spr.Texture = "../../PulseProtocol/Assets/Textures/UI/" + spriteName;
             Console.WriteLine($"[OrderSlipNext] Sprite -> {spriteName}");
         }
         else

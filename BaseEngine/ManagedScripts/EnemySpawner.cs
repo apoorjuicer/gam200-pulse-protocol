@@ -42,11 +42,19 @@ public class EnemySpawner : Script
     private bool EnemySpawnedAlr = false; // Stop spawning as soon as u spawn an enemy
 
     //Container of enemy 2 spawn. 
-    private List<EnemyIconType> EnemyContainer = new List<EnemyIconType>
+    // private List<EnemyIconType> EnemyContainer = new List<EnemyIconType>
+    // {
+    //     EnemyIconType.Rat,
+    //     EnemyIconType.Bat,
+    //     EnemyIconType.Gorilla,
+    //     EnemyIconType.Rat
+    // };
+
+    private List<EnemyIconType> EnemyContainer = new List<EnemyIconType> // chloe: i just change to rat for now since this is the reason why it wasnt spawning the next enemies
     {
         EnemyIconType.Rat,
-        EnemyIconType.Bat,
         EnemyIconType.Gorilla,
+        EnemyIconType.Rat,
         EnemyIconType.Rat
     };
 
@@ -211,8 +219,8 @@ public class EnemySpawner : Script
         switch (type)
         {
             case EnemyIconType.Rat: return "Rat_Enemy";
-            case EnemyIconType.Bat: return "Bat_Enemy";
-            case EnemyIconType.Gorilla: return "Gorilla_Enemy";
+            case EnemyIconType.Bat: return "Rat_Enemy";     // temp, to replace after new enemies spritesheet has been added in
+            case EnemyIconType.Gorilla: return "Gorilla_Enemy"; // temp, to replace after new enemies spritesheet has been added in
             default: return "";
         }
     }

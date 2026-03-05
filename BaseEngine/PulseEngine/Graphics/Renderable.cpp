@@ -49,6 +49,15 @@ namespace Framework
 		colorVal.AddMember("b", tintColor.b, alloc);
 		colorVal.AddMember("a", tintColor.a, alloc);
 		out.AddMember("tintColor", colorVal, alloc);
+
+		/* Glow Serialization */
+		Value glowVal(kObjectType);
+		glowVal.AddMember("enabled",   glow.enabled,   alloc);
+		glowVal.AddMember("intensity", glow.intensity, alloc);
+		glowVal.AddMember("r",         glow.r,         alloc);
+		glowVal.AddMember("g",         glow.g,         alloc);
+		glowVal.AddMember("b",         glow.b,         alloc);
+		out.AddMember("glow", glowVal, alloc);
 	}
 
 	void Renderable::Deserialize(const rapidjson::Value &in)
@@ -84,6 +93,17 @@ namespace Framework
 				tintColor.b = col["b"].GetFloat();
 			if (col.HasMember("a"))
 				tintColor.a = col["a"].GetFloat();
+		}
+
+		/* Glow deserialization */
+		if (in.HasMember("glow") && in["glow"].IsObject())
+		{
+			auto& gl = in["glow"];
+			if (gl.HasMember("enabled"))   glow.enabled   = gl["enabled"].GetBool();
+			if (gl.HasMember("intensity")) glow.intensity = gl["intensity"].GetFloat();
+			if (gl.HasMember("r"))         glow.r         = gl["r"].GetFloat();
+			if (gl.HasMember("g"))         glow.g         = gl["g"].GetFloat();
+			if (gl.HasMember("b"))         glow.b         = gl["b"].GetFloat();
 		}
 	}
 

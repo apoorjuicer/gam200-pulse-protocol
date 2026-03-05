@@ -6,8 +6,8 @@ public class HealthBGController : Script
     public static HealthBGController? Instance { get; private set; }
 
     // Back Glow Sprites
-    public string blueGlowSprite = "../../PulseEngine/Assets/Textures/UI/back glow blue.png";
-    public string redGlowSprite = "../../PulseEngine/Assets/Textures/UI/back glow red.png";
+    public string blueGlowSprite = "../../PulseProtocol/Assets/Textures/UI/back glow blue.png";
+    public string redGlowSprite = "../../PulseProtocol/Assets/Textures/UI/back glow red.png";
 
     private float flashTimer = 0f;
     private float flashDuration = 0.5f;

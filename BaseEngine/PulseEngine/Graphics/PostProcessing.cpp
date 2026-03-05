@@ -47,6 +47,7 @@ void PostProcessing::Shutdown()
     m_extractShader.DeleteShaderProgram();
     m_blurShader.DeleteShaderProgram();
     m_compositeShader.DeleteShaderProgram();
+    m_glowCompositeShader.DeleteShaderProgram();
 
     std::cout << "[PostProcessing] Shutdown complete\n";
 }
@@ -165,6 +166,86 @@ void PostProcessing::ApplyBloom()
 }
 
 // ============================================================
+//  Per-object glow capture & composite
+// ============================================================
+
+void PostProcessing::BeginGlowCapture()
+{
+    // Save current viewport so ApplyGlowBlur can restore it
+    glGetIntegerv(GL_VIEWPORT, m_savedVP);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_glowFBO);
+    glViewport(0, 0, m_w, m_h);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void PostProcessing::ApplyGlowBlur(float intensity)
+{
+    glDisable(GL_BLEND);
+
+    // ---- Blur the captured glow silhouette (ping-pong, reuse bloom FBOs) ----
+    // Pass 0: glow texture -> blurFBO[0] (horizontal)
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, m_blurFBO[0]);
+        glViewport(0, 0, m_bw, m_bh);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        m_blurShader.Use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_glowTexture);
+        m_blurShader.SetUniform("uTex",        0);
+        m_blurShader.SetUniform("uHorizontal", (GLboolean)GL_TRUE);
+        RenderQuad();
+        m_blurShader.UnUse();
+    }
+
+    // Remaining 9 passes (alternating V/H)
+    for (int i = 1; i < 10; ++i)
+    {
+        int dst = i & 1;
+        int src = 1 - dst;
+
+        glBindFramebuffer(GL_FRAMEBUFFER, m_blurFBO[dst]);
+        glViewport(0, 0, m_bw, m_bh);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        m_blurShader.Use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_blurTexture[src]);
+        m_blurShader.SetUniform("uTex",        0);
+        GLboolean isHoriz = (i % 2 == 0) ? GL_TRUE : GL_FALSE;
+        m_blurShader.SetUniform("uHorizontal", isHoriz);
+        RenderQuad();
+        m_blurShader.UnUse();
+    }
+    // After 10 passes, final blur result is in m_blurTexture[1]
+    GLuint finalGlow = m_blurTexture[1];
+
+    // ---- Composite additively onto the default FBO ----
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(m_savedVP[0], m_savedVP[1], m_savedVP[2], m_savedVP[3]);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);  // additive blending
+
+    m_glowCompositeShader.Use();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, finalGlow);
+    m_glowCompositeShader.SetUniform("uGlowTex",       0);
+    m_glowCompositeShader.SetUniform("uGlowIntensity", intensity);
+    RenderQuad();
+    m_glowCompositeShader.UnUse();
+
+    // Restore normal alpha blending for text/UI/overlay rendering
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Clean up texture units
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+// ============================================================
 //  Private helpers
 // ============================================================
 
@@ -198,6 +279,20 @@ void PostProcessing::CreateFBOs()
     if (glCheckNamedFramebufferStatus(m_extractFBO, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cerr << "[PostProcessing] Extract FBO incomplete!\n";
 
+    // --- Glow capture FBO (full resolution) ---
+    glCreateTextures(GL_TEXTURE_2D, 1, &m_glowTexture);
+    glTextureStorage2D(m_glowTexture, 1, GL_RGBA8, m_w, m_h);
+    glTextureParameteri(m_glowTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(m_glowTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(m_glowTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(m_glowTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glCreateFramebuffers(1, &m_glowFBO);
+    glNamedFramebufferTexture(m_glowFBO, GL_COLOR_ATTACHMENT0, m_glowTexture, 0);
+
+    if (glCheckNamedFramebufferStatus(m_glowFBO, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cerr << "[PostProcessing] Glow FBO incomplete!\n";
+
     // --- Blur ping-pong FBOs (half resolution) ---
     glCreateTextures(GL_TEXTURE_2D, 2, m_blurTexture);
     glCreateFramebuffers(2, m_blurFBO);
@@ -223,6 +318,8 @@ void PostProcessing::DeleteFBOs()
     if (m_sceneTexture)    { glDeleteTextures(1,    &m_sceneTexture);     m_sceneTexture    = 0; }
     if (m_extractFBO)      { glDeleteFramebuffers(1, &m_extractFBO);      m_extractFBO      = 0; }
     if (m_extractTexture)  { glDeleteTextures(1,    &m_extractTexture);   m_extractTexture  = 0; }
+    if (m_glowFBO)         { glDeleteFramebuffers(1, &m_glowFBO);         m_glowFBO         = 0; }
+    if (m_glowTexture)     { glDeleteTextures(1,    &m_glowTexture);      m_glowTexture     = 0; }
 
     glDeleteFramebuffers(2, m_blurFBO);
     glDeleteTextures(2,     m_blurTexture);
@@ -295,6 +392,14 @@ void PostProcessing::LoadShaders(const std::string& shaderDir)
         }))
     {
         std::cerr << "[PostProcessing] Composite shader failed: " << m_compositeShader.GetLog() << "\n";
+    }
+
+    if (!m_glowCompositeShader.CompileLinkValidate({
+            { GL_VERTEX_SHADER,   vsPath },
+            { GL_FRAGMENT_SHADER, path("glow_composite_fs.frag") }
+        }))
+    {
+        std::cerr << "[PostProcessing] Glow composite shader failed: " << m_glowCompositeShader.GetLog() << "\n";
     }
 }
 

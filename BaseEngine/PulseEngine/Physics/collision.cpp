@@ -6,11 +6,11 @@
  * @brief       Implements all collision mechanics such as AABB overlap, edge detection,
  *              and SAT-based OBB collision for rotated entities. Contains helper methods
  *              for building bounding volumes and detecting mouse/GUI interactions.
- * 
+ *
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
- * 
+ *
  ******************************************************************************/
 
 #include "pch/pch.h"
@@ -24,22 +24,217 @@ void CollisionManager::Update(float) {
 // =============================================================================
 // BuildAABBFromTransform
 // =============================================================================
-AABB CollisionManager::BuildAABBFromTransform(const Framework::Transform& transform, const AABB& baseBox)
+//AABB CollisionManager::BuildAABBFromTransform(const Framework::Transform& transform,
+//    const AABB& baseBox)
+//{
+//    AABB box{};
+//
+//    // ------------------------------------------------------------
+//    // 1) Get local box extents from min/max first (JSON style)
+//    // ------------------------------------------------------------
+//    float localMinX = baseBox.min.x;
+//    float localMinY = baseBox.min.y;
+//    float localMaxX = baseBox.max.x;
+//    float localMaxY = baseBox.max.y;
+//
+//    float localW = localMaxX - localMinX;
+//    float localH = localMaxY - localMinY;
+//
+//    // If min/max is not usable, fall back to width/height
+//    if (localW <= 0.0f || localH <= 0.0f)
+//    {
+//        float w = baseBox.width;
+//        float h = baseBox.height;
+//
+//        // last fallback: treat max as size if width/height missing
+//        if (w <= 0.0f) w = baseBox.max.x;
+//        if (h <= 0.0f) h = baseBox.max.y;
+//
+//        if (w <= 0.0f) w = 50.0f;
+//        if (h <= 0.0f) h = 50.0f;
+//
+//        localMinX = 0.0f; localMinY = 0.0f;
+//        localMaxX = w;    localMaxY = h;
+//        localW = w;       localH = h;
+//    }
+//
+//    // ------------------------------------------------------------
+//    // 2) Handle 2 possible "units":
+//    //    A) Small (<= ~60)  => assume 50-based units, scale by Transform.Scale/50
+//    //    B) Large (> ~60)   => assume pixels already, no scaling
+//    // ------------------------------------------------------------
+//    float scaleX = 1.0f;
+//    float scaleY = 1.0f;
+//
+//    if (localW <= 60.0f && transform.Scale.x > 60.0f)
+//        scaleX = transform.Scale.x / 50.0f;
+//
+//    if (localH <= 60.0f && transform.Scale.y > 60.0f)
+//        scaleY = transform.Scale.y / 50.0f;
+//
+//    // ------------------------------------------------------------
+//    // 3) Convert from "local box coordinates" to world:
+//    //    We anchor local (0..50) or (0..pixels) around Transform.Pos (CENTER).
+//    //    This matches your gameplay world where Pos is centered.
+//    // ------------------------------------------------------------
+//    const float halfX = transform.Scale.x * 0.5f;
+//    const float halfY = transform.Scale.y * 0.5f;
+//
+//    box.min.x = transform.Pos.x + (localMinX * scaleX) - halfX;
+//    box.max.x = transform.Pos.x + (localMaxX * scaleX) - halfX;
+//
+//    box.min.y = transform.Pos.y + (localMinY * scaleY) - halfY;
+//    box.max.y = transform.Pos.y + (localMaxY * scaleY) - halfY;
+//
+//    // Optional width/height set (not required for overlap test)
+//    box.width = box.max.x - box.min.x;
+//    box.height = box.max.y - box.min.y;
+//
+//    return box;
+//}
+
+// =============================================================================
+// BuildAABBFromTransform
+// =============================================================================
+AABB CollisionManager::BuildAABBFromTransform(const Framework::Transform& transform,
+    const AABB& baseBox)
 {
-    AABB box;
-    box.width = baseBox.width * transform.Scale.x / 50.0f;
-    box.height = baseBox.height * transform.Scale.y / 50.0f;
+    AABB box{};
 
-    box.min.x = transform.Pos.x - (box.width * 0.5f);
-    box.max.x = transform.Pos.x + (box.width * 0.5f);
-    box.min.y = transform.Pos.y - (box.height * 0.5f);
-    box.max.y = transform.Pos.y + (box.height * 0.5f);
+    const float sxAbs = std::abs(transform.Scale.x);
+    const float syAbs = std::abs(transform.Scale.y);
 
-    //std::cout << std::fixed << std::setprecision(2)
-    //    << "[DEBUG] BuildAABBFromTransform -> Pos(" << transform.Pos.x << "," << transform.Pos.y << ") "
-    //    << "Width=" << box.width << " Height=" << box.height << "\n"
-    //    << "AABB Min(" << box.min.x << "," << box.min.y << ") Max(" << box.max.x << "," << box.max.y << ")\n";
+    // Treat Transform.Pos as CENTER
+    const float left = transform.Pos.x - sxAbs * 0.5f;
+    const float right = transform.Pos.x + sxAbs * 0.5f;
+    const float top = transform.Pos.y - syAbs * 0.5f;
+    const float bottom = transform.Pos.y + syAbs * 0.5f;
 
+    bool doNormalized = (baseBox.type == AABBType::Normalized);
+    bool doPixel = (baseBox.type == AABBType::Pixel);
+    bool doGrid = (baseBox.type == AABBType::Grid);
+
+    // Helper: determine if values look normalized-ish
+    auto LooksNormalized = [&](const AABB& b) -> bool
+        {
+            const float maxAbs =
+                std::max({ std::abs(b.min.x), std::abs(b.min.y),
+                           std::abs(b.max.x), std::abs(b.max.y) });
+
+            // Normalized local coords usually in [-1..1] (or [-0.5..0.5]).
+            return maxAbs <= 2.0f;
+        };
+
+    // --- AUTO mode: keep your existing logic ---
+    if (baseBox.type == AABBType::Auto)
+    {
+        // Detect normalized local AABB [-0.5..0.5] or similar small range
+        const bool looksNormalized =
+            (std::abs(baseBox.min.x) <= 1.0f && std::abs(baseBox.min.y) <= 1.0f &&
+                std::abs(baseBox.max.x) <= 1.0f && std::abs(baseBox.max.y) <= 1.0f);
+
+        if (looksNormalized)
+        {
+            doNormalized = true;
+        }
+        else
+        {
+            // Legacy “grid units” AABB like min=-0.5 max=10 (old placeholder)
+            const float derivedW = std::abs(baseBox.max.x - baseBox.min.x);
+            const float derivedH = std::abs(baseBox.max.y - baseBox.min.y);
+
+            const bool looksLikeOldPlaceholder =
+                (derivedW > 0.0f && derivedW <= 12.0f) &&
+                (derivedH > 0.0f && derivedH <= 12.0f);
+
+            // If it looks like the old placeholder, use FULL sprite bounds.
+            if (looksLikeOldPlaceholder)
+            {
+                box.min = { left,  top };
+                box.max = { right, bottom };
+                box.width = right - left;
+                box.height = bottom - top;
+                return box;
+            }
+
+            // Otherwise keep your existing behavior
+            const bool looksLikeGridUnits =
+                (std::abs(baseBox.max.x) <= 100.0f && std::abs(baseBox.max.y) <= 100.0f &&
+                    std::abs(baseBox.min.x) <= 20.0f && std::abs(baseBox.min.y) <= 20.0f);
+
+            const float gx = looksLikeGridUnits ? (sxAbs / 50.0f) : 1.0f;
+            const float gy = looksLikeGridUnits ? (syAbs / 50.0f) : 1.0f;
+
+            // Using sprite TOP-LEFT anchor
+            box.min.x = left + baseBox.min.x * gx;
+            box.min.y = top + baseBox.min.y * gy;
+            box.max.x = left + baseBox.max.x * gx;
+            box.max.y = top + baseBox.max.y * gy;
+
+            if (box.min.x > box.max.x) std::swap(box.min.x, box.max.x);
+            if (box.min.y > box.max.y) std::swap(box.min.y, box.max.y);
+
+            box.width = box.max.x - box.min.x;
+            box.height = box.max.y - box.min.y;
+            return box;
+        }
+    }
+
+    // --- Explicit modes ---
+    if (doNormalized)
+    {
+        // SAFETY: if someone put pixel-ish numbers into a Normalized box,
+        // treat it like Pixel offsets from CENTER to avoid giant AABBs.
+        if (!LooksNormalized(baseBox))
+        {
+            // Fallback to Pixel behavior (offset from center, unscaled)
+            box.min.x = transform.Pos.x + baseBox.min.x;
+            box.max.x = transform.Pos.x + baseBox.max.x;
+            box.min.y = transform.Pos.y + baseBox.min.y;
+            box.max.y = transform.Pos.y + baseBox.max.y;
+        }
+        else
+        {
+            // Normalized local space => scale by Transform.Scale around center
+            box.min.x = transform.Pos.x + baseBox.min.x * sxAbs;
+            box.max.x = transform.Pos.x + baseBox.max.x * sxAbs;
+            box.min.y = transform.Pos.y + baseBox.min.y * syAbs;
+            box.max.y = transform.Pos.y + baseBox.max.y * syAbs;
+        }
+    }
+    else if (doPixel)
+    {
+        // Pixel: absolute offset from center (unscaled)
+        box.min.x = transform.Pos.x + baseBox.min.x;
+        box.max.x = transform.Pos.x + baseBox.max.x;
+        box.min.y = transform.Pos.y + baseBox.min.y;
+        box.max.y = transform.Pos.y + baseBox.max.y;
+    }
+    else if (doGrid)
+    {
+        // Grid: scale by (Scale/50.0f), anchor top-left
+        const float gx = sxAbs / 50.0f;
+        const float gy = syAbs / 50.0f;
+
+        box.min.x = left + baseBox.min.x * gx;
+        box.min.y = top + baseBox.min.y * gy;
+        box.max.x = left + baseBox.max.x * gx;
+        box.max.y = top + baseBox.max.y * gy;
+    }
+    else
+    {
+        // If type is somehow invalid/unset, default to Normalized
+        box.min.x = transform.Pos.x + baseBox.min.x * sxAbs;
+        box.max.x = transform.Pos.x + baseBox.max.x * sxAbs;
+        box.min.y = transform.Pos.y + baseBox.min.y * syAbs;
+        box.max.y = transform.Pos.y + baseBox.max.y * syAbs;
+    }
+
+    if (box.min.x > box.max.x) std::swap(box.min.x, box.max.x);
+    if (box.min.y > box.max.y) std::swap(box.min.y, box.max.y);
+
+    box.width = box.max.x - box.min.x;
+    box.height = box.max.y - box.min.y;
     return box;
 }
 
@@ -314,13 +509,13 @@ void CollisionManager::RebuildUniformGrid()
 
     m_broadPairsLastFrame = m_candidatePairs.size();
 
-     //Optional debug proof (uncomment in debug builds)
-    //static int frameCounter = 0;
-    //if (++frameCounter % 60 == 0) // print once per ~60 frames
-    //{
-    //    std::cout << "[BroadPhase] cells=" << m_cells.size()
-    //        << " candidatePairs=" << m_candidatePairs.size()
-    //        << " entities=" << EntityMember.size()
-    //        << "\n";
-    //}
+    //Optional debug proof (uncomment in debug builds)
+   //static int frameCounter = 0;
+   //if (++frameCounter % 60 == 0) // print once per ~60 frames
+   //{
+   //    std::cout << "[BroadPhase] cells=" << m_cells.size()
+   //        << " candidatePairs=" << m_candidatePairs.size()
+   //        << " entities=" << EntityMember.size()
+   //        << "\n";
+   //}
 }

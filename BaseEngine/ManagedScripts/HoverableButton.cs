@@ -3,7 +3,7 @@
 * @file        HoverableButton.cs
 * @project     Pulse Protocol
 * @author      Chloe Lau Rey En
-* @brief       Script for hovering of buttons, and transition of scenes and showing overlay for quit button
+* @brief       Script for hovering of buttons, and transition of scenes and showing overlay for all 4 buttons
 *
 * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the
@@ -21,6 +21,8 @@ public class NavigationButtons : Script
     private static Stack<string> sceneHistory = new Stack<string>();
     public static string currentScene = "";
     public static string LastGameplayScene = "";
+    public static string LastEnteredLevel = ""; // set when entering any level
+    public static string LastClearedLevel = ""; // set only when a level is beaten
 
     // Track if we've set the initial scene THIS play session
     private static int lastFrameCount = -1;
@@ -324,7 +326,11 @@ public class NavigationButtons : Script
         if (!string.IsNullOrEmpty(currentScene))
         {
             sceneHistory.Push(currentScene);
-        }
+        }  
+
+        if (newScene.ToLower().Contains("level"))
+            LastEnteredLevel = newScene;
+
         currentScene = newScene;
         Scene.LoadScene(newScene);
     }
@@ -604,7 +610,29 @@ public class NavigationButtons : Script
 
         if (tex.Contains("continue"))
         {
-            Console.WriteLine("NOT IMPLEMENTED YET!");
+            string sceneToLoad = "";
+
+            if (!string.IsNullOrEmpty(LastClearedLevel))
+            {
+                // Player has cleared at least one level — go to the next one
+                string nextScene;
+                if (TryGetNextLevelSceneName(LastClearedLevel, out nextScene) && Scene.SceneExists(nextScene))
+                    sceneToLoad = nextScene;
+                else
+                    sceneToLoad = LastClearedLevel; // no next level, replay last cleared
+            }
+            else if (!string.IsNullOrEmpty(LastEnteredLevel))
+            {
+                // Player paused and quit — return to the level they were in
+                sceneToLoad = LastEnteredLevel;
+            }
+            else
+            {
+                // Nothing played yet — same as New Game
+                sceneToLoad = "Cutscene";
+            }
+
+            NavigateTo(sceneToLoad);
             return;
         }
 
@@ -642,6 +670,7 @@ public class NavigationButtons : Script
         if (tex.Contains("nextstage"))
         {
             StageClearElement.ResetStageClear();
+            LastClearedLevel = currentScene;
             ContinueToNextLevel();
             return;
         }

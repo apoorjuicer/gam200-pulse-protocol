@@ -42,6 +42,7 @@
 #include "StateMachine/StateMachine.h"
 #include "../../StateMachine/FSMComponent.h"
 #include "../../StateMachine/GameplayFSMSystem.h"
+#include "Graphics/Renderable.h"
 
 
 #include "Audio/AudioSource.h"
@@ -299,26 +300,26 @@ void CoreEngine::CompileScriptAssembly()
 		std::cout << "[CoreEngine] Scripts compiled successfully!\n";
 #endif
 
-		// Copy the ManageScripts.dll to the PulseEditor and PulseProtocol cos ITS FUCKING STUPID FK CMAKE BS
+		// Copy ManagedScripts.dll next to the currently running executable. And 2 make it not hard coded just do in bin then ask 2 grab if needed
 		std::filesystem::path dllSource = baseEngineDir / "build" / ".bin" / (configuration + "-x64") / "ManagedScripts.dll";
-		std::filesystem::path dllDest1 = baseEngineDir / "build" / "PulseEditor" / configuration / "ManagedScripts.dll";
-		std::filesystem::path dllDest2 = baseEngineDir / "build" / "PulseProtocol" / configuration / "ManagedScripts.dll";
+
+		// Get the directory of the running executable(all exe yippeeeeeeeeeeeeeee)
+		char exePathBuf[MAX_PATH];
+		GetModuleFileNameA(nullptr, exePathBuf, MAX_PATH);
+		std::filesystem::path dllDest = std::filesystem::path(exePathBuf).parent_path() / "ManagedScripts.dll";
 
 		if (!std::filesystem::exists(dllSource))
 		{
-			std::cerr << "[Hot Reload] ERROR: Built DLL not found!" << std::endl;
+			std::cerr << "[Hot Reload] ERROR: Built DLL not found at: " << dllSource << std::endl;
 			return;
 		}
 
 		try
 		{
-			std::filesystem::create_directories(dllDest1.parent_path());
-			std::filesystem::create_directories(dllDest2.parent_path());
-
-			std::filesystem::copy_file(dllSource, dllDest1, std::filesystem::copy_options::overwrite_existing);
-			std::filesystem::copy_file(dllSource, dllDest2, std::filesystem::copy_options::overwrite_existing);
+			// just 1 place and they all copy
+			std::filesystem::copy_file(dllSource, dllDest, std::filesystem::copy_options::overwrite_existing);
 #ifdef _DEBUG
-			std::cout << "[CoreEngine] ManagedScripts.dll copied to both locations!\n";
+			std::cout << "[CoreEngine] ManagedScripts.dll copied to: " << dllDest << "\n";
 #endif
 		}
 
@@ -755,10 +756,8 @@ void CoreEngine::Init()
 	GameRunning = true;	 // 3.. 2.. 1.. GAME START
 	startScriptEngine(); // 3.. 2.. 1.. DLL SCRIPT! START ROLLINGGGGGGGGGGGGGGGGGG
 
-	//remove for game.exe in release cos no hotreload allow but need managescript.dll to be copied
-//#ifdef _DEBUG
-	CompileScriptAssembly();
-//#endif // DEBUG
+	// ManagedScripts.dll is now built and copied by CMake POST_BUILD.
+	// CompileScriptAssembly() is only called at runtime for hot-reload (R key in Debug).
 
 
 	std::cout << "[Hot Reload] Working dir: " << std::filesystem::current_path() << std::endl;
@@ -815,15 +814,21 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<FSMComponent>();
 	g_coordinator->RegisterComponent<FSM>();
 
-	// Register your systems here, this order is IMPORTANT FOR UPDATE LOOP!!!!
+	// Register your systems here, ORDER = UPDATE ORDER every frame
+	// 1. Input   — read raw input first
+	// 2. FSM     — state machine reacts to input
+	// 3. Audio   — FMOD ticks, fresh position ready for Conductor
+	// 4. Collision
+	// 5. Scene
+	// 6. Logic   — C# scripts run, Conductor reads fresh audio position
+	// 7. Graphics — renders the final game state last
 	g_coordinator->RegisterSystem<InputManager>();
-	//g_coordinator->RegisterSystem<RhythmGameplayInput>();
-	g_coordinator->RegisterSystem<GameplayFSMSystem>();
-	g_coordinator->RegisterSystem<GraphicsManager>();
+	g_coordinator->RegisterSystem<LogicSystem>();
+	g_coordinator->RegisterSystem<GraphicsManager>();  
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<CollisionManager>();
 	g_coordinator->RegisterSystem<SceneManager>();
-	g_coordinator->RegisterSystem<LogicSystem>();
+	g_coordinator->RegisterSystem<GameplayFSMSystem>();
 
 	// for clearing script when scene change. pass an instance of scenemanager
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
@@ -897,9 +902,16 @@ void CoreEngine::Update(float dt)
 	// Always process engine / message stuff
 	MessageManager::GetInstance()->ProcessQueue(glfwGetTime());
 
-	profiler->StartSystem("LogicSystem");
+	// update all the system
+	profiler->StartSystem("UpdateAllSystems");
 	g_coordinator->UpdateAllSystems(dt);
-	profiler->EndSystem("LogicSystem");
+	profiler->EndSystem("UpdateAllSystems");
+
+
+	profiler->StartSystem("Graphics System");
+	if (g_graphicsSystem)
+		g_graphicsSystem->Update();
+	profiler->EndSystem("Graphics System");
 
 	//--- Start of script/hot reload ---//
 	// Press R to reload the script changes 
@@ -982,44 +994,10 @@ void CoreEngine::Update(float dt)
 	executeUpdate();*/
 	//--- End of script/hot reload ---//
 
-	profiler->StartSystem("Graphics System");
-	if (g_graphicsSystem)
-		g_graphicsSystem->Update();
-	profiler->EndSystem("Graphics System");
-
-	profiler->StartSystem("Input System");
-	if (g_inputSystem)
-		g_inputSystem->Update(dt);
-	profiler->EndSystem("Input System");
-
-	//profiler->StartSystem("RhythmGameplayInput");
-	//if (g_rhythmSystem)
-	//	g_rhythmSystem->Update(dt);
-	//profiler->EndSystem("RhythmGameplayInput");
-
-	profiler->StartSystem("Audio System");
-	if (g_audioSystem)
-		g_audioSystem->Update();
-	profiler->EndSystem("Audio System");
-
-	profiler->StartSystem("Collision System");
-	// If collision is in UpdateAllSystems, remove this
-	profiler->EndSystem("Collision System");
-	// Test.Update(dt);
-
-	// Always draw/update graphics once per frame
-	if (g_graphicsSystem)
-		g_graphicsSystem->Update();
-
-	// 2) If paused, stop here. no gameplay / input / scene logic
 	if (m_paused)
 	{
 		return;
 	}
-
-	// 3) Normal running path
-	if (g_inputSystem)    g_inputSystem->Update(dt);
-	//if (g_rhythmSystem)   g_rhythmSystem->Update(dt);
 
 }
 
@@ -1114,21 +1092,32 @@ void CoreEngine::RenderDebugDraw()
 	if (!g_inputSystem)
 		return;
 
-	const float aspect = (WindowHeight > 0)
-		? static_cast<float>(WindowWidth) / static_cast<float>(WindowHeight)
+	// ============================================================
+	// PASS 1: WORLD-SPACE DEBUG (F1-F6)  [-worldW/2..worldW/2]
+	// ============================================================
+	const float aspect =
+		(GLApp::VIRTUAL_H > 0)
+		? static_cast<float>(GLApp::VIRTUAL_W) / static_cast<float>(GLApp::VIRTUAL_H)
 		: (16.0f / 9.0f);
 
-	// reference world height
 	const float worldH = 900.0f;
 	const float worldW = worldH * aspect;
 
-	glm::mat4 projection = glm::ortho(-worldW * 0.5f, worldW * 0.5f,
-		-worldH * 0.5f, worldH * 0.5f);
-	DebugDraw::Begin(projection);
+	glm::mat4 worldProj = glm::ortho(
+		-worldW * 0.5f, worldW * 0.5f,
+		-worldH * 0.5f, worldH * 0.5f
+	);
 
-	// --- VFX Particles ---
-	// Render active particles from the VFX system as small shrinking dots.
-	// Particles carry world-space positions, which match the DebugDraw projection.
+	DebugDraw::Begin(worldProj);
+
+	// Red border of WORLD view
+	DebugDraw::DrawRect(
+		{ -worldW * 0.5f, -worldH * 0.5f },
+		{ worldW * 0.5f,  worldH * 0.5f },
+		{ 1.0f, 0.0f, 0.0f }
+	);
+
+	// --- VFX Particles --- (UNCHANGED)
 	if (Framework::GameState::IsPlaying())
 	{
 		if (auto logic = g_coordinator->GetSystem<LogicSystem>())
@@ -1136,16 +1125,16 @@ void CoreEngine::RenderDebugDraw()
 			for (const auto& p : logic->GetVfx().GetParticles())
 			{
 				if (!p.active) continue;
-				if (p.textureID != 0) continue; // textured particles rendered via gBatch in glapp
+				if (p.textureID != 0) continue;
 				float lifeRatio = (p.lifeMax > 0.0f) ? (p.life / p.lifeMax) : 0.0f;
-				float radius    = p.size * lifeRatio; // shrinks to 0 as particle expires
+				float radius = p.size * lifeRatio;
 				glm::vec3 color = { 1.0f, 0.75f + 0.25f * lifeRatio, 0.2f * lifeRatio };
 				DebugDraw::DrawCircleFilled({ p.pos.x, p.pos.y }, radius, color, 6);
 			}
 		}
 	}
 
-	// F1 - DrawRect
+	// F1 - DrawRect (UNCHANGED)
 	if (g_inputSystem->isDebugRectsEnabled())
 	{
 		for (auto& entity : g_inputSystem->DebugEntities)
@@ -1160,7 +1149,7 @@ void CoreEngine::RenderDebugDraw()
 		}
 	}
 
-	// F2 - DrawLine
+	// F2 - DrawLine (UNCHANGED)
 	if (g_inputSystem->isDebugLinesEnabled())
 	{
 		DebugDraw::DrawLine({ -800.0f, -450.0f }, { 800.0f, 450.0f }, { 1.0f, 0.0f, 0.0f });
@@ -1169,21 +1158,21 @@ void CoreEngine::RenderDebugDraw()
 		DebugDraw::DrawLine({ -800.0f, 0.0f }, { 800.0f, 0.0f }, { 1.0f, 1.0f, 0.0f });
 	}
 
-	// F3 - DrawCircle
+	// F3 - DrawCircle (UNCHANGED)
 	if (g_inputSystem->isDebugCirclesEnabled())
 	{
-		DebugDraw::DrawCircle({ 0.0, 0.0f }, 200.0f, { 1.0f, 0.0f, 1.0f }, 32);
+		DebugDraw::DrawCircle({ 0.0f, 0.0f }, 200.0f, { 1.0f, 0.0f, 1.0f }, 32);
 		DebugDraw::DrawCircle({ 400.0f, 300.0f }, 100.0f, { 0.0f, 1.0f, 1.0f }, 24);
 	}
 
-	// F4 - DrawCircleFilled
+	// F4 - DrawCircleFilled (UNCHANGED)
 	if (g_inputSystem->isDebugCirclesFilledEnabled())
 	{
 		DebugDraw::DrawCircleFilled({ 100.0f, 300.0f }, 80.0f, { 1.0f, 0.5f, 0.0f }, 24);
 		DebugDraw::DrawCircleFilled({ 100.0f, -300.0f }, 60.0f, { 0.5f, 0.0f, 1.0f }, 16);
 	}
 
-	// F5 - DrawPoint
+	// F5 - DrawPoint (UNCHANGED)
 	if (g_inputSystem->isDebugPointsEnabled())
 	{
 		for (float x = -800.0f; x < 800.0f; x += 200.0f)
@@ -1195,20 +1184,120 @@ void CoreEngine::RenderDebugDraw()
 		}
 	}
 
-	// F6 - Grid
+	// F6 - Grid (UNCHANGED)
 	if (g_inputSystem->isDebugGridEnabled())
 	{
 		for (float x = -800.0f; x < 800.0f; x += 100.0f)
-		{
 			DebugDraw::DrawLine({ x, -450.0f }, { x, 450.0f }, { 0.3f, 0.3f, 0.3f });
-		}
+
 		for (float y = -450.0f; y < 450.0f; y += 100.0f)
-		{
 			DebugDraw::DrawLine({ -800.0f, y }, { 800.0f, y }, { 0.3f, 0.3f, 0.3f });
-		}
 	}
 
 	DebugDraw::End();
+
+
+	// ============================================================
+	// PASS 2: SCREEN-SPACE DEBUG (F7) [0..VIRTUAL_W, 0..VIRTUAL_H]
+	// Draw AABB where the SPRITE actually appears on screen.
+	// ============================================================
+	if (g_inputSystem->isDebugHitboxesEnabled())
+	{
+		auto sceneManager = g_coordinator->GetSystem<SceneManager>();
+		auto colMgr = g_coordinator->GetSystem<CollisionManager>();
+		if (!sceneManager || !colMgr) return;
+
+		glm::mat4 screenProj = glm::ortho(
+			0.0f, static_cast<float>(GLApp::VIRTUAL_W),
+			static_cast<float>(GLApp::VIRTUAL_H), 0.0f
+		);
+
+		const glm::vec2 pivot = { GLApp::VIRTUAL_W * 0.5f, GLApp::VIRTUAL_H * 0.5f };
+		float zoom = 1.0f;
+		glm::vec2 cam = { 0.0f, 0.0f };
+
+		if (Framework::GameState::IsPlaying())
+		{
+			zoom = GLApp::gGameCamera.zoom;
+			cam = { GLApp::gGameCamera.center.x, GLApp::gGameCamera.center.y };
+		}
+
+		auto WorldToScreen = [&](glm::vec2 w) -> glm::vec2
+			{
+				glm::vec2 rel = w - cam;
+				return { pivot.x + rel.x * zoom, pivot.y - rel.y * zoom };
+			};
+
+		DebugDraw::Begin(screenProj);
+
+		static int spam = 0;
+		int printed = 0;
+		int drawn = 0;
+
+		for (Entity e : sceneManager->GetSceneEntities())
+		{
+			if (!g_coordinator->HasComponent<Framework::Transform>(e)) continue;
+			if (!g_coordinator->HasComponent<AABB>(e)) continue;
+
+			const auto& tf = g_coordinator->GetComponent<Framework::Transform>(e);
+			const AABB base = g_coordinator->GetComponent<AABB>(e);
+
+			//// A) GREEN: what rendering "should" cover (full sprite bounds from Transform)
+			//const float sxAbs = std::abs(tf.Scale.x);
+			//const float syAbs = std::abs(tf.Scale.y);
+
+			//const glm::vec2 spriteMinW = { tf.Pos.x - sxAbs * 0.5f, tf.Pos.y - syAbs * 0.5f };
+			//const glm::vec2 spriteMaxW = { tf.Pos.x + sxAbs * 0.5f, tf.Pos.y + syAbs * 0.5f };
+
+			//glm::vec2 sprMinS = WorldToScreen(spriteMinW);
+			//glm::vec2 sprMaxS = WorldToScreen(spriteMaxW);
+
+			//glm::vec2 greenMin = { std::min(sprMinS.x, sprMaxS.x), std::min(sprMinS.y, sprMaxS.y) };
+			//glm::vec2 greenMax = { std::max(sprMinS.x, sprMaxS.x), std::max(sprMinS.y, sprMaxS.y) };
+
+			//DebugDraw::DrawRect(greenMin, greenMax, { 0.0f, 1.0f, 0.0f });
+
+			// B) CYAN: gameplay collision AABB
+			AABB world = colMgr->BuildAABBFromTransform(tf, base);
+
+			glm::vec2 sMin = WorldToScreen({ world.min.x, world.min.y });
+			glm::vec2 sMax = WorldToScreen({ world.max.x, world.max.y });
+
+			glm::vec2 cyanMin = { std::min(sMin.x, sMax.x), std::min(sMin.y, sMax.y) };
+			glm::vec2 cyanMax = { std::max(sMin.x, sMax.x), std::max(sMin.y, sMax.y) };
+
+			DebugDraw::DrawRect(cyanMin, cyanMax, { 0.0f, 1.0f, 1.0f });
+
+			// Proof points (BIG)
+			glm::vec2 sPos = WorldToScreen({ tf.Pos.x, tf.Pos.y });
+			glm::vec2 sCtr = WorldToScreen({ (world.min.x + world.max.x) * 0.5f, (world.min.y + world.max.y) * 0.5f });
+
+			DebugDraw::DrawPoint(sPos, 20.0f, { 1.0f, 0.0f, 1.0f }); // magenta: transform pos
+			DebugDraw::DrawPoint(sCtr, 16.0f, { 1.0f, 1.0f, 0.0f }); // yellow: aabb center
+
+			if (spam < 600 && printed < 6)
+			{
+				float dW = std::abs(base.max.x - base.min.x);
+				float dH = std::abs(base.max.y - base.min.y);
+
+				std::cout
+					<< "[F7] e=" << (int)e
+					<< " Pos=(" << tf.Pos.x << "," << tf.Pos.y << ")"
+					<< " Scale=(" << tf.Scale.x << "," << tf.Scale.y << ")"
+					<< " baseDerived=(" << dW << "," << dH << ")"
+					<< " worldWH=(" << world.width << "," << world.height << ")\n";
+
+				printed++;
+			}
+
+			drawn++;
+		}
+
+		if ((spam++ % 60) == 0)
+			std::cout << "[F7] Hitboxes drawn: " << drawn << "\n";
+
+		DebugDraw::End();
+	}
 
 	//// ---------------------------------------------------------------------
 	//// F7: spawn/delete 1,000 moving sprites (hero)
@@ -1342,7 +1431,7 @@ void CoreEngine::SetPaused(bool paused, PauseSource source)
 		if (source == PauseSource::Game)
 		{
 			// Pause ONLY music during game pause, keep SFX alive for hover/click
-			audio->SetMusicPaused(paused);
+			//audio->SetMusicPaused(paused);
 		}
 		else
 		{

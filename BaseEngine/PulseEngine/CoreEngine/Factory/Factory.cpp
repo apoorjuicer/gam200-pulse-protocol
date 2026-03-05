@@ -71,10 +71,13 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, boo
 	// std::string savefilePath = "../../PulseEngine/JSON/test2.json";
 
 	std::ifstream ifs(path);
+
+	std::cerr << "Trying to open: " << std::filesystem::absolute(path) << "\n";
+
 	if (!ifs.is_open())
 	{
 		std::cerr << "Error: Cannot open file for reading: " << path << "\n";
-		return false;
+		return std::nullopt;
 	}
 
 	IStreamWrapper isw(ifs);
@@ -85,7 +88,7 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, boo
 	if (!(d.HasMember("components") && d["components"].IsArray()))
 	{
 		std::cerr << "Components are missing/wrong!" << std::endl;
-		return false;
+		return std::nullopt;
 	}
 
 	Entity entity = g_coordinator->CreateEntity();
@@ -155,6 +158,33 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, boo
 		{
 			AABB aabb;
 			aabb.Deserialize(component["AABB"]);
+
+			if (aabb.width <= 0.0f || aabb.height <= 0.0f)
+			{
+				float w = aabb.max.x - aabb.min.x;
+				float h = aabb.max.y - aabb.min.y;
+
+				if (w <= 0.0f) w = aabb.max.x;
+				if (h <= 0.0f) h = aabb.max.y;
+
+				if (w <= 0.0f) w = 50.0f;
+				if (h <= 0.0f) h = 50.0f;
+
+				aabb.width = w;
+				aabb.height = h;
+			}
+
+			// <<< ADD STEP 1 HERE >>>
+			/*if (std::abs(aabb.min.x) < 0.0001f && std::abs(aabb.min.y) < 0.0001f &&
+				aabb.width > 0.0f && aabb.height > 0.0f)
+			{
+				const float w = aabb.width;
+				const float h = aabb.height;
+
+				aabb.min = { -w * 0.5f, -h * 0.5f };
+				aabb.max = { w * 0.5f,  h * 0.5f };
+			}*/
+
 			g_coordinator->AddComponent<AABB>(entity, aabb);
 		}
 
@@ -191,6 +221,36 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, boo
 			g_coordinator->AddComponent<Children>(entity, c);
 		}
 	}
+
+	// ============================
+	// AUTO-ATTACH AABB (for debug draw / collisions)
+	// If the JSON didn't include an AABB, we create a default one
+	// for gameplay entities (player/enemy/etc.).
+	// ============================
+	if (g_coordinator->HasComponent<AABB>(entity) && g_coordinator->HasComponent<Framework::Transform>(entity))
+	{
+		auto& aabb = g_coordinator->GetComponent<AABB>(entity);
+		const auto& tf = g_coordinator->GetComponent<Framework::Transform>(entity);
+
+		const float derivedW = std::abs(aabb.max.x - aabb.min.x);
+		const float derivedH = std::abs(aabb.max.y - aabb.min.y);
+
+		const bool looksLikeOldPlaceholder =
+			(derivedW > 0.0f && derivedW <= 12.0f) &&
+			(derivedH > 0.0f && derivedH <= 12.0f);
+
+		const bool isBigSprite = (std::abs(tf.Scale.x) >= 100.0f || std::abs(tf.Scale.y) >= 100.0f);
+
+		if (looksLikeOldPlaceholder && isBigSprite)
+		{
+			// normalized unit box (centered)
+			aabb.min = { -0.5f, -0.5f };
+			aabb.max = { 0.5f,  0.5f };
+			aabb.width = 1.0f;
+			aabb.height = 1.0f;
+		}
+	}
+
 	// add entity to list of entity in the current scene
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
 	sceneManager->IncrementEntityArray(entity);

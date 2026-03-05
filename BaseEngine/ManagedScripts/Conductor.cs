@@ -22,13 +22,15 @@ public class Conductor : Script
     private float nextHalfBeat;
     private int lastBeat = -1;
     private bool initialized = false;
+    private float audioTimeAccumulator = 0f; // Total time
+    private float prevAudioPos = 0f;         // Last known FMOD pos
     public float GetBeatDuration()
     {
         return 60.0f / BPM;
     }
 
     // Stupid FMOD has a latency for about 90ms?!?!?!?!??!!
-    public float MusicLatencyOffset = 0.09f;
+    public float MusicLatencyOffset = 0.125f;
 
     public override void Update()
     {
@@ -59,6 +61,8 @@ public class Conductor : Script
             songTime = 0.0f;
             nextHalfBeat = secondsPerBeat * 0.5f;
             lastBeat = -1;
+            audioTimeAccumulator = 0f;
+            prevAudioPos = 0f;
 
             initialized = true;
 
@@ -72,19 +76,35 @@ public class Conductor : Script
         float dt = Time.DeltaTime;
         //songTime += dt;
 
-        //
+        // Instead of making the audio be linked to dt(will drift due to FPS),
+        // we use Fmod to tell us the audio pos instead. Apparently this is how OSU does it? idk xd
         float audioPos = (float)GetAudio().GetBGMPosition();
-        if (audioPos > 0f) // only sync when audio is actually playing
+        if (audioPos > 0f) // START AS SOON AS TRACK IS PLAYED
         {
-            songTime = audioPos;
+            // When the loop ends, FMOD restarts the audio back to 0, so we manually add it for the beats when it does 
+            if (audioPos < prevAudioPos - 1.0f)
+            {
+                // Save how long this loop was and updtae our beat counter so instead
+                // of jumping back to beat 0 and freezing the game, it just keeps going
+                audioTimeAccumulator += prevAudioPos;    
+            }
+            
+            // where we left off
+            prevAudioPos = audioPos;
+
+            // instead of just restarting, just add it to the first loop. Cos if we reset 2 0, its stuck at beat 127 and it will nvr go pass it 
+            songTime = audioTimeAccumulator + audioPos;
         }
         else
         {
-            songTime += dt; // fallback if audio not playing yet
+            // INCASE IT NO WORK ;-;
+            songTime += dt; 
         }
 
-        //int currentBeat = (int)Math.Floor(songTime / secondsPerBeat);
-        int currentBeat = (int)Math.Floor((songTime - MusicLatencyOffset) / secondsPerBeat);
+        // Apply MusicLatencyOffset to everything(pls work fuck me la)
+        float adjustedTime = songTime - MusicLatencyOffset; // use this 2 check the hlaf beat instead
+
+        int currentBeat = (int)Math.Floor(adjustedTime / secondsPerBeat);
 
         // Full beat
         if (currentBeat > lastBeat)
@@ -94,7 +114,7 @@ public class Conductor : Script
         }
 
         // Half beat (use while to catch up if a frame skips)
-        while (songTime >= nextHalfBeat)
+        while (adjustedTime >= nextHalfBeat)
         {
             Console.WriteLine($"[Conductor] HalfBeat near Beat {lastBeat} | GameTime={Time.GameTime:F3}");
             nextHalfBeat += secondsPerBeat;
@@ -112,6 +132,8 @@ public class Conductor : Script
         songTime = 0.0f;
         lastBeat = -1;
         nextHalfBeat = secondsPerBeat * 0.5f;
+        audioTimeAccumulator = 0f;
+        prevAudioPos = 0f;
         Console.WriteLine("[Conductor] Clock reset — syncing to audio start");
         Console.WriteLine("[Conductor] ResetClock called from: " + Environment.StackTrace);
     }

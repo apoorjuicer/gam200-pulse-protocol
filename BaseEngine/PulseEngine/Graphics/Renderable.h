@@ -53,6 +53,12 @@ namespace Framework
 		Color tintColor = Color(1.0f, 1.0f, 1.0f, 1.0f); // Default white
 		bool useTexture = true;     // Flag: true = use texture, false = use solid color
 
+		struct GlowState {
+			bool  enabled   = false;
+			float intensity = 1.0f;   // multiplier applied to glow color when rendering
+			float r = 1.f, g = 1.f, b = 1.f;  // glow color
+		} glow;
+
 		//void SetSprite(std::string ref);
 		//std::string GetSprite() const;
 		void AssignTextureFromPath(Framework::Renderable& t);

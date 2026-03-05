@@ -187,7 +187,7 @@ void GLApp::drawTrans(Framework::Renderable& x, Framework::Animation& y,
 		glm::vec4(x.tintColor.r, x.tintColor.g, x.tintColor.b, x.tintColor.a));
 }
 
-void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
+void GLApp::draw(std::set<Entity> entities, LayerMask includeMask, float deltaTime) {
 
 	// Use game camera during play, editor camera in edit mode
 	glm::mat3 PanZoom = BuildPanZoomNDC(Framework::GameState::IsPlaying() ? gGameCamera : gEditorCamera);
@@ -195,11 +195,11 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	// ========================== REST OF YOUR DRAW ===========================
 	auto* g_coordinator = Coordinator::GetInstance();
 
-	static auto lastTime = std::chrono::high_resolution_clock::now();
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float deltaTime =
-		std::chrono::duration<float>(currentTime - lastTime).count();
-	lastTime = currentTime;
+	//static auto lastTime = std::chrono::high_resolution_clock::now();
+	//auto currentTime = std::chrono::high_resolution_clock::now();
+	//float deltaTime =
+	//	std::chrono::duration<float>(currentTime - lastTime).count();
+	//lastTime = currentTime;
 
 	// Don't advance time if not playing or if paused
 	if (!Framework::GameState::IsPlaying() || (Engine && Engine->IsPaused()))
@@ -400,6 +400,61 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask) {
 	if (depthWasOn)
 		glEnable(GL_DEPTH_TEST);
 
+}
+
+void GLApp::drawGlowing(std::set<Entity>& entities, float dt)
+{
+	glm::mat3 PanZoom = BuildPanZoomNDC(Framework::GameState::IsPlaying() ? gGameCamera : gEditorCamera);
+	auto* g_coordinator = Coordinator::GetInstance();
+
+	gBatch.Begin();
+
+	int drawOrder = 0;
+	for (auto it : entities) {
+		if (!g_coordinator->HasComponent<Framework::Renderable>(it)) continue;
+		auto& re = g_coordinator->GetComponent<Framework::Renderable>(it);
+		if (!re.glow.enabled) continue;
+
+		if (!g_coordinator->HasComponent<Framework::Transform>(it)) continue;
+		auto& tr = g_coordinator->GetComponent<Framework::Transform>(it);
+		if (!tr.isVisible) continue;
+
+		if (re.textureID == 0 || !glIsTexture(re.textureID)) continue;
+
+		// Get animation for current frame UVs (don't advance — draw() already did)
+		auto& an = g_coordinator->GetComponent<Framework::Animation>(it);
+
+		const int rows    = std::max(1, an.rows);
+		const int columns = std::max(1, an.columns);
+		float frameWidth  = 1.0f / columns;
+		float frameHeight = 1.0f / rows;
+		int   frame       = an.currentFrame % (rows * columns);
+		float uOffsetX    = (frame % columns) * frameWidth;
+		float vTop        = 1.0f - ((frame / columns + 1) * frameHeight);
+
+		const float u0 = uOffsetX;
+		const float v0 = vTop;
+		const float u1 = uOffsetX + frameWidth;
+		const float v1 = vTop + frameHeight;
+
+		glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
+		glm::mat3 modelNDC = PanZoom * M;
+
+		// Override tint with glow color × intensity (baked brightness)
+		float gi = re.glow.intensity;
+		glm::vec4 glowColor(re.glow.r * gi, re.glow.g * gi, re.glow.b * gi, 1.0f);
+
+		gBatch.Push(
+			static_cast<uint16_t>(re.shd_ref),
+			static_cast<uint16_t>(re.mdl_ref),
+			re.textureID, drawOrder,
+			modelNDC, u0, v0, u1, v1,
+			glowColor);
+
+		drawOrder++;
+	}
+
+	gBatch.Flush(shdrpgms);
 }
 
 void GLApp::cleanup()

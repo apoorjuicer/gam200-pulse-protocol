@@ -80,7 +80,7 @@ public class PauseBackgroundAnimator : Script
                 }
             }
             
-            sprite.Texture = $"../../PulseEngine/Assets/Textures/UI/pause{currentFrame}.png";
+            sprite.Texture = $"../../PulseProtocol/Assets/Textures/UI/pause{currentFrame}.png";
             frameTimer = 0f;
         }
     }

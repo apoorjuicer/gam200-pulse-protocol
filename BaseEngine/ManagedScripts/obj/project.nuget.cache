@@ -1,8 +1,18 @@
 {
   "version": 2,
-  "dgSpecHash": "jwB0tBydKWQ=",
+  "dgSpecHash": "9Yt9bIXH63o=",
   "success": true,
-  "projectFilePath": "C:\\GAM200\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+  "projectFilePath": "C:\\Users\\Reginald Lew\\Documents\\GitHub\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
   "expectedPackageFiles": [],
-  "logs": []
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "message": "Problem reading the cache file C:\\Users\\Reginald Lew\\Documents\\GitHub\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\obj\\project.nuget.cache : '<' is an invalid start of a property name. Expected a '\"'. Path: $ | LineNumber: 2 | BytePositionInLine: 0.",
+      "projectPath": "C:\\Users\\Reginald Lew\\Documents\\GitHub\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Reginald Lew\\Documents\\GitHub\\csd2401f25_team_bloop\\BaseEngine\\ManagedScripts\\ManagedScripts.csproj",
+      "targetGraphs": []
+    }
+  ]
 }

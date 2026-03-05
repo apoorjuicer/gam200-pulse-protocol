@@ -1,5 +1,8 @@
 {
     "scene": "Csharpscene",
+<<<<<<< Updated upstream
+    "entities": []
+=======
     "entities": [
         {
             "components": [
@@ -30,9 +33,9 @@
                 {
                     "render": {
                         "mdl_ref": 1.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/Characters/hero_spritesheet.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/Characters/../Characters/Dorian_Idle2_579x615.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -43,12 +46,20 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.03542499616742134,
-                        "totalFrames": 3,
-                        "columns": 3,
-                        "rows": 1,
-                        "animationSpeed": 26.0
+                        "currentFrame": 9,
+                        "elapsedTime": 0.010945644229650496,
+                        "totalFrames": 15,
+                        "columns": 4,
+                        "rows": 4,
+                        "animationSpeed": 33.19499969482422
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "PlayerAnimationController",
+                            "PlayerHealth"
+                        ]
                     }
                 },
                 {
@@ -58,29 +69,41 @@
                 },
                 {
                     "Health": {
-                        "hp": -22,
-                        "damage": 26,
-                        "isAlive": false
+                        "hp": 100,
+                        "damage": 5,
+                        "isAlive": true
                     }
                 },
                 {
                     "AABB": {
                         "min": {
-                            "x": 0.0,
-                            "y": -10.0
+                            "x": -0.5,
+                            "y": -0.5
                         },
                         "max": {
-                            "x": 529.0,
-                            "y": 529.0
+                            "x": 0.10000000149011612,
+                            "y": 0.5
                         },
-                        "width": 50.0,
-                        "height": 50.0
+                        "width": 0.6000000238418579,
+                        "height": 1.0,
+                        "type": 1
                     }
                 },
                 {
-                    "prefabInstance": {
-                        "prefabName": "Jeff",
-                        "isLinked": true
+                    "LayerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 50,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "SFX_SwordSwing_2",
+                        "volume": 1.0,
+                        "loop": false,
+                        "playOnAwake": false
                     }
                 },
                 {
@@ -90,6 +113,12 @@
                         "sortingLayer": 1,
                         "orderInLayer": 50,
                         "z": 0.0
+                    }
+                },
+                {
+                    "prefabInstance": {
+                        "prefabName": "Jeff",
+                        "isLinked": true
                     }
                 }
             ]
@@ -200,7 +229,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -449.23065185546875,
+                            "x": -449.2306518554687,
                             "y": 246.15383911132813
                         },
                         "scale": {
@@ -261,7 +290,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -241.15390014648438,
+                            "x": -241.1539001464844,
                             "y": -615.7691650390625
                         },
                         "scale": {
@@ -396,4 +425,5 @@
             ]
         }
     ]
+>>>>>>> Stashed changes
 }
