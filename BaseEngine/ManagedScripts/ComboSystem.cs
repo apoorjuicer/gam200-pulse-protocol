@@ -23,7 +23,6 @@ public class ComboSystem : Script
     public float perfectWindow = 0.08f;
     public float greatWindow   = 0.15f;
 
-    public float earlyPressMultiplier = 2.0f;
 
     // DEBUG: Set to true to auto-set a test weakness and accept all input regardless of turn state
     public bool DebugTestMode = false;
@@ -143,8 +142,7 @@ public class ComboSystem : Script
         float timeSince = (currentSongTime % beatDuration + beatDuration) % beatDuration;
         float timeUntilNext = beatDuration - timeSince;
         
-        // penalise early input 
-        float delta = Math.Min(timeSince, timeUntilNext * earlyPressMultiplier);
+        float delta = Math.Min(timeSince, timeUntilNext);
 
         // Clamp to zero in case of floating-point drift
         if (delta < 0f) delta = 0f;
