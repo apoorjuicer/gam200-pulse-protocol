@@ -524,7 +524,7 @@
                 {
                     "audiosource": {
                         "audio_id": "SFX_Border_Beat",
-                        "volume": 0.18000000715255737,
+                        "volume": 1.0,
                         "loop": false,
                         "playOnAwake": false
                     }
@@ -1382,7 +1382,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": true,
+                        "visible": false,
                         "alignment": 0
                     }
                 }
@@ -2286,7 +2286,7 @@
                 {
                     "audiosource": {
                         "audio_id": "BGM_L1_TESTING",
-                        "volume": 0.5,
+                        "volume": 1.0,
                         "loop": true,
                         "playOnAwake": false
                     }
