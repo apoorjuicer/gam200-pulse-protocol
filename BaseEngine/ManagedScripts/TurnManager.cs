@@ -20,10 +20,8 @@ public class TurnManager : Script
     // Config
     // =========================
     public int CountdownBeats = 4;
-    public int EnemyDisplayBeats = 5;
-    public int PlayerInputBeats = 6;  // 6 because StartPlayerInput() back-dates phaseStartBeat by -1,
-                                      // so beatsInPhase starts at 1 instead of 0.
-                                      // Effective beat slots = PlayerInputBeats - 1 = 5.
+    public int EnemyDisplayBeats = 5;  // effective display beats = EnemyDisplayBeats - 1 = 4 (phaseStartBeat backdated by -1)
+    public int PlayerInputBeats = 5;   // effective input beats   = PlayerInputBeats  - 1 = 4 (phaseStartBeat backdated by -1)
 
     // =========================
     // State
@@ -98,7 +96,7 @@ public class TurnManager : Script
                 break;
 
             case TurnPhase.EnemyDisplay:
-                if (beatsInPhase == EnemyDisplayBeats - 1)
+                if (beatsInPhase >= EnemyDisplayBeats)
                 {
                     ComboDisplayManager.Instance?.StartPlayerCountdownEarly();
                     StartPlayerInput(); // unlock input on the same beat

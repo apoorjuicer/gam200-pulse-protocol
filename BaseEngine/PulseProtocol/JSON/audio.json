@@ -39,14 +39,14 @@
             "id": "SFX_W_Key",
             "path": "Assets/Sound/Keys/SFX_W_Key.mp3",
             "loop": false,
-            "volume": 0.5,
+            "volume": 1.0,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_A_Key",
             "path": "Assets/Sound/Keys/SFX_A_Key.mp3",
             "loop": false,
-            "volume": 0.5,
+            "volume": 1.0,
             "audiotype": "SFX"
         },
         {

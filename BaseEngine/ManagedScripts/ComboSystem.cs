@@ -20,8 +20,8 @@ public class ComboSystem : Script
     // PERFECT ≤ 0.06s (~3-4 frames @ 60fps)
     // GREAT   ≤ 0.125s (~7-8 frames @ 60fps)
     // MISS    >  0.125s  (the central 50% of each beat interval — pressing mid-beat)
-    public float perfectWindow = 0.06f;
-    public float greatWindow   = 0.125f;
+    public float perfectWindow = 0.1f;
+    public float greatWindow   = 0.2f;
 
     // DEBUG: Set to true to auto-set a test weakness and accept all input regardless of turn state
     public bool DebugTestMode = false;
@@ -42,7 +42,7 @@ public class ComboSystem : Script
     // Beat Timing
     // =========================
     private int lastBeatIndex = -1;
-    private float timeSinceLastBeat = 0.0f;
+    private float timeSinceLastBeat = 0.5f;
 
     // Cache beat duration so we can measure distance to NEXT beat
     private float cachedBeatDuration = 0.5f; // fallback default (~120 BPM)
@@ -105,7 +105,7 @@ public class ComboSystem : Script
             return;
         }
 
-        // If a duplicate exists, let it just return silently — don't replace the initialized instance
+        
         if (Instance != this)
             return;
 
@@ -155,10 +155,14 @@ public class ComboSystem : Script
             return;
         }
 
+<<<<<<< Updated upstream
         float currentSongTime = Conductor.Instance!.GetAdjustedSongTime();
+=======
+>>>>>>> Stashed changes
         float beatDuration = Conductor.Instance!.GetBeatDuration();
+        float currentSongTime = Conductor.Instance!.GetAdjustedSongTime();
 
-        float timeSince = currentSongTime % beatDuration;
+        float timeSince = (currentSongTime % beatDuration + beatDuration) % beatDuration;
         float timeUntilNext = beatDuration - timeSince;
         float delta = Math.Min(timeSince, timeUntilNext);
 
