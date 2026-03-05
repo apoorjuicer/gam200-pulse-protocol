@@ -176,7 +176,7 @@ public class ScriptName : Script
         //   textureName(3rd parameter) of SpawnParticles must match the id inside texture.json 
         //   id is created in this manner inside of texture.json:
         //   { 
-        //     "id": "particle", "path": "../../PulseEngine/Assets/Textures/VFX/star.png",
+        //     "id": "particle", "path": "../../PulseProtocol/Assets/Textures/VFX/star.png",
         //     "vert_shader_path": "shader/sprite_vs.vert", "frag_shader_path": "shader/sprite_fs.frag",
         //     "mdl_ref": 1, "shd_ref": 2 
         //   }
