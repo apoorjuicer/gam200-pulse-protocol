@@ -588,8 +588,6 @@
 		if (p.is_absolute()) return res->path;
 		return (basePath / p).lexically_normal().string();
 
-		std::cout << "  (no ../../ prefix, using as-is)\n";
-		return res->path;
 	}
 	std::string AssetRegistry::GetFontItemPath(std::string const& id)   const {
 		auto* res = FindFont(id);

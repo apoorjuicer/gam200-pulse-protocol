@@ -21,8 +21,9 @@
 #include "CoreEngine/Core/CoreEngine.h"
 #pragma warning(push, 0)
 #include "FMOD_API/api/core/inc/fmod.hpp"
+static_assert(true, "fmod.hpp loaded");
 #include "FMOD_API/api/core/inc/fmod_errors.h"
-
+#include <cmath>
 #pragma warning(pop)
 
 // #include "../CoreEngine/Core/CoreEngine.h"
@@ -123,6 +124,32 @@ void AudioManager::Initialize()
         return; // failed to initialize FMOD engine
     }
 
+    unsigned int bufferLen = 0;
+    int numBuffers = 0;
+    mSystem->getDSPBufferSize(&bufferLen, &numBuffers);
+
+    mDSPBufferLength = bufferLen;
+    mDSPNumBuffers = numBuffers;
+
+
+
+    int sampleRate = 0;
+    FMOD_SPEAKERMODE speakerMode;
+    int numRawSpeakers = 0;
+
+    FMOD_RESULT r = mSystem->getSoftwareFormat(
+        &sampleRate,
+        &speakerMode,
+        &numRawSpeakers
+    );
+    FMOD_CHECK(r, "getSoftwareFormat");
+
+    mMixSampleRate = sampleRate;
+
+    std::cout << "[AudioManager] MixRate=" << mMixSampleRate
+        << " DSPBuffer=" << bufferLen
+        << " x " << numBuffers << "\n";
+
     std::cout << "[AudioManager] FMOD initialized successfully.\n";
 
     // 3) Get the master channel group
@@ -195,6 +222,8 @@ void AudioManager::Initialize()
     // PlaySound("beat_placeholder");
     std::cout << "[AudioManager] AudioManager initialization completed with mixers.\n";
 
+
+
 } // end init
 
 void AudioManager::Update()
@@ -211,9 +240,9 @@ void AudioManager::Update()
     //     ProcessAudioSources(); // 
     //     mSystem->update();
     // }
-    mSystem->update(); 
     if (!Engine || !Engine->IsPlaying()) return;
     ProcessAudioSources();
+    mSystem->update();
 }
 
 void AudioManager::Shutdown()
@@ -580,17 +609,29 @@ void AudioManager::PlaySound(std::string const &id)
 
 /**/
 
+//double AudioManager::GetBGMPositionSeconds() const
+//{
+//    if (!mCurrentBGMCh)
+//        return 0.0;
+//
+//    unsigned int ms = 0; // position in milliseconds
+//    FMOD_RESULT result = mCurrentBGMCh->getPosition(&ms, FMOD_TIMEUNIT_MS);
+//    FMOD_CHECK(result, "getPosition(BGM)");
+//
+//    return static_cast<double>(ms) / 1000.0; // convert to seconds
+//}
+
 double AudioManager::GetBGMPositionSeconds() const
 {
-    if (!mCurrentBGMCh)
-        return 0.0;
+    if (!mCurrentBGMCh) return 0.0;
 
-    unsigned int ms = 0; // position in milliseconds
-    FMOD_RESULT result = mCurrentBGMCh->getPosition(&ms, FMOD_TIMEUNIT_MS);
-    FMOD_CHECK(result, "getPosition(BGM)");
+    unsigned int pcm = 0;
+    FMOD_RESULT r = mCurrentBGMCh->getPosition(&pcm, FMOD_TIMEUNIT_PCM);
+    FMOD_CHECK(r, "getPosition(BGM, PCM)");
 
-    return static_cast<double>(ms) / 1000.0; // convert to seconds
+    return double(pcm) / double(mMixSampleRate); // cache from getSoftwareFormat()
 }
+
 bool AudioManager::UnloadAudio(std::string const &id)
 {
     // -------- SFX --------
@@ -921,6 +962,120 @@ void AudioManager::StopPlayingAllAudio() {
         master->stop();
     }
 }
+
+/*
+*/
+double AudioManager::GetSongTimeSec() const {
+    if (!IsBGMPlaying() || !mCurrentBGMCh || mMixSampleRate <= 0)
+        return 0.0;
+
+    // Use parent clock domain for stability with setDelay scheduling
+    unsigned long long dsp = 0, parent = 0;
+    FMOD_RESULT r = mCurrentBGMCh->getDSPClock(&dsp, &parent);
+    FMOD_CHECK(r, "Channel::getDSPClock");
+
+    double t = double(parent - mSongDspStart) / double(mMixSampleRate);
+
+    // Apply calibration/latency offset:
+    // If testers must hit EARLY, increase mAudioOffsetMs so judged time is slightly BEHIND.
+    t -= (mAudioOffsetMs / 1000.0);
+    return t;
+}
+void AudioManager::StartBGMAtDsp(unsigned long long dspStart) {
+    if (!mCurrentBGMCh)
+        return;
+
+    // Ensure we're paused while applying delay
+    mCurrentBGMCh->setPaused(true);
+
+    FMOD_RESULT r = mCurrentBGMCh->setDelay(dspStart, 0, false);
+    FMOD_CHECK(r, "Channel::setDelay");
+
+    r = mCurrentBGMCh->setPaused(false);
+    FMOD_CHECK(r, "Channel::setPaused(false)");
+
+    mSongDspStart = dspStart;   // store start time in SAME clock domain used in GetSongTimeSec()
+    mBgmPlaying = true;
+}
+void AudioManager::StartBGMWithLatencyComp() {
+    if (!mCurrentBGMCh || mMixSampleRate <= 0)
+        return;
+
+    // Estimate latency in mixer samples
+    const unsigned long long latencySamples =
+        (unsigned long long)mDSPBufferLength * (unsigned long long)mDSPNumBuffers;
+
+    // Get a stable clock domain: use master group if available, else fall back to channel’s parent clock
+    unsigned long long dsp = 0, parent = 0;
+    if (mMasterGroup)
+    {
+        FMOD_RESULT r = mMasterGroup->getDSPClock(&dsp, &parent);
+        FMOD_CHECK(r, "MasterGroup::getDSPClock");
+    }
+    else
+    {
+        FMOD_RESULT r = mCurrentBGMCh->getDSPClock(&dsp, &parent);
+        FMOD_CHECK(r, "Channel::getDSPClock (fallback)");
+    }
+
+    // Schedule start "audibly soon" (now + estimated latency)
+    const unsigned long long start = parent + latencySamples;
+    StartBGMAtDsp(start);
+}
+double AudioManager::GetBeatFloat(double songTimeSec) const {
+    // beats = seconds * (beats/sec)
+    return songTimeSec * (double(mBpm) / 60.0);
+}
+int AudioManager::GetBeatIndex(double songTimeSec) const {
+    // current beat number (0-based)
+    return (int)std::floor(GetBeatFloat(songTimeSec));
+}
+double AudioManager::GetTimeOfBeatSec(int beatIndex) {
+    if (mBpm <= 0) return 0.0;
+    return (60.0 / double(mBpm)) * double(beatIndex);
+}
+double AudioManager::GetStepFloat(double songTimeSec, int stepsPerBeat) const {
+    if (stepsPerBeat <= 0) return 0.0;
+    return GetBeatFloat(songTimeSec) * double(stepsPerBeat);
+}
+int AudioManager::GetStepIndex(double songTimeSec, int stepsPerBeat) const {
+    if (stepsPerBeat <= 0) return 0;
+    return (int)std::floor(GetStepFloat(songTimeSec, stepsPerBeat));
+}
+double AudioManager::GetTimeOfStepSec(int stepIndex, int stepsPerBeat) const {
+    if (mBpm <= 0 || stepsPerBeat <= 0) return 0.0;
+    // stepIndex steps where each beat is subdivided into stepsPerBeat
+// seconds = (60/bpm) * (stepIndex/stepsPerBeat)
+    return (60.0 / double(mBpm)) * (double(stepIndex) / double(stepsPerBeat));
+}
+double AudioManager::QuantizeTimeSec(double timeSec, int stepsPerBeat) const {
+    if (mBpm <= 0 || stepsPerBeat <= 0) return timeSec;
+
+    // Convert time -> steps, round to nearest step, convert back
+    const double beats = timeSec * (double(mBpm) / 60.0);
+    const double steps = beats * double(stepsPerBeat);
+    const double snappedSteps = std::floor(steps + 0.5); // nearest
+    const double snappedBeats = snappedSteps / double(stepsPerBeat);
+
+    return snappedBeats * (60.0 / double(mBpm));
+}
+double AudioManager::GetHitErrorMs(double inputTimeSec, double noteTimeSec) const {
+    return (inputTimeSec - noteTimeSec) * 1000.0;
+}
+//Judgement JudgeHit(double inputTimeSec, double noteTimeSec);
+void  AudioManager::SetAudioOffsetMs(double ms) {
+    mAudioOffsetMs = ms;
+}
+double  AudioManager::GetEstimatedOutputLatencyMs() {
+    if (mMixSampleRate <= 0) return 0.0;
+
+    // Latency approx = bufferLen * numBuffers samples
+    const double latencySamples =
+        double(mDSPBufferLength) * double(mDSPNumBuffers);
+
+    return 1000.0 * (latencySamples / double(mMixSampleRate));
+}
+
 
 /*
    Every FMOD function returns an FMOD_RESULT
