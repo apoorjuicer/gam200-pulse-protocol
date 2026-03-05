@@ -15,6 +15,7 @@ public class ComboDisplayManager : Script
 
     private static Dictionary<int, ComboKeySlot> enemySlots = new Dictionary<int, ComboKeySlot>();
     private static Dictionary<int, ComboKeySlot> playerSlots = new Dictionary<int, ComboKeySlot>();
+    private static Dictionary<int, GlowOutlineScript> outlineSlots = new Dictionary<int, GlowOutlineScript>();
     private static ComboJudgementDisplay? judgementScript = null;
 
     private bool isRevealing = false;
@@ -64,6 +65,17 @@ public class ComboDisplayManager : Script
 
     public static void UnregisterJudgement() { judgementScript = null; }
 
+    public static void RegisterOutlineSlot(int slotIndex, GlowOutlineScript script)
+    {
+        outlineSlots[slotIndex] = script;
+    }
+
+    public static void TriggerOutlineGlow(int slotIndex)
+    {
+        if (outlineSlots.ContainsKey(slotIndex))
+            outlineSlots[slotIndex].TriggerGlow();
+    }
+
     // =========================
     // Update
     // =========================
@@ -81,7 +93,10 @@ public class ComboDisplayManager : Script
             isCountingDown = true;
             lastCountdownBeat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() : -1;
             if (playerSlots.ContainsKey(0) && currentWeakness.Length > 0)
+            {
                 playerSlots[0].StartCountdown(currentWeakness[0]);
+                TriggerOutlineGlow(0);
+            }
             countdownCurrentSlot = 1;
         }
 
@@ -100,7 +115,10 @@ public class ComboDisplayManager : Script
                 {
                     lastCountdownBeat = currentBeat;
                     if (playerSlots.ContainsKey(countdownCurrentSlot))
+                    {
                         playerSlots[countdownCurrentSlot].StartCountdown(currentWeakness[countdownCurrentSlot]);
+                        TriggerOutlineGlow(countdownCurrentSlot);
+                    }
                     countdownCurrentSlot++;
 
                     if (countdownCurrentSlot >= currentWeakness.Length)
@@ -164,7 +182,8 @@ public class ComboDisplayManager : Script
         isCountingDown = false;
 
         enemySlots.Clear();
-        playerSlots.Clear();
+        playerSlots.Clear();    
+        outlineSlots.Clear();
         judgementScript = null;
 
         Console.WriteLine("[ComboDisplayManager] Initialized");
@@ -293,6 +312,10 @@ public class ComboDisplayManager : Script
         {
             if (playerSlots.ContainsKey(i))
                 playerSlots[i].HideInstant();
+
+            // Reset outline glow
+            if (outlineSlots.ContainsKey(i))
+                outlineSlots[i].ResetGlow();
         }
     }
 
@@ -336,7 +359,10 @@ public class ComboDisplayManager : Script
         // isRevealing = false;
 
         if (playerSlots.ContainsKey(0))
+        {
             playerSlots[0].StartCountdown(currentWeakness[0]);
+            TriggerOutlineGlow(0);
+        }
 
         countdownCurrentSlot = 1;
         isCountingDown = true;

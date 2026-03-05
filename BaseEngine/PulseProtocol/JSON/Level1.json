@@ -1836,7 +1836,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border 0.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1916,7 +1916,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border 1.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1996,7 +1996,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border 2.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2076,7 +2076,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border 3.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
