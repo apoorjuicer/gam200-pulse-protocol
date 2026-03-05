@@ -63,7 +63,7 @@ public class OrderSlipCurrentIcon : Script
         SpriteComponent spr = GetSprite();
         if (spr.HasSprite())
         {
-            spr.Texture = "../../PulseEngine/Assets/Textures/UI/" + spriteName;
+            spr.Texture = "../../PulseProtocol/Assets/Textures/UI/" + spriteName;
             Console.WriteLine($"[OrderSlipCurrent] Sprite -> {spriteName}\n");
         }
         else

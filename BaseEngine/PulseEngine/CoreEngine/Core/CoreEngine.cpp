@@ -822,12 +822,12 @@ void CoreEngine::Setup()
 	// 6. Logic   — C# scripts run, Conductor reads fresh audio position
 	// 7. Graphics — renders the final game state last
 	g_coordinator->RegisterSystem<InputManager>();
-	g_coordinator->RegisterSystem<GameplayFSMSystem>();
+	g_coordinator->RegisterSystem<LogicSystem>();
 	g_coordinator->RegisterSystem<GraphicsManager>();  
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<CollisionManager>();
 	g_coordinator->RegisterSystem<SceneManager>();
-	g_coordinator->RegisterSystem<LogicSystem>();
+	g_coordinator->RegisterSystem<GameplayFSMSystem>();
 
 	// for clearing script when scene change. pass an instance of scenemanager
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
