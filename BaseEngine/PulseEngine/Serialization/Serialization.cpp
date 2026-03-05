@@ -31,10 +31,16 @@ std::string Config::GetConfigPath() const
 {
     return ConfigPath;
 }
+std::string Config::GetFirstScenePath() const
+{
+    return FirstScene;
+}
+
 
 void Config::SetWindowWidth(int w) { WindowWidth = w; }
 void Config::SetWindowHeight(int h) { WindowHeight = h; }
 void Config::SetConfigPath(std::string path) { ConfigPath = std::move(path); }
+void Config::SetFirstScenePath(std::string path) { FirstScene = std::move(path); }
 
 void Config::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const
 {
@@ -48,6 +54,11 @@ void Config::Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType
                       static_cast<SizeType>(GetConfigPath().length()),
                       alloc);
     out.AddMember("ConfigPath", pathVal, alloc);
+
+    pathVal.SetString(GetConfigPath().c_str(),
+        static_cast<SizeType>(GetConfigPath().length()),
+        alloc);
+    out.AddMember("FirstScene", pathVal, alloc);
 }
 void Config::Deserialize(const rapidjson::Value &in)
 {
@@ -68,6 +79,10 @@ void Config::Deserialize(const rapidjson::Value &in)
     if (in.HasMember("ConfigPath") && in["ConfigPath"].IsString())
     {
         SetConfigPath(in["ConfigPath"].GetString());
+    }
+    if (in.HasMember("FirstScene") && in["FirstScene"].IsString())
+    {
+        SetConfigPath(in["FirstScene"].GetString());
     }
 }
 

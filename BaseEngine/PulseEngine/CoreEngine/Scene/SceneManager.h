@@ -130,7 +130,7 @@ private:
 	std::string LastScene;			// For ESC navigation - the scene we came FROM
 	std::vector<Entity> SceneEntityList;
 
-	std::string StartingScene = "PulseProtocol/JSON/MainMenu.json";
+	std::string StartingScene = "PulseProtocol/JSON/MainMenu.json"; // make this into cmake in the future, if they no say in the config, then make a blank screen.
 
 	void Deserialize(const rapidjson::Value& in);
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
