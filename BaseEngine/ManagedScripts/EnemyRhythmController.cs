@@ -103,6 +103,9 @@ public class EnemyRhythmController : Script
     // leave the weakness pinned to a stale ComboSystem from a previous session.
     private ComboSystem? weaknessSetOnInstance = null;
 
+    // Footstep alternation
+    // private bool footstepToggle = false;
+
     // Debug
     private int collisionCheckCount = 0;
 
@@ -482,6 +485,16 @@ public class EnemyRhythmController : Script
         TransformComponent myTf = GetTransform();
         myTf.X -= StepDistance;
         Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}");
+
+        // // Dynamic footstep volume based on distance to player
+        // AudioComponent audio = GetAudio();
+        // float startX = 977f;
+        // float stopX = ManualAttackRange;
+        // float t = 1f - Math.Clamp((myTf.X - stopX) / (startX - stopX), 0f, 1f);
+        // float volume = 0.05f + (0.5f * (t * t));
+        // audio.SetSfxVolume(volume);
+        // audio.PlaySFX(footstepToggle ? "SFX_Rat_Steps_1" : "SFX_Rat_Steps_2");
+        // footstepToggle = !footstepToggle;
     }
 
     private void AttackPlayer()
