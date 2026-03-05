@@ -155,10 +155,6 @@ public class ComboSystem : Script
             return;
         }
 
-<<<<<<< Updated upstream
-        float currentSongTime = Conductor.Instance!.GetAdjustedSongTime();
-=======
->>>>>>> Stashed changes
         float beatDuration = Conductor.Instance!.GetBeatDuration();
         float currentSongTime = Conductor.Instance!.GetAdjustedSongTime();
 
