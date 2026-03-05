@@ -39,13 +39,16 @@ private:
 	int WindowHeight = 0;
 	//std::string ConfigPath = "../../PulseEngine/JSON/config.json";
     std::string ConfigPath = "";
+    std::string FirstScene = "";
 public:
 	int GetWindowWidth() const;
 	int GetWindowHeight() const;
 	std::string GetConfigPath() const;
+    std::string GetFirstScenePath() const;
 	void SetWindowWidth(int w);
 	void SetWindowHeight(int h);
 	void SetConfigPath(std::string path);
+    void SetFirstScenePath(std::string path);
 	void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
 	void Deserialize(const rapidjson::Value &in);
 };
