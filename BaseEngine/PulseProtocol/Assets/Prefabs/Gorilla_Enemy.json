@@ -22,7 +22,7 @@
         "mdl_ref": 0.0,
         "shd_ref": 2.0,
         "useTexture": true,
-        "spriteName": "../../PulseProtocol/Assets/Textures/Enemies/BlueGorillaEnemy.png",
+        "spriteName": "../../PulseProtocol/Assets/Textures/Enemies/Gorilla_Idle_1459x977.png",
         "tintColor": {
           "r": 1.0,
           "g": 1.0,
@@ -35,9 +35,9 @@
       "animation": {
         "currentFrame": 0,
         "elapsedTime": 0.0,
-        "totalFrames": 1,
-        "columns": 1,
-        "rows": 1,
+        "totalFrames": 16,
+        "columns": 4,
+        "rows": 4,
         "animationSpeed": 12.0
       }
     },

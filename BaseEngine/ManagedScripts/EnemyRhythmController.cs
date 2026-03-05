@@ -12,10 +12,10 @@ public class EnemyRhythmController : Script
     public static EnemyRhythmController? Instance { get; private set; }
 
     // === SPRITE SHEET SETTINGS ===
-    public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_634x433";
-    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_634x433";
-    public string AttackSpriteSheet = "../Enemies/Rat_Attack_spritesheet_634x433";
-    public string HurtSpriteSheet = "../Enemies/Rat_Hurt_spritesheet_634x433";
+    public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_764x456";
+    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_764x456";
+    public string AttackSpriteSheet = "../Enemies/Rat_Attack_spritesheet_764x456";
+    public string HurtSpriteSheet = "../Enemies/Rat_Hurt_spritesheet_764x456";
 
     public int IdleFrames = 15;
     public int IdleColumns = 4;
