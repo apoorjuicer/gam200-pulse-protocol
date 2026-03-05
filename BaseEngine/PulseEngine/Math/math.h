@@ -80,17 +80,17 @@ public:
 	float &y; //!< Access to Y component.
 }; // end of vector class
 
-float distance(Vector2 v0, Vector2 v1);
-float distanceSq(Vector2 v0, Vector2 v1);
-float dot(Vector2 v0, Vector2 v1);
-float cross(Vector2 v0, Vector2 v1);
+DLL_API float distance(Vector2 v0, Vector2 v1);
+DLL_API float distanceSq(Vector2 v0, Vector2 v1);
+DLL_API float dot(Vector2 v0, Vector2 v1);
+DLL_API float cross(Vector2 v0, Vector2 v1);
 
-Vector2 operator+(Vector2 v0, Vector2 v1);
-Vector2 operator-(Vector2 v0, Vector2 v1);
-Vector2 operator*(Vector2 v, float s); // vector * scalar
-Vector2 operator*(float s, Vector2 v); // scalar * vector
-Vector2 operator/(Vector2 v, float s); // vector / scalar
-std::ostream &operator<<(std::ostream &os, Vector2 const &vec);
+DLL_API Vector2 operator+(Vector2 v0, Vector2 v1);
+DLL_API Vector2 operator-(Vector2 v0, Vector2 v1);
+DLL_API Vector2 operator*(Vector2 v, float s); // vector * scalar
+DLL_API Vector2 operator*(float s, Vector2 v); // scalar * vector
+DLL_API Vector2 operator/(Vector2 v, float s); // vector / scalar
+DLL_API std::ostream &operator<<(std::ostream &os, Vector2 const &vec);
 
 class DLL_API Matrix3x3
 {
@@ -149,9 +149,9 @@ public:
 }; // end of matrix 3 class
 
 // * operator: matrix multiplication
-Matrix3x3 operator*(Matrix3x3 const &l, Matrix3x3 const &r);
+DLL_API Matrix3x3 operator*(Matrix3x3 const &l, Matrix3x3 const &r);
 
 // * operator: scalar multiplication
-Matrix3x3 operator*(float s, Matrix3x3 const &mat);
+DLL_API Matrix3x3 operator*(float s, Matrix3x3 const &mat);
 
-std::ostream &operator<<(std::ostream &os, Matrix3x3 const &mat3);
+DLL_API std::ostream &operator<<(std::ostream &os, Matrix3x3 const &mat3);

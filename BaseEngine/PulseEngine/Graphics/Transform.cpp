@@ -223,4 +223,15 @@ namespace Framework
 		return true;
 	}
 
+
+	std::ostream& operator<<(std::ostream& os, Transform const& t) {
+		os << "[Transform Component] contains these values\n";
+		os << "Transform pos:" << t.Pos << "\n";
+		os << "Transform scale:" << t.Scale << "\n";
+		os << "Transform rot:" << t.Rotation << "\n";
+
+		return os;
+	}
+
+
 } // end of namespace

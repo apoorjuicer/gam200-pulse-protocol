@@ -6,6 +6,7 @@
 #include "CoreEngine/Factory/Factory.h" 
 #include "SnapShot.h"
 #include "EditorTypes.h"
+#include <iostream>
 //using Entity = std::uint32_t; lazy put header
 //std::uint32_t = Entity  
 
@@ -42,7 +43,7 @@ namespace PulseEditor
         return static_cast<int>(it - order.begin());
     }
 
-    inline void RebindHandle(std::unordered_map<Entity, std::shared_ptr<EntityHandle>>& handleOf,
+    inline void RebindHandle(std::unordered_map<Entity, std::shared_ptr<EntityHandle>>& hof,
         std::shared_ptr<EntityHandle> const& h,
         Entity oldId,
         Entity newId)
@@ -50,15 +51,15 @@ namespace PulseEditor
         if (!h) return;
 
         if (oldId != INVALID_ENTITY)
-            handleOf.erase(oldId);
+            hof.erase(oldId);
 
         if (newId != INVALID_ENTITY)
-            handleOf[newId] = h;
+            hof[newId] = h;
     }
 
     inline std::shared_ptr<EntityHandle>
         PushCreateDefault(UndoManager& undo, Factory& factory, std::vector<Entity>& displayOrder
-        , std::unordered_map<Entity, std::shared_ptr<EntityHandle>>& handleOf)
+        , std::unordered_map<Entity, std::shared_ptr<EntityHandle>>& hof)
     {
         // Shared stable handle for this conceptual object
         auto h = std::make_shared<EntityHandle>();
@@ -67,7 +68,7 @@ namespace PulseEditor
         {
             Entity created = factory.DefaultObj();
             h->id = created;
-            handleOf[created] = h;
+            hof[created] = h;
             // Put into display list (optional)
             displayOrder.push_back(created);
         }
@@ -78,7 +79,7 @@ namespace PulseEditor
         // - shared handle h (stable)
         UndoManager::Action a;
 
-        a.undo = [h, &factory, &displayOrder, &handleOf]()
+        a.undo = [h, &factory, &displayOrder, &hof]()
             {
                 // Undo create = delete the currently live entity
                 if (h->id == INVALID_ENTITY) return;
@@ -97,7 +98,7 @@ namespace PulseEditor
                 h->id = INVALID_ENTITY;
             };
 
-        a.redo = [h, &factory, &displayOrder, &handleOf]()
+        a.redo = [h, &factory, &displayOrder, &hof]()
             {
                 // Redo create = create a NEW entity (new id), then update the handle
                 if (h->id != INVALID_ENTITY)
@@ -108,7 +109,7 @@ namespace PulseEditor
 
                 Entity createdAGN = factory.DefaultObj();
                 h->id = createdAGN;
-                handleOf[createdAGN] = h;
+                hof[createdAGN] = h;
 
                 // Add back into UI list
                 displayOrder.push_back(createdAGN);
@@ -123,7 +124,7 @@ namespace PulseEditor
             Factory& factory,
             std::vector<Entity>& displayOrder,
             std::shared_ptr<EntityHandle> h
-        , std::unordered_map<Entity, std::shared_ptr<EntityHandle>>& handleOf)
+        , std::unordered_map<Entity, std::shared_ptr<EntityHandle>>& hof)
     {
         if (!h || h->id == INVALID_ENTITY)
             return; // nothing to delete
@@ -138,14 +139,14 @@ namespace PulseEditor
             Entity old = h->id;
             RemoveFromDisplayOrder(displayOrder, old);
             factory.DeleteEntity(old);
-            handleOf.erase(old);
+            hof.erase(old);
             h->id = INVALID_ENTITY; //assign to invalid
         }
 
         UndoManager::Action a;
         //the mutable keyword in a lambda expression allows the body of the lambda 
         // to modify variables that were captured by value
-        a.undo = [h, snap, index, &factory, &displayOrder, &handleOf]() mutable
+        a.undo = [h, snap, index, &factory, &displayOrder, &hof]() mutable
             {
                 // Undo delete = recreate entity from snapshot
                 if (h->id != INVALID_ENTITY)
@@ -156,7 +157,7 @@ namespace PulseEditor
 
                 std::cout << "[CreateFromSnapshot] UNDOING..\n";
 
-                Entity recreated = CreateFromSnapshot(snap, factory);
+                Entity recreated = CreateFromSnapshot(snap);
                 if (recreated == INVALID_ENTITY) {
                     std::cout << "[CreateFromSnapshot] recreated is invalid entitiy..\n";
                     return;
@@ -164,7 +165,7 @@ namespace PulseEditor
               
 
                 h->id = recreated;
-                handleOf[recreated] = h;
+                hof[recreated] = h;
 
                 // Restore UI order at original index (optional)
                 InsertIntoDisplayOrder(displayOrder, recreated, index);
@@ -176,7 +177,7 @@ namespace PulseEditor
          
             };
 
-        a.redo = [h, &factory, &displayOrder, &handleOf]()
+        a.redo = [h, &factory, &displayOrder, &hof]()
             {
                 // Redo delete = delete the currently live entity
                 if (h->id == INVALID_ENTITY)
@@ -184,7 +185,7 @@ namespace PulseEditor
                 Entity old = h->id;
                 RemoveFromDisplayOrder(displayOrder, old);
                 factory.DeleteEntity(old);
-                handleOf.erase(old);
+                hof.erase(old);
                 h->id = INVALID_ENTITY;
             };
 
@@ -200,8 +201,15 @@ namespace PulseEditor
         Framework::Transform const& before,
         Framework::Transform const& after)
     {
-        if (!h || h->id == INVALID_ENTITY) return;
+        std::cout << "[UndoH] PushTransformEdit called\n";
 
+        std::cout << "[UndoH] h ptr = " << h.get()
+            << " id = " << (h ? h->id : INVALID_ENTITY)
+            << " INVALID_ENTITY = " << INVALID_ENTITY
+            << "\n";
+
+        if (!h || h->id == INVALID_ENTITY) return;
+        std::cout << "[UndoH] PushTransformEdit no early return\n";
         UndoManager::Action a;
 
         a.undo = [h, before]()
@@ -212,6 +220,8 @@ namespace PulseEditor
                 if (!c->HasComponent<Framework::Transform>(h->id)) return;
 
                 c->GetComponent<Framework::Transform>(h->id) = before;
+                std::cout << "[UndoH] undo transform for entity id " << h->id 
+                    << "[UndoH] transform values are " << before << "\n";
             };
 
         a.redo = [h, after]()
@@ -222,6 +232,8 @@ namespace PulseEditor
                 if (!c->HasComponent<Framework::Transform>(h->id)) return;
 
                 c->GetComponent<Framework::Transform>(h->id) = after;
+                //std::cout << "[UndoH] redo transform for entity id " << h->id
+                 //   << "[UndoH] transform values are " << after << "\n";
             };
 
         undo.Push(std::move(a));

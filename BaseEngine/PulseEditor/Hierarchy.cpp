@@ -577,7 +577,7 @@ namespace PulseEditor
         // -----------------------------------------------------------------------------
         if (ImGui::Button("+"))
         {
-            Entity prevSelected = selectedEntity;
+            //Entity prevSelected = selectedEntity;
 
             //Factory factory;
             selectedHandle = PushCreateDefault(mUndo, Editorfactory, entityDisplayOrder, handleOf);

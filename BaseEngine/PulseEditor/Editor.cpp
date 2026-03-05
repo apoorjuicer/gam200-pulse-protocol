@@ -53,10 +53,14 @@ namespace PulseEditor
     UndoManager mUndo;
    // const Entity INVALID_ENTITY = static_cast<Entity>(-1);
     Entity selectedEntity = INVALID_ENTITY;
+
     std::shared_ptr<EntityHandle> selectedHandle = nullptr;
     std::vector<Entity> entityDisplayOrder{};
     std::unordered_map<Entity, std::shared_ptr<EntityHandle>> handleOf{};
     Factory Editorfactory;
+
+// keep synced every frame / on selection change
+
     // this vector maintains the order entities appear in the hierarchy
     static GLFWwindow* s_Window = nullptr;
     static bool s_restoreNextFrame = false;

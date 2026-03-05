@@ -317,7 +317,7 @@ namespace PulseEditor
     //    return newEntities[0]; // root
     //}
     
-    Entity CreateFromSnapshot(EntitySnapshot const& snap,Factory f)
+    Entity CreateFromSnapshot(EntitySnapshot const& snap)
     {
         // Create new entity and apply snapshot data
         // Return new entity id

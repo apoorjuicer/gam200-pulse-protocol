@@ -80,18 +80,22 @@ namespace PulseEditor
         // Started dragging / editing THIS widget
         if (ImGui::IsItemActivated())
         {
+            std::cout << "editing widget transform\n";
             beforeEdit = currentTransform;
+            std::cout << "[INSPECTOR] BEFORE EDITTING values" << beforeEdit << "\n";
             isEditing = true;
         }
 
         // Finished editing THIS widget
         if (ImGui::IsItemDeactivatedAfterEdit() && isEditing)
         {
+            std::cout << "done editing widget transform\n";
             Framework::Transform after = currentTransform;
-
+            std::cout << "[INSPECTOR] AFTER EDITTING values" << after << "\n";
             // Only push if changed ( Transform probably has no operator!=, so compare fields)
             if (beforeEdit != after)   // adjust to your fields
             {
+                std::cout << "BEFORE != AFTER !!!!! pushing transform edit\n";
                 PushTransformEdit(undo, h, beforeEdit, after);
             }
 
@@ -293,6 +297,8 @@ namespace PulseEditor
     // -------------------------------------------------------------------------
     void DrawInspectorWindow(ImGuiID rightDockID)
     {
+
+
         // Dock on the right
         if (rightDockID)
             ImGui::SetNextWindowDockID(rightDockID, ImGuiCond_FirstUseEver);
@@ -505,6 +511,13 @@ namespace PulseEditor
 
             ImGui::Separator();
         }
+
+
+        if (!selectedHandle) {
+            selectedHandle = std::make_shared<EntityHandle>();
+        }
+        selectedHandle->id = selectedEntity;
+
 
         // ---------------------------------------------------------------------
         // Name component

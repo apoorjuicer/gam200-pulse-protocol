@@ -123,7 +123,7 @@ namespace PulseEditor
     //// on failure.  Also re-attaches scripts if attachScripts == true.
     //Entity RestoreSceneSnapshot(SceneSnapshot& scene, bool attachScripts = true);
 
-    Entity CreateFromSnapshot(EntitySnapshot const& snap,Factory f);
+    Entity CreateFromSnapshot(EntitySnapshot const& snap);
     EntitySnapshot MakeEntitySnapshot(Entity e);
 
 } // namespace PulseEditor
