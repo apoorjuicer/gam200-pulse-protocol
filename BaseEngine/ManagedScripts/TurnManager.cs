@@ -193,8 +193,8 @@ public class TurnManager : Script
         Console.WriteLine($"[TurnManager] Displaying combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input LOCKED");
 
-        AudioComponent audio = GetAudio();
-        audio.PlaySFX("SFX_Enemy_Ping");
+        // AudioComponent audio = GetAudio();
+        // audio.PlaySFX("SFX_Enemy_Ping");
        
         if (ComboSystem.Instance != null)
         {
@@ -226,8 +226,8 @@ public class TurnManager : Script
         Console.WriteLine($"[TurnManager] Input the combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input UNLOCKED");
 
-        AudioComponent audio = GetAudio();
-        audio.PlaySFX("SFX_Player_Ping");
+        // AudioComponent audio = GetAudio();
+        // audio.PlaySFX("SFX_Player_Ping");
 
         // Enemy freezes during player input (handled in EnemyRhythmController.HandleBeat)
 
