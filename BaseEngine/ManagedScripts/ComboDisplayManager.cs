@@ -108,7 +108,7 @@ public class ComboDisplayManager : Script
             float timeUntilNextBeat = beatDuration - timeSinceBeat;
 
             // Trigger next slot when we're ScaleAnimDuration away from the next beat
-            if (timeUntilNextBeat <= 0.25f && countdownCurrentSlot < currentWeakness.Length)
+            if (timeUntilNextBeat <= 0.05f && countdownCurrentSlot < currentWeakness.Length)
             {
                 int currentBeat = Conductor.Instance.GetCurrentBeat();
                 if (currentBeat > lastCountdownBeat)

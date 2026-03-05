@@ -187,7 +187,8 @@ public class TurnManager : Script
         Console.WriteLine($"[TurnManager] Displaying combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input LOCKED");
 
-        audio.PlaySFX("SFX_EnemyTurn");
+        AudioComponent audio = GetAudio();
+        audio.PlaySFX("SFX_Enemy_Ping");
        
         if (ComboSystem.Instance != null)
         {
