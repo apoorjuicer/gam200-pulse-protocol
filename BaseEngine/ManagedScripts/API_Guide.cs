@@ -221,7 +221,7 @@ public class ScriptName : Script
 
         entityFade.FadeOut(1.0f);           // fade THIS entity to 0 alpha over 1 second
         entityFade.FadeIn(1.0f);            // fade THIS entity to 1 alpha over 1 second
-        entityFade.FadeTo(0.5f, 1.0f);      // tween alpha to any target (0.0–1.0) over duration
+        entityFade.FadeTo(0.5f, 1.0f);      // tween alpha to any target (0.0-1.0) over duration
         entityFade.SetAlpha(1.0f);          // set alpha instantly (no tween)
 
         float entityAlpha = entityFade.GetAlpha();   // current sprite alpha
@@ -235,7 +235,7 @@ public class ScriptName : Script
 
         // 17. PostProcessAPI - SCREEN-WIDE bloom post-processing.
         //     Adds a glow halo around bright pixels (sprites, particles, VFX).
-        //     Bloom is OFF by default — you must enable it explicitly.
+        //     Bloom is OFF by default - you must enable it explicitly.
         //     This is a STATIC class - no entity or component needed.
         //
         //     Pipeline (when enabled, per frame):
@@ -250,31 +250,71 @@ public class ScriptName : Script
         PostProcessAPI.SetBloomEnabled(false);  // turn bloom off (scene renders normally)
         bool bloomOn = PostProcessAPI.IsBloomEnabled();
 
-        // Intensity — how bright the glow halo is (0.0 = none, 1.2 = default, 3.0 = max):
-        PostProcessAPI.SetBloomIntensity(1.2f);          // default — subtle glow
-        PostProcessAPI.SetBloomIntensity(2.5f);          // beat-flash — strong burst
+        // Intensity - how bright the glow halo is (0.0 = none, 1.2 = default, 3.0 = max):
+        PostProcessAPI.SetBloomIntensity(1.2f);          // default - subtle glow
+        PostProcessAPI.SetBloomIntensity(2.5f);          // beat-flash - strong burst
         PostProcessAPI.SetBloomIntensity(0.0f);          // effectively off (same as disabled)
         float intensity = PostProcessAPI.GetBloomIntensity();
 
-        // Threshold — luminance cutoff above which pixels contribute to bloom (0.0–1.0):
+        // Threshold - luminance cutoff above which pixels contribute to bloom (0.0-1.0):
         //   low  threshold (0.2) = almost everything glows (background, sprites, etc.)
         //   high threshold (0.8) = only the very brightest pixels glow (near-white highlights)
-        PostProcessAPI.SetBloomThreshold(0.5f);          // default — balanced
-        PostProcessAPI.SetBloomThreshold(0.2f);          // low — whole scene glows
-        PostProcessAPI.SetBloomThreshold(0.8f);          // high — only highlights glow
+        PostProcessAPI.SetBloomThreshold(0.5f);          // default - balanced
+        PostProcessAPI.SetBloomThreshold(0.2f);          // low - whole scene glows
+        PostProcessAPI.SetBloomThreshold(0.8f);          // high - only highlights glow
         float threshold = PostProcessAPI.GetBloomThreshold();
 
-        // Example — beat-flash: spike intensity on beat, ease back over the interval:
+        // Example - beat-flash: spike intensity on beat, ease back over the interval:
         //   PostProcessAPI.SetBloomEnabled(true);
         //   PostProcessAPI.SetBloomIntensity(2.5f);   // call from Conductor on beat
         //   ... lerp back to 1.2 over the beat interval each Update() ...
 
-        // Example — boss-entry dramatic effect:
+        // Example - boss-entry dramatic effect:
         //   PostProcessAPI.SetBloomEnabled(true);
         //   PostProcessAPI.SetBloomThreshold(0.1f);   // whole scene glows
         //   PostProcessAPI.SetBloomIntensity(3.0f);   // max intensity
         //   ... after a few seconds, restore defaults ...
         //   PostProcessAPI.SetBloomThreshold(0.5f);
         //   PostProcessAPI.SetBloomIntensity(1.2f);
+
+
+        // 18. GlowComponent - PER-ENTITY blurred glow halo.
+        //     Adds a soft blurred halo around an entity.
+        //     Independent of bloom - both can be active simultaneously.
+        //     Accessed via GetGlow() - bound to the script's own entity.
+        //
+        //     The glow color is rendered as the entity silhouette in glow color,
+        //     then blurred and composited additively on top of the scene.
+        //
+        GlowComponent glow = GetGlow();
+
+        glow.SetEnabled(true);              // turn glow on for this entity
+        glow.SetEnabled(false);             // turn glow off
+
+        glow.SetColor(1f, 0.8f, 0f);       // golden glow (r, g, b in 0.0-1.0)
+        glow.SetColor(0f, 1f, 1f);         // cyan glow
+        glow.SetColor(1f, 1f, 1f);         // white glow (default)
+
+        glow.SetIntensity(1.5f);            // set intensity instantly (0 = dim, 1 = normal, 2+ = intense)
+        float currentIntensity = glow.GetIntensity();
+
+        glow.GlowTo(2.0f, 0.5f);           // tween intensity to 2.0 over 0.5 seconds
+        glow.GlowTo(0.0f, 1.0f);           // fade glow out over 1 second
+        bool done = glow.IsDone();          // true when no tween is running
+
+        bool glowOn = glow.IsEnabled();     // check if glow is currently enabled
+
+        // Example - pulse glow on a pickup item:
+        //   GlowComponent glow = GetGlow();
+        //   glow.SetEnabled(true);
+        //   glow.SetColor(1f, 1f, 0f);        // yellow glow
+        //   glow.GlowTo(2.5f, 0.3f);          // flash bright
+        //   ... wait for IsDone() ...
+        //   glow.GlowTo(0.8f, 0.5f);          // ease back to subtle
+        //
+        // Example - boss entry dramatic glow:
+        //   GetGlow().SetEnabled(true);
+        //   GetGlow().SetColor(1f, 0f, 0f);   // red glow
+        //   GetGlow().GlowTo(3.0f, 1.0f);     // ramp up over 1 second
     }
 }

@@ -54,11 +54,23 @@ public:
     float GetBloomIntensity()  const  { return m_bloomIntensity;  }
     float GetBloomThreshold()  const  { return m_bloomThreshold;  }
 
+    // --- Per-object glow pass ---
+    // Bind the glow FBO so subsequent draw calls write the glowing-entity silhouettes.
+    void BeginGlowCapture();
+    // Blur the captured glow texture and composite it additively onto FBO 0.
+    // intensity: final brightness multiplier (1.0 is normal; individual entity
+    //            intensities are already baked into the silhouette color).
+    void ApplyGlowBlur(float intensity = 1.0f);
+
 private:
     // --- FBO / texture handles ---
     GLuint m_sceneFBO      = 0;  GLuint m_sceneTexture   = 0;
     GLuint m_extractFBO    = 0;  GLuint m_extractTexture = 0;
     GLuint m_blurFBO[2]    = {}; GLuint m_blurTexture[2] = {};
+
+    // Glow pass (full resolution, separate from bloom)
+    GLuint m_glowFBO     = 0;
+    GLuint m_glowTexture = 0;
 
     // --- Fullscreen quad ---
     GLuint m_quadVAO = 0;
@@ -68,6 +80,7 @@ private:
     GLSLShader m_extractShader;
     GLSLShader m_blurShader;
     GLSLShader m_compositeShader;
+    GLSLShader m_glowCompositeShader;
 
     // --- Parameters ---
     float m_bloomIntensity = 1.2f;
