@@ -33,13 +33,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -106,13 +99,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -217,13 +203,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -325,13 +304,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -400,13 +372,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -480,13 +445,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -524,7 +482,7 @@
                 {
                     "audiosource": {
                         "audio_id": "SFX_Border_Beat",
-                        "volume": 1.0,
+                        "volume": 0.18000000715255737,
                         "loop": false,
                         "playOnAwake": false
                     }
@@ -563,13 +521,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -671,13 +622,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -764,13 +708,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -837,13 +774,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -917,13 +847,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -997,13 +920,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -1084,13 +1000,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -1165,13 +1074,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -1246,13 +1148,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -1327,13 +1222,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -1382,7 +1270,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": false,
+                        "visible": true,
                         "alignment": 0
                     }
                 }
@@ -1420,13 +1308,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -1503,13 +1384,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -1599,13 +1473,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -1677,13 +1544,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -1752,13 +1612,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -1836,19 +1689,12 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border 0.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -1864,9 +1710,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "GlowOutlineScript"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -1916,19 +1760,12 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border 1.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -1944,9 +1781,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "GlowOutlineScript"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -1996,19 +1831,12 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border 2.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -2024,9 +1852,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "GlowOutlineScript"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -2076,19 +1902,12 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border 3.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -2104,9 +1923,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "GlowOutlineScript"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -2162,13 +1979,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -2242,13 +2052,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -2286,7 +2089,7 @@
                 {
                     "audiosource": {
                         "audio_id": "BGM_L2_TESTING",
-                        "volume": 1.0,
+                        "volume": 0.5,
                         "loop": true,
                         "playOnAwake": false
                     }
@@ -2325,13 +2128,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -2405,13 +2201,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -2486,13 +2275,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -2569,13 +2351,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -2650,13 +2425,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -2731,13 +2499,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -2804,13 +2565,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -2902,13 +2656,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -3000,13 +2747,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -3098,13 +2838,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -3173,13 +2906,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -3257,13 +2983,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -3337,13 +3056,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -3418,13 +3130,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -3499,13 +3204,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -3583,13 +3281,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -3663,13 +3354,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -3744,13 +3428,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -3825,13 +3502,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -3912,13 +3582,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -3996,13 +3659,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -4072,13 +3728,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -4152,13 +3801,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -4233,13 +3875,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -4314,13 +3949,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -4394,13 +4022,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -4475,13 +4096,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -4556,13 +4170,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -4640,13 +4247,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -4721,13 +4321,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -4803,13 +4396,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -4884,13 +4470,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -4966,13 +4545,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -5047,13 +4619,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -5128,13 +4693,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 0.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -5211,13 +4769,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -5294,13 +4845,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -5374,13 +4918,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -5454,13 +4991,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -5534,13 +5064,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -5614,13 +5137,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -5694,13 +5210,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -5774,13 +5283,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },
@@ -5854,13 +5356,6 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
-                        },
-                        "glow": {
-                            "enabled": false,
-                            "intensity": 1.0,
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
                         }
                     }
                 },

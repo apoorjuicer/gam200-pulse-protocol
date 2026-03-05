@@ -38,23 +38,15 @@ namespace ScriptAPI
 
 		// change c# string to c++ , and get prefab json pathway
 		msclr::interop::marshal_context context;
-		std::string prefabName = context.marshal_as<std::string>(scriptname);
+		std::string prefabDirectory =  "../../PulseProtocol/Assets/Prefabs/";
+		std::string prefabPath = prefabDirectory + context.marshal_as<std::string>(scriptname) + ".json";
 
-		// Use PrefabManager to resolve the correct path via CoreEngine::GetAssetRoot()
-		// This avoids the hardcoded relative path that breaks when the working directory
-		// is not exactly where expected (e.g. different build configs / shipped builds).
-		PrefabManager prefabMgr;
-		std::string prefabPath = prefabMgr.GetPrefabPath(prefabName);
 
-		// Use factory to create entity from .json file
+		// Use factory manager to create entity from .json file 
 		::Factory factory;
 		auto new_entity = factory.CreateEntityFromJson(prefabPath, false);
-
-		if (!new_entity.has_value())
-		{
-			System::Console::WriteLine("[Factory::Instantiate] Failed to instantiate prefab: " + scriptname);
-			return -1;
-		}
+		
+		System::Console::WriteLine(new_entity.value());
 
 		int entityID = static_cast<int>(new_entity.value());
 
