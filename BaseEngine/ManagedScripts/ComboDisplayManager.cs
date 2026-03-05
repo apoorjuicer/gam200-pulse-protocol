@@ -87,9 +87,9 @@ public class ComboDisplayManager : Script
 
         if (isCountingDown && Conductor.Instance != null)
         {
-            float songTime = Conductor.Instance.GetSongTime();
+            float songTime = Conductor.Instance.GetAdjustedSongTime();
             float beatDuration = Conductor.Instance.GetBeatDuration();
-            float timeSinceBeat = songTime % beatDuration;
+            float timeSinceBeat = (songTime % beatDuration + beatDuration) % beatDuration;
             float timeUntilNextBeat = beatDuration - timeSinceBeat;
 
             // Trigger next slot when we're ScaleAnimDuration away from the next beat

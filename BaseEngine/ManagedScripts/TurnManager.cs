@@ -20,7 +20,7 @@ public class TurnManager : Script
     // Config
     // =========================
     public int CountdownBeats = 4;
-    public int EnemyDisplayBeats = 5;  // effective display beats = EnemyDisplayBeats - 1 = 4 (phaseStartBeat backdated by -1)
+    public int EnemyDisplayBeats = 4;  // with -1 backdating: transition beat + 3 more = 4 beats total. First key shows immediately, keys 2-4 on the next 3 beats. No idle beat at end.
     public int PlayerInputBeats = 5;   // effective input beats   = PlayerInputBeats  - 1 = 4 (phaseStartBeat backdated by -1)
 
     // =========================
@@ -207,9 +207,6 @@ public class TurnManager : Script
     private void StartPlayerInput()
     {
         currentPhase = TurnPhase.PlayerInput;
-        // Subtract 1 so the transition beat counts as beat 1 of the input window.
-        // This guarantees the player can press on the same beat the phase opens,
-        // regardless of whether InputBridge or TurnManager updates first.
         phaseStartBeat = Conductor.Instance!.GetCurrentBeat() - 1;
 
         ComboSystem.Instance?.ResetCombo();

@@ -30,14 +30,10 @@ public class Conductor : Script
     }
 
     // Compensates for FMOD output buffer lag (~90ms hardware delay).
-    // Tune this once per machine - it should stay constant across songs.
     public float MusicLatencyOffset = 0.125f;
 
     // Compensates for where beat 1 actually starts in the BGM audio file.
-    // If the file has silence or a pickup note before the first downbeat, set this
-    // to that timestamp (in seconds). Tune this per song.
-    // At 120 BPM (0.5s/beat): 0.25 = half-beat shift to align code boundary with audio beat.
-    public float BeatStartOffset = 0.25f;
+    public float BeatStartOffset = 0.75f;
 
     public override void Update()
     {
@@ -130,11 +126,17 @@ public class Conductor : Script
 
     public int GetCurrentBeat() => lastBeat;
     public float GetSongTime() => songTime;
-    public float GetAdjustedSongTime() => songTime - MusicLatencyOffset - BeatStartOffset;
+
+
+    public float GetAdjustedSongTime()
+    {
+        float audioPos = (float)GetAudio().GetBGMPosition();
+        float t = (audioPos > 0f) ? audioTimeAccumulator + audioPos : songTime;
+        return t - MusicLatencyOffset - BeatStartOffset;
+    }
     public float SecondsPerBeat => secondsPerBeat;
 
-    // Call this the same frame PlayBGM fires so the beat clock starts
-    // at t=0 in sync with audio rather than when this script initialised.
+ 
     public void ResetClock()
     {
         songTime = 0.0f;

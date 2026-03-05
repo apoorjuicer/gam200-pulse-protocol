@@ -62,13 +62,14 @@ public class LevelBGM : Script
             audio.SetSfxVolume(0.25f); // <-- THIS IS THE DEFAULT VOLUME FOR SFX
 
             audio.PlayBGM();
-            //audio.PlayBGM("LVL 1 BGM 90 MILI OFF TEST"); 
+            //audio.PlayBGM("LVL 1 BGM 90 MILI OFF TEST");
             BGMManager.CurrentTrack = "Level";
             Console.WriteLine("BGM: Playing Level music");
 
-            // Reset Conductor clock so beat tracking starts at t=0
-            // Conductor.Instance?.ResetClock();
-             
+            // Reset Conductor clock so beat tracking starts at t=0 to uh hopefully be in sync with audio if not i kms.
+          
+            Conductor.Instance?.ResetClock();
+
             started = true;
         }
 

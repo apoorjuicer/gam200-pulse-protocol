@@ -58,12 +58,6 @@ public class EnemyRhythmController : Script
     // For Edge mode
     public float EdgeContactThreshold = 5f;
 
-    // For Manual mode - radius in world units for CheckDistance
-    // This determines how far from the player's center the enemy stops.
-    // Player scale is ~300 wide, enemy is ~110 wide.
-    // ~350 means the enemy stops when its center is 350 units from the player center,
-    // which visually places it right in front of the player sprite.
-    // Increase if enemy still overlaps, decrease if it stops too far away.
     public float ManualAttackRange = 350f;
 
     // === PLAYER REFERENCE ===
