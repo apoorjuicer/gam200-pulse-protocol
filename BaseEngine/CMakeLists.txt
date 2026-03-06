@@ -80,7 +80,7 @@ include(DotnetRuntime)
 # -------------------------------
 add_subdirectory(PulseEngine)     # defines PulseEngine_Editor / PulseEngine_Game
 add_subdirectory(ScriptAPI)
-add_subdirectory(ManagedScripts)  # C# scripts — depends on ScriptAPI
+add_subdirectory(PulseProtocol/ManagedScripts)  # C# scripts put inside of game(need change later why flexi)
 add_subdirectory(PulseEditor)     # depends on ManagedScripts
 add_subdirectory(PulseProtocol)   # depends on ManagedScripts, LATER MAKE IT GAME NAME, NOT HARDCODED.
 

@@ -224,7 +224,7 @@ void CoreEngine::CompileScriptAssembly()
 	std::cout << "[Hot Reload] BaseEngine dir: " << baseEngineDir << std::endl;
 #endif
 
-	auto projectPath = baseEngineDir / "ManagedScripts" / "ManagedScripts.csproj";
+	auto projectPath = baseEngineDir / "PulseProtocol" / "ManagedScripts" / "ManagedScripts.csproj";
 
 #ifdef _DEBUG
 	std::cout << "[Hot Reload] Project path: " << projectPath << std::endl;
