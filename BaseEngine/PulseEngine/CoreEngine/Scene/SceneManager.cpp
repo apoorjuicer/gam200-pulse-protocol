@@ -49,6 +49,23 @@ SceneManager::SceneManager()
 
 }
 
+
+// For now its 
+// 1. When u start a new game, have a asset and a JSon folder alr inside
+// 2. When u start the game, have a default scene which u cant change unless u change it in config.
+//std::filesystem::path IsThereStartingSceneInConfig()
+//{
+//	if (true) // can open the file given?  
+//	{
+//		
+//	}
+//
+//	else
+//	{
+//		// make a scene for them and add a folder too? 
+//	}
+//}
+
 std::filesystem::path GetScenePath(const std::string& sceneNameOrPath) {
 	// Get PulseEngine base path
 	char exePath[MAX_PATH];

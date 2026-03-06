@@ -2,6 +2,7 @@
   "config": {
     "WindowWidth": 1600,
     "WindowHeight": 900,
-    "ConfigPath": "../../PulseProtocol/JSON/config.json"
+    "ConfigPath": "../../PulseProtocol/JSON/config.json",
+    "FirstScene": "../../PulseProtocol/JSON/MainMenu.json"
   }
 }

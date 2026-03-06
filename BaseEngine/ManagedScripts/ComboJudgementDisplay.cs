@@ -4,9 +4,9 @@ using ScriptAPI;
 public class ComboJudgementDisplay : Script
 {
     // Configuration
-    public string PerfectSprite = "../../PulseEngine/Assets/Textures/UI/perfect.png";
-    public string GreatSprite = "../../PulseEngine/Assets/Textures/UI/great.png";
-    public string MissSprite = "../../PulseEngine/Assets/Textures/UI/miss.png";
+    public string PerfectSprite = "../../PulseProtocol/Assets/Textures/UI/perfect.png";
+    public string GreatSprite = "../../PulseProtocol/Assets/Textures/UI/great.png";
+    public string MissSprite = "../../PulseProtocol/Assets/Textures/UI/miss.png";
 
     public float DisplayDuration = 0.6f;
 

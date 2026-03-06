@@ -30,7 +30,7 @@ public class Conductor : Script
     }
 
     // Stupid FMOD has a latency for about 90ms?!?!?!?!??!!
-    public float MusicLatencyOffset = 0.10f;
+    public float MusicLatencyOffset = 0.125f;
 
     public override void Update()
     {

@@ -7,8 +7,8 @@
           "y": -299.010
         },
         "scale": {
-          "x": 350.0,
-          "y": 230.0
+          "x": 485.0,
+          "y": 325.0
         },
         "rotation": {
           "x": 0.0,
@@ -22,7 +22,7 @@
         "mdl_ref": 0.0,
         "shd_ref": 2.0,
         "useTexture": true,
-        "spriteName": "../../PulseProtocol/Assets/Textures/Enemies/BlueGorillaEnemy.png",
+        "spriteName": "../../PulseProtocol/Assets/Textures/Enemies/Gorilla_Idle_spritesheet_1459x977.png",
         "tintColor": {
           "r": 1.0,
           "g": 1.0,
@@ -35,9 +35,9 @@
       "animation": {
         "currentFrame": 0,
         "elapsedTime": 0.0,
-        "totalFrames": 1,
-        "columns": 1,
-        "rows": 1,
+        "totalFrames": 15,
+        "columns": 4,
+        "rows": 4,
         "animationSpeed": 12.0
       }
     },
@@ -48,8 +48,8 @@
     },
     {
       "Health": {
-        "hp": 15,
-        "damage": 5,
+        "hp": 20,
+        "damage": 20,
         "isAlive": true
       }
     },
@@ -57,14 +57,14 @@
       "LayerTag": {
         "layerName": "World",
         "mask": 2,
-        "orderInLayer": 5,
+        "orderInLayer": 21,
         "z": 0.0
       }
     },
     {
       "script": { 
         "ScriptName": [
-          "EnemyRhythmController"
+          "Gorilla"
         ]
       }
     }
