@@ -100,6 +100,7 @@ public:
     // Fade current BGM channel to 0 without changing slider values
     void FadeOutCurrentBGM(float durationSeconds, bool stopAfterFade = true);
     void CancelCurrentBGMFade();
+    void FadeInCurrentBGM(float duration);
 
 private:
     FMOD::System *mSystem = nullptr;
@@ -133,6 +134,12 @@ private:
     float mBGMFadeDuration = 0.0f;
     float mBGMFadeElapsed = 0.0f;
     float mBGMFadeStart = 1.0f;
+
+    bool  m_isFadingInBGM = false;
+    float m_bgmFadeTimer = 0.0f;
+    float m_bgmFadeDuration = 0.0f;
+    float m_bgmFadeStartVolume = 0.0f;
+    float m_bgmFadeTargetVolume = 1.0f;
 
     std::chrono::steady_clock::time_point mLastAudioTick;
     bool mHasLastAudioTick = false;

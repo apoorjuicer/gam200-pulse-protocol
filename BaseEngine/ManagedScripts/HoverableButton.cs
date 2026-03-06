@@ -249,16 +249,23 @@ public class NavigationButtons : Script
             }
 
             // Apply actual pause state once
-        if (shouldGameBePaused != s_appliedGamePause)
-        {
-            Application.SetPaused(shouldGameBePaused);
+            if (shouldGameBePaused != s_appliedGamePause)
+            {
+                Application.SetPaused(shouldGameBePaused);
 
-            AudioComponent audio = GetAudio();
-            if (shouldGameBePaused) audio.PauseBGM();
-            else audio.ResumeBGM();
+                AudioComponent audio = GetAudio();
 
-            s_appliedGamePause = shouldGameBePaused;
-        }
+                if (shouldGameBePaused)
+                {
+                    audio.PauseBGM();
+                }
+                else
+                {
+                    audio.FadeInMusic(0.5f);
+                }
+
+                s_appliedGamePause = shouldGameBePaused;
+            }
         }
 
         string texLower = defaultTexture.ToLower();

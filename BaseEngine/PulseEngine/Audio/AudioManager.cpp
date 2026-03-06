@@ -239,6 +239,7 @@ void AudioManager::Update()
     {
         ProcessAudioSources();
     }
+    
 
     // FMOD should still update every frame
     mSystem->update();
@@ -740,6 +741,8 @@ void AudioManager::PauseBGM()
         mCurrentBGMCh->setPaused(true);
         std::cout << "[AudioManager] BGM Paused\n";
     }
+
+    m_isFadingInBGM = false;
 }
 
 void AudioManager::ResumeBGM()
@@ -1053,6 +1056,57 @@ void AudioManager::CancelCurrentBGMFade()
     }
 
     mCurrentBGMCh->setVolume(clampto0and1(baseVol));
+}
+
+void AudioManager::FadeInCurrentBGM(float durationSeconds)
+{
+    if (!mSystem || !mMusicGroup || !mCurrentBGMCh)
+    {
+        std::cout << "[AudioManager] FadeInCurrentBGM: missing system/group/channel\n";
+        return;
+    }
+
+    // Cancel any old manual fade state
+    m_isFadingInBGM = false;
+    mBGMFadeMultiplier = 1.0f;
+
+    // Resume the paused BGM first
+    mCurrentBGMCh->setPaused(false);
+
+    float targetVol = clampto0and1(mMusicVol);
+
+    // If slider is already 0, there will be no audible fade
+    if (durationSeconds <= 0.0f)
+    {
+        mMusicGroup->setVolume(targetVol);
+        std::cout << "[AudioManager] FadeInCurrentBGM immediate -> targetVol = " << targetVol << "\n";
+        return;
+    }
+
+    int sampleRate = 48000;
+    mSystem->getSoftwareFormat(&sampleRate, nullptr, nullptr);
+
+    unsigned long long dspClock = 0;
+    unsigned long long parentClock = 0;
+    mMusicGroup->getDSPClock(&dspClock, &parentClock);
+
+    unsigned long long fadeEnd =
+        dspClock + static_cast<unsigned long long>(durationSeconds * sampleRate);
+
+    // Clear any old fade points around this time window
+    mMusicGroup->removeFadePoints(dspClock, fadeEnd + sampleRate);
+
+    // Start silent now
+    mMusicGroup->addFadePoint(dspClock, 0.0f);
+
+    // Fade up to the current music slider value
+    mMusicGroup->addFadePoint(fadeEnd, targetVol);
+
+    // Also set the final steady-state value
+    mMusicGroup->setVolume(targetVol);
+
+    std::cout << "[AudioManager] FadeInCurrentBGM scheduled -> targetVol = "
+              << targetVol << ", duration = " << durationSeconds << "\n";
 }
 
 /*

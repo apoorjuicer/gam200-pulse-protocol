@@ -47,6 +47,7 @@ namespace ScriptAPI
         float GetBGMPosition();
 
         void FadeOutMusic(float duration);
+        void FadeInMusic(float duration);
 
         bool IsBGMPlaying();
     };
