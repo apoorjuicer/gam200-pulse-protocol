@@ -45,6 +45,8 @@
 #include "Graphics/Renderable.h"
 #include "Graphics/Transform.h"
 #include "Graphics/Layer.h"
+#include "UndoHelper.h"
+
 
 namespace PulseEditor
 {
@@ -541,15 +543,17 @@ namespace PulseEditor
                             // ═══════════════════════════════════════════════════════════════
                             // UNDO: Snapshot BEFORE texture change
                             // ═══════════════════════════════════════════════════════════════
-                            Entity e = selectedEntity;
+                           // Entity e = selectedEntity;
                             // Snapshot BEFORE change
-                            EntitySnapshot before = MakeEntitySnapshot(e);
+                           // EntitySnapshot before = MakeEntitySnapshot(e);
                             //mUndo.Push([e, before]() {
                             //    RestoreEntityFromSnapshot(e, before);
                             //    });
 
-                            auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
 
+
+                            auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
+                            Framework::Renderable before = rend;
                             namespace fs = std::filesystem;
 
                             // Use GetRelativeAssetPath to get the correct absolute path
@@ -604,13 +608,16 @@ namespace PulseEditor
                             }
 
                             // Snapshot AFTER change
-                            EntitySnapshot after = MakeEntitySnapshot(e);
-
+ 
                             //// Push undo/redo action
                             //mUndo.Push(UndoManager::Action{
                             //    .undo = [e, before]() { RestoreEntityFromSnapshot(e, before); },
                             //    .redo = [e, after]() { RestoreEntityFromSnapshot(e, after);  }
                             //    });
+
+
+                            Framework::Renderable after = rend;
+                            PushRenderableEdit(mUndo, selectedHandle, before, after);
 
                             std::cout << "[ProjectPanel] Assigned texture to entity " << selectedEntity << std::endl;
                         }

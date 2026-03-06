@@ -2,7 +2,8 @@
 /**
  * @file        Renderable.h
  * @project     Pulse Protocol
- * @author      Goh Pin Kai
+ * @author      Goh Pin Kai (primary) - 90%
+ * @author 		Ban Kai Wei Benjamin (secondary) - 10%
  * @brief       Declares the Renderable component used by the ECS framework.
  *              This component stores references to the model, shader, and
  *              texture used during rendering, along with sprite name for
@@ -61,6 +62,36 @@ namespace Framework
 
 		bool        needsTextureReload = false;   // true after user edits the name
 		std::string loadedSpriteName;             // the name we actually loaded
+
+		//operator overloads
+		//for Undo comparison function
+		bool operator==(Renderable const& other) const {
+				return
+		texW == other.texW &&
+		texH == other.texH &&
+		mdl_ref == other.mdl_ref &&
+		shd_ref == other.shd_ref &&
+		textureID == other.textureID &&
+		spriteName == other.spriteName &&
+		useTexture == other.useTexture &&
+		loadedSpriteName == other.loadedSpriteName;
+		}
+		bool operator!=(Renderable const& other) const
+			{
+				return !(*this == other);
+			}
 	};
+
+	////std::ostream& operator<<(std::ostream& os, Renderable const& t);
+	//	std::ostream& operator<<(std::ostream& os, Renderable const& r) {
+	//	os << "[Renderable Component] contains these values\n";
+	//	os << "Renderable texW:" << r.texW << "\n";
+	//	os << "Renderable texH:" << r.texH << "\n";
+	//	os << "Renderable spriteName:" << r.spriteName << "\n";
+	//	os << "Renderable mdl_ref:" << r.mdl_ref << "\n";
+	//	os << "Renderable shd_ref:" << r.shd_ref << "\n";
+	//	os << "Renderable textureID:" << r.textureID << "\n";
+	//	return os;
+	//}
 }
 #endif // FRAMEWORK_RENDERABLE_H

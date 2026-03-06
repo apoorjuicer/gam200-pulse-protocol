@@ -2,7 +2,8 @@
 /**
  * @file        HierarchyHelpers.h
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En (primary) - 90%
+ * @author      Ban Kai Wei Benjamin (secondary) - 10%
  * @brief       Helper functions for managing entity parent-child relationships.
  *              Provides utilities for setting parents, getting children,
  *              and checking hierarchy structure.

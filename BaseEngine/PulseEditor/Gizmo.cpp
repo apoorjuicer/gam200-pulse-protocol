@@ -1008,11 +1008,11 @@ namespace PulseEditor
             // Replace the entire if block with:
             if (s_gizmoEditing && s_gizmoHandle->id != INVALID_ENTITY)
             {
-                auto* coord = Coordinator::GetInstance();
-                if (coord && coord->HasComponent<Framework::Transform>(s_gizmoHandle->id))
+                auto* g = Coordinator::GetInstance();
+                if (g && g->HasComponent<Framework::Transform>(s_gizmoHandle->id))
                 {
                     Framework::Transform after =
-                        coord->GetComponent<Framework::Transform>(s_gizmoHandle->id);
+                        g->GetComponent<Framework::Transform>(s_gizmoHandle->id);
 
                     if (s_gizmoBeforeTransform != after)
                     {

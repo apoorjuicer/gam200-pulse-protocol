@@ -13,7 +13,7 @@
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
 /******************************************************************************/
-#include "Graphics/Renderable.h"
+#include "Renderable.h"
 #include "Math/math.h"
 
 namespace Framework
@@ -86,5 +86,38 @@ namespace Framework
 				tintColor.a = col["a"].GetFloat();
 		}
 	}
+
+
+	/*
+	* Something wrong if define outside the class have LINKR error wtf?
+	*/
+
+	//bool Renderable::operator==(Renderable const& other) const
+	//{
+	//	return
+	//		texW == other.texW &&
+	//		texH == other.texH &&
+	//		mdl_ref == other.mdl_ref &&
+	//		shd_ref == other.shd_ref &&
+	//		textureID == other.textureID &&
+	//		spriteName == other.spriteName &&
+	//		useTexture == other.useTexture &&
+	//		loadedSpriteName == other.loadedSpriteName;
+	//}
+	//bool Renderable::operator!=(Renderable const& other) const
+	//{
+	//	return !(*this == other);
+	//}
+
+	//std::ostream& operator<<(std::ostream& os, Renderable const& r) {
+	//	os << "[Renderable Component] contains these values\n";
+	//	os << "Renderable texW:" << r.texW << "\n";
+	//	os << "Renderable texH:" << r.texH << "\n";
+	//	os << "Renderable spriteName:" << r.spriteName << "\n";
+	//	os << "Renderable mdl_ref:" << r.mdl_ref << "\n";
+	//	os << "Renderable shd_ref:" << r.shd_ref << "\n";
+	//	os << "Renderable textureID:" << r.textureID << "\n";
+	//	return os;
+	//}
 
 } // end of namespace

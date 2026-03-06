@@ -223,8 +223,8 @@ namespace PulseEditor
         std::vector<Entity>& displayOrder,
         std::unordered_map<Entity, std::shared_ptr<EntityHandle>>& hof,
         Entity root,
-        Entity& selectedEntity,
-        std::shared_ptr<EntityHandle>& selectedHandle)
+        Entity& se,
+        std::shared_ptr<EntityHandle>& sh)
     {
         if (root == INVALID_ENTITY)
             return;
@@ -287,12 +287,12 @@ namespace PulseEditor
                 node.handle->id = INVALID_ENTITY;
         }
 
-        selectedEntity = INVALID_ENTITY;
-        selectedHandle.reset();
+        se = INVALID_ENTITY;
+        sh.reset();
 
         UndoManager::Action a;
 
-        a.undo = [deleted, &displayOrder, &hof, &selectedEntity, &selectedHandle]() mutable
+        a.undo = [deleted, &displayOrder, &hof, &se, &sh]() mutable
             {
                 auto* g = Coordinator::GetInstance();
                 if (!g) return;
@@ -406,12 +406,12 @@ namespace PulseEditor
                 if (!deleted->empty())
                 {
                     auto& rootNode = deleted->back(); // root is last
-                    selectedHandle = rootNode.handle;
-                    selectedEntity = selectedHandle ? selectedHandle->id : INVALID_ENTITY;
+                    sh = rootNode.handle;
+                    se = sh ? sh->id : INVALID_ENTITY;
                 }
             };
 
-        a.redo = [deleted, &displayOrder, &hof, &selectedEntity, &selectedHandle, &factory]() mutable
+        a.redo = [deleted, &displayOrder, &hof, &se, &sh, &factory]() mutable
             {
                 // deleted vector order is children first, parent last
                 // deleting in this same order is okay
@@ -428,8 +428,8 @@ namespace PulseEditor
                     node.handle->id = INVALID_ENTITY;
                 }
 
-                selectedEntity = INVALID_ENTITY;
-                selectedHandle.reset();
+                se = INVALID_ENTITY;
+                sh.reset();
             };
 
         undo.Push(std::move(a));
@@ -482,10 +482,10 @@ namespace PulseEditor
         undo.Push(std::move(a));
     }
 
-    inline void PushAnimationEdit(UndoManager& undo,
+    inline void PushRenderableEdit(UndoManager& undo,
         std::shared_ptr<EntityHandle> h,
-        Framework::Animation const& before,
-        Framework::Animation const& after)
+        Framework::Renderable const& before,
+        Framework::Renderable const& after)
     {
         if (!h || h->id == INVALID_ENTITY) return;
 
@@ -496,9 +496,9 @@ namespace PulseEditor
                 if (!h || h->id == INVALID_ENTITY) return;
                 auto* c = Coordinator::GetInstance();
                 if (!c) return;
-                if (!c->HasComponent<Framework::Animation>(h->id)) return;
+                if (!c->HasComponent<Framework::Renderable>(h->id)) return;
 
-                c->GetComponent<Framework::Animation>(h->id) = before;
+                c->GetComponent<Framework::Renderable>(h->id) = before;
             };
 
         a.redo = [h, after]()
@@ -506,9 +506,9 @@ namespace PulseEditor
                 if (!h || h->id == INVALID_ENTITY) return;
                 auto* c = Coordinator::GetInstance();
                 if (!c) return;
-                if (!c->HasComponent<Framework::Animation>(h->id)) return;
+                if (!c->HasComponent<Framework::Renderable>(h->id)) return;
 
-                c->GetComponent<Framework::Animation>(h->id) = after;
+                c->GetComponent<Framework::Renderable>(h->id) = after;
             };
 
         undo.Push(std::move(a));

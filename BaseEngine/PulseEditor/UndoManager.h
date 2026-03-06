@@ -4,8 +4,10 @@
  * @project     Pulse Protocol
  * @author      Ban Kai Wei Benjamin
  * @brief       Undo Manager contains a "stack" of actions or steps that can be
- *				undo/reverted up to a maximum of 40 steps will be stored in
+ *				undo/redo up to a maximum of 40 steps will be stored in
  *				MAX_HISTORY
+ * 
+ *				MAX_HISTORY is the variable for how many "steps"
  *
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the

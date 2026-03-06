@@ -33,13 +33,17 @@
 #include "EditorTypes.h"
 #include "UndoHelper.h"
 
+//#include "Graphics/Renderable.h"
+
 namespace PulseEditor
 {
     // Definition of singleton undomanager for editor;
     // UNDO Manager
+    static bool isEditing_Transform = false;
+    static Framework::Transform beforeEdit_Transform;
 
-    static Framework::Transform beforeEdit;
-    static bool isEditing = false;
+    static bool isEditing_Renderable = false;
+    static Framework::Renderable beforeEdit_Renderable{};
 
     // -------------------------------------------------------------------------
     // Function to handle Transform undo
@@ -80,28 +84,49 @@ namespace PulseEditor
         // Started dragging / editing THIS widget
         if (ImGui::IsItemActivated())
         {
-            std::cout << "editing widget transform\n";
-            beforeEdit = currentTransform;
-            std::cout << "[INSPECTOR] BEFORE EDITTING values" << beforeEdit << "\n";
-            isEditing = true;
+            beforeEdit_Transform = currentTransform;
+            isEditing_Transform = true;
         }
 
         // Finished editing THIS widget
-        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing)
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_Transform)
         {
             std::cout << "done editing widget transform\n";
             Framework::Transform after = currentTransform;
             std::cout << "[INSPECTOR] AFTER EDITTING values" << after << "\n";
-            // Only push if changed ( Transform probably has no operator!=, so compare fields)
-            if (beforeEdit != after)   // adjust to your fields
+            if (beforeEdit_Transform != after)
             {
                 std::cout << "BEFORE != AFTER !!!!! pushing transform edit\n";
-                PushTransformEdit(undo, h, beforeEdit, after);
+                PushTransformEdit(undo, h, beforeEdit_Transform, after);
             }
 
-            isEditing = false;
+            isEditing_Transform = false;
         }
     }
+
+    static void HandleRenderableUndo(
+        Framework::Renderable& currentRenderable,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h) {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_Renderable = currentRenderable;
+            isEditing_Renderable = true;
+        }
+
+        // Finished editing THIS widget
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_Renderable)
+        {
+            Framework::Renderable after = currentRenderable;
+            if (beforeEdit_Renderable != after)
+            {
+                PushRenderableEdit(undo, h, beforeEdit_Renderable, after);
+            }
+            isEditing_Renderable = false;
+        }
+    }
+    
+
 
     // -------------------------------------------------------------------------
     // Helper: add a "add component" button at the bottom, more intuitive
@@ -322,7 +347,10 @@ namespace PulseEditor
 
         static Entity lastSelected = INVALID_ENTITY;
         if (selectedEntity != lastSelected) {
-            isEditing = false;
+            //isEditing = false;
+            //Reset flags for undo
+            isEditing_Transform = false;
+            isEditing_Renderable = false;
             lastSelected = selectedEntity;
         }
 
@@ -729,8 +757,6 @@ namespace PulseEditor
     }
 
 
-
-   
     void Inspector_RenderableComponent(Coordinator *g)
     {
         if (g->HasComponent<Framework::Renderable>(selectedEntity))
@@ -751,26 +777,37 @@ namespace PulseEditor
 
                 // --- Model reference (background vs sprite) ----------------------
                 {
-                    int modelIdx = static_cast<int>(r.mdl_ref);
-                    modelIdx = std::clamp(modelIdx, 0, 1);
+                   // int modelIdx = static_cast<int>(r.mdl_ref);
+                   // modelIdx = std::clamp(modelIdx, 0, 1);
+                    int oldModelIdx = std::clamp(static_cast<int>(r.mdl_ref), 0, 1);
+                    int newModelIdx = oldModelIdx;
 
                     const char *kModelNames[2] = {"Background Quad", "Sprite Quad"};
 
-                    ImGui::Text("Model: %s", kModelNames[modelIdx]);
+                    ImGui::Text("Model: %s", kModelNames[oldModelIdx]);
                     ImGui::SameLine();
                     if (ImGui::SmallButton(" - ##model"))
-                        modelIdx = std::max(0, modelIdx - 1);
+                        newModelIdx = std::max(0, oldModelIdx - 1);
                     ImGui::SameLine();
                     if (ImGui::SmallButton(" + ##model"))
-                        modelIdx = std::min(1, modelIdx + 1);
+                        newModelIdx = std::min(1, oldModelIdx + 1);
 
-                    r.mdl_ref = static_cast<float>(modelIdx);
+                    //==Undo Renderable
+                    if (newModelIdx != oldModelIdx)
+                    {
+                        Framework::Renderable before = r;
+                        r.mdl_ref = static_cast<float>(newModelIdx);
+                        Framework::Renderable after = r;
+                        PushRenderableEdit(mUndo, selectedHandle, before, after);
+                    }
                 }
 
                 // --- Shader reference --------------------------------------------
                 {
                     const int maxShaders = static_cast<int>(GLApp::shdrpgms.size());
-                    int shaderIdx = std::clamp(static_cast<int>(r.shd_ref), 0, std::max(0, maxShaders - 1));
+                    //int shaderIdx = std::clamp(static_cast<int>(r.shd_ref), 0, std::max(0, maxShaders - 1));
+                    int oldShaderIdx = std::clamp(static_cast<int>(r.shd_ref), 0, std::max(0, maxShaders - 1));
+                    int newShaderIdx = oldShaderIdx;
 
                     auto ShaderName = [&](int i) -> const char *
                     {
@@ -789,15 +826,23 @@ namespace PulseEditor
                         }
                     };
 
-                    ImGui::Text("Shader: %s", ShaderName(shaderIdx));
+                    ImGui::Text("Shader: %s", ShaderName(oldShaderIdx));
                     ImGui::SameLine();
                     if (ImGui::SmallButton(" - ##shader"))
-                        shaderIdx = std::max(0, shaderIdx - 1);
+                        newShaderIdx = std::max(0, oldShaderIdx - 1);
                     ImGui::SameLine();
                     if (ImGui::SmallButton(" + ##shader"))
-                        shaderIdx = std::min(std::max(0, maxShaders - 1), shaderIdx + 1);
+                        newShaderIdx = std::min(std::max(0, maxShaders - 1), oldShaderIdx + 1);
 
-                    r.shd_ref = static_cast<float>(shaderIdx);
+                    if (newShaderIdx != oldShaderIdx)
+                    {
+                        Framework::Renderable before = r;
+                        r.shd_ref = static_cast<float>(newShaderIdx);
+                        Framework::Renderable after = r;
+                        PushRenderableEdit(mUndo, selectedHandle, before, after);
+                    }
+
+                    //r.shd_ref = static_cast<float>(shaderIdx);
                 }
 
                 // --- Texture info ------------------------------------------------
@@ -851,6 +896,8 @@ namespace PulseEditor
 
                         r.needsTextureReload = true;
                     }
+
+                    HandleRenderableUndo(r, mUndo, selectedHandle);
                 }
 
                 // --- Reload texture button + drag & drop target ------------------
@@ -878,12 +925,12 @@ namespace PulseEditor
                         // ═══════════════════════════════════════════════════════════════
                         // UNDO: Snapshot BEFORE texture change
                         // ═══════════════════════════════════════════════════════════════
-                        Entity e = selectedEntity;
-                        EntitySnapshot before = MakeEntitySnapshot(e);
+                        //Entity e = selectedEntity;
+                        //EntitySnapshot before = MakeEntitySnapshot(e);
                         //mUndo.Push([e, before]() {
                         //    RestoreEntityFromSnapshot(e, before);
                         //});
-
+                        Framework::Renderable before = r;
                         namespace fs = std::filesystem;
                         const std::string kTexturesRoot = "../../PulseProtocol/Assets/Textures";
 
@@ -979,18 +1026,13 @@ namespace PulseEditor
 
                         r.shd_ref = static_cast<float>(isSheet ? SPRITESHEET_SHADER_INDEX : SPRITE_SHADER_INDEX);
 
-                        EntitySnapshot after = MakeEntitySnapshot(e);
+                        Framework::Renderable after = r;
+                        PushRenderableEdit(mUndo, selectedHandle, before, after);
 
-                        //mUndo.Push(UndoManager::Action{
-                        //    .undo = [e, before]()
-                        //    {
-                        //        RestoreEntityFromSnapshot(e, before);
-                        //    },
-                        //    .redo = [e, after]()
-                        //    {
-                        //        RestoreEntityFromSnapshot(e, after);
-                        //    }
-                        //    });
+
+
+
+
                     } // end ofreload clicked 
                 }
 
