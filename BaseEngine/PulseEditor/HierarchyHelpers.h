@@ -290,4 +290,25 @@ namespace HierarchyHelpers
 
         return depth;
     }
+
+    // =========================================================================
+    // Collec tSubtree Entities
+    // Collect all the children
+    // =========================================================================
+    inline void CollectSubtreeEntities(Entity entity, std::vector<Entity>& outEntities)
+    {
+        auto* g = Coordinator::GetInstance();
+        if (!g) return;
+
+        if (g->HasComponent<Children>(entity))
+        {
+            for (Entity child : g->GetComponent<Children>(entity).children)
+            {
+                CollectSubtreeEntities(child, outEntities);
+            }
+        }
+
+        // children first, parent last
+        outEntities.push_back(entity);
+    }
 }

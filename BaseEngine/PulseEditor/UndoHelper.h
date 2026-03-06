@@ -1,3 +1,17 @@
+/******************************************************************************/
+/**
+ * @file        UndoHelper.h
+ * @project     Pulse Protocol
+ * @author      Ban Kai Wei Benjamin
+ * @brief       Functions that implement undo logic using undomanager,
+ *              snapshot, hierarchyhelpers 
+ *               and editortypes with engine's factory functions
+ *
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+ /******************************************************************************/
 #pragma once
 #include <vector>
 #include <algorithm>
@@ -6,13 +20,24 @@
 #include "CoreEngine/Factory/Factory.h" 
 #include "SnapShot.h"
 #include "EditorTypes.h"
+#include "HierarchyHelpers.h"
 #include <iostream>
+#include <unordered_set>
 //using Entity = std::uint32_t; lazy put header
 //std::uint32_t = Entity  
 
 
 namespace PulseEditor
 {
+
+    struct DeletedNode
+    {
+        Entity oldEntity = INVALID_ENTITY;
+        EntitySnapshot snapshot{};
+        int displayIndex = -1;
+        std::shared_ptr<EntityHandle> handle;
+    };
+
     // Helper: remove entity from display order if present
     //find entity e and remove it from the vector of entities
     inline void RemoveFromDisplayOrder(std::vector<std::uint32_t>& order, std::uint32_t e)
@@ -93,7 +118,7 @@ namespace PulseEditor
                 RemoveFromDisplayOrder(displayOrder, old);
 
                 // unbind map
-                handleOf.erase(old);
+                hof.erase(old);
                 // Mark as not alive
                 h->id = INVALID_ENTITY;
             };
@@ -187,6 +212,224 @@ namespace PulseEditor
                 factory.DeleteEntity(old);
                 hof.erase(old);
                 h->id = INVALID_ENTITY;
+            };
+
+        undo.Push(std::move(a));
+    }
+
+    inline void PushDeleteSubtree(
+        UndoManager& undo,
+        Factory& factory,
+        std::vector<Entity>& displayOrder,
+        std::unordered_map<Entity, std::shared_ptr<EntityHandle>>& hof,
+        Entity root,
+        Entity& selectedEntity,
+        std::shared_ptr<EntityHandle>& selectedHandle)
+    {
+        if (root == INVALID_ENTITY)
+            return;
+
+        std::vector<Entity> entitiesToDelete;
+        HierarchyHelpers::CollectSubtreeEntities(root, entitiesToDelete);
+        std::unordered_set<Entity> deletedSet(entitiesToDelete.begin(), entitiesToDelete.end());
+        if (entitiesToDelete.empty())
+            return;
+
+        auto deleted = std::make_shared<std::vector<DeletedNode>>();
+        deleted->reserve(entitiesToDelete.size());
+
+        // Capture all info BEFORE deletion
+        for (Entity e : entitiesToDelete)
+        {
+            DeletedNode node;
+            node.oldEntity = e;
+            node.snapshot = MakeEntitySnapshot(e);
+            node.displayIndex = FindIndexInDisplayOrder(displayOrder, e);
+
+            auto itHandle = hof.find(e);
+            if (itHandle != hof.end())
+            {
+                node.handle = itHandle->second;
+            }
+            else
+            {
+                node.handle = std::make_shared<EntityHandle>();
+                node.handle->id = e;
+                hof[e] = node.handle;
+            }
+
+            deleted->push_back(node);
+        }
+
+        // Delete now
+        for (Entity e : entitiesToDelete)
+        {
+            auto* g = Coordinator::GetInstance();
+            if (g && g->HasComponent<Parent>(e))
+            {
+                Entity parent = g->GetComponent<Parent>(e).parent;
+
+                // only detach from parent if parent is NOT also being deleted
+                if (parent != INVALID_ENTITY && deletedSet.find(parent) == deletedSet.end())
+                {
+                    HierarchyHelpers::SetParent(e, HierarchyHelpers::INVALID);
+                }
+            }
+
+            RemoveFromDisplayOrder(displayOrder, e);
+            hof.erase(e);
+            factory.DeleteEntity(e);
+        }
+
+        for (auto& node : *deleted)
+        {
+            if (node.handle)
+                node.handle->id = INVALID_ENTITY;
+        }
+
+        selectedEntity = INVALID_ENTITY;
+        selectedHandle.reset();
+
+        UndoManager::Action a;
+
+        a.undo = [deleted, &displayOrder, &hof, &selectedEntity, &selectedHandle]() mutable
+            {
+                auto* g = Coordinator::GetInstance();
+                if (!g) return;
+
+                std::unordered_map<Entity, Entity> oldToNew;
+
+                // Pass 1: recreate all entities
+                for (auto& node : *deleted)
+                {
+                    Entity recreated = CreateFromSnapshot(node.snapshot);
+                    if (recreated == INVALID_ENTITY)
+                        continue;
+
+                    oldToNew[node.oldEntity] = recreated;
+
+                    if (node.handle)
+                    {
+                        node.handle->id = recreated;
+                        hof[recreated] = node.handle;
+                    }
+                }
+
+                // Pass 2: clear recreated hierarchy data
+                for (auto& node : *deleted)
+                {
+                    auto itNew = oldToNew.find(node.oldEntity);
+                    if (itNew == oldToNew.end())
+                        continue;
+
+                    Entity newEntity = itNew->second;
+
+                    if (g->HasComponent<Parent>(newEntity))
+                        g->RemoveComponent<Parent>(newEntity);
+
+                    if (g->HasComponent<Children>(newEntity))
+                        g->RemoveComponent<Children>(newEntity);
+                }
+
+                // Pass 3: rebuild hierarchy using saved parent links
+                for (auto& node : *deleted)
+                {
+                    auto itNewChild = oldToNew.find(node.oldEntity);
+                    if (itNewChild == oldToNew.end())
+                        continue;
+
+                    Entity newChild = itNewChild->second;
+
+                    //if (node.snapshot.hasParent)
+                    //{
+                    //    Entity oldParent = node.snapshot.parent_snap.parent;
+                    //    auto itNewParent = oldToNew.find(oldParent);
+
+                    //    if (itNewParent != oldToNew.end())
+                    //    {
+                    //        Entity newParent = itNewParent->second;
+                    //        HierarchyHelpers::SetParent(newChild, newParent);
+                    //    }
+                    //    else
+                    //    {
+                    //        HierarchyHelpers::SetParent(newChild, INVALID_ENTITY);
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    HierarchyHelpers::SetParent(newChild, INVALID_ENTITY);
+                    //}
+                    if (node.snapshot.hasParent)
+                    {
+                        Entity oldParent = node.snapshot.parent_snap.parent;
+                        Entity parentToUse = INVALID_ENTITY;
+
+                        // Case 1: parent was deleted too and got recreated
+                        auto itNewParent = oldToNew.find(oldParent);
+                        if (itNewParent != oldToNew.end())
+                        {
+                            parentToUse = itNewParent->second;
+                        }
+                        else
+                        {
+                            // Case 2: parent was not deleted; if it still exists, use it directly
+                            if (oldParent != INVALID_ENTITY)
+                            {
+                                bool liveParentExists =
+                                    g->HasComponent<Framework::Transform>(oldParent) ||
+                                    g->HasComponent<Name>(oldParent) ||
+                                    g->HasComponent<LayerTag>(oldParent);
+
+                                if (liveParentExists)
+                                    parentToUse = oldParent;
+                            }
+                        }
+
+                        HierarchyHelpers::SetParent(newChild, parentToUse);
+                    }
+                    else
+                    {
+                        HierarchyHelpers::SetParent(newChild, INVALID_ENTITY);
+                    }
+                }
+
+                // Pass 4: restore display order
+                for (auto& node : *deleted)
+                {
+                    if (!node.handle || node.handle->id == INVALID_ENTITY)
+                        continue;
+
+                    InsertIntoDisplayOrder(displayOrder, node.handle->id, node.displayIndex);
+                }
+
+                // Pass 5: restore selection to root
+                if (!deleted->empty())
+                {
+                    auto& rootNode = deleted->back(); // root is last
+                    selectedHandle = rootNode.handle;
+                    selectedEntity = selectedHandle ? selectedHandle->id : INVALID_ENTITY;
+                }
+            };
+
+        a.redo = [deleted, &displayOrder, &hof, &selectedEntity, &selectedHandle, &factory]() mutable
+            {
+                // deleted vector order is children first, parent last
+                // deleting in this same order is okay
+                for (auto& node : *deleted)
+                {
+                    if (!node.handle || node.handle->id == INVALID_ENTITY)
+                        continue;
+
+                    Entity e = node.handle->id;
+
+                    RemoveFromDisplayOrder(displayOrder, e);
+                    hof.erase(e);
+                    factory.DeleteEntity(e);
+                    node.handle->id = INVALID_ENTITY;
+                }
+
+                selectedEntity = INVALID_ENTITY;
+                selectedHandle.reset();
             };
 
         undo.Push(std::move(a));

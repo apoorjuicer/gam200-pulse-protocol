@@ -45,8 +45,8 @@ namespace PulseEditor
 {
     // Gizmo-undo state (separate from Inspector)
     static bool s_gizmoEditing = false;
-    static EntitySnapshot s_gizmoBeforeSnapshot;
-    static Entity s_gizmoEntity = INVALID_ENTITY;
+    static Framework::Transform s_gizmoBeforeTransform{};
+    static std::shared_ptr<EntityHandle> s_gizmoHandle = nullptr; //will assign when dragging
     GLFWwindow* window;
     // -------------------------------------------------------------------------
     // Internal state & constants
@@ -899,12 +899,13 @@ namespace PulseEditor
 
                 // UNDO: snapshot transform at start of gizmo drag
                 s_gizmoEditing = true;
-                s_gizmoEntity = selectedEntity;
-                s_gizmoBeforeSnapshot = MakeEntitySnapshot(selectedEntity);
+                s_gizmoBeforeTransform = tr;
+                s_gizmoHandle = selectedHandle;
             }
             else if (hovered != INVALID_ENTITY)
             {
                 selectedEntity = hovered;
+                selectedHandle = (selectedEntity != INVALID_ENTITY) ? handleOf[selectedEntity] : nullptr;
             }
             else
             {
@@ -1005,145 +1006,89 @@ namespace PulseEditor
             g_gizmo.activeHandle = GizmoHandle::None;
 
             // Replace the entire if block with:
-            if (s_gizmoEditing && s_gizmoEntity != INVALID_ENTITY)
+            if (s_gizmoEditing && s_gizmoHandle->id != INVALID_ENTITY)
             {
-               // Entity e = s_gizmoEntity;
-                //EntitySnapshot before = s_gizmoBeforeSnapshot;
+                auto* coord = Coordinator::GetInstance();
+                if (coord && coord->HasComponent<Framework::Transform>(s_gizmoHandle->id))
+                {
+                    Framework::Transform after =
+                        coord->GetComponent<Framework::Transform>(s_gizmoHandle->id);
 
-                //EntitySnapshot after = MakeEntitySnapshot(e);
-
-                //mUndo.Push(UndoManager::Action{
-                //    .undo = [e, before]() { RestoreEntityFromSnapshot(e, before); },
-                //    .redo = [e, after]() { RestoreEntityFromSnapshot(e, after);  }
-                //    });
+                    if (s_gizmoBeforeTransform != after)
+                    {
+                        PushTransformEdit(mUndo, s_gizmoHandle, s_gizmoBeforeTransform, after);
+                    }
+                }
 
                 s_gizmoEditing = false;
-                s_gizmoEntity = INVALID_ENTITY;
+                s_gizmoHandle.reset();
             }
         }
 
-        // ---------------------------------------------------------------------
-        // DELETE KEY (with children support)
-        // ---------------------------------------------------------------------
-        if (selectedEntity != INVALID_ENTITY && glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS)
-        {
-            Entity toDelete = selectedEntity;
-            if (!coord)
-                return;
+        //// ---------------------------------------------------------------------
+        //// DELETE KEY (with children support)
+        //// ---------------------------------------------------------------------
+        //if (selectedEntity != INVALID_ENTITY && glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS)
+        //{
+        //    Entity toDelete = selectedEntity;
+        //    if (!coord)
+        //        return;
 
-            // If gizmo was dragging this entity, stop it
-            if (g_gizmo.dragging && g_gizmo.active == toDelete)
-            {
-                g_gizmo.dragging = false;
-                g_gizmo.active = INVALID_ENTITY;
-                g_gizmo.activeHandle = GizmoHandle::None;
-            }
+        //    // If gizmo was dragging this entity, stop it
+        //    if (g_gizmo.dragging && g_gizmo.active == toDelete)
+        //    {
+        //        g_gizmo.dragging = false;
+        //        g_gizmo.active = INVALID_ENTITY;
+        //        g_gizmo.activeHandle = GizmoHandle::None;
+        //    }
 
-            // Collect all entities to delete (including children)
-            std::vector<Entity> entitiesToDelete;
-            HierarchyHelpers::PrepareDeleteWithChildren(toDelete, entitiesToDelete);
+        //    // Collect all entities to delete (including children)
+        //    std::vector<Entity> entitiesToDelete;
+        //    HierarchyHelpers::PrepareDeleteWithChildren(toDelete, entitiesToDelete);
 
-            // Store snapshots and indices for undo
-            std::vector<EntitySnapshot> snapshots;
-            std::vector<int> indices;
+        //    // Store snapshots and indices for undo
+        //    std::vector<EntitySnapshot> snapshots;
+        //    std::vector<int> indices;
 
-            for (Entity e : entitiesToDelete)
-            {
-                // Find position in hierarchy
-                auto it = std::find(entityDisplayOrder.begin(),
-                    entityDisplayOrder.end(), e);
-                int index = -1;
-                if (it != entityDisplayOrder.end())
-                {
-                    index = static_cast<int>(it - entityDisplayOrder.begin());
-                }
-                indices.push_back(index);
+        //    for (Entity e : entitiesToDelete)
+        //    {
+        //        // Find position in hierarchy
+        //        auto it = std::find(entityDisplayOrder.begin(),
+        //            entityDisplayOrder.end(), e);
+        //        int index = -1;
+        //        if (it != entityDisplayOrder.end())
+        //        {
+        //            index = static_cast<int>(it - entityDisplayOrder.begin());
+        //        }
+        //        indices.push_back(index);
 
-                // Snapshot while entity is still valid
-                snapshots.push_back(MakeEntitySnapshot(e));
-            }
+        //        // Snapshot while entity is still valid
+        //        snapshots.push_back(MakeEntitySnapshot(e));
+        //    }
 
-            // Remove all from entityDisplayOrder
-            for (Entity e : entitiesToDelete)
-            {
-                auto it = std::find(entityDisplayOrder.begin(),
-                    entityDisplayOrder.end(), e);
-                if (it != entityDisplayOrder.end())
-                {
-                    entityDisplayOrder.erase(it);
-                }
-            }
+        //    // Remove all from entityDisplayOrder
+        //    for (Entity e : entitiesToDelete)
+        //    {
+        //        auto it = std::find(entityDisplayOrder.begin(),
+        //            entityDisplayOrder.end(), e);
+        //        if (it != entityDisplayOrder.end())
+        //        {
+        //            entityDisplayOrder.erase(it);
+        //        }
+        //    }
 
-            // Delete all entities
-            Factory factory;
-            for (Entity e : entitiesToDelete)
-            {
-                factory.DeleteEntity(e);
-            }
+        //    // Delete all entities
+        //    Factory factory;
+        //    for (Entity e : entitiesToDelete)
+        //    {
+        //        factory.DeleteEntity(e);
+        //    }
 
 
-            PushDeleteEntity(mUndo, Editorfactory, entityDisplayOrder, selectedHandle, handleOf);
-            selectedHandle.reset();
-            selectedEntity = INVALID_ENTITY;
-
-            //// --- UNDO/REDO: recreate all entities and restore hierarchy ---
-            //auto restoredIds = std::make_shared<std::vector<Entity>>(); // filled on undo, used on redo
-
-            //mUndo.Push(UndoManager::Action{
-            //    // UNDO: recreate entities from snapshots and reinsert into hierarchy
-            //    .undo = [snapshots, indices, restoredIds]() mutable
-            //    {
-            //        restoredIds->clear();
-
-            //        // Recreate entities (you can keep your order; just be consistent)
-            //        for (size_t i = 0; i < snapshots.size(); ++i)
-            //        {
-            //            Entity restored = CreateEntityFromEntitySnapshot(snapshots[i]);
-            //            if (restored == INVALID_ENTITY)
-            //                continue;
-
-            //            restoredIds->push_back(restored);
-
-            //            // Reinsert into hierarchy at the original index (clamped)
-            //            int insertIndex = indices[i];
-            //            if (insertIndex < 0 || insertIndex > static_cast<int>(entityDisplayOrder.size()))
-            //                insertIndex = static_cast<int>(entityDisplayOrder.size());
-
-            //            entityDisplayOrder.insert(entityDisplayOrder.begin() + insertIndex, restored);
-            //        }
-
-            //        // Select the first restored (your comment says original parent)
-            //        if (!restoredIds->empty())
-            //            selectedEntity = (*restoredIds)[0];
-            //    },
-
-            //    // REDO: delete the entities that were recreated by undo
-            //    .redo = [restoredIds]() mutable
-            //    {
-            //        if (!restoredIds || restoredIds->empty())
-            //            return;
-
-            //        // Remove all from entityDisplayOrder first
-            //        for (Entity e : *restoredIds)
-            //        {
-            //            auto it = std::find(entityDisplayOrder.begin(), entityDisplayOrder.end(), e);
-            //            if (it != entityDisplayOrder.end())
-            //                entityDisplayOrder.erase(it);
-            //        }
-
-            //        // Delete entities
-            //        Factory factory;
-            //        for (Entity e : *restoredIds)
-            //            factory.DeleteEntity(e);
-
-            //        selectedEntity = INVALID_ENTITY;
-
-            //        // keep list (or clear it). Clearing prevents double-redo issues.
-            //        // If you clear, redo becomes a no-op until undo runs again, which is correct.
-            //        restoredIds->clear();
-            //    }
-            //    });
-        }
+        //    PushDeleteEntity(mUndo, Editorfactory, entityDisplayOrder, selectedHandle, handleOf);
+        //    selectedHandle.reset();
+        //    selectedEntity = INVALID_ENTITY;
+        //}
 
         dl->PopClipRect();
     }

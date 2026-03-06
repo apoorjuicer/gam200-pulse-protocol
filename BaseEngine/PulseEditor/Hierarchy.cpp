@@ -248,6 +248,7 @@ namespace PulseEditor
     {
         auto* g_coordinator = Coordinator::GetInstance();
         if (!g_coordinator) return;
+        if (!g_coordinator->IsAlive(entity)) return;
 
         // Get display name
         std::string display;
@@ -607,16 +608,19 @@ namespace PulseEditor
         {
             if (selectedHandle && selectedHandle->id != INVALID_ENTITY)
             {
-                Entity toDelete = selectedEntity;
+               // Entity toDelete = selectedEntity;
 
-                // Collect the whole subtree (root + all descendants)
-                std::vector<Entity> entitiesToDelete;
-                HierarchyHelpers::PrepareDeleteWithChildren(toDelete, entitiesToDelete);
+               // // Collect the whole subtree (root + all descendants)
+               // std::vector<Entity> entitiesToDelete;
+               // HierarchyHelpers::PrepareDeleteWithChildren(toDelete, entitiesToDelete);
 
-               // Factory factory;
-                PushDeleteEntity(mUndo, Editorfactory, entityDisplayOrder, selectedHandle, handleOf);
-                selectedHandle.reset();
-                selectedEntity = INVALID_ENTITY;
+               //// Factory factory;
+               // PushDeleteEntity(mUndo, Editorfactory, entityDisplayOrder, selectedHandle, handleOf);
+               // selectedHandle.reset();
+               // selectedEntity = INVALID_ENTITY;
+
+                PushDeleteSubtree(mUndo, Editorfactory, entityDisplayOrder, handleOf,
+                    selectedEntity, selectedEntity, selectedHandle);
             }
         }
 
