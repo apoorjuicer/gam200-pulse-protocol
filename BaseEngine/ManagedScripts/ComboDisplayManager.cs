@@ -7,8 +7,8 @@ public class ComboDisplayManager : Script
     public static ComboDisplayManager? Instance { get; private set; }
 
     public bool DebugLogging = false;
-    public float FadeOutDuration = 0.3f;
-    public float FadeStaggerDelay = 0.1f;
+    public float FadeOutDuration = 0.1f; // making this faster to counter INPUT NOW showing on MEMORIZE enemy last key 
+    public float FadeStaggerDelay = 0.05f;
 
     private bool initialized = false;
     private int lastInputProgress = 0;
@@ -99,7 +99,11 @@ public class ComboDisplayManager : Script
                 if (currentBeat > lastCountdownBeat)
                 {
                     lastCountdownBeat = currentBeat;
-                    if (playerSlots.ContainsKey(countdownCurrentSlot))
+                    // show me blank placeholder
+                    // if player presses wrong flash them (with sprite)
+             
+                    int alreadyPressed = ComboSystem.Instance != null ? ComboSystem.Instance.GetComboProgress() : 0;
+                    if (countdownCurrentSlot >= alreadyPressed && playerSlots.ContainsKey(countdownCurrentSlot))
                         playerSlots[countdownCurrentSlot].StartCountdown(currentWeakness[countdownCurrentSlot]);
                     countdownCurrentSlot++;
 
@@ -138,10 +142,6 @@ public class ComboDisplayManager : Script
                     }
                 }
             }
-        }
-        else if (currentProgress < lastInputProgress)
-        {
-            ClearPlayerSlots();
         }
 
         lastInputProgress = currentProgress;
