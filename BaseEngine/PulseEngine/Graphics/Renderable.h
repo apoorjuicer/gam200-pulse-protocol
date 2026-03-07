@@ -77,9 +77,9 @@ namespace Framework
 		loadedSpriteName == other.loadedSpriteName;
 		}
 		bool operator!=(Renderable const& other) const
-			{
-				return !(*this == other);
-			}
+		{
+			return !(*this == other);
+		}
 	};
 
 	////std::ostream& operator<<(std::ostream& os, Renderable const& t);

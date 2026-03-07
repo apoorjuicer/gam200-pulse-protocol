@@ -45,6 +45,12 @@ namespace PulseEditor
     static bool isEditing_Renderable = false;
     static Framework::Renderable beforeEdit_Renderable{};
 
+    static Framework::Animation beforeEdit_Animation{};
+    static bool isEditing_Animation = false;
+
+    static Name beforeEdit_Name{};
+    static bool isEditing_Name = false;
+
     // -------------------------------------------------------------------------
     // Function to handle Transform undo
     // -------------------------------------------------------------------------
@@ -125,7 +131,42 @@ namespace PulseEditor
             isEditing_Renderable = false;
         }
     }
-    
+
+    static void HandleNameUndo(
+        Name& currentName,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            std::cout << "[Inspector] HandleNameUndo called\n";
+            beforeEdit_Name = currentName;
+            isEditing_Name = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_Name)
+        {
+            Name after = currentName;
+            if (beforeEdit_Name != after)
+            {
+                PushNameEdit(undo, h, beforeEdit_Name, after);
+            }
+
+            isEditing_Name = false;
+        }
+    }
+
+    static void HandleAnimationUndo(
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        Framework::Animation const& before,
+        Framework::Animation const& after)
+    {
+        if (before != after)
+        {
+            PushAnimationEdit(undo, h, before, after);
+        }
+    }
 
 
     // -------------------------------------------------------------------------
@@ -620,34 +661,61 @@ namespace PulseEditor
     // -------------------------------------------------------------------------
     void Inspector_NameComponent(Coordinator *g)
     {
-        if (g->HasComponent<Name>(selectedEntity))
+        //early return
+        if (!g->HasComponent<Name>(selectedEntity)){ return; }
+       
+        auto &nm = g->GetComponent<Name>(selectedEntity);
+
+        bool removeName = false;
+        bool nameOpen = 
+            ImGui::CollapsingHeader("Name", ImGuiTreeNodeFlags_DefaultOpen 
+                | ImGuiTreeNodeFlags_AllowOverlap);
+        removeName = DrawInlineRemoveButton("Name");
+
+        if (removeName) // remove name component
         {
-            auto &nm = g->GetComponent<Name>(selectedEntity);
+            //save name first
+            Name oldName = nm;
+            auto h = selectedHandle;
 
-            bool removeName = false;
-            bool nameOpen = ImGui::CollapsingHeader("Name", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
-            removeName = DrawInlineRemoveButton("Name");
+            g->RemoveComponent<Name>(selectedEntity);
+           // PushRemoveName(mUndo, h, oldName); //push
+        }
+        else if (nameOpen)
+        {
+            ImGui::Indent();
 
-            if (removeName)
+            static Entity lastEntity = INVALID_ENTITY;
+            static char nameBuf[256] = {};
+
+            if (lastEntity != selectedEntity)
             {
-                g->RemoveComponent<Name>(selectedEntity);
-            }
-            else if (nameOpen)
-            {
-                ImGui::Indent();
-
-                static char nameBuf[256];
+                lastEntity = selectedEntity;
                 std::strncpy(nameBuf, nm.name.c_str(), sizeof(nameBuf));
                 nameBuf[sizeof(nameBuf) - 1] = '\0';
-                if (ImGui::InputText("Entity Name", nameBuf, IM_ARRAYSIZE(nameBuf)))
-                    nm.name = nameBuf;
-
-                ImGui::Unindent();
+                std::cout << "name buffer " << nameBuf << "\n";
+            }
+            else if (!isEditing_Name)
+            {
+                std::strncpy(nameBuf, nm.name.c_str(), sizeof(nameBuf));
+                nameBuf[sizeof(nameBuf) - 1] = '\0';
             }
 
-            ImGui::Separator();
+            //copying nm.name into namebuf every frame
+            //static char nameBuf[256];
+            //std::strncpy(nameBuf, nm.name.c_str(), sizeof(nameBuf));
+            //nameBuf[sizeof(nameBuf) - 1] = '\0';
+            if (ImGui::InputText("Entity Name", nameBuf, IM_ARRAYSIZE(nameBuf))) {//edit string
+                nm.name = nameBuf;
+            }
+
+            HandleNameUndo(nm, mUndo, selectedHandle);
+
+            ImGui::Unindent();
         }
-    }
+
+        ImGui::Separator();
+    }// end of Name component
 
 
     void Inspector_TransformComponent(Coordinator* g)
@@ -1116,6 +1184,8 @@ namespace PulseEditor
 
                 // Rows
                 {
+                    Framework::Animation before = a;
+
                     int rows = a.rows;
                     if (StepperInt("Rows", &rows, 1, 999))
                     {
@@ -1123,11 +1193,15 @@ namespace PulseEditor
                         a.totalFrames = std::max(1, a.rows * a.columns);
                         a.currentFrame = std::min(a.currentFrame, a.totalFrames - 1);
                         a.elapsedTime = 0.0f;
+
+                        HandleAnimationUndo(mUndo, selectedHandle, before, a);
                     }
                 }
 
                 // Columns
                 {
+                    Framework::Animation before = a;
+
                     int cols = a.columns;
                     if (StepperInt("Columns", &cols, 1, 999))
                     {
@@ -1135,11 +1209,15 @@ namespace PulseEditor
                         a.totalFrames = std::max(1, a.rows * a.columns);
                         a.currentFrame = std::min(a.currentFrame, a.totalFrames - 1);
                         a.elapsedTime = 0.0f;
+
+                        HandleAnimationUndo(mUndo, selectedHandle, before, a);
                     }
                 }
 
                 // Total Frames 
                 {
+                    Framework::Animation before = a;
+
                     const int maxFrames = std::max(1, a.rows * a.columns);
                     int frames = a.totalFrames;
 
@@ -1148,25 +1226,34 @@ namespace PulseEditor
                         a.totalFrames = std::clamp(frames, 1, maxFrames);
                         a.currentFrame = std::clamp(a.currentFrame, 0, a.totalFrames - 1);
                         a.elapsedTime = 0.0f;
+
+                        HandleAnimationUndo(mUndo, selectedHandle, before, a);
                     }
                 }
 
                 // Current frame
                 {
+                    Framework::Animation before = a;
+
                     const int maxFrame = std::max(0, a.totalFrames - 1);
                     int cur = std::clamp(a.currentFrame, 0, maxFrame);
                     if (ImGui::SliderInt("Current Frame", &cur, 0, maxFrame))
                     {
                         a.currentFrame = cur;
                         a.elapsedTime = 0.0f;
+
+                        HandleAnimationUndo(mUndo, selectedHandle, before, a);
                     }
                 }
 
                 // Animation speed
                 {
+                    Framework::Animation before = a;
                     float sp = a.animationSpeed;
-                    if (StepperFloat("Anim Speed (fps)", &sp, 0.0f, 120.0f, 0.1f))
+                    if (StepperFloat("Anim Speed (fps)", &sp, 0.0f, 120.0f, 0.1f)) {
                         a.animationSpeed = std::max(0.0f, sp);
+                        HandleAnimationUndo(mUndo, selectedHandle, before, a);
+                    }
                 }
 
                 ImGui::Unindent();

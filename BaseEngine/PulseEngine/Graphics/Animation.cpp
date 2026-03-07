@@ -75,4 +75,34 @@ namespace Framework
 		if (in.HasMember("animationSpeed"))
 			animationSpeed = in["animationSpeed"].GetFloat();
 	}
+
+	//bool Animation::operator==(Animation const& other) const {
+	//	return id == other.id &&
+	//		path == other.path &&
+	//		currentFrame == other.currentFrame &&
+	//		elapsedTime == other.elapsedTime &&
+	//		totalFrames == other.totalFrames &&
+	//		columns == other.columns &&
+	//		rows == other.rows &&
+	//		animationSpeed == other.animationSpeed;
+	//}
+	//bool Animation::operator!=(Animation const& other) const
+	//{
+	//	return !(*this == other);
+	//}
+
+	//std::ostream& operator<<(std::ostream& os, Animation const& t) {
+	//	os << "[Animation Component values] "
+	//		<< "id: \"" << t.id << "\", "
+	//		<< "path: \"" << t.path << "\", "
+	//		<< "currentFrame: " << t.currentFrame << ", "
+	//		<< "elapsedTime: " << t.elapsedTime << ", "
+	//		<< "totalFrames: " << t.totalFrames << ", "
+	//		<< "columns: " << t.columns << ", "
+	//		<< "rows: " << t.rows << ", "
+	//		<< "animationSpeed: " << t.animationSpeed
+	//		<< "\n";
+	//	return os;
+	//}
+
 } // end of namespace

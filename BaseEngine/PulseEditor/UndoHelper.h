@@ -38,6 +38,21 @@ namespace PulseEditor
         std::shared_ptr<EntityHandle> handle;
     };
 
+    //not needed for now
+    //inline std::shared_ptr<EntityHandle> EnsureHandle(Entity e)
+    //{
+    //    if (e == INVALID_ENTITY) return nullptr;
+
+    //    auto it = handleOf.find(e);
+    //    if (it != handleOf.end() && it->second)
+    //        return it->second;
+
+    //    auto h = std::make_shared<EntityHandle>();
+    //    h->id = e;
+    //    handleOf[e] = h;
+    //    return h;
+    //}
+
     // Helper: remove entity from display order if present
     //find entity e and remove it from the vector of entities
     inline void RemoveFromDisplayOrder(std::vector<std::uint32_t>& order, std::uint32_t e)
@@ -513,6 +528,116 @@ namespace PulseEditor
 
         undo.Push(std::move(a));
     }
+
+    inline void PushNameEdit(UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        Name const& before,
+        Name const& after)
+    {
+
+
+        std::cout << "[UndoH] PushNameEdit called\n";
+        if (!h || h->id == INVALID_ENTITY) return;
+        std::cout << "[UndoH] PushNameEdit called after early return check\n";
+        UndoManager::Action a;
+
+        a.undo = [h, before]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                std::cout << "[UndoH] PushNameEdit undo \n";
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<Name>(h->id)) return;
+
+                c->GetComponent<Name>(h->id) = before;
+            };
+
+        a.redo = [h, after]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                std::cout << "[UndoH] PushNameEdit redo \n";
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<Name>(h->id)) return;
+
+                c->GetComponent<Name>(h->id) = after;
+            };
+
+        undo.Push(std::move(a));
+    }
+
+    inline void PushAnimationEdit(UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        Framework::Animation const& before,
+        Framework::Animation const& after)
+    {
+        std::cout << "[UndoH] PushAnimationEdit called\n";
+        if (!h || h->id == INVALID_ENTITY) return;
+        std::cout << "[UndoH] PushAnimationEdit called after early return check\n";
+
+        UndoManager::Action a;
+
+        a.undo = [h, before]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                std::cout << "[UndoH] PushAnimationEdit undo\n";
+
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<Framework::Animation>(h->id)) return;
+
+                c->GetComponent<Framework::Animation>(h->id) = before;
+            };
+
+        a.redo = [h, after]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                std::cout << "[UndoH] PushAnimationEdit redo\n";
+
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<Framework::Animation>(h->id)) return;
+
+                c->GetComponent<Framework::Animation>(h->id) = after;
+            };
+
+        undo.Push(std::move(a));
+    }
+
+    /*
+    * Remove component undo
+    */
+
+    //inline void PushRemoveName(UndoManager& undo,
+    //    std::shared_ptr<EntityHandle> h,
+    //    Name const& removedValue)
+    //{
+    //    if (!h || h->id == INVALID_ENTITY) return;
+
+    //    UndoManager::Action a;
+
+    //    a.undo = [h, removedValue]()
+    //        {
+    //            if (!h || h->id == INVALID_ENTITY) return;
+    //            auto* c = Coordinator::GetInstance();
+    //            if (!c) return;
+    //            if (c->HasComponent<Name>(h->id)) return;
+
+    //            c->AddComponent<Name>(h->id, removedValue);
+    //        };
+
+    //    a.redo = [h]()
+    //        {
+    //            if (!h || h->id == INVALID_ENTITY) return;
+    //            auto* c = Coordinator::GetInstance();
+    //            if (!c) return;
+    //            if (!c->HasComponent<Name>(h->id)) return;
+
+    //            c->RemoveComponent<Name>(h->id);
+    //        };
+
+    //    undo.Push(std::move(a));
+    //}
 
 }
 

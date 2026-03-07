@@ -67,6 +67,7 @@ namespace PulseEditor
         Entity renamingEntity = INVALID_ENTITY;
         char renameBuffer[256] = "";
         bool justStartedRenaming = false;
+        Name beforeEdit{};
     };
 
     static RenameState s_renameState;
@@ -171,6 +172,9 @@ namespace PulseEditor
         if (g_coordinator->HasComponent<Name>(entity))
         {
             s_renameState.renamingEntity = entity;
+            //Undo name
+            s_renameState.beforeEdit = g_coordinator->GetComponent<Name>(entity);
+            std::cout << "[Hierarchy RENAME] before : " << s_renameState.beforeEdit.name <<"\n";
             std::string currentName = g_coordinator->GetComponent<Name>(entity).name;
             std::strncpy(s_renameState.renameBuffer, currentName.c_str(), sizeof(s_renameState.renameBuffer) - 1);
             s_renameState.renameBuffer[sizeof(s_renameState.renameBuffer) - 1] = '\0';
@@ -189,7 +193,26 @@ namespace PulseEditor
                 std::string newName = s_renameState.renameBuffer;
                 if (!newName.empty())
                 {
-                    g_coordinator->GetComponent<Name>(s_renameState.renamingEntity).name = newName;
+                    //Undo name
+                    Name after;
+                    after.name = newName;
+                    std::cout << "[Hierarchy RENAME] after : " << after.name << "\n";
+                    if (s_renameState.beforeEdit != after)
+                    {
+                        Entity e = s_renameState.renamingEntity;
+
+                        auto it = handleOf.find(e);
+                        //std::shared_ptr<EntityHandle> h =
+                        //    (it != handleOf.end()) ? it->second : nullptr;
+
+                        g_coordinator->GetComponent<Name>(e) = after;
+                        //auto h = EnsureHandle(e);
+                        PushNameEdit(mUndo, selectedHandle, s_renameState.beforeEdit, after);
+                    }
+                    else
+                    {
+                        g_coordinator->GetComponent<Name>(s_renameState.renamingEntity) = after;
+                    }
                 }
             }
         }

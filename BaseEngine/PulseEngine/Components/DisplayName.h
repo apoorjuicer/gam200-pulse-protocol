@@ -2,7 +2,8 @@
 /**
  * @file        DisplayName.h
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En (primary) - 80%
+ * @author      Ban Kai Wei Benjamin (secondary) - 20%
  * @brief       Defines the Name component for ECS entities. Provides a simple
  *              string-based identifier for entities with JSON serialization
  *              support, used primarily for hierarchy display and debugging.
@@ -36,5 +37,13 @@ struct Name {
 
         if (in.HasMember("name") && in["name"].IsString())
             name = in["name"].GetString();
+    }
+
+    bool operator==(Name const& other) const {
+        return(name == other.name);
+    }
+    bool operator!=(Name const& other) const
+    {
+        return !(*this == other);
     }
 };
