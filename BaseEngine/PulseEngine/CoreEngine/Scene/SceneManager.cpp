@@ -118,7 +118,7 @@ void SceneManager::Init()
 	// RELEASE BUILD: JSON is copied flat beside the exe by CMake
 	if (std::filesystem::exists(currentDir / "JSON"))
 	{
-		scenePath = currentDir / "JSON" / "MainMenu.json";
+		scenePath = currentDir / "JSON" / "LatencyCalibration.json";
 		std::cout << "[SceneManager] Using release path (next to exe)" << std::endl;
 	}
 	// DEV BUILD: find BaseEngine/PulseProtocol/JSON/
@@ -129,7 +129,7 @@ void SceneManager::Init()
 		{
 			baseEngineDir = baseEngineDir.parent_path();
 		}
-		scenePath = baseEngineDir / "PulseProtocol" / "JSON" / "MainMenu.json";
+		scenePath = baseEngineDir / "PulseProtocol" / "JSON" / "LatencyCalibration.json";
 		std::cout << "[SceneManager] Using dev path (BaseEngine folder)" << std::endl;
 	}
 

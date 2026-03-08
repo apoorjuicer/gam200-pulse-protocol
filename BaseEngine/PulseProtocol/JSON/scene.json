@@ -1,6 +1,10 @@
 {
     "sceneFilePaths": [
         {
+            "id": "latencycalibration_scene",
+            "path": "JSON/LatencyCalibration.json"
+        },
+        {
             "id": "mainmenu_scene",
             "path": "JSON/MainMenu.json"
         },

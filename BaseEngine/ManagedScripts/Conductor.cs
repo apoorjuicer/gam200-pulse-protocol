@@ -29,6 +29,11 @@ public class Conductor : Script
         return 60.0f / BPM;
     }
 
+    // default vals calibrated for my com but
+    // LatencyCalibrator will override this thing AFTER test so every new Conductor instance reads it on init.
+    public static float CalibratedOffset = 0.125f;
+
+
     // Compensates for FMOD output buffer lag (~90ms hardware delay).
     public float MusicLatencyOffset = 0.125f;
 
@@ -59,7 +64,7 @@ public class Conductor : Script
 
         if (!initialized)
         {
-
+            MusicLatencyOffset = CalibratedOffset;
             secondsPerBeat = 60.0f / BPM;
             songTime = 0.0f;
             nextHalfBeat = secondsPerBeat * 0.5f;
@@ -67,9 +72,9 @@ public class Conductor : Script
             audioTimeAccumulator = 0f;
             prevAudioPos = 0f;
 
-            initialized = true;
+            Console.WriteLine($"[Conductor] Init | BPM={BPM} | SPB={secondsPerBeat:F3} | LatencyOffset={MusicLatencyOffset:F4}s");
 
-            Console.WriteLine($"[Conductor] Init | BPM={BPM} | SPB={secondsPerBeat:F3}");
+            initialized = true;
             return;
         }
 

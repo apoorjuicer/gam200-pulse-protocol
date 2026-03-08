@@ -23,7 +23,7 @@ public class LatencySliderApplier : Script
 {
     // Range in milliseconds exposed to the editor
     public float MinLatencyMs = 0f;
-    public float MaxLatencyMs = 300f;
+    public float MaxLatencyMs = 500f;
 
     // What to use when no saved value exists yet
     public float DefaultLatencyMs = 100f;
