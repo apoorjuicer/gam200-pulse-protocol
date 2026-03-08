@@ -304,8 +304,8 @@ public class NavigationButtons : Script
         float mx = input.WorldMouseX;
         float my = input.WorldMouseY;
 
-        bool isHovered = mx >= t.X - halfW && mx <= t.X + halfW &&
-                         my >= t.Y - halfH && my <= t.Y + halfH;
+        // DONT process hover when mouse is outside viewport.
+        bool isHovered = input.InGameViewport && mx >= t.X - halfW && mx <= t.X + halfW && my >= t.Y - halfH && my <= t.Y + halfH;
 
         if (isHovered && !isCurrentlyHovered)
         {
