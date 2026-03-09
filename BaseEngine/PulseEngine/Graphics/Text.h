@@ -34,6 +34,25 @@ struct TextComponent
     // To be added, probably typed class enum
     // std::string font_style;
 
+
+    //operator overloads
+    //for Undo comparison function
+    bool operator==(TextComponent const& other) const {
+        return
+            text == other.text &&
+            font_id == other.font_id &&
+            offset == other.offset &&
+            font_size == other.font_size &&
+            color == other.color &&
+            visible == other.visible &&
+            alignment == other.alignment;
+    }
+    bool operator!=(TextComponent const& other) const
+    {
+        return !(*this == other);
+    }
+
+
     // ---------------------------------------------------
     // Serialize
     // ---------------------------------------------------

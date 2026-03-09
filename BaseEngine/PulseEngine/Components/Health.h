@@ -57,4 +57,15 @@ struct DLL_API Health
         if (in.HasMember("isAlive")) isAlive = in["isAlive"].GetBool();
 
     }
+
+    bool operator==(Health const& other) const {
+        return
+            hp == other.hp &&
+            damage == other.damage &&
+            isAlive == other.isAlive;
+    }
+
+    bool operator!=(Health const& other) const {
+        return !(*this == other);
+    }
 };

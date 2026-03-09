@@ -54,6 +54,25 @@ namespace PulseEditor
     static AABB beforeEdit_AABB;
     static bool isEditing_AABB = false;
 
+    static Health beforeEdit_Health;
+    static bool isEditing_Health = false;
+
+    static bool isEditing_Text = false;
+    static TextComponent beforeEdit_Text{};
+
+    static bool isEditing_AudioSource = false;
+    static AudioSource beforeEdit_AudioSource{};
+
+    static bool isEditing_LayerTag = false;
+    static LayerTag beforeEdit_LayerTag{};
+
+    static bool isEditing_PrefabInstance = false;
+    static PrefabInstance beforeEdit_PrefabInstance{};
+
+    static bool isEditing_Logic = false;
+    static LogicComponent beforeEdit_Logic{};
+
+
     // -------------------------------------------------------------------------
     // Function to handle Transform undo
     // -------------------------------------------------------------------------
@@ -193,6 +212,50 @@ namespace PulseEditor
         }
     }
 
+    static void HandleHealthUndo(
+        Health& currentHealth,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_Health = currentHealth;
+            isEditing_Health = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_Health)
+        {
+            Health after = currentHealth;
+            if (beforeEdit_Health != after)
+            {
+                PushHealthEdit(undo, h, beforeEdit_Health, after);
+            }
+            isEditing_Health = false;
+        }
+    }
+
+    static void HandleTextUndo(
+        TextComponent& currentText,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_Text = currentText;
+            isEditing_Text = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_Text)
+        {
+            TextComponent after = currentText;
+            if (beforeEdit_Text != after)
+            {
+                PushTextEdit(undo, h, beforeEdit_Text, after);
+            }
+
+            isEditing_Text = false;
+        }
+    }
 
     // -------------------------------------------------------------------------
     // Helper: add a "add component" button at the bottom, more intuitive
@@ -1747,6 +1810,7 @@ namespace PulseEditor
             {
                 txt.text = textBuf;
             }
+            HandleTextUndo(txt, mUndo, selectedHandle);
 
             ImGui::Spacing();
 
@@ -1758,6 +1822,8 @@ namespace PulseEditor
             std::string fontPreview = txt.font_id.empty() ? "<Default>" : txt.font_id;
 
             ImGui::SetNextItemWidth(250.0f);
+
+            TextComponent beforeFont = txt;
             if (ImGui::BeginCombo("##FontSelect", fontPreview.c_str()))
             {
                 // Default font option
@@ -1785,30 +1851,36 @@ namespace PulseEditor
                 ImGui::EndCombo();
             }
 
+            if (beforeFont != txt)
+            {
+                PushTextEdit(mUndo, selectedHandle, beforeFont, txt);
+            }
+
             // === Font Size ===
             ImGui::Text("Size:");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(150.0f);
-            ImGui::DragFloat("##FontSize", &txt.font_size, 1.0f, 8.0f, 200.0f, "%.0f px");
-
+            ImGui::DragFloat("##FontSize", &txt.font_size, 1.0f, 8.0f, 200.0f, "%.0f px"); //font size edit
+            HandleTextUndo(txt, mUndo, selectedHandle);
             // === Text Color ===
             ImGui::Text("Color:");
             ImGui::SameLine();
             float col[3] = {txt.color.r, txt.color.g, txt.color.b};
-            if (ImGui::ColorEdit3("##TextColor", col))
+            if (ImGui::ColorEdit3("##TextColor", col)) //color edit
             {
                 txt.color = {col[0], col[1], col[2]};
             }
-
+            HandleTextUndo(txt, mUndo, selectedHandle);
             // === Offset from Transform ===
             ImGui::Text("Offset:");
             ImGui::SameLine();
             float offset[2] = {txt.offset.x, txt.offset.y};
             ImGui::SetNextItemWidth(200.0f);
-            if (ImGui::DragFloat2("##TextOffset", offset, 1.0f))
+            if (ImGui::DragFloat2("##TextOffset", offset, 1.0f)) // slider
             {
                 txt.offset = {offset[0], offset[1]};
             }
+            HandleTextUndo(txt, mUndo, selectedHandle);
             ImGui::SameLine();
             ImGui::TextDisabled("(?)");
             if (ImGui::IsItemHovered())
@@ -1819,7 +1891,7 @@ namespace PulseEditor
             // === Text Alignment ===
             ImGui::Text("Alignment:");
             ImGui::SameLine();
-
+            TextComponent beforeAlign = txt;
             const char* alignmentOptions[] = { "Left", "Center", "Right" };
             int currentAlignment = static_cast<int>(txt.alignment);
 
@@ -1827,6 +1899,10 @@ namespace PulseEditor
             if (ImGui::Combo("##TextAlignment", &currentAlignment, alignmentOptions, IM_ARRAYSIZE(alignmentOptions)))
             {
                 txt.alignment = static_cast<TextAlignment>(currentAlignment);
+            }
+            if (beforeAlign != txt)
+            {
+                PushTextEdit(mUndo, selectedHandle, beforeAlign, txt);
             }
             ImGui::SameLine();
             ImGui::TextDisabled("(?)");
@@ -1837,7 +1913,7 @@ namespace PulseEditor
 
             // === Visibility Toggle ===
             ImGui::Checkbox("Visible##TextComponent", &txt.visible);
-
+            HandleTextUndo(txt, mUndo, selectedHandle);
             ImGui::Spacing();
             ImGui::Separator();
 
@@ -1876,15 +1952,15 @@ namespace PulseEditor
             ImGui::Text("HP:");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(150.0f);
-            ImGui::DragInt("##HP", &health.hp, 1.0f, 0, 10000);
-
+            ImGui::DragInt("##HP", &health.hp, 1.0f, 0, 10000); // slide1
+            HandleHealthUndo(health, mUndo, selectedHandle);
             ImGui::Text("Damage:");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(150.0f);
-            ImGui::DragInt("##Damage", &health.damage, 1.0f, 0, 1000);
-
-            ImGui::Checkbox("Is Alive", &health.isAlive);
-
+            ImGui::DragInt("##Damage", &health.damage, 1.0f, 0, 1000); //slide2
+            HandleHealthUndo(health, mUndo, selectedHandle);
+            ImGui::Checkbox("Is Alive", &health.isAlive); //checkbox1
+            HandleHealthUndo(health, mUndo, selectedHandle);
             ImGui::Unindent();
         }
 
