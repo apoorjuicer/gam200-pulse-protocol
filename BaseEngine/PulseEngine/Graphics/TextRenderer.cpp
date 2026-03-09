@@ -139,7 +139,7 @@ void TextRenderer::RenderText(
     const std::string& text,
     float x, float y,
     float scale,
-    const glm::vec3& color,
+    const glm::vec4& color,
     const FontData* fontData,
     TextAlignment alignment)
 {
@@ -160,9 +160,9 @@ void TextRenderer::RenderText(
         1, GL_FALSE,
         glm::value_ptr(m_projection));
 
-    glUniform3f(
+    glUniform4f(
         glGetUniformLocation(shader.GetHandle(), "textColor"),
-        color.x, color.y, color.z);
+        color.x, color.y, color.z, color.w);
 
     glUniform1i(
         glGetUniformLocation(shader.GetHandle(), "text"),

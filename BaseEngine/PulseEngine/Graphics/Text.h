@@ -29,6 +29,7 @@ struct TextComponent
     Vector2 offset{0, 0};
     float font_size{};           // pixel height
     glm::vec3 color = {1, 1, 1}; // RGB
+    float alpha = 1.0f;          // opacity (0.0 = transparent, 1.0 = opaque)
     bool visible = true;         // toggle on/off
     TextAlignment alignment = TextAlignment::Left; // text alignment
     // To be added, probably typed class enum

@@ -95,4 +95,22 @@ namespace ScriptAPI
         auto& comp = g_coordinator->GetComponent<::TextComponent>(entityID);
         comp.alignment = static_cast<::TextAlignment>(alignment);
     }
+
+    void TextComponentAPI::SetAlpha(float a)
+    {
+        auto* g_coordinator = Coordinator::GetInstance();
+        if (!g_coordinator->HasComponent<::TextComponent>(entityID))
+            return;
+        auto& comp = g_coordinator->GetComponent<::TextComponent>(entityID);
+        comp.alpha = a;
+    }
+
+    float TextComponentAPI::GetAlpha()
+    {
+        auto* g_coordinator = Coordinator::GetInstance();
+        if (!g_coordinator->HasComponent<::TextComponent>(entityID))
+            return 1.0f;
+        auto& comp = g_coordinator->GetComponent<::TextComponent>(entityID);
+        return comp.alpha;
+    }
 }
