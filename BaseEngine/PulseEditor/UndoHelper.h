@@ -37,6 +37,7 @@ namespace PulseEditor
         EntitySnapshot snapshot{};
         int displayIndex = -1;
         std::shared_ptr<EntityHandle> handle;
+        std::shared_ptr<EntityHandle> parentHandle;
     };
 
     //not needed for now
@@ -273,6 +274,37 @@ namespace PulseEditor
                 node.handle->id = e;
                 hof[e] = node.handle;
             }
+            //e.g. delete child then delete parent then undo
+            //Need this for child-parent
+            if (node.snapshot.hasParent)
+            {
+                //Entity oldParent = node.snapshot.parent_snap.parent;
+                //auto itParentHandle = hof.find(oldParent);
+                //if (itParentHandle != hof.end())
+                //{
+                //    node.parentHandle = itParentHandle->second;
+                //}
+
+                //need this to fix child D, parent D then undo undo
+                Entity oldParent = node.snapshot.parent_snap.parent;
+                if (oldParent != INVALID_ENTITY)
+                {
+                    auto itParentHandle = hof.find(oldParent);
+                    if (itParentHandle != hof.end())
+                    {
+                        node.parentHandle = itParentHandle->second;
+                    }
+                    else //
+                    {
+                        // Create a stable handle for the parent,
+                        // even if the parent is not being deleted in this action.
+                        // prevents bug, cDpD, undo x2
+                        node.parentHandle = std::make_shared<EntityHandle>();
+                        node.parentHandle->id = oldParent;
+                        hof[oldParent] = node.parentHandle;
+                    }
+                }
+            }
 
             deleted->push_back(node);
         }
@@ -353,52 +385,35 @@ namespace PulseEditor
                     auto itNewChild = oldToNew.find(node.oldEntity);
                     if (itNewChild == oldToNew.end())
                         continue;
-
                     Entity newChild = itNewChild->second;
-
-                    //if (node.snapshot.hasParent)
-                    //{
-                    //    Entity oldParent = node.snapshot.parent_snap.parent;
-                    //    auto itNewParent = oldToNew.find(oldParent);
-
-                    //    if (itNewParent != oldToNew.end())
-                    //    {
-                    //        Entity newParent = itNewParent->second;
-                    //        HierarchyHelpers::SetParent(newChild, newParent);
-                    //    }
-                    //    else
-                    //    {
-                    //        HierarchyHelpers::SetParent(newChild, INVALID_ENTITY);
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    HierarchyHelpers::SetParent(newChild, INVALID_ENTITY);
-                    //}
                     if (node.snapshot.hasParent)
                     {
                         Entity oldParent = node.snapshot.parent_snap.parent;
                         Entity parentToUse = INVALID_ENTITY;
 
-                        // Case 1: parent was deleted too and got recreated
+                        // Case 1: parent was deleted in the SAME undo action
                         auto itNewParent = oldToNew.find(oldParent);
                         if (itNewParent != oldToNew.end())
                         {
                             parentToUse = itNewParent->second;
                         }
-                        else
+                        // Case 2: parent was deleted/recreated in a DIFFERENT undo action
+                        else if (node.parentHandle && node.parentHandle->id != INVALID_ENTITY)
                         {
-                            // Case 2: parent was not deleted; if it still exists, use it directly
-                            if (oldParent != INVALID_ENTITY)
-                            {
-                                bool liveParentExists =
-                                    g->HasComponent<Framework::Transform>(oldParent) ||
-                                    g->HasComponent<Name>(oldParent) ||
-                                    g->HasComponent<LayerTag>(oldParent);
+                            parentToUse = node.parentHandle->id;
+                        }
+                        // Case 3: parent was never deleted and still uses same raw ID
+                        else if (oldParent != INVALID_ENTITY)
+                        {
+                            bool liveParentExists =
+                                g->HasComponent<Parent>(oldParent) ||
+                                g->HasComponent<Children>(oldParent) ||
+                                g->HasComponent<Framework::Transform>(oldParent) ||
+                                g->HasComponent<Name>(oldParent) ||
+                                g->HasComponent<LayerTag>(oldParent);
 
-                                if (liveParentExists)
-                                    parentToUse = oldParent;
-                            }
+                            if (liveParentExists)
+                                parentToUse = oldParent;
                         }
 
                         HierarchyHelpers::SetParent(newChild, parentToUse);
