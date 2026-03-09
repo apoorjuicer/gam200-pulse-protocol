@@ -1,5 +1,5 @@
-﻿/******************************************************************************/
-/**
+/******************************************************************************/
+/*
  * @file        CoreEngine.cpp
  * @project     Pulse Protocol
  * @author		Chia Wei Xuan Rachael (primary) - 50%
@@ -52,16 +52,14 @@
 #pragma comment(lib, "shlwapi.lib") // Needed for <shlwapi.h>
 
 // Game window dimensions and title
+CoreEngine* Engine = nullptr;
 const char WindowTitle[] = "Game Window";
 Config config;
 AssetsManager mAssets;
-
 int WindowWidth;
 int WindowHeight;
 double g_scrollY;
-
-
-CoreEngine* Engine = nullptr;
+std::filesystem::path FilePathToGame;
 
 using HelloWorldFunctionPtr = void(*)(void);
 using InitFunctionPtr = void(*)(CoreEngine*);
@@ -213,7 +211,7 @@ void CoreEngine::CompileScriptAssembly()
 	// Calculate from current working dir (wherever we are)
 	auto currentDir = std::filesystem::current_path();
 
-	// Go up to BaseEngine folder
+	// Find and go into the BaseEngine folder
 	auto baseEngineDir = currentDir;
 	while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
 	{
@@ -224,7 +222,7 @@ void CoreEngine::CompileScriptAssembly()
 	std::cout << "[Hot Reload] BaseEngine dir: " << baseEngineDir << std::endl;
 #endif
 
-	auto projectPath = baseEngineDir / "PulseProtocol" / "ManagedScripts" / "ManagedScripts.csproj";
+	auto projectPath = FilePathToGame / "ManagedScripts" / "ManagedScripts.csproj";
 
 #ifdef _DEBUG
 	std::cout << "[Hot Reload] Project path: " << projectPath << std::endl;
@@ -455,30 +453,81 @@ CoreEngine::~CoreEngine()
 	}
 }
 
-void CoreEngine::Init()
+// Call in init to get the game name fro ActiveGame.json and load that game for editing/playing.
+// then set the game file director(FilePathToGame), if it has not been set yet.
+static void EnsureGameProjectPath()
 {
+	// already set, fuck off from here
+	if (!FilePathToGame.empty()) 
+	{
+		return;
+	}
+
+	// Find the PulseEngine.dll in the build folder
 	char exePath[MAX_PATH];
 	GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
+
+	// Go back 1 file path to get the json file that is next to the exe.
 	std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
 
-	std::filesystem::path configPath;
-	// Check if game JSON is next to exe (RELEASE - copied by CMake)
-	if (std::filesystem::exists(currentDir / "JSON"))
+	// Try to find BaseEngine by walking up (debug/editor build)
+	auto baseEngineDir = currentDir;
+	while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
 	{
-		configPath = currentDir / "JSON" / "config.json";
-		std::cout << "[Config] Using release path (next to exe)" << std::endl;
+		baseEngineDir = baseEngineDir.parent_path();
 	}
-	// Otherwise find BaseEngine folder (DEV)
+
+	if (baseEngineDir.filename() == "BaseEngine")
+	{
+		// Debug build: found BaseEngine, read ActiveGame.json to get the active game
+		std::string activeGame = "PulseProtocol"; // if ActiveGame.json is missing
+
+		std::filesystem::path ConfigFile = baseEngineDir / "ActiveGame.json";
+		if (std::filesystem::exists(ConfigFile))
+		{	
+			//deseralize game name :>
+			std::ifstream f(ConfigFile);
+			if (f.is_open())
+			{
+				rapidjson::IStreamWrapper isw(f);
+				rapidjson::Document doc;
+				doc.ParseStream(isw);
+				if (doc.IsObject() && doc.HasMember("ActiveGame") && doc["ActiveGame"].IsString())
+				{
+					activeGame = doc["ActiveGame"].GetString();
+				}
+			}
+		}
+
+		// FilePathToGame = BaseEngine / Game Name 
+		FilePathToGame = baseEngineDir / activeGame;
+	}
+
+	else if (std::filesystem::exists(currentDir / "JSON"))
+	{
+		// Release build: no BaseEngine found, game assets are beside the exe
+		FilePathToGame = currentDir;
+	}
+	
 	else
 	{
-		auto baseEngineDir = currentDir;
-		while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
-		{
-			baseEngineDir = baseEngineDir.parent_path();
-		}
-		configPath = baseEngineDir / "PulseProtocol" / "JSON" / "config.json";
-		std::cout << "[Config] Using dev path (BaseEngine folder)" << std::endl;
+		// Last resort: just use the folder the DLL is in
+		FilePathToGame = currentDir;
 	}
+
+#ifdef _DEBUG
+	std::cout << "[CoreEngine] Active game project: " << FilePathToGame << std::endl;
+#endif
+}
+
+void CoreEngine::Init()
+{
+	// Get and set the file directory for game name(FilePathToGame)
+	EnsureGameProjectPath(); 
+
+	// FilePathToGame is already set correctly by EnsureGameProjectPath() above.
+	// It handles both dev (BaseEngine/GameName) and release (exe folder) cases.
+	std::filesystem::path configPath = FilePathToGame / "JSON" / "config.json";
 
 	config.SetConfigPath(configPath.string());
 
@@ -668,32 +717,15 @@ void CoreEngine::Init()
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 	}
 
-	// Create systems AFTER GL is ready
-	char eexePath[MAX_PATH];
-	GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), eexePath, MAX_PATH);
-	std::filesystem::path ccurrentDir = std::filesystem::path(eexePath).parent_path();
+	// Just incase, do again.
+	EnsureGameProjectPath();
 
-	std::filesystem::path gameProjectPath;
-	if (std::filesystem::exists(ccurrentDir / "JSON"))
-	{
-		gameProjectPath = ccurrentDir;  // Release: JSON and Assets are flat beside the exe
-	}
-	else
-	{
-		auto baseEngineDir = ccurrentDir;
-		while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
-		{
-			baseEngineDir = baseEngineDir.parent_path();
-		}
-		gameProjectPath = baseEngineDir / "PulseProtocol";  // Dev: BaseEngine/PulseProtocol
-	}
-
-	// Set paths BEFORE Initialize
-	std::cout << "[DEBUG] Setting asset paths, gameProjectPath = " << gameProjectPath << std::endl;
-	mAssets.getRegistry().SetAssetPaths(gameProjectPath);
+	// Check were we are before we set the asset path.
+	std::cout << "[DEBUG] Setting asset paths, FilePathToGame = " << FilePathToGame << std::endl;
+	mAssets.getRegistry().SetAssetPaths(FilePathToGame);
 
 	std::cout << "[DEBUG] Testing path resolution:" << std::endl;
-	std::cout << "[DEBUG] Base path: " << gameProjectPath << std::endl;
+	std::cout << "[DEBUG] Base path: " << FilePathToGame << std::endl;
 
 	// Load manifests
 	mAssets.Initialize();
@@ -749,8 +781,6 @@ void CoreEngine::Init()
 	//	transform2.textureID = barTexture;
 	//	std::cout << "Texture loaded and assigned to box 2: " << barTexture << std::endl;
 	// }
-
-	std::cout << "[CHEESE BURGER FOR SALE] " << std::filesystem::current_path() << std::endl;
 
 	GameRunning = true;	 // 3.. 2.. 1.. GAME START
 	startScriptEngine(); // 3.. 2.. 1.. DLL SCRIPT! START ROLLINGGGGGGGGGGGGGGGGGG
@@ -1364,7 +1394,7 @@ void CoreEngine::PlayGame()
 		}
 
 		// ALWAYS update this path, even if already set
-		m_originalScenePath = "../../PulseProtocol/JSON/" + sceneName + ".json";
+		m_originalScenePath = (FilePathToGame / "JSON" / (sceneName + ".json")).string();
 
 		std::cout << "[CoreEngine] Original scene path: " << m_originalScenePath << std::endl; // DEBUG
 	}
@@ -1558,7 +1588,7 @@ std::filesystem::path CoreEngine::GetAssetRoot()
 	fs::path cur = dllDir;
 	for (int i = 0; i < 30; ++i)
 	{
-		fs::path candidate = cur / "PulseProtocol" / "Assets";
+		fs::path candidate = cur / FilePathToGame.filename() / "Assets";
 		if (fs::exists(candidate) && fs::is_directory(candidate))
 		{
 			fs::path resolved = fs::weakly_canonical(candidate);

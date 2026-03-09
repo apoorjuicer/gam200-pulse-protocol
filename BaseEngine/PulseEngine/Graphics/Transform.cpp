@@ -16,6 +16,7 @@
 /******************************************************************************/
 #include "Transform.h"
 #include "Math/math.h"
+#include "CoreEngine/Core/CoreEngine.h" // for FilePathToGame
 
 namespace Framework
 {
@@ -177,8 +178,7 @@ namespace Framework
 
 		// Ensure directory exists
 		namespace fs = std::filesystem;
-		fs::create_directories("../../PulseProtocol/JSON");
-		// fs::create_directories("../JSON");
+		fs::create_directories(FilePathToGame / "JSON");
 
 		std::ofstream ofs(path);
 		if (!ofs.is_open())

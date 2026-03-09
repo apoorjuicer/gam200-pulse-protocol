@@ -40,6 +40,7 @@
 #include "FolderValidation.h"
 #include "SnapShot.h"
 
+#include "CoreEngine/Core/CoreEngine.h"      // for FilePathToGame
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "CoreEngine/ECS/Coordinator.h"
 #include "Graphics/Renderable.h"
@@ -83,6 +84,16 @@ namespace PulseEditor
     static std::string FindAssetRoot()
     {
         namespace fs = std::filesystem;
+
+        // Just use FilePathToGame if its alr set
+        if (!FilePathToGame.empty())
+        {
+            fs::path assetPath = FilePathToGame / "Assets";
+            if (fs::exists(assetPath) && fs::is_directory(assetPath))
+            {
+                return assetPath.string();
+            }
+        }
 
         fs::path cwd = fs::current_path();
         std::string cwdStr = cwd.string();

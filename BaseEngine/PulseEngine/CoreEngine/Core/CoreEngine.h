@@ -195,3 +195,4 @@ extern DLL_API AssetsManager mAssets;
 extern DLL_API int WindowWidth;
 extern DLL_API int WindowHeight;
 extern DLL_API double g_scrollY;
+extern DLL_API std::filesystem::path FilePathToGame; // File path to game folder.

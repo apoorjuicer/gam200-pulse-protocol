@@ -63,7 +63,9 @@ private:
 
 	// calls onto prefab json file only, it will just load what the param PrefabName is.
 	//bool LoadPrefab(Entity entity, std::string const& PrefabName);
-	std::string PrefabPathway = "../../PulseProtocol/Assets/Prefabs";
+
+	// set at runtime in init from FilePathToGame
+	std::string PrefabPathway; 
 
 	CoreEngine* m_coreEngine = nullptr;
 };

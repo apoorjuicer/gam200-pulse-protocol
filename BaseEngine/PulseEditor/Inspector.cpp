@@ -28,6 +28,7 @@
 #include "Graphics/Layer.h"         // GLApp::shdrpgms
 #include "Graphics/LayerRegistry.h" // for dynamic layer names
 #include "Graphics/Text.h"
+#include "CoreEngine/Core/CoreEngine.h"      // for FilePathToGame
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "CoreEngine/Prefab/PrefabInstance.h"
 namespace PulseEditor
@@ -839,7 +840,7 @@ namespace PulseEditor
                         });
 
                         namespace fs = std::filesystem;
-                        const std::string kTexturesRoot = "../../PulseProtocol/Assets/Textures";
+                        const std::string kTexturesRoot = (FilePathToGame / "Assets" / "Textures").string();
 
                         constexpr int SPRITE_SHADER_INDEX = 1;
                         constexpr int SPRITESHEET_SHADER_INDEX = 2;
@@ -860,7 +861,7 @@ namespace PulseEditor
 
                                 const fs::path roots[] = {
                                     fs::path(kTexturesRoot),
-                                    fs::path("../../PulseProtocol/Assets")};
+                                    FilePathToGame / "Assets"};
 
                                 std::string resolved;
                                 for (const fs::path &root : roots)
@@ -888,7 +889,7 @@ namespace PulseEditor
                                     std::string pathStr = resolved;
                                     std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
 
-                                    size_t myEnginePos = pathStr.find("PulseProtocol/Assets");
+                                    size_t myEnginePos = pathStr.find(FilePathToGame.filename().string() + "/Assets");
                                     if (myEnginePos != std::string::npos)
                                     {
                                         r.spriteName = "../../" + pathStr.substr(myEnginePos);

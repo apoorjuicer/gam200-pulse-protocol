@@ -1,4 +1,4 @@
-﻿/******************************************************************************/
+/******************************************************************************/
 /**
  * @file        GraphicsManager.cpp
  * @project     Pulse Protocol
@@ -32,8 +32,9 @@
  */
 /******************************************************************************/
 
-#include "GraphicsManager.h"
+#include "CoreEngine/Core/CoreEngine.h" // for FilePathToGame
 #include "Resources/AssetRegistry.h"
+#include "GraphicsManager.h"
 #include "glapp.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -445,32 +446,27 @@ GLuint GraphicsManager::LoadTextureFile(const std::string &path)
 
     if (!std::filesystem::path(path).is_absolute())
     {
-        // Resolve all relative paths against the game project root (PulseProtocol).
-        char exePath[MAX_PATH];
-        GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
-        std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
+        // FilePathToGame is already set correctly by EnsureGameProjectPath() in CoreEngine::Init().
+        // It handles both dev (BaseEngine/GameName) and release (exe folder) cases.
+        std::filesystem::path baseGamePath = FilePathToGame;
 
-        std::filesystem::path baseGamePath;
-        if (std::filesystem::exists(currentDir / "JSON"))
-        {
-            baseGamePath = currentDir;  // Release: JSON/Assets copied flat beside exe
-        }
-        else
-        {
-            auto baseEngineDir = currentDir;
-            while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
-                baseEngineDir = baseEngineDir.parent_path();
-            baseGamePath = baseEngineDir / "PulseProtocol";  // Dev
-        }
-
-        // Strip legacy ../../PulseProtocol/ or ../../PulseEngine/ prefix if present
+        // Strip legacy ../../GameName/ or ../../PulseEngine/ prefix if present
         std::string relativePath = path;
-        if (path.find("../../PulseProtocol/") == 0)
-            relativePath = path.substr(std::string("../../PulseProtocol/").length());
+
+        // basically just ../../PulseProtocal/
+        std::string gamePrefix = "../../" + FilePathToGame.filename().string() + "/";
+        if (path.find(gamePrefix) == 0)
+        {
+            relativePath = path.substr(gamePrefix.length());
+        }
         else if (path.find("../../PulseEngine/") == 0)
+        {
             relativePath = path.substr(std::string("../../PulseEngine/").length());
+        }
         else if (path.find("../../") == 0)
+        {
             relativePath = path.substr(6);
+        }
 
         resolvedPath = (baseGamePath / relativePath).make_preferred().string();
     }

@@ -14,6 +14,7 @@
 
 #include "pch/pch_temp.h"
 #include "LayerRegistry.h"
+#include "CoreEngine/Core/CoreEngine.h" // for FilePathToGame
 
 // -------------------------------------------------------------------------
 // Singleton Access
@@ -33,7 +34,7 @@ static std::string GetLayerConfigPath()
     fs::path cur = fs::current_path();
     while (cur.filename() != "BaseEngine" && cur.has_parent_path())
         cur = cur.parent_path();
-    return (cur / "PulseProtocol" / "JSON" / "layers.json").string();
+    return (FilePathToGame / "JSON" / "layers.json").string();
 }
 
 // -------------------------------------------------------------------------

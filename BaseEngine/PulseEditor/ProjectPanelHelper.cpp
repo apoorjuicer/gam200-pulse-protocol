@@ -16,6 +16,7 @@
 
 #include "ProjectPanelHelper.h"
 
+#include "CoreEngine/Core/CoreEngine.h"      // for FilePathToGame
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "CoreEngine/ECS/Coordinator.h"
 #include "Graphics/Renderable.h"
@@ -44,8 +45,9 @@ namespace PulseEditor
         // std::cout << "[GetRelativeAssetPath] Input: " << pathStr << std::endl;
 
         // Convert absolute path to relative
-        // Look for "PulseEngine/Assets/" first (more specific)
-        size_t pulseAssetsPos = pathStr.find("PulseProtocol/Assets/");
+        // Look for "<GameName>/Assets/" first (more specific)
+        std::string gameName = FilePathToGame.filename().string(); 
+        size_t pulseAssetsPos = pathStr.find(gameName + "/Assets/");
         if (pulseAssetsPos != std::string::npos)
         {
             std::string result = "../../" + pathStr.substr(pulseAssetsPos);
@@ -57,7 +59,7 @@ namespace PulseEditor
         size_t assetsPos = pathStr.find("Assets/");
         if (assetsPos != std::string::npos)
         {
-            std::string result = "../../PulseProtocol/" + pathStr.substr(assetsPos);
+            std::string result = "../../" + gameName + "/" + pathStr.substr(assetsPos);
             // std::cout << "[GetRelativeAssetPath] Output: " << result << std::endl;
             return result;
         }

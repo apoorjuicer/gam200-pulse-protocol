@@ -1,4 +1,4 @@
-﻿/******************************************************************************/
+/******************************************************************************/
 /**
  * @file        TopBarPanel.cpp
  * @project     Pulse Protocol
@@ -134,7 +134,7 @@ namespace PulseEditor
         ofn.lpstrTitle = "Select scene JSON";
 
         namespace fs = std::filesystem;
-        std::string dir = "../../PulseProtocol/JSON";
+        std::string dir = (FilePathToGame / "JSON").string();
         ofn.lpstrInitialDir = dir.c_str();
 
 
@@ -210,6 +210,66 @@ namespace PulseEditor
             ImGui::OpenPopup("New Game Project");
         }
 
+        ImGui::SameLine(); // umm i think this puts it on the same Y axis as those above???(idfk tbh, me is just follow)
+
+        if (ImGui::Button("Load Other Games"))
+        {
+            // Set up the Windows file-open finder. Find config.json that will be inside the Games Json Folder
+            char fileBuf[MAX_PATH] = { 0 };
+            OPENFILENAMEA ofn{};
+            ofn.lStructSize  = sizeof(OPENFILENAMEA);   // Windows API say need do.....
+            ofn.hwndOwner    = nullptr;                 // no parent window
+
+            // format for the config.json
+            ofn.lpstrFilter  = "Game Config\0config.json\0All Files\0*.*\0";
+            ofn.lpstrFile    = fileBuf;
+            ofn.nMaxFile     = MAX_PATH;
+            ofn.Flags        = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+            ofn.lpstrTitle   = "Open Game Project (select config.json)";        
+
+            // Only continue if the user picks a file
+            if (GetOpenFileNameA(&ofn))
+            {
+                namespace fs = std::filesystem;
+
+                // by right this will be in BaseEngine/GameName/Json/config.json if u pick correctly ah :>
+                fs::path selectedFile(fileBuf);
+
+                // Now we go up 2 levels to BaseEngine/GameName. We then update the 
+                // file path to the game and the Game Name  
+                fs::path newGameRoot = selectedFile.parent_path().parent_path();
+                std::string newGameName = newGameRoot.filename().string();
+
+                // We then find BaseEngine to update ActiveGame.json with the new game name(so that it knows which game 2 load nxt time)
+                fs::path cur = fs::current_path();
+                while (cur.filename() != "BaseEngine" && cur.has_parent_path())
+                {
+                    cur = cur.parent_path();
+                }
+
+                // Write into ActiveGame.json
+                std::ofstream ConfigOut(cur / "ActiveGame.json");
+                if (ConfigOut.is_open())
+                {
+                    ConfigOut << "{\n  \"ActiveGame\": \"" << newGameName << "\"\n}\n";
+                }
+
+                // Show a message that tell user need to restart the entire editor as FilePathToGame takes effect only on next time it launches
+                ImGui::OpenPopup("GameSwitched");
+            }
+        }
+
+        if (ImGui::BeginPopupModal("GameSwitched", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("Game project switched!");
+            ImGui::Text("Restart the editor to load the new game.");
+            if (ImGui::Button("OK"))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
         // ── New Game popup ─────────────────────────────────────────
         if (ImGui::BeginPopupModal("New Game Project", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
@@ -225,12 +285,21 @@ namespace PulseEditor
             {
                 namespace fs = std::filesystem;
 
+                std::string gameName(s_newGameNameBuf);
+
+                // Reject gamename with spaces 
+                if (gameName.find(' ') != std::string::npos)
+                {
+                    s_newGameResult = "Error: Game name cannot contain spaces!\n";
+                    ImGui::EndPopup();
+                    return;
+                }
+
                 // Find BaseEngine folder by walking up from current path
                 fs::path cur = fs::current_path();
                 while (cur.filename() != "BaseEngine" && cur.has_parent_path())
                     cur = cur.parent_path();
 
-                std::string gameName(s_newGameNameBuf);
                 fs::path gameRoot = cur / gameName;
 
                 // Create folder structure
@@ -248,7 +317,11 @@ namespace PulseEditor
                 };
 
                 writeFile(gameRoot / "JSON" / "config.json",
-                    "{\n    \"config\": {\n        \"WindowWidth\": 1600,\n        \"WindowHeight\": 900,\n        \"ConfigPath\": \"\"\n    }\n}\n");
+                    ("{\n    \"GameName\": \"" + gameName + "\",\n    \"config\": {\n        \"WindowWidth\": 1600,\n        \"WindowHeight\": 900,\n        \"ConfigPath\": \"\",\n        \"FirstScene\": \"FirstScene\"\n    }\n}\n").c_str());
+
+                // Default empty scene — engine loads this if no other FirstScene is set in config.json
+                writeFile(gameRoot / "JSON" / "FirstScene.json",
+                    ("{\n    \"scene\": \"FirstScene\",\n    \"entities\": []\n}\n"));
                 writeFile(gameRoot / "JSON" / "texture.json",
                     "{\n    \"textureFilePaths\": []\n}\n");
                 writeFile(gameRoot / "JSON" / "audio.json",
@@ -260,10 +333,102 @@ namespace PulseEditor
                 writeFile(gameRoot / "JSON" / "scene.json",
                     "{\n    \"sceneFilePaths\": []\n}\n");
 
+                // Create ManagedScripts folder + project files so the new game has its own C# script project(AND MUST BE IN THE GAME AH)
+                fs::create_directories(gameRoot / "ManagedScripts", ec);
+
+                // .csproj use the path: ..\..\build\.bin\ which works at the same folder depth as PulseProtocol.
+                // The rest are just to tell dotnet how to build your C# script(used to be in the other cmake but do it here instead cos easier.)
+                writeFile(gameRoot / "ManagedScripts" / "ManagedScripts.csproj",
+                    "<Project Sdk=\"Microsoft.NET.Sdk\">\n"
+                    "  <PropertyGroup>\n"
+                    "    <OutputType>Library</OutputType>\n"
+                    "    <TargetFramework>net8.0</TargetFramework>\n"
+                    "    <ImplicitUsings>enable</ImplicitUsings>\n"
+                    "    <Nullable>enable</Nullable>\n"
+                    "    <Platforms>x64</Platforms>\n"
+                    "    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>\n"
+                    "  </PropertyGroup>\n"
+                    "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\">\n"
+                    "    <OutputPath>..\\..\\build\\.bin\\$(Configuration)-$(Platform)\\</OutputPath>\n"
+                    "    <PlatformTarget>x64</PlatformTarget>\n"
+                    "  </PropertyGroup>\n"
+                    "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\">\n"
+                    "    <OutputPath>..\\..\\build\\.bin\\$(Configuration)-$(Platform)\\</OutputPath>\n"
+                    "    <PlatformTarget>x64</PlatformTarget>\n"
+                    "  </PropertyGroup>\n"
+                    "  <ItemGroup>\n"
+                    "    <Reference Include=\"ScriptAPI\">\n"
+                    "      <HintPath>..\\..\\build\\.bin\\$(Configuration)-$(Platform)\\ScriptAPI.dll</HintPath>\n"
+                    "    </Reference>\n"
+                    "  </ItemGroup>\n"
+                    "</Project>\n");
+
+                // .sln file: THIS IS WHAT U OPEN TO EDIT SCRIPTS!!!!!!!!!
+                writeFile(gameRoot / "ManagedScripts" / "ManagedScripts.sln",
+                    "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+                    "# Visual Studio Version 17\n"
+                    " VisualStudioVersion = 17.5.2.0\n"
+                    "MinimumVisualStudioVersion = 10.0.40219.1\n"
+                    "Project(\"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}\") = \"ManagedScripts\", \"ManagedScripts.csproj\", \"{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}\"\n"
+                    "EndProject\n"
+                    "Global\n"
+                    "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n"
+                    "\t\tDebug|Any CPU = Debug|Any CPU\n"
+                    "\t\tRelease|Any CPU = Release|Any CPU\n"
+                    "\tEndGlobalSection\n"
+                    "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution\n"
+                    "\t\t{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU\n"
+                    "\t\t{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.Build.0 = Debug|Any CPU\n"
+                    "\t\t{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.ActiveCfg = Release|Any CPU\n"
+                    "\t\t{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.Build.0 = Release|Any CPU\n"
+                    "\tEndGlobalSection\n"
+                    "\tGlobalSection(SolutionProperties) = preSolution\n"
+                    "\t\tHideSolutionNode = FALSE\n"
+                    "\tEndGlobalSection\n"
+                    "\tGlobalSection(ExtensibilityGlobals) = postSolution\n"
+                    "\t\tSolutionGuid = {B2C3D4E5-F6A7-8901-BCDE-F12345678901}\n"
+                    "\tEndGlobalSection\n"
+                    "EndGlobal\n");
+
+                // CMakeLists.txt: so cmake builds it as part of the main build
+                writeFile(gameRoot / "ManagedScripts" / "CMakeLists.txt",
+                    "# Build ManagedScripts C# assembly using dotnet CLI\n"
+                    "# The .csproj OutputPath already points to build/.bin/{Config}-x64/\n"
+                    "# so we don't pass -o here — dotnet respects the .csproj settings.\n"
+                    "add_custom_target(ManagedScripts ALL\n"
+                    "    COMMAND dotnet build \"${CMAKE_CURRENT_SOURCE_DIR}/ManagedScripts.csproj\"\n"
+                    "            -c $<CONFIG>\n"
+                    "            -p:Platform=x64\n"
+                    "    BYPRODUCTS \"${CMAKE_BINARY_DIR}/.bin/$<CONFIG>-x64/ManagedScripts.dll\"\n"
+                    "    COMMENT \"Building ManagedScripts C# assembly\"\n"
+                    "    WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}\"\n"
+                    ")\n"
+                    "\n"
+                    "# ManagedScripts references ScriptAPI.dll. Must build after it!!!!\n"
+                    "add_dependencies(ManagedScripts ScriptAPI)\n");
+
+                // Fianlly, da starter C# script with instructions so the project isn't empty when first opened 
+                writeFile(gameRoot / "ManagedScripts" / "HelloWorld.cs",
+                    ("using ScriptAPI;\n\n"
+                    "// Starter script for " + gameName + ".\n"
+                    "public class HelloWorld : Script\n"
+                    "{\n"
+                    "    public override void Update()\n"
+                    "    {\n"
+                    "    }\n"
+                    "}\n").c_str());
+
+                // After the Json folder has been made, open this ones config.json instead of the old one
                 if (fs::exists(gameRoot / "JSON"))
                 {
-                    s_newGameResult = "Game project '" + gameName + "' created at:\n" + gameRoot.string()
-                        + "\n\nTo use it: update the game project path in CoreEngine, rebuild, and restart.";
+                    // Switch ActiveGame.json so next launch opens this game
+                    std::ofstream ConfigOut(cur / "ActiveGame.json");
+                    if (ConfigOut.is_open())
+                    {
+                        ConfigOut << "{\n  \"ActiveGame\": \"" << gameName << "\"\n}\n";
+                    }
+
+                    s_newGameResult = "Game project '" + gameName + "' created!\nRestart the editor to start editing it.";
                 }
                 else
                 {
