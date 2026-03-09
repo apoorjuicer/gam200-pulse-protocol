@@ -948,5 +948,363 @@ namespace PulseEditor
     //    undo.Push(std::move(a));
     //}
 
+    inline void PushRemoveTransform(
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        Framework::Transform const& removedValue)
+    {
+        if (!h || h->id == INVALID_ENTITY) return;
+
+        UndoManager::Action a;
+
+        a.undo = [h, removedValue]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (c->HasComponent<Framework::Transform>(h->id)) return;
+
+                c->AddComponent<Framework::Transform>(h->id, removedValue);
+            };
+
+        a.redo = [h]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<Framework::Transform>(h->id)) return;
+
+                c->RemoveComponent<Framework::Transform>(h->id);
+            };
+
+        undo.Push(std::move(a));
+    }
+
+    inline void PushRemoveRenderable(
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        Framework::Renderable const& removedValue)
+    {
+        if (!h || h->id == INVALID_ENTITY) return;
+
+        UndoManager::Action a;
+
+        a.undo = [h, removedValue]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (c->HasComponent<Framework::Renderable>(h->id)) return;
+
+                c->AddComponent<Framework::Renderable>(h->id, removedValue);
+            };
+
+        a.redo = [h]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<Framework::Renderable>(h->id)) return;
+
+                c->RemoveComponent<Framework::Renderable>(h->id);
+            };
+
+        undo.Push(std::move(a));
+    }
+
+    inline void PushRemoveAnimation(
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        Framework::Animation const& removedValue)
+    {
+        if (!h || h->id == INVALID_ENTITY) return;
+
+        UndoManager::Action a;
+
+        a.undo = [h, removedValue]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (c->HasComponent<Framework::Animation>(h->id)) return;
+
+                c->AddComponent<Framework::Animation>(h->id, removedValue);
+            };
+
+        a.redo = [h]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<Framework::Animation>(h->id)) return;
+
+                c->RemoveComponent<Framework::Animation>(h->id);
+            };
+
+        undo.Push(std::move(a));
+    }
+
+    inline void PushRemoveName(
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        Name const& removedValue)
+    {
+        if (!h || h->id == INVALID_ENTITY) return;
+
+        UndoManager::Action a;
+
+        a.undo = [h, removedValue]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (c->HasComponent<Name>(h->id)) return;
+
+                c->AddComponent<Name>(h->id, removedValue);
+            };
+
+        a.redo = [h]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<Name>(h->id)) return;
+
+                c->RemoveComponent<Name>(h->id);
+            };
+
+        undo.Push(std::move(a));
+    }
+
+    inline void PushRemoveAABB(
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        AABB const& removedValue)
+    {
+        if (!h || h->id == INVALID_ENTITY) return;
+
+        UndoManager::Action a;
+
+        a.undo = [h, removedValue]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (c->HasComponent<AABB>(h->id)) return;
+
+                c->AddComponent<AABB>(h->id, removedValue);
+            };
+
+        a.redo = [h]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<AABB>(h->id)) return;
+
+                c->RemoveComponent<AABB>(h->id);
+            };
+
+        undo.Push(std::move(a));
+    }
+
+    inline void PushRemoveHealth(
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        Health const& removedValue)
+    {
+        if (!h || h->id == INVALID_ENTITY) return;
+
+        UndoManager::Action a;
+
+        a.undo = [h, removedValue]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (c->HasComponent<Health>(h->id)) return;
+
+                c->AddComponent<Health>(h->id, removedValue);
+            };
+
+        a.redo = [h]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<Health>(h->id)) return;
+
+                c->RemoveComponent<Health>(h->id);
+            };
+
+        undo.Push(std::move(a));
+    }
+
+    inline void PushRemoveText(
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        TextComponent const& removedValue)
+    {
+        if (!h || h->id == INVALID_ENTITY) return;
+
+        UndoManager::Action a;
+
+        a.undo = [h, removedValue]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (c->HasComponent<TextComponent>(h->id)) return;
+
+                c->AddComponent<TextComponent>(h->id, removedValue);
+            };
+
+        a.redo = [h]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<TextComponent>(h->id)) return;
+
+                c->RemoveComponent<TextComponent>(h->id);
+            };
+
+        undo.Push(std::move(a));
+    }
+
+    inline void PushRemoveAudioSource(
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        AudioSource const& removedValue)
+    {
+        if (!h || h->id == INVALID_ENTITY) return;
+
+        UndoManager::Action a;
+
+        a.undo = [h, removedValue]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (c->HasComponent<AudioSource>(h->id)) return;
+
+                c->AddComponent<AudioSource>(h->id, removedValue);
+            };
+
+        a.redo = [h]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<AudioSource>(h->id)) return;
+
+                c->RemoveComponent<AudioSource>(h->id);
+            };
+
+        undo.Push(std::move(a));
+    }
+    //Layer Tag cannot be Removed
+    //inline void PushRemoveLayerTag(
+    //    UndoManager& undo,
+    //    std::shared_ptr<EntityHandle> h,
+    //    LayerTag const& removedValue)
+    //{
+    //    if (!h || h->id == INVALID_ENTITY) return;
+
+    //    UndoManager::Action a;
+
+    //    a.undo = [h, removedValue]()
+    //        {
+    //            if (!h || h->id == INVALID_ENTITY) return;
+    //            auto* c = Coordinator::GetInstance();
+    //            if (!c) return;
+    //            if (c->HasComponent<LayerTag>(h->id)) return;
+
+    //            c->AddComponent<LayerTag>(h->id, removedValue);
+    //        };
+
+    //    a.redo = [h]()
+    //        {
+    //            if (!h || h->id == INVALID_ENTITY) return;
+    //            auto* c = Coordinator::GetInstance();
+    //            if (!c) return;
+    //            if (!c->HasComponent<LayerTag>(h->id)) return;
+
+    //            c->RemoveComponent<LayerTag>(h->id);
+    //        };
+
+    //    undo.Push(std::move(a));
+    //}
+
+    inline void PushRemoveLogic(
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        LogicComponent const& removedValue)
+    {
+        if (!h || h->id == INVALID_ENTITY) return;
+
+        UndoManager::Action a;
+
+        a.undo = [h, removedValue]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (c->HasComponent<LogicComponent>(h->id)) return;
+
+                // Restore ECS component first
+                c->AddComponent<LogicComponent>(h->id, removedValue);
+
+                // Restore runtime script bindings
+                auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>(
+                    "ScriptAPI",
+                    "ScriptAPI.EngineInterface",
+                    "AddScriptViaName"
+                );
+
+                if (addScriptFunc)
+                {
+                    for (auto const& scriptName : removedValue.ScriptName)
+                    {
+                        addScriptFunc(h->id, scriptName.c_str());
+                    }
+                }
+            };
+
+        a.redo = [h]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<LogicComponent>(h->id)) return;
+
+                auto& logic = c->GetComponent<LogicComponent>(h->id);
+
+                // Remove runtime script bindings first
+                auto removeScriptFunc = Engine->GetFunctionPtr<void(*)(int, const char*)>(
+                    "ScriptAPI",
+                    "ScriptAPI.EngineInterface",
+                    "RemoveScriptFromEntity"
+                );
+
+                if (removeScriptFunc)
+                {
+                    for (auto const& scriptName : logic.ScriptName)
+                    {
+                        removeScriptFunc(h->id, scriptName.c_str());
+                    }
+                }
+
+                // Then remove ECS component
+                c->RemoveComponent<LogicComponent>(h->id);
+            };
+
+        undo.Push(std::move(a));
+    }
+
 }
 

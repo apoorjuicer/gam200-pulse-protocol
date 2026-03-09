@@ -848,12 +848,14 @@ namespace PulseEditor
 
         if (removeName) // remove name component
         {
+            //Framework::Transform beforeRemove = tr;
+            //PushRemoveTransform(mUndo, selectedHandle, beforeRemove);
+            //g->RemoveComponent<Framework::Transform>(selectedEntity);
             //save name first
-            Name oldName = nm;
-            auto h = selectedHandle;
-
+            Name beforeRemove = nm;
+            PushRemoveName(mUndo, selectedHandle, beforeRemove);
             g->RemoveComponent<Name>(selectedEntity);
-           // PushRemoveName(mUndo, h, oldName); //push
+
         }
         else if (nameOpen)
         {
@@ -907,6 +909,8 @@ namespace PulseEditor
 
             if (removeTransform)
             {
+                Framework::Transform beforeRemove = tr;
+                PushRemoveTransform(mUndo, selectedHandle, beforeRemove);
                 g->RemoveComponent<Framework::Transform>(selectedEntity);
             }
             else if (transformOpen)
@@ -1011,6 +1015,8 @@ namespace PulseEditor
 
             if (removeRenderable)
             {
+                Framework::Renderable beforeRemove = r;
+                PushRemoveRenderable(mUndo, selectedHandle, beforeRemove);
                 g->RemoveComponent<Framework::Renderable>(selectedEntity);
             }
             else if (renderableOpen)
@@ -1296,7 +1302,13 @@ namespace PulseEditor
 
             if (removeAnimation)
             {
+                //Framework::Renderable beforeRemove = r;
+                //PushRemoveRenderable(mUndo, selectedHandle, beforeRemove);
+                //g->RemoveComponent<Framework::Renderable>(selectedEntity);
+                Framework::Animation beforeRemove = a;
+                PushRemoveAnimation(mUndo, selectedHandle, a);
                 g->RemoveComponent<Framework::Animation>(selectedEntity);
+
             }
             else if (animationOpen)
             {
@@ -1448,6 +1460,8 @@ namespace PulseEditor
 
             if (removeScript)
             {
+                LogicComponent beforeRemove = script;
+                PushRemoveLogic(mUndo, selectedHandle, beforeRemove);
                 g->RemoveComponent<LogicComponent>(selectedEntity);
             }
             else if (scriptOpen)
@@ -1682,6 +1696,8 @@ namespace PulseEditor
 
             if (removeAudio)
             {
+                AudioSource beforeRemove = audio;
+                PushRemoveAudioSource(mUndo, selectedHandle, beforeRemove);
                 g->RemoveComponent<AudioSource>(selectedEntity);
             }
             else if (audioOpen)
@@ -1902,7 +1918,9 @@ namespace PulseEditor
         removeText = DrawInlineRemoveButton("TextComponent");
 
         if (removeText)
-        {
+        {                
+            TextComponent beforeRemove = txt;
+            PushRemoveText(mUndo, selectedHandle, beforeRemove);
             g->RemoveComponent<TextComponent>(selectedEntity);
         }
         else if (textOpen)
@@ -2056,6 +2074,9 @@ namespace PulseEditor
 
         if (removeHealth)
         {
+
+            Health beforeRemove = health;
+            PushRemoveHealth(mUndo, selectedHandle, beforeRemove);
             g->RemoveComponent<Health>(selectedEntity);
         }
         else if (healthOpen)
@@ -2093,6 +2114,8 @@ namespace PulseEditor
 
         if (removeAABB)
         {
+            AABB beforeRemove = aabb;
+            PushRemoveAABB(mUndo, selectedHandle, beforeRemove);
             g->RemoveComponent<AABB>(selectedEntity);
         }
         else if (aabbOpen)
