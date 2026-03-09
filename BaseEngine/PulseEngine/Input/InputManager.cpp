@@ -211,16 +211,29 @@ void InputManager::updateInputStates() {
 }
 
 void InputManager::processDebugToggles() {
-	const int debugKeys[] = { GLFW_KEY_F1, GLFW_KEY_F2, GLFW_KEY_F3, GLFW_KEY_F4, GLFW_KEY_F5, GLFW_KEY_F6 };
-	bool* debugFlags[] = { &debugRectsEnabled, &debugLinesEnabled, &debugCirclesEnabled,
-						  &debugCirclesFilledEnabled, &debugPointsEnabled, &debugGridEnabled };
-	const char* debugNames[] = { "DEBUG RECTS", "DEBUG LINES", "DEBUG CIRCLES",
-								"DEBUG CIRCLES FILLED", "DEBUG POINTS", "DEBUG GRID" };
+	const int debugKeys[] = {
+	GLFW_KEY_F1, GLFW_KEY_F2, GLFW_KEY_F3,
+	GLFW_KEY_F4, GLFW_KEY_F5, GLFW_KEY_F6,
+	GLFW_KEY_F7
+	};
 
-	for (int i = 0; i < 6; ++i) {
+	bool* debugFlags[] = {
+		&debugRectsEnabled, &debugLinesEnabled, &debugCirclesEnabled,
+		&debugCirclesFilledEnabled, &debugPointsEnabled, &debugGridEnabled,
+		&debugCollisionEnabled
+	};
+
+	const char* debugNames[] = {
+		"DEBUG RECTS", "DEBUG LINES", "DEBUG CIRCLES",
+		"DEBUG CIRCLES FILLED", "DEBUG POINTS", "DEBUG GRID",
+		"DEBUG COLLISION"
+	};
+
+	for (int i = 0; i < 7; ++i) {
 		if (isKeyTriggered(debugKeys[i])) {
 			*debugFlags[i] = !(*debugFlags[i]);
-			std::cout << "[" << debugNames[i] << "] " << (*debugFlags[i] ? "ENABLED" : "DISABLED") << std::endl;
+			std::cout << "[" << debugNames[i] << "] "
+				<< (*debugFlags[i] ? "ENABLED" : "DISABLED") << std::endl;
 		}
 	}
 

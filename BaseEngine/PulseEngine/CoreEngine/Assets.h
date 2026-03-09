@@ -80,17 +80,8 @@ struct NPC
 // -----------------------------------------------------------------------------
 struct AABB
 {
-    Vector2 min;    ///< Bottom-left corner of the box
-    Vector2 max;    ///< Top-right corner of the box
-    float width;    ///< Box width along X-axis
-    float height;   ///< Box height along Y-axis
-
-    /**
-     * @brief Default constructor initializing all values to zero.
-     */
-     /* AABB()
-          : min{ 0.0f, 0.0f }, max{ 0.0f, 0.0f }, width{ 0.0f }, height{ 0.0f } {}*/
-
+    Vector2 min;    ///< Local-space bottom-left
+    Vector2 max;    ///< Local-space top-right
 
     void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const
     {
@@ -104,29 +95,27 @@ struct AABB
 
         out.AddMember("min", minVal, alloc);
         out.AddMember("max", maxVal, alloc);
-        out.AddMember("width", width, alloc);
-        out.AddMember("height", height, alloc);
     }
 
     void Deserialize(const rapidjson::Value& in)
     {
-        if (!in.IsObject()) throw std::runtime_error("Invalid JSON for AABB");
-        if (in.HasMember("min")) min.Deserialize(in["min"]);
-        if (in.HasMember("max")) max.Deserialize(in["max"]);
-        if (in.HasMember("width")) width = in["width"].GetFloat();
-        if (in.HasMember("height")) height = in["height"].GetFloat();
+        if (!in.IsObject())
+            throw std::runtime_error("Invalid JSON for AABB");
+
+        if (in.HasMember("min"))
+            min.Deserialize(in["min"]);
+
+        if (in.HasMember("max"))
+            max.Deserialize(in["max"]);
     }
 
-    bool operator==(AABB const& other) const {
-        return
-            min == other.min &&
-            max == other.max &&
-            width == other.width &&
-            height == other.height;
+    bool operator==(AABB const& other) const
+    {
+        return min == other.min && max == other.max;
     }
 
-    bool operator!=(AABB const& other) const {
+    bool operator!=(AABB const& other) const
+    {
         return !(*this == other);
     }
 };
-

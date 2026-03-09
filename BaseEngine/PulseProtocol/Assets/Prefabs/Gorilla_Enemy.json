@@ -42,6 +42,18 @@
       }
     },
     {
+      "AABB": {
+        "min": {
+          "x": -12.0,
+          "y": -14.0
+        },
+        "max": {
+          "x": 12.0,
+          "y": 14.0
+        }
+      }
+    },
+    {
       "name": {
         "name": "Gorilla_Enemy"
       }
@@ -62,7 +74,7 @@
       }
     },
     {
-      "script": { 
+      "script": {
         "ScriptName": [
           "Gorilla"
         ]

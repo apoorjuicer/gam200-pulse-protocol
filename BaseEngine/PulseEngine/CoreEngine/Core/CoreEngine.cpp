@@ -1145,7 +1145,7 @@ void CoreEngine::RenderDebugDraw()
 				if (!p.active) continue;
 				if (p.textureID != 0) continue; // textured particles rendered via gBatch in glapp
 				float lifeRatio = (p.lifeMax > 0.0f) ? (p.life / p.lifeMax) : 0.0f;
-				float radius    = p.size * lifeRatio; // shrinks to 0 as particle expires
+				float radius = p.size * lifeRatio; // shrinks to 0 as particle expires
 				glm::vec3 color = { 1.0f, 0.75f + 0.25f * lifeRatio, 0.2f * lifeRatio };
 				DebugDraw::DrawCircleFilled({ p.pos.x, p.pos.y }, radius, color, 6);
 			}
@@ -1212,6 +1212,35 @@ void CoreEngine::RenderDebugDraw()
 		for (float y = -450.0f; y < 450.0f; y += 100.0f)
 		{
 			DebugDraw::DrawLine({ -800.0f, y }, { 800.0f, y }, { 0.3f, 0.3f, 0.3f });
+		}
+	}
+
+	// F7 - Collision AABB Debug
+	if (g_inputSystem->isDebugCollisionEnabled())
+	{
+		auto collisionSystem = g_coordinator->GetSystem<CollisionManager>();
+		if (collisionSystem)
+		{
+			for (auto& entity : collisionSystem->EntityMember)
+			{
+				if (!g_coordinator->HasComponent<Framework::Transform>(entity) ||
+					!g_coordinator->HasComponent<AABB>(entity))
+					continue;
+
+				auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
+				auto& baseAABB = g_coordinator->GetComponent<AABB>(entity);
+
+				AABB worldAABB = collisionSystem->BuildAABBFromTransform(transform, baseAABB);
+
+				glm::vec2 min = { worldAABB.min.x, worldAABB.min.y };
+				glm::vec2 max = { worldAABB.max.x, worldAABB.max.y };
+
+				// Green box = collision box
+				DebugDraw::DrawRect(min, max, { 0.0f, 1.0f, 0.0f });
+
+				// Red point = entity center
+				DebugDraw::DrawPoint({ transform.Pos.x, transform.Pos.y }, 4.0f, { 1.0f, 0.0f, 0.0f });
+			}
 		}
 	}
 

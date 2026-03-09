@@ -49,7 +49,7 @@ public class EnemyRhythmController : Script
     // "Edge"     = edge contact with threshold (uses AABB components)
     // "Distance" = radius-based via engine (uses transforms only, bypasses BroadPhase)
     // "Manual"   = uses engine CheckDistance with ManualAttackRange as radius (simplest, most reliable)
-    public string CollisionMode = "Manual";
+    public string CollisionMode = "AABB";
 
     // For Distance mode
     public float SelfCollisionRadius = 25f;
