@@ -2,7 +2,8 @@
 /**
  * @file        PrefabInstance.h
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En (primary) - 90%
+ * @author      Ban Kai Wei Benjamin (secondary) - 10%
  * @brief       Component that tracks which prefab an entity was instantiated from.
  *              Enables the prefab system to update all instances when a prefab
  *              is modified in the editor.
@@ -28,6 +29,18 @@
 struct PrefabInstance {
     std::string prefabName;  // Name of the prefab this entity was created from (without .json)
     bool isLinked = true;    // If true, this instance will update when the prefab changes; else this instance is independent from the prefab
+
+    //comaprison
+    bool operator==(PrefabInstance const& other) const
+    {
+        return prefabName == other.prefabName &&
+            isLinked == other.isLinked;
+    }
+
+    bool operator!=(PrefabInstance const& other) const
+    {
+        return !(*this == other);
+    }
 
     // Serialization methods for saving/loading
     void Serialize(rapidjson::Value& obj, rapidjson::Document::AllocatorType& alloc) const

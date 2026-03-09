@@ -791,6 +791,128 @@ namespace PulseEditor
         undo.Push(std::move(a));
     }
 
+    inline void PushPrefabInstanceEdit(
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        PrefabInstance const& before,
+        PrefabInstance const& after)
+    {
+        if (!h || h->id == INVALID_ENTITY) return;
+
+        UndoManager::Action a;
+
+        a.undo = [h, before]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<PrefabInstance>(h->id)) return;
+
+                c->GetComponent<PrefabInstance>(h->id) = before;
+            };
+
+        a.redo = [h, after]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<PrefabInstance>(h->id)) return;
+
+                c->GetComponent<PrefabInstance>(h->id) = after;
+            };
+
+        undo.Push(std::move(a));
+    }
+
+    inline void PushLogicEdit(
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        LogicComponent const& before,
+        LogicComponent const& after)
+    {
+        if (!h || h->id == INVALID_ENTITY) return;
+
+        UndoManager::Action a;
+
+        a.undo = [h, before]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<LogicComponent>(h->id)) return;
+
+                auto& logic = c->GetComponent<LogicComponent>(h->id);
+
+
+                std::cout << "[UndoHelper] LogicComponent before sync engine undo\n";
+
+                // sync engine/runtime first if needed
+                for (auto const& s : logic.ScriptName)
+                {
+                    auto removeScriptFunc = Engine->GetFunctionPtr<void(*)(int, const char*)>(
+                        "ScriptAPI",
+                        "ScriptAPI.EngineInterface",
+                        "RemoveScriptFromEntity"
+                    );
+                    if (removeScriptFunc)
+                        removeScriptFunc(h->id, s.c_str());
+                }
+
+                logic = before;
+
+                for (auto const& s : logic.ScriptName)
+                {
+                    auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>(
+                        "ScriptAPI",
+                        "ScriptAPI.EngineInterface",
+                        "AddScriptViaName"
+                    );
+                    if (addScriptFunc)
+                        addScriptFunc(h->id, s.c_str());
+                }
+            };
+
+        a.redo = [h, after]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<LogicComponent>(h->id)) return;
+
+                auto& logic = c->GetComponent<LogicComponent>(h->id);
+
+                std::cout << "[UndoHelper] LogicComponent before sync engine redo\n";
+
+                for (auto const& s : logic.ScriptName)
+                {
+                    auto removeScriptFunc = Engine->GetFunctionPtr<void(*)(int, const char*)>(
+                        "ScriptAPI",
+                        "ScriptAPI.EngineInterface",
+                        "RemoveScriptFromEntity"
+                    );
+                    if (removeScriptFunc)
+                        removeScriptFunc(h->id, s.c_str());
+                }
+
+                logic = after;
+
+                for (auto const& s : logic.ScriptName)
+                {
+                    auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>(
+                        "ScriptAPI",
+                        "ScriptAPI.EngineInterface",
+                        "AddScriptViaName"
+                    );
+                    if (addScriptFunc)
+                        addScriptFunc(h->id, s.c_str());
+                }
+            };
+
+        undo.Push(std::move(a));
+    }
+
     /*
     * Remove component undo
     */

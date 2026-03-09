@@ -304,6 +304,15 @@ bool LoadScriptName(LogicComponent& t, std::string const& path)
     return true;
 }
 
+bool LogicComponent::operator==(LogicComponent const& other) const
+{
+    return ScriptName == other.ScriptName;
+}
+
+bool LogicComponent::operator!=(LogicComponent const& other) const
+{
+    return !(*this == other);
+}
 
 // ---------------------------------------------------------------------
 // FOR SCRIPTS ONLY ONWARDS

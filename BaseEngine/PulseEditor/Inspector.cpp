@@ -303,6 +303,32 @@ namespace PulseEditor
         }
     }
 
+    static void HandlePrefabInstanceUndo(
+        PrefabInstance& currentPrefabInstance,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_PrefabInstance = currentPrefabInstance;
+            isEditing_PrefabInstance = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_PrefabInstance)
+        {
+            PrefabInstance after = currentPrefabInstance;
+            if (beforeEdit_PrefabInstance != after)
+            {
+                PushPrefabInstanceEdit(undo, h, beforeEdit_PrefabInstance, after);
+            }
+
+            isEditing_PrefabInstance = false;
+        }
+    }
+    // Don't have HandleLogicComponentUndo 
+    // as PushLogicEdit in UndoHelper.h is different from the rest.
+    //
+
     // -------------------------------------------------------------------------
     // Helper: add a "add component" button at the bottom, more intuitive
     // compared to right-clicking
@@ -684,6 +710,7 @@ namespace PulseEditor
                         std::cout << "[Inspector] Linked entity " << selectedEntity
                                   << " to prefab '" << prefabInstance.prefabName << "'" << std::endl;
                     }
+                    HandlePrefabInstanceUndo(prefabInstance, mUndo, selectedHandle);
                 }
                 if (ImGui::IsItemHovered())
                 {
@@ -1484,6 +1511,8 @@ namespace PulseEditor
 
                     if (ImGui::SmallButton("Remove##Script"))
                     {
+                        LogicComponent before = script;
+
                         const char* scriptToRemove = script.ScriptName[i].c_str();
                         script.ScriptName.erase(script.ScriptName.begin() + i);
 
@@ -1494,6 +1523,12 @@ namespace PulseEditor
                         );
                         if (removeScriptFunc)
                             removeScriptFunc(selectedEntity, scriptToRemove);
+
+                        LogicComponent after = script;
+                        if (before != after)
+                        {
+                            PushLogicEdit(mUndo, selectedHandle, before, after);
+                        }
 
                         ImGui::PopStyleColor(3);
                         ImGui::PopID();
@@ -1575,6 +1610,8 @@ namespace PulseEditor
 
                             if (!alreadyExists)
                             {
+                                LogicComponent before = script;
+
                                 script.ScriptName.push_back(selectedScript);
 
                                 auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>(
@@ -1588,6 +1625,13 @@ namespace PulseEditor
                                     std::cout << "[Inspector] Added script: " << selectedScript
                                         << " (Success: " << success << ")" << std::endl;
                                 }
+
+                                LogicComponent after = script;
+                                if (before != after)
+                                {
+                                    PushLogicEdit(mUndo, selectedHandle, before, after);
+                                }
+
                                 selectedScriptIndex = 0;
                                 searchBuf[0] = '\0';
                             }
