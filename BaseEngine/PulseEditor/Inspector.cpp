@@ -51,6 +51,9 @@ namespace PulseEditor
     static Name beforeEdit_Name{};
     static bool isEditing_Name = false;
 
+    static AABB beforeEdit_AABB;
+    static bool isEditing_AABB = false;
+
     // -------------------------------------------------------------------------
     // Function to handle Transform undo
     // -------------------------------------------------------------------------
@@ -165,6 +168,28 @@ namespace PulseEditor
         if (before != after)
         {
             PushAnimationEdit(undo, h, before, after);
+        }
+    }
+
+    static void HandleAABBUndo(
+        AABB& currentAABB,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_AABB = currentAABB;
+            isEditing_AABB = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_AABB)
+        {
+            AABB after = currentAABB;
+            if (beforeEdit_AABB != after)
+            {
+                PushAABBEdit(undo, h, beforeEdit_AABB, after);
+            }
+            isEditing_AABB = false;
         }
     }
 
@@ -1889,20 +1914,22 @@ namespace PulseEditor
             ImGui::SameLine();
             float min[2] = { aabb.min.x, aabb.min.y };
             ImGui::SetNextItemWidth(200.0f);
-            if (ImGui::DragFloat2("##AABBMin", min, 0.1f))
+            if (ImGui::DragFloat2("##AABBMin", min, 0.1f)) //slider1
             {
                 aabb.min = { min[0], min[1] };
+               
             }
-
+            HandleAABBUndo(aabb, mUndo, selectedHandle);
             ImGui::Text("Max:");
             ImGui::SameLine();
             float max[2] = { aabb.max.x, aabb.max.y };
             ImGui::SetNextItemWidth(200.0f);
-            if (ImGui::DragFloat2("##AABBMax", max, 0.1f))
+            if (ImGui::DragFloat2("##AABBMax", max, 0.1f)) //slider 2
             {
                 aabb.max = { max[0], max[1] };
+                
             }
-
+            HandleAABBUndo(aabb, mUndo, selectedHandle);
             // Display calculated width/height for convenience
             ImGui::Spacing();
             ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Size: %.2f x %.2f",
