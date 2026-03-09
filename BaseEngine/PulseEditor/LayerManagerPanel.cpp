@@ -2,7 +2,8 @@
 /**
  * @file        LayerManagerPanel.cpp
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En (primary) - 90%
+ * @author      Ban Kai Wei Benjamin (secondary) - 10%
  * 
  * @brief       Layer management window using LayerRegistry for editable names
  *
@@ -23,6 +24,7 @@
 #include "Graphics/Layer.h"
 #include "CoreEngine/ECS/Coordinator.h"
 #include "Graphics/GraphicsManager.h"
+#include "UndoHelper.h"
 
 namespace PulseEditor
 {
@@ -110,8 +112,11 @@ namespace PulseEditor
             bool visible = layer.visible;
             if (ImGui::Checkbox("##Visible", &visible))
             {
+                auto before = registry.MakeSnapshot();
                 layer.visible = visible;
                 needsFilterUpdate = true;
+                auto after = registry.MakeSnapshot();
+                PushLayerRegistryEdit(mUndo, before, after);
             }
             if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("Toggle visibility");
@@ -119,7 +124,19 @@ namespace PulseEditor
             ImGui::SameLine();
 
             // Lock toggle
-            ImGui::Checkbox("##Locked", &layer.locked);
+           // ImGui::Checkbox("##Locked", &layer.locked);
+
+            bool locked = layer.locked;
+            if (ImGui::Checkbox("##Locked", &locked))
+            {
+                auto before = registry.MakeSnapshot();
+
+                layer.locked = locked;
+
+                auto after = registry.MakeSnapshot();
+                PushLayerRegistryEdit(mUndo, before, after);
+            }
+
             if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("Lock layer (prevent selection)");
 
@@ -136,7 +153,10 @@ namespace PulseEditor
                     // Enter pressed - save the name using SetLayerName (triggers auto-save)
                     if (strlen(s_editBuffer) > 0)
                     {
+                        auto before = registry.MakeSnapshot();
                         registry.SetLayerName(layer.mask, s_editBuffer);
+                        auto after = registry.MakeSnapshot();
+                        PushLayerRegistryEdit(mUndo, before, after);
                     }
                     s_editingLayerIndex = -1;
                 }
@@ -195,8 +215,14 @@ namespace PulseEditor
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.7f, 0.2f, 0.2f, 1.0f));
                 if (ImGui::SmallButton("X"))
                 {
+                    auto before = registry.MakeSnapshot();
+
                     registry.RemoveCustomLayer(layer.mask);  // Auto-saves internally
                     needsFilterUpdate = true;
+
+                    auto after = registry.MakeSnapshot();
+                    PushLayerRegistryEdit(mUndo, before, after);
+
                     ImGui::PopStyleColor(2);
                     ImGui::PopID();
                     break; // Exit loop since we modified the vector
@@ -241,23 +267,38 @@ namespace PulseEditor
 
         if (ImGui::Button("Show All"))
         {
+            auto before = registry.MakeSnapshot();
+
             registry.ShowAllLayers();
             UpdateGraphicsLayerFilter();
+
+            auto after = registry.MakeSnapshot();
+            PushLayerRegistryEdit(mUndo, before, after);
         }
 
         ImGui::SameLine();
 
         if (ImGui::Button("Hide All"))
         {
+            auto before = registry.MakeSnapshot();
+
             registry.HideAllLayers();
             UpdateGraphicsLayerFilter();
+
+            auto after = registry.MakeSnapshot();
+            PushLayerRegistryEdit(mUndo, before, after);
         }
 
         ImGui::SameLine();
 
         if (ImGui::Button("Unlock All"))
         {
+            auto before = registry.MakeSnapshot();
+
             registry.UnlockAllLayers();
+
+            auto after = registry.MakeSnapshot();
+            PushLayerRegistryEdit(mUndo, before, after);
         }
 
         // =====================================================================
@@ -277,11 +318,16 @@ namespace PulseEditor
         {
             if (strlen(newLayerName) > 0)
             {
+                auto before = registry.MakeSnapshot();
+
                 LayerMask newMask = registry.AddCustomLayer(newLayerName);  // Auto-saves internally
                 if (newMask != 0)
                 {
                     newLayerName[0] = '\0'; // Clear input on success
                 }
+
+                auto after = registry.MakeSnapshot();
+                PushLayerRegistryEdit(mUndo, before, after);
             }
         }
 

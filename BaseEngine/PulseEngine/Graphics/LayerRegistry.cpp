@@ -2,7 +2,8 @@
 /**
  * @file        LayerRegistry.cpp
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En (primary) - 90%
+ * @author      Ban Kai Wei Benjamin (secondary) - 10%
  * 
  * @brief       Implementation of centralized layer registry
  *
@@ -640,4 +641,26 @@ std::vector<const char*> LayerRegistry::GetLayerNamesForCombo() const
     }
 
     return names;
+}
+
+//Undo Layer
+LayerRegistrySnapshot LayerRegistry::MakeSnapshot() const
+{
+    if (!m_initialized) {
+        const_cast<LayerRegistry*>(this)->Initialize();
+    }
+
+    LayerRegistrySnapshot snap;
+    snap.layers = m_layers;
+    return snap;
+}
+void LayerRegistry::RestoreSnapshot(LayerRegistrySnapshot const& snap)
+{
+    if (!m_initialized) {
+        Initialize();
+    }
+
+    m_layers = snap.layers;
+
+    SaveConfig(GetLayerConfigPath());
 }

@@ -280,6 +280,29 @@ namespace PulseEditor
         }
     }
 
+    static void HandleLayerUndo(
+        LayerTag& currentLayer,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_LayerTag = currentLayer;
+            isEditing_LayerTag = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_LayerTag)
+        {
+            LayerTag after = currentLayer;
+            if (beforeEdit_LayerTag != after)
+            {
+                PushLayerEdit(undo, h, beforeEdit_LayerTag, after);
+            }
+
+            isEditing_LayerTag = false;
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Helper: add a "add component" button at the bottom, more intuitive
     // compared to right-clicking
@@ -513,6 +536,11 @@ namespace PulseEditor
             return;
         }
 
+        if (!selectedHandle) {
+            selectedHandle = std::make_shared<EntityHandle>();
+        }
+        selectedHandle->id = selectedEntity;
+
         ImGui::Text("Entity ID: %d", (int)selectedEntity);
 
         ImGui::SameLine();
@@ -562,6 +590,8 @@ namespace PulseEditor
         {
             currentLayerIndex = 1;
         }
+        //UNDO FOR LAYER
+        LayerTag beforeLayerDropdown = layer;
 
         ImGui::SetNextItemWidth(130.0f);
         if (ImGui::Combo("##LayerDropdown", &currentLayerIndex, s_layerNamePtrs.data(), static_cast<int>(s_layerNamePtrs.size())))
@@ -578,14 +608,23 @@ namespace PulseEditor
             }
         }
 
+        if (beforeLayerDropdown != layer)
+        {
+            PushLayerEdit(mUndo, selectedHandle, beforeLayerDropdown, layer);
+        }
+
         // === SORTING LAYER (for render order) ===
+
         ImGui::Text("Sorting Layer:");
         ImGui::SameLine();
         ImGui::SetNextItemWidth(130.0f);
-
+        LayerTag beforeSortingLayer = layer;
         const char* sortingLayerNames[] = { "Background", "World", "UI", "Text" };
         ImGui::Combo("##SortingLayer", &layer.sortingLayer, sortingLayerNames, IM_ARRAYSIZE(sortingLayerNames));
-
+        if (beforeSortingLayer != layer)
+        {
+            PushLayerEdit(mUndo, selectedHandle, beforeSortingLayer, layer);
+        }
         ImGui::SameLine();
         ImGui::TextDisabled("(?)");
         if (ImGui::IsItemHovered())
@@ -598,7 +637,7 @@ namespace PulseEditor
         ImGui::SameLine();
         ImGui::SetNextItemWidth(150.0f);
         ImGui::DragInt("##OrderInLayer", &layer.orderInLayer, 1.0f, -9999, 9999);
-
+        HandleLayerUndo(layer, mUndo, selectedHandle);
         ImGui::SameLine();
         ImGui::TextDisabled("(?)");
         if (ImGui::IsItemHovered())
@@ -693,10 +732,7 @@ namespace PulseEditor
         }
 
 
-        if (!selectedHandle) {
-            selectedHandle = std::make_shared<EntityHandle>();
-        }
-        selectedHandle->id = selectedEntity;
+
 
 
         // ---------------------------------------------------------------------

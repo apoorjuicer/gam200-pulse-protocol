@@ -23,6 +23,7 @@
 #include "HierarchyHelpers.h"
 #include <iostream>
 #include <unordered_set>
+#include "LayerManagerPanel.h"
 //using Entity = std::uint32_t; lazy put header
 //std::uint32_t = Entity  
 
@@ -729,6 +730,62 @@ namespace PulseEditor
                 if (!c->HasComponent<AudioSource>(h->id)) return;
 
                 c->GetComponent<AudioSource>(h->id) = after;
+            };
+
+        undo.Push(std::move(a));
+    }
+
+    inline void PushLayerEdit(UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        LayerTag const& before,
+        LayerTag const& after)
+    {
+        if (!h || h->id == INVALID_ENTITY) return;
+
+        UndoManager::Action a;
+
+        a.undo = [h, before]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<LayerTag>(h->id)) return;
+
+                c->GetComponent<LayerTag>(h->id) = before;
+            };
+
+        a.redo = [h, after]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<LayerTag>(h->id)) return;
+
+                c->GetComponent<LayerTag>(h->id) = after;
+            };
+
+        undo.Push(std::move(a));
+    }
+
+    inline void PushLayerRegistryEdit(
+        UndoManager& undo,
+        LayerRegistrySnapshot const& before,
+        LayerRegistrySnapshot const& after)
+    {
+        UndoManager::Action a;
+
+        a.undo = [before]()
+            {
+                LayerRegistry::Get().RestoreSnapshot(before);
+                UpdateGraphicsLayerFilter();
+            };
+
+        a.redo = [after]()
+            {
+                LayerRegistry::Get().RestoreSnapshot(after);
+                UpdateGraphicsLayerFilter();
             };
 
         undo.Push(std::move(a));
