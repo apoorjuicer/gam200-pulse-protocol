@@ -402,7 +402,7 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask, float deltaTi
 
 }
 
-void GLApp::drawGlowing(std::set<Entity>& entities, float dt)
+void GLApp::drawGlowing(std::set<Entity>& entities, float /*dt*/)
 {
 	glm::mat3 PanZoom = BuildPanZoomNDC(Framework::GameState::IsPlaying() ? gGameCamera : gEditorCamera);
 	auto* g_coordinator = Coordinator::GetInstance();

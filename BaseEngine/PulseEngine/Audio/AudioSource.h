@@ -33,6 +33,19 @@ struct AudioSource {
 
     //runtime
     FMOD::Channel* channel = nullptr;
+
+    bool operator==(AudioSource const& other) const {
+        return audio_id == other.audio_id &&
+            volume == other.volume &&
+            loop == other.loop &&
+            playOnAwake == other.playOnAwake;
+    }
+    bool operator!=(AudioSource const& other) const
+    {
+        return !(*this == other);
+    }
+
+
     // ---------------------------------------------------
     // Serialize
     // ---------------------------------------------------

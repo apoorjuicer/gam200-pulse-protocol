@@ -110,11 +110,23 @@ struct AABB
 
     void Deserialize(const rapidjson::Value& in)
     {
-        if (!in.IsObject()) throw std::runtime_error("Invalid JSON for LogicComponent");
+        if (!in.IsObject()) throw std::runtime_error("Invalid JSON for AABB");
         if (in.HasMember("min")) min.Deserialize(in["min"]);
         if (in.HasMember("max")) max.Deserialize(in["max"]);
         if (in.HasMember("width")) width = in["width"].GetFloat();
         if (in.HasMember("height")) height = in["height"].GetFloat();
+    }
+
+    bool operator==(AABB const& other) const {
+        return
+            min == other.min &&
+            max == other.max &&
+            width == other.width &&
+            height == other.height;
+    }
+
+    bool operator!=(AABB const& other) const {
+        return !(*this == other);
     }
 };
 

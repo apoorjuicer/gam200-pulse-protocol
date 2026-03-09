@@ -125,7 +125,8 @@ public class InputBridge : Script
                 if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
                 {
                     // Console.WriteLine("[InputBridge] SUCCESS! Applying damage immediately.");
-                    EnemyRhythmController.Instance?.TakeDamage(10f);
+                    float playerDamage = PlayerHealth.Instance != null ? PlayerHealth.Instance.GetHealth().damage : 10;
+                    EnemyRhythmController.Instance?.TakeDamage(playerDamage);
                     PlayerAnimationController.Instance?.PlayAttack();
                 }
                 // else

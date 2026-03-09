@@ -2,7 +2,8 @@
 /**
  * @file        LayerRegistry.h
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En (primary) - 90%
+ * @author      Ban Kai Wei Benjamin (secondary) - 10%
  * 
  * @brief       Centralized registry for layer names and configuration.
  *              This allows layer names to be edited via the editor while
@@ -49,6 +50,42 @@ struct DLL_API LayerInfo
     float colorG = 1.0f;
     float colorB = 1.0f;
     float colorA = 1.0f;
+
+    bool operator==(LayerInfo const& other) const
+    {
+        return name == other.name &&
+            mask == other.mask &&
+            visible == other.visible &&
+            locked == other.locked &&
+            isDefault == other.isDefault &&
+            colorR == other.colorR &&
+            colorG == other.colorG &&
+            colorB == other.colorB &&
+            colorA == other.colorA;
+    }
+
+    bool operator!=(LayerInfo const& other) const
+    {
+        return !(*this == other);
+    }
+};
+/**
+ * @struct LayerRegistrySnapshot
+ * @brief  takes a snapshot of the layer registry
+ */
+struct DLL_API LayerRegistrySnapshot
+{
+    std::vector<LayerInfo> layers;
+
+    bool operator==(LayerRegistrySnapshot const& other) const
+    {
+        return layers == other.layers;
+    }
+
+    bool operator!=(LayerRegistrySnapshot const& other) const
+    {
+        return !(*this == other);
+    }
 };
 
 /**
@@ -153,6 +190,9 @@ public:
     // Note: Pointers are valid only until layers are modified
     std::vector<const char*> GetLayerNamesForCombo() const;
 
+    //undo...
+    LayerRegistrySnapshot MakeSnapshot() const;
+    void RestoreSnapshot(LayerRegistrySnapshot const& snap);
 private:
     LayerRegistry() = default;
     ~LayerRegistry() = default;

@@ -185,11 +185,30 @@ namespace PulseEditor
         ImVec2 saveButtonSize = ImVec2(saveTextSize.x + framePadding.x * 2, 0);
         ImVec2 loadButtonSize = ImVec2(loadTextSize.x + framePadding.x * 2, 0);
 
+        if (IsPlaying())
+        {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+        }
+
         if (ImGui::Button("Save Scene", saveButtonSize))
         {
-            if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>())
+            if (!IsPlaying()) // block the action manually
             {
-                sceneMgr->SaveCurrentScene();
+                if (auto sceneMgr = Coordinator::GetInstance()->GetSystem<SceneManager>())
+                    sceneMgr->SaveCurrentScene();
+            }
+        }
+
+        if (IsPlaying())
+        {
+            ImGui::PopStyleColor(3);
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f)); // red-ish warning
+                ImGui::SetTooltip("Stop the game first before saving!!!");
+                ImGui::PopStyleColor();
             }
         }
 

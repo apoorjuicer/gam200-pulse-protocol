@@ -157,14 +157,18 @@ public:
 	template<typename FunctionType>
 	FunctionType GetFunctionPtr(const std::string_view& assemblyName, const std::string_view& typeName, const std::string_view& functionName)
 	{
+		const std::string a{ assemblyName };
+		const std::string t{ typeName };
+		const std::string f{ functionName };
+
 		FunctionType managedDelegate = nullptr;
 		int result = createManagedDelegate
 		(
 			hostHandle,
 			domainId,
-			assemblyName.data(),
-			typeName.data(),
-			functionName.data(),
+			a.c_str(),
+			t.c_str(),
+			f.c_str(),
 			reinterpret_cast<void**>(&managedDelegate)
 		);
 		// Check if it failed

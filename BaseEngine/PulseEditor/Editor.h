@@ -38,6 +38,7 @@
 #include "ObjectAllocator/ObjectAllocator.h"
 
 #include "UndoManager.h" //FOR UNDO
+#include "EditorTypes.h"
 struct GLFWwindow;
 
 
@@ -50,11 +51,6 @@ namespace PulseEditor {
     bool IsPlaying();
     void SetPlaying(bool p);
 
-    struct GameViewport { int x, y, w, h; };
-    extern const Entity INVALID_ENTITY;
-    extern Entity selectedEntity;
-    extern std::vector<Entity> entityDisplayOrder;
-
     void EnqueueExternalDrop(const std::vector<std::string>& paths);
     void PushOSDropPath(const char* path);
     void Editor_FrameCallback();
@@ -64,8 +60,6 @@ namespace PulseEditor {
     // update cursor
     static void UpdateImGuiCursor(GLFWwindow* window);
 
-
-    // Simple editor-gizmo state
     struct GizmoState {
         bool  dragging = false;
         Entity active = INVALID_ENTITY;
@@ -73,6 +67,7 @@ namespace PulseEditor {
         Vector2  dragStartWorld{ 0,0 };        // world coords at press
         Vector2  entityStartPos{ 0,0 };        // starting entity world pos
     };
+
 
     struct AssetItem
     {
@@ -84,7 +79,6 @@ namespace PulseEditor {
         unsigned int texID = 0;
         bool triedLoad = false; // so we don't spam-load every frame
     };
-    //UNDO Manager
-    extern UndoManager mUndo;
+
 
 }// end of namespace PulseEditor

@@ -44,6 +44,24 @@ namespace Framework
 		void Deserialize(const rapidjson::Value &in);
 		static bool IsSingleImage(const Animation& a);
 		void Tick(float dt);
+
+		//bool operator==(Animation const& other) const;
+		//bool operator!=(Animation const& other) const;
+		bool operator==(Animation const& other) const {
+			return id == other.id &&
+				path == other.path &&
+				currentFrame == other.currentFrame &&
+				elapsedTime == other.elapsedTime &&
+				totalFrames == other.totalFrames &&
+				columns == other.columns &&
+				rows == other.rows &&
+				animationSpeed == other.animationSpeed;
+		}
+		bool operator!=(Animation const& other) const
+		{
+			return !(*this == other);
+		}
 	};
+	//std::ostream& operator<<(std::ostream& os, Animation const& t);
 }
 #endif // FRAMEWORK_ANIMATION_H

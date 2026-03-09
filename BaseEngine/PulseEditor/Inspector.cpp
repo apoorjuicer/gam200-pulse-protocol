@@ -31,49 +31,304 @@
 #include "CoreEngine/Core/CoreEngine.h"      // for FilePathToGame
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "CoreEngine/Prefab/PrefabInstance.h"
+#include "EditorTypes.h"
+#include "UndoHelper.h"
+
+//#include "Graphics/Renderable.h"
+
 namespace PulseEditor
 {
     // Definition of singleton undomanager for editor;
     // UNDO Manager
-    UndoManager mUndo;
-    static Framework::Transform beforeEdit;
-    static bool isEditing = false;
+    static bool isEditing_Transform = false;
+    static Framework::Transform beforeEdit_Transform;
+
+    static bool isEditing_Renderable = false;
+    static Framework::Renderable beforeEdit_Renderable{};
+
+    static Framework::Animation beforeEdit_Animation{};
+    static bool isEditing_Animation = false;
+
+    static Name beforeEdit_Name{};
+    static bool isEditing_Name = false;
+
+    static AABB beforeEdit_AABB;
+    static bool isEditing_AABB = false;
+
+    static Health beforeEdit_Health;
+    static bool isEditing_Health = false;
+
+    static bool isEditing_Text = false;
+    static TextComponent beforeEdit_Text{};
+
+    static bool isEditing_AudioSource = false;
+    static AudioSource beforeEdit_AudioSource{};
+
+    static bool isEditing_LayerTag = false;
+    static LayerTag beforeEdit_LayerTag{};
+
+    static bool isEditing_PrefabInstance = false;
+    static PrefabInstance beforeEdit_PrefabInstance{};
+
+    static bool isEditing_Logic = false;
+    static LogicComponent beforeEdit_Logic{};
+
 
     // -------------------------------------------------------------------------
     // Function to handle Transform undo
     // -------------------------------------------------------------------------
+    //static void HandleTransformUndo(
+    //    Framework::Transform &currentTransform,
+    //    UndoManager &undo,
+    //    Entity e,
+    //    Coordinator *g)
+    //{
+    //    // If the current ImGui widget became active (user clicked or started dragging)
+    //    if (ImGui::IsItemActivated())
+    //    {
+    //        // "snapshot" the "before" state
+    //        // "save the transform data before editting"
+    //        beforeEdit = currentTransform;
+    //        isEditing = true;
+    //    }
+
+    //    // If editing has ended (mouse released or finalizing text input)
+    //    if (ImGui::IsItemDeactivatedAfterEdit() && isEditing)
+    //    {
+    //        if (beforeEdit != currentTransform) // if something actually changed
+    //        {
+    //            Framework::Transform after = currentTransform;
+    //            PushTransformEdit(mUndo, selectedHandle, beforeEdit, after);
+    //        }
+
+    //        isEditing = false; // reset edit session
+    //    }
+    //}
+
     static void HandleTransformUndo(
-        Framework::Transform &tr,
-        UndoManager &undo,
-        Entity e,
-        Coordinator *g)
+        Framework::Transform& currentTransform,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
     {
-        // If the current ImGui widget became active (user clicked or started dragging)
+        // Started dragging / editing THIS widget
         if (ImGui::IsItemActivated())
         {
-            // "snapshot" the "before" state
-            // "save the transform data before editting"
-            beforeEdit = tr;
-            isEditing = true;
+            beforeEdit_Transform = currentTransform;
+            isEditing_Transform = true;
         }
 
-        // If editing has ended (mouse released or finalizing text input)
-        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing)
+        // Finished editing THIS widget
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_Transform)
         {
-            if (beforeEdit != tr) // if something actually changed
+            std::cout << "done editing widget transform\n";
+            Framework::Transform after = currentTransform;
+            std::cout << "[INSPECTOR] AFTER EDITTING values" << after << "\n";
+            if (beforeEdit_Transform != after)
             {
-                // undo the changes....
-                undo.Push([e, oldData = beforeEdit, g]()
-                          {
-                        if (g->HasComponent<Framework::Transform>(e))
-                        {
-                            g->GetComponent<Framework::Transform>(e) = oldData;
-                        } });
+                std::cout << "BEFORE != AFTER !!!!! pushing transform edit\n";
+                PushTransformEdit(undo, h, beforeEdit_Transform, after);
             }
 
-            isEditing = false; // reset edit session
+            isEditing_Transform = false;
         }
     }
+
+    static void HandleRenderableUndo(
+        Framework::Renderable& currentRenderable,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h) {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_Renderable = currentRenderable;
+            isEditing_Renderable = true;
+        }
+
+        // Finished editing THIS widget
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_Renderable)
+        {
+            Framework::Renderable after = currentRenderable;
+            if (beforeEdit_Renderable != after)
+            {
+                PushRenderableEdit(undo, h, beforeEdit_Renderable, after);
+            }
+            isEditing_Renderable = false;
+        }
+    }
+
+    static void HandleNameUndo(
+        Name& currentName,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            std::cout << "[Inspector] HandleNameUndo called\n";
+            beforeEdit_Name = currentName;
+            isEditing_Name = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_Name)
+        {
+            Name after = currentName;
+            if (beforeEdit_Name != after)
+            {
+                PushNameEdit(undo, h, beforeEdit_Name, after);
+            }
+
+            isEditing_Name = false;
+        }
+    }
+
+    static void HandleAnimationUndo(
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        Framework::Animation const& before,
+        Framework::Animation const& after)
+    {
+        if (before != after)
+        {
+            PushAnimationEdit(undo, h, before, after);
+        }
+    }
+
+    static void HandleAABBUndo(
+        AABB& currentAABB,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_AABB = currentAABB;
+            isEditing_AABB = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_AABB)
+        {
+            AABB after = currentAABB;
+            if (beforeEdit_AABB != after)
+            {
+                PushAABBEdit(undo, h, beforeEdit_AABB, after);
+            }
+            isEditing_AABB = false;
+        }
+    }
+
+    static void HandleHealthUndo(
+        Health& currentHealth,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_Health = currentHealth;
+            isEditing_Health = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_Health)
+        {
+            Health after = currentHealth;
+            if (beforeEdit_Health != after)
+            {
+                PushHealthEdit(undo, h, beforeEdit_Health, after);
+            }
+            isEditing_Health = false;
+        }
+    }
+
+    static void HandleTextUndo(
+        TextComponent& currentText,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_Text = currentText;
+            isEditing_Text = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_Text)
+        {
+            TextComponent after = currentText;
+            if (beforeEdit_Text != after)
+            {
+                PushTextEdit(undo, h, beforeEdit_Text, after);
+            }
+
+            isEditing_Text = false;
+        }
+    }
+
+    static void HandleAudioUndo(
+        AudioSource& currentAudio,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_AudioSource = currentAudio;
+            isEditing_AudioSource = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_AudioSource)
+        {
+            AudioSource after = currentAudio;
+            if (beforeEdit_AudioSource != after)
+            {
+                PushAudioEdit(undo, h, beforeEdit_AudioSource, after);
+            }
+
+            isEditing_AudioSource = false;
+        }
+    }
+
+    static void HandleLayerUndo(
+        LayerTag& currentLayer,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_LayerTag = currentLayer;
+            isEditing_LayerTag = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_LayerTag)
+        {
+            LayerTag after = currentLayer;
+            if (beforeEdit_LayerTag != after)
+            {
+                PushLayerEdit(undo, h, beforeEdit_LayerTag, after);
+            }
+
+            isEditing_LayerTag = false;
+        }
+    }
+
+    static void HandlePrefabInstanceUndo(
+        PrefabInstance& currentPrefabInstance,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_PrefabInstance = currentPrefabInstance;
+            isEditing_PrefabInstance = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_PrefabInstance)
+        {
+            PrefabInstance after = currentPrefabInstance;
+            if (beforeEdit_PrefabInstance != after)
+            {
+                PushPrefabInstanceEdit(undo, h, beforeEdit_PrefabInstance, after);
+            }
+
+            isEditing_PrefabInstance = false;
+        }
+    }
+    // Don't have HandleLogicComponentUndo 
+    // as PushLogicEdit in UndoHelper.h is different from the rest.
+    //
 
     // -------------------------------------------------------------------------
     // Helper: add a "add component" button at the bottom, more intuitive
@@ -269,6 +524,8 @@ namespace PulseEditor
     // -------------------------------------------------------------------------
     void DrawInspectorWindow(ImGuiID rightDockID)
     {
+
+
         // Dock on the right
         if (rightDockID)
             ImGui::SetNextWindowDockID(rightDockID, ImGuiCond_FirstUseEver);
@@ -290,12 +547,26 @@ namespace PulseEditor
             return;
         }
 
+        static Entity lastSelected = INVALID_ENTITY;
+        if (selectedEntity != lastSelected) {
+            //isEditing = false;
+            //Reset flags for undo
+            isEditing_Transform = false;
+            isEditing_Renderable = false;
+            lastSelected = selectedEntity;
+        }
+
         if (selectedEntity == INVALID_ENTITY)
         {
             ImGui::TextUnformatted("No entity selected.");
             ImGui::End();
             return;
         }
+
+        if (!selectedHandle) {
+            selectedHandle = std::make_shared<EntityHandle>();
+        }
+        selectedHandle->id = selectedEntity;
 
         ImGui::Text("Entity ID: %d", (int)selectedEntity);
 
@@ -346,6 +617,8 @@ namespace PulseEditor
         {
             currentLayerIndex = 1;
         }
+        //UNDO FOR LAYER
+        LayerTag beforeLayerDropdown = layer;
 
         ImGui::SetNextItemWidth(130.0f);
         if (ImGui::Combo("##LayerDropdown", &currentLayerIndex, s_layerNamePtrs.data(), static_cast<int>(s_layerNamePtrs.size())))
@@ -362,14 +635,23 @@ namespace PulseEditor
             }
         }
 
+        if (beforeLayerDropdown != layer)
+        {
+            PushLayerEdit(mUndo, selectedHandle, beforeLayerDropdown, layer);
+        }
+
         // === SORTING LAYER (for render order) ===
+
         ImGui::Text("Sorting Layer:");
         ImGui::SameLine();
         ImGui::SetNextItemWidth(130.0f);
-
+        LayerTag beforeSortingLayer = layer;
         const char* sortingLayerNames[] = { "Background", "World", "UI", "Text" };
         ImGui::Combo("##SortingLayer", &layer.sortingLayer, sortingLayerNames, IM_ARRAYSIZE(sortingLayerNames));
-
+        if (beforeSortingLayer != layer)
+        {
+            PushLayerEdit(mUndo, selectedHandle, beforeSortingLayer, layer);
+        }
         ImGui::SameLine();
         ImGui::TextDisabled("(?)");
         if (ImGui::IsItemHovered())
@@ -382,7 +664,7 @@ namespace PulseEditor
         ImGui::SameLine();
         ImGui::SetNextItemWidth(150.0f);
         ImGui::DragInt("##OrderInLayer", &layer.orderInLayer, 1.0f, -9999, 9999);
-
+        HandleLayerUndo(layer, mUndo, selectedHandle);
         ImGui::SameLine();
         ImGui::TextDisabled("(?)");
         if (ImGui::IsItemHovered())
@@ -429,6 +711,7 @@ namespace PulseEditor
                         std::cout << "[Inspector] Linked entity " << selectedEntity
                                   << " to prefab '" << prefabInstance.prefabName << "'" << std::endl;
                     }
+                    HandlePrefabInstanceUndo(prefabInstance, mUndo, selectedHandle);
                 }
                 if (ImGui::IsItemHovered())
                 {
@@ -475,6 +758,10 @@ namespace PulseEditor
 
             ImGui::Separator();
         }
+
+
+
+
 
         // ---------------------------------------------------------------------
         // Name component
@@ -549,34 +836,63 @@ namespace PulseEditor
     // -------------------------------------------------------------------------
     void Inspector_NameComponent(Coordinator *g)
     {
-        if (g->HasComponent<Name>(selectedEntity))
+        //early return
+        if (!g->HasComponent<Name>(selectedEntity)){ return; }
+       
+        auto &nm = g->GetComponent<Name>(selectedEntity);
+
+        bool removeName = false;
+        bool nameOpen = 
+            ImGui::CollapsingHeader("Name", ImGuiTreeNodeFlags_DefaultOpen 
+                | ImGuiTreeNodeFlags_AllowOverlap);
+        removeName = DrawInlineRemoveButton("Name");
+
+        if (removeName) // remove name component
         {
-            auto &nm = g->GetComponent<Name>(selectedEntity);
+            //Framework::Transform beforeRemove = tr;
+            //PushRemoveTransform(mUndo, selectedHandle, beforeRemove);
+            //g->RemoveComponent<Framework::Transform>(selectedEntity);
+            //save name first
+            Name beforeRemove = nm;
+            PushRemoveName(mUndo, selectedHandle, beforeRemove);
+            g->RemoveComponent<Name>(selectedEntity);
 
-            bool removeName = false;
-            bool nameOpen = ImGui::CollapsingHeader("Name", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap);
-            removeName = DrawInlineRemoveButton("Name");
+        }
+        else if (nameOpen)
+        {
+            ImGui::Indent();
 
-            if (removeName)
+            static Entity lastEntity = INVALID_ENTITY;
+            static char nameBuf[256] = {};
+
+            if (lastEntity != selectedEntity)
             {
-                g->RemoveComponent<Name>(selectedEntity);
-            }
-            else if (nameOpen)
-            {
-                ImGui::Indent();
-
-                static char nameBuf[256];
+                lastEntity = selectedEntity;
                 std::strncpy(nameBuf, nm.name.c_str(), sizeof(nameBuf));
                 nameBuf[sizeof(nameBuf) - 1] = '\0';
-                if (ImGui::InputText("Entity Name", nameBuf, IM_ARRAYSIZE(nameBuf)))
-                    nm.name = nameBuf;
-
-                ImGui::Unindent();
+                std::cout << "name buffer " << nameBuf << "\n";
+            }
+            else if (!isEditing_Name)
+            {
+                std::strncpy(nameBuf, nm.name.c_str(), sizeof(nameBuf));
+                nameBuf[sizeof(nameBuf) - 1] = '\0';
             }
 
-            ImGui::Separator();
+            //copying nm.name into namebuf every frame
+            //static char nameBuf[256];
+            //std::strncpy(nameBuf, nm.name.c_str(), sizeof(nameBuf));
+            //nameBuf[sizeof(nameBuf) - 1] = '\0';
+            if (ImGui::InputText("Entity Name", nameBuf, IM_ARRAYSIZE(nameBuf))) {//edit string
+                nm.name = nameBuf;
+            }
+
+            HandleNameUndo(nm, mUndo, selectedHandle);
+
+            ImGui::Unindent();
         }
-    }
+
+        ImGui::Separator();
+    }// end of Name component
 
 
     void Inspector_TransformComponent(Coordinator* g)
@@ -594,6 +910,8 @@ namespace PulseEditor
 
             if (removeTransform)
             {
+                Framework::Transform beforeRemove = tr;
+                PushRemoveTransform(mUndo, selectedHandle, beforeRemove);
                 g->RemoveComponent<Framework::Transform>(selectedEntity);
             }
             else if (transformOpen)
@@ -605,7 +923,9 @@ namespace PulseEditor
                 ImGui::DragFloat2("Position", pos, 0.5f);
                 tr.Pos.x = pos[0];
                 tr.Pos.y = pos[1];
-                HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                //HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                HandleTransformUndo(tr, mUndo, selectedHandle);
+
 
                 // --- Scale + Keep Aspect Ratio (Option A: changing both updates ratio) ---
                 static std::unordered_map<std::uint32_t, bool>  s_keepAspect;
@@ -662,20 +982,20 @@ namespace PulseEditor
 
                 tr.Scale.x = sc[0];
                 tr.Scale.y = sc[1];
-                HandleTransformUndo(tr, mUndo, selectedEntity, g);
-
+                //HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                HandleTransformUndo(tr, mUndo, selectedHandle);
                 // --- Rotation (deg) ---
                 ImGui::DragFloat("Rotation (deg)", &tr.Rotation.x, 1.0f, -360.f, 360.f);
-                HandleTransformUndo(tr, mUndo, selectedEntity, g);
-
+                //HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                HandleTransformUndo(tr, mUndo, selectedHandle);
                 // --- Rotation Speed ---
                 ImGui::DragFloat("Rotation Speed", &tr.Rotation.y, 0.1f, -10.0f, 10.0f);
-                HandleTransformUndo(tr, mUndo, selectedEntity, g);
-
+                //HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                HandleTransformUndo(tr, mUndo, selectedHandle);
                 // --- Visible ---
                 ImGui::Checkbox("Visible", &tr.isVisible);
-                HandleTransformUndo(tr, mUndo, selectedEntity, g);
-
+               // HandleTransformUndo(tr, mUndo, selectedEntity, g);
+                HandleTransformUndo(tr, mUndo, selectedHandle);
                 ImGui::Unindent();
             }
 
@@ -684,8 +1004,6 @@ namespace PulseEditor
     }
 
 
-
-   
     void Inspector_RenderableComponent(Coordinator *g)
     {
         if (g->HasComponent<Framework::Renderable>(selectedEntity))
@@ -698,6 +1016,8 @@ namespace PulseEditor
 
             if (removeRenderable)
             {
+                Framework::Renderable beforeRemove = r;
+                PushRemoveRenderable(mUndo, selectedHandle, beforeRemove);
                 g->RemoveComponent<Framework::Renderable>(selectedEntity);
             }
             else if (renderableOpen)
@@ -706,26 +1026,37 @@ namespace PulseEditor
 
                 // --- Model reference (background vs sprite) ----------------------
                 {
-                    int modelIdx = static_cast<int>(r.mdl_ref);
-                    modelIdx = std::clamp(modelIdx, 0, 1);
+                   // int modelIdx = static_cast<int>(r.mdl_ref);
+                   // modelIdx = std::clamp(modelIdx, 0, 1);
+                    int oldModelIdx = std::clamp(static_cast<int>(r.mdl_ref), 0, 1);
+                    int newModelIdx = oldModelIdx;
 
                     const char *kModelNames[2] = {"Background Quad", "Sprite Quad"};
 
-                    ImGui::Text("Model: %s", kModelNames[modelIdx]);
+                    ImGui::Text("Model: %s", kModelNames[oldModelIdx]);
                     ImGui::SameLine();
                     if (ImGui::SmallButton(" - ##model"))
-                        modelIdx = std::max(0, modelIdx - 1);
+                        newModelIdx = std::max(0, oldModelIdx - 1);
                     ImGui::SameLine();
                     if (ImGui::SmallButton(" + ##model"))
-                        modelIdx = std::min(1, modelIdx + 1);
+                        newModelIdx = std::min(1, oldModelIdx + 1);
 
-                    r.mdl_ref = static_cast<float>(modelIdx);
+                    //==Undo Renderable
+                    if (newModelIdx != oldModelIdx)
+                    {
+                        Framework::Renderable before = r;
+                        r.mdl_ref = static_cast<float>(newModelIdx);
+                        Framework::Renderable after = r;
+                        PushRenderableEdit(mUndo, selectedHandle, before, after);
+                    }
                 }
 
                 // --- Shader reference --------------------------------------------
                 {
                     const int maxShaders = static_cast<int>(GLApp::shdrpgms.size());
-                    int shaderIdx = std::clamp(static_cast<int>(r.shd_ref), 0, std::max(0, maxShaders - 1));
+                    //int shaderIdx = std::clamp(static_cast<int>(r.shd_ref), 0, std::max(0, maxShaders - 1));
+                    int oldShaderIdx = std::clamp(static_cast<int>(r.shd_ref), 0, std::max(0, maxShaders - 1));
+                    int newShaderIdx = oldShaderIdx;
 
                     auto ShaderName = [&](int i) -> const char *
                     {
@@ -744,15 +1075,23 @@ namespace PulseEditor
                         }
                     };
 
-                    ImGui::Text("Shader: %s", ShaderName(shaderIdx));
+                    ImGui::Text("Shader: %s", ShaderName(oldShaderIdx));
                     ImGui::SameLine();
                     if (ImGui::SmallButton(" - ##shader"))
-                        shaderIdx = std::max(0, shaderIdx - 1);
+                        newShaderIdx = std::max(0, oldShaderIdx - 1);
                     ImGui::SameLine();
                     if (ImGui::SmallButton(" + ##shader"))
-                        shaderIdx = std::min(std::max(0, maxShaders - 1), shaderIdx + 1);
+                        newShaderIdx = std::min(std::max(0, maxShaders - 1), oldShaderIdx + 1);
 
-                    r.shd_ref = static_cast<float>(shaderIdx);
+                    if (newShaderIdx != oldShaderIdx)
+                    {
+                        Framework::Renderable before = r;
+                        r.shd_ref = static_cast<float>(newShaderIdx);
+                        Framework::Renderable after = r;
+                        PushRenderableEdit(mUndo, selectedHandle, before, after);
+                    }
+
+                    //r.shd_ref = static_cast<float>(shaderIdx);
                 }
 
                 // --- Texture info ------------------------------------------------
@@ -806,6 +1145,8 @@ namespace PulseEditor
 
                         r.needsTextureReload = true;
                     }
+
+                    HandleRenderableUndo(r, mUndo, selectedHandle);
                 }
 
                 // --- Reload texture button + drag & drop target ------------------
@@ -833,12 +1174,12 @@ namespace PulseEditor
                         // ═══════════════════════════════════════════════════════════════
                         // UNDO: Snapshot BEFORE texture change
                         // ═══════════════════════════════════════════════════════════════
-                        Entity e = selectedEntity;
-                        EntitySnapshot before = MakeEntitySnapshot(e);
-                        mUndo.Push([e, before]() {
-                            RestoreEntityFromSnapshot(e, before);
-                        });
-
+                        //Entity e = selectedEntity;
+                        //EntitySnapshot before = MakeEntitySnapshot(e);
+                        //mUndo.Push([e, before]() {
+                        //    RestoreEntityFromSnapshot(e, before);
+                        //});
+                        Framework::Renderable before = r;
                         namespace fs = std::filesystem;
                         const std::string kTexturesRoot = (FilePathToGame / "Assets" / "Textures").string();
 
@@ -933,7 +1274,15 @@ namespace PulseEditor
                         }
 
                         r.shd_ref = static_cast<float>(isSheet ? SPRITESHEET_SHADER_INDEX : SPRITE_SHADER_INDEX);
-                    }
+
+                        Framework::Renderable after = r;
+                        PushRenderableEdit(mUndo, selectedHandle, before, after);
+
+
+
+
+
+                    } // end ofreload clicked 
                 }
 
                 ImGui::Unindent();
@@ -954,7 +1303,13 @@ namespace PulseEditor
 
             if (removeAnimation)
             {
+                //Framework::Renderable beforeRemove = r;
+                //PushRemoveRenderable(mUndo, selectedHandle, beforeRemove);
+                //g->RemoveComponent<Framework::Renderable>(selectedEntity);
+                Framework::Animation beforeRemove = a;
+                PushRemoveAnimation(mUndo, selectedHandle, a);
                 g->RemoveComponent<Framework::Animation>(selectedEntity);
+
             }
             else if (animationOpen)
             {
@@ -1016,6 +1371,8 @@ namespace PulseEditor
 
                 // Rows
                 {
+                    Framework::Animation before = a;
+
                     int rows = a.rows;
                     if (StepperInt("Rows", &rows, 1, 999))
                     {
@@ -1023,11 +1380,15 @@ namespace PulseEditor
                         a.totalFrames = std::max(1, a.rows * a.columns);
                         a.currentFrame = std::min(a.currentFrame, a.totalFrames - 1);
                         a.elapsedTime = 0.0f;
+
+                        HandleAnimationUndo(mUndo, selectedHandle, before, a);
                     }
                 }
 
                 // Columns
                 {
+                    Framework::Animation before = a;
+
                     int cols = a.columns;
                     if (StepperInt("Columns", &cols, 1, 999))
                     {
@@ -1035,11 +1396,15 @@ namespace PulseEditor
                         a.totalFrames = std::max(1, a.rows * a.columns);
                         a.currentFrame = std::min(a.currentFrame, a.totalFrames - 1);
                         a.elapsedTime = 0.0f;
+
+                        HandleAnimationUndo(mUndo, selectedHandle, before, a);
                     }
                 }
 
                 // Total Frames 
                 {
+                    Framework::Animation before = a;
+
                     const int maxFrames = std::max(1, a.rows * a.columns);
                     int frames = a.totalFrames;
 
@@ -1048,25 +1413,34 @@ namespace PulseEditor
                         a.totalFrames = std::clamp(frames, 1, maxFrames);
                         a.currentFrame = std::clamp(a.currentFrame, 0, a.totalFrames - 1);
                         a.elapsedTime = 0.0f;
+
+                        HandleAnimationUndo(mUndo, selectedHandle, before, a);
                     }
                 }
 
                 // Current frame
                 {
+                    Framework::Animation before = a;
+
                     const int maxFrame = std::max(0, a.totalFrames - 1);
                     int cur = std::clamp(a.currentFrame, 0, maxFrame);
                     if (ImGui::SliderInt("Current Frame", &cur, 0, maxFrame))
                     {
                         a.currentFrame = cur;
                         a.elapsedTime = 0.0f;
+
+                        HandleAnimationUndo(mUndo, selectedHandle, before, a);
                     }
                 }
 
                 // Animation speed
                 {
+                    Framework::Animation before = a;
                     float sp = a.animationSpeed;
-                    if (StepperFloat("Anim Speed (fps)", &sp, 0.0f, 120.0f, 0.1f))
+                    if (StepperFloat("Anim Speed (fps)", &sp, 0.0f, 120.0f, 0.1f)) {
                         a.animationSpeed = std::max(0.0f, sp);
+                        HandleAnimationUndo(mUndo, selectedHandle, before, a);
+                    }
                 }
 
                 ImGui::Unindent();
@@ -1087,6 +1461,8 @@ namespace PulseEditor
 
             if (removeScript)
             {
+                LogicComponent beforeRemove = script;
+                PushRemoveLogic(mUndo, selectedHandle, beforeRemove);
                 g->RemoveComponent<LogicComponent>(selectedEntity);
             }
             else if (scriptOpen)
@@ -1150,6 +1526,8 @@ namespace PulseEditor
 
                     if (ImGui::SmallButton("Remove##Script"))
                     {
+                        LogicComponent before = script;
+
                         const char* scriptToRemove = script.ScriptName[i].c_str();
                         script.ScriptName.erase(script.ScriptName.begin() + i);
 
@@ -1160,6 +1538,12 @@ namespace PulseEditor
                         );
                         if (removeScriptFunc)
                             removeScriptFunc(selectedEntity, scriptToRemove);
+
+                        LogicComponent after = script;
+                        if (before != after)
+                        {
+                            PushLogicEdit(mUndo, selectedHandle, before, after);
+                        }
 
                         ImGui::PopStyleColor(3);
                         ImGui::PopID();
@@ -1241,6 +1625,8 @@ namespace PulseEditor
 
                             if (!alreadyExists)
                             {
+                                LogicComponent before = script;
+
                                 script.ScriptName.push_back(selectedScript);
 
                                 auto addScriptFunc = Engine->GetFunctionPtr<bool(*)(int, const char*)>(
@@ -1254,6 +1640,13 @@ namespace PulseEditor
                                     std::cout << "[Inspector] Added script: " << selectedScript
                                         << " (Success: " << success << ")" << std::endl;
                                 }
+
+                                LogicComponent after = script;
+                                if (before != after)
+                                {
+                                    PushLogicEdit(mUndo, selectedHandle, before, after);
+                                }
+
                                 selectedScriptIndex = 0;
                                 searchBuf[0] = '\0';
                             }
@@ -1304,6 +1697,8 @@ namespace PulseEditor
 
             if (removeAudio)
             {
+                AudioSource beforeRemove = audio;
+                PushRemoveAudioSource(mUndo, selectedHandle, beforeRemove);
                 g->RemoveComponent<AudioSource>(selectedEntity);
             }
             else if (audioOpen)
@@ -1317,6 +1712,9 @@ namespace PulseEditor
                 std::string preview = audio.audio_id.empty() ? "<None>" : audio.audio_id;
 
                 static char audioSearchFilter[128] = "";
+
+
+                AudioSource before = audio;
 
                 ImGui::SetNextItemWidth(300.0f);
                 if (ImGui::BeginCombo("##AudioFile", preview.c_str()))
@@ -1447,13 +1845,20 @@ namespace PulseEditor
                     }
                 }
 
+                if (before != audio)
+                {
+                    PushAudioEdit(mUndo, selectedHandle, before, audio);
+                }
+
                 ImGui::Separator();
 
                 ImGui::SetNextItemWidth(200.0f);
-                ImGui::SliderFloat("Volume", &audio.volume, 0.0f, 1.0f, "%.2f");
-
-                ImGui::Checkbox("Loop", &audio.loop);
-                ImGui::Checkbox("Play on Awake", &audio.playOnAwake);
+                ImGui::SliderFloat("Volume", &audio.volume, 0.0f, 1.0f, "%.2f"); //slide1
+                HandleAudioUndo(audio, mUndo, selectedHandle);
+                ImGui::Checkbox("Loop", &audio.loop); //checkbox1
+                HandleAudioUndo(audio, mUndo, selectedHandle);
+                ImGui::Checkbox("Play on Awake", &audio.playOnAwake); //checkbox2
+                HandleAudioUndo(audio, mUndo, selectedHandle);
 
                 ImGui::Spacing();
 
@@ -1477,7 +1882,7 @@ namespace PulseEditor
                     }
                     ImGui::SameLine();
 
-                    if (ImGui::SmallButton("Stop"))
+                    if (ImGui::SmallButton("Stop")) 
                     {
                         auto audioManager = g->GetSystem<AudioManager>();
                         if (audioManager)
@@ -1514,7 +1919,9 @@ namespace PulseEditor
         removeText = DrawInlineRemoveButton("TextComponent");
 
         if (removeText)
-        {
+        {                
+            TextComponent beforeRemove = txt;
+            PushRemoveText(mUndo, selectedHandle, beforeRemove);
             g->RemoveComponent<TextComponent>(selectedEntity);
         }
         else if (textOpen)
@@ -1535,6 +1942,7 @@ namespace PulseEditor
             {
                 txt.text = textBuf;
             }
+            HandleTextUndo(txt, mUndo, selectedHandle);
 
             ImGui::Spacing();
 
@@ -1546,6 +1954,8 @@ namespace PulseEditor
             std::string fontPreview = txt.font_id.empty() ? "<Default>" : txt.font_id;
 
             ImGui::SetNextItemWidth(250.0f);
+
+            TextComponent beforeFont = txt;
             if (ImGui::BeginCombo("##FontSelect", fontPreview.c_str()))
             {
                 // Default font option
@@ -1573,30 +1983,36 @@ namespace PulseEditor
                 ImGui::EndCombo();
             }
 
+            if (beforeFont != txt)
+            {
+                PushTextEdit(mUndo, selectedHandle, beforeFont, txt);
+            }
+
             // === Font Size ===
             ImGui::Text("Size:");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(150.0f);
-            ImGui::DragFloat("##FontSize", &txt.font_size, 1.0f, 8.0f, 200.0f, "%.0f px");
-
+            ImGui::DragFloat("##FontSize", &txt.font_size, 1.0f, 8.0f, 200.0f, "%.0f px"); //font size edit
+            HandleTextUndo(txt, mUndo, selectedHandle);
             // === Text Color ===
             ImGui::Text("Color:");
             ImGui::SameLine();
             float col[3] = {txt.color.r, txt.color.g, txt.color.b};
-            if (ImGui::ColorEdit3("##TextColor", col))
+            if (ImGui::ColorEdit3("##TextColor", col)) //color edit
             {
                 txt.color = {col[0], col[1], col[2]};
             }
-
+            HandleTextUndo(txt, mUndo, selectedHandle);
             // === Offset from Transform ===
             ImGui::Text("Offset:");
             ImGui::SameLine();
             float offset[2] = {txt.offset.x, txt.offset.y};
             ImGui::SetNextItemWidth(200.0f);
-            if (ImGui::DragFloat2("##TextOffset", offset, 1.0f))
+            if (ImGui::DragFloat2("##TextOffset", offset, 1.0f)) // slider
             {
                 txt.offset = {offset[0], offset[1]};
             }
+            HandleTextUndo(txt, mUndo, selectedHandle);
             ImGui::SameLine();
             ImGui::TextDisabled("(?)");
             if (ImGui::IsItemHovered())
@@ -1607,7 +2023,7 @@ namespace PulseEditor
             // === Text Alignment ===
             ImGui::Text("Alignment:");
             ImGui::SameLine();
-
+            TextComponent beforeAlign = txt;
             const char* alignmentOptions[] = { "Left", "Center", "Right" };
             int currentAlignment = static_cast<int>(txt.alignment);
 
@@ -1615,6 +2031,10 @@ namespace PulseEditor
             if (ImGui::Combo("##TextAlignment", &currentAlignment, alignmentOptions, IM_ARRAYSIZE(alignmentOptions)))
             {
                 txt.alignment = static_cast<TextAlignment>(currentAlignment);
+            }
+            if (beforeAlign != txt)
+            {
+                PushTextEdit(mUndo, selectedHandle, beforeAlign, txt);
             }
             ImGui::SameLine();
             ImGui::TextDisabled("(?)");
@@ -1625,7 +2045,7 @@ namespace PulseEditor
 
             // === Visibility Toggle ===
             ImGui::Checkbox("Visible##TextComponent", &txt.visible);
-
+            HandleTextUndo(txt, mUndo, selectedHandle);
             ImGui::Spacing();
             ImGui::Separator();
 
@@ -1655,6 +2075,9 @@ namespace PulseEditor
 
         if (removeHealth)
         {
+
+            Health beforeRemove = health;
+            PushRemoveHealth(mUndo, selectedHandle, beforeRemove);
             g->RemoveComponent<Health>(selectedEntity);
         }
         else if (healthOpen)
@@ -1664,15 +2087,15 @@ namespace PulseEditor
             ImGui::Text("HP:");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(150.0f);
-            ImGui::DragInt("##HP", &health.hp, 1.0f, 0, 10000);
-
+            ImGui::DragInt("##HP", &health.hp, 1.0f, 0, 10000); // slide1
+            HandleHealthUndo(health, mUndo, selectedHandle);
             ImGui::Text("Damage:");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(150.0f);
-            ImGui::DragInt("##Damage", &health.damage, 1.0f, 0, 1000);
-
-            ImGui::Checkbox("Is Alive", &health.isAlive);
-
+            ImGui::DragInt("##Damage", &health.damage, 1.0f, 0, 1000); //slide2
+            HandleHealthUndo(health, mUndo, selectedHandle);
+            ImGui::Checkbox("Is Alive", &health.isAlive); //checkbox1
+            HandleHealthUndo(health, mUndo, selectedHandle);
             ImGui::Unindent();
         }
 
@@ -1692,6 +2115,8 @@ namespace PulseEditor
 
         if (removeAABB)
         {
+            AABB beforeRemove = aabb;
+            PushRemoveAABB(mUndo, selectedHandle, beforeRemove);
             g->RemoveComponent<AABB>(selectedEntity);
         }
         else if (aabbOpen)
@@ -1702,20 +2127,22 @@ namespace PulseEditor
             ImGui::SameLine();
             float min[2] = { aabb.min.x, aabb.min.y };
             ImGui::SetNextItemWidth(200.0f);
-            if (ImGui::DragFloat2("##AABBMin", min, 0.1f))
+            if (ImGui::DragFloat2("##AABBMin", min, 0.1f)) //slider1
             {
                 aabb.min = { min[0], min[1] };
+               
             }
-
+            HandleAABBUndo(aabb, mUndo, selectedHandle);
             ImGui::Text("Max:");
             ImGui::SameLine();
             float max[2] = { aabb.max.x, aabb.max.y };
             ImGui::SetNextItemWidth(200.0f);
-            if (ImGui::DragFloat2("##AABBMax", max, 0.1f))
+            if (ImGui::DragFloat2("##AABBMax", max, 0.1f)) //slider 2
             {
                 aabb.max = { max[0], max[1] };
+                
             }
-
+            HandleAABBUndo(aabb, mUndo, selectedHandle);
             // Display calculated width/height for convenience
             ImGui::Spacing();
             ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Size: %.2f x %.2f",

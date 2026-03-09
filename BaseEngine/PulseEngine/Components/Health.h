@@ -2,7 +2,8 @@
 /**
  * @file        Health.h
  * @project     Pulse Protocol
- * @author		Reginald Lew Yee Ren
+ * @author		Reginald Lew Yee Ren (primary) - 90%
+ * @author      Ban Kai Wei Benjamin (secondary) - 10%
  * @brief		Health component used to track an entity's vitality, damage output,
  *              and alive state. This component contains no graphical or collision
  *              data — it is purely for gameplay logic.
@@ -56,5 +57,16 @@ struct DLL_API Health
         if (in.HasMember("damage")) damage = in["damage"].GetFloat();
         if (in.HasMember("isAlive")) isAlive = in["isAlive"].GetBool();
 
+    }
+
+    bool operator==(Health const& other) const {
+        return
+            hp == other.hp &&
+            damage == other.damage &&
+            isAlive == other.isAlive;
+    }
+
+    bool operator!=(Health const& other) const {
+        return !(*this == other);
     }
 };
