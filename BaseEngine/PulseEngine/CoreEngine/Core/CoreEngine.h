@@ -44,7 +44,7 @@ public:
 	CoreEngine();
 	~CoreEngine();
 
-	enum class PauseSource { Game, Editor };
+	enum class PauseSource { Game, Editor, Focus };
 
 	// Engine 3 states
 	void Init();
@@ -111,6 +111,7 @@ private:
 	bool DebugMode = false;
 	unsigned LastTime; // The last time the game was updated
 	bool m_paused = true;
+	bool m_manualPause = false; // set when the player explicitly pauses via ESC
 	bool m_isPlaying = false;
 	std::string m_originalScenePath = "";
 	void RenderDebugDraw();

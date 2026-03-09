@@ -672,9 +672,9 @@ void CoreEngine::Init()
 			(void)win;
 			if (!Engine) return;
 			if (focused)
-				Engine->SetPaused(false);
+				Engine->SetPaused(false, PauseSource::Focus);
 			else
-				Engine->SetPaused(true);
+				Engine->SetPaused(true, PauseSource::Focus);
 		});
 
 	// Also pause when minimized / restored
@@ -684,7 +684,7 @@ void CoreEngine::Init()
 			(void)win;
 			if (!Engine) return;
 			if (iconified == GLFW_TRUE)
-				Engine->SetPaused(true);
+				Engine->SetPaused(true, PauseSource::Focus);
 			// When restored, focus callback will unpause if the window regains focus
 		});
 
@@ -1380,22 +1380,19 @@ void CoreEngine::SetPaused(bool paused)
 
 void CoreEngine::SetPaused(bool paused, PauseSource source)
 {
+	if (source == PauseSource::Game)
+	{
+		// Player explicitly paused/unpaused — record intent
+		m_manualPause = paused;
+	}
+	else if (source == PauseSource::Focus && !paused && m_manualPause)
+	{
+		// Window regained focus but player manually paused — keep paused
+		return;
+	}
+
 	if (m_paused == paused) return;
 	m_paused = paused;
-
-	if (auto audio = Coordinator::GetInstance()->GetSystem<AudioManager>())
-	{
-		if (source == PauseSource::Game)
-		{
-			// Pause ONLY music during game pause, keep SFX alive for hover/click
-			//audio->SetMusicPaused(paused);
-		}
-		else
-		{
-			// Editor pause should NOT affect game audio
-			// do nothing
-		}
-	}
 }
 
  void CoreEngine::TogglePaused()
@@ -1407,6 +1404,7 @@ void CoreEngine::PlayGame()
 {
 	m_isPlaying = true;
 	m_paused = false;
+	m_manualPause = false;
 	Framework::GameState::SetPlaying(true);
 
 	// RESET TIME!!!!
