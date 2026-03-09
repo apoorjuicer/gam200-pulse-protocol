@@ -3,7 +3,7 @@
 * @file        HoverableButton.cs
 * @project     Pulse Protocol
 * @author      Chloe Lau Rey En
-* @brief       Script for hovering of buttons, and transition of scenes and showing overlay for quit button
+* @brief       Script for hovering of buttons, and transition of scenes and showing overlay for all 4 buttons
 *
 * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the
@@ -21,6 +21,8 @@ public class NavigationButtons : Script
     private static Stack<string> sceneHistory = new Stack<string>();
     public static string currentScene = "";
     public static string LastGameplayScene = "";
+    public static string LastEnteredLevel = ""; // set when entering any level
+    public static string LastClearedLevel = ""; // set only when a level is beaten
 
     // Track if we've set the initial scene THIS play session
     private static int lastFrameCount = -1;
@@ -50,6 +52,9 @@ public class NavigationButtons : Script
 
     private static bool wasEscPressed = false;
 
+    private static bool waitingForSceneTransition = false;
+    private static string pendingScene = "";
+
     public override void Update()
     {
         // Reset history when a new Play session starts (frame count resets to 0)
@@ -67,6 +72,9 @@ public class NavigationButtons : Script
 
             wasEscPressed = false;
             s_appliedGamePause = false;
+
+            waitingForSceneTransition = false;
+            pendingScene = "";
         }
 
         if (currentFrame != lastFrameCount)
@@ -80,6 +88,25 @@ public class NavigationButtons : Script
         TransformComponent t = GetTransform();
 
         string realScene = Scene.GetCurrentScene();
+
+        if (waitingForSceneTransition)
+        {
+            AudioComponent audio = GetAudio();
+
+            // Go next only after BGM has finished/stopped
+            if (!audio.IsBGMPlaying())
+            {
+                waitingForSceneTransition = false;
+
+                string targetScene = pendingScene;
+                pendingScene = "";
+
+                if (!string.IsNullOrEmpty(targetScene))
+                    NavigateTo(targetScene);
+            }
+
+            return;
+        }
 
         // Keep tracked scene in sync with the actual loaded scene (fixes Cutscene -> Level1 issue)
         if (!string.IsNullOrEmpty(realScene) && currentScene != realScene)
@@ -222,16 +249,23 @@ public class NavigationButtons : Script
             }
 
             // Apply actual pause state once
-        if (shouldGameBePaused != s_appliedGamePause)
-        {
-            Application.SetPaused(shouldGameBePaused);
+            if (shouldGameBePaused != s_appliedGamePause)
+            {
+                Application.SetPaused(shouldGameBePaused);
 
-            AudioComponent audio = GetAudio();
-            if (shouldGameBePaused) audio.PauseBGM();
-            else audio.ResumeBGM();
+                AudioComponent audio = GetAudio();
 
-            s_appliedGamePause = shouldGameBePaused;
-        }
+                if (shouldGameBePaused)
+                {
+                    audio.PauseBGM();
+                }
+                else
+                {
+                    audio.FadeInMusic(0.5f);
+                }
+
+                s_appliedGamePause = shouldGameBePaused;
+            }
         }
 
         string texLower = defaultTexture.ToLower();
@@ -270,8 +304,8 @@ public class NavigationButtons : Script
         float mx = input.WorldMouseX;
         float my = input.WorldMouseY;
 
-        bool isHovered = mx >= t.X - halfW && mx <= t.X + halfW &&
-                         my >= t.Y - halfH && my <= t.Y + halfH;
+        // DONT process hover when mouse is outside viewport.
+        bool isHovered = input.InGameViewport && mx >= t.X - halfW && mx <= t.X + halfW && my >= t.Y - halfH && my <= t.Y + halfH;
 
         if (isHovered && !isCurrentlyHovered)
         {
@@ -324,7 +358,11 @@ public class NavigationButtons : Script
         if (!string.IsNullOrEmpty(currentScene))
         {
             sceneHistory.Push(currentScene);
-        }
+        }  
+
+        if (newScene.ToLower().Contains("level"))
+            LastEnteredLevel = newScene;
+
         currentScene = newScene;
         Scene.LoadScene(newScene);
     }
@@ -598,13 +636,40 @@ public class NavigationButtons : Script
 
         if (tex.Contains("new game") || tex.Contains("new_game") || tex.Contains("start"))
         {
-            NavigateTo("Cutscene");
+            if (!waitingForSceneTransition)
+            {
+                GetAudio().FadeOutMusic(0.4f);
+                waitingForSceneTransition = true;
+                pendingScene = "Cutscene";
+            }
             return;
         }
 
         if (tex.Contains("continue"))
         {
-            Console.WriteLine("NOT IMPLEMENTED YET!");
+            string sceneToLoad = "";
+
+            if (!string.IsNullOrEmpty(LastClearedLevel))
+            {
+                // Player has cleared at least one level — go to the next one
+                string nextScene;
+                if (TryGetNextLevelSceneName(LastClearedLevel, out nextScene) && Scene.SceneExists(nextScene))
+                    sceneToLoad = nextScene;
+                else
+                    sceneToLoad = LastClearedLevel; // no next level, replay last cleared
+            }
+            else if (!string.IsNullOrEmpty(LastEnteredLevel))
+            {
+                // Player paused and quit — return to the level they were in
+                sceneToLoad = LastEnteredLevel;
+            }
+            else
+            {
+                // Nothing played yet — same as New Game
+                sceneToLoad = "Cutscene";
+            }
+
+            NavigateTo(sceneToLoad);
             return;
         }
 
@@ -642,6 +707,7 @@ public class NavigationButtons : Script
         if (tex.Contains("nextstage"))
         {
             StageClearElement.ResetStageClear();
+            LastClearedLevel = currentScene;
             ContinueToNextLevel();
             return;
         }

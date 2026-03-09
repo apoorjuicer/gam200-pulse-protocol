@@ -42,6 +42,9 @@ public:
 	//void update(GLFWwindow* window);
 	void update(GLFWwindow* window, std::set<Entity>);
 	void draw(std::set<Entity> entities, LayerMask includeMask, float deltaTime);
+	// Draw only glow-enabled entities into the currently bound FBO (glow capture pass).
+	// The entity silhouettes are rendered using each entity's glow color * intensity.
+	void drawGlowing(std::set<Entity>& entities, float dt);
 	void cleanup();
 
 	GLuint vaoid; // handle to VAO

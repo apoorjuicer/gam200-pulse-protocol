@@ -45,5 +45,10 @@ namespace ScriptAPI
 
         // for removing the latency completely cos System::setDSPBufferSize is for reducing it ony :/
         float GetBGMPosition();
+
+        void FadeOutMusic(float duration);
+        void FadeInMusic(float duration);
+
+        bool IsBGMPlaying();
     };
 }

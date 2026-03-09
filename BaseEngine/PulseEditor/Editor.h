@@ -26,6 +26,7 @@
 #include "DebugConsole.h"
 #include "ProfilingTab.h"
 #include "LayerManagerPanel.h"
+#include "ConfigPanel.h"
 
 #include "CoreEngine/Factory/Factory.h" // for creating/deleting entities
 #include "CoreEngine/Prefab/PrefabManager.h"

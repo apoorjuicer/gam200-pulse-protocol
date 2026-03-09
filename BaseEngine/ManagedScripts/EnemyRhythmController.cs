@@ -12,10 +12,10 @@ public class EnemyRhythmController : Script
     public static EnemyRhythmController? Instance { get; private set; }
 
     // === SPRITE SHEET SETTINGS ===
-    public string IdleSpriteSheet = "../Enemies/Rat_Idle_spritesheet_634x433";
-    public string WalkSpriteSheet = "../Enemies/Rat_Walk_spritesheet_634x433";
-    public string AttackSpriteSheet = "../Enemies/Rat_Attack_spritesheet_634x433";
-    public string HurtSpriteSheet = "../Enemies/Rat_Hurt_spritesheet_634x433";
+    public string IdleSpriteSheet   = "../Enemies/Rat_Idle_spritesheet_764x456";
+    public string WalkSpriteSheet   = "../Enemies/Rat_Walk_spritesheet_764x456";
+    public string AttackSpriteSheet = "../Enemies/Rat_Attack_spritesheet_764x456";
+    public string HurtSpriteSheet   = "../Enemies/Rat_Hurt_spritesheet_764x456";
 
     public int IdleFrames = 15;
     public int IdleColumns = 4;
@@ -102,6 +102,9 @@ public class EnemyRhythmController : Script
     // If ComboSystem.Instance changes (new play session), we re-set so we never
     // leave the weakness pinned to a stale ComboSystem from a previous session.
     private ComboSystem? weaknessSetOnInstance = null;
+
+    // Footstep alternation
+    // private bool footstepToggle = false;
 
     // Debug
     private int collisionCheckCount = 0;
@@ -220,6 +223,7 @@ public class EnemyRhythmController : Script
         playerEntityID = -1;
         lastBeat = -1;
         animPaused = false;
+        SetupSprites();
 
         // Reset weakness retry state so each new enemy gets a fresh attempt
         weaknessSet = false;
@@ -244,7 +248,7 @@ public class EnemyRhythmController : Script
         TrySetWeakness();
 
         HealthComponent eh = GetHealth();
-        eh.hp = (int)Health;
+        Health = eh.hp;
         eh.isAlive = true;
         Console.WriteLine($"[Enemy] Initialized at ({tf.X:F1}, {tf.Y:F1}) | Health: {eh.hp}");
         Console.WriteLine($"[Enemy] Collision mode: {CollisionMode} | ManualAttackRange: {ManualAttackRange}");
@@ -482,20 +486,31 @@ public class EnemyRhythmController : Script
         TransformComponent myTf = GetTransform();
         myTf.X -= StepDistance;
         Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}");
+
+        // // Dynamic footstep volume based on distance to player
+        // AudioComponent audio = GetAudio();
+        // float startX = 977f;
+        // float stopX = ManualAttackRange;
+        // float t = 1f - Math.Clamp((myTf.X - stopX) / (startX - stopX), 0f, 1f);
+        // float volume = 0.05f + (0.5f * (t * t));
+        // audio.SetSfxVolume(volume);
+        // audio.PlaySFX(footstepToggle ? "SFX_Rat_Steps_1" : "SFX_Rat_Steps_2");
+        // footstepToggle = !footstepToggle;
     }
 
     private void AttackPlayer()
     {
         if (isDead) return;
 
-        Console.WriteLine($"[Enemy] ATTACKING PLAYER for {AttackDamage} damage!");
+        int attackDamage = GetHealth().damage;
+        Console.WriteLine($"[Enemy] ATTACKING PLAYER for {attackDamage} damage!");
         SetState(EnemyState.Attacking);
 
         attackCooldownTimer = AttackFrames / AnimationSpeed;
 
         if (PlayerHealth.Instance != null)
         {
-            PlayerHealth.Instance.TakeDamage(AttackDamage);
+            PlayerHealth.Instance.TakeDamage(attackDamage);
             Console.WriteLine("[Enemy] Successfully damaged player");
         }
         else
@@ -604,4 +619,41 @@ public class EnemyRhythmController : Script
 
         SetState(EnemyState.Idle);
     }
+
+    protected virtual void SetupSprites()
+    {
+        //nth cos rat took the parent spot!??!!??! wtv
+    }
+}
+
+
+public class Gorilla: EnemyRhythmController
+{
+    protected override void SetupSprites()
+    {
+        IdleSpriteSheet = "../Enemies/Gorilla_Idle_spritesheet_1459x977";
+        WalkSpriteSheet = "../Enemies/Gorilla_Walk_spritesheet_1459x977";
+        AttackSpriteSheet = "../Enemies/Gorilla_Attack_spritesheet_1459x977";
+        HurtSpriteSheet = "../Enemies/Gorilla_Hurt_spritesheet_1459x977";
+        WeaknessCombo = "WASD";
+
+        IdleFrames = 15;
+        IdleColumns = 4;
+        IdleRows = 4;
+        
+        WalkFrames = 30;
+        WalkColumns = 6;
+        WalkRows = 5;
+        
+        AttackFrames = 30;
+        AttackColumns = 6;
+        AttackRows = 5;
+        
+        HurtFrames = 15;
+        HurtColumns = 4;
+        HurtRows = 4;
+        
+        AnimationSpeed = 12f;
+        SizeMultiplier = 5.0f;
+}
 }

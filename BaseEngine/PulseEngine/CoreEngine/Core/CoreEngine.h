@@ -194,7 +194,7 @@ public:
 
 // A global pointer to the instance of the core
 extern DLL_API CoreEngine *Engine;
-extern Config config; // global scope
+extern DLL_API Config config; // global scope
 extern DLL_API AssetsManager mAssets;
 extern DLL_API int WindowWidth;
 extern DLL_API int WindowHeight;

@@ -27,7 +27,7 @@ public class ComboKeySlot : Script
     public string RedDSprite = "../../PulseProtocol/Assets/Textures/UI/Player Input RED D.png";
 
     public float DisplayDuration = 0.5f;
-    public float ScaleAnimDuration = 0.5f;
+    public float ScaleAnimDuration = 0.15f;
     public float ResultDisplayDuration = 0.3f;
     public float CorrectHintDuration = 0.3f;
 
@@ -51,8 +51,19 @@ public class ComboKeySlot : Script
     public float PopDuration = 0.15f;
     public float PopScale = 1.4f; // this is for enhancing the "pop" animation
 
+    // PLAYER pop animation (when correct input)
+    private bool isPoppingCorrect = false;
+    private float correctPopTimer = 0f;
+    public float CorrectPopDuration = 0.1f;
+    public float CorrectPopScale = 1.2f;
+
     private bool isShowingResult = false;
     private float resultTimer = 0f;
+
+    // Beat flash
+    private bool isFlashing = false;
+    private float flashTimer = 0f;
+    public float FlashDuration = 0.2f;
 
     // Correct hint after wrong press
     private bool isShowingCorrectHint = false;
@@ -156,6 +167,23 @@ public class ComboKeySlot : Script
         }
 
         // =========================
+        // Correct Pop Animation
+        // =========================
+        if (isPoppingCorrect)
+        {
+            correctPopTimer += Time.DeltaTime;
+            float t01 = Math.Min(correctPopTimer / CorrectPopDuration, 1f);
+            float currentScale = CorrectPopScale + (1f - CorrectPopScale) * t01;
+
+            var transform = GetTransform();
+            transform.ScaleX = baseScaleX * currentScale;
+            transform.ScaleY = baseScaleY * currentScale;
+
+            if (t01 >= 1f)
+                isPoppingCorrect = false;
+        }
+
+        // =========================
         // Result Display Timer
         // =========================
         if (isShowingResult)
@@ -166,6 +194,25 @@ public class ComboKeySlot : Script
                 isShowingResult = false;
                 if (isShowingCorrectHint)
                     ShowCorrectHint(); // swap to green correct key
+            }
+        }
+
+        // =========================
+        // Beat Flash
+        // =========================
+        if (isFlashing)
+        {
+            flashTimer += Time.DeltaTime;
+            float t01 = Math.Min(flashTimer / FlashDuration, 1f);
+            // Lerp from bright (2.0) back to normal (1.0)
+            float brightness = 2.0f - (1.0f * t01);
+            var sprite = GetSprite();
+            sprite.SetTint(brightness, brightness, brightness, 1f);
+
+            if (t01 >= 1f)
+            {
+                isFlashing = false;
+                sprite.SetTint(1f, 1f, 1f, 1f); // reset to normal
             }
         }
 
@@ -200,11 +247,24 @@ public class ComboKeySlot : Script
     {
         if (IsEnemySlot) return;
 
+            // DEBUG
+        if (Conductor.Instance != null)
+        {
+            float songTime = Conductor.Instance.GetSongTime();
+            float beatDuration = Conductor.Instance.GetBeatDuration();
+            float timeUntilBeat = beatDuration - (songTime % beatDuration);
+            Console.WriteLine($"[ComboKeySlot] Slot {SlotIndex} StartCountdown | timeUntilNextBeat={timeUntilBeat:F3}");
+        }
+
         correctKey = expectedKey;
 
         var sprite = GetSprite();
         sprite.Texture = BlankSprite;
         sprite.SetTint(1f, 1f, 1f, 1f); // white tint so blank key is visible
+
+        // Flash bright on beat
+        isFlashing = true;
+        flashTimer = 0f;
 
         var transform = GetTransform();
         transform.IsVisible = true;
@@ -222,6 +282,7 @@ public class ComboKeySlot : Script
         if (IsEnemySlot) return;
 
         isScaling = false;
+        isShowingResult = false;
         isShowingCorrectHint = false;
 
         var sprite = GetSprite();
@@ -233,8 +294,8 @@ public class ComboKeySlot : Script
         transform.ScaleX = baseScaleX;
         transform.ScaleY = baseScaleY;
 
-        isShowingResult = true;
-        resultTimer = ResultDisplayDuration;
+        isPoppingCorrect = true;
+        correctPopTimer = 0f;
     }
 
     public void ShowWrong(char pressedKey, char expectedKey)
@@ -242,7 +303,8 @@ public class ComboKeySlot : Script
         if (IsEnemySlot) return;
 
         isScaling = false;
-        correctKey = expectedKey;
+        isShowingResult = false;
+        isShowingCorrectHint = false;
 
         var sprite = GetSprite();
         sprite.Texture = GetRedSpriteForKey(pressedKey);
@@ -252,13 +314,7 @@ public class ComboKeySlot : Script
         transform.IsVisible = true;
         transform.ScaleX = baseScaleX;
         transform.ScaleY = baseScaleY;
-
-        // Show red first, then flash correct key
-        isShowingResult = true;
-        resultTimer = ResultDisplayDuration;
-        isShowingCorrectHint = true;
-        correctHintTimer = CorrectHintDuration;
-    }
+    }   
 
     private void ShowCorrectHint()
     {
@@ -350,6 +406,7 @@ public class ComboKeySlot : Script
         isScaling = false;
         isShowingResult = false;
         isShowingCorrectHint = false;
+        isPoppingCorrect = false;
     }
 
     public void Hide()

@@ -545,6 +545,13 @@ namespace PulseEditor
         }
         ImGui::End();
 
+        // Config Editor
+        if (rightDockID) ImGui::SetNextWindowDockID(rightDockID, ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("Config")) {
+            DrawConfigPanel();
+        }
+        ImGui::End();
+
         // Project (Assets & Prefabs)
         if (bottomDockID) ImGui::SetNextWindowDockID(bottomDockID, ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Project")) {

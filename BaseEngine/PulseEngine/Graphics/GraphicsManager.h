@@ -76,6 +76,14 @@ struct EntityFadeState
     float elapsed     = 0.0f;
 };
 
+struct EntityGlowTween
+{
+    float startIntensity  = 0.0f;
+    float targetIntensity = 1.0f;
+    float duration        = 1.0f;
+    float elapsed         = 0.0f;
+};
+
 struct ScreenFadeState
 {
     float r            = 0.0f;
@@ -184,6 +192,13 @@ public:
     float GetBloomIntensity()      const  { return m_postProcess.GetBloomIntensity(); }
     float GetBloomThreshold()      const  { return m_postProcess.GetBloomThreshold(); }
 
+    // --- Per-entity glow ---
+    void SetEntityGlowEnabled(Entity e, bool enabled);
+    void SetEntityGlowIntensity(Entity e, float intensity);
+    void SetEntityGlowColor(Entity e, float r, float g, float b);
+    void GlowTo(Entity e, float toIntensity, float duration);
+    bool IsGlowTweenDone(Entity e) const;
+
 private:
     // Draw text (world overlay / debug text etc.)
     TextRenderer m_textRenderer;
@@ -245,6 +260,9 @@ private:
     // --- Entity fade state map ---
     std::unordered_map<Entity, EntityFadeState> m_entityFades;
 
+    // --- Per-entity glow tween map ---
+    std::unordered_map<Entity, EntityGlowTween> m_entityGlowTweens;
+
     // --- Screen-wide fade overlay ---
     ScreenFadeState m_screenFade;
     GLuint m_overlayVAO = 0;
@@ -252,6 +270,8 @@ private:
     void UpdateEntityFades(float dt);
     void UpdateScreenFade(float dt);
     void RenderScreenOverlay();
+    void UpdateEntityGlowTweens(float dt);
+    bool AnyEntityHasGlow();
 
     // --- Bloom post-processing pipeline ---
     PostProcessing m_postProcess;

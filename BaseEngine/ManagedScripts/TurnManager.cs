@@ -20,7 +20,7 @@ public class TurnManager : Script
     // Config
     // =========================
     public int CountdownBeats = 4;
-    public int EnemyDisplayBeats = 4;
+    public int EnemyDisplayBeats = 5;
     public int PlayerInputBeats = 6;  // 6 because StartPlayerInput() back-dates phaseStartBeat by -1,
                                       // so beatsInPhase starts at 1 instead of 0.
                                       // Effective beat slots = PlayerInputBeats - 1 = 5.
@@ -98,9 +98,10 @@ public class TurnManager : Script
                 break;
 
             case TurnPhase.EnemyDisplay:
-                if (beatsInPhase >= EnemyDisplayBeats)
+                if (beatsInPhase == EnemyDisplayBeats - 1)
                 {
-                    StartPlayerInput();
+                    ComboDisplayManager.Instance?.StartPlayerCountdownEarly();
+                    StartPlayerInput(); // unlock input on the same beat
                     beatsInPhase = currentBeat - phaseStartBeat;
                     goto case TurnPhase.PlayerInput;
                 }
@@ -172,6 +173,12 @@ public class TurnManager : Script
         Console.WriteLine("[TurnManager] Starting countdown phase (4 beats)");
 
         initialized = true;
+
+        // Preload turn SFX
+        AudioComponent audio = GetAudio();
+        audio.SetSfxVolume(0f);
+        audio.PlaySFX("SFX_Enemy_Ping");
+        audio.PlaySFX("SFX_Player_Ping");
     }
 
     // =========================
@@ -180,12 +187,14 @@ public class TurnManager : Script
     private void StartEnemyDisplay()
     {
         currentPhase = TurnPhase.EnemyDisplay;
-        phaseStartBeat = Conductor.Instance!.GetCurrentBeat();
+        phaseStartBeat = Conductor.Instance!.GetCurrentBeat() - 1;
 
         Console.WriteLine("[TurnManager] === ENEMY TURN ===");
         Console.WriteLine($"[TurnManager] Displaying combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input LOCKED");
 
+        // AudioComponent audio = GetAudio();
+        // audio.PlaySFX("SFX_Enemy_Ping");
        
         if (ComboSystem.Instance != null)
         {
@@ -211,15 +220,20 @@ public class TurnManager : Script
         // regardless of whether InputBridge or TurnManager updates first.
         phaseStartBeat = Conductor.Instance!.GetCurrentBeat() - 1;
 
+        ComboSystem.Instance?.ResetCombo();
+
         Console.WriteLine("[TurnManager] === PLAYER TURN ===");
         Console.WriteLine($"[TurnManager] Input the combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input UNLOCKED");
 
+        // AudioComponent audio = GetAudio();
+        // audio.PlaySFX("SFX_Player_Ping");
+
         // Enemy freezes during player input (handled in EnemyRhythmController.HandleBeat)
 
-        // this will trigger the fade out, and then clear for player input phase
+        // Just fade out enemy slots, don't stop the reveal
         if (ComboDisplayManager.Instance != null)
-            ComboDisplayManager.Instance.StopComboReveal();
+            ComboDisplayManager.Instance.FadeOutEnemySlots();
     }
 
     private void ResolvePlayerInput()

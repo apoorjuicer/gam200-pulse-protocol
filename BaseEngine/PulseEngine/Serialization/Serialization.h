@@ -21,7 +21,9 @@
 #pragma once
 #//include <pch/pch.h>
 //#include "../PulseEngine/CoreEngine/ECS/Types.h" // ensures Entity/Signature are known  <-- (from Types.h)
+#include "CoreEngine/Core/ImportExport.h"
 #include <rapidjson/ostreamwrapper.h>
+
 //#include <rapidjson/document.h>     // for Document, Value, AllocatorType in pch tmp
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/istreamwrapper.h>
@@ -30,31 +32,34 @@
 #include "pch/pch_temp.h"
 
 
-class Config
+class DLL_API Config
 {
 private:
 	int WindowWidth = 0;
 	int WindowHeight = 0;
 	//std::string ConfigPath = "../../PulseEngine/JSON/config.json";
     std::string ConfigPath = "";
+    std::string FirstScene = "";
 public:
 	int GetWindowWidth() const;
 	int GetWindowHeight() const;
 	std::string GetConfigPath() const;
+    std::string GetFirstScenePath() const;
 	void SetWindowWidth(int w);
 	void SetWindowHeight(int h);
 	void SetConfigPath(std::string path);
+    void SetFirstScenePath(std::string path);
 	void Serialize(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
 	void Deserialize(const rapidjson::Value &in);
 };
 
-bool SaveConfig(Config const &cfg, std::string const &path, bool pretty = true);
+DLL_API bool SaveConfig(Config const &cfg, std::string const &path, bool pretty = true);
 
 //bool SaveConfig(Config const& cfg) {
 //	return SaveConfig(cfg, cfg.GetConfigPath());
 //}
 //bool SaveConfig(Config const& cfg, std::string const& path);
-bool LoadConfig(Config &cfg, std::string const &path);
+DLL_API bool LoadConfig(Config &cfg, std::string const &path);
 
 namespace JSONUtils {
 	using namespace rapidjson;
