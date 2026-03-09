@@ -257,6 +257,29 @@ namespace PulseEditor
         }
     }
 
+    static void HandleAudioUndo(
+        AudioSource& currentAudio,
+        UndoManager& undo,
+        std::shared_ptr<EntityHandle> h)
+    {
+        if (ImGui::IsItemActivated())
+        {
+            beforeEdit_AudioSource = currentAudio;
+            isEditing_AudioSource = true;
+        }
+
+        if (ImGui::IsItemDeactivatedAfterEdit() && isEditing_AudioSource)
+        {
+            AudioSource after = currentAudio;
+            if (beforeEdit_AudioSource != after)
+            {
+                PushAudioEdit(undo, h, beforeEdit_AudioSource, after);
+            }
+
+            isEditing_AudioSource = false;
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Helper: add a "add component" button at the bottom, more intuitive
     // compared to right-clicking
@@ -1593,6 +1616,9 @@ namespace PulseEditor
 
                 static char audioSearchFilter[128] = "";
 
+
+                AudioSource before = audio;
+
                 ImGui::SetNextItemWidth(300.0f);
                 if (ImGui::BeginCombo("##AudioFile", preview.c_str()))
                 {
@@ -1722,13 +1748,20 @@ namespace PulseEditor
                     }
                 }
 
+                if (before != audio)
+                {
+                    PushAudioEdit(mUndo, selectedHandle, before, audio);
+                }
+
                 ImGui::Separator();
 
                 ImGui::SetNextItemWidth(200.0f);
-                ImGui::SliderFloat("Volume", &audio.volume, 0.0f, 1.0f, "%.2f");
-
-                ImGui::Checkbox("Loop", &audio.loop);
-                ImGui::Checkbox("Play on Awake", &audio.playOnAwake);
+                ImGui::SliderFloat("Volume", &audio.volume, 0.0f, 1.0f, "%.2f"); //slide1
+                HandleAudioUndo(audio, mUndo, selectedHandle);
+                ImGui::Checkbox("Loop", &audio.loop); //checkbox1
+                HandleAudioUndo(audio, mUndo, selectedHandle);
+                ImGui::Checkbox("Play on Awake", &audio.playOnAwake); //checkbox2
+                HandleAudioUndo(audio, mUndo, selectedHandle);
 
                 ImGui::Spacing();
 
@@ -1752,7 +1785,7 @@ namespace PulseEditor
                     }
                     ImGui::SameLine();
 
-                    if (ImGui::SmallButton("Stop"))
+                    if (ImGui::SmallButton("Stop")) 
                     {
                         auto audioManager = g->GetSystem<AudioManager>();
                         if (audioManager)

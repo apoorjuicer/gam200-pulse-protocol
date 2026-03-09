@@ -702,6 +702,38 @@ namespace PulseEditor
         undo.Push(std::move(a));
     }
 
+    inline void PushAudioEdit(UndoManager& undo,
+        std::shared_ptr<EntityHandle> h,
+        AudioSource const& before,
+        AudioSource const& after)
+    {
+        if (!h || h->id == INVALID_ENTITY) return;
+
+        UndoManager::Action a;
+
+        a.undo = [h, before]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<AudioSource>(h->id)) return;
+
+                c->GetComponent<AudioSource>(h->id) = before;
+            };
+
+        a.redo = [h, after]()
+            {
+                if (!h || h->id == INVALID_ENTITY) return;
+                auto* c = Coordinator::GetInstance();
+                if (!c) return;
+                if (!c->HasComponent<AudioSource>(h->id)) return;
+
+                c->GetComponent<AudioSource>(h->id) = after;
+            };
+
+        undo.Push(std::move(a));
+    }
+
     /*
     * Remove component undo
     */
