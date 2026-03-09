@@ -261,8 +261,15 @@ void GraphicsManager::Initialize()
         else
         {
             auto baseEngineDir = currentDir;
-            while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
-                baseEngineDir = baseEngineDir.parent_path();
+            while (baseEngineDir.filename() != "BaseEngine")
+            {
+                auto parent = baseEngineDir.parent_path();
+                if (parent.empty() || parent == baseEngineDir)
+                {
+                    break;
+                }
+                baseEngineDir = parent;
+            }
             basePath = baseEngineDir / "PulseEngine"; // Dev layout
         }
         std::string shaderDir = (basePath / "Graphics" / "shader").string();
@@ -462,6 +469,12 @@ GLuint GraphicsManager::LoadTextureFile(const std::string &path)
         else if (path.find("../../PulseEngine/") == 0)
         {
             relativePath = path.substr(std::string("../../PulseEngine/").length());
+        }
+        else if (path.find("../../PulseProtocol/") == 0)
+        {
+            // Legacy path written by the editor (relative to dev build output).
+            // Strip "../../PulseProtocol/" so the path resolves from FilePathToGame.
+            relativePath = path.substr(std::string("../../PulseProtocol/").length());
         }
         else if (path.find("../../") == 0)
         {

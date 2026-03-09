@@ -213,9 +213,14 @@ void CoreEngine::CompileScriptAssembly()
 
 	// Find and go into the BaseEngine folder
 	auto baseEngineDir = currentDir;
-	while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+	while (baseEngineDir.filename() != "BaseEngine")
 	{
-		baseEngineDir = baseEngineDir.parent_path();
+		auto parent = baseEngineDir.parent_path();
+		if (parent.empty() || parent == baseEngineDir)
+		{
+			break;
+		}
+		baseEngineDir = parent;
 	}
 
 #ifdef _DEBUG
@@ -472,9 +477,14 @@ static void EnsureGameProjectPath()
 
 	// Try to find BaseEngine by walking up (debug/editor build)
 	auto baseEngineDir = currentDir;
-	while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+	while (baseEngineDir.filename() != "BaseEngine")
 	{
-		baseEngineDir = baseEngineDir.parent_path();
+		auto parent = baseEngineDir.parent_path();
+		if (parent.empty() || parent == baseEngineDir)
+		{
+			break;
+		}
+		baseEngineDir = parent;
 	}
 
 	if (baseEngineDir.filename() == "BaseEngine")
@@ -844,13 +854,13 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<FSM>();
 
 	// Register your systems here, ORDER = UPDATE ORDER every frame
-	// 1. Input   — read raw input first
-	// 2. FSM     — state machine reacts to input
-	// 3. Audio   — FMOD ticks, fresh position ready for Conductor
+	// 1. Input   -read raw input first
+	// 2. FSM     -state machine reacts to input
+	// 3. Audio   -FMOD ticks, fresh position ready for Conductor
 	// 4. Collision
 	// 5. Scene
-	// 6. Logic   — C# scripts run, Conductor reads fresh audio position
-	// 7. Graphics — renders the final game state last
+	// 6. Logic   -C# scripts run, Conductor reads fresh audio position
+	// 7. Graphics -renders the final game state last
 	g_coordinator->RegisterSystem<InputManager>();
 	g_coordinator->RegisterSystem<LogicSystem>();
 	g_coordinator->RegisterSystem<GraphicsManager>();  

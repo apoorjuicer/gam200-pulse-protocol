@@ -41,9 +41,14 @@ static std::string LoadFile(const char* relativeToGraphicsShader)
 	else
 	{
 		auto baseEngineDir = currentDir;
-		while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+		while (baseEngineDir.filename() != "BaseEngine")
 		{
-			baseEngineDir = baseEngineDir.parent_path();
+			auto parent = baseEngineDir.parent_path();
+			if (parent.empty() || parent == baseEngineDir)
+			{
+				break;
+			}
+			baseEngineDir = parent;
 		}
 		basePath = baseEngineDir / "PulseEngine";  // Dev
 	}
