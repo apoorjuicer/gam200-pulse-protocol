@@ -57,6 +57,8 @@ namespace PulseEditor
     static std::vector<SavedEntityState> s_editorBaseline;
     static std::string s_sceneBeforePlay;
 
+    static bool s_wasManuallPaused = false;  // for checking if you pressed pause button
+
     void CaptureEditorBaseline()
     {
         s_editorBaseline.clear();
@@ -549,6 +551,7 @@ namespace PulseEditor
             if (IsPlaying())
             {
                 isPaused = !isPaused;
+                s_wasManuallPaused = isPaused; // track that the pause button HAS been pressed
 
                 if (isPaused)
                 {
@@ -561,6 +564,12 @@ namespace PulseEditor
                     //std::cout << "[Editor] Game Resumed\n";
                 }
             }
+        }
+
+        // if the pause button is manually paused, enforce it every frame
+        if (IsPlaying() && s_wasManuallPaused && !Engine->IsPaused())
+        {
+            Engine->PauseGame();
         }
 
         if (!IsPlaying())
@@ -687,6 +696,9 @@ namespace PulseEditor
             if (IsPlaying())
             {
                 //std::cout << "[Editor] Stopping game before loading scene (editor action)\n";
+                
+                // reset manual pause since we r force-stopping for scene load
+                s_wasManuallPaused = false;
                 Engine->StopGame();
                 SetPlaying(false);
                 isPaused = false;
