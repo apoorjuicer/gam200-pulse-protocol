@@ -4,7 +4,7 @@
             "id": "BGM_L1",
             "path": "Assets/Sound/BG & Ambience/BGM_L1_Theme.mp3",
             "loop": true,
-            "volume": 0.6,
+            "volume": 1.0,
             "audiotype": "BGM"
         },
         {
@@ -25,7 +25,7 @@
             "id": "BGM_GENERAL",
             "path": "Assets/Sound/BG & Ambience/TEMP_Menu_Demo_V1.mp3",
             "loop": true,
-            "volume": 0.5,
+            "volume": 1.0,
             "audiotype": "BGM"
         },
         {
@@ -39,14 +39,14 @@
             "id": "SFX_W_Key",
             "path": "Assets/Sound/Keys/SFX_W_Key.mp3",
             "loop": false,
-            "volume": 0.5,
+            "volume": 1.0,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_A_Key",
             "path": "Assets/Sound/Keys/SFX_A_Key.mp3",
             "loop": false,
-            "volume": 0.5,
+            "volume": 1.0,
             "audiotype": "SFX"
         },
         {
@@ -67,7 +67,7 @@
             "id": "SFX_Invalid_Key",
             "path": "Assets/Sound/Keys/SFX_Invalid_Key.mp3",
             "loop": false,
-            "volume": 0.5,
+            "volume": 1.0,
             "audiotype": "SFX"
         },
         {
@@ -173,34 +173,6 @@
             "path": "Assets/Sound/UI/SFX_UI_Popup_2.mp3",
             "loop": false,
             "volume": 1.0,
-            "audiotype": "SFX"
-        },
-        {
-            "id": "SFX_Enemy_Ping",
-            "path": "Assets/Sound/BG & Ambience/SFX_Enemy_Ping.mp3",
-            "loop": false,
-            "volume": 0.3,
-            "audiotype": "SFX"
-        },
-        {
-            "id": "SFX_Player_Ping",
-            "path": "Assets/Sound/BG & Ambience/SFX_Player_Ping.mp3",
-            "loop": false,
-            "volume": 0.3,
-            "audiotype": "SFX"
-        },
-        {
-            "id": "SFX_Rat_Steps_1",
-            "path": "Assets/Sound/BG & Ambience/SFX_Rat_Steps_1.mp3",
-            "loop": false,
-            "volume": 0.3,
-            "audiotype": "SFX"
-        },
-        {
-            "id": "SFX_Rat_Steps_2",
-            "path": "Assets/Sound/BG & Ambience/SFX_Rat_Steps_2.mp3",
-            "loop": false,
-            "volume": 0.3,
             "audiotype": "SFX"
         }
     ]

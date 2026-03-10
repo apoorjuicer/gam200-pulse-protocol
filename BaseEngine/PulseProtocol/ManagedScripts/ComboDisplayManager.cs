@@ -7,15 +7,14 @@ public class ComboDisplayManager : Script
     public static ComboDisplayManager? Instance { get; private set; }
 
     public bool DebugLogging = false;
-    public float FadeOutDuration = 0.3f;
-    public float FadeStaggerDelay = 0.1f;
+    public float FadeOutDuration = 0.1f; // making this faster to counter INPUT NOW showing on MEMORIZE enemy last key 
+    public float FadeStaggerDelay = 0.05f;
 
     private bool initialized = false;
     private int lastInputProgress = 0;
 
     private static Dictionary<int, ComboKeySlot> enemySlots = new Dictionary<int, ComboKeySlot>();
     private static Dictionary<int, ComboKeySlot> playerSlots = new Dictionary<int, ComboKeySlot>();
-    private static Dictionary<int, GlowOutlineScript> outlineSlots = new Dictionary<int, GlowOutlineScript>();
     private static ComboJudgementDisplay? judgementScript = null;
 
     private bool isRevealing = false;
@@ -65,17 +64,6 @@ public class ComboDisplayManager : Script
 
     public static void UnregisterJudgement() { judgementScript = null; }
 
-    public static void RegisterOutlineSlot(int slotIndex, GlowOutlineScript script)
-    {
-        outlineSlots[slotIndex] = script;
-    }
-
-    public static void TriggerOutlineGlow(int slotIndex)
-    {
-        if (outlineSlots.ContainsKey(slotIndex))
-            outlineSlots[slotIndex].TriggerGlow();
-    }
-
     // =========================
     // Update
     // =========================
@@ -93,32 +81,30 @@ public class ComboDisplayManager : Script
             isCountingDown = true;
             lastCountdownBeat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() : -1;
             if (playerSlots.ContainsKey(0) && currentWeakness.Length > 0)
-            {
                 playerSlots[0].StartCountdown(currentWeakness[0]);
-                TriggerOutlineGlow(0);
-            }
             countdownCurrentSlot = 1;
         }
 
         if (isCountingDown && Conductor.Instance != null)
         {
-            float songTime = Conductor.Instance.GetSongTime();
+            float songTime = Conductor.Instance.GetAdjustedSongTime();
             float beatDuration = Conductor.Instance.GetBeatDuration();
-            float timeSinceBeat = songTime % beatDuration;
+            float timeSinceBeat = (songTime % beatDuration + beatDuration) % beatDuration;
             float timeUntilNextBeat = beatDuration - timeSinceBeat;
 
             // Trigger next slot when we're ScaleAnimDuration away from the next beat
-            if (timeUntilNextBeat <= 0.05f && countdownCurrentSlot < currentWeakness.Length)
+            if (timeUntilNextBeat <= 0.25f && countdownCurrentSlot < currentWeakness.Length)
             {
                 int currentBeat = Conductor.Instance.GetCurrentBeat();
                 if (currentBeat > lastCountdownBeat)
                 {
                     lastCountdownBeat = currentBeat;
-                    if (playerSlots.ContainsKey(countdownCurrentSlot))
-                    {
+                    // show me blank placeholder
+                    // if player presses wrong flash them (with sprite)
+             
+                    int alreadyPressed = ComboSystem.Instance != null ? ComboSystem.Instance.GetComboProgress() : 0;
+                    if (countdownCurrentSlot >= alreadyPressed && playerSlots.ContainsKey(countdownCurrentSlot))
                         playerSlots[countdownCurrentSlot].StartCountdown(currentWeakness[countdownCurrentSlot]);
-                        TriggerOutlineGlow(countdownCurrentSlot);
-                    }
                     countdownCurrentSlot++;
 
                     if (countdownCurrentSlot >= currentWeakness.Length)
@@ -157,10 +143,6 @@ public class ComboDisplayManager : Script
                 }
             }
         }
-        else if (currentProgress < lastInputProgress)
-        {
-            ClearPlayerSlots();
-        }
 
         lastInputProgress = currentProgress;
     }
@@ -182,8 +164,7 @@ public class ComboDisplayManager : Script
         isCountingDown = false;
 
         enemySlots.Clear();
-        playerSlots.Clear();    
-        outlineSlots.Clear();
+        playerSlots.Clear();
         judgementScript = null;
 
         Console.WriteLine("[ComboDisplayManager] Initialized");
@@ -200,7 +181,9 @@ public class ComboDisplayManager : Script
         revealIndex = 0;
         isRevealing = true;
         isFadingOut = false;
-        lastRevealBeat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() : -1;
+        // Prime to one beat before current so the first key fires on this beat boundary,
+        // keeping all keys on the same beat-gated path as keys 2-4.
+        lastRevealBeat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() - 1 : -1;
 
         ClearEnemySlotsInstant();
         ClearPlayerSlots();
@@ -232,20 +215,6 @@ public class ComboDisplayManager : Script
 
 
         int currentBeat = Conductor.Instance!.GetCurrentBeat();
-
-        // Console.WriteLine($"[HandleBeatReveal] revealIndex={revealIndex}, beat={currentBeat}");
-        if (revealIndex == 0)
-        {
-            lastRevealBeat = currentBeat;
-            char key = revealCombo[0];
-            if (enemySlots.ContainsKey(0))
-            {
-                enemySlots[0].ShowKeyPop(key);
-                Console.WriteLine($"[ComboDisplayManager] Reveal immediate: enemy slot 0 = '{key}'");
-            }
-            revealIndex = 1;
-            return;
-        }
 
         if (currentBeat <= lastRevealBeat) return;
         lastRevealBeat = currentBeat;
@@ -312,10 +281,6 @@ public class ComboDisplayManager : Script
         {
             if (playerSlots.ContainsKey(i))
                 playerSlots[i].HideInstant();
-
-            // Reset outline glow
-            if (outlineSlots.ContainsKey(i))
-                outlineSlots[i].ResetGlow();
         }
     }
 
@@ -359,10 +324,7 @@ public class ComboDisplayManager : Script
         // isRevealing = false;
 
         if (playerSlots.ContainsKey(0))
-        {
             playerSlots[0].StartCountdown(currentWeakness[0]);
-            TriggerOutlineGlow(0);
-        }
 
         countdownCurrentSlot = 1;
         isCountingDown = true;

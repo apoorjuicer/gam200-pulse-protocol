@@ -77,7 +77,7 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, boo
 	if (!ifs.is_open())
 	{
 		std::cerr << "Error: Cannot open file for reading: " << path << "\n";
-		return std::nullopt;
+		return false;
 	}
 
 	IStreamWrapper isw(ifs);
@@ -88,7 +88,7 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, boo
 	if (!(d.HasMember("components") && d["components"].IsArray()))
 	{
 		std::cerr << "Components are missing/wrong!" << std::endl;
-		return std::nullopt;
+		return false;
 	}
 
 	Entity entity = g_coordinator->CreateEntity();

@@ -588,6 +588,16 @@ public class NavigationButtons : Script
         {
             ShowPauseOverlay = false;
             Application.SetPaused(false);
+            if (Scene.GetCurrentScene() == "LatencyCalibration")
+            {
+                LatencyCalibrator.Instance?.Reset();
+                return;
+            }
+            if (Scene.GetCurrentScene() == "VisualLatencyCalibration")
+            {
+                VisualLatencyCalibrator.Instance?.Reset();
+                return;
+            }
             Scene.RestartScene();
             return;
         }
@@ -706,6 +716,16 @@ public class NavigationButtons : Script
 
         if (tex.Contains("nextstage"))
         {
+            if (Scene.GetCurrentScene() == "LatencyCalibration")
+            {
+                LatencyCalibrator.Instance?.Skip();
+                return;
+            }
+            if (Scene.GetCurrentScene() == "VisualLatencyCalibration")
+            {
+                VisualLatencyCalibrator.Instance?.Skip();
+                return;
+            }
             StageClearElement.ResetStageClear();
             LastClearedLevel = currentScene;
             ContinueToNextLevel();

@@ -20,10 +20,8 @@ public class TurnManager : Script
     // Config
     // =========================
     public int CountdownBeats = 4;
-    public int EnemyDisplayBeats = 5;
-    public int PlayerInputBeats = 6;  // 6 because StartPlayerInput() back-dates phaseStartBeat by -1,
-                                      // so beatsInPhase starts at 1 instead of 0.
-                                      // Effective beat slots = PlayerInputBeats - 1 = 5.
+    public int EnemyDisplayBeats = 4;  // with -1 backdating: transition beat + 3 more = 4 beats total. First key shows immediately, keys 2-4 on the next 3 beats. No idle beat at end.
+    public int PlayerInputBeats = 5;   // effective input beats   = PlayerInputBeats  - 1 = 4 (phaseStartBeat backdated by -1)
 
     // =========================
     // State
@@ -72,10 +70,14 @@ public class TurnManager : Script
 
         if (!GameStart.Ready) return;
 
-        // Anchor the phase start to the first beat the game actually becomes ready,
-        // so beatsInPhase doesn't inherit stale counts from before GameStart.
+        // Anchor the phase start only once FMOD is confirmed driving the beat clock.
+        // LevelBGM runs after TurnManager in entity order, so on the GameStart.Ready frame
+        // TurnManager would otherwise anchor against a stale pre-BGM DT beat. Waiting for
+        // IsFMODSynced ensures the clock has been reset AND FMOD is actually reporting
+        // position before we lock in phaseStartBeat.
         if (!gameStarted)
         {
+            if (!Conductor.Instance.IsFMODSynced) return;
             gameStarted = true;
             lastBeat = currentBeat;
             StartEnemyDisplay();
@@ -98,7 +100,7 @@ public class TurnManager : Script
                 break;
 
             case TurnPhase.EnemyDisplay:
-                if (beatsInPhase == EnemyDisplayBeats - 1)
+                if (beatsInPhase >= EnemyDisplayBeats)
                 {
                     ComboDisplayManager.Instance?.StartPlayerCountdownEarly();
                     StartPlayerInput(); // unlock input on the same beat
@@ -173,12 +175,6 @@ public class TurnManager : Script
         Console.WriteLine("[TurnManager] Starting countdown phase (4 beats)");
 
         initialized = true;
-
-        // Preload turn SFX
-        AudioComponent audio = GetAudio();
-        audio.SetSfxVolume(0f);
-        audio.PlaySFX("SFX_Enemy_Ping");
-        audio.PlaySFX("SFX_Player_Ping");
     }
 
     // =========================
@@ -215,9 +211,6 @@ public class TurnManager : Script
     private void StartPlayerInput()
     {
         currentPhase = TurnPhase.PlayerInput;
-        // Subtract 1 so the transition beat counts as beat 1 of the input window.
-        // This guarantees the player can press on the same beat the phase opens,
-        // regardless of whether InputBridge or TurnManager updates first.
         phaseStartBeat = Conductor.Instance!.GetCurrentBeat() - 1;
 
         ComboSystem.Instance?.ResetCombo();
@@ -273,6 +266,15 @@ public class TurnManager : Script
             {
                 EnemyRhythmController.Instance.ExecuteFailurePunishment();
             }
+        }
+
+        // Penalize any keys the player never entered as MISS (no-input penalty)
+        if (ComboSystem.Instance != null && ScoreManager.Instance != null)
+        {
+            int entered  = ComboSystem.Instance.GetComboProgress();
+            int expected = ComboSystem.Instance.GetExpectedCombo().Length;
+            for (int i = entered; i < expected; i++)
+                ScoreManager.Instance.AddScore("MISS");
         }
 
         // Reset for next turn

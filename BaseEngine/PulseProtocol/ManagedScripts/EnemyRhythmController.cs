@@ -58,12 +58,6 @@ public class EnemyRhythmController : Script
     // For Edge mode
     public float EdgeContactThreshold = 5f;
 
-    // For Manual mode - radius in world units for CheckDistance
-    // This determines how far from the player's center the enemy stops.
-    // Player scale is ~300 wide, enemy is ~110 wide.
-    // ~350 means the enemy stops when its center is 350 units from the player center,
-    // which visually places it right in front of the player sprite.
-    // Increase if enemy still overlaps, decrease if it stops too far away.
     public float ManualAttackRange = 350f;
 
     // === PLAYER REFERENCE ===
@@ -102,9 +96,6 @@ public class EnemyRhythmController : Script
     // If ComboSystem.Instance changes (new play session), we re-set so we never
     // leave the weakness pinned to a stale ComboSystem from a previous session.
     private ComboSystem? weaknessSetOnInstance = null;
-
-    // Footstep alternation
-    // private bool footstepToggle = false;
 
     // Debug
     private int collisionCheckCount = 0;
@@ -486,16 +477,6 @@ public class EnemyRhythmController : Script
         TransformComponent myTf = GetTransform();
         myTf.X -= StepDistance;
         Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}");
-
-        // // Dynamic footstep volume based on distance to player
-        // AudioComponent audio = GetAudio();
-        // float startX = 977f;
-        // float stopX = ManualAttackRange;
-        // float t = 1f - Math.Clamp((myTf.X - stopX) / (startX - stopX), 0f, 1f);
-        // float volume = 0.05f + (0.5f * (t * t));
-        // audio.SetSfxVolume(volume);
-        // audio.PlaySFX(footstepToggle ? "SFX_Rat_Steps_1" : "SFX_Rat_Steps_2");
-        // footstepToggle = !footstepToggle;
     }
 
     private void AttackPlayer()

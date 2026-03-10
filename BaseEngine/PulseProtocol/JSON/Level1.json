@@ -80,7 +80,7 @@
                     "transform": {
                         "position": {
                             "x": -867.1965942382813,
-                            "y": -159.14208984375
+                            "y": -125.29593658447266
                         },
                         "scale": {
                             "x": 800.0,
@@ -118,12 +118,12 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
+                        "currentFrame": 14,
+                        "elapsedTime": 0.018724938854575157,
                         "totalFrames": 15,
                         "columns": 4,
                         "rows": 4,
-                        "animationSpeed": 0.0
+                        "animationSpeed": 33.19499969482422
                     }
                 },
                 {
@@ -369,7 +369,7 @@
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
-                            "a": 1.0
+                            "a": 0.2000001072883606
                         },
                         "glow": {
                             "enabled": false,
@@ -421,7 +421,7 @@
                 {
                     "audiosource": {
                         "audio_id": "SFX_Border_Beat",
-                        "volume": 1.0,
+                        "volume": 0.18000000715255737,
                         "loop": false,
                         "playOnAwake": false
                     }
@@ -434,7 +434,7 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": 315.38458251953125
+                            "y": 450.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -503,8 +503,8 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "2",
-                        "font_id": "",
+                        "text": "GO!",
+                        "font_id": "barlow_extrabolditalic_font",
                         "offset": {
                             "x": 0.0,
                             "y": 0.0
@@ -515,7 +515,7 @@
                             1.0,
                             1.0
                         ],
-                        "visible": true,
+                        "visible": false,
                         "alignment": 1
                     }
                 }
@@ -627,7 +627,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon bat greyed.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat greyed.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1086,7 +1086,7 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "FPS: 1.3 | Graphics System: 82.59% [DEBUG]",
+                        "text": "FPS: 63.0 | Graphics System: 90.39% [DEBUG]",
                         "font_id": "PatrickHand_font",
                         "offset": {
                             "x": 0.0,
@@ -1192,8 +1192,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 977.0,
-                            "y": -299.010009765625
+                            "x": 927.0,
+                            "y": -255.93309020996094
                         },
                         "scale": {
                             "x": 350.0,
@@ -1213,7 +1213,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/Characters/../Enemies/Rat_Idle_spritesheet_764x456.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/Characters/../Enemies/Rat_Walk_spritesheet_634x433.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1231,12 +1231,12 @@
                 },
                 {
                     "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
+                        "currentFrame": 4,
+                        "elapsedTime": 0.006893843412399292,
                         "totalFrames": 15,
                         "columns": 4,
                         "rows": 4,
-                        "animationSpeed": 0.0
+                        "animationSpeed": 12.0
                     }
                 },
                 {
@@ -1557,7 +1557,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border 0.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1585,9 +1585,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "GlowOutlineScript"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -1637,7 +1635,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border 1.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1665,9 +1663,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "GlowOutlineScript"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -1717,7 +1713,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border 2.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1745,9 +1741,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "GlowOutlineScript"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -1797,7 +1791,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border 3.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/player input border.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1825,9 +1819,7 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [
-                            "GlowOutlineScript"
-                        ]
+                        "ScriptName": []
                     }
                 },
                 {
@@ -2007,7 +1999,7 @@
                 {
                     "audiosource": {
                         "audio_id": "BGM_L1_TESTING",
-                        "volume": 1.0,
+                        "volume": 0.5,
                         "loop": true,
                         "playOnAwake": false
                     }
@@ -4496,8 +4488,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 0.0,
-                            "y": 575.3845825195313
+                            "x": 36.53850555419922,
+                            "y": 544.6153564453125
                         },
                         "scale": {
                             "x": 200.0,
@@ -4556,8 +4548,8 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "POS",
-                        "font_id": "",
+                        "text": "MEMORIZE!",
+                        "font_id": "barlow_extrabolditalic_font",
                         "offset": {
                             "x": 0.0,
                             "y": 0.0
@@ -4568,7 +4560,7 @@
                             1.0,
                             1.0
                         ],
-                        "visible": false,
+                        "visible": true,
                         "alignment": 1
                     }
                 }
@@ -4662,7 +4654,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -700.0,
+                            "x": -600.0,
                             "y": 250.0
                         },
                         "scale": {
@@ -4673,7 +4665,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -4681,7 +4673,7 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/EKeyW.png",
                         "tintColor": {
@@ -4742,7 +4734,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -236.0,
+                            "x": -200.0,
                             "y": 250.0
                         },
                         "scale": {
@@ -4822,7 +4814,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 195.38499450683594,
+                            "x": 200.0,
                             "y": 250.0
                         },
                         "scale": {
@@ -4902,7 +4894,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 700.0,
+                            "x": 600.0,
                             "y": 250.0
                         },
                         "scale": {
@@ -4993,7 +4985,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -5073,7 +5065,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -5153,7 +5145,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -5233,7 +5225,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -5293,6 +5285,99 @@
                 {
                     "Parent": {
                         "parent": 17
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -1300.0,
+                            "y": -640.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": false,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 0.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 0.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "ScoreManager"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "ScoreDisplay"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 10,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "TextComponent": {
+                        "text": "Score  0\nCombo  0×",
+                        "font_id": "barlow_font",
+                        "offset": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "font_size": 36.0,
+                        "color": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true,
+                        "alignment": 0
                     }
                 }
             ]
