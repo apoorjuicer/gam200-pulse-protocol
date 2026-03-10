@@ -49,7 +49,7 @@
             "shd_ref": 3
         },
         { 
-            "id": "particle", "path": "Assets/Textures/VFX/star.png",
+            "id": "particle", "path": "Assets/Textures/VFX/VFX_Hit_259x270.png",
             "vert_shader_path": "shader/sprite_vs.vert", "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1, "shd_ref": 2 
         }
