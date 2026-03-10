@@ -1098,7 +1098,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": true,
+                        "visible": false,
                         "alignment": 0
                     }
                 }
@@ -2498,8 +2498,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -470.4551086425781,
-                            "y": -215.0
+                            "x": -750.0,
+                            "y": -350.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -2509,7 +2509,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2597,7 +2597,7 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": -215.0
+                            "y": -350.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -2694,8 +2694,8 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 381.1306457519531,
-                            "y": -215.0
+                            "x": 750.0,
+                            "y": -350.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -2705,7 +2705,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -2777,7 +2777,7 @@
                             1.0
                         ],
                         "visible": false,
-                        "alignment": 0
+                        "alignment": 1
                     }
                 },
                 {
