@@ -214,7 +214,7 @@
                 {
                     "TextComponent": {
                         "text": "AUDIO LATENCY CALIBRATION",
-                        "font_id": "barlow_font",
+                        "font_id": "barlow_extrabolditalic_font",
                         "offset": {
                             "x": 0.0,
                             "y": 0.0
@@ -237,7 +237,7 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": 206.15383911132813
+                            "y": 206.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -307,7 +307,7 @@
                 {
                     "TextComponent": {
                         "text": "Press ENTER to begin",
-                        "font_id": "barlow_font",
+                        "font_id": "barlow_semibold_font",
                         "offset": {
                             "x": 0.0,
                             "y": 0.0
@@ -330,7 +330,7 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": 136.92306518554688
+                            "y": 137.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -416,7 +416,7 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": -16.153793334960938
+                            "y": -59.23072052001953
                         },
                         "scale": {
                             "x": 200.0,
@@ -509,7 +509,7 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": -93.84609985351563
+                            "y": -180.0
                         },
                         "scale": {
                             "x": 200.0,

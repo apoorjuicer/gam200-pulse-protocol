@@ -289,7 +289,7 @@
                 {
                     "TextComponent": {
                         "text": "VISUAL LATENCY CALIBRATION",
-                        "font_id": "barlow_font",
+                        "font_id": "barlow_extrabolditalic_font",
                         "offset": {
                             "x": 0.0,
                             "y": 0.0
@@ -382,7 +382,7 @@
                 {
                     "TextComponent": {
                         "text": "Press ENTER to begin",
-                        "font_id": "barlow_font",
+                        "font_id": "barlow_semibold_font",
                         "offset": {
                             "x": 0.0,
                             "y": 0.0
