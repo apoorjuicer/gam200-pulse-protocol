@@ -78,51 +78,6 @@ namespace PulseEditor
         Children              children_snap{};  // stores OLD children entity ids
     };
 
-    //// =========================================================================
-    //// SceneSnapshot
-    //// Captures a whole subtree (entity + all descendants) in one go.
-    //// After restore, oldToNew maps original IDs -> new IDs so parent/child
-    //// references can be fixed up without ever touching CreateEntityWithID.
-    //// =========================================================================
-    //struct SceneSnapshot
-    //{
-    //    // Snapshots in depth-first order: index 0 is the root of the subtree.
-    //    std::vector<EntitySnapshot> nodes;
-
-    //    // Populated after RestoreSceneSnapshot(); maps old id -> new id.
-    //    std::unordered_map<Entity, Entity> oldToNew;
-    //};
-
-    //// =========================================================================
-    //// Single-entity helpers (no hierarchy awareness)
-    //// =========================================================================
-
-    //// Capture all components of a single entity (does NOT walk children).
-    //EntitySnapshot MakeEntitySnapshot(Entity e);
-
-    //// Restore a single entity from snapshot onto a FRESHLY created entity
-    //// (caller must have already called CreateEntity / Factory::DefaultObj).
-    //// Does NOT restore Parent/Children — use SceneSnapshot for that.
-    //void ApplySnapshotToEntity(Entity e, const EntitySnapshot& snap, bool attachScripts = true);
-
-    //// Restore component values onto an entity that is ALREADY alive
-    //// (e.g. undoing a property change without delete/recreate).
-    //void RestoreEntityFromSnapshot(Entity e, const EntitySnapshot& snap);
-
-    //// =========================================================================
-    //// Subtree helpers  (entity + all descendants)
-    //// =========================================================================
-
-    //// Walk entity and all descendants depth-first, capture each as an
-    //// EntitySnapshot, store in SceneSnapshot.nodes.
-    //SceneSnapshot MakeSceneSnapshot(Entity root);
-
-    //// Recreate every entity in the SceneSnapshot using fresh IDs (CreateEntity),
-    //// restore all components, then fix up Parent/Children references using
-    //// the oldToNew remap table.  Returns the new root entity, or INVALID_ENTITY
-    //// on failure.  Also re-attaches scripts if attachScripts == true.
-    //Entity RestoreSceneSnapshot(SceneSnapshot& scene, bool attachScripts = true);
-
     Entity CreateFromSnapshot(EntitySnapshot const& snap);
     EntitySnapshot MakeEntitySnapshot(Entity e);
 
