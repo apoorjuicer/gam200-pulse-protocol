@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(GAME_NAME PulseProtocol)
+# Grab the game name from the current folder name(it should be same name as when u add a new game in editor)
+get_filename_component(GAME_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 set(GAME_ROOT ${CMAKE_CURRENT_LIST_DIR})
 
 # Grab all cpp/h in this folder
@@ -22,7 +23,8 @@ if (WIN32)
   )
 endif()
 
-add_dependencies(PulseProtocol PulseEngine)
+# Makes the game fking dynamic instead of hardcoded.
+add_dependencies(${GAME_NAME} PulseEngine)
 
 # Ensures POST_BUILD copy commands run
 set_target_properties(${GAME_NAME} PROPERTIES 

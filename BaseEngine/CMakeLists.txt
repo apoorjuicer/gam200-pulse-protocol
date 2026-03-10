@@ -102,7 +102,13 @@ else()
     message(WARNING "[PulseEngine] '${ACTIVE_GAME_NAME}/ManagedScripts' not found! Did you create the game via New Game button in editor?")
 endif()
 add_subdirectory(PulseEditor)     # depends on ManagedScripts
-add_subdirectory(PulseProtocol)   # depends on ManagedScripts, LATER MAKE IT GAME NAME, NOT HARDCODED.
+
+# ONLY build the active games exe by reading from ActiveGame.json(Need rerun run.bat tho)
+if(IS_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${ACTIVE_GAME_NAME}")
+    add_subdirectory(${ACTIVE_GAME_NAME})
+else()
+    message(WARNING "[PulseEngine] Game folder '${ACTIVE_GAME_NAME}' not found! Check ActiveGame.json.")
+endif()
 
 # -------------------------------
 # Nice Solution Explorer layout
@@ -114,7 +120,7 @@ function(pulse_rootify tgt)
 endfunction()
 
 pulse_rootify(PulseEditor)
-pulse_rootify(PulseProtocol)
+pulse_rootify(${ACTIVE_GAME_NAME})
 pulse_rootify(ScriptAPI)
 
 # Visible "PulseEngine" node in the solution (meta target)
