@@ -183,6 +183,7 @@ public class ComboSystem : Script
         {
             Console.WriteLine($"[ComboSystem] [{key}] MISS — pressed too far from beat (Δ={delta:F3}s). Slot {targetBeat} freed.");
             lastInputBeat = -1; // free the slot so they can retry on the same beat window
+            ScoreManager.Instance?.AddScore("MISS");
             if (ComboDisplayManager.Instance != null)
                 ComboDisplayManager.Instance.ShowJudgement("MISS");
             VisualBeatSystem.Instance?.FlashJudgement("MISS");
@@ -192,6 +193,7 @@ public class ComboSystem : Script
 
         hitResults.Add(judgement);
         currentCombo.Add(key);
+        ScoreManager.Instance?.AddScore(judgement);
 
         Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s, sinceBeat={timeSince:F3}s, untilNext={timeUntilNext:F3}s)");
         Console.WriteLine($"[ComboSystem]   Progress: {currentCombo.Count}/{maxComboLength} | Expected: {(currentCombo.Count <= currentEnemyWeakness.Length ? currentEnemyWeakness[currentCombo.Count - 1].ToString() : "?")} | Got: {key}");

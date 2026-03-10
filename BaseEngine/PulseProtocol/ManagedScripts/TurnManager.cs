@@ -268,6 +268,15 @@ public class TurnManager : Script
             }
         }
 
+        // Penalize any keys the player never entered as MISS (no-input penalty)
+        if (ComboSystem.Instance != null && ScoreManager.Instance != null)
+        {
+            int entered  = ComboSystem.Instance.GetComboProgress();
+            int expected = ComboSystem.Instance.GetExpectedCombo().Length;
+            for (int i = entered; i < expected; i++)
+                ScoreManager.Instance.AddScore("MISS");
+        }
+
         // Reset for next turn
         if (ComboSystem.Instance != null)
         {
