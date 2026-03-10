@@ -213,9 +213,14 @@ void CoreEngine::CompileScriptAssembly()
 
 	// Find and go into the BaseEngine folder
 	auto baseEngineDir = currentDir;
-	while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+	while (baseEngineDir.filename() != "BaseEngine")
 	{
-		baseEngineDir = baseEngineDir.parent_path();
+		auto parent = baseEngineDir.parent_path();
+		if (parent.empty() || parent == baseEngineDir)
+		{
+			break;
+		}
+		baseEngineDir = parent;
 	}
 
 #ifdef _DEBUG
@@ -472,9 +477,14 @@ static void EnsureGameProjectPath()
 
 	// Try to find BaseEngine by walking up (debug/editor build)
 	auto baseEngineDir = currentDir;
-	while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+	while (baseEngineDir.filename() != "BaseEngine")
 	{
-		baseEngineDir = baseEngineDir.parent_path();
+		auto parent = baseEngineDir.parent_path();
+		if (parent.empty() || parent == baseEngineDir)
+		{
+			break;
+		}
+		baseEngineDir = parent;
 	}
 
 	if (baseEngineDir.filename() == "BaseEngine")
@@ -662,9 +672,9 @@ void CoreEngine::Init()
 			(void)win;
 			if (!Engine) return;
 			if (focused)
-				Engine->SetPaused(false);
+				Engine->SetPaused(false, PauseSource::Focus);
 			else
-				Engine->SetPaused(true);
+				Engine->SetPaused(true, PauseSource::Focus);
 		});
 
 	// Also pause when minimized / restored
@@ -674,7 +684,7 @@ void CoreEngine::Init()
 			(void)win;
 			if (!Engine) return;
 			if (iconified == GLFW_TRUE)
-				Engine->SetPaused(true);
+				Engine->SetPaused(true, PauseSource::Focus);
 			// When restored, focus callback will unpause if the window regains focus
 		});
 
@@ -844,13 +854,13 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<FSM>();
 
 	// Register your systems here, ORDER = UPDATE ORDER every frame
-	// 1. Input   — read raw input first
-	// 2. FSM     — state machine reacts to input
-	// 3. Audio   — FMOD ticks, fresh position ready for Conductor
+	// 1. Input   -read raw input first
+	// 2. FSM     -state machine reacts to input
+	// 3. Audio   -FMOD ticks, fresh position ready for Conductor
 	// 4. Collision
 	// 5. Scene
-	// 6. Logic   — C# scripts run, Conductor reads fresh audio position
-	// 7. Graphics — renders the final game state last
+	// 6. Logic   -C# scripts run, Conductor reads fresh audio position
+	// 7. Graphics -renders the final game state last
 	g_coordinator->RegisterSystem<InputManager>();
 	g_coordinator->RegisterSystem<LogicSystem>();
 	g_coordinator->RegisterSystem<GraphicsManager>();  
@@ -1145,7 +1155,7 @@ void CoreEngine::RenderDebugDraw()
 				if (!p.active) continue;
 				if (p.textureID != 0) continue; // textured particles rendered via gBatch in glapp
 				float lifeRatio = (p.lifeMax > 0.0f) ? (p.life / p.lifeMax) : 0.0f;
-				float radius    = p.size * lifeRatio; // shrinks to 0 as particle expires
+				float radius = p.size * lifeRatio; // shrinks to 0 as particle expires
 				glm::vec3 color = { 1.0f, 0.75f + 0.25f * lifeRatio, 0.2f * lifeRatio };
 				DebugDraw::DrawCircleFilled({ p.pos.x, p.pos.y }, radius, color, 6);
 			}
@@ -1212,6 +1222,35 @@ void CoreEngine::RenderDebugDraw()
 		for (float y = -450.0f; y < 450.0f; y += 100.0f)
 		{
 			DebugDraw::DrawLine({ -800.0f, y }, { 800.0f, y }, { 0.3f, 0.3f, 0.3f });
+		}
+	}
+
+	// F7 - Collision AABB Debug
+	if (g_inputSystem->isDebugCollisionEnabled())
+	{
+		auto collisionSystem = g_coordinator->GetSystem<CollisionManager>();
+		if (collisionSystem)
+		{
+			for (auto& entity : collisionSystem->EntityMember)
+			{
+				if (!g_coordinator->HasComponent<Framework::Transform>(entity) ||
+					!g_coordinator->HasComponent<AABB>(entity))
+					continue;
+
+				auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
+				auto& baseAABB = g_coordinator->GetComponent<AABB>(entity);
+
+				AABB worldAABB = collisionSystem->BuildAABBFromTransform(transform, baseAABB);
+
+				glm::vec2 min = { worldAABB.min.x, worldAABB.min.y };
+				glm::vec2 max = { worldAABB.max.x, worldAABB.max.y };
+
+				// Green box = collision box
+				DebugDraw::DrawRect(min, max, { 0.0f, 1.0f, 0.0f });
+
+				// Red point = entity center
+				DebugDraw::DrawPoint({ transform.Pos.x, transform.Pos.y }, 4.0f, { 1.0f, 0.0f, 0.0f });
+			}
 		}
 	}
 
@@ -1341,22 +1380,19 @@ void CoreEngine::SetPaused(bool paused)
 
 void CoreEngine::SetPaused(bool paused, PauseSource source)
 {
+	if (source == PauseSource::Game)
+	{
+		// Player explicitly paused/unpaused — record intent
+		m_manualPause = paused;
+	}
+	else if (source == PauseSource::Focus && !paused && m_manualPause)
+	{
+		// Window regained focus but player manually paused — keep paused
+		return;
+	}
+
 	if (m_paused == paused) return;
 	m_paused = paused;
-
-	if (auto audio = Coordinator::GetInstance()->GetSystem<AudioManager>())
-	{
-		if (source == PauseSource::Game)
-		{
-			// Pause ONLY music during game pause, keep SFX alive for hover/click
-			//audio->SetMusicPaused(paused);
-		}
-		else
-		{
-			// Editor pause should NOT affect game audio
-			// do nothing
-		}
-	}
 }
 
  void CoreEngine::TogglePaused()
@@ -1368,6 +1404,7 @@ void CoreEngine::PlayGame()
 {
 	m_isPlaying = true;
 	m_paused = false;
+	m_manualPause = false;
 	Framework::GameState::SetPlaying(true);
 
 	// RESET TIME!!!!

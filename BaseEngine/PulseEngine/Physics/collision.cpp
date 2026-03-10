@@ -24,21 +24,51 @@ void CollisionManager::Update(float) {
 // =============================================================================
 // BuildAABBFromTransform
 // =============================================================================
+//AABB CollisionManager::BuildAABBFromTransform(const Framework::Transform& transform, const AABB& baseBox)
+//{
+//    AABB box;
+//    box.width = baseBox.width * transform.Scale.x / 50.0f;
+//    box.height = baseBox.height * transform.Scale.y / 50.0f;
+//
+//    box.min.x = transform.Pos.x - (box.width * 0.5f);
+//    box.max.x = transform.Pos.x + (box.width * 0.5f);
+//    box.min.y = transform.Pos.y - (box.height * 0.5f);
+//    box.max.y = transform.Pos.y + (box.height * 0.5f);
+//
+//    //std::cout << std::fixed << std::setprecision(2)
+//    //    << "[DEBUG] BuildAABBFromTransform -> Pos(" << transform.Pos.x << "," << transform.Pos.y << ") "
+//    //    << "Width=" << box.width << " Height=" << box.height << "\n"
+//    //    << "AABB Min(" << box.min.x << "," << box.min.y << ") Max(" << box.max.x << "," << box.max.y << ")\n";
+//
+//    return box;
+//}
+
 AABB CollisionManager::BuildAABBFromTransform(const Framework::Transform& transform, const AABB& baseBox)
 {
-    AABB box;
-    box.width = baseBox.width * transform.Scale.x / 50.0f;
-    box.height = baseBox.height * transform.Scale.y / 50.0f;
+    AABB box{};
 
-    box.min.x = transform.Pos.x - (box.width * 0.5f);
-    box.max.x = transform.Pos.x + (box.width * 0.5f);
-    box.min.y = transform.Pos.y - (box.height * 0.5f);
-    box.max.y = transform.Pos.y + (box.height * 0.5f);
+    float localWidth = std::abs(baseBox.max.x - baseBox.min.x);
+    float localHeight = std::abs(baseBox.max.y - baseBox.min.y);
 
-    //std::cout << std::fixed << std::setprecision(2)
-    //    << "[DEBUG] BuildAABBFromTransform -> Pos(" << transform.Pos.x << "," << transform.Pos.y << ") "
-    //    << "Width=" << box.width << " Height=" << box.height << "\n"
-    //    << "AABB Min(" << box.min.x << "," << box.min.y << ") Max(" << box.max.x << "," << box.max.y << ")\n";
+    if (localWidth <= 0.0f)  localWidth = 1.0f;
+    if (localHeight <= 0.0f) localHeight = 1.0f;
+
+    float worldWidth = localWidth * transform.Scale.x / 50.0f;
+    float worldHeight = localHeight * transform.Scale.y / 50.0f;
+
+    float localCenterX = (baseBox.min.x + baseBox.max.x) * 0.5f;
+    float localCenterY = (baseBox.min.y + baseBox.max.y) * 0.5f;
+
+    float worldOffsetX = localCenterX * transform.Scale.x / 50.0f;
+    float worldOffsetY = localCenterY * transform.Scale.y / 50.0f;
+
+    float centerX = transform.Pos.x + worldOffsetX;
+    float centerY = transform.Pos.y + worldOffsetY;
+
+    box.min.x = centerX - (worldWidth * 0.5f);
+    box.max.x = centerX + (worldWidth * 0.5f);
+    box.min.y = centerY - (worldHeight * 0.5f);
+    box.max.y = centerY + (worldHeight * 0.5f);
 
     return box;
 }
@@ -59,21 +89,27 @@ bool CollisionManager::CheckAABBCollision(const AABB& a, const AABB& b)
 
 bool CollisionManager::CheckEdgeContactCollision(const AABB& a, const AABB& b, float threshold)
 {
-    // Horizontal edge contact (X direction)
     bool xEdgeContact =
-        (std::abs(a.max.x - b.min.x) <= threshold) || // A right vs B left
-        (std::abs(b.max.x - a.min.x) <= threshold);   // B right vs A left
+        (std::abs(a.max.x - b.min.x) <= threshold) ||
+        (std::abs(b.max.x - a.min.x) <= threshold);
 
-    // Vertical edge contact (Y direction)
     bool yEdgeContact =
-        (std::abs(a.max.y - b.min.y) <= threshold) || // A top vs B bottom
-        (std::abs(b.max.y - a.min.y) <= threshold);   // B top vs A bottom
+        (std::abs(a.max.y - b.min.y) <= threshold) ||
+        (std::abs(b.max.y - a.min.y) <= threshold);
 
-    // Allow slight Y and X proximity so height difference doesn�t block edge collision
-    bool yCloseEnough = std::abs(((a.min.y + a.max.y) / 2) - ((b.min.y + b.max.y) / 2)) <= ((a.height + b.height) * 0.5f);
-    bool xCloseEnough = std::abs(((a.min.x + a.max.x) / 2) - ((b.min.x + b.max.x) / 2)) <= ((a.width + b.width) * 0.5f);
+    float aWidth = a.max.x - a.min.x;
+    float aHeight = a.max.y - a.min.y;
+    float bWidth = b.max.x - b.min.x;
+    float bHeight = b.max.y - b.min.y;
 
-    // Trigger collision when edges meet in either direction, with small tolerance
+    bool yCloseEnough =
+        std::abs(((a.min.y + a.max.y) * 0.5f) - ((b.min.y + b.max.y) * 0.5f))
+        <= ((aHeight + bHeight) * 0.5f);
+
+    bool xCloseEnough =
+        std::abs(((a.min.x + a.max.x) * 0.5f) - ((b.min.x + b.max.x) * 0.5f))
+        <= ((aWidth + bWidth) * 0.5f);
+
     return (xEdgeContact && yCloseEnough) || (yEdgeContact && xCloseEnough);
 }
 

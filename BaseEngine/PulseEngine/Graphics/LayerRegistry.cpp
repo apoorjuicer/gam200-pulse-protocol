@@ -31,10 +31,6 @@ LayerRegistry& LayerRegistry::Get()
 // -------------------------------------------------------------------------
 static std::string GetLayerConfigPath()
 {
-    namespace fs = std::filesystem;
-    fs::path cur = fs::current_path();
-    while (cur.filename() != "BaseEngine" && cur.has_parent_path())
-        cur = cur.parent_path();
     return (FilePathToGame / "JSON" / "layers.json").string();
 }
 

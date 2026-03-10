@@ -53,7 +53,7 @@ public:
         const std::string& text,
         float x, float y,
         float scale,
-        const glm::vec3& color,
+        const glm::vec4& color,
         const FontData* fontData,
         TextAlignment alignment = TextAlignment::Left
     );

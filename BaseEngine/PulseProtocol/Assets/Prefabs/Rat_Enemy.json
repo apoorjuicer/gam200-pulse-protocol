@@ -42,6 +42,18 @@
       }
     },
     {
+      "AABB": {
+        "min": {
+          "x": -10.0,
+          "y": -10.0
+        },
+        "max": {
+          "x": 10.0,
+          "y": 10.0
+        }
+      }
+    },
+    {
       "name": {
         "name": "Rat_Enemy"
       }
@@ -62,7 +74,7 @@
       }
     },
     {
-      "script": { 
+      "script": {
         "ScriptName": [
           "EnemyRhythmController"
         ]

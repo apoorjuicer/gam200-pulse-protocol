@@ -44,8 +44,29 @@
       }
     },
     {
+      "AABB": {
+        "min": {
+          "x": -12.0,
+          "y": -14.0
+        },
+        "max": {
+          "x": 12.0,
+          "y": 14.0
+        }
+      }
+    },
+    {
+      "Health": {
+        "hp": 20,
+        "damage": 20,
+        "isAlive": true
+      }
+    },
+    {
       "script": {
-        "name": "EnemyRhythmController"
+        "ScriptName": [
+          "EnemyRhythmController"
+        ]
       }
     },
     {

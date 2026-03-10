@@ -49,7 +49,7 @@ public class EnemyRhythmController : Script
     // "Edge"     = edge contact with threshold (uses AABB components)
     // "Distance" = radius-based via engine (uses transforms only, bypasses BroadPhase)
     // "Manual"   = uses engine CheckDistance with ManualAttackRange as radius (simplest, most reliable)
-    public string CollisionMode = "Manual";
+    public string CollisionMode = "AABB";
 
     // For Distance mode
     public float SelfCollisionRadius = 25f;
@@ -521,13 +521,21 @@ public class EnemyRhythmController : Script
 
     public void TakeDamage(float dmg)
     {
-        if (isDead) return;
+        if (isDead) return; 
 
         HealthComponent h = GetHealth();
         int prev = h.hp;
         h.hp -= (int)dmg;
+
         if (h.hp < 0) h.hp = 0;
         Console.WriteLine($"[Enemy] Took {dmg} damage! HP: {h.hp}/{prev}");
+
+        // Spawn damage indicator
+        EnemyDamageIndicator.SpawnX = GetTransform().X;
+        EnemyDamageIndicator.SpawnY = GetTransform().Y;
+        EnemyDamageIndicator.DamageText = "-" + ((int)dmg).ToString();
+        // Console.WriteLine($"[DamageIndicator] Spawning at X:{GetTransform().X} Y:{GetTransform().Y}");
+        Factory.Instantiate("EnemyDamageIndicator");
 
         if (h.hp <= 0)
             Die();

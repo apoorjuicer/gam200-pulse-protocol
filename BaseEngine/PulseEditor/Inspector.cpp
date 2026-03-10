@@ -2127,26 +2127,31 @@ namespace PulseEditor
             ImGui::SameLine();
             float min[2] = { aabb.min.x, aabb.min.y };
             ImGui::SetNextItemWidth(200.0f);
-            if (ImGui::DragFloat2("##AABBMin", min, 0.1f)) //slider1
+            if (ImGui::DragFloat2("##AABBMin", min, 0.1f))
             {
                 aabb.min = { min[0], min[1] };
-               
             }
             HandleAABBUndo(aabb, mUndo, selectedHandle);
+
             ImGui::Text("Max:");
             ImGui::SameLine();
             float max[2] = { aabb.max.x, aabb.max.y };
             ImGui::SetNextItemWidth(200.0f);
-            if (ImGui::DragFloat2("##AABBMax", max, 0.1f)) //slider 2
+            if (ImGui::DragFloat2("##AABBMax", max, 0.1f))
             {
                 aabb.max = { max[0], max[1] };
-                
             }
             HandleAABBUndo(aabb, mUndo, selectedHandle);
-            // Display calculated width/height for convenience
+
             ImGui::Spacing();
-            ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Size: %.2f x %.2f",
-                aabb.max.x - aabb.min.x, aabb.max.y - aabb.min.y);
+
+            float sizeX = aabb.max.x - aabb.min.x;
+            float sizeY = aabb.max.y - aabb.min.y;
+            float centerX = (aabb.min.x + aabb.max.x) * 0.5f;
+            float centerY = (aabb.min.y + aabb.max.y) * 0.5f;
+
+            ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Size: %.2f x %.2f", sizeX, sizeY);
+            ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.0f, 1.0f), "Center Offset: %.2f, %.2f", centerX, centerY);
 
             ImGui::Unindent();
         }

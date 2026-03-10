@@ -165,7 +165,7 @@ public:
         std::string const& fontId,
         float x, float y,
         float pixelHeight,
-        glm::vec3 const& color,
+        glm::vec4 const& color,
         TextAlignment alignment = TextAlignment::Left // default left aligned
     );
 

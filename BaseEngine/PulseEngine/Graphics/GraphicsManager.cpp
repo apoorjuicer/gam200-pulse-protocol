@@ -261,8 +261,15 @@ void GraphicsManager::Initialize()
         else
         {
             auto baseEngineDir = currentDir;
-            while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
-                baseEngineDir = baseEngineDir.parent_path();
+            while (baseEngineDir.filename() != "BaseEngine")
+            {
+                auto parent = baseEngineDir.parent_path();
+                if (parent.empty() || parent == baseEngineDir)
+                {
+                    break;
+                }
+                baseEngineDir = parent;
+            }
             basePath = baseEngineDir / "PulseEngine"; // Dev layout
         }
         std::string shaderDir = (basePath / "Graphics" / "shader").string();
@@ -462,6 +469,12 @@ GLuint GraphicsManager::LoadTextureFile(const std::string &path)
         else if (path.find("../../PulseEngine/") == 0)
         {
             relativePath = path.substr(std::string("../../PulseEngine/").length());
+        }
+        else if (path.find("../../PulseProtocol/") == 0)
+        {
+            // Legacy path written by the editor (relative to dev build output).
+            // Strip "../../PulseProtocol/" so the path resolves from FilePathToGame.
+            relativePath = path.substr(std::string("../../PulseProtocol/").length());
         }
         else if (path.find("../../") == 0)
         {
@@ -885,7 +898,7 @@ void GraphicsManager::DrawText2D(
     std::string const& fontId,
     float x, float y,
     float pixelHeight,
-    glm::vec3 const& color,
+    glm::vec4 const& color,
     TextAlignment alignment
 ) {
     if (text.empty()) {
@@ -965,8 +978,10 @@ void GraphicsManager::Update2DTextComponent(LayerMask maskFilter) {
         else
         {
             // Normal entities convert world coords to screen coords
-            screenX = tr.Pos.x + (GLApp::VIRTUAL_W / 2.0f) + txt.offset.x;
-            screenY = (GLApp::VIRTUAL_H / 2.0f) - tr.Pos.y + txt.offset.y;
+            glm::mat3 camMat = GLApp::BuildPanZoomNDC(Framework::GameState::IsPlaying() ? GLApp::gGameCamera : GLApp::gEditorCamera);
+            glm::vec3 ndcPos = camMat * glm::vec3(tr.Pos.x * (2.0f / GLApp::VIRTUAL_W), tr.Pos.y * (2.0f / GLApp::VIRTUAL_H), 1.0f);
+            screenX = (ndcPos.x + 1.0f) * 0.5f * GLApp::VIRTUAL_W + txt.offset.x;
+            screenY = (1.0f - ndcPos.y) * 0.5f * GLApp::VIRTUAL_H + txt.offset.y;
         }
 
         DrawText2D(
@@ -975,7 +990,7 @@ void GraphicsManager::Update2DTextComponent(LayerMask maskFilter) {
             screenX,
             screenY,
             txt.font_size,
-            txt.color,
+            glm::vec4(txt.color, txt.alpha),
             txt.alignment
         );
     }

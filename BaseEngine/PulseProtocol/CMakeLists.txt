@@ -105,6 +105,13 @@ add_custom_command(TARGET ${GAME_NAME} POST_BUILD
 #        $<TARGET_FILE_DIR:${GAME_NAME}>/../../PulseEngine/Assets
 #    COMMENT "Copying Assets to shared PulseEngine folder"
 #)
+# Copy engine shaders to the release layout PulseProtocol expects
+add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/PulseEngine/Graphics/shader"
+        "$<TARGET_FILE_DIR:${GAME_NAME}>/PulseEngine/Graphics/shader"
+    COMMENT "Copying engine shaders to PulseProtocol output"
+)
 
 # Copy ManagedScripts.dll next to the game executable
 add_custom_command(TARGET ${GAME_NAME} POST_BUILD
@@ -116,6 +123,18 @@ add_custom_command(TARGET ${GAME_NAME} POST_BUILD
 
 # Must build after ManagedScripts is compiled
 add_dependencies(${GAME_NAME} ManagedScripts)
+
+# Bundle MSVC runtime DLLs (VCRUNTIME140.dll, MSVCP140.dll, etc.) for self-contained distribution
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+include(InstallRequiredSystemLibraries)
+if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+    add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+            "$<TARGET_FILE_DIR:${GAME_NAME}>"
+        COMMENT "Copying MSVC runtime DLLs to PulseProtocol output"
+    )
+endif()
 
 # Enables multi-processor parallel compilation in Visual Studio
 if(MSVC)
