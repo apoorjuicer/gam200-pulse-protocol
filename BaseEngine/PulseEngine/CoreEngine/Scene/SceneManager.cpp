@@ -1,4 +1,4 @@
-﻿/******************************************************************************/
+/******************************************************************************/
 /**
  * @file       SceneManager.cpp
  * @project    Pulse Protocol
@@ -24,21 +24,22 @@
  /******************************************************************************/
 #pragma once
 #include "SceneManager.h"
-#include "GameLogic/GameLogic.h"
-#include "Graphics/Transform.h"
-#include "Graphics/Animation.h"
-#include "Graphics/Renderable.h"
 #include "Graphics/Text.h"
-#include "CoreEngine/Assets.h"
-#include "CoreEngine/Prefab/PrefabInstance.h"
-#include "Components/Health.h"
-#include "Components/EntityType.h"
-#include "Components/DisplayName.h"
-#include "CoreEngine/Factory/Factory.h"
 #include "Graphics/Layer.h"
+#include "CoreEngine/Assets.h"
+#include "Components/Health.h"
+#include "Graphics/Animation.h"
+#include "Graphics/Transform.h"
+#include "Graphics/Renderable.h"
+#include "GameLogic/GameLogic.h"
+#include "Components/EntityType.h"
 #include "Components/ParentChild.h"
+#include "Components/DisplayName.h"
 #include "StateMachine/StateMachine.h"
+#include "CoreEngine/Factory/Factory.h"
+#include "CoreEngine/Core/CoreEngine.h" // for FilePathToGame
 #include "CoreEngine/Core/CoreEngine.h"  // For GetFunctionPtr
+#include "CoreEngine/Prefab/PrefabInstance.h"
 //#include "../Components/AABB.h"
 
 extern bool g_countdownFinished;
@@ -67,29 +68,14 @@ SceneManager::SceneManager()
 //}
 
 std::filesystem::path GetScenePath(const std::string& sceneNameOrPath) {
-	// Get PulseEngine base path
-	char exePath[MAX_PATH];
-	GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
-	std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
+	std::filesystem::path basePath = FilePathToGame;
 
-	std::filesystem::path basePath;
-	if (std::filesystem::exists(currentDir / "JSON"))
+	// Strip "../../{GameName}/" prefix so we get a path relative to the game root
+	if (sceneNameOrPath.find("../../") == 0) 
 	{
-		basePath = currentDir;  // Release: JSON is flat beside the exe
-	}
-	else
-	{
-		auto baseEngineDir = currentDir;
-		while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
-		{
-			baseEngineDir = baseEngineDir.parent_path();
-		}
-		basePath = baseEngineDir / "PulseProtocol";  // Dev
-	}
-
-	// If it's a full path starting with ../../, resolve it (legacy fallback)
-	if (sceneNameOrPath.find("../../") == 0) {
-		std::string relativePath = sceneNameOrPath.substr(std::string("../../PulseProtocol/").length());
+		// so like prefix = ../../PulseProtocol/
+		std::string prefix = "../../" + FilePathToGame.filename().string() + "/";
+		std::string relativePath = sceneNameOrPath.substr(prefix.length());
 		return (basePath / relativePath).make_preferred();
 	}
 
@@ -104,49 +90,54 @@ std::filesystem::path GetScenePath(const std::string& sceneNameOrPath) {
 
 void SceneManager::Init()
 {
-	std::cout << "[CoreEngine] Init START" << std::endl;
+	std::filesystem::path jsonDir = FilePathToGame / "JSON";
 
-	// Get exe directory
-	char exePath[MAX_PATH];
-	GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
-	std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
-
-	std::filesystem::path scenePath;
-
-	std::cout << "[CoreEngine] GOING IN" << std::endl;
-
-	// RELEASE BUILD: JSON is copied flat beside the exe by CMake
-	if (std::filesystem::exists(currentDir / "JSON"))
+	// Open config.json and grab the "FirstScene" value	
+	std::string firstSceneName = "";
+	std::filesystem::path configPath = jsonDir / "config.json";
+	if (std::filesystem::exists(configPath))
 	{
-		scenePath = currentDir / "JSON" / "LatencyCalibration.json";
-		std::cout << "[SceneManager] Using release path (next to exe)" << std::endl;
+		std::ifstream f(configPath);
+		if (f.is_open())
+		{
+			rapidjson::IStreamWrapper isw(f);
+			rapidjson::Document doc;
+			doc.ParseStream(isw);
+
+			// seralized the scene name in config.json
+			if (doc.IsObject() && doc.HasMember("config") && doc["config"].IsObject())
+			{
+				const auto& cfg = doc["config"];
+				if (cfg.HasMember("FirstScene") && cfg["FirstScene"].IsString())
+					firstSceneName = cfg["FirstScene"].GetString();
+			}
+		}
 	}
-	// DEV BUILD: find BaseEngine/PulseProtocol/JSON/
+
+	// Decide which scene to load
+	std::filesystem::path scenePath;
+	if (!firstSceneName.empty())
+	{
+		// load whatever scene that is in config.json
+		scenePath = jsonDir / (firstSceneName + ".json"); 
+
+		// if cannot find the file in the config.json, just load default.
+		if (!std::filesystem::exists(scenePath))
+		{
+			std::cout << "[SceneManager] '" << firstSceneName << ".json' not found, loading FirstScene.json instead!" << std::endl;
+			scenePath = jsonDir / "FirstScene.json";
+		}
+	}
 	else
 	{
-		auto baseEngineDir = currentDir;
-		while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
-		{
-			baseEngineDir = baseEngineDir.parent_path();
-		}
-		scenePath = baseEngineDir / "PulseProtocol" / "JSON" / "LatencyCalibration.json";
-		std::cout << "[SceneManager] Using dev path (BaseEngine folder)" << std::endl;
+		// No FirstScene in config.json so just load the default blank scene
+		scenePath = jsonDir / "FirstScene.json";
 	}
 
-	std::cout << "[CoreEngine] OUT" << std::endl;
-
-	// Starting scene will be main menu
+	std::cout << "[SceneManager] Loading: " << scenePath << std::endl;
 	LoadSceneFromJson(scenePath.string());
-	//LoadSceneFromJson(StartingScene);
-
-	//std::cout << std::filesystem::absolute(StartingScene) << std::endl;
-	//std::cout << std::filesystem::current_path() << std::endl;
 
 	PreviousScene = CurrentScene;
-
-	// testing for it it works 
-	//std::string testpath = "MainMenu";
-	//CurrentScene = testpath;
 }
 
 void SceneManager::Update(float dt)
@@ -194,8 +185,7 @@ void SceneManager::SaveCurrentScene()
 	std::cout << std::filesystem::absolute(basePath.parent_path().parent_path()) << std::endl;
 	std::cout << std::filesystem::absolute(basePath.parent_path().parent_path().parent_path()) << std::endl;
 
-	//  ONE MORE parent_path() to get OUT of build folder!
-	std::filesystem::path path = basePath.parent_path().parent_path().parent_path() / "PulseProtocol" / "JSON" / (CurrentScene + ".json");
+	std::filesystem::path path = FilePathToGame / "JSON" / (CurrentScene + ".json");
 	
 
 	// grab scene name for the json file name

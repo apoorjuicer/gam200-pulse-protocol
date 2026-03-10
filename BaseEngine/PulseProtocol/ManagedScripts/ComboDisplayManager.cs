@@ -214,7 +214,7 @@ public class ComboDisplayManager : Script
 
         int currentBeat = Conductor.Instance!.GetCurrentBeat();
 
-        Console.WriteLine($"[HandleBeatReveal] revealIndex={revealIndex}, beat={currentBeat}");
+        // Console.WriteLine($"[HandleBeatReveal] revealIndex={revealIndex}, beat={currentBeat}");
         if (revealIndex == 0)
         {
             lastRevealBeat = currentBeat;

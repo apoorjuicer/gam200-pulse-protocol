@@ -17,6 +17,7 @@
 #include "../CoreEngine/ECS/Coordinator.h"
 #include "../CoreEngine/Scene/SceneManager.h"
 #include "CoreEngine/Core/ScriptingBridge.h"
+#include "../CoreEngine/Core/CoreEngine.h"   // for FilePathToGame
 #include <filesystem>
 #include <fstream>
 #undef generic
@@ -33,7 +34,7 @@ namespace ScriptAPI
 
 		// change c# string to c++ string
 		msclr::interop::marshal_context context;
-		std::string Filename_pathway = "../../PulseProtocol/JSON/"  + context.marshal_as<std::string>(Filename) + ".json";
+		std::string Filename_pathway = (FilePathToGame / "JSON").string() + "/" + context.marshal_as<std::string>(Filename) + ".json";
 
 		auto* coord = Coordinator::GetInstance();
 		auto sceneManager = coord->GetSystem<SceneManager>();

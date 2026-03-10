@@ -25,6 +25,8 @@ namespace ScriptAPI
         void SetVisible(bool visible);
         bool IsVisible();
         void SetAlignment(int alignment);
+        void SetAlpha(float a);
+        float GetAlpha();
 
     internal:
         TextComponentAPI(unsigned int ID);

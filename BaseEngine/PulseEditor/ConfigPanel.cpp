@@ -30,7 +30,7 @@ namespace PulseEditor
         auto baseEngineDir = currentDir;
         while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
             baseEngineDir = baseEngineDir.parent_path();
-        return baseEngineDir / "PulseProtocol" / "JSON" / "config.json";
+        return FilePathToGame / "JSON" / "config.json";
     };
 
     void DrawConfigPanel()
@@ -90,7 +90,7 @@ namespace PulseEditor
             while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
                 baseEngineDir = baseEngineDir.parent_path();
 
-            std::filesystem::path savePath = baseEngineDir / "PulseProtocol" / "JSON" / "config.json";
+            std::filesystem::path savePath = FilePathToGame / "JSON" / "config.json";
 
             std::cout << "[ConfigPanel] Saving to source: " << savePath << std::endl;
 
@@ -110,7 +110,7 @@ namespace PulseEditor
             while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
                 baseEngineDir = baseEngineDir.parent_path();
 
-            std::filesystem::path sourcePath = baseEngineDir / "PulseProtocol" / "JSON" / "config.json";
+            std::filesystem::path sourcePath = FilePathToGame / "JSON" / "config.json";
 
             LoadConfig(config, sourcePath.string());
             s_width = config.GetWindowWidth();

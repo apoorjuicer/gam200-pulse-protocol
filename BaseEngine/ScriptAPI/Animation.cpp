@@ -17,6 +17,7 @@
 #include <msclr/marshal_cppstd.h>   // for converting C# to C++ string
 #include "../Graphics/Animation.h"
 #include "../Graphics/Renderable.h"
+#include "../CoreEngine/Core/CoreEngine.h"   // for FilePathToGame
 #undef generic
 
 namespace ScriptAPI
@@ -42,7 +43,8 @@ namespace ScriptAPI
         }
 
         // Convert C# string to C++ string
-        std::string nativeSpriteName = "../../PulseProtocol/Assets/Textures/Characters/" +  msclr::interop::marshal_as<std::string>(SpriteName) + ".png";
+        std::string nativeSpriteName = (FilePathToGame / "Assets" / "Textures" / "Characters").string()
+                                       + "/" + msclr::interop::marshal_as<std::string>(SpriteName) + ".png";
 
         if (g_coordinator->HasComponent<Framework::Renderable>(entityID))
         {

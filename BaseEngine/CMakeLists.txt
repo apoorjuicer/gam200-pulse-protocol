@@ -80,7 +80,27 @@ include(DotnetRuntime)
 # -------------------------------
 add_subdirectory(PulseEngine)     # defines PulseEngine_Editor / PulseEngine_Game
 add_subdirectory(ScriptAPI)
-add_subdirectory(ManagedScripts)  # C# scripts — depends on ScriptAPI
+
+# Dynamically build the active game ManagedScripts by reading ActiveGame.json at config time. But must rerun cmake 2 load in.
+set(ACTIVE_GAME_JSON_PATH "${CMAKE_CURRENT_LIST_DIR}/ActiveGame.json")  
+
+# Check if ActiveGame.json exists
+if(EXISTS "${ACTIVE_GAME_JSON_PATH}")
+    file(READ "${ACTIVE_GAME_JSON_PATH}" ACTIVE_GAME_JSON_CONTENT)               # reads whats inside
+    string(JSON ACTIVE_GAME_NAME GET "${ACTIVE_GAME_JSON_CONTENT}" "ActiveGame") # grab ActiveGame value
+    message(STATUS "[PulseEngine] Active game: ${ACTIVE_GAME_NAME}")
+else()
+    # if cannot find just hardcode it.
+    set(ACTIVE_GAME_NAME "PulseProtocol")
+    message(WARNING "[PulseEngine] ActiveGame.json not found \u2014 defaulting to PulseProtocol")
+endif()
+
+# Check: Only add ManagedScripts if the folder actually exists, incase game name is wrong or folder wasn't created yet
+if(IS_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${ACTIVE_GAME_NAME}/ManagedScripts")
+    add_subdirectory(${ACTIVE_GAME_NAME}/ManagedScripts)
+else()
+    message(WARNING "[PulseEngine] '${ACTIVE_GAME_NAME}/ManagedScripts' not found! Did you create the game via New Game button in editor?")
+endif()
 add_subdirectory(PulseEditor)     # depends on ManagedScripts
 add_subdirectory(PulseProtocol)   # depends on ManagedScripts, LATER MAKE IT GAME NAME, NOT HARDCODED.
 

@@ -12,12 +12,12 @@
  /******************************************************************************/
 
 #pragma once
-
+#include "CoreEngine/ECS/System.h"
 namespace PulseEditor
 {
     // Forward declaration; full definition is in Editor.h
     struct GameViewport;
-
+    void CancelGizmoIfEntity(Entity e);
     // Main gizmo function
     void Gizmo_DrawAndHandle(const GameViewport& vp);
 }

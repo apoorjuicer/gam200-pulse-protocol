@@ -25,6 +25,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "glhelper.h"
 #include "glapp.h"
+#include <iostream>
 
 //for .NET
 #include "CoreEngine/Core/ImportExport.h" // for DLL_API
@@ -77,8 +78,20 @@ namespace Framework
 		void Deserialize(const rapidjson::Value& in);
 	};
 
-	bool SaveTransform(Transform const& t, std::string const& path);
-	bool LoadTransform(Transform& t, std::string const& path);
+	DLL_API std::ostream& operator<<(std::ostream& os, Transform const& t);
+
+	DLL_API bool SaveTransform(Transform const& t, std::string const& path);
+	DLL_API bool LoadTransform(Transform& t, std::string const& path);
 }
 #pragma warning(pop)
 #endif // FRAMEWORK_TRANSFORM_H
+
+//namespace Framework {
+//	inline std::ostream& operator<<(std::ostream& os, const Transform& t) {
+//			os << "[Transform Component] contains these values\n";
+//	os << "Transform pos:" << t.Pos.x << " " << t.Pos.y << "\n";
+//	os << "Transform scale:" << t.Scale.x << " " << t.Scale.y << "\n";
+//	os << "Transform rot:" << t.Rotation.x << " " << t.Rotation.y << "\n";
+//	return os;
+//	}
+//}

@@ -29,10 +29,30 @@ struct TextComponent
     Vector2 offset{0, 0};
     float font_size{};           // pixel height
     glm::vec3 color = {1, 1, 1}; // RGB
+    float alpha = 1.0f;          // opacity (0.0 = transparent, 1.0 = opaque)
     bool visible = true;         // toggle on/off
     TextAlignment alignment = TextAlignment::Left; // text alignment
     // To be added, probably typed class enum
     // std::string font_style;
+
+
+    //operator overloads
+    //for Undo comparison function
+    bool operator==(TextComponent const& other) const {
+        return
+            text == other.text &&
+            font_id == other.font_id &&
+            offset == other.offset &&
+            font_size == other.font_size &&
+            color == other.color &&
+            visible == other.visible &&
+            alignment == other.alignment;
+    }
+    bool operator!=(TextComponent const& other) const
+    {
+        return !(*this == other);
+    }
+
 
     // ---------------------------------------------------
     // Serialize

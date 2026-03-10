@@ -263,7 +263,7 @@ bool SaveScriptName(LogicComponent const& t, std::string const& path)
 
     // MUST HAVE TO RETURN BACK TO MYENGINE INSTEAD OF BUILD(AKA GETS DELETE WHEN CLEANED)
     namespace fs = std::filesystem;
-    fs::create_directories("../../PulseProtocol/JSON");
+    fs::create_directories(FilePathToGame / "JSON"); // use active game path, not hardcoded PulseProtocol
 
     std::ofstream ofs(path);
     if (!ofs.is_open()) {
@@ -304,6 +304,15 @@ bool LoadScriptName(LogicComponent& t, std::string const& path)
     return true;
 }
 
+bool LogicComponent::operator==(LogicComponent const& other) const
+{
+    return ScriptName == other.ScriptName;
+}
+
+bool LogicComponent::operator!=(LogicComponent const& other) const
+{
+    return !(*this == other);
+}
 
 // ---------------------------------------------------------------------
 // FOR SCRIPTS ONLY ONWARDS

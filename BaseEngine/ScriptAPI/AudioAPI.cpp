@@ -106,9 +106,10 @@ namespace ScriptAPI
 
     void AudioComponent::ResumeBGM()
     {
-        auto mgr = GetAudioManager();
-        if (!mgr) return;
-        mgr->ResumeBGM();
+        AudioManager* audio = GetAudioManager();
+        if (!audio) return;
+
+        audio->ResumeBGM();
     }
 
     void AudioComponent::SetBGMVolume(float volume)
@@ -185,4 +186,29 @@ namespace ScriptAPI
         }
         return mgr->GetBGMPositionSeconds();
     }
+
+    void AudioComponent::FadeOutMusic(float duration)
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr) return;
+
+        mgr->FadeOutCurrentBGM(duration, true);
+    }
+
+    bool AudioComponent::IsBGMPlaying()
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr) return false;
+
+        return mgr->IsBGMPlaying();
+    }
+
+    void AudioComponent::FadeInMusic(float duration)
+    {
+        AudioManager* audio = GetAudioManager();
+        if (!audio) return;
+
+        audio->FadeInCurrentBGM(duration);
+    }
+
 }

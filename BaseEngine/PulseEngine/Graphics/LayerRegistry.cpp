@@ -2,7 +2,8 @@
 /**
  * @file        LayerRegistry.cpp
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En (primary) - 90%
+ * @author      Ban Kai Wei Benjamin (secondary) - 10%
  * 
  * @brief       Implementation of centralized layer registry
  *
@@ -14,6 +15,7 @@
 
 #include "pch/pch_temp.h"
 #include "LayerRegistry.h"
+#include "CoreEngine/Core/CoreEngine.h" // for FilePathToGame
 
 // -------------------------------------------------------------------------
 // Singleton Access
@@ -29,11 +31,7 @@ LayerRegistry& LayerRegistry::Get()
 // -------------------------------------------------------------------------
 static std::string GetLayerConfigPath()
 {
-    namespace fs = std::filesystem;
-    fs::path cur = fs::current_path();
-    while (cur.filename() != "BaseEngine" && cur.has_parent_path())
-        cur = cur.parent_path();
-    return (cur / "PulseProtocol" / "JSON" / "layers.json").string();
+    return (FilePathToGame / "JSON" / "layers.json").string();
 }
 
 // -------------------------------------------------------------------------
@@ -640,4 +638,26 @@ std::vector<const char*> LayerRegistry::GetLayerNamesForCombo() const
     }
 
     return names;
+}
+
+//Undo Layer
+LayerRegistrySnapshot LayerRegistry::MakeSnapshot() const
+{
+    if (!m_initialized) {
+        const_cast<LayerRegistry*>(this)->Initialize();
+    }
+
+    LayerRegistrySnapshot snap;
+    snap.layers = m_layers;
+    return snap;
+}
+void LayerRegistry::RestoreSnapshot(LayerRegistrySnapshot const& snap)
+{
+    if (!m_initialized) {
+        Initialize();
+    }
+
+    m_layers = snap.layers;
+
+    SaveConfig(GetLayerConfigPath());
 }

@@ -52,6 +52,9 @@ public class NavigationButtons : Script
 
     private static bool wasEscPressed = false;
 
+    private static bool waitingForSceneTransition = false;
+    private static string pendingScene = "";
+
     public override void Update()
     {
         // Reset history when a new Play session starts (frame count resets to 0)
@@ -69,6 +72,9 @@ public class NavigationButtons : Script
 
             wasEscPressed = false;
             s_appliedGamePause = false;
+
+            waitingForSceneTransition = false;
+            pendingScene = "";
         }
 
         if (currentFrame != lastFrameCount)
@@ -82,6 +88,25 @@ public class NavigationButtons : Script
         TransformComponent t = GetTransform();
 
         string realScene = Scene.GetCurrentScene();
+
+        if (waitingForSceneTransition)
+        {
+            AudioComponent audio = GetAudio();
+
+            // Go next only after BGM has finished/stopped
+            if (!audio.IsBGMPlaying())
+            {
+                waitingForSceneTransition = false;
+
+                string targetScene = pendingScene;
+                pendingScene = "";
+
+                if (!string.IsNullOrEmpty(targetScene))
+                    NavigateTo(targetScene);
+            }
+
+            return;
+        }
 
         // Keep tracked scene in sync with the actual loaded scene (fixes Cutscene -> Level1 issue)
         if (!string.IsNullOrEmpty(realScene) && currentScene != realScene)
@@ -224,16 +249,23 @@ public class NavigationButtons : Script
             }
 
             // Apply actual pause state once
-        if (shouldGameBePaused != s_appliedGamePause)
-        {
-            Application.SetPaused(shouldGameBePaused);
+            if (shouldGameBePaused != s_appliedGamePause)
+            {
+                Application.SetPaused(shouldGameBePaused);
 
-            AudioComponent audio = GetAudio();
-            if (shouldGameBePaused) audio.PauseBGM();
-            else audio.ResumeBGM();
+                AudioComponent audio = GetAudio();
 
-            s_appliedGamePause = shouldGameBePaused;
-        }
+                if (shouldGameBePaused)
+                {
+                    audio.PauseBGM();
+                }
+                else
+                {
+                    audio.FadeInMusic(0.5f);
+                }
+
+                s_appliedGamePause = shouldGameBePaused;
+            }
         }
 
         string texLower = defaultTexture.ToLower();
@@ -272,8 +304,8 @@ public class NavigationButtons : Script
         float mx = input.WorldMouseX;
         float my = input.WorldMouseY;
 
-        bool isHovered = mx >= t.X - halfW && mx <= t.X + halfW &&
-                         my >= t.Y - halfH && my <= t.Y + halfH;
+        // DONT process hover when mouse is outside viewport.
+        bool isHovered = input.InGameViewport && mx >= t.X - halfW && mx <= t.X + halfW && my >= t.Y - halfH && my <= t.Y + halfH;
 
         if (isHovered && !isCurrentlyHovered)
         {
@@ -609,7 +641,12 @@ public class NavigationButtons : Script
 
         if (tex.Contains("new game") || tex.Contains("new_game") || tex.Contains("start"))
         {
-            NavigateTo("Cutscene");
+            if (!waitingForSceneTransition)
+            {
+                GetAudio().FadeOutMusic(0.4f);
+                waitingForSceneTransition = true;
+                pendingScene = "Cutscene";
+            }
             return;
         }
 

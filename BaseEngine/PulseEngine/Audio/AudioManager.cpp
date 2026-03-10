@@ -88,7 +88,18 @@ void AudioManager::RestartBGM()
             return;
         }
 
-        mCurrentBGMCh->setVolume(1.0f);
+        ResetBGMFade();
+
+        float vol = 1.0f;
+        if (mRegistry && !mCurrentBGMID.empty())
+        {
+            if (AudioResource const* ar = mRegistry->FindAudio(mCurrentBGMID))
+            {
+                vol = ar->volume;
+            }
+        }
+
+        mCurrentBGMCh->setVolume(clampto0and1(vol));
         // mCurrentBGMCh->setPaused(startPaused);
     }
 
@@ -195,25 +206,43 @@ void AudioManager::Initialize()
     // PlaySound("beat_placeholder");
     std::cout << "[AudioManager] AudioManager initialization completed with mixers.\n";
 
+
+    ResetBGMFade();
+    mHasLastAudioTick = false;
 } // end init
 
 void AudioManager::Update()
 {
-   // std::cout << "Processing AudioManager Update\n";
     if (!mSystem)
         return;
-    // ecs, audio component
-    // Audio Component -> Audio Source
-    // if (!Engine || !Engine->IsPlaying()) {
-    //     if (!Engine || !Engine->IsPlaying()) return;
-    // }
-    // else {
-    //     ProcessAudioSources(); // 
-    //     mSystem->update();
-    // }
-    mSystem->update(); 
-    if (!Engine || !Engine->IsPlaying()) return;
-    ProcessAudioSources();
+
+    using Clock = std::chrono::steady_clock;
+    auto now = Clock::now();
+
+    float dt = 0.0f;
+    if (!mHasLastAudioTick)
+    {
+        mLastAudioTick = now;
+        mHasLastAudioTick = true;
+    }
+    else
+    {
+        dt = std::chrono::duration<float>(now - mLastAudioTick).count();
+        mLastAudioTick = now;
+    }
+
+    // Always update fade, even in menus
+    UpdateBGMFade(dt);
+
+    // Only gameplay AudioSource processing should depend on play mode
+    if (Engine && Engine->IsPlaying())
+    {
+        ProcessAudioSources();
+    }
+    
+
+    // FMOD should still update every frame
+    mSystem->update();
 }
 
 void AudioManager::Shutdown()
@@ -399,7 +428,8 @@ bool AudioManager::PlayBGM(const std::string &id)
         vol = ar->volume;
     }
        
-    ch->setVolume(clampto0and1(vol * mMusicVol));
+    ResetBGMFade();
+    ch->setVolume(clampto0and1(vol));
 
     // book-keeping
     mBGMChannels[id] = ch;
@@ -417,6 +447,8 @@ void AudioManager::StopBGM()
         FMOD_CHECK(result, "StopBGM(): ");
         mCurrentBGMCh = nullptr;
     }
+
+    ResetBGMFade();
     std::cout << "[AudioManager] BGM stopped.\n";
 }
 void AudioManager::SetBGMVolume(float volume)
@@ -689,8 +721,9 @@ void AudioManager::applyMasterVolume()
 void AudioManager::applyMusicVolume()
 {
     if (mMusicGroup)
-        mMusicGroup->setVolume(clampto0and1(mMusicVol));
+        mMusicGroup->setVolume(clampto0and1(mMusicVol * mBGMFadeMultiplier));
 }
+
 void AudioManager::applySfxVolume()
 {
     if (mSfxGroup)
@@ -708,6 +741,8 @@ void AudioManager::PauseBGM()
         mCurrentBGMCh->setPaused(true);
         std::cout << "[AudioManager] BGM Paused\n";
     }
+
+    m_isFadingInBGM = false;
 }
 
 void AudioManager::ResumeBGM()
@@ -760,8 +795,8 @@ void AudioManager::PlayFromAudioSource(AudioSource& src) {
 
             if (ch)
             {
-                float baseVol = res->volume;              // volume from registry
-                float finalVol = clampto0and1(baseVol * mMusicVol * src.volume);
+                float baseVol = res->volume;
+                float finalVol = clampto0and1(baseVol * src.volume * mBGMFadeMultiplier);
                 ch->setVolume(finalVol);
                 ch->setMode(src.loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF);
             }
@@ -866,16 +901,9 @@ void AudioManager::ProcessAudioSources()
                 float base = res->volume;
                 float user = std::clamp(src.volume, 0.0f, 1.0f);
 
-                // Pick the correct group volume
-                float groupVol = 1.0f;
-                if (res->audiotype == "BGM")
-                    groupVol = mMusicVol;
-                else if (res->audiotype == "SFX")
-                    groupVol = mSfxVol;
+                float final = base * user;
 
-                float final = clampto0and1(base * groupVol * user);
-
-                src.channel->setVolume(final);
+                src.channel->setVolume(clampto0and1(final));
                 src.channel->setMode(src.loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF);
 
             }
@@ -920,6 +948,165 @@ void AudioManager::StopPlayingAllAudio() {
     {
         master->stop();
     }
+}
+
+void AudioManager::ResetBGMFade()
+{
+    mBGMFadeMultiplier = 1.0f;
+    mBGMFadeActive = false;
+    mStopBGMAfterFade = true;
+    mBGMFadeDuration = 0.0f;
+    mBGMFadeElapsed = 0.0f;
+    mBGMFadeStart = 1.0f;
+
+    applyMusicVolume();
+}
+
+void AudioManager::FadeOutCurrentBGM(float durationSeconds, bool stopAfterFade)
+{
+    if (!mSystem || !mCurrentBGMCh)
+    {
+        std::cout << "[AudioManager] FadeOutCurrentBGM: no current BGM channel\n";
+        return;
+    }
+
+    std::cout << "[AudioManager] FadeOutCurrentBGM called, duration = " << durationSeconds << "\n";
+
+    if (durationSeconds <= 0.0f)
+    {
+        mCurrentBGMCh->setVolume(0.0f);
+
+        if (stopAfterFade)
+            mCurrentBGMCh->stop();
+
+        return;
+    }
+
+    int sampleRate = 48000;
+    mSystem->getSoftwareFormat(&sampleRate, nullptr, nullptr);
+
+    unsigned long long dspClock = 0;
+    unsigned long long parentClock = 0;
+    mCurrentBGMCh->getDSPClock(&dspClock, &parentClock);
+
+    float currentVol = 1.0f;
+    mCurrentBGMCh->getVolume(&currentVol);
+
+    unsigned long long fadeEnd = parentClock + static_cast<unsigned long long>(durationSeconds * sampleRate);
+
+    // Clear old fade points in this range just in case
+    mCurrentBGMCh->removeFadePoints(parentClock, fadeEnd + sampleRate);
+
+    // Start at current volume now
+    mCurrentBGMCh->addFadePoint(parentClock, currentVol);
+
+    // End at 0 volume
+    mCurrentBGMCh->addFadePoint(fadeEnd, 0.0f);
+
+    // Stop channel exactly when fade finishes
+    if (stopAfterFade)
+    {
+        mCurrentBGMCh->setDelay(0, fadeEnd, true);
+    }
+}
+
+void AudioManager::UpdateBGMFade(float dt)
+{
+    if (!mBGMFadeActive) return;
+
+    mBGMFadeElapsed += (dt < 0.0f ? 0.0f : dt);
+
+    float t = 1.0f;
+    if (mBGMFadeDuration > 0.0001f)
+        t = clampto0and1(mBGMFadeElapsed / mBGMFadeDuration);
+
+    mBGMFadeMultiplier = mBGMFadeStart + (0.0f - mBGMFadeStart) * t;
+
+    // Apply fade on the MUSIC GROUP (affects whatever is playing)
+    applyMusicVolume();
+
+    if (t >= 1.0f)
+    {
+        mBGMFadeActive = false;
+
+        if (mStopBGMAfterFade)
+        {
+            StopBGM();
+            ResetBGMFade();
+        }
+    }
+}
+
+
+
+void AudioManager::CancelCurrentBGMFade()
+{
+    ResetBGMFade();
+
+    if (!mCurrentBGMCh)
+        return;
+
+    float baseVol = 1.0f;
+    if (mRegistry && !mCurrentBGMID.empty())
+    {
+        if (AudioResource const* ar = mRegistry->FindAudio(mCurrentBGMID))
+        {
+            baseVol = ar->volume;
+        }
+    }
+
+    mCurrentBGMCh->setVolume(clampto0and1(baseVol));
+}
+
+void AudioManager::FadeInCurrentBGM(float durationSeconds)
+{
+    if (!mSystem || !mMusicGroup || !mCurrentBGMCh)
+    {
+        std::cout << "[AudioManager] FadeInCurrentBGM: missing system/group/channel\n";
+        return;
+    }
+
+    // Cancel any old manual fade state
+    m_isFadingInBGM = false;
+    mBGMFadeMultiplier = 1.0f;
+
+    // Resume the paused BGM first
+    mCurrentBGMCh->setPaused(false);
+
+    float targetVol = clampto0and1(mMusicVol);
+
+    // If slider is already 0, there will be no audible fade
+    if (durationSeconds <= 0.0f)
+    {
+        mMusicGroup->setVolume(targetVol);
+        std::cout << "[AudioManager] FadeInCurrentBGM immediate -> targetVol = " << targetVol << "\n";
+        return;
+    }
+
+    int sampleRate = 48000;
+    mSystem->getSoftwareFormat(&sampleRate, nullptr, nullptr);
+
+    unsigned long long dspClock = 0;
+    unsigned long long parentClock = 0;
+    mMusicGroup->getDSPClock(&dspClock, &parentClock);
+
+    unsigned long long fadeEnd =
+        dspClock + static_cast<unsigned long long>(durationSeconds * sampleRate);
+
+    // Clear any old fade points around this time window
+    mMusicGroup->removeFadePoints(dspClock, fadeEnd + sampleRate);
+
+    // Start silent now
+    mMusicGroup->addFadePoint(dspClock, 0.0f);
+
+    // Fade up to the current music slider value
+    mMusicGroup->addFadePoint(fadeEnd, targetVol);
+
+    // Also set the final steady-state value
+    mMusicGroup->setVolume(targetVol);
+
+    std::cout << "[AudioManager] FadeInCurrentBGM scheduled -> targetVol = "
+              << targetVol << ", duration = " << durationSeconds << "\n";
 }
 
 /*

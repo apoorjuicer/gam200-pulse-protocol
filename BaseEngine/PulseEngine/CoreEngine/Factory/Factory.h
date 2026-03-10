@@ -41,6 +41,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 
+
 class DLL_API Factory
 {
 public: 
@@ -58,12 +59,13 @@ public:
 
 	// Save this entity into the json file, might make a save then delete function if needed.
 	bool SaveEntityToJson(Entity entity, std::filesystem::path const& path);
-
 private:
 
 	// calls onto prefab json file only, it will just load what the param PrefabName is.
 	//bool LoadPrefab(Entity entity, std::string const& PrefabName);
-	std::string PrefabPathway = "../../PulseProtocol/Assets/Prefabs";
+
+	// set at runtime in init from FilePathToGame
+	std::string PrefabPathway; 
 
 	CoreEngine* m_coreEngine = nullptr;
 };

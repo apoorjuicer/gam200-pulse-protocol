@@ -41,9 +41,14 @@ static std::string LoadFile(const char* relativeToGraphicsShader)
 	else
 	{
 		auto baseEngineDir = currentDir;
-		while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+		while (baseEngineDir.filename() != "BaseEngine")
 		{
-			baseEngineDir = baseEngineDir.parent_path();
+			auto parent = baseEngineDir.parent_path();
+			if (parent.empty() || parent == baseEngineDir)
+			{
+				break;
+			}
+			baseEngineDir = parent;
 		}
 		basePath = baseEngineDir / "PulseEngine";  // Dev
 	}
@@ -402,7 +407,7 @@ void GLApp::draw(std::set<Entity> entities, LayerMask includeMask, float deltaTi
 
 }
 
-void GLApp::drawGlowing(std::set<Entity>& entities, float dt)
+void GLApp::drawGlowing(std::set<Entity>& entities, float /*dt*/)
 {
 	glm::mat3 PanZoom = BuildPanZoomNDC(Framework::GameState::IsPlaying() ? gGameCamera : gEditorCamera);
 	auto* g_coordinator = Coordinator::GetInstance();

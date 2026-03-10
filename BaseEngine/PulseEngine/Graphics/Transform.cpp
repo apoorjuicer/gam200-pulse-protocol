@@ -16,6 +16,7 @@
 /******************************************************************************/
 #include "Transform.h"
 #include "Math/math.h"
+#include "CoreEngine/Core/CoreEngine.h" // for FilePathToGame
 
 namespace Framework
 {
@@ -177,8 +178,7 @@ namespace Framework
 
 		// Ensure directory exists
 		namespace fs = std::filesystem;
-		fs::create_directories("../../PulseProtocol/JSON");
-		// fs::create_directories("../JSON");
+		fs::create_directories(FilePathToGame / "JSON");
 
 		std::ofstream ofs(path);
 		if (!ofs.is_open())
@@ -222,5 +222,16 @@ namespace Framework
 		t.Deserialize(d["transform"]);
 		return true;
 	}
+
+
+	std::ostream& operator<<(std::ostream& os, Transform const& t) {
+		os << "[Transform Component] contains these values\n";
+		os << "Transform pos:" << t.Pos << "\n";
+		os << "Transform scale:" << t.Scale << "\n";
+		os << "Transform rot:" << t.Rotation << "\n";
+
+		return os;
+	}
+
 
 } // end of namespace

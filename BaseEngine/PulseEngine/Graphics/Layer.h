@@ -2,7 +2,8 @@
 /**
  * @file        Layer.h
  * @project     Pulse Protocol
- * @author      Goh Pin Kai
+ * @author      Goh Pin Kai (primary) - 90%
+ * @author      Ban Kai Wei Benjamin (secondary) - 10%
  * 
  * @brief       Defines the rendering layer system used to control draw order.
  *              Updated to use LayerRegistry for editable layer names.
@@ -21,6 +22,18 @@ struct LayerTag {
     int sortingLayer = 1; // 0=Background, 1=World, 2=UI (for render order)
     int orderInLayer = 0;  // Higher = draws later = appears in front
     float z = 0.f;       // Depth offset for fine-grained ordering
+
+    bool operator==(LayerTag const& other) const {
+        return
+            mask == other.mask &&
+            sortingLayer == other.sortingLayer &&
+            orderInLayer == other.orderInLayer &&
+            z == other.z;
+    }
+    bool operator!=(LayerTag const& other) const
+    {
+        return !(*this == other);
+    }
 
     void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const {
         using namespace rapidjson;

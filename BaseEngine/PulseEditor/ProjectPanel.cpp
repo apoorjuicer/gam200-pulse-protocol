@@ -40,11 +40,14 @@
 #include "FolderValidation.h"
 #include "SnapShot.h"
 
+#include "CoreEngine/Core/CoreEngine.h"      // for FilePathToGame
 #include "CoreEngine/Asset/AssetsManager.h"
 #include "CoreEngine/ECS/Coordinator.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Transform.h"
 #include "Graphics/Layer.h"
+#include "UndoHelper.h"
+
 
 namespace PulseEditor
 {
@@ -83,6 +86,16 @@ namespace PulseEditor
     static std::string FindAssetRoot()
     {
         namespace fs = std::filesystem;
+
+        // Just use FilePathToGame if its alr set
+        if (!FilePathToGame.empty())
+        {
+            fs::path assetPath = FilePathToGame / "Assets";
+            if (fs::exists(assetPath) && fs::is_directory(assetPath))
+            {
+                return assetPath.string();
+            }
+        }
 
         fs::path cwd = fs::current_path();
         std::string cwdStr = cwd.string();
@@ -541,14 +554,17 @@ namespace PulseEditor
                             // ═══════════════════════════════════════════════════════════════
                             // UNDO: Snapshot BEFORE texture change
                             // ═══════════════════════════════════════════════════════════════
-                            Entity e = selectedEntity;
-                            EntitySnapshot before = MakeEntitySnapshot(e);
-                            mUndo.Push([e, before]() {
-                                RestoreEntityFromSnapshot(e, before);
-                                });
+                           // Entity e = selectedEntity;
+                            // Snapshot BEFORE change
+                           // EntitySnapshot before = MakeEntitySnapshot(e);
+                            //mUndo.Push([e, before]() {
+                            //    RestoreEntityFromSnapshot(e, before);
+                            //    });
+
+
 
                             auto& rend = coord->GetComponent<Framework::Renderable>(selectedEntity);
-
+                            Framework::Renderable before = rend;
                             namespace fs = std::filesystem;
 
                             // Use GetRelativeAssetPath to get the correct absolute path
@@ -601,6 +617,18 @@ namespace PulseEditor
                                     std::cout << "[ProjectPanel] Auto-set Sorting Layer: World (1)" << std::endl;
                                 }
                             }
+
+                            // Snapshot AFTER change
+ 
+                            //// Push undo/redo action
+                            //mUndo.Push(UndoManager::Action{
+                            //    .undo = [e, before]() { RestoreEntityFromSnapshot(e, before); },
+                            //    .redo = [e, after]() { RestoreEntityFromSnapshot(e, after);  }
+                            //    });
+
+
+                            Framework::Renderable after = rend;
+                            PushRenderableEdit(mUndo, selectedHandle, before, after);
 
                             std::cout << "[ProjectPanel] Assigned texture to entity " << selectedEntity << std::endl;
                         }

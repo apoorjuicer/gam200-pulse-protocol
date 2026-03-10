@@ -1,0 +1,9 @@
+{
+    "GameName": "CheeseBurger",
+    "config": {
+        "WindowWidth": 1600,
+        "WindowHeight": 900,
+        "ConfigPath": "",
+        "FirstScene": "FirstScene"
+    }
+}

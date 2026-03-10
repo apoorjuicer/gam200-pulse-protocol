@@ -8,8 +8,8 @@
  *             and JSON serialization of game scenes.
  *
  *             Public Interface:
- *             - Init(): Loads StartingScene (configured to Level1.json), sets initial
- *               CurrentScene and PreviousScene values
+ *             - Init(): Reads "FirstScene" from config.json and loads it. Falls back to FirstScene.json if not set or missing.
+ *               Sets initial CurrentScene and PreviousScene values
  *             - Update(float dt): Passive scene state tracking, monitors scene changes
  *             - LoadSceneFromJson(path): Parses JSON scene file, creates entities with
  *               components, auto-stops game during transition, registers GUI buttons
@@ -130,7 +130,6 @@ private:
 	std::string LastScene;			// For ESC navigation - the scene we came FROM
 	std::vector<Entity> SceneEntityList;
 
-	std::string StartingScene = "PulseProtocol/JSON/MainMenu.json"; // make this into cmake in the future, if they no say in the config, then make a blank screen.
 
 	void Deserialize(const rapidjson::Value& in);
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;

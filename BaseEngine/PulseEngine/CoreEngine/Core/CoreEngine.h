@@ -44,7 +44,7 @@ public:
 	CoreEngine();
 	~CoreEngine();
 
-	enum class PauseSource { Game, Editor };
+	enum class PauseSource { Game, Editor, Focus };
 
 	// Engine 3 states
 	void Init();
@@ -111,6 +111,7 @@ private:
 	bool DebugMode = false;
 	unsigned LastTime; // The last time the game was updated
 	bool m_paused = true;
+	bool m_manualPause = false; // set when the player explicitly pauses via ESC
 	bool m_isPlaying = false;
 	std::string m_originalScenePath = "";
 	void RenderDebugDraw();
@@ -157,14 +158,18 @@ public:
 	template<typename FunctionType>
 	FunctionType GetFunctionPtr(const std::string_view& assemblyName, const std::string_view& typeName, const std::string_view& functionName)
 	{
+		const std::string a{ assemblyName };
+		const std::string t{ typeName };
+		const std::string f{ functionName };
+
 		FunctionType managedDelegate = nullptr;
 		int result = createManagedDelegate
 		(
 			hostHandle,
 			domainId,
-			assemblyName.data(),
-			typeName.data(),
-			functionName.data(),
+			a.c_str(),
+			t.c_str(),
+			f.c_str(),
 			reinterpret_cast<void**>(&managedDelegate)
 		);
 		// Check if it failed
@@ -195,3 +200,4 @@ extern DLL_API AssetsManager mAssets;
 extern DLL_API int WindowWidth;
 extern DLL_API int WindowHeight;
 extern DLL_API double g_scrollY;
+extern DLL_API std::filesystem::path FilePathToGame; // File path to game folder.

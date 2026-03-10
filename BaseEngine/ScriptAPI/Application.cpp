@@ -47,7 +47,7 @@ namespace ScriptAPI
     {
         if (Engine)
         {
-            Engine->SetPaused(paused);
+            Engine->SetPaused(paused, CoreEngine::PauseSource::Game);
         }
     }
 

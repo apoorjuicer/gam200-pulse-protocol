@@ -2,7 +2,8 @@
 /**
  * @file        HierarchyHelpers.h
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En (primary) - 90%
+ * @author      Ban Kai Wei Benjamin (secondary) - 10%
  * @brief       Helper functions for managing entity parent-child relationships.
  *              Provides utilities for setting parents, getting children,
  *              and checking hierarchy structure.
@@ -289,5 +290,26 @@ namespace HierarchyHelpers
         }
 
         return depth;
+    }
+
+    // =========================================================================
+    // Collec tSubtree Entities
+    // Collect all the children
+    // =========================================================================
+    inline void CollectSubtreeEntities(Entity entity, std::vector<Entity>& outEntities)
+    {
+        auto* g = Coordinator::GetInstance();
+        if (!g) return;
+
+        if (g->HasComponent<Children>(entity))
+        {
+            for (Entity child : g->GetComponent<Children>(entity).children)
+            {
+                CollectSubtreeEntities(child, outEntities);
+            }
+        }
+
+        // children first, parent last
+        outEntities.push_back(entity);
     }
 }

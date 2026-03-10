@@ -66,6 +66,7 @@ public:
 	bool isDebugCirclesFilledEnabled() const { return debugCirclesFilledEnabled; }
 	bool isDebugPointsEnabled() const { return debugPointsEnabled; }
 	bool isDebugGridEnabled() const { return debugGridEnabled; }
+	bool isDebugCollisionEnabled() const { return debugCollisionEnabled; }
 	bool ConsumeStressToggleRequest() {
 		bool out = stressToggleRequested;
 		stressToggleRequested = false;
@@ -108,8 +109,9 @@ private:
 	bool debugCirclesFilledEnabled = false;
 	bool debugPointsEnabled = false;
 	bool debugGridEnabled = false;
-	bool debugToggleKeyPressed[6] = { false };
+	bool debugToggleKeyPressed[7] = { false };
 	bool stressToggleRequested = false;
+	bool debugCollisionEnabled = false;
 
 	// for raw input functions
 	void updateInputStates();
