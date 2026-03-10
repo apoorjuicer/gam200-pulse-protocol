@@ -606,13 +606,14 @@ public class NavigationButtons : Script
         {
             openedSettingsFromPause = true;
             ShowPauseOverlay = false;
-            Application.SetPaused(false);
             ShowSettingsOverlay = true;
             return;
         }
 
         if (tex.Contains("restartyes"))
         {
+            Application.SetPaused(false);
+
             if (!string.IsNullOrEmpty(LastGameplayScene))
             {
                 currentScene = LastGameplayScene;
