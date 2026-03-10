@@ -24,6 +24,7 @@ public class Conductor : Script
     private bool initialized = false;
     private float audioTimeAccumulator = 0f; // Total time
     private float prevAudioPos = 0f;         // Last known FMOD pos
+    private float cachedAdjustedTime = 0f;   // Computed once per frame, shared by all callers
     public float GetBeatDuration()
     {
         return 60.0f / BPM;
@@ -33,9 +34,15 @@ public class Conductor : Script
     // LatencyCalibrator will override this thing AFTER test so every new Conductor instance reads it on init.
     public static float CalibratedOffset = 0.125f;
 
+    // Set by VisualLatencyCalibrator — how many seconds to pre-fire visuals to compensate for display pipeline lag.
+    public static float CalibratedDisplayOffset = 0f;
 
     // Compensates for FMOD output buffer lag (~90ms hardware delay).
     public float MusicLatencyOffset = 0.125f;
+
+    // Compensates for how many seconds the display pipeline delays rendered frames.
+    // Positive = pre-fire visuals earlier to compensate for a slow monitor / VSync frame-hold.
+    public float DisplayLatencyOffset = 0f;
 
     // Compensates for where beat 1 actually starts in the BGM audio file.
     public float BeatStartOffset = 0.75f;
@@ -64,7 +71,8 @@ public class Conductor : Script
 
         if (!initialized)
         {
-            MusicLatencyOffset = CalibratedOffset;
+            MusicLatencyOffset   = CalibratedOffset;
+            DisplayLatencyOffset = CalibratedDisplayOffset;
             secondsPerBeat = 60.0f / BPM;
             songTime = 0.0f;
             nextHalfBeat = secondsPerBeat * 0.5f;
@@ -109,8 +117,10 @@ public class Conductor : Script
             songTime += dt; 
         }
 
-        // Apply both offsets: hardware latency + per-song beat phase
-        float adjustedTime = songTime - MusicLatencyOffset - BeatStartOffset; // use this 2 check the hlaf beat instead
+        // Apply both offsets: hardware latency + per-song beat phase.
+        // Cached so VisualBeatSystem, ComboSystem, etc. all read the same value this frame.
+        cachedAdjustedTime = songTime - MusicLatencyOffset - BeatStartOffset;
+        float adjustedTime = cachedAdjustedTime;
 
         int currentBeat = (int)Math.Floor(adjustedTime / secondsPerBeat);
 
@@ -132,14 +142,17 @@ public class Conductor : Script
     public int GetCurrentBeat() => lastBeat;
     public float GetSongTime() => songTime;
 
+    public float GetAdjustedSongTime() => cachedAdjustedTime;
 
-    public float GetAdjustedSongTime()
-    {
-        float audioPos = (float)GetAudio().GetBGMPosition();
-        float t = (audioPos > 0f) ? audioTimeAccumulator + audioPos : songTime;
-        return t - MusicLatencyOffset - BeatStartOffset;
-    }
+    // Use this in VisualBeatSystem and any other purely-visual beat query.
+    // Pre-fires the phase by DisplayLatencyOffset to compensate for monitor/VSync delay.
+    public float GetVisualAdjustedSongTime() => cachedAdjustedTime + DisplayLatencyOffset;
+
     public float SecondsPerBeat => secondsPerBeat;
+
+    // True once FMOD has started reporting a position > 0.
+    // Use this to gate any system that needs a stable, audio-driven beat clock.
+    public bool IsFMODSynced => prevAudioPos > 0f;
 
  
     public void ResetClock()
@@ -149,6 +162,7 @@ public class Conductor : Script
         nextHalfBeat = secondsPerBeat * 0.5f;
         audioTimeAccumulator = 0f;
         prevAudioPos = 0f;
+        cachedAdjustedTime = 0f;
         Console.WriteLine("[Conductor] Clock reset — syncing to audio start");
         Console.WriteLine("[Conductor] ResetClock called from: " + Environment.StackTrace);
     }

@@ -2,103 +2,150 @@ using System;
 using System.Collections.Generic;
 using ScriptAPI;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// LatencyCalibrator — synchronization-based audio latency measurement.
+//
+// HOW IT WORKS (not reaction time):
+//   A metronome ticks at CalibBPM.  The player taps ALONG with the beat
+//   (like clapping to music), not in response to each individual click.
+//   Each tap is snapped to the nearest scheduled beat on the grid.
+//   The signed delta (tapTime − nearestBeatTime) represents how much the
+//   audio is delayed: +20 ms means the player heard the click 20 ms late,
+//   so MusicLatencyOffset should grow by 20 ms.
+//
+// DIRECTION:
+//   avgDelta > 0  →  player taps late  →  audio delayed  →  increase offset
+//   avgDelta < 0  →  player taps early →  audio arrives early → decrease offset
+// ─────────────────────────────────────────────────────────────────────────────
 public class LatencyCalibrator : Script
 {
     public static LatencyCalibrator? Instance { get; private set; }
 
     // -------------------------------------------------------------------------
-    // Tunables 
+    // Tunables
     // -------------------------------------------------------------------------
-    public string PingSFXName   = "SFX_Border_Beat"; // SFX id to fire as the ping cue
-    public int    SampleCount   = 12;           // presses to average
-    public float  PingIntervalBeats = 2f;       // how often to ping (in beats)
-    public string NextScene     = "MainMenu";   // scene to load when done
+    public string PingSFXName  = "SFX_Border_Beat"; // metronome click SFX
+    public int    SampleCount  = 12;                // taps to record (after warm-up)
+    public float  CalibBPM     = 60f;               // 60 BPM = 1 tick/s, easy to sync with
+    public int    WarmupBeats  = 4;                 // taps to discard while player settles into groove
+    public string NextScene    = "MainMenu";
 
     // -------------------------------------------------------------------------
     // Internal state
     // -------------------------------------------------------------------------
-    private bool  calibrating   = false;
-    private bool  done          = false;
-    private float nextPingBeat  = 0f;           // next beat index to ping on
-    private float lastPingTime  = -1f;          // songTime when last ping fired
-    private List<float> offsets = new List<float>();
-    private float resultOffset  = 0f;
-    private float lastSampleMs  = -1f;          // most recent recorded sample in ms
-    private float stdDevMs      = 0f;           // std dev of all samples in ms
+    private bool  calibrating  = false;
+    private bool  done         = false;
+    private float beatInterval = 1.0f;   // seconds per calibration beat (= 60 / CalibBPM)
+    private float calibOrigin  = 0f;     // raw songTime of beat 0 on the calibration grid
+    private float nextPingTime = 0f;     // raw songTime of the next scheduled tick
+    private int   warmupLeft   = 0;      // warm-up taps remaining
+    private float lastTapTime  = -999f;  // debounce: raw songTime of most recent tap
+    private List<float> signedDeltas = new List<float>();
+    private float resultOffset = 0f;    // final MusicLatencyOffset written to Conductor
+    private float lastSampleMs = 0f;    // most recent signed delta in ms (shown in UI)
+    private float stdDevMs     = 0f;
 
     public override void Update()
     {
         Instance = this;
-
         if (done) return;
 
-        // no countdown, go conductor go
+        // Allow Conductor to tick even before normal gameplay starts
         GameStart.Ready = true;
 
-        // Press Enter/Return to start calibration
+        if (Conductor.Instance == null) return;
+
+        // Use raw song time so we measure absolute audio delay,
+        // independent of the MusicLatencyOffset we're trying to calibrate.
+        float songTime = Conductor.Instance.GetSongTime();
+
+        // ── Wait for player to press Space / Enter to begin ──────────────────
         if (!calibrating)
         {
-            if (Conductor.Instance == null) return;
-
             var inp = GetInput();
-            if (inp.IsKeyTriggered(257) || inp.IsKeyTriggered(32)) // Enter=257, Space=32
+            if (inp.IsKeyTriggered(257) || inp.IsKeyTriggered(32)) // Enter / Space
             {
-                calibrating = true;
-                offsets.Clear();
-                nextPingBeat = Conductor.Instance.GetCurrentBeat() + PingIntervalBeats;
-                Console.WriteLine("[LatencyCalibrator] Starting — press SPACE each time you HEAR the ping.");
+                beatInterval = 60f / CalibBPM;
+                calibOrigin  = songTime + beatInterval; // first tick 1 beat from now
+                nextPingTime = calibOrigin;
+                warmupLeft   = WarmupBeats;
+                calibrating  = true;
+                signedDeltas.Clear();
+                Console.WriteLine($"[LatencyCalibrator] Starting metronome at {CalibBPM} BPM." +
+                                  $" Tap SPACE in time. First {WarmupBeats} taps are warm-up.");
             }
             return;
         }
 
-        if (Conductor.Instance == null) return;
-        float songTime   = Conductor.Instance.GetSongTime();
-        float spb        = Conductor.Instance.SecondsPerBeat;
-        float currentBeat = songTime / spb;    // raw beat, no offset applied
-
-        // Fire ping when we reach the scheduled beat
-        if (currentBeat >= nextPingBeat)
+        // ── Fire metronome ticks continuously ────────────────────────────────
+        // Use while so we never fall behind if a frame drops.
+        while (songTime >= nextPingTime)
         {
-            lastPingTime = songTime;
             GetAudio().PlaySFX(PingSFXName);
-            nextPingBeat += PingIntervalBeats;
-            Console.WriteLine($"[LatencyCalibrator] Ping fired at songTime={songTime:F3}s — press SPACE when you HEAR it!");
+            Console.WriteLine($"[LatencyCalibrator] Tick at t={nextPingTime:F3}s");
+            nextPingTime += beatInterval;
         }
 
-        // Record a sample when player pressess Space
-        if (GetInput().IsKeyTriggered(32) && lastPingTime >= 0f) // Space=32
+        // ── Record a tap ─────────────────────────────────────────────────────
+        if (GetInput().IsKeyTriggered(32)) // Space
         {
-            float offset = songTime - lastPingTime;
+            // Debounce: ignore a tap that arrives within half a beat of the last one.
+            // This prevents accidental double-taps counting as two samples.
+            if (songTime - lastTapTime < beatInterval * 0.5f)
+                return;
 
-            // Ignore presses that arrive before the ping or suspiciously late (> 1 beat)
-            if (offset > 0f && offset < spb)
+            lastTapTime = songTime;
+
+            if (warmupLeft > 0)
             {
-                offsets.Add(offset);
-                lastSampleMs = offset * 1000f;
-                Console.WriteLine($"[LatencyCalibrator] Sample {offsets.Count}/{SampleCount}: offset={lastSampleMs:F0}ms");
-                lastPingTime = -1f; // reset so one ping = one sample
+                warmupLeft--;
+                Console.WriteLine($"[LatencyCalibrator] Warm-up tap ({WarmupBeats - warmupLeft}/{WarmupBeats}) — not recorded");
+            }
+            else
+            {
+                // Snap to the nearest beat on the grid.
+                // elapsed is measured from calibOrigin (beat 0 of the grid).
+                float elapsed     = songTime - calibOrigin;
+                float nearestIdx  = (float)Math.Round(elapsed / beatInterval);
+                float nearestBeat = calibOrigin + nearestIdx * beatInterval;
+                float signedDelta = songTime - nearestBeat;
+
+                signedDeltas.Add(signedDelta);
+                lastSampleMs = signedDelta * 1000f;
+
+                string dir = signedDelta >= 0f ? "late" : "early";
+                Console.WriteLine($"[LatencyCalibrator] Sample {signedDeltas.Count}/{SampleCount}: " +
+                                  $"{lastSampleMs:+0.0;-0.0;0}ms ({dir})");
             }
         }
 
-        // ENOUGHHHHH, take the amount and give it to the next person (condcutor)
-        if (offsets.Count >= SampleCount)
+        // ── Enough samples: compute and apply result ──────────────────────────
+        if (signedDeltas.Count >= SampleCount)
         {
             float sum = 0f;
-            foreach (float o in offsets) sum += o;
-            resultOffset = sum / offsets.Count;
+            foreach (float d in signedDeltas) sum += d;
+            float avgDelta = sum / signedDeltas.Count;
 
-            // Compute std dev
             float variance = 0f;
-            foreach (float o in offsets) variance += (o * 1000f - resultOffset * 1000f) * (o * 1000f - resultOffset * 1000f);
-            stdDevMs = (float)Math.Sqrt(variance / offsets.Count);
+            foreach (float d in signedDeltas)
+            {
+                float diff = d * 1000f - avgDelta * 1000f;
+                variance += diff * diff;
+            }
+            stdDevMs = (float)Math.Sqrt(variance / signedDeltas.Count);
 
+            // Shift the existing calibrated offset by the measured average delay.
+            // Clamp to 0 so we never use a negative offset.
+            resultOffset = Math.Max(0f, Conductor.CalibratedOffset + avgDelta);
             Conductor.CalibratedOffset = resultOffset;
             if (Conductor.Instance != null)
                 Conductor.Instance.MusicLatencyOffset = resultOffset;
 
-            Console.WriteLine($"[LatencyCalibrator] Done! Average offset = {resultOffset*1000f:F0}ms | StdDev = {stdDevMs:F0}ms — applied to Conductor.");
+            Console.WriteLine($"[LatencyCalibrator] Done! " +
+                              $"AvgDelta={avgDelta*1000f:+0.0;-0.0;0}ms | " +
+                              $"StdDev={stdDevMs:F0}ms | " +
+                              $"NewOffset={resultOffset*1000f:F0}ms — applied to Conductor.");
             done = true;
-            // change scene
         }
     }
 
@@ -107,31 +154,28 @@ public class LatencyCalibrator : Script
         if (Instance == this) Instance = null;
     }
 
-    // Call this from a UI "Skip" button script if player wants to skip calibration
     public void Skip()
     {
         Console.WriteLine("[LatencyCalibrator] Skipped — keeping existing MusicLatencyOffset.");
         Scene.LoadScene(NextScene);
     }
 
-    // Read-only access for display/UI scripts
-    public bool IsCalibrating      => calibrating;
-    public bool IsDone             => done;
-    public int  GetSamplesDone()   => offsets.Count;
-    public int  GetSamplesNeeded() => SampleCount;
-    public float GetResultMs()     => resultOffset * 1000f;
-    public float GetLastSampleMs() => lastSampleMs;
-    public float GetStdDevMs()     => stdDevMs;
+    // Read-only access for UI scripts (API unchanged)
+    public bool  IsCalibrating      => calibrating;
+    public bool  IsDone             => done;
+    public int   GetSamplesDone()   => signedDeltas.Count;
+    public int   GetSamplesNeeded() => SampleCount;
+    public float GetResultMs()      => resultOffset * 1000f;
+    public float GetLastSampleMs()  => lastSampleMs;   // signed: + = late, - = early
+    public float GetStdDevMs()      => stdDevMs;
 
-    // Returns a short rating string based on std dev
-    // < 25ms = Excellent, 25-50ms = Good, 50-80ms = Fair, > 80ms = Inconsistent
     public string GetConsistencyRating()
     {
-        if (stdDevMs < 25f)  return "Excellent";
-        if (stdDevMs < 50f)  return "Good";
-        if (stdDevMs < 80f)  return "Fair";
+        if (stdDevMs < 15f) return "Excellent";
+        if (stdDevMs < 30f) return "Good";
+        if (stdDevMs < 50f) return "Fair";
         return "Inconsistent";
     }
 
-    public bool ShouldRetry() => stdDevMs >= 80f;
+    public bool ShouldRetry() => stdDevMs >= 50f;
 }

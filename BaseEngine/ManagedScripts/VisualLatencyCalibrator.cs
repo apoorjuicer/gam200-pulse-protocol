@@ -1,0 +1,202 @@
+using System;
+using ScriptAPI;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VisualLatencyCalibrator — interactive audio-visual sync offset adjustment.
+//
+// HOW IT WORKS:
+//   A metronome click fires on every beat, timed to land on the exact same
+//   raw-time grid as the border pulse produced by VisualBeatSystem.
+//   When previewOffset = 0, click and border peak are simultaneous.
+//   As the player presses RIGHT (+offset), the border fires EARLIER than the
+//   click (compensating for display lag).  As they press LEFT (−offset) the
+//   border fires LATER.  They adjust until click and border feel simultaneous,
+//   then confirm.  The saved value is Conductor.DisplayLatencyOffset.
+//
+// KEY DIRECTIONS:
+//   RIGHT (key 262) → border fires EARLIER → "I see the flash too late"
+//   LEFT  (key 263) → border fires LATER   → "I see the flash too early"
+//
+// WHAT TO LOOK/LISTEN FOR:
+//   One audio click per border pulse (always 1:1 — uses Conductor BPM).
+//   Adjust until the border brightens at exactly the same instant as the click.
+//
+// SCENE SETUP:
+//   "CalibrationSystem"  — Conductor + VisualLatencyCalibrator  (needs AudioComponent)
+//   "CalibBorder"        — VisualBeatSystem                     (needs SpriteComponent)
+//   "OffsetText"         — VisualCalibrationDisplay + TextComponent
+//   "InstructionText"    — VisualCalibrationInstructionText + TextComponent
+// ─────────────────────────────────────────────────────────────────────────────
+public class VisualLatencyCalibrator : Script
+{
+    public static VisualLatencyCalibrator? Instance { get; private set; }
+
+    // -------------------------------------------------------------------------
+    // Tunables
+    // -------------------------------------------------------------------------
+    public string PingSFXName  = "SFX_Border_Beat"; // audio click SFX (same as VisualBeatSystem uses)
+    public float  AdjustStepMs = 5f;                // ms shifted per key press / held-key step
+    public float  MaxOffsetMs  = 200f;              // clamp range in both directions
+    public string NextScene    = "MainMenu";
+
+    // GLFW key codes
+    private const int KeyRight = 262;
+    private const int KeyLeft  = 263;
+    private const int KeyEnter = 257;
+    private const int KeySpace = 32;
+
+    // -------------------------------------------------------------------------
+    // Internal state
+    // -------------------------------------------------------------------------
+    private bool  adjusting      = false;
+    private bool  done           = false;
+    private float beatInterval   = 0.5f;   // set from Conductor.SecondsPerBeat on start
+    private float nextAudioTime  = 0f;     // raw songTime of next audio tick
+    private float previewOffset  = 0f;     // written live to Conductor.DisplayLatencyOffset each frame
+    private float originalOffset = 0f;     // saved on start so Skip() can revert
+    private float timeSinceStart = 0f;     // guard against immediate re-confirm
+
+    // Held-key auto-repeat
+    private float rightHeld = 0f;
+    private float leftHeld  = 0f;
+    private const float HoldDelay = 0.35f;
+    private const float HoldRate  = 0.06f;
+
+    public override void Update()
+    {
+        Instance = this;
+        if (done) return;
+
+        // Allow Conductor to tick in this scene
+        GameStart.Ready = true;
+
+        if (Conductor.Instance == null) return;
+
+        float spb = Conductor.Instance.SecondsPerBeat;
+        if (spb <= 0f) return; // Conductor not yet initialized
+
+        float songTime = Conductor.Instance.GetSongTime();
+        float dt       = Time.DeltaTime;
+
+        // ── Wait for player to press Enter / Space ────────────────────────────
+        if (!adjusting)
+        {
+            var inp = GetInput();
+            if (inp.IsKeyTriggered(KeyEnter) || inp.IsKeyTriggered(KeySpace))
+            {
+                // Match the audio click rate to Conductor BPM so there is
+                // exactly ONE click per border pulse — makes the offset obvious.
+                beatInterval = spb;
+
+                // Align the audio click grid to the visual beat grid so that
+                // when previewOffset = 0, click and border peak are simultaneous.
+                //
+                // Visual peaks when:
+                //   cachedAdjustedTime + DisplayLatencyOffset = N * spb
+                //   → rawSongTime = N * spb + (MusicLatencyOffset + BeatStartOffset) − previewOffset
+                //
+                // rawToAdj = rawSongTime − cachedAdjustedTime = MusicLatencyOffset + BeatStartOffset
+                //
+                float adjNow     = Conductor.Instance.GetAdjustedSongTime();
+                float rawToAdj   = songTime - adjNow;   // = MusicLatencyOffset + BeatStartOffset
+
+                // Next visual beat in adjusted-time space (skip the current beat with +epsilon)
+                float nextVisAdj = (float)Math.Ceiling(adjNow / spb + 0.001f) * spb;
+                float nextVisRaw = nextVisAdj + rawToAdj; // same instant in raw songTime (at offset=0)
+
+                nextAudioTime  = nextVisRaw;  // first click fires with the first visual peak
+                originalOffset = Conductor.CalibratedDisplayOffset;
+                previewOffset  = originalOffset;
+                timeSinceStart = 0f;
+                adjusting      = true;
+
+                Console.WriteLine($"[VisualLatencyCalibrator] Starting at {60f / spb:F0} BPM. " +
+                                  $"Current offset: {previewOffset * 1000f:F0} ms. " +
+                                  $"RIGHT = border earlier | LEFT = border later | ENTER = confirm.");
+            }
+            return;
+        }
+
+        timeSinceStart += dt;
+
+        // ── Push previewOffset into Conductor every frame so VisualBeatSystem
+        //    reflects the live adjustment in real-time ───────────────────────
+        Conductor.Instance.DisplayLatencyOffset = previewOffset;
+
+        // ── Fire audio tick continuously on the fixed grid ────────────────────
+        while (songTime >= nextAudioTime)
+        {
+            GetAudio().PlaySFX(PingSFXName);
+            nextAudioTime += beatInterval;
+        }
+
+        // ── Arrow key adjustment with held-key auto-repeat ────────────────────
+        float stepS = AdjustStepMs / 1000f;
+        float maxS  = MaxOffsetMs  / 1000f;
+        var   input = GetInput();
+
+        bool rightDown = input.IsKeyPressed(KeyRight);
+        bool leftDown  = input.IsKeyPressed(KeyLeft);
+
+        rightHeld = rightDown ? rightHeld + dt : 0f;
+        leftHeld  = leftDown  ? leftHeld  + dt : 0f;
+
+        bool stepRight = input.IsKeyTriggered(KeyRight)
+                         || (rightHeld > HoldDelay && rightHeld % HoldRate < dt);
+        bool stepLeft  = input.IsKeyTriggered(KeyLeft)
+                         || (leftHeld  > HoldDelay && leftHeld  % HoldRate < dt);
+
+        if (stepRight)
+        {
+            previewOffset = Math.Min(maxS, previewOffset + stepS);
+            Console.WriteLine($"[VisualLatencyCalibrator] Offset: {previewOffset * 1000f:+0.0;-0.0;0} ms  (border earlier)");
+        }
+        if (stepLeft)
+        {
+            previewOffset = Math.Max(-maxS, previewOffset - stepS);
+            Console.WriteLine($"[VisualLatencyCalibrator] Offset: {previewOffset * 1000f:+0.0;-0.0;0} ms  (border later)");
+        }
+
+        // ── Confirm (1 s cooldown prevents the start-press from confirming) ───
+        if (timeSinceStart > 1.0f &&
+            (input.IsKeyTriggered(KeyEnter) || input.IsKeyTriggered(KeySpace)))
+        {
+            Conductor.CalibratedDisplayOffset       = previewOffset;
+            Conductor.Instance.DisplayLatencyOffset = previewOffset;
+            Console.WriteLine($"[VisualLatencyCalibrator] Confirmed! " +
+                              $"DisplayLatencyOffset = {previewOffset * 1000f:F0} ms saved.");
+            done = true;
+        }
+    }
+
+    public void OnDestroy()
+    {
+        // Revert the live preview if destroyed without confirming
+        if (!done && Conductor.Instance != null)
+            Conductor.Instance.DisplayLatencyOffset = originalOffset;
+
+        if (Instance == this) Instance = null;
+    }
+
+    public void Skip()
+    {
+        if (Conductor.Instance != null)
+            Conductor.Instance.DisplayLatencyOffset = originalOffset;
+
+        Console.WriteLine("[VisualLatencyCalibrator] Skipped — keeping existing DisplayLatencyOffset.");
+        Scene.LoadScene(NextScene);
+    }
+
+    // Read-only access for UI scripts
+    public bool  IsAdjusting   => adjusting;
+    public bool  IsDone        => done;
+    public float GetOffsetMs() => previewOffset * 1000f;
+
+    public string GetOffsetLabel()
+    {
+        float ms = previewOffset * 1000f;
+        if      (ms >  10f) return $"+{ms:F0} ms  (border pre-fired — compensating for display lag)";
+        else if (ms < -10f) return $"{ms:F0} ms  (border delayed — display faster than expected)";
+        else                return $"~0 ms  (audio and visual in sync)";
+    }
+}

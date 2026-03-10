@@ -70,10 +70,14 @@ public class TurnManager : Script
 
         if (!GameStart.Ready) return;
 
-        // Anchor the phase start to the first beat the game actually becomes ready,
-        // so beatsInPhase doesn't inherit stale counts from before GameStart.
+        // Anchor the phase start only once FMOD is confirmed driving the beat clock.
+        // LevelBGM runs after TurnManager in entity order, so on the GameStart.Ready frame
+        // TurnManager would otherwise anchor against a stale pre-BGM DT beat. Waiting for
+        // IsFMODSynced ensures the clock has been reset AND FMOD is actually reporting
+        // position before we lock in phaseStartBeat.
         if (!gameStarted)
         {
+            if (!Conductor.Instance.IsFMODSynced) return;
             gameStarted = true;
             lastBeat = currentBeat;
             StartEnemyDisplay();
