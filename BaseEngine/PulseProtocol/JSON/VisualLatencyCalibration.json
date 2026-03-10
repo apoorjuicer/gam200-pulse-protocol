@@ -27,7 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": false,
-                        "spriteName": "",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/Backgrounds/Calibrator BG.png",
                         "tintColor": {
                             "r": 0.0,
                             "g": 0.0,
@@ -60,9 +60,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "Background",
-                        "mask": 1,
-                        "sortingLayer": 0,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
