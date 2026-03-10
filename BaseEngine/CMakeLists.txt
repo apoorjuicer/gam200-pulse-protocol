@@ -120,7 +120,7 @@ function(pulse_rootify tgt)
 endfunction()
 
 pulse_rootify(PulseEditor)
-pulse_rootify(PulseProtocol)
+pulse_rootify(${ACTIVE_GAME_NAME})
 pulse_rootify(ScriptAPI)
 
 # Visible "PulseEngine" node in the solution (meta target)

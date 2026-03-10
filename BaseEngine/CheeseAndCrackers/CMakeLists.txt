@@ -79,6 +79,13 @@ add_custom_command(TARGET ${GAME_NAME} POST_BUILD
         $<TARGET_FILE_DIR:${GAME_NAME}>/Assets
 )
 
+# # Copy engine shaders to the release layout PulseProtocol expects
+add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/PulseEngine/Graphics/shader"
+        "$<TARGET_FILE_DIR:${GAME_NAME}>/PulseEngine/Graphics/shader"
+)
+
 # Copy ManagedScripts.dll next to the game exe
 add_custom_command(TARGET ${GAME_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -87,6 +94,17 @@ add_custom_command(TARGET ${GAME_NAME} POST_BUILD
 )
 
 add_dependencies(${GAME_NAME} ManagedScripts)
+
+# Bundle MSVC runtime DLLs (VCRUNTIME140.dll, MSVCP140.dll, etc.) for self-contained distribution
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+include(InstallRequiredSystemLibraries)
+if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+    add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+            "$<TARGET_FILE_DIR:${GAME_NAME}>"
+    )
+endif()
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
