@@ -10,10 +10,10 @@ public class LatencyCalibrator : Script
     // Tunables
     // -------------------------------------------------------------------------
     public string PingSFXName  = "SFX_Border_Beat"; // metronome click SFX
-    public int    SampleCount  = 12;                // taps to record (after warm-up)
+    public int    SampleCount  = 12;                // taps to record
     public float  CalibBPM     = 60f;               // 60 BPM = 1 tick/s, easy to sync with
-    public int    WarmupBeats  = 4;                 // taps to discard while player settles into groove
-    public string NextScene    = "MainMenu";
+    public int    WarmupBeats  = 0;                 // taps to discard before recording (0 = record immediately)
+    public string NextScene    = "VisualLatencyCalibration";
 
     // -------------------------------------------------------------------------
     // Internal state
@@ -127,6 +127,17 @@ public class LatencyCalibrator : Script
                               $"NewOffset={resultOffset*1000f:F0}ms — applied to Conductor.");
             done = true;
         }
+    }
+
+    public void Reset()
+    {
+        calibrating  = false;
+        done         = false;
+        warmupLeft   = 0;
+        lastTapTime  = -999f;
+        nextPingTime = 0f;
+        signedDeltas.Clear();
+        Console.WriteLine("[LatencyCalibrator] Reset — ready to calibrate again.");
     }
 
     public void OnDestroy()

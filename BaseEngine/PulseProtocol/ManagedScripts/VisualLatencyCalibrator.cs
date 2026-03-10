@@ -137,6 +137,19 @@ public class VisualLatencyCalibrator : Script
         }
     }
 
+    public void Reset()
+    {
+        adjusting      = false;
+        done           = false;
+        timeSinceStart = 0f;
+        rightHeld      = 0f;
+        leftHeld       = 0f;
+        previewOffset  = Conductor.CalibratedDisplayOffset;
+        if (Conductor.Instance != null)
+            Conductor.Instance.DisplayLatencyOffset = previewOffset;
+        Console.WriteLine("[VisualLatencyCalibrator] Reset — ready to calibrate again.");
+    }
+
     public void OnDestroy()
     {
         if (!done && Conductor.Instance != null)

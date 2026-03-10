@@ -5,6 +5,10 @@
             "path": "JSON/LatencyCalibration.json"
         },
         {
+            "id": "visuallatencycalibration_scene",
+            "path": "JSON/VisualLatencyCalibration.json"
+        },
+        {
             "id": "mainmenu_scene",
             "path": "JSON/MainMenu.json"
         },

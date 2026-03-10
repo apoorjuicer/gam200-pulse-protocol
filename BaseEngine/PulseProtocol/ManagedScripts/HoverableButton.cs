@@ -590,7 +590,12 @@ public class NavigationButtons : Script
             Application.SetPaused(false);
             if (Scene.GetCurrentScene() == "LatencyCalibration")
             {
-                Scene.LoadScene("LatencyCalibration");
+                LatencyCalibrator.Instance?.Reset();
+                return;
+            }
+            if (Scene.GetCurrentScene() == "VisualLatencyCalibration")
+            {
+                VisualLatencyCalibrator.Instance?.Reset();
                 return;
             }
             Scene.RestartScene();
@@ -714,6 +719,11 @@ public class NavigationButtons : Script
             if (Scene.GetCurrentScene() == "LatencyCalibration")
             {
                 LatencyCalibrator.Instance?.Skip();
+                return;
+            }
+            if (Scene.GetCurrentScene() == "VisualLatencyCalibration")
+            {
+                VisualLatencyCalibrator.Instance?.Skip();
                 return;
             }
             StageClearElement.ResetStageClear();
