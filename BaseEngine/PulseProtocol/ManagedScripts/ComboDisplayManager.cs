@@ -181,9 +181,7 @@ public class ComboDisplayManager : Script
         revealIndex = 0;
         isRevealing = true;
         isFadingOut = false;
-        // Prime to one beat before current so the first key fires on this beat boundary,
-        // keeping all keys on the same beat-gated path as keys 2-4.
-        lastRevealBeat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() - 1 : -1;
+        lastRevealBeat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() : -1;
 
         ClearEnemySlotsInstant();
         ClearPlayerSlots();
@@ -215,6 +213,20 @@ public class ComboDisplayManager : Script
 
 
         int currentBeat = Conductor.Instance!.GetCurrentBeat();
+
+        // Console.WriteLine($"[HandleBeatReveal] revealIndex={revealIndex}, beat={currentBeat}");
+        if (revealIndex == 0)
+        {
+            lastRevealBeat = currentBeat;
+            char key = revealCombo[0];
+            if (enemySlots.ContainsKey(0))
+            {
+                enemySlots[0].ShowKeyPop(key);
+                Console.WriteLine($"[ComboDisplayManager] Reveal immediate: enemy slot 0 = '{key}'");
+            }
+            revealIndex = 1;
+            return;
+        }
 
         if (currentBeat <= lastRevealBeat) return;
         lastRevealBeat = currentBeat;

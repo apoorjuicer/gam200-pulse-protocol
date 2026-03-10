@@ -137,8 +137,6 @@ public class ComboSystem : Script
         }
 
         float beatDuration = Conductor.Instance!.GetBeatDuration();
-        // Back-date by half a frame: InputBridge detects taps one frame late (prev/cur polling),
-        // so the press likely happened ~0.5 frames ago on average.
         float currentSongTime = Conductor.Instance!.GetAdjustedSongTime();
 
         float timeSince = (currentSongTime % beatDuration + beatDuration) % beatDuration;

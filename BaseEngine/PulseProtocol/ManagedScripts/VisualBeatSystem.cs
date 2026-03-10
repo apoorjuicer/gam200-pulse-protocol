@@ -59,9 +59,7 @@ public class VisualBeatSystem : Script
         // =========================
         // Beat phase (0..1)
         // =========================
-        // Pre-advance by one frame so the rendered spike appears on screen
-        // on the same frame the beat is heard, compensating for display pipeline lag.
-        float songTime = Conductor.Instance!.GetVisualAdjustedSongTime();
+        float songTime = Conductor.Instance!.GetAdjustedSongTime();
 
         int ppb = Math.Max(1, pulsesPerBeat);
         float subBeat = spb / ppb;
