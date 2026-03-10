@@ -529,11 +529,11 @@ namespace PulseEditor
     // MAIN GIZMO FUNCTION
     // =========================================================================
 
-    void Gizmo_DrawAndHandle(const GameViewport &vp)
+    void Gizmo_DrawAndHandle(const GameViewport& vp)
     {
         using namespace GizmoConfig;
 
-        auto *coord = Coordinator::GetInstance();
+        auto* coord = Coordinator::GetInstance();
         if (!coord)
             return;
 
@@ -588,7 +588,7 @@ namespace PulseEditor
             //-----------------------------------------
             static double lastX = curX, lastY = curY;
 
-            if (!PulseEditor::IsPlaying())                     
+            if (!PulseEditor::IsPlaying())
             {
                 if (allowCamera && ImGui::IsMouseDown(ImGuiMouseButton_Middle))
                 {
@@ -690,7 +690,7 @@ namespace PulseEditor
         {
             if (coord->HasComponent<LayerTag>(selectedEntity))
             {
-                auto &tag = coord->GetComponent<LayerTag>(selectedEntity);
+                auto& tag = coord->GetComponent<LayerTag>(selectedEntity);
                 if (!IsLayerVisible(tag.mask) || IsLayerLocked(tag.mask))
                 {
                     selectedEntity = INVALID_ENTITY;
@@ -704,7 +704,7 @@ namespace PulseEditor
         // ---------------------------------------------------------------------
         // SETUP COORDINATE TRANSFORMS
         // ---------------------------------------------------------------------
-        ImGuiIO &io = ImGui::GetIO();
+        ImGuiIO& io = ImGui::GetIO();
         const float sx_ui = io.DisplayFramebufferScale.x > 0.f ? io.DisplayFramebufferScale.x : 1.f;
         const float sy_ui = io.DisplayFramebufferScale.y > 0.f ? io.DisplayFramebufferScale.y : 1.f;
 
@@ -727,19 +727,19 @@ namespace PulseEditor
         const glm::mat3 invAll = glm::inverse(PanZoom * N);
 
         auto ScreenToWorld_DrawRect = [&](glm::vec2 fb) -> Vector2
-        {
-            const float x = ((fb.x - drawX) / drawW) * 2.0f - 1.0f;
-            const float y = 1.0f - ((fb.y - drawY) / drawH) * 2.0f;
-            glm::vec3 w = invAll * glm::vec3(x, y, 1.0f);
-            return Vector2{w.x, w.y};
-        };
+            {
+                const float x = ((fb.x - drawX) / drawW) * 2.0f - 1.0f;
+                const float y = 1.0f - ((fb.y - drawY) / drawH) * 2.0f;
+                glm::vec3 w = invAll * glm::vec3(x, y, 1.0f);
+                return Vector2{ w.x, w.y };
+            };
 
         // ---------------------------------------------------------------------
         // COLLECT ENTITIES FOR HIT-TESTING
         // ---------------------------------------------------------------------
         Entity hovered = INVALID_ENTITY;
 
-        ImDrawList *dl = ImGui::GetForegroundDrawList();
+        ImDrawList* dl = ImGui::GetForegroundDrawList();
         dl->PushClipRect(
             ImVec2(drawX / sx_ui, drawY / sy_ui),
             ImVec2((drawX + drawW) / sx_ui, (drawY + drawH) / sy_ui),
@@ -747,7 +747,7 @@ namespace PulseEditor
 
         const bool inGameRect =
             (mouseFB.x >= drawX && mouseFB.x <= drawX + drawW &&
-             mouseFB.y >= drawY && mouseFB.y <= drawY + drawH);
+                mouseFB.y >= drawY && mouseFB.y <= drawY + drawH);
 
         std::vector<std::pair<Entity, int>> entitiesWithOrder;
 
@@ -757,13 +757,13 @@ namespace PulseEditor
                 !coord->HasComponent<Framework::Renderable>(e))
                 continue;
 
-            auto &tr = coord->GetComponent<Framework::Transform>(e);
+            auto& tr = coord->GetComponent<Framework::Transform>(e);
             if (!tr.isVisible)
                 continue;
 
             if (coord->HasComponent<LayerTag>(e))
             {
-                auto &tag = coord->GetComponent<LayerTag>(e);
+                auto& tag = coord->GetComponent<LayerTag>(e);
                 if (!IsLayerVisible(tag.mask))
                     continue;
             }
@@ -774,12 +774,12 @@ namespace PulseEditor
                 order = coord->GetComponent<LayerTag>(e).orderInLayer;
             }
 
-            entitiesWithOrder.push_back({e, order});
+            entitiesWithOrder.push_back({ e, order });
         }
 
         std::sort(entitiesWithOrder.begin(), entitiesWithOrder.end(),
-                  [](const auto &a, const auto &b)
-                  { return a.second < b.second; });
+            [](const auto& a, const auto& b)
+            { return a.second < b.second; });
 
         // ---------------------------------------------------------------------
         // HIT-TEST AND DRAW
@@ -789,8 +789,8 @@ namespace PulseEditor
         for (auto it = entitiesWithOrder.rbegin(); it != entitiesWithOrder.rend(); ++it)
         {
             Entity e = it->first;
-            auto &tr = coord->GetComponent<Framework::Transform>(e);
-            auto &re = coord->GetComponent<Framework::Renderable>(e);
+            auto& tr = coord->GetComponent<Framework::Transform>(e);
+            auto& re = coord->GetComponent<Framework::Renderable>(e);
 
             glm::mat3 M = glm::make_mat3(tr.mdl_to_ndc_xform.Begin());
             glm::mat3 modelToNDC = PanZoom * M;
@@ -799,13 +799,13 @@ namespace PulseEditor
             glm::vec2 qmin, qmax;
             if (re.mdl_ref == 0)
             {
-                qmin = {-1.f, -1.f};
-                qmax = {1.f, 1.f};
+                qmin = { -1.f, -1.f };
+                qmax = { 1.f, 1.f };
             }
             else
             {
-                qmin = {-0.5f, -0.5f};
-                qmax = {0.5f, 0.5f};
+                qmin = { -0.5f, -0.5f };
+                qmax = { 0.5f, 0.5f };
             }
 
             // Hit test for entity selection (only if not dragging gizmo)
@@ -814,7 +814,7 @@ namespace PulseEditor
                 bool isLocked = false;
                 if (coord->HasComponent<LayerTag>(e))
                 {
-                    auto &tag = coord->GetComponent<LayerTag>(e);
+                    auto& tag = coord->GetComponent<LayerTag>(e);
                     isLocked = IsLayerLocked(tag.mask);
                 }
 
@@ -832,26 +832,26 @@ namespace PulseEditor
             if (e == selectedEntity)
             {
                 auto toUI = [&](glm::vec2 modelP) -> ImVec2
-                {
-                    glm::vec3 n = modelToNDC * glm::vec3(modelP, 1.0f);
-                    const float x = drawX + (n.x * 0.5f + 0.5f) * drawW;
-                    const float y = drawY + (1.0f - (n.y * 0.5f + 0.5f)) * drawH;
-                    return ImVec2(x / sx_ui, y / sy_ui);
-                };
+                    {
+                        glm::vec3 n = modelToNDC * glm::vec3(modelP, 1.0f);
+                        const float x = drawX + (n.x * 0.5f + 0.5f) * drawW;
+                        const float y = drawY + (1.0f - (n.y * 0.5f + 0.5f)) * drawH;
+                        return ImVec2(x / sx_ui, y / sy_ui);
+                    };
 
                 auto toFB = [&](glm::vec2 modelP) -> glm::vec2
-                {
-                    glm::vec3 n = modelToNDC * glm::vec3(modelP, 1.0f);
-                    const float x = drawX + (n.x * 0.5f + 0.5f) * drawW;
-                    const float y = drawY + (1.0f - (n.y * 0.5f + 0.5f)) * drawH;
-                    return {x, y};
-                };
+                    {
+                        glm::vec3 n = modelToNDC * glm::vec3(modelP, 1.0f);
+                        const float x = drawX + (n.x * 0.5f + 0.5f) * drawW;
+                        const float y = drawY + (1.0f - (n.y * 0.5f + 0.5f)) * drawH;
+                        return { x, y };
+                    };
 
                 // Draw selection bounds
-                ImVec2 a = toUI({qmin.x, qmin.y});
-                ImVec2 b = toUI({qmax.x, qmin.y});
-                ImVec2 c = toUI({qmax.x, qmax.y});
-                ImVec2 d = toUI({qmin.x, qmax.y});
+                ImVec2 a = toUI({ qmin.x, qmin.y });
+                ImVec2 b = toUI({ qmax.x, qmin.y });
+                ImVec2 c = toUI({ qmax.x, qmax.y });
+                ImVec2 d = toUI({ qmin.x, qmax.y });
 
                 dl->AddLine(a, b, COLOR_BOUNDS, 2.0f);
                 dl->AddLine(b, c, COLOR_BOUNDS, 2.0f);
@@ -859,7 +859,7 @@ namespace PulseEditor
                 dl->AddLine(d, a, COLOR_BOUNDS, 2.0f);
 
                 // Get center in screen space
-                glm::vec2 centerFB = toFB({0, 0});
+                glm::vec2 centerFB = toFB({ 0, 0 });
 
                 // Draw appropriate gizmo based on current mode
                 switch (g_gizmo.mode)
@@ -885,7 +885,7 @@ namespace PulseEditor
             // Priority: Gizmo handle > Entity selection
             if (selectedEntity != INVALID_ENTITY && hoveredHandle != GizmoHandle::None)
             {
-                auto &tr = coord->GetComponent<Framework::Transform>(selectedEntity);
+                auto& tr = coord->GetComponent<Framework::Transform>(selectedEntity);
 
                 g_gizmo.dragging = true;
                 g_gizmo.active = selectedEntity;
@@ -918,7 +918,7 @@ namespace PulseEditor
         {
             if (coord->HasComponent<Framework::Transform>(g_gizmo.active))
             {
-                auto &tr = coord->GetComponent<Framework::Transform>(g_gizmo.active);
+                auto& tr = coord->GetComponent<Framework::Transform>(g_gizmo.active);
                 Vector2 mouseWorld = ScreenToWorld_DrawRect(mouseFB);
                 glm::vec2 delta = mouseFB - g_gizmo.dragStartScreen;
 
@@ -951,7 +951,7 @@ namespace PulseEditor
                     break;
                 }
 
-                    // ----- SCALE HANDLES -----
+                // ----- SCALE HANDLES -----
                 case GizmoHandle::ScaleX:
                 {
                     float scaleFactor = 1.0f + delta.x * 0.01f;
@@ -1028,71 +1028,38 @@ namespace PulseEditor
         //// ---------------------------------------------------------------------
         //// DELETE KEY (with children support)
         //// ---------------------------------------------------------------------
-        //if (selectedEntity != INVALID_ENTITY && glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS)
-        //{
-        //    Entity toDelete = selectedEntity;
-        //    if (!coord)
-        //        return;
+        if (selectedEntity != INVALID_ENTITY &&
+            glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS)
+        {
+            if (!coord)
+                return;
 
-        //    // If gizmo was dragging this entity, stop it
-        //    if (g_gizmo.dragging && g_gizmo.active == toDelete)
-        //    {
-        //        g_gizmo.dragging = false;
-        //        g_gizmo.active = INVALID_ENTITY;
-        //        g_gizmo.activeHandle = GizmoHandle::None;
-        //    }
+            Entity toDelete = selectedEntity;
 
-        //    // Collect all entities to delete (including children)
-        //    std::vector<Entity> entitiesToDelete;
-        //    HierarchyHelpers::PrepareDeleteWithChildren(toDelete, entitiesToDelete);
+            // If gizmo was dragging this entity, stop it
+            if (g_gizmo.dragging && g_gizmo.active == toDelete)
+            {
+                g_gizmo.dragging = false;
+                g_gizmo.active = INVALID_ENTITY;
+                g_gizmo.activeHandle = GizmoHandle::None;
+            }
 
-        //    // Store snapshots and indices for undo
-        //    std::vector<EntitySnapshot> snapshots;
-        //    std::vector<int> indices;
-
-        //    for (Entity e : entitiesToDelete)
-        //    {
-        //        // Find position in hierarchy
-        //        auto it = std::find(entityDisplayOrder.begin(),
-        //            entityDisplayOrder.end(), e);
-        //        int index = -1;
-        //        if (it != entityDisplayOrder.end())
-        //        {
-        //            index = static_cast<int>(it - entityDisplayOrder.begin());
-        //        }
-        //        indices.push_back(index);
-
-        //        // Snapshot while entity is still valid
-        //        snapshots.push_back(MakeEntitySnapshot(e));
-        //    }
-
-        //    // Remove all from entityDisplayOrder
-        //    for (Entity e : entitiesToDelete)
-        //    {
-        //        auto it = std::find(entityDisplayOrder.begin(),
-        //            entityDisplayOrder.end(), e);
-        //        if (it != entityDisplayOrder.end())
-        //        {
-        //            entityDisplayOrder.erase(it);
-        //        }
-        //    }
-
-        //    // Delete all entities
-        //    Factory factory;
-        //    for (Entity e : entitiesToDelete)
-        //    {
-        //        factory.DeleteEntity(e);
-        //    }
-
-
-        //    PushDeleteEntity(mUndo, Editorfactory, entityDisplayOrder, selectedHandle, handleOf);
-        //    selectedHandle.reset();
-        //    selectedEntity = INVALID_ENTITY;
-        //}
+            if (selectedHandle && selectedHandle->id != INVALID_ENTITY)
+            {
+                PushDeleteSubtree(
+                    mUndo,
+                    Editorfactory,
+                    entityDisplayOrder,
+                    handleOf,
+                    selectedEntity,   // root to delete
+                    selectedEntity,   // selection ref
+                    selectedHandle    // selection handle ref
+                );
+            }
+        }
 
         dl->PopClipRect();
     }
-
 
     void CancelGizmoIfEntity(Entity e)
     {

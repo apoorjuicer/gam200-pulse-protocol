@@ -1,6 +1,6 @@
 using ScriptAPI;
 
-// Starter script for CheeseBurger.
+// Starter script for CheeseAndCrackers.
 public class HelloWorld : Script
 {
     public override void Update()

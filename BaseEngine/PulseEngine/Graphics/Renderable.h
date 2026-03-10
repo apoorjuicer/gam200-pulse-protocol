@@ -38,6 +38,18 @@ namespace Framework
 		Color(float red, float green, float blue, float alpha = 1.0f)
 			: r(red), g(green), b(blue), a(alpha) {
 		}
+
+		bool operator!=(Color const& other) const {
+			return
+				r != other.r ||
+				g != other.g ||
+				b != other.b ||
+				a != other.a;
+		}
+
+		bool operator==(Color const& other) const {
+			return !(*this != other);
+		}
 	};
 
 
@@ -79,6 +91,7 @@ namespace Framework
 		shd_ref == other.shd_ref &&
 		textureID == other.textureID &&
 		spriteName == other.spriteName &&
+		tintColor == other.tintColor &&
 		useTexture == other.useTexture &&
 		loadedSpriteName == other.loadedSpriteName;
 		}

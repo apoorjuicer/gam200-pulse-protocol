@@ -275,6 +275,15 @@ namespace PulseEditor
                     ConfigOut << "{\n  \"ActiveGame\": \"" << newGameName << "\"\n}\n";
                 }
 
+                // Auto delete CMakeCache.txt when u pick a new game so that ran.bat can reconfigures the cmake for the new game.
+                fs::path cacheFile = cur / "build" / "CMakeCache.txt";
+                if (fs::exists(cacheFile))
+                {
+                    std::error_code ecCache;
+                    fs::remove(cacheFile, ecCache);
+                }
+                
+
                 // Show a message that tell user need to restart the entire editor as FilePathToGame takes effect only on next time it launches
                 ImGui::OpenPopup("GameSwitched");
             }
@@ -283,7 +292,12 @@ namespace PulseEditor
         if (ImGui::BeginPopupModal("GameSwitched", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::Text("Game project switched!");
-            ImGui::Text("Restart the editor to load the new game.");
+            ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "CMake cache auto-cleared.");
+            ImGui::Separator();
+            ImGui::Text("Next steps:");
+            ImGui::BulletText("Close Visual Studio");
+            ImGui::BulletText("Run ran.bat");
+            ImGui::BulletText("Reopen PulseEngine.sln");
             if (ImGui::Button("OK"))
             {
                 ImGui::CloseCurrentPopup();
@@ -428,7 +442,169 @@ namespace PulseEditor
                     "# ManagedScripts references ScriptAPI.dll. Must build after it!!!!\n"
                     "add_dependencies(ManagedScripts ScriptAPI)\n");
 
-                // Fianlly, da starter C# script with instructions so the project isn't empty when first opened 
+                // Entry point for game & its exe
+                // Entry point name: GameMain.cpp creates CoreEngine and runs the game loop(Copied from PulseEngine ah so if change pulse need change here)
+                writeFile(gameRoot / "GameMain.cpp",
+                    "#include \"pch/pch.h\"\n"
+                    "#include <windows.h>\n"
+                    "\n"
+                    "int main()\n"
+                    "{\n"
+                    "    CoreEngine engine;\n"
+                    "    Engine = &engine;\n"
+                    "\n"
+                    "    engine.Setup();\n"
+                    "    engine.SetStartupFullscreen(true);\n"
+                    "    engine.Init();\n"
+                    "    engine.PlayGame();\n"
+                    "\n"
+                    "    engine.GameLoop();\n"
+                    "    engine.Exit();\n"
+                    "\n"
+                    "    Engine = nullptr;\n"
+                    "    return 0;\n"
+                    "}\n");
+
+                // WinMain.cpp: so release builds don't open a console window.(If PulseProtocol change, this also change)
+                writeFile(gameRoot / "WinMain.cpp",
+                    "#include <windows.h>\n"
+                    "\n"
+                    "int main(int argc, char** argv);\n"
+                    "\n"
+                    "int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)\n"
+                    "{\n"
+                    "    return main(__argc, __argv);\n"
+                    "}\n");
+
+                // CMakeLists.txt: tells cmake how to build this game as an exe.
+                writeFile(gameRoot / "CMakeLists.txt",
+                    "cmake_minimum_required(VERSION 3.20)\n"
+                    "\n"
+                    "# Grab the game name from the current folder name(it should be same name as when u add a new game in editor)\n"
+                    "get_filename_component(GAME_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)\n"
+                    "set(GAME_ROOT ${CMAKE_CURRENT_LIST_DIR})\n"
+                    "\n"
+                    "# Grab all cpp/h in this folder\n"
+                    "file(GLOB_RECURSE GAME_SRC CONFIGURE_DEPENDS\n"
+                    "    \"${GAME_ROOT}/*.cpp\"\n"
+                    "    \"${GAME_ROOT}/*.h\"\n"
+                    ")\n"
+                    "\n"
+                    "add_executable(${GAME_NAME} ${GAME_SRC})\n"
+                    "\n"
+                    "# Hide console in Release (GUI subsystem), keep console in Debug\n"
+                    "if (WIN32)\n"
+                    "  set_target_properties(${GAME_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)\n"
+                    "  target_link_options(${GAME_NAME} PRIVATE\n"
+                    "    $<$<CONFIG:Debug>:/SUBSYSTEM:CONSOLE>\n"
+                    "    $<$<NOT:$<CONFIG:Debug>>:/SUBSYSTEM:WINDOWS>\n"
+                    "    $<$<NOT:$<CONFIG:Debug>>:/ENTRY:mainCRTStartup>\n"
+                    "  )\n"
+                    "endif()\n"
+                    "\n"
+                    "add_dependencies(${GAME_NAME} PulseEngine)\n"
+                    "\n"
+                    "set_target_properties(${GAME_NAME} PROPERTIES\n"
+                    "    VS_GLOBAL_DisableFastUpToDateCheck true\n"
+                    ")\n"
+                    "\n"
+                    "target_link_libraries(${GAME_NAME} PRIVATE PulseEngine)\n"
+                    "\n"
+                    "target_include_directories(${GAME_NAME} PRIVATE\n"
+                    "    ${CMAKE_SOURCE_DIR}/PulseEngine\n"
+                    ")\n"
+                    "\n"
+                    "add_dependencies(${GAME_NAME} ScriptAPI)\n"
+                    "\n"
+                    "# Copy PulseEngine.dll next to the game exe\n"
+                    "add_custom_command(TARGET ${GAME_NAME} POST_BUILD\n"
+                    "  COMMAND ${CMAKE_COMMAND} -E copy_if_different\n"
+                    "    \"$<TARGET_FILE:PulseEngine>\" \"$<TARGET_FILE_DIR:${GAME_NAME}>\"\n"
+                    "  VERBATIM\n"
+                    ")\n"
+                    "\n"
+                    "# Copy runtime DLLs (glfw3.dll etc.)\n"
+                    "add_custom_command(TARGET ${GAME_NAME} POST_BUILD\n"
+                    "    COMMAND ${CMAKE_COMMAND} -E copy_if_different\n"
+                    "        $<TARGET_RUNTIME_DLLS:${GAME_NAME}> \"$<TARGET_FILE_DIR:${GAME_NAME}>\"\n"
+                    "    COMMAND_EXPAND_LISTS\n"
+                    "    VERBATIM\n"
+                    ")\n"
+                    "\n"
+                    "# Copy ScriptAPI.dll next to the game exe\n"
+                    "add_custom_command(TARGET ${GAME_NAME} POST_BUILD\n"
+                    "    COMMAND ${CMAKE_COMMAND} -E copy_if_different\n"
+                    "        \"$<TARGET_FILE:ScriptAPI>\"\n"
+                    "        \"$<TARGET_FILE_DIR:${GAME_NAME}>\"\n"
+                    ")\n"
+                    "\n"
+                    "# Copy .NET Runtime DLLs for C# scripting\n"
+                    "add_custom_command(TARGET ${GAME_NAME} POST_BUILD\n"
+                    "    COMMAND ${CMAKE_COMMAND} -E copy_directory\n"
+                    "        \"${CMAKE_SOURCE_DIR}/extern/dotnet/bin\"\n"
+                    "        \"$<TARGET_FILE_DIR:${GAME_NAME}>\"\n"
+                    ")\n"
+                    "\n"
+                    "# Copy this game's JSON folder next to the exe\n"
+                    "add_custom_command(TARGET ${GAME_NAME} POST_BUILD\n"
+                    "    COMMAND ${CMAKE_COMMAND} -E copy_directory\n"
+                    "        ${CMAKE_CURRENT_LIST_DIR}/JSON\n"
+                    "        $<TARGET_FILE_DIR:${GAME_NAME}>/JSON\n"
+                    ")\n"
+                    "\n"
+                    "# Copy this game's Assets folder next to the exe\n"
+                    "add_custom_command(TARGET ${GAME_NAME} POST_BUILD\n"
+                    "    COMMAND ${CMAKE_COMMAND} -E copy_directory\n"
+                    "        ${CMAKE_CURRENT_LIST_DIR}/Assets\n"
+                    "        $<TARGET_FILE_DIR:${GAME_NAME}>/Assets\n"
+                    ")\n"
+                    "\n"
+                    "# # Copy engine shaders to the release layout PulseProtocol expects\n"
+                    "add_custom_command(TARGET ${GAME_NAME} POST_BUILD\n"
+                    "    COMMAND ${CMAKE_COMMAND} -E copy_directory\n"
+                    "        \"${CMAKE_SOURCE_DIR}/PulseEngine/Graphics/shader\"\n"
+                    "        \"$<TARGET_FILE_DIR:${GAME_NAME}>/PulseEngine/Graphics/shader\"\n"
+                    ")\n"
+                    "\n"
+                    "# Copy ManagedScripts.dll next to the game exe\n"
+                    "add_custom_command(TARGET ${GAME_NAME} POST_BUILD\n"
+                    "    COMMAND ${CMAKE_COMMAND} -E copy_if_different\n"
+                    "        \"${CMAKE_BINARY_DIR}/.bin/$<CONFIG>-x64/ManagedScripts.dll\"\n"
+                    "        \"$<TARGET_FILE_DIR:${GAME_NAME}>\"\n"
+                    ")\n"
+                    "\n"
+                    "add_dependencies(${GAME_NAME} ManagedScripts)\n"
+                    "\n"
+                    "# Bundle MSVC runtime DLLs (VCRUNTIME140.dll, MSVCP140.dll, etc.) for self-contained distribution\n"
+                    "set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)\n"
+                    "include(InstallRequiredSystemLibraries)\n"
+                    "if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)\n"
+                    "    add_custom_command(TARGET ${GAME_NAME} POST_BUILD\n"
+                    "        COMMAND ${CMAKE_COMMAND} -E copy_if_different\n"
+                    "            ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}\n"
+                    "            \"$<TARGET_FILE_DIR:${GAME_NAME}>\"\n"
+                    "    )\n"
+                    "endif()\n"
+                    "\n"
+                    "if(MSVC)\n"
+                    "    set(CMAKE_CXX_FLAGS \"${CMAKE_CXX_FLAGS} /MP\")\n"
+                    "    if (FMOD_API_DIR_FOUND)\n"
+                    "        set(FMOD_CORE_DEBUG   \"${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmodL.dll\")\n"
+                    "        set(FMOD_CORE_RELEASE \"${FMOD_API_DIR_FOUND}/api/core/lib/x64/fmod.dll\")\n"
+                    "        set(FMOD_STUDIO_DEBUG   \"${FMOD_API_DIR_FOUND}/api/studio/lib/x64/fmodstudioL.dll\")\n"
+                    "        set(FMOD_STUDIO_RELEASE \"${FMOD_API_DIR_FOUND}/api/studio/lib/x64/fmodstudio.dll\")\n"
+                    "        add_custom_command(TARGET ${GAME_NAME} POST_BUILD\n"
+                    "            COMMAND ${CMAKE_COMMAND} -E copy_if_different\n"
+                    "                \"$<IF:$<CONFIG:Debug>,${FMOD_CORE_DEBUG},${FMOD_CORE_RELEASE}>\"\n"
+                    "                $<TARGET_FILE_DIR:${GAME_NAME}>\n"
+                    "            COMMAND ${CMAKE_COMMAND} -E copy_if_different\n"
+                    "                \"$<IF:$<CONFIG:Debug>,${FMOD_STUDIO_DEBUG},${FMOD_STUDIO_RELEASE}>\"\n"
+                    "                $<TARGET_FILE_DIR:${GAME_NAME}>\n"
+                    "        )\n"
+                    "    endif()\n"
+                    "endif()\n");
+
+                // Fianlly, da starter C# script with instructions so the project isn't empty when first opened
                 writeFile(gameRoot / "ManagedScripts" / "HelloWorld.cs",
                     ("using ScriptAPI;\n\n"
                     "// Starter script for " + gameName + ".\n"
@@ -449,7 +625,18 @@ namespace PulseEditor
                         ConfigOut << "{\n  \"ActiveGame\": \"" << gameName << "\"\n}\n";
                     }
 
-                    s_newGameResult = "Game project '" + gameName + "' created!\nRestart the editor to start editing it.";
+                    // Auto delete CMakeCache.txt so run.bat can make a new add_subdirectory
+                    {
+                        fs::path cacheFile = cur / "build" / "CMakeCache.txt";
+                        if (fs::exists(cacheFile))
+                        {
+                            std::error_code ecCache;
+                            fs::remove(cacheFile, ecCache);
+                        }
+                    }
+
+                    s_newGameResult = "Game '" + gameName + "' created! CMake cache auto-cleared.\n"
+                                      "Close VS -> run ran.bat -> reopen .sln";
                 }
                 else
                 {

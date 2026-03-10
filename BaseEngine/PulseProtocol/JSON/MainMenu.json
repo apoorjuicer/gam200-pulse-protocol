@@ -1621,89 +1621,12 @@
                 {
                     "Children": {
                         "children": [
-                            32,
-                            34,
-                            33,
-                            35,
-                            36,
-                            37
-                        ]
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -824.3192749023438,
-                            "y": -500.3079528808594
-                        },
-                        "scale": {
-                            "x": 400.0,
-                            "y": 40.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": false,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Brightness_.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Brightness"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "Children": {
-                        "children": [
                             28,
-                            27,
-                            29
+                            30,
+                            29,
+                            31,
+                            32,
+                            33
                         ]
                     }
                 }
@@ -1846,7 +1769,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 31
+                        "parent": 27
                     }
                 }
             ]
@@ -1920,7 +1843,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 31
+                        "parent": 27
                     }
                 }
             ]
@@ -1994,228 +1917,7 @@
                 },
                 {
                     "Parent": {
-                        "parent": 31
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 5.691999912261963,
-                            "y": -650.0
-                        },
-                        "scale": {
-                            "x": 1140.0,
-                            "y": 30.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": false,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/slider bar bottom.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "SettingsOverlay"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "BEmpty"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "Parent": {
-                        "parent": 22
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": 1086.5181884765625,
-                            "y": -650.0
-                        },
-                        "scale": {
-                            "x": 56.0,
-                            "y": 30.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": false,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/slider.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "BrightnessKnob",
-                            "SettingsOverlay"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "BKnob"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "Parent": {
-                        "parent": 22
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -2.681884765625,
-                            "y": -650.0
-                        },
-                        "scale": {
-                            "x": 1117.2000732421875,
-                            "y": 20.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": false,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/slider bar fill.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "BrightnessFill",
-                            "SettingsOverlay"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "BFilled"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 15,
-                        "z": 0.0
-                    }
-                },
-                {
-                    "Parent": {
-                        "parent": 22
+                        "parent": 27
                     }
                 }
             ]
@@ -2341,9 +2043,9 @@
                 {
                     "Children": {
                         "children": [
+                            23,
                             24,
-                            25,
-                            26
+                            25
                         ]
                     }
                 }
