@@ -97,6 +97,9 @@ public class EnemyRhythmController : Script
     // leave the weakness pinned to a stale ComboSystem from a previous session.
     private ComboSystem? weaknessSetOnInstance = null;
 
+    // Step SFX alternation
+    private bool stepSFXToggle = false;
+
     // Debug
     private int collisionCheckCount = 0;
 
@@ -214,6 +217,7 @@ public class EnemyRhythmController : Script
         playerEntityID = -1;
         lastBeat = -1;
         animPaused = false;
+        stepSFXToggle = false;
         SetupSprites();
 
         // Reset weakness retry state so each new enemy gets a fresh attempt
@@ -476,6 +480,11 @@ public class EnemyRhythmController : Script
         SetState(EnemyState.Moving);
         TransformComponent myTf = GetTransform();
         myTf.X -= StepDistance;
+
+        string stepSFX = stepSFXToggle ? "SFX_Rat_Steps_2" : "SFX_Rat_Steps_1";
+        stepSFXToggle = !stepSFXToggle;
+        GetAudio().PlaySFX(stepSFX);
+
         Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}");
     }
 

@@ -44,6 +44,7 @@ public class PlayerAnimationController : Script
     // =========================
     private bool initialized = false;
     private PlayerAnimState currentState = PlayerAnimState.Idle2;
+    private bool swingToggle = false;
 
     // Determines which idle to return to after Attack/Hurt finishes
     // false = Idle2 (default, unarmed stance)
@@ -153,6 +154,9 @@ public class PlayerAnimationController : Script
 
         Console.WriteLine("[PlayerAnim] Playing Attack");
         // hasAttacked = true; // From now on, idle = Idle2
+        string swingSFX = swingToggle ? "SFX_SwordSwing_2" : "SFX_SwordSwing_1";
+        swingToggle = !swingToggle;
+        GetAudio().PlaySFX(swingSFX);
         SetAnimState(PlayerAnimState.Attack);
 
         waitingForStateEnd = true;
