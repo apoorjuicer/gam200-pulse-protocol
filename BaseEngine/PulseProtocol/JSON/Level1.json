@@ -1585,7 +1585,9 @@
                 },
                 {
                     "script": {
-                        "ScriptName": []
+                        "ScriptName": [
+                            "GlowOutlineScript"
+                        ]
                     }
                 },
                 {
@@ -1663,7 +1665,9 @@
                 },
                 {
                     "script": {
-                        "ScriptName": []
+                        "ScriptName": [
+                            "GlowOutlineScript"
+                        ]
                     }
                 },
                 {
@@ -1741,7 +1745,9 @@
                 },
                 {
                     "script": {
-                        "ScriptName": []
+                        "ScriptName": [
+                            "GlowOutlineScript"
+                        ]
                     }
                 },
                 {
@@ -1819,7 +1825,9 @@
                 },
                 {
                     "script": {
-                        "ScriptName": []
+                        "ScriptName": [
+                            "GlowOutlineScript"
+                        ]
                     }
                 },
                 {
@@ -5355,9 +5363,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
+                        "layerName": "Text",
+                        "mask": 8,
+                        "sortingLayer": 3,
                         "orderInLayer": 10,
                         "z": 0.0
                     }

@@ -39,7 +39,7 @@ public class EnemyDamageIndicator : Script
             var text = GetTextComponent();
             text.SetText(DamageText);
             text.SetAlignment(1); // center align
-            text.SetFontSize(125.0f);
+            text.SetFontSize(60.0f);
             // Console.WriteLine($"[DamageIndicator] Init done, text={DamageText} alignment set to center");
             return;
         }

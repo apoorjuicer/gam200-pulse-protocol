@@ -193,10 +193,6 @@ public class ComboSystem : Script
 
         hitResults.Add(judgement);
         currentCombo.Add(key);
-        ScoreManager.Instance?.AddScore(judgement);
-
-        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s, sinceBeat={timeSince:F3}s, untilNext={timeUntilNext:F3}s)");
-        Console.WriteLine($"[ComboSystem]   Progress: {currentCombo.Count}/{maxComboLength} | Expected: {(currentCombo.Count <= currentEnemyWeakness.Length ? currentEnemyWeakness[currentCombo.Count - 1].ToString() : "?")} | Got: {key}");
 
         // === VISUAL FEEDBACK ===
         // If the key is wrong, always show MISS visually regardless of timing, if not might mess up w the timing
@@ -207,6 +203,13 @@ public class ComboSystem : Script
             if (key != expectedKey)
                 visualJudgement = "MISS";
         }
+
+        // miss combo resets
+        ScoreManager.Instance?.AddScore(visualJudgement);
+
+        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s, sinceBeat={timeSince:F3}s, untilNext={timeUntilNext:F3}s)");
+        Console.WriteLine($"[ComboSystem]   Progress: {currentCombo.Count}/{maxComboLength} | Expected: {(currentCombo.Count <= currentEnemyWeakness.Length ? currentEnemyWeakness[currentCombo.Count - 1].ToString() : "?")} | Got: {key}");
+
 
         if (ComboDisplayManager.Instance != null)
         {
