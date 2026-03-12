@@ -182,6 +182,7 @@ namespace PulseEditor
         // ------------------------------------------------------------
         // Left side: Save Scene / Load Scene
         // ------------------------------------------------------------
+        ImVec2 newTextSize = ImGui::CalcTextSize("New Scene");
         ImVec2 saveTextSize = ImGui::CalcTextSize("Save Scene");
         ImVec2 loadTextSize = ImGui::CalcTextSize("Load Scene");
         ImVec2 newButtonSize = ImVec2(newTextSize.x + framePadding.x * 2, 0);
