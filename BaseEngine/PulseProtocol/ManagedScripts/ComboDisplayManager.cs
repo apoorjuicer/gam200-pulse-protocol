@@ -1,4 +1,19 @@
-    using System;
+/******************************************************************************/
+/**
+* @file        ComboDisplayManager.cs
+* @project     Pulse Protocol
+* @author      Carrie Lam (70%)
+*              Chloe Lau (30%)
+* @brief       Manages beat-synced reveal, staggered fade-out, and player input
+*              feedback for combo key slot UI during enemy encounters.
+*
+* @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+*              Reproduction or disclosure of this file or its contents without the
+*              prior written consent of DigiPen Institute of Technology is prohibited.
+*
+/******************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using ScriptAPI;
 

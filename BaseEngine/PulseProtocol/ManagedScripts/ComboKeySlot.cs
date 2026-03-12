@@ -1,3 +1,19 @@
+/******************************************************************************/
+/**
+* @file        ComboKeySlot.cs
+* @project     Pulse Protocol
+* @author      Carrie Lam (70%)
+*              Chloe Lau (30%)
+* @brief       Represents a single key slot in the combo UI, handling sprite
+*              detection, registration, and animations for enemy reveals and
+*              player input feedback (correct, wrong, countdown, pop effects).
+*
+* @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+*              Reproduction or disclosure of this file or its contents without the
+*              prior written consent of DigiPen Institute of Technology is prohibited.
+*
+/******************************************************************************/
+
 using System;
 using ScriptAPI;
 
