@@ -31,6 +31,7 @@ public class NavigationButtons : Script
     public static bool ShowQuitOverlay = false;
     public static bool ShowPauseOverlay = false;
     public static bool ShowHowToPlayOverlay = false;
+    public static int HtpPage = 1; // 1, 2, or 3
     private static bool openedSettingsFromPause  = false;
     private static bool stageClearPaused = false;
     private static bool s_appliedGamePause = false;
@@ -68,6 +69,7 @@ public class NavigationButtons : Script
             ShowQuitOverlay = false;
             ShowPauseOverlay = false;
             ShowHowToPlayOverlay = false;
+            HtpPage = 1;
             ShowSettingsOverlay = false;
 
             wasEscPressed = false;
@@ -272,7 +274,8 @@ public class NavigationButtons : Script
         bool isQuitOverlayButton = texLower.Contains("quit yes") || texLower.Contains("quit no");
         bool isPauseOverlayButton = texLower.Contains("pause") || texLower.Contains("exit");
         
-        bool isHowToPlayOverlayButton = texLower.Contains("temp_close") || texLower.Contains("close_htp");
+        bool isHowToPlayOverlayButton = texLower.Contains("temp_close") || texLower.Contains("close_htp") ||
+            texLower.Contains("exit") || texLower.Contains("nextstage");
 
         bool isOverlayButton = isQuitOverlayButton || isPauseOverlayButton;
 
@@ -570,6 +573,22 @@ public class NavigationButtons : Script
         string tex = defaultTexture.ToLower();
         Console.WriteLine($"Button clicked: {tex}");
 
+        // HTP overlay: handle Exit (close overlay) and NextStage (advance page) before generic handlers
+        if (ShowHowToPlayOverlay)
+        {
+            if (tex.Contains("exit") || tex.Contains("temp_close") || tex.Contains("close_htp"))
+            {
+                ShowHowToPlayOverlay = false;
+                HtpPage = 1;
+                return;
+            }
+            if (tex.Contains("nextstage"))
+            {
+                if (HtpPage < 3) HtpPage++;
+                return;
+            }
+        }
+
         if (tex.Contains("exit"))
         {
             ShowPauseOverlay = false;
@@ -606,13 +625,14 @@ public class NavigationButtons : Script
         {
             openedSettingsFromPause = true;
             ShowPauseOverlay = false;
-            Application.SetPaused(false);
             ShowSettingsOverlay = true;
             return;
         }
 
         if (tex.Contains("restartyes"))
         {
+            Application.SetPaused(false);
+
             if (!string.IsNullOrEmpty(LastGameplayScene))
             {
                 currentScene = LastGameplayScene;
@@ -780,6 +800,43 @@ public class HowToPlayOverlay : Script
     {
         TransformComponent t = GetTransform();
         t.IsVisible = NavigationButtons.ShowHowToPlayOverlay;
+    }
+}
+
+public class HowToPlayPage1 : Script
+{
+    public override void Update()
+    {
+        TransformComponent t = GetTransform();
+        t.IsVisible = NavigationButtons.ShowHowToPlayOverlay && NavigationButtons.HtpPage == 1;
+    }
+}
+
+public class HowToPlayPage2 : Script
+{
+    public override void Update()
+    {
+        TransformComponent t = GetTransform();
+        t.IsVisible = NavigationButtons.ShowHowToPlayOverlay && NavigationButtons.HtpPage == 2;
+    }
+}
+
+public class HowToPlayPage3 : Script
+{
+    public override void Update()
+    {
+        TransformComponent t = GetTransform();
+        t.IsVisible = NavigationButtons.ShowHowToPlayOverlay && NavigationButtons.HtpPage == 3;
+    }
+}
+
+// Visible when HTP overlay is open AND there is a next page (pages 1 and 2)
+public class HtpNextButton : Script
+{
+    public override void Update()
+    {
+        TransformComponent t = GetTransform();
+        t.IsVisible = NavigationButtons.ShowHowToPlayOverlay && NavigationButtons.HtpPage < 3;
     }
 }
 
