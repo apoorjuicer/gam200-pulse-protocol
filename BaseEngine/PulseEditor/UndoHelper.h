@@ -192,7 +192,6 @@ namespace PulseEditor
 ///        - undo => recreate from snapshot and restore hierarchy position
 ///        - redo => delete the recreated live entity again
 /*****************************************************************************/
-    inline
     inline void
         PushDeleteEntity(UndoManager& undo,
             Factory& factory,
