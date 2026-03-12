@@ -25,7 +25,7 @@
 
 // engine headers
 #include "CoreEngine/ECS/Coordinator.h"
-
+#include "CoreEngine/Scene/SceneManager.h"
 
 namespace PulseEditor
 {
@@ -182,8 +182,10 @@ namespace PulseEditor
         // ------------------------------------------------------------
         // Left side: Save Scene / Load Scene / New Game / Load Other Games
         // ------------------------------------------------------------
+        ImVec2 newTextSize = ImGui::CalcTextSize("New Scene");
         ImVec2 saveTextSize = ImGui::CalcTextSize("Save Scene");
         ImVec2 loadTextSize = ImGui::CalcTextSize("Load Scene");
+        ImVec2 newButtonSize = ImVec2(newTextSize.x + framePadding.x * 2, 0);
         ImVec2 saveButtonSize = ImVec2(saveTextSize.x + framePadding.x * 2, 0);
         ImVec2 loadButtonSize = ImVec2(loadTextSize.x + framePadding.x * 2, 0);
 
@@ -212,6 +214,16 @@ namespace PulseEditor
                 ImGui::SetTooltip("Stop the game first before saving!!!");
                 ImGui::PopStyleColor();
             }
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("New Scene", newButtonSize))
+        {
+            //add name 
+            s_showNewGamePopup = true;
+            s_newGameNameBuf[0] = '\0';
+            s_newGameResult.clear();
+            ImGui::OpenPopup("New Scene Name");
         }
 
         ImGui::SameLine();
@@ -300,6 +312,75 @@ namespace PulseEditor
             ImGui::BulletText("Reopen PulseEngine.sln");
             if (ImGui::Button("OK"))
             {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
+        // For new scene
+        if (ImGui::BeginPopupModal("New Scene Name", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("Enter a name for the new game project:");
+            ImGui::InputText("##gamename", s_newGameNameBuf, sizeof(s_newGameNameBuf));
+
+            if (!s_newGameResult.empty())
+            {
+                ImGui::TextWrapped("%s", s_newGameResult.c_str());
+            }
+
+            if (ImGui::Button("Create") && s_newGameNameBuf[0] != '\0')
+            {
+                namespace fs = std::filesystem;
+
+                std::string gameName(s_newGameNameBuf);
+
+                // Reject gamename with spaces 
+                if (gameName.find(' ') != std::string::npos)
+                {
+                    s_newGameResult = "Error: Game name cannot contain spaces!\n";
+                    ImGui::EndPopup();
+                    return;
+                }
+
+                //// Find BaseEngine folder by walking up from current path
+                //fs::path cur = fs::current_path();
+                //while (cur.filename() != "BaseEngine" && cur.has_parent_path())
+                //    cur = cur.parent_path();
+
+                //fs::path gameRoot = cur;
+
+                //// Create folder structure
+                //std::error_code ec;
+                //fs::create_directories(gameRoot / "Assets" / "Textures", ec);
+                //fs::create_directories(gameRoot / "Assets" / "Sound", ec);
+                //fs::create_directories(gameRoot / "Assets" / "Font", ec);
+                //fs::create_directories(gameRoot / "Assets" / "Prefabs", ec);
+                //fs::create_directories(gameRoot / "JSON", ec);
+
+
+                // Write starter JSON files
+                auto writeFile = [](const fs::path& p, const std::string& content) {
+                    std::ofstream f(p);
+                    if (f.is_open()) f << content;
+                    };
+
+
+                // create json file with new game name
+                writeFile(FilePathToGame / "JSON" / (gameName + ".json"),("{\n    \"scene\": \"" + gameName + "\",\n    \"entities\": []\n}\n").c_str());
+
+                // load that scene 
+                auto g_coordinator = Coordinator::GetInstance();
+                auto g_Scene = g_coordinator->GetSystem<SceneManager>();
+                g_Scene->ChangeCurrentScene(gameName);
+                ImGui::CloseCurrentPopup();
+            }
+
+
+            ImGui::SameLine();
+            if (ImGui::Button("Close"))
+            {
+                s_showNewGamePopup = false;
+                s_newGameResult.clear();
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();

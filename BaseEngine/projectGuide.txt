@@ -103,8 +103,16 @@ run_editor.bat  -  Generates solution WITH editor
 run_game.bat    -  Generates solution WITHOUT editor (game only)
 clean.bat       -  Removes build folder (run before switching modes)
 
-[ 6. How to test Csharp script]
-- First, in editor mode, change scene to "Csharpscene.Json"
-- Once loaded, you should see two object, 1 Player, 1 Enemy. 
-  The script should rotating and increasing its scale as time goes on.
+[ 6. How to add scripts]
+- First, in the ManagedScripts folder, add a new .cs file. Exp: New_Script_Goes_Here.cs
+- 2nd, open ManagedScripts.sln and add the new .cs file as a exisiting item.
+- Lastly, add them into the json in the array of scripts: "script": {"ScriptName": [ "New_Script_Goes_Here" ] }
+
+[7. How to change games to edit]
+- First, in the editor, pick either new game or load other games.
+- If you pick new game, type a name (e.g. MyGame) and press Create.
+- If you load other games, go into the json file of whatever game you want, and pick the config.json.
+- After the pop up, close VSC and re run the run.bat file.
+- When you open the PulseEngine.sln in the build folder, it should be able to edit the game you choose.
+
 ================================================================================

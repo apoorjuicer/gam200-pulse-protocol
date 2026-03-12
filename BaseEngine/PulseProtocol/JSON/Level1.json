@@ -627,7 +627,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon rat greyed.png",
+                        "spriteName": "../../PulseEngine/Assets/Textures/UI/enemy icon gorilla greyed.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
