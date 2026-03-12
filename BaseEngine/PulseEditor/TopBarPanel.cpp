@@ -2,7 +2,8 @@
 /**
  * @file        TopBarPanel.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong
+ * @author      Leu Jun Yong (90%)
+ * @co-author   Chia Wei Xuan Rachael(10%).
  * @brief       Implements the Top Panel for the editor.
  *
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
