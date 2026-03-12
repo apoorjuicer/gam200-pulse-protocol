@@ -2,8 +2,9 @@
 /**
  * @file        Factory.cpp
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael (primary) - 90%
+ * @author		Chia Wei Xuan Rachael (primary) - 80%
  * @author      Ban Kai Wei Benjamin (secondary) - 10%
+ * @author      Reginald Lew Yee Ren (secondary) - 10%
  * @brief		Entity factory system for creating, deleting, and serializing individual
  *              game entities from JSON prefab files or programmatically. Handles entity
  *              lifecycle integration with SceneManager tracking and ECS Coordinator.
