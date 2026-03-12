@@ -3,8 +3,9 @@
  * @file        Hierarchy.cpp
  * @project     Pulse Protocol
  * @author      Leu Jun Yong (primary) - 60%
- * @author      Chloe Lau Rey En (secondary) - 20%
- * @author      Ban Kai Wei Benjamin (secondary) - 20%
+ * @author      Chloe Lau Rey En (secondary) - 15%
+ * @author      Ban Kai Wei Benjamin (secondary) - 15%
+ * @author      Reginald Lew Yee Ren (secondary) - 10%
  * @brief       Scene hierarchy panel with entity list, drag-drop reordering, and inline renaming.
  *
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
