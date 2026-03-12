@@ -2,7 +2,8 @@
 /**
 * @file        HoverableButton.cs
 * @project     Pulse Protocol
-* @author      Chloe Lau Rey En
+* @author      Chloe Lau Rey En (primary) - 70%
+               Leu Jun Yong (secondary) - 30%
 * @brief       Script for hovering of buttons, and transition of scenes and showing overlay for all 4 buttons
 *
 * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
