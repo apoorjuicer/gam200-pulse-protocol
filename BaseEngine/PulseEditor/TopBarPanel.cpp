@@ -342,21 +342,6 @@ namespace PulseEditor
                     return;
                 }
 
-                //// Find BaseEngine folder by walking up from current path
-                //fs::path cur = fs::current_path();
-                //while (cur.filename() != "BaseEngine" && cur.has_parent_path())
-                //    cur = cur.parent_path();
-
-                //fs::path gameRoot = cur;
-
-                //// Create folder structure
-                //std::error_code ec;
-                //fs::create_directories(gameRoot / "Assets" / "Textures", ec);
-                //fs::create_directories(gameRoot / "Assets" / "Sound", ec);
-                //fs::create_directories(gameRoot / "Assets" / "Font", ec);
-                //fs::create_directories(gameRoot / "Assets" / "Prefabs", ec);
-                //fs::create_directories(gameRoot / "JSON", ec);
-
 
                 // Write starter JSON files
                 auto writeFile = [](const fs::path& p, const std::string& content) {
