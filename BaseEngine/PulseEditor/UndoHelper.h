@@ -191,10 +191,8 @@ namespace PulseEditor
 ///     4. Push an action:
 ///        - undo => recreate from snapshot and restore hierarchy position
 ///        - redo => delete the recreated live entity again
-/*****************************************************************************/
-    inline
-    inline void
-        PushDeleteEntity(UndoManager& undo,
+/*****************************************************************************/   
+    inline void PushDeleteEntity(UndoManager& undo,
             Factory& factory,
             std::vector<Entity>& displayOrder,
             std::shared_ptr<EntityHandle> h
