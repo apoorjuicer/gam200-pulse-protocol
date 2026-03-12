@@ -2,7 +2,9 @@
 /**
  * @file        AssetRegistry.cpp
  * @project     Pulse Protocol
- * @author		Ban Kai Wei Benjamin
+ * @author		Ban Kai Wei Benjamin - 99%
+ * @author      Goh Pin Kai (secondary) - 1%
+ * 
  * @brief       Implementation of a basic asset registry
  *              An asset registry in a game is a centralized system that tracks and 
  *				provides access to all the digital resources (assets) metadata
