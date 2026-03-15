@@ -38,9 +38,12 @@
 #include "StateMachine/StateMachine.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "CoreEngine/Core/CoreEngine.h" // for FilePathToGame
-#include "CoreEngine/Core/CoreEngine.h"  // For GetFunctionPtr
+//#include "CoreEngine/Core/CoreEngine.h"  // For GetFunctionPtr
 #include "CoreEngine/Prefab/PrefabInstance.h"
 //#include "../Components/AABB.h"
+
+#include "SceneManifest.h"
+#include "CoreEngine/Asset/AssetsManager.h"
 
 extern bool g_countdownFinished;
 
@@ -621,6 +624,38 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	std::cout << "       [SceneManager] Loading in progress!" << std::endl;
 	std::cout << "================================================" << std::endl;
 #endif
+
+	SceneManifest manifest;
+	std::filesystem::path manifestPath = std::filesystem::path(resolvedPath).replace_extension(".manifest.json");
+
+	if (!std::filesystem::exists(manifestPath)) {
+		std::cout << "[SceneManager] No manifest found for scene: "
+			<< manifestPath << "\n";
+		//return; //dont early return
+	}
+	else {
+		std::cout << "[SceneManager] Loading manifest found for scene: " 
+			<< manifestPath << "\n";
+	}
+
+	if (!LoadSceneManifestFile(manifest, manifestPath.string()))
+	{
+		std::cerr << "[SceneManager] Failed to load manifest: "
+			<< manifestPath << "\n";
+	}
+	else
+	{
+		if (!mAssets.PreloadSceneAssets(manifest))
+		{
+			std::cerr << "[SceneManager] Some assets failed to preload for scene: "
+				<< manifest.sceneName << "\n";
+		}
+		else {
+			std::cerr << "[SceneManager] Load Asset Manifest for scene success: "
+				<< manifest.sceneName << "\n";
+		}
+	}
+
 
 	// just a for loop going thru all the entity arrray list and calling the factory function to create them 
 	auto* g_coordinator = Coordinator::GetInstance();

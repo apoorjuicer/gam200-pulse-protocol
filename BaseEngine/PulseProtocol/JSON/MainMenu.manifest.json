@@ -1,0 +1,30 @@
+{ //audio and font already preloaded though
+    "scenemanifest": {
+        "sceneId": "MainMenu",
+        "textures": [
+            "MainMenu_BG",
+            "newgamebtn",
+            "continuebtn",
+            "settingsbtn",
+            "quitbtn",
+            "quitpromptbg",
+            "yesbtn",
+            "nobtn",
+            "howtoplaybtn",
+            "tempclosebtn",
+            "settings0000",
+            "screen",
+            "dropdownclose",
+            "dropdownopen",
+            "windowedopen",
+            "windowedclose",
+            "fullscreenopen",
+            "fullscreenclose"
+        ],
+        "audio": [
+            "BGM_GENERAL"
+        ],
+        "fonts": [],
+        "animations": []
+    }
+}
