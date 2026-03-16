@@ -162,6 +162,12 @@ public class PlayerAnimationController : Script
         waitingForStateEnd = true;
         stateTimer = 0f;
         stateDuration = AttackFrames / GetBeatSyncedSpeed(AttackFrames);
+
+        // Spawn sword slash VFX — lives for exactly one attack animation cycle
+        SwordSlashVFX.SpawnX = GetTransform().X + 300f;
+        SwordSlashVFX.SpawnY = GetTransform().Y;
+        SwordSlashVFX.SpawnDuration = stateDuration;
+        Factory.Instantiate("SwordSlashVFX");
     }
 
     public void PlayHurt()
