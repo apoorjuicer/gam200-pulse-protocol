@@ -174,7 +174,7 @@
         },
         {
             "id": "A_KEY_BLACK",
-            "path": "Assets/Textures/UI/WASDKeys/EKeyA.png.png",
+            "path": "Assets/Textures/UI/WASDKeys/EKeyA.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
@@ -182,7 +182,7 @@
         },
         {
             "id": "S_KEY_BLACK",
-            "path": "Assets/Textures/UI/WASDKeys/EKeyS.png.png",
+            "path": "Assets/Textures/UI/WASDKeys/EKeyS.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
@@ -190,7 +190,71 @@
         },
         {
             "id": "D_KEY_BLACK",
-            "path": "Assets/Textures/UI/WASDKeys/EKeyD.png.png",
+            "path": "Assets/Textures/UI/WASDKeys/EKeyD.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "continue_mainmenu_ui",
+            "path": "Assets/Textures/UI/Buttons/mainmenu/continue.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "continue_hover_mainmenu_ui",
+            "path": "Assets/Textures/UI/Buttons/mainmenu/continue_hover.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "newgame_mainmenu_ui",
+            "path": "Assets/Textures/UI/Buttons/mainmenu/newgame.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "newgame_hover_mainmenu_ui",
+            "path": "Assets/Textures/UI/Buttons/mainmenu/newgame_hover.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "quit_mainmenu_ui",
+            "path": "Assets/Textures/UI/Buttons/mainmenu/quit.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "quit_hover_mainmenu_ui",
+            "path": "Assets/Textures/UI/Buttons/mainmenu/quit_hover.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "settings_mainmenu_ui",
+            "path": "Assets/Textures/UI/Buttons/mainmenu/settings.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "settings_hover_mainmenu_ui",
+            "path": "Assets/Textures/UI/Buttons/mainmenu/settings_hover.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
