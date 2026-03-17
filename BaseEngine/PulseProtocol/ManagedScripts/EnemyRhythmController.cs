@@ -43,6 +43,8 @@ public class EnemyRhythmController : Script
     // === COMBAT SETTINGS ===
     public int AttackDamage = 5;
     public float Health = 15f;
+    public int MaxHP { get; private set; } = 1;
+    public int HealthBarBlockCount = 4;
 
     // === COLLISION SETTINGS ===
     // "AABB"     = box collision (uses AABB components, may be affected by BroadPhase filtering)
@@ -243,8 +245,11 @@ public class EnemyRhythmController : Script
         TrySetWeakness();
 
         HealthComponent eh = GetHealth();
+        MaxHP = Math.Max(1, eh.hp);
         Health = eh.hp;
         eh.isAlive = true;
+        if (HealthBarBlockCount < 2) HealthBarBlockCount = 2;
+        if (HealthBarBlockCount > 4) HealthBarBlockCount = 4;
         Console.WriteLine($"[Enemy] Initialized at ({tf.X:F1}, {tf.Y:F1}) | Health: {eh.hp}");
         Console.WriteLine($"[Enemy] Collision mode: {CollisionMode} | ManualAttackRange: {ManualAttackRange}");
         Console.WriteLine($"[Enemy] AttackDamage: {AttackDamage}");
@@ -529,6 +534,23 @@ public class EnemyRhythmController : Script
 
         if (h.hp <= 0)
             Die();
+    }
+
+    public int GetCurrentHP()
+    {
+        return GetHealth().hp;
+    }
+
+    public float GetHealthPercent()
+    {
+        int hp = GetHealth().hp;
+        if (hp < 0) hp = 0;
+        return (float)hp / MaxHP;
+    }
+
+    public int GetHealthBarBlockCount()
+    {
+        return HealthBarBlockCount;
     }
 
     private void Die()
