@@ -26,6 +26,9 @@ namespace ScriptAPI
        
 		//change animation speed(duh)
 		void SetAnimationSpeed(float speed);
+		
+		// for loading assets into GPU cache at start of lvl
+		static void PreloadTexture(System::String^ SpriteName);
 
 	internal:
 		//Constrcutor when GetAnimation() with Entity ID gets called

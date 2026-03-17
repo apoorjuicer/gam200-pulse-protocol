@@ -11,6 +11,9 @@ public class EnemyRhythmController : Script
     // =========================
     public static EnemyRhythmController? Instance { get; private set; }
 
+    // So that u can pick which enemy u want 2 use 
+    protected virtual EnemyIconType MyEnemyType => EnemyIconType.None;
+
     // === SPRITE SHEET SETTINGS ===
     public string IdleSpriteSheet   = "../Enemies/Rat_Idle_spritesheet_764x456";
     public string WalkSpriteSheet   = "../Enemies/Rat_Walk_spritesheet_764x456";
@@ -105,7 +108,15 @@ public class EnemyRhythmController : Script
 
     public override void Update()
     {
-        // Detect if this C# object has been reused for a new entity 
+        // Guard — keep this entity hidden until EnemySpawner releases it from the pool [cheese]
+        if (EnemySpawner.HiddenPreloads.TryGetValue(MyEnemyType, out int pooledID) && entityID == pooledID)
+        {
+            TransformComponent TF = GetTransform();
+            TF.IsVisible = false;
+            return;
+        }
+
+        // Detect if this C# object has been reused for a new entity
         if (initialized && entityID != initializedForEntityID)
         {
             Console.WriteLine($"[Enemy] Entity ID changed ({initializedForEntityID} -> {entityID}), re-initializing...");
@@ -227,9 +238,10 @@ public class EnemyRhythmController : Script
 
         Console.WriteLine("[Enemy] Initializing...");
 
-        TransformComponent tf = GetTransform();
 
-        // Force the idle spritesheet to load regardless of the previous currentState.
+        // Bring them back :P
+        TransformComponent tf = GetTransform();
+        tf.IsVisible = true; 
         currentState = EnemyState.Dead;
         SetState(EnemyState.Idle);
 
@@ -470,7 +482,11 @@ public class EnemyRhythmController : Script
 
         if (currentPhase == TurnPhase.PlayerInput)
         {
-            SetState(EnemyState.Idle);
+            // Wait for it 2 end first
+            if (currentState != EnemyState.Attacking)
+            { 
+                SetState(EnemyState.Idle);
+            }
             return;
         }
     }
@@ -494,6 +510,9 @@ public class EnemyRhythmController : Script
 
         int attackDamage = GetHealth().damage;
         Console.WriteLine($"[Enemy] ATTACKING PLAYER for {attackDamage} damage!");
+
+        // Reset state after attacking. (Rmb add check for when it still attacking ah)
+        currentState = EnemyState.Idle;
         SetState(EnemyState.Attacking);
 
         attackCooldownTimer = AttackFrames / AnimationSpeed;
@@ -615,7 +634,11 @@ public class EnemyRhythmController : Script
             TrySetWeakness();
         }
 
-        SetState(EnemyState.Idle);
+        // only reset if its done attacking
+        if (currentState != EnemyState.Attacking)
+        {
+            SetState(EnemyState.Idle);
+        }
     }
 
     protected virtual void SetupSprites()
@@ -624,9 +647,10 @@ public class EnemyRhythmController : Script
     }
 }
 
-
-public class Gorilla: EnemyRhythmController
+//[cheese], both the varables and preloading spritesheet
+public class Gorilla : EnemyRhythmController
 {
+    protected override EnemyIconType MyEnemyType => EnemyIconType.Gorilla;
     protected override void SetupSprites()
     {
         IdleSpriteSheet = "../Enemies/Gorilla_Idle_spritesheet_1459x977";
@@ -653,5 +677,14 @@ public class Gorilla: EnemyRhythmController
         
         AnimationSpeed = 12f;
         SizeMultiplier = 5.0f;
-}
+    }
+
+    // For preloading at the start of the fucking level, [cheese]
+    public static string[] GetRequiredTextures() => new[]
+    {
+        "../Enemies/Gorilla_Idle_spritesheet_1459x977",
+        "../Enemies/Gorilla_Walk_spritesheet_1459x977",
+        "../Enemies/Gorilla_Attack_spritesheet_1459x977",
+        "../Enemies/Gorilla_Hurt_spritesheet_1459x977",
+    };
 }

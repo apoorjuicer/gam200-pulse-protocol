@@ -21,14 +21,18 @@ public class LevelCountdown : Script
     {
 
         var text = GetTextComponent();
+
+        // Dont fucking start the countdown til we load in all the assets for this level.
+        if (!EnemySpawner.LoadingComplete)
+        {
+            text.SetVisible(false); 
+            return; // return early here so it will never get to start countdown hehe
+        }
+
         if (!started)
         {
             started = true;
             GameStart.Ready = false;
-
-
-            //if (text != null)
-            // {
             text.SetVisible(true);
             text.SetText("3");
             // text.SetColor(1f, 0.3f, 0.3f);

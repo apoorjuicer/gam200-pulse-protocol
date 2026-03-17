@@ -41,6 +41,15 @@ public class EnemySpawner : Script
     private bool pendingSpawn = false;
     private bool EnemySpawnedAlr = false; // Stop spawning as soon as u spawn an enemy
 
+    // For preloading assets
+    public static bool LoadingComplete            = false;                        // To check if u finish preloading assets
+    
+    private List<string>         PendingTextures  = new List<string>();           // list of textures that will be preloaded.
+    private int                  PreloadPos       = 0;                            // current pos for container.
+
+    private Queue<EnemyIconType> PendingSpawn  = new Queue<EnemyIconType>();   // container for those that need 2 be created then made invise.(only for first time)
+    public static Dictionary<EnemyIconType, int> HiddenPreloads = new Dictionary<EnemyIconType, int>(); //map of enemy that will be hiddne
+
     //Container of enemy 2 spawn. 
     // private List<EnemyIconType> EnemyContainer = new List<EnemyIconType>
     // {
@@ -50,12 +59,12 @@ public class EnemySpawner : Script
     //     EnemyIconType.Rat
     // };
 
-    private List<EnemyIconType> EnemyContainer = new List<EnemyIconType> // chloe: i just change to rat for now since this is the reason why it wasnt spawning the next enemies
+    private List<EnemyIconType> EnemyContainer = new List<EnemyIconType> 
     {
         EnemyIconType.Rat,
         EnemyIconType.Gorilla,
         EnemyIconType.Rat,
-        EnemyIconType.Rat
+        EnemyIconType.Gorilla
     };
 
     public override void Update()
@@ -65,6 +74,34 @@ public class EnemySpawner : Script
             Initialize();
             initialized = true;
             return;
+        }
+
+        // Load assets first.
+        if (!LoadingComplete)
+        {
+            // keep preloading all the assets that need to be preloaded
+            if (PreloadPos < PendingTextures.Count)
+            {
+                Animation.PreloadTexture(PendingTextures[PreloadPos++]);
+            }
+            
+            // then now create all those that need to be spawned and hidden.
+            else if (PendingSpawn.Count > 0)
+            {
+                EnemyIconType type = PendingSpawn.Dequeue();
+                int id = Factory.Instantiate(EnumtoString(type));
+                if (id >= 0)
+                {
+                    HiddenPreloads[type] = id;
+                }
+            }
+            
+            else
+            {
+                LoadingComplete = true;
+            }
+
+            return; 
         }
 
         // UI init after a few frames
@@ -136,6 +173,26 @@ public class EnemySpawner : Script
 
         SetupEnemyQueue();
 
+        // Reset loading state for new lvl
+        LoadingComplete = false;
+        PreloadPos = 0;
+        PendingTextures.Clear();
+        PendingSpawn.Clear();
+        HiddenPreloads.Clear();
+
+        // What assets need to be loaded before lvl start, just copy and paste this and change 2 bat/boss/or smth[cheese]
+        if (EnemyContainer.Contains(EnemyIconType.Gorilla))
+        {
+            PendingTextures.AddRange(Gorilla.GetRequiredTextures());
+            PendingSpawn.Enqueue(EnemyIconType.Gorilla);
+        }
+
+        // nth new 2 load in, idt we will need but just in case
+        if (PendingTextures.Count == 0)
+        {
+            LoadingComplete = true; 
+        }
+
         pendingSpawn = SpawnImmediatelyOnStart;
     }
 
@@ -193,11 +250,22 @@ public class EnemySpawner : Script
             return;
         }
 
-        string FactoryString = EnumtoString(enemyQueue.Peek());
+        // Look at container and spawn wtv next
+        EnemyIconType type = enemyQueue.Peek();
+        string FactoryString = EnumtoString(type);
 
         // if it returns ""
         if (string.IsNullOrEmpty(FactoryString))
         {
+            return;
+        }
+
+        // If it was one of the enemy that was preloaded at the start of the lvl, just make in visible.[cheese]
+        if (HiddenPreloads.TryGetValue(type, out int pooledID))
+        {
+            HiddenPreloads.Remove(type); // releases the pool guard in EnemyRhythmController
+            EnemySpawnedAlr = true;
+            enemiesSpawned++;
             return;
         }
 
@@ -214,13 +282,14 @@ public class EnemySpawner : Script
         Console.WriteLine($"[EnemySpawner] Spawned enemy {enemiesSpawned}/{EnemiesToSpawn} (ID: {enemyID})");
     }
 
+    //[cheese]
     public string EnumtoString(EnemyIconType type)
     {
         switch (type)
         {
             case EnemyIconType.Rat: return "Rat_Enemy";
             case EnemyIconType.Bat: return "Rat_Enemy";     // temp, to replace after new enemies spritesheet has been added in
-            case EnemyIconType.Gorilla: return "Gorilla_Enemy"; // temp, to replace after new enemies spritesheet has been added in
+            case EnemyIconType.Gorilla: return "Gorilla_Enemy"; 
             default: return "";
         }
     }

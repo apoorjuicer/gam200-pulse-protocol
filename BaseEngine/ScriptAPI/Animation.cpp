@@ -17,6 +17,7 @@
 #include <msclr/marshal_cppstd.h>   // for converting C# to C++ string
 #include "../Graphics/Animation.h"
 #include "../Graphics/Renderable.h"
+#include "../Graphics/GraphicsManager.h"     
 #include "../CoreEngine/Core/CoreEngine.h"   // for FilePathToGame
 #undef generic
 
@@ -54,6 +55,14 @@ namespace ScriptAPI
            // Comp.needsTextureReload = true;     // Trigger hot-swap
         }
 
+        // Forces the texture into the GPU cache early via GetOrLoad instead of when we first spawn it.
+        auto graphicsMgr = g_coordinator->GetSystem<GraphicsManager>();
+        if (graphicsMgr)
+        {
+            // alr in cache?
+            graphicsMgr->GetOrLoad(nativeSpriteName);
+        }
+
     }
 
     // Get the current SpriteName from this entity
@@ -75,6 +84,20 @@ namespace ScriptAPI
         auto* g_coordinator = Coordinator::GetInstance();
         auto& comp = g_coordinator->GetComponent<Framework::Animation>(entityID);
         comp.animationSpeed = speed;
+    }
+
+    // Same as SetAnimation but we forces the texture into the GPU cache early via GetOrLoad instead of when we first spawn it.
+    void Animation::PreloadTexture(System::String^ SpriteName)
+    {
+        std::string nativePath = (FilePathToGame / "Assets" / "Textures" / "Characters").string() + "/" + msclr::interop::marshal_as<std::string>(SpriteName) + ".png";
+
+        auto* g_coordinator = Coordinator::GetInstance();
+        auto graphicsMgr = g_coordinator->GetSystem<GraphicsManager>();
+        if (graphicsMgr)
+        {
+            // alr in cache?
+            graphicsMgr->GetOrLoad(nativePath);
+        }
     }
 
 }
