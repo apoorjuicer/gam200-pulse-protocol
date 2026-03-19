@@ -1,3 +1,17 @@
+/******************************************************************************/
+/**
+* @file        HoverableButton.cs
+* @project     Pulse Protocol
+* @author      Chloe Lau Rey En (primary) - 70%
+               Leu Jun Yong (secondary) - 30%
+* @brief       Script for hovering of buttons, and transition of scenes and showing overlay for all 4 buttons
+*
+* @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+*              Reproduction or disclosure of this file or its contents without the
+*              prior written consent of DigiPen Institute of Technology is prohibited.
+*
+/******************************************************************************/
+
 using System;
 using ScriptAPI;
 
@@ -16,13 +30,7 @@ public class GeneralBGM : Script
         if (!started)
         {
             // Don't set volume here - the MusicKnob slider handles it
-            // audio.SetSfxVolume(0.25f); // <-- THIS IS THE DEFAULT VOLUME FOR SFX
-
-            audio.SetSfxVolume(0.05f);
-            audio.SetMusicVolume(0.25f);
-            AudioSliderKnobBase.States["SFX"] = new AudioSliderKnobBase.SliderState { Value01 = 0.05f };
-            AudioSliderKnobBase.States["Music"] = new AudioSliderKnobBase.SliderState { Value01 = 0.25f };
-
+            audio.SetSfxVolume(0.25f); // <-- THIS IS THE DEFAULT VOLUME FOR SFX
             audio.PlayBGM();
             BGMManager.CurrentTrack = "General";
             Console.WriteLine("BGM: Playing General music");
@@ -65,21 +73,17 @@ public class LevelBGM : Script
         if (!started)
         {
             // Don't set volume here - the MusicKnob slider handles it
-            // audio.SetSfxVolume(0.25f); // <-- THIS IS THE DEFAULT VOLUME FOR SFX
-
-            audio.SetSfxVolume(0.05f);
-            audio.SetMusicVolume(0.25f);
-            AudioSliderKnobBase.States["SFX"] = new AudioSliderKnobBase.SliderState { Value01 = 0.05f };
-            AudioSliderKnobBase.States["Music"] = new AudioSliderKnobBase.SliderState { Value01 = 0.25f };
+            audio.SetSfxVolume(0.25f); // <-- THIS IS THE DEFAULT VOLUME FOR SFX
 
             audio.PlayBGM();
-            //audio.PlayBGM("LVL 1 BGM 90 MILI OFF TEST"); 
+            //audio.PlayBGM("LVL 1 BGM 90 MILI OFF TEST");
             BGMManager.CurrentTrack = "Level";
             Console.WriteLine("BGM: Playing Level music");
 
-            // Reset Conductor clock so beat tracking starts at t=0
-            // Conductor.Instance?.ResetClock();
-             
+            // Reset Conductor clock so beat tracking starts at t=0 to uh hopefully be in sync with audio if not i kms.
+          
+            Conductor.Instance?.ResetClock();
+
             started = true;
         }
 

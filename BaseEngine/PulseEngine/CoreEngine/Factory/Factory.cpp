@@ -2,8 +2,9 @@
 /**
  * @file        Factory.cpp
  * @project     Pulse Protocol
- * @author		Chia Wei Xuan Rachael (primary) - 90%
+ * @author		Chia Wei Xuan Rachael (primary) - 80%
  * @author      Ban Kai Wei Benjamin (secondary) - 10%
+ * @author      Reginald Lew Yee Ren (secondary) - 10%
  * @brief		Entity factory system for creating, deleting, and serializing individual
  *              game entities from JSON prefab files or programmatically. Handles entity
  *              lifecycle integration with SceneManager tracking and ECS Coordinator.
@@ -77,7 +78,7 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, boo
 	if (!ifs.is_open())
 	{
 		std::cerr << "Error: Cannot open file for reading: " << path << "\n";
-		return std::nullopt;
+		return false;
 	}
 
 	IStreamWrapper isw(ifs);
@@ -88,7 +89,7 @@ std::optional<Entity> Factory::CreateEntityFromJson(std::string const &path, boo
 	if (!(d.HasMember("components") && d["components"].IsArray()))
 	{
 		std::cerr << "Components are missing/wrong!" << std::endl;
-		return std::nullopt;
+		return false;
 	}
 
 	Entity entity = g_coordinator->CreateEntity();

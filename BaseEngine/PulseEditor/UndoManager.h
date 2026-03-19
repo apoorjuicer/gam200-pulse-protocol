@@ -48,7 +48,7 @@ private:
 	// Last-In-First-Out, store the previous step
 	std::vector<Action> undo_stack;
 	std::vector<Action> redo_stack;
-
+	// Trims history by erasing oldest action
 	void TrimUndoHistory();
 	void TrimRedoHistory();
 };

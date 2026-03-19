@@ -2,8 +2,9 @@
 /**
  * @file       AudioManager.cpp
  * @project    Pulse Protocol
- * @author     Ban Kai Wei Benjamin (primary) - 75%
- * @author     Leu Jun Yong (secondary) - 25%
+ * @author     Ban Kai Wei Benjamin (primary) - 70%
+ * @author     Leu Jun Yong (secondary) - 20%
+ * @author     Goh Pin Kai (secondary) - 10%
  * 
  * @brief      Manages FMOD audio system for BGM and SFX.
  * 
@@ -430,6 +431,7 @@ bool AudioManager::PlayBGM(const std::string &id)
        
     ResetBGMFade();
     ch->setVolume(clampto0and1(vol));
+    ch->setPriority(0); // highest FMOD priority to prevent SFX from stealing the BGM channel
 
     // book-keeping
     mBGMChannels[id] = ch;
@@ -619,7 +621,8 @@ double AudioManager::GetBGMPositionSeconds() const
 
     unsigned int ms = 0; // position in milliseconds
     FMOD_RESULT result = mCurrentBGMCh->getPosition(&ms, FMOD_TIMEUNIT_MS);
-    FMOD_CHECK(result, "getPosition(BGM)");
+    if (result != FMOD_OK)
+        return 0.0; // channel was stolen or invalidated; fall back to DeltaTime accumulation
 
     return static_cast<double>(ms) / 1000.0; // convert to seconds
 }

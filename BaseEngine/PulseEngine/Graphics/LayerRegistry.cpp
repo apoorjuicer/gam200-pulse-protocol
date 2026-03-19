@@ -2,8 +2,9 @@
 /**
  * @file        LayerRegistry.cpp
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En (primary) - 90%
+ * @author      Chloe Lau Rey En (primary) - 89%
  * @author      Ban Kai Wei Benjamin (secondary) - 10%
+ * @author      Goh Pin Kai (secondary) - 1%
  * 
  * @brief       Implementation of centralized layer registry
  *

@@ -4,7 +4,8 @@
  * @project     Pulse Protocol
  * @author      Leu Jun Yong (primary) - 70%
  *              Chloe Lau Rey En (secondary) - 20%
- *              Ban Kai Wei Benjamin (secondary) - 10%
+ *              Ban Kai Wei Benjamin (secondary) - 9%
+ *              Goh Pin Kai (secondary) - 1%
  * 
  * @brief       Implements the Project Panel (asset browser) for the editor.
  *              Helper functions moved to ProjectPanelHelpers.cpp for readability.

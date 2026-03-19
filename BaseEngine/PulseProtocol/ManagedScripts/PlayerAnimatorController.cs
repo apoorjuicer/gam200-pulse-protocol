@@ -44,6 +44,7 @@ public class PlayerAnimationController : Script
     // =========================
     private bool initialized = false;
     private PlayerAnimState currentState = PlayerAnimState.Idle2;
+    private bool swingToggle = false;
 
     // Determines which idle to return to after Attack/Hurt finishes
     // false = Idle2 (default, unarmed stance)
@@ -153,11 +154,20 @@ public class PlayerAnimationController : Script
 
         Console.WriteLine("[PlayerAnim] Playing Attack");
         // hasAttacked = true; // From now on, idle = Idle2
+        string swingSFX = swingToggle ? "SFX_SwordSwing_2" : "SFX_SwordSwing_1";
+        swingToggle = !swingToggle;
+        GetAudio().PlaySFX(swingSFX);
         SetAnimState(PlayerAnimState.Attack);
 
         waitingForStateEnd = true;
         stateTimer = 0f;
         stateDuration = AttackFrames / GetBeatSyncedSpeed(AttackFrames);
+
+        // Spawn sword slash VFX — lives for exactly one attack animation cycle
+        SwordSlashVFX.SpawnX = GetTransform().X + 300f;
+        SwordSlashVFX.SpawnY = GetTransform().Y;
+        SwordSlashVFX.SpawnDuration = stateDuration;
+        Factory.Instantiate("SwordSlashVFX");
     }
 
     public void PlayHurt()

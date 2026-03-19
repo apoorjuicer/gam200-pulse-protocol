@@ -8,7 +8,7 @@ public class ComboJudgementDisplay : Script
     public string GreatSprite = "../../PulseProtocol/Assets/Textures/UI/great.png";
     public string MissSprite = "../../PulseProtocol/Assets/Textures/UI/miss.png";
 
-    public float DisplayDuration = 0.6f;
+    public float DisplayDuration = 0.25f;
 
     // State
     private float displayTimer = 0f;

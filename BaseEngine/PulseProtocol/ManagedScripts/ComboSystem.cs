@@ -14,14 +14,15 @@ public class ComboSystem : Script
     // =========================
     public int maxComboLength = 4;
 
-    // Timing windows (seconds) — distance to the nearest beat boundary.
+    // Timing windows (seconds): Distance to the nearest beat boundary.
     // At 120 BPM (beatDuration = 0.5s), max possible delta is 0.25s.
     // Setting greatWindow < 0.25s creates a genuine MISS dead-zone in the middle of each beat.
     // PERFECT ≤ 0.06s (~3-4 frames @ 60fps)
     // GREAT   ≤ 0.125s (~7-8 frames @ 60fps)
-    // MISS    >  0.125s  (the central 50% of each beat interval — pressing mid-beat)
-    public float perfectWindow = 0.06f;
-    public float greatWindow   = 0.125f;
+    // MISS    >  0.125s  (the central 50% of each beat interval pressing mid-beat) :(
+    public float perfectWindow = 0.08f;
+    public float greatWindow   = 0.15f;
+
 
     // DEBUG: Set to true to auto-set a test weakness and accept all input regardless of turn state
     public bool DebugTestMode = false;
@@ -42,16 +43,10 @@ public class ComboSystem : Script
     // Beat Timing
     // =========================
     private int lastBeatIndex = -1;
-    private float timeSinceLastBeat = 0.0f;
 
     // Cache beat duration so we can measure distance to NEXT beat
     private float cachedBeatDuration = 0.5f; // fallback default (~120 BPM)
 
-    // One-key-per-beat enforcement.
-    // Tracks which beat slot the last accepted key press was assigned to.
-    // A beat slot is "the nearest beat" to the press time:
-    //   if timeSince <= timeUntilNext → slot = currentBeat
-    //   else                          → slot = currentBeat + 1
     private int lastInputBeat = -1;
 
     // =========================
@@ -71,8 +66,7 @@ public class ComboSystem : Script
     {
         // Console.WriteLine($"[CS:DEBUG] initialized={initialized}, Instance==this:{Instance == this}, weakness='{currentEnemyWeakness}'");
 
-        // On scene restart, Instance points to the old object but this is a new object.
-        // Copy weakness from old instance before taking over so it isn't lost.
+   
         if (Instance != null && Instance != this && !initialized)
         {
             string preservedWeakness = Instance.currentEnemyWeakness;
@@ -95,17 +89,13 @@ public class ComboSystem : Script
         if (!initialized)
         {
             Instance = this;
-            // Do NOT call SetEnemyWeakness here — EnemyRhythmController will set the
-            // real weakness once it initialises. Calling it here with a hardcoded default
-            // caused a session-2 race: EnemyRhythmController set weakness on the STALE
-            // ComboSystem instance from session 1, then this Init ran on the NEW instance
-            // overwriting it back to "WASD", breaking combo matching.
+     
             initialized = true;
             Console.WriteLine("[ComboSystem] Initialized");
             return;
         }
 
-        // If a duplicate exists, let it just return silently — don't replace the initialized instance
+        
         if (Instance != this)
             return;
 
@@ -115,18 +105,9 @@ public class ComboSystem : Script
 
         cachedBeatDuration = Conductor.Instance!.GetBeatDuration();
 
-        float dt = Time.DeltaTime;
-        timeSinceLastBeat += dt;
-
         int currentBeat = Conductor.Instance!.GetCurrentBeat();
-
-        // ---- Guard against duplicate beat events ----
-        // Only reset the timer if the beat index actually advanced.
         if (currentBeat != lastBeatIndex)
-        {
             lastBeatIndex = currentBeat;
-            timeSinceLastBeat = 0.0f;
-        }
     }
 
     // =========================
@@ -155,11 +136,14 @@ public class ComboSystem : Script
             return;
         }
 
-        float currentSongTime = Conductor.Instance!.GetSongTime();
         float beatDuration = Conductor.Instance!.GetBeatDuration();
+        // Back-date by half a frame: InputBridge detects taps one frame late (prev/cur polling),
+        // so the press likely happened ~0.5 frames ago on average.
+        float currentSongTime = Conductor.Instance!.GetAdjustedSongTime();
 
-        float timeSince = currentSongTime % beatDuration;
+        float timeSince = (currentSongTime % beatDuration + beatDuration) % beatDuration;
         float timeUntilNext = beatDuration - timeSince;
+        
         float delta = Math.Min(timeSince, timeUntilNext);
 
         // Clamp to zero in case of floating-point drift
@@ -168,9 +152,7 @@ public class ComboSystem : Script
         // =========================
         // One-key-per-beat gate
         // =========================
-        // Determine which beat slot this press "belongs to" — the nearest beat boundary.
-        // timeSince <= timeUntilNext means the player is in the first half of the beat interval
-        // and is closer to the beat that just fired; otherwise closer to the next beat.
+        
         int targetBeat = (timeSince <= timeUntilNext)
             ? Conductor.Instance!.GetCurrentBeat()
             : Conductor.Instance!.GetCurrentBeat() + 1;
@@ -196,13 +178,12 @@ public class ComboSystem : Script
         // =========================
         // MISS rejection
         // =========================
-        // A MISS means the player pressed mid-beat (outside the GREAT window).
-        // Reject it so it doesn't silently consume a combo slot — the player must
-        // wait for the next beat and try again on that slot.
+        
         if (judgement == "MISS")
         {
             Console.WriteLine($"[ComboSystem] [{key}] MISS — pressed too far from beat (Δ={delta:F3}s). Slot {targetBeat} freed.");
             lastInputBeat = -1; // free the slot so they can retry on the same beat window
+            ScoreManager.Instance?.AddScore("MISS");
             if (ComboDisplayManager.Instance != null)
                 ComboDisplayManager.Instance.ShowJudgement("MISS");
             VisualBeatSystem.Instance?.FlashJudgement("MISS");
@@ -213,9 +194,6 @@ public class ComboSystem : Script
         hitResults.Add(judgement);
         currentCombo.Add(key);
 
-        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s, sinceBeat={timeSince:F3}s, untilNext={timeUntilNext:F3}s)");
-        Console.WriteLine($"[ComboSystem]   Progress: {currentCombo.Count}/{maxComboLength} | Expected: {(currentCombo.Count <= currentEnemyWeakness.Length ? currentEnemyWeakness[currentCombo.Count - 1].ToString() : "?")} | Got: {key}");
-
         // === VISUAL FEEDBACK ===
         // If the key is wrong, always show MISS visually regardless of timing, if not might mess up w the timing
         string visualJudgement = judgement;
@@ -225,6 +203,13 @@ public class ComboSystem : Script
             if (key != expectedKey)
                 visualJudgement = "MISS";
         }
+
+        // miss combo resets
+        ScoreManager.Instance?.AddScore(visualJudgement);
+
+        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s, sinceBeat={timeSince:F3}s, untilNext={timeUntilNext:F3}s)");
+        Console.WriteLine($"[ComboSystem]   Progress: {currentCombo.Count}/{maxComboLength} | Expected: {(currentCombo.Count <= currentEnemyWeakness.Length ? currentEnemyWeakness[currentCombo.Count - 1].ToString() : "?")} | Got: {key}");
+
 
         if (ComboDisplayManager.Instance != null)
         {

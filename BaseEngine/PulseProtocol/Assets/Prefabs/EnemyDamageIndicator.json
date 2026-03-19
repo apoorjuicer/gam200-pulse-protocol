@@ -49,12 +49,12 @@
     {
       "TextComponent": {
         "text": "",
-        "font_id": "PatrickHand_font",
+        "font_id": "barlow_extrabolditalic_font",
         "offset": {
           "x": 0.0,
           "y": 0.0
         },
-        "font_size": 48.0,
+        "font_size": 10.0,
         "color": [1.0, 1.0, 1.0],
         "visible": true,
         "alignment": 1

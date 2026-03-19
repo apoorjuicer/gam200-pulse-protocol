@@ -2,7 +2,8 @@
 /**
  * @file        PrefabManager.cpp
  * @project     Pulse Protocol
- * @author      Chloe Lau Rey En
+ * @author      Chloe Lau Rey En (Primary) - 90%
+ * @author      Reginald Lew Yee Ren (Secondary) - 10%
  * @brief       Implements the PrefabManager system for entity template management.
  *              - Blocks saving entities with '_' prefix (engine-managed)
  *              - Game text (TextComponent without '_' prefix) CAN be saved

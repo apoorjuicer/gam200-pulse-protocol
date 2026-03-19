@@ -15,6 +15,10 @@
 #include <utility>
 
 namespace {
+	/*
+	RAII guard for undo/redo
+	prevents double undo/redo on a single action
+	*/
 	struct ApplyingGuard {
 		bool& flag;
 		explicit ApplyingGuard(bool& f) : flag(f) { flag = true; }
@@ -71,11 +75,11 @@ void UndoManager::Undo()
 		}
 		else {
 			std::cout << "[UndoManager] ERROR: undo is null\n";
-			return; // Don't push a broken action to Redo
+			return; // Don't push a broken "action" to Redo
 		}
-	}
+	}//in a scope, applying guard dtor called at end of this
 
-	if (a.redo)                                  // only push if redo exists
+	if (a.redo)  // only push if redo exists
 	{
 		redo_stack.push_back(std::move(a));
 		TrimRedoHistory();
@@ -93,7 +97,7 @@ void UndoManager::Redo()
 	redo_stack.pop_back();
 
 	//guard
-	{
+	{ //in a scope, applying guard dtor called at end of this
 		ApplyingGuard g(m_applying);
 		if (a.redo) {
 			a.redo();
@@ -101,6 +105,7 @@ void UndoManager::Redo()
 		}
 		else {
 			std::cout << "[UndoManager] ERROR: redo is null\n";
+			return;
 		}			
 	}// g should be done here
 

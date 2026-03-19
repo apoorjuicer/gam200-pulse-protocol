@@ -180,7 +180,7 @@ namespace ScriptAPI
     float AudioComponent::GetBGMPosition()
     {
         auto mgr = GetAudioManager();
-        if (!mgr)   
+        if (!mgr)
         {
             return 1.0f;
         }

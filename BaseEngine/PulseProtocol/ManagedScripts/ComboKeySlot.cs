@@ -60,11 +60,6 @@ public class ComboKeySlot : Script
     private bool isShowingResult = false;
     private float resultTimer = 0f;
 
-    // Beat flash
-    private bool isFlashing = false;
-    private float flashTimer = 0f;
-    public float FlashDuration = 0.2f;
-
     // Correct hint after wrong press
     private bool isShowingCorrectHint = false;
     private float correctHintTimer = 0f;
@@ -198,25 +193,6 @@ public class ComboKeySlot : Script
         }
 
         // =========================
-        // Beat Flash
-        // =========================
-        if (isFlashing)
-        {
-            flashTimer += Time.DeltaTime;
-            float t01 = Math.Min(flashTimer / FlashDuration, 1f);
-            // Lerp from bright (2.0) back to normal (1.0)
-            float brightness = 2.0f - (1.0f * t01);
-            var sprite = GetSprite();
-            sprite.SetTint(brightness, brightness, brightness, 1f);
-
-            if (t01 >= 1f)
-            {
-                isFlashing = false;
-                sprite.SetTint(1f, 1f, 1f, 1f); // reset to normal
-            }
-        }
-
-        // =========================
         // Correct Hint Timer
         // =========================
         if (isShowingCorrectHint && !isShowingResult)
@@ -261,10 +237,6 @@ public class ComboKeySlot : Script
         var sprite = GetSprite();
         sprite.Texture = BlankSprite;
         sprite.SetTint(1f, 1f, 1f, 1f); // white tint so blank key is visible
-
-        // Flash bright on beat
-        isFlashing = true;
-        flashTimer = 0f;
 
         var transform = GetTransform();
         transform.IsVisible = true;
