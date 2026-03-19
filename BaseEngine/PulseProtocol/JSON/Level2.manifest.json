@@ -1,0 +1,11 @@
+{ //audio and font already preloaded though
+    "scenemanifest": {
+        "sceneId": "Level2",
+        "textures": [],
+        "audio": [
+            "BGM_L2_TESTING"
+        ],
+        "fonts": [],
+        "animations": []
+    }
+}

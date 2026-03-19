@@ -1,0 +1,11 @@
+{ //audio and font already preloaded though
+    "scenemanifest": {
+        "sceneId": "MainMenu",
+        "textures": [],
+        "audio": [
+            "BGM_L1_TESTING"
+        ],
+        "fonts": [],
+        "animations": []
+    }
+}
