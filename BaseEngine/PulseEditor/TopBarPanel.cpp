@@ -181,7 +181,7 @@ namespace PulseEditor
         float itemSpacing = ImGui::GetStyle().ItemSpacing.x;
 
         // ------------------------------------------------------------
-        // Left side: Save Scene / Load Scene
+        // Left side: Save Scene / Load Scene / New Game / Load Other Games
         // ------------------------------------------------------------
         ImVec2 newTextSize = ImGui::CalcTextSize("New Scene");
         ImVec2 saveTextSize = ImGui::CalcTextSize("Save Scene");
