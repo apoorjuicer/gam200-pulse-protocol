@@ -2,8 +2,9 @@
 /**
  * @file        AudioManager.h
  * @project     Pulse Protocol
- * @author      Ban Kai Wei Benjamin (primary) - 75%
- * @author      Leu Jun Yong (secondary) - 25%
+ * @author      Ban Kai Wei Benjamin (primary) - 70%
+ * @author      Leu Jun Yong (secondary) - 20%
+ * @author      Goh Pin Kai (secondary) - 10%
  * @brief       Provides initialization, playback, control, and shutdown of
  *              FMOD-based audio for BGM and sound effects.
  *

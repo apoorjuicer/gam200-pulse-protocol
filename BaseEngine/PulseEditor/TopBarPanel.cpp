@@ -2,7 +2,8 @@
 /**
  * @file        TopBarPanel.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong
+ * @author      Leu Jun Yong (90%)
+ * @co-author   Chia Wei Xuan Rachael(10%).
  * @brief       Implements the Top Panel for the editor.
  *
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
@@ -341,21 +342,6 @@ namespace PulseEditor
                     ImGui::EndPopup();
                     return;
                 }
-
-                //// Find BaseEngine folder by walking up from current path
-                //fs::path cur = fs::current_path();
-                //while (cur.filename() != "BaseEngine" && cur.has_parent_path())
-                //    cur = cur.parent_path();
-
-                //fs::path gameRoot = cur;
-
-                //// Create folder structure
-                //std::error_code ec;
-                //fs::create_directories(gameRoot / "Assets" / "Textures", ec);
-                //fs::create_directories(gameRoot / "Assets" / "Sound", ec);
-                //fs::create_directories(gameRoot / "Assets" / "Font", ec);
-                //fs::create_directories(gameRoot / "Assets" / "Prefabs", ec);
-                //fs::create_directories(gameRoot / "JSON", ec);
 
 
                 // Write starter JSON files

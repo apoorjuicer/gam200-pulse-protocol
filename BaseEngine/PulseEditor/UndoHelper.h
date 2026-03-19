@@ -6,7 +6,13 @@
  * @brief       Functions that implement undo logic using undomanager,
  *              snapshot, hierarchyhelpers 
  *               and editortypes with engine's factory functions
- *
+ * 
+ *              The stable handle exists so undo/redo can keep track of the
+ *              same "conceptual" game object even if ECS ID changes over time
+ *              Need it to prevent phantom entity bug
+ *              conceptual objecct -> same logical object in editor
+ *              live entity -> current ECS id it has in the Entity container
+ * 
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
@@ -31,7 +37,7 @@
 namespace PulseEditor
 {
 
-    struct DeletedNode
+    struct DeletedNode // for tree
     {
         Entity oldEntity = INVALID_ENTITY;
         EntitySnapshot snapshot{};
@@ -85,25 +91,36 @@ namespace PulseEditor
         return static_cast<int>(it - order.begin());
     }
 
-    inline void RebindHandle(std::unordered_map<Entity, std::shared_ptr<EntityHandle>>& hof,
-        std::shared_ptr<EntityHandle> const& h,
-        Entity oldId,
-        Entity newId)
-    {
-        if (!h) return;
+ 
+    //inline void RebindHandle(std::unordered_map<Entity, std::shared_ptr<EntityHandle>>& hof,
+    //    std::shared_ptr<EntityHandle> const& h,
+    //    Entity oldId,
+    //    Entity newId)
+    //{
+    //    if (!h) return;
 
-        if (oldId != INVALID_ENTITY)
-            hof.erase(oldId);
+    //    if (oldId != INVALID_ENTITY)
+    //        hof.erase(oldId);
 
-        if (newId != INVALID_ENTITY)
-            hof[newId] = h;
-    }
+    //    if (newId != INVALID_ENTITY)
+    //        hof[newId] = h;
+    //}
 
+
+/**
+ * @brief Creates a default game object and records the action for undo/redo.
+ *
+ * Spawns a default entity immediately, adds it to the display order and
+ * handle map, then pushes an undo/redo action so the creation can be
+ * reversed or recreated later.
+ *
+ * @return Stable handle to the "conceptual" object for selection/tracking.
+ */
     inline std::shared_ptr<EntityHandle>
         PushCreateDefault(UndoManager& undo, Factory& factory, std::vector<Entity>& displayOrder
         , std::unordered_map<Entity, std::shared_ptr<EntityHandle>>& hof)
     {
-        // Shared stable handle for this conceptual object
+        // Shared stable handle for this object
         auto h = std::make_shared<EntityHandle>();
         h->id = INVALID_ENTITY;
 
@@ -131,7 +148,7 @@ namespace PulseEditor
                 // Delete from ECS
                 factory.DeleteEntity(old);
                 
-                // Remove from UI list first
+                // Remove from UI
                 RemoveFromDisplayOrder(displayOrder, old);
 
                 // unbind map
@@ -148,7 +165,7 @@ namespace PulseEditor
                     // Already alive somehow; avoid double-create
                     return;
                 }
-
+                //create the object again
                 Entity createdAGN = factory.DefaultObj();
                 h->id = createdAGN;
                 hof[createdAGN] = h;
@@ -160,7 +177,21 @@ namespace PulseEditor
         undo.Push(std::move(a));
         return h; // return handle so caller can keep selection tracking
     }
-
+    /******************************************************************************/
+/// @brief Records a delete-entity action into the undo system.
+///
+///     Deletes the entity currently referenced by the stable handle immediately,
+///     then pushes an undo/redo action pair into the UndoManager so the deletion
+///     can be reversed or re-applied later
+///     The stable handle is required because undo restore may create a new
+///     ECS entity ID. The handle preserves the logical identity of the object
+///     1. Validate the stable handle.
+///     2. Capture entity snapshot and hierarchy index.
+///     3. Delete the live entity immediately.
+///     4. Push an action:
+///        - undo => recreate from snapshot and restore hierarchy position
+///        - redo => delete the recreated live entity again
+/*****************************************************************************/
     inline void
         PushDeleteEntity(UndoManager& undo,
             Factory& factory,
@@ -209,7 +240,7 @@ namespace PulseEditor
                 h->id = recreated;
                 hof[recreated] = h;
 
-                // Restore UI order at original index (optional)
+                // Restore UI order at original index
                 InsertIntoDisplayOrder(displayOrder, recreated, index);
 
                 //if (index < 0 || index >(int)displayOrder.size())
@@ -233,7 +264,26 @@ namespace PulseEditor
 
         undo.Push(std::move(a));
     }
-
+    /**
+     * @brief Deletes a root entity and its entire subtree with undo/redo support.
+     *
+     * Captures snapshots, stable handles, hierarchy links, display order, and
+     * selection state before deleting the subtree. Undo recreates the subtree and
+     * restores parent-child relationships, UI order, and selection. Redo deletes
+     * the subtree again.
+     * 
+     * Needs this for Parent-Child delete undo/redo
+     * 
+     *  Undo restores:
+     *    - all deleted entities
+     *    - parent-child hierarchy links
+     *    - display order positions
+     *    - stable handles
+     *    - selection of the restored root
+     *
+     *    Redo deletes the restored subtree again and clears selection.
+     * 
+     */
     inline void PushDeleteSubtree(
         UndoManager& undo,
         Factory& factory,
@@ -243,7 +293,7 @@ namespace PulseEditor
         Entity& se,
         std::shared_ptr<EntityHandle>& sh)
     {
-        if (root == INVALID_ENTITY)
+        if (root == INVALID_ENTITY) //early return
             return;
 
         std::vector<Entity> entitiesToDelete;
@@ -252,12 +302,15 @@ namespace PulseEditor
         if (entitiesToDelete.empty())
             return;
 
+        // Shared container holding all deleted subtree nodes.
+        // Kept alive for both undo and redo lambdas.
         auto deleted = std::make_shared<std::vector<DeletedNode>>();
         deleted->reserve(entitiesToDelete.size());
 
         // Capture all info BEFORE deletion
         for (Entity e : entitiesToDelete)
         {
+            //create node and snapshots and get disply index
             DeletedNode node;
             node.oldEntity = e;
             node.snapshot = MakeEntitySnapshot(e);
@@ -320,12 +373,14 @@ namespace PulseEditor
                 // only detach from parent if parent is NOT also being deleted
                 if (parent != INVALID_ENTITY && deletedSet.find(parent) == deletedSet.end())
                 {
+                    //use hierarchy helper set parent 
                     HierarchyHelpers::SetParent(e, HierarchyHelpers::INVALID);
                 }
             }
 
             RemoveFromDisplayOrder(displayOrder, e);
             hof.erase(e);
+            //delete the object
             factory.DeleteEntity(e);
         }
 
@@ -336,7 +391,9 @@ namespace PulseEditor
         }
 
         se = INVALID_ENTITY;
-        sh.reset();
+        //reset the shared container before executing
+        // undo/redo action 
+        sh.reset(); 
 
         UndoManager::Action a;
 
@@ -351,12 +408,14 @@ namespace PulseEditor
                 for (auto& node : *deleted)
                 {
                     Entity recreated = CreateFromSnapshot(node.snapshot);
-                    if (recreated == INVALID_ENTITY)
+                    if (recreated == INVALID_ENTITY) {
                         continue;
+                    }//early return
+                       
 
                     oldToNew[node.oldEntity] = recreated;
-
-                    if (node.handle)
+                    //asign the handles to recreated entity
+                    if (node.handle) 
                     {
                         node.handle->id = recreated;
                         hof[recreated] = node.handle;
@@ -371,6 +430,8 @@ namespace PulseEditor
                         continue;
 
                     Entity newEntity = itNew->second;
+
+                    //remove the parent and child component
 
                     if (g->HasComponent<Parent>(newEntity))
                         g->RemoveComponent<Parent>(newEntity);
@@ -403,12 +464,13 @@ namespace PulseEditor
                             parentToUse = node.parentHandle->id;
                         }
                         // Case 3: parent was never deleted and still uses same raw ID
+                        // check if parent(old) still exists
                         else if (oldParent != INVALID_ENTITY)
                         {
+                            //assume exist if contain this components
                             bool liveParentExists =
                                 g->HasComponent<Parent>(oldParent) ||
                                 g->HasComponent<Children>(oldParent) ||
-                                g->HasComponent<Framework::Transform>(oldParent) ||
                                 g->HasComponent<Name>(oldParent) ||
                                 g->HasComponent<LayerTag>(oldParent);
 
@@ -445,20 +507,22 @@ namespace PulseEditor
         a.redo = [deleted, &displayOrder, &hof, &se, &sh, &factory]() mutable
             {
                 // deleted vector order is children first, parent last
-                // deleting in this same order is okay
+                // deleting in this same order
                 for (auto& node : *deleted)
                 {
+                    // Skip nodes that are not currently live.
+                    // in handle and marked as invalid
                     if (!node.handle || node.handle->id == INVALID_ENTITY)
                         continue;
 
                     Entity e = node.handle->id;
-
+                    // Remove from editor UI, unbind handle map, and delete from ECS.
                     RemoveFromDisplayOrder(displayOrder, e);
                     hof.erase(e);
                     factory.DeleteEntity(e);
                     node.handle->id = INVALID_ENTITY;
                 }
-
+                // Clear current selection after subtree deletion.
                 se = INVALID_ENTITY;
                 sh.reset();
             };
@@ -468,6 +532,33 @@ namespace PulseEditor
 
     /*
     Components
+    Push Edits, could be template functions for majority
+    but easier debug and safer to execute this way
+
+    NOTE: Layer and Logic Components vastly differs from 
+    typical components
+
+    Regular components
+     * Records a transform component edit for undo/redo.
+     * Stores the previous and updated <COMPONENT_TYPE> states for the entity referenced
+     * by the stable handle. Undo restores the old <COMPONENT_TYPE>, while redo reapplies
+     * the new <COMPONENT_TYPE>.
+
+     LayerTag component
+    - Records a LayerTag edit for undo/redo.
+     * Restores the old layer on undo and reapplies the new layer on redo.
+
+    LayerRegistry edit
+    - Records a global layer registry edit for undo/redo.
+     * Restores the previous registry snapshot on undo and the updated snapshot on redo.
+     * Also refreshes the graphics layer filter after each restore.
+
+    Logic component
+    - Records a LogicComponent edit for undo/redo.
+     * Restores the old script list on undo and reapplies the new script list on redo.
+     * Also syncs the runtime script bindings by removing old scripts first,
+     * then re-adding the restored scripts after the component state is assigned.
+
     */
 
     inline void PushTransformEdit(UndoManager& undo,
@@ -475,19 +566,21 @@ namespace PulseEditor
         Framework::Transform const& before,
         Framework::Transform const& after)
     {
-        std::cout << "[UndoH] PushTransformEdit called\n";
+        // Record a transform change for undo/redo.
 
-        std::cout << "[UndoH] h ptr = " << h.get()
-            << " id = " << (h ? h->id : INVALID_ENTITY)
-            << " INVALID_ENTITY = " << INVALID_ENTITY
-            << "\n";
+        // Debug: show the stable handle and current live entity id.
+        //std::cout << "[UndoH] PushTransformEdit called\n";
+        //std::cout << "[UndoH] h ptr = " << h.get()
+        //    << " id = " << (h ? h->id : INVALID_ENTITY)
+        //    << " INVALID_ENTITY = " << INVALID_ENTITY
+        //    << "\n";
 
         if (!h || h->id == INVALID_ENTITY) return;
-        std::cout << "[UndoH] PushTransformEdit no early return\n";
+        //std::cout << "[UndoH] PushTransformEdit no early return\n";
         UndoManager::Action a;
 
         a.undo = [h, before]()
-            {
+            {// Restore the previous transform state.
                 if (!h || h->id == INVALID_ENTITY) return;
                 auto* c = Coordinator::GetInstance();
                 if (!c) return;
@@ -499,7 +592,7 @@ namespace PulseEditor
             };
 
         a.redo = [h, after]()
-            {
+            {// Reapply the edited transform state.
                 if (!h || h->id == INVALID_ENTITY) return;
                 auto* c = Coordinator::GetInstance();
                 if (!c) return;
@@ -509,7 +602,7 @@ namespace PulseEditor
                 //std::cout << "[UndoH] redo transform for entity id " << h->id
                  //   << "[UndoH] transform values are " << after << "\n";
             };
-
+        // Store the action in undo history.
         undo.Push(std::move(a));
     }
 
@@ -929,39 +1022,23 @@ namespace PulseEditor
     }
 
     /*
-    * Remove component undo
+    * Remove Component Feature
+      undo/redo
+
+
+
+      Regular remove component
+      - Records component removal for undo/redo.
+      * Undo restores the removed <COMPONENT_TYPE> with its saved value.
+      * Redo removes the <COMPONENT_TYPE> again from the entity
+        referenced by the stable handle.
+        
+      Layer Component CANNOT BE REMOVED
+
+      Logic Component needs to re-add runtime scripts
+      or remove runtime scripts too depending on undo/redo
+
     */
-
-    //inline void PushRemoveName(UndoManager& undo,
-    //    std::shared_ptr<EntityHandle> h,
-    //    Name const& removedValue)
-    //{
-    //    if (!h || h->id == INVALID_ENTITY) return;
-
-    //    UndoManager::Action a;
-
-    //    a.undo = [h, removedValue]()
-    //        {
-    //            if (!h || h->id == INVALID_ENTITY) return;
-    //            auto* c = Coordinator::GetInstance();
-    //            if (!c) return;
-    //            if (c->HasComponent<Name>(h->id)) return;
-
-    //            c->AddComponent<Name>(h->id, removedValue);
-    //        };
-
-    //    a.redo = [h]()
-    //        {
-    //            if (!h || h->id == INVALID_ENTITY) return;
-    //            auto* c = Coordinator::GetInstance();
-    //            if (!c) return;
-    //            if (!c->HasComponent<Name>(h->id)) return;
-
-    //            c->RemoveComponent<Name>(h->id);
-    //        };
-
-    //    undo.Push(std::move(a));
-    //}
 
     inline void PushRemoveTransform(
         UndoManager& undo,

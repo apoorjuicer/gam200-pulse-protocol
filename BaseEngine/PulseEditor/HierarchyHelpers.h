@@ -294,12 +294,13 @@ namespace HierarchyHelpers
 
     // =========================================================================
     // Collec tSubtree Entities
-    // Collect all the children
+    // Collect all the children and parent recursively
+    // parents will be added to the back of container
     // =========================================================================
     inline void CollectSubtreeEntities(Entity entity, std::vector<Entity>& outEntities)
     {
         auto* g = Coordinator::GetInstance();
-        if (!g) return;
+        if (!g) return; //early return
 
         if (g->HasComponent<Children>(entity))
         {

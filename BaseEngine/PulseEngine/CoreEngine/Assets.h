@@ -2,8 +2,8 @@
 /**
  * @file        Assets.h
  * @project     Pulse Protocol
- * @author      Reginald Lew Yee Ren (primary)- 40%
- * @author      Ban Kai Wei Benjamin (secondary) - 60%
+ * @author      Reginald Lew Yee Ren (primary)- 50%
+ * @author      Ban Kai Wei Benjamin (secondary) - 50%
  * @brief       Core asset data structures used by the ECS system for collision entity
  * 
  * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
