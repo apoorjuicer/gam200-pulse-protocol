@@ -31,7 +31,7 @@ public class ComboKeySlot : Script
     public string DSprite = "../../PulseProtocol/Assets/Textures/UI/D.png";
 
     // Player fill sprites
-    public string BlankSprite = "../../PulseProtocol/Assets/Textures/UI/blank key.png";
+    public string BlankSprite = "../../PulseProtocol/Assets/Textures/UI/question mark blank key.png";
     public string GreenWSprite = "../../PulseProtocol/Assets/Textures/UI/Player Input GREEN W.png";
     public string GreenASprite = "../../PulseProtocol/Assets/Textures/UI/Player Input GREEN A.png";
     public string GreenSSprite = "../../PulseProtocol/Assets/Textures/UI/Player Input GREEN S.png";
