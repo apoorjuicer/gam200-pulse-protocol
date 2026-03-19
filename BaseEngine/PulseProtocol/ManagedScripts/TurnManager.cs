@@ -1,3 +1,19 @@
+/******************************************************************************/
+/**
+* @file        TurnManager.cs
+* @project     Pulse Protocol
+* @author      Carrie Lam (70%)
+*              Chloe Lau (30%)
+* @brief       Controls the beat-driven turn loop between enemy and player phases
+*              (Countdown, EnemyDisplay, PlayerInput, Resolution), coordinating
+*              phase transitions and combo resolution each session.
+*
+* @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+*              Reproduction or disclosure of this file or its contents without the
+*              prior written consent of DigiPen Institute of Technology is prohibited.
+*
+/******************************************************************************/
+
 using System;
 using ScriptAPI;
 
