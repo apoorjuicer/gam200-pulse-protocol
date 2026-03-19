@@ -57,6 +57,14 @@
             "mdl_ref": 0,
             "shd_ref": 1
         },
+        {
+            "id": "Calibrator_BG",
+            "path": "Assets/Textures/Backgrounds/Calibrator BG.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
         //Player/Enemy
         {
             "id": "hero",
@@ -82,6 +90,121 @@
             "mdl_ref": 1,
             "shd_ref": 2
         },
+        //dorian
+        {
+            "id": "dorian_idle1",
+            "path": "Assets/Textures/Characters/Dorian_Idle1_579x615.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "dorian_idle2",
+            "path": "Assets/Textures/Characters/Dorian_Idle2_579x615.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "dorian_sword",
+            "path": "Assets/Textures/Characters/Dorian_Sword_579x615.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "dorian_hurt",
+            "path": "Assets/Textures/Characters/Dorian_Hurt_579x615.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        //gorilla
+        {
+            "id": "gorilla_idle",
+            "path": "Assets/Textures/Enemies/Gorilla/Gorilla_Idle_spritesheet_1459x977.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "gorilla_hurt",
+            "path": "Assets/Textures/Enemies/Gorilla/Gorilla_Hurt_spritesheet_1459x977.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "gorilla_walk",
+            "path": "Assets/Textures/Enemies/Gorilla/Gorilla_Walk_spritesheet_1459x977.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "gorilla_attack",
+            "path": "Assets/Textures/Enemies/Gorilla/Gorilla_Attack_spritesheet_1459x977.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "gorilla_death",
+            "path": "Assets/Textures/Enemies/Gorilla/Gorilla_Death_spritesheet_1459x977.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        //rat
+        {
+            "id": "rat_idle",
+            "path": "Assets/Textures/Enemies/Rat/Rat_Idle_spritesheet_764x456.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "rat_hurt",
+            "path": "Assets/Textures/Enemies/Rat/Rat_Hurt_spritesheet_764x456.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "rat_walk",
+            "path": "Assets/Textures/Enemies/Rat/Rat_Walk_spritesheet_764x456.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "rat_attack",
+            "path": "Assets/Textures/Enemies/Rat/Rat_Attack_spritesheet_764x456.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "rat_death",
+            "path": "Assets/Textures/Enemies/Rat/Rat_Death_spritesheet_764x456.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
         //UI
         {
             "id": "bar_ui",
@@ -92,16 +215,42 @@
             "shd_ref": 3
         },
         {
-            "id": "perfect_ui",
-            "path": "Assets/Textures/UI/perfect.png",
+            "id": "miss_ui",
+            "path": "Assets/Textures/UI/combotext/miss.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
             "shd_ref": 3
         },
         {
+            "id": "great_ui",
+            "path": "Assets/Textures/UI/combotext/great.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "perfect_ui",
+            "path": "Assets/Textures/UI/combotext/perfect.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        //player inputborder
+        {
+            "id": "player_input_border",
+            "path": "Assets/Textures/UI/player_input_border.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        //wasd key
+        {
             "id": "W_KEY_GREEN",
-            "path": "Assets/Textures/UI/WASDKeys/Player Input GREEN W.png",
+            "path": "Assets/Textures/UI/WASDKeys/PlayerInputGREENW.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
@@ -109,7 +258,7 @@
         },
         {
             "id": "A_KEY_GREEN",
-            "path": "Assets/Textures/UI/WASDKeys/Player Input GREEN A.png",
+            "path": "Assets/Textures/UI/WASDKeys/PlayerInputGREENA.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
@@ -117,7 +266,7 @@
         },
         {
             "id": "S_KEY_GREEN",
-            "path": "Assets/Textures/UI/WASDKeys/Player Input GREEN S.png",
+            "path": "Assets/Textures/UI/WASDKeys/PlayerInputGREENS.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
@@ -125,7 +274,7 @@
         },
         {
             "id": "D_KEY_GREEN",
-            "path": "Assets/Textures/UI/WASDKeys/Player Input GREEN D.png",
+            "path": "Assets/Textures/UI/WASDKeys/PlayerInputGREEND.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
@@ -133,7 +282,7 @@
         },
         {
             "id": "W_KEY_RED",
-            "path": "Assets/Textures/UI/WASDKeys/Player Input RED W.png",
+            "path": "Assets/Textures/UI/WASDKeys/PlayerInputREDW.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
@@ -141,7 +290,7 @@
         },
         {
             "id": "A_KEY_RED",
-            "path": "Assets/Textures/UI/WASDKeys/Player Input RED A.png",
+            "path": "Assets/Textures/UI/WASDKeys/PlayerInputREDA.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
@@ -149,7 +298,7 @@
         },
         {
             "id": "S_KEY_RED",
-            "path": "Assets/Textures/UI/WASDKeys/Player Input RED S.png",
+            "path": "Assets/Textures/UI/WASDKeys/PlayerInputREDS.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
@@ -157,7 +306,7 @@
         },
         {
             "id": "D_KEY_RED",
-            "path": "Assets/Textures/UI/WASDKeys/Player Input RED D.png",
+            "path": "Assets/Textures/UI/WASDKeys/PlayerInputREDD.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
@@ -312,16 +461,16 @@
         {
             "id": "dropdownopen_BOX",
             "path": "Assets/Textures/UI/Settings/dropdownopen.png",
-            "vert_shader_path": "shader/font_vs.vert",
-            "frag_shader_path": "shader/font_fs.frag",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
             "shd_ref": 3
         },
         {
             "id": "dropdownclose_BOX",
             "path": "Assets/Textures/UI/Settings/dropdownclose.png",
-            "vert_shader_path": "shader/font_vs.vert",
-            "frag_shader_path": "shader/font_fs.frag",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
             "shd_ref": 3
         },
@@ -368,24 +517,24 @@
         {
             "id": "slider_point",
             "path": "Assets/Textures/UI/Settings/slider.png",
-            "vert_shader_path": "shader/font_vs.vert",
-            "frag_shader_path": "shader/font_fs.frag",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
             "shd_ref": 3
         },
         {
             "id": "slider_fill",
             "path": "Assets/Textures/UI/Settings/sliderbarfill.png",
-            "vert_shader_path": "shader/font_vs.vert",
-            "frag_shader_path": "shader/font_fs.frag",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
             "shd_ref": 3
         },
         {
             "id": "slider_empty",
             "path": "Assets/Textures/UI/Settings/sliderbarbottom.png",
-            "vert_shader_path": "shader/font_vs.vert",
-            "frag_shader_path": "shader/font_fs.frag",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
             "shd_ref": 3
         },
@@ -444,6 +593,310 @@
             "path": "Assets/Textures/UI/quitprompt/quitno_hover.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        //howtoplay cut scene
+        {
+            "id": "htp_1",
+            "path": "Assets/Textures/UI/howtoplay/HTP_1.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "htp_2",
+            "path": "Assets/Textures/UI/howtoplay/HTP_2.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "htp_3",
+            "path": "Assets/Textures/UI/howtoplay/HTP_3.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        //beatborder
+        {
+            "id": "beatborder_transparent",
+            "path": "Assets/Textures/UI/border/border_transparent.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "beatborder_frame",
+            "path": "Assets/Textures/UI/border/border_frame.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        //enemyicon
+        //rat
+        {
+            "id": "enemyicon_rat",
+            "path": "Assets/Textures/UI/enemyicon/enemy_icon_rat.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "enemyicon_rat_grey",
+            "path": "Assets/Textures/UI/enemyicon/enemy_icon_rat_greyed.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "enemyicon_bat",
+            "path": "Assets/Textures/UI/enemyicon/enemy_icon_bat.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "enemyicon_bat_grey",
+            "path": "Assets/Textures/UI/enemyicon/enemy_icon_bat_greyed.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "enemyicon_gorilla",
+            "path": "Assets/Textures/UI/enemyicon/enemy_icon_gorilla.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "enemyicon_gorilla_grey",
+            "path": "Assets/Textures/UI/enemyicon/enemy_icon_gorilla_greyed.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        //healthbar
+        {
+            "id": "back_glow_blue",
+            "path": "Assets/Textures/UI/healthbar/backglowblue.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "back_glow_red",
+            "path": "Assets/Textures/UI/healthbar/backglowred.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "health_tile001",
+            "path": "Assets/Textures/UI/healthbar/tile001.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "health_tile002",
+            "path": "Assets/Textures/UI/healthbar/tile002.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "health_tile003",
+            "path": "Assets/Textures/UI/healthbar/tile003.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "health_tile004",
+            "path": "Assets/Textures/UI/healthbar/tile004.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "health_tile005",
+            "path": "Assets/Textures/UI/healthbar/tile005.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "health_tile006",
+            "path": "Assets/Textures/UI/healthbar/tile006.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "health_tile007",
+            "path": "Assets/Textures/UI/healthbar/tile007.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "health_tile008",
+            "path": "Assets/Textures/UI/healthbar/tile008.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "health_tile009",
+            "path": "Assets/Textures/UI/healthbar/tile009.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "health_tile010",
+            "path": "Assets/Textures/UI/healthbar/tile010.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "health_tile011",
+            "path": "Assets/Textures/UI/healthbar/tile011.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "health_tile012",
+            "path": "Assets/Textures/UI/healthbar/tile012.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        //winscreen nextstage
+        {
+            "id": "NextStage_btn",
+            "path": "Assets/Textures/UI/winscreen/NextStage.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "NextStagehover_btn",
+            "path": "Assets/Textures/UI/winscreen/NextStage_hover.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        //home
+        {
+            "id": "home_btn",
+            "path": "Assets/Textures/UI/winscreen/home.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "homehover_btn",
+            "path": "Assets/Textures/UI/winscreen/home_hover.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        //pause
+        {
+            "id": "exit_btn",
+            "path": "Assets/Textures/UI/pause/Exit.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "exithover_btn",
+            "path": "Assets/Textures/UI/pause/Exit_hover.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "pausequit_btn",
+            "path": "Assets/Textures/UI/pause/pausequit.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "pausequithover_btn",
+            "path": "Assets/Textures/UI/pause/pausequit_hover.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "pauserestart_btn",
+            "path": "Assets/Textures/UI/pause/pauserestart.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "pauserestarthover_btn",
+            "path": "Assets/Textures/UI/pause/pauserestart_hover.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "pausesettings_btn",
+            "path": "Assets/Textures/UI/pause/pausesettings.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "pausesettingshover_btn",
+            "path": "Assets/Textures/UI/pause/pausesettings_hover.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
             "shd_ref": 3
         },

@@ -2,7 +2,7 @@
     "scenemanifest": {
         "sceneId": "MainMenu",
         "textures": [
-            "MainMenu_BG",          
+            "MainMenu_BG",
             "continue_mainmenu_btn",
             "continue_hover_mainmenu_btn",
             "newgame_mainmenu_btn",
@@ -15,6 +15,9 @@
             "howtoplay_btn",
             "howtoplayhover_btn",
             "howtoplaypressed_btn",
+            "htp_1",
+            "htp_2",
+            "htp_3",
             //setting
             "Settings_BG",
             "back_btn",
