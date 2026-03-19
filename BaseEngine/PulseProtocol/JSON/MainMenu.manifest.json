@@ -1,0 +1,47 @@
+{ //audio and font already preloaded though
+    "scenemanifest": {
+        "sceneId": "MainMenu",
+        "textures": [
+            "MainMenu_BG",          
+            "continue_mainmenu_btn",
+            "continue_hover_mainmenu_btn",
+            "newgame_mainmenu_btn",
+            "newgame_hover_mainmenu_btn",
+            "quit_mainmenu_btn",
+            "quit_hover_mainmenu_btn",
+            "settings_mainmenu_btn",
+            "settings_hover_mainmenu_btn",
+            //htp
+            "howtoplay_btn",
+            "howtoplayhover_btn",
+            "howtoplaypressed_btn",
+            //setting
+            "Settings_BG",
+            "back_btn",
+            "backhover_btn",
+            "windowed_TEXT",
+            "fullscreen_TEXT",
+            "dropdownopen_BOX",
+            "dropdownclose_BOX",
+            "screen_TEXT",
+            "volume_TEXT",
+            "music_TEXT",
+            "sfx_TEXT",
+            "brightess_TEXT",
+            "slider_point",
+            "slider_fill",
+            "slider_empty",
+            //quitprompt
+            "QuitScreen_BG",
+            "quityes_btn",
+            "quityeshover_btn",
+            "quitno_btn",
+            "quitnohover_btn"
+        ],
+        "audio": [
+            "BGM_GENERAL"
+        ],
+        "fonts": [],
+        "animations": []
+    }
+}

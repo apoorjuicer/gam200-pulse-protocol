@@ -19,7 +19,7 @@
 #include "Resources/AssetRegistry.h"
 // #include "../Graphics/GraphicsManager.h"
 // #include "../Audio/AudioManager.h"
-
+#include "../Scene/SceneManifest.h"
 // for .net
 #include "CoreEngine/Core/ImportExport.h"
 #pragma warning(push)
@@ -78,6 +78,9 @@ public:
     bool HasScene(std::string const& id)const;
     bool HasAnimation(std::string const& id)const;
 
+    //Scene manifest file
+    bool PreloadSceneAssets(SceneManifest const& manifest);
+    bool UnloadSceneAssets(SceneManifest const& manifest);
 
 private:
     AssetRegistry mRegistry; // owned
