@@ -241,7 +241,7 @@
         //player inputborder
         {
             "id": "player_input_border",
-            "path": "Assets/Textures/UI/player_input_border.png",
+            "path": "Assets/Textures/UI/border/player_input_border.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,

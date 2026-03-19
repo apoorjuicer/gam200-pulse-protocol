@@ -62,10 +62,10 @@
             "S_KEY_BLACK",
             "D_KEY_BLACK",
             //enemyicon
-            "enemy_icon_gorilla",
-            "enemy_icon_gorilla_greyed",
-            "enemy_icon_rat",
-            "enemy_icon_rat_greyed",
+            "enemyicon_gorilla",
+            "enemyicon_gorilla_grey",
+            "enemyicon_rat",
+            "enemyicon_rat_grey",
             //pause
             "exit_btn",
             "exithover_btn",
@@ -104,9 +104,8 @@
             "health_tile007",
             "health_tile008",
             "health_tile009",
-            "health_tile0010",
-            "health_tile0011",
-            "health_tile0012",
+            "health_tile010",
+            "health_tile011",
             //nextstage
             "NextStage_btn",
             "NextStagehover_btn",

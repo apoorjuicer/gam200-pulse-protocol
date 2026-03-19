@@ -184,14 +184,14 @@ void AudioManager::Initialize()
     //     std::cout << "[AudioManager] 'beat_placeholder' loaded from registry.\n";
     // }
 
-    if (!LoadAllBGM())
-    {
-        std::cerr << "[AudioManager] load all BGM failed.\n";
-    }
-    else
-    {
-        std::cout << "[AudioManager] load all BGM success.\n";
-    }
+    //if (!LoadAllBGM())
+    //{
+    //    std::cerr << "[AudioManager] load all BGM failed.\n";
+    //}
+    //else
+    //{
+    //    std::cout << "[AudioManager] load all BGM success.\n";
+    //}
 
     if (!LoadAllSFX())
     {
