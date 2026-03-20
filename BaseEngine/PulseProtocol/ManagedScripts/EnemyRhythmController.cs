@@ -45,6 +45,10 @@ public class EnemyRhythmController : Script
     public float Health = 15f;
     public int MaxHP { get; private set; } = 1;
     public int HealthBarBlockCount = 4;
+    public float HealthBarOffsetX = -102f;
+    public float HealthBarOffsetY = -55f;
+    public float HealthBarScaleOffsetXFactor = 0f;
+    public float HealthBarScaleOffsetYFactor = 0.78f;
 
     // === COLLISION SETTINGS ===
     // "AABB"     = box collision (uses AABB components, may be affected by BroadPhase filtering)
@@ -553,6 +557,26 @@ public class EnemyRhythmController : Script
         return HealthBarBlockCount;
     }
 
+    public float GetHealthBarOffsetX()
+    {
+        return HealthBarOffsetX;
+    }
+
+    public float GetHealthBarOffsetY()
+    {
+        return HealthBarOffsetY;
+    }
+
+    public float GetHealthBarScaleOffsetXFactor()
+    {
+        return HealthBarScaleOffsetXFactor;
+    }
+
+    public float GetHealthBarScaleOffsetYFactor()
+    {
+        return HealthBarScaleOffsetYFactor;
+    }
+
     private void Die()
     {
         if (isDead) return;
@@ -675,5 +699,12 @@ public class Gorilla: EnemyRhythmController
         
         AnimationSpeed = 12f;
         SizeMultiplier = 5.0f;
+
+        // Gorilla transform anchor is not visually centered on sprite body,
+        // so shift bar left by a scale-based amount and further downward.
+        HealthBarOffsetX = 0f;
+        HealthBarScaleOffsetXFactor = -0.24f;
+        HealthBarOffsetY = -110f;
+        HealthBarScaleOffsetYFactor = 0.76f;
 }
 }

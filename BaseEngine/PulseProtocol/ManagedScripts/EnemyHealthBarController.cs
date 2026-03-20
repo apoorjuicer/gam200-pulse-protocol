@@ -29,10 +29,14 @@ public class EnemyHealthBarController : Script
         "../../PulseProtocol/Assets/Textures/UI/enemy_hp4_04.png"
     };
 
-    // Tune these in inspector if needed.
-    public float OffsetY = -180f;   // below enemy
+    // Global nudges if needed.
+    public float GlobalOffsetX = 0f;
+    public float GlobalOffsetY = 0f;
     public float ScaleX = 176f;
     public float ScaleY = 33f;
+    public float MinScaleX = 176f;
+    public float MaxScaleX = 260f;
+    public float ScaleXFromEnemyFactor = 0.23f;
 
     private int lastFrame = -1;
     private int lastBlocks = -1;
@@ -60,12 +64,29 @@ public class EnemyHealthBarController : Script
 
         barTf.IsVisible = true;
 
-        // Follow active enemy.
+        // Follow active enemy (centered-under enemy with per-type tuning).
         var enemyTf = EnemyRhythmController.Instance.GetTransform();
-        barTf.X = enemyTf.X;
-        barTf.Y = enemyTf.Y + OffsetY;
-        barTf.ScaleX = ScaleX;
-        barTf.ScaleY = ScaleY;
+        float offsetX =
+            GlobalOffsetX +
+            EnemyRhythmController.Instance.GetHealthBarOffsetX() +
+            (enemyTf.ScaleX * EnemyRhythmController.Instance.GetHealthBarScaleOffsetXFactor());
+
+        float offsetY =
+            GlobalOffsetY +
+            EnemyRhythmController.Instance.GetHealthBarOffsetY() -
+            (enemyTf.ScaleY * EnemyRhythmController.Instance.GetHealthBarScaleOffsetYFactor());
+
+        barTf.X = enemyTf.X + offsetX;
+        barTf.Y = enemyTf.Y + offsetY;
+
+        float autoScaleX = enemyTf.ScaleX * ScaleXFromEnemyFactor;
+        if (autoScaleX < MinScaleX) autoScaleX = MinScaleX;
+        if (autoScaleX > MaxScaleX) autoScaleX = MaxScaleX;
+
+        // Preserve original texture aspect ratio (176x33).
+        float autoScaleY = autoScaleX * (33f / 176f);
+        barTf.ScaleX = autoScaleX;
+        barTf.ScaleY = autoScaleY;
 
         int blocks = EnemyRhythmController.Instance.GetHealthBarBlockCount();
         if (blocks < 2) blocks = 2;
