@@ -700,11 +700,40 @@ public class Gorilla: EnemyRhythmController
         AnimationSpeed = 12f;
         SizeMultiplier = 5.0f;
 
-        // Gorilla transform anchor is not visually centered on sprite body,
-        // so shift bar left by a scale-based amount and further downward.
         HealthBarOffsetX = 0f;
         HealthBarScaleOffsetXFactor = -0.24f;
         HealthBarOffsetY = -110f;
         HealthBarScaleOffsetYFactor = 0.76f;
 }
+}
+
+public class Bat: EnemyRhythmController
+{
+    protected override void SetupSprites()
+    {
+        IdleSpriteSheet = "../Enemies/bat_idle_724x535";
+        WalkSpriteSheet = "../Enemies/bat_walk_724x535";
+        AttackSpriteSheet = "../Enemies/bat_attack_724x535";
+        HurtSpriteSheet = "../Enemies/bat_hurt_724x535";
+        WeaknessCombo = "SAWD";
+
+        IdleFrames = 15;
+        IdleColumns = 4;
+        IdleRows = 4;
+
+        WalkFrames = 15;
+        WalkColumns = 4;
+        WalkRows = 4;
+
+        AttackFrames = 15;
+        AttackColumns = 4;
+        AttackRows = 4;
+
+        HurtFrames = 15;
+        HurtColumns = 4;
+        HurtRows = 4;
+
+        AnimationSpeed = 12f;
+        SizeMultiplier = 2.0f;
+    }
 }

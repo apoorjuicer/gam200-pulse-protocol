@@ -22,7 +22,7 @@
         "mdl_ref": 0.0,
         "shd_ref": 2.0,
         "useTexture": true,
-        "spriteName": "../../PulseProtocol/Assets/Textures/Enemies/Rat_Hurt_spritesheet_634x433.png",
+        "spriteName": "../../PulseProtocol/Assets/Textures/Enemies/bat_idle_724x535.png",
         "tintColor": {
           "r": 1.0,
           "g": 1.0,
@@ -35,7 +35,7 @@
       "animation": {
         "currentFrame": 0,
         "elapsedTime": 0.0,
-        "totalFrames": 16,
+        "totalFrames": 15,
         "columns": 4,
         "rows": 4,
         "animationSpeed": 12.0
@@ -64,7 +64,7 @@
     {
       "script": { 
         "ScriptName": [
-          "EnemyRhythmController"
+          "Bat"
         ]
       }
     }

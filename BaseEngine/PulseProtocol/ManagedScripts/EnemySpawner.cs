@@ -54,7 +54,7 @@ public class EnemySpawner : Script
     {
         EnemyIconType.Rat,
         EnemyIconType.Gorilla,
-        EnemyIconType.Rat,
+        EnemyIconType.Bat,
         EnemyIconType.Rat
     };
 
@@ -219,8 +219,8 @@ public class EnemySpawner : Script
         switch (type)
         {
             case EnemyIconType.Rat: return "Rat_Enemy";
-            case EnemyIconType.Bat: return "Rat_Enemy";     // temp, to replace after new enemies spritesheet has been added in
-            case EnemyIconType.Gorilla: return "Gorilla_Enemy"; // temp, to replace after new enemies spritesheet has been added in
+            case EnemyIconType.Bat: return "Bat_Enemy"; 
+            case EnemyIconType.Gorilla: return "Gorilla_Enemy";
             default: return "";
         }
     }
