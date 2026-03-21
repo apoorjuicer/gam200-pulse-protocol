@@ -735,5 +735,7 @@ public class Bat: EnemyRhythmController
 
         AnimationSpeed = 12f;
         SizeMultiplier = 2.0f;
+
+        HealthBarOffsetX = 40;
     }
 }
