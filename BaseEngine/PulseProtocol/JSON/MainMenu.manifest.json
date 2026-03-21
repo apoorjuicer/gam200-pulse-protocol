@@ -1,6 +1,9 @@
 { //audio and font already preloaded though
     "scenemanifest": {
-        "sceneId": "MainMenu",
+        "sceneName": "MainMenu",
+        "sharedGroups": [
+            "GlobalUI"
+        ],
         "textures": [
             "MainMenu_BG",
             "continue_mainmenu_btn",
@@ -18,22 +21,22 @@
             "htp_1",
             "htp_2",
             "htp_3",
-            //setting
-            "Settings_BG",
-            "back_btn",
-            "backhover_btn",
-            "windowed_TEXT",
-            "fullscreen_TEXT",
-            "dropdownopen_BOX",
-            "dropdownclose_BOX",
-            "screen_TEXT",
-            "volume_TEXT",
-            "music_TEXT",
-            "sfx_TEXT",
-            "brightess_TEXT",
-            "slider_point",
-            "slider_fill",
-            "slider_empty",
+            // //setting
+            // "Settings_BG",
+            // "back_btn",
+            // "backhover_btn",
+            // "windowed_TEXT",
+            // "fullscreen_TEXT",
+            // "dropdownopen_BOX",
+            // "dropdownclose_BOX",
+            // "screen_TEXT",
+            // "volume_TEXT",
+            // "music_TEXT",
+            // "sfx_TEXT",
+            // "brightess_TEXT",
+            // "slider_point",
+            // "slider_fill",
+            // "slider_empty",
             //quitprompt
             "QuitScreen_BG",
             "quityes_btn",

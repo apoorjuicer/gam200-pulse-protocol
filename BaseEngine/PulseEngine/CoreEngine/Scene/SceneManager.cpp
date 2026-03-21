@@ -645,6 +645,21 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	}
 	else
 	{
+		// Load shared groups first
+		for (auto const& groupName : manifest.sharedGroups)
+		{
+			if (!mAssets.LoadSharedAssets(groupName))
+			{
+				std::cerr << "[SceneManager] Failed to load shared asset group: "
+					<< groupName << "\n";
+			}
+			else
+			{
+				std::cout << "[SceneManager] Loaded shared asset group: "
+					<< groupName << "\n";
+			}
+		}
+		// Then load scene-local assets
 		if (!mAssets.PreloadSceneAssets(manifest))
 		{
 			std::cerr << "[SceneManager] Some assets failed to preload for scene: "

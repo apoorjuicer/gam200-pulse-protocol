@@ -25,6 +25,18 @@
 #pragma warning(push)
 #pragma warning(disable: 4251) // stupid warning just saying to make sure we are using same compilier type and runtime MDd. WHICH WE ARE SO WHY WARNING STILL??????????
 
+struct AssetGroup
+{
+    std::vector<std::string> textures;
+    std::vector<std::string> audio;
+    std::vector<std::string> fonts;
+    std::vector<std::string> animations;
+};
+
+struct SharedAssetsManifest
+{
+    std::unordered_map<std::string, AssetGroup> groups;
+};
 
 class GraphicsManager; // fwd
 class AudioManager;    // fwd
@@ -82,8 +94,14 @@ public:
     bool PreloadSceneAssets(SceneManifest const& manifest);
     bool UnloadSceneAssets(SceneManifest const& manifest);
 
+    bool GetSharedManifestLoaded() const;
+    bool LoadSharedManifestFromFile(std::string const& path);
+    bool LoadSharedAssets(std::string const& groupName);
+
 private:
     AssetRegistry mRegistry; // owned
+    SharedAssetsManifest mSharedManifest; //owned
+    bool mSharedManifestLoaded = false;
     AudioManager* mAudio = nullptr;    // non-owning
     GraphicsManager* mGraphics = nullptr;   // non-owning
 };

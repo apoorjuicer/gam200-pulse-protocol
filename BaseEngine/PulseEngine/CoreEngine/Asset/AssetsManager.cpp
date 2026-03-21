@@ -18,7 +18,10 @@
 #include "Graphics/GraphicsManager.h"
 #include "Audio/AudioManager.h"
 // namespace Framework {
-
+#include <fstream>
+#include <filesystem>
+#include <rapidjson/document.h>
+#include <rapidjson/istreamwrapper.h>
 
 
 AssetsManager::~AssetsManager()
@@ -413,3 +416,126 @@ bool AssetsManager::UnloadSceneAssets(SceneManifest const& manifest)
     return allOk;
 }
 
+
+bool AssetsManager::GetSharedManifestLoaded() const {
+    return mSharedManifestLoaded;
+}
+
+bool AssetsManager::LoadSharedManifestFromFile(std::string const& path) {
+    namespace fs = std::filesystem;
+
+    std::ifstream ifs(path);
+    if (!ifs.is_open())
+    {
+        std::cerr << "[AssetsManager] Failed to open shared manifest: "
+            << path << "\n";
+        return false;
+    }
+
+    rapidjson::IStreamWrapper isw(ifs);
+    rapidjson::Document d;
+    d.ParseStream(isw);
+
+    if (d.HasParseError())
+    {
+        std::cerr << "[AssetsManager] JSON parse error in shared manifest: "
+            << path << "\n";
+        return false;
+    }
+
+    if (!d.IsObject() || !d.HasMember("sharedmanifest") || !d["sharedmanifest"].IsObject())
+    {
+        std::cerr << "[AssetsManager] Missing 'sharedmanifest' root object in: "
+            << path << "\n";
+        return false;
+    }
+
+    auto const& root = d["sharedmanifest"];
+
+    if (!root.HasMember("groups") || !root["groups"].IsObject())
+    {
+        std::cerr << "[AssetsManager] Missing 'groups' object in shared manifest: "
+            << path << "\n";
+        return false;
+    }
+
+    auto const& groupsObj = root["groups"];
+
+    mSharedManifest.groups.clear();
+
+    for (auto it = groupsObj.MemberBegin(); it != groupsObj.MemberEnd(); ++it)
+    {
+        if (!it->name.IsString() || !it->value.IsObject())
+            continue;
+
+        std::string groupName = it->name.GetString();
+        auto const& groupJson = it->value;
+
+        AssetGroup group;
+
+        auto ReadStringArray = [](rapidjson::Value const& obj,
+            char const* key,
+            std::vector<std::string>& outVec)
+            {
+                outVec.clear();
+
+                if (!obj.HasMember(key) || !obj[key].IsArray())
+                    return;
+
+                auto const& arr = obj[key];
+                for (rapidjson::SizeType i = 0; i < arr.Size(); ++i)
+                {
+                    if (arr[i].IsString())
+                        outVec.emplace_back(arr[i].GetString());
+                }
+            };
+
+        ReadStringArray(groupJson, "textures", group.textures);
+        ReadStringArray(groupJson, "audio", group.audio);
+        ReadStringArray(groupJson, "fonts", group.fonts);
+        ReadStringArray(groupJson, "animations", group.animations);
+
+        mSharedManifest.groups[groupName] = std::move(group);
+    }
+
+    mSharedManifestLoaded = true;
+
+    std::cout << "[AssetsManager] Loaded shared manifest: " << path
+        << " | groups: " << mSharedManifest.groups.size() << "\n";
+
+    return true;
+}
+
+//group name is like 
+bool AssetsManager::LoadSharedAssets(std::string const& groupName) {
+    namespace fs = std::filesystem;
+
+    if (!mSharedManifestLoaded)
+    {
+        fs::path sharedManifestPath = FilePathToGame / "JSON" / "SharedAssets.manifest.json";
+
+        if (!LoadSharedManifestFromFile(sharedManifestPath.string()))
+        {
+            std::cerr << "[AssetsManager] Failed to load shared manifest file.\n";
+            return false;
+        }
+    }
+
+    auto it = mSharedManifest.groups.find(groupName);
+    if (it == mSharedManifest.groups.end())
+    {
+        std::cerr << "[AssetsManager] Shared group not found: "
+            << groupName << "\n";
+        return false;
+    }
+
+    SceneManifest tempManifest;
+    tempManifest.sceneName = "shared:" + groupName;
+    tempManifest.textures = it->second.textures;
+    tempManifest.audio = it->second.audio;
+    tempManifest.fonts = it->second.fonts;
+    tempManifest.animations = it->second.animations;
+
+    std::cout << "[AssetsManager] Loading shared group: " << groupName << "\n";
+    return PreloadSceneAssets(tempManifest);
+}
