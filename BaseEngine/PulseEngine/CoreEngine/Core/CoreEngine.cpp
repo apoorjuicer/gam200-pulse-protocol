@@ -211,9 +211,9 @@ void CoreEngine::CompileScriptAssembly()
 	// Calculate from current working dir (wherever we are)
 	auto currentDir = std::filesystem::current_path();
 
-	// Find and go into the BaseEngine folder
+	// Find and go into the RootFolderName folder :p
 	auto baseEngineDir = currentDir;
-	while (baseEngineDir.filename() != "BaseEngine")
+	while (baseEngineDir.filename() != RootFolderName)
 	{
 		auto parent = baseEngineDir.parent_path();
 		if (parent.empty() || parent == baseEngineDir)
@@ -475,9 +475,9 @@ static void EnsureGameProjectPath()
 	// Go back 1 file path to get the json file that is next to the exe.
 	std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
 
-	// Try to find BaseEngine by walking up (debug/editor build)
+	// Try to find the RootFolderName folder by walking up (debug/editor build)
 	auto baseEngineDir = currentDir;
-	while (baseEngineDir.filename() != "BaseEngine")
+	while (baseEngineDir.filename() != RootFolderName)
 	{
 		auto parent = baseEngineDir.parent_path();
 		if (parent.empty() || parent == baseEngineDir)
@@ -487,7 +487,7 @@ static void EnsureGameProjectPath()
 		baseEngineDir = parent;
 	}
 
-	if (baseEngineDir.filename() == "BaseEngine")
+	if (baseEngineDir.filename() == RootFolderName)
 	{
 		// Debug build: found BaseEngine, read ActiveGame.json to get the active game
 		std::string activeGame = "PulseProtocol"; // if ActiveGame.json is missing
