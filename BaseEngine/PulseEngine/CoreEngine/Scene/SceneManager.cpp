@@ -2,8 +2,10 @@
 /**
  * @file       SceneManager.cpp
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael (primary) - 95%
+ * @author     Chia Wei Xuan Rachael - 90%
  * @author     Goh Pin Kai (secondary) - 5%
+ * @author     Ban Kai Wei Benjamin (secondary) - 5%
+ * 
  * @brief      Manages scene lifecycle, serialization, and entity ownership across
  *             game scenes (MainMene and level1 for now) .
  *
@@ -556,6 +558,12 @@ void SceneManager::UnloadCurrentScene()
 	auto audioMgr = g_coord->GetSystem<AudioManager>();
 	if (audioMgr) {
 		for (auto const& entity : SceneEntityList) {
+
+			if (!g_coordinator->IsAlive(entity))
+			{
+				continue;
+			}
+
 			if (g_coord->HasComponent<AudioSource>(entity)) {
 				auto& audioSrc = g_coord->GetComponent<AudioSource>(entity);
 				if (audioSrc.channel) {
@@ -569,11 +577,14 @@ void SceneManager::UnloadCurrentScene()
 		audioMgr->StopBGM();
 	}
 
+	// Unload only scene-owned assets from manifest
+	UnloadCurrentSceneAssets();
+
 	// CLEAR THE ASSETS!
-	auto gfxMgr = g_coordinator->GetSystem<GraphicsManager>();
-	if (gfxMgr) {
-		gfxMgr->Clear();  // Calls glDeleteTextures()
-	}
+	//auto gfxMgr = g_coordinator->GetSystem<GraphicsManager>();
+	//if (gfxMgr) {
+	//	gfxMgr->Clear();  // Calls glDeleteTextures()
+	//}
 
 
 	// Clear the Csharp script when scene change
@@ -626,24 +637,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 #endif
 
 	SceneManifest manifest;
-	std::filesystem::path manifestPath = std::filesystem::path(resolvedPath).replace_extension(".manifest.json");
-
-	if (!std::filesystem::exists(manifestPath)) {
-		std::cout << "[SceneManager] No manifest found for scene: "
-			<< manifestPath << "\n";
-		//return; //dont early return
-	}
-	else {
-		std::cout << "[SceneManager] Loading manifest found for scene: " 
-			<< manifestPath << "\n";
-	}
-
-	if (!LoadSceneManifestFile(manifest, manifestPath.string()))
-	{
-		std::cerr << "[SceneManager] Failed to load manifest: "
-			<< manifestPath << "\n";
-	}
-	else
+	if (LoadManifestForScene(resolvedPath, manifest))
 	{
 		// Load shared groups first
 		for (auto const& groupName : manifest.sharedGroups)
@@ -659,14 +653,16 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 					<< groupName << "\n";
 			}
 		}
+
 		// Then load scene-local assets
 		if (!mAssets.PreloadSceneAssets(manifest))
 		{
 			std::cerr << "[SceneManager] Some assets failed to preload for scene: "
 				<< manifest.sceneName << "\n";
 		}
-		else {
-			std::cerr << "[SceneManager] Load Asset Manifest for scene success: "
+		else
+		{
+			std::cout << "[SceneManager] Load Asset Manifest for scene success: "
 				<< manifest.sceneName << "\n";
 		}
 	}
@@ -1542,3 +1538,73 @@ void SceneManager::LoadFromString(const std::string& jsonString)
 	// ─────────────────────────────────────────────────────────────────────────
 	std::remove(tempPath.c_str());
 }
+
+std::filesystem::path SceneManager::GetManifestPathForScene(std::string const& sceneNameOrPath) const
+{
+	std::filesystem::path p(sceneNameOrPath);
+
+	// If caller already passed a full manifest path, keep it
+	std::string pStr = p.string();
+	if (pStr.size() >= std::string(".manifest.json").size() &&
+		pStr.ends_with(".manifest.json"))
+	{
+		return p;
+	}
+
+	if (pStr.size() >= std::string(".json").size() &&
+		pStr.ends_with(".json"))
+	{
+		return p.replace_extension(".manifest.json");
+	}
+
+	std::filesystem::path scenePath = GetScenePath(sceneNameOrPath);
+	std::string sceneStr = scenePath.string();
+
+	if (sceneStr.size() >= std::string(".manifest.json").size() &&
+		sceneStr.ends_with(".manifest.json"))
+	{
+		return scenePath;
+	}
+
+	return scenePath.replace_extension(".manifest.json");
+}
+
+bool SceneManager::LoadManifestForScene(std::string const& sceneNameOrPath, SceneManifest& outManifest) const
+{
+	std::filesystem::path manifestPath = GetManifestPathForScene(sceneNameOrPath);
+
+	if (!std::filesystem::exists(manifestPath))
+	{
+		std::cout << "[SceneManager] No manifest found for scene: "
+			<< manifestPath << "\n";
+		return false;
+	}
+
+	if (!LoadSceneManifestFile(outManifest, manifestPath.string()))
+	{
+		std::cerr << "[SceneManager] Failed to load manifest: "
+			<< manifestPath << "\n";
+		return false;
+	}
+
+	return true;
+}
+
+void SceneManager::UnloadCurrentSceneAssets()
+{
+	if (CurrentScene.empty())
+	{
+		return;
+	}
+
+	SceneManifest oldManifest;
+	if (!LoadManifestForScene(CurrentScene, oldManifest))
+	{
+		std::cout << "[SceneManager] No unload manifest for current scene: "
+			<< CurrentScene << "\n";
+		return;
+	}
+
+	mAssets.UnloadSceneAssets(oldManifest);
+}
+

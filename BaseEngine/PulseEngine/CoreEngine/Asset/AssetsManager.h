@@ -98,6 +98,10 @@ public:
     bool LoadSharedManifestFromFile(std::string const& path);
     bool LoadSharedAssets(std::string const& groupName);
 
+    bool UnloadSceneBGMOnly(SceneManifest const& manifest);
+    bool IsAudioBGM(std::string const& id) const;
+    bool IsAudioSFX(std::string const& id) const;
+
 private:
     AssetRegistry mRegistry; // owned
     SharedAssetsManifest mSharedManifest; //owned

@@ -22,7 +22,7 @@
 #include <filesystem>
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
-
+#include <Serialization/Serialization.h>
 
 AssetsManager::~AssetsManager()
 {
@@ -293,27 +293,6 @@ bool AssetsManager::PreloadSceneAssets(SceneManifest const& manifest)
         }
     }
 
-    // =========================================================
-    // Animations
-    // =========================================================
-    std::cout << "[AssetsManager] Animations:\n";
-    for (auto const& animId : manifest.animations)
-    {
-        std::string animPath = GetAnimationPath(animId);
-
-        if (animPath.empty())
-        {
-            std::cout << "  [FAIL] Animation ID not found: " << animId << "\n";
-            allOk = false;
-        }
-        else
-        {
-            std::cout << "  [OK] Resolved Animation"
-                << " | id: " << animId
-                << " | path: " << animPath << "\n";
-        }
-    }
-
     std::cout << "[AssetsManager] ===== Preload Complete ===== "
         << (allOk ? "[SUCCESS]" : "[PARTIAL/FAILED]") << "\n\n";
 
@@ -370,20 +349,34 @@ bool AssetsManager::UnloadSceneAssets(SceneManifest const& manifest)
         std::cout << "[AssetsManager] Audio:\n";
         for (auto const& audioId : manifest.audio)
         {
-            std::string audioPath = GetAudioPath(audioId);
+            if (IsAudioSFX(audioId))
+            {
+                std::cout << "  [SKIP] Global SFX loaded on engine start"
+                    << " | id: " << audioId
+                    << " | path: " << GetAudioPath(audioId) << "\n";
+                continue;
+            }
+
+            if (!IsAudioBGM(audioId))
+            {
+                std::cout << "  [SKIP] Unknown audio type"
+                    << " | id: " << audioId
+                    << " | path: " << GetAudioPath(audioId) << "\n";
+                continue;
+            }
 
             if (!mAudio->UnloadAudio(audioId))
             {
-                std::cout << "  [FAIL] Failed to unload audio"
+                std::cout << "  [FAIL] Failed to unload BGM"
                     << " | id: " << audioId
-                    << " | path: " << audioPath << "\n";
+                    << " | path: " << GetAudioPath(audioId) << "\n";
                 allOk = false;
             }
             else
             {
-                std::cout << "  [OK] Unloaded Audio"
+                std::cout << "  [OK] Unloaded BGM"
                     << " | id: " << audioId
-                    << " | path: " << audioPath << "\n";
+                    << " | path: " << GetAudioPath(audioId) << "\n";
             }
         }
     }
@@ -424,22 +417,10 @@ bool AssetsManager::GetSharedManifestLoaded() const {
 bool AssetsManager::LoadSharedManifestFromFile(std::string const& path) {
     namespace fs = std::filesystem;
 
-    std::ifstream ifs(path);
-    if (!ifs.is_open())
-    {
-        std::cerr << "[AssetsManager] Failed to open shared manifest: "
-            << path << "\n";
-        return false;
-    }
-
-    rapidjson::IStreamWrapper isw(ifs);
     rapidjson::Document d;
-    d.ParseStream(isw);
-
-    if (d.HasParseError())
+    if (!JSONUtils::ReadJSONFromFile(d, path))
     {
-        std::cerr << "[AssetsManager] JSON parse error in shared manifest: "
-            << path << "\n";
+        std::cerr << "[AssetsManager] Failed to load shared manifest file.\n";
         return false;
     }
 
@@ -538,4 +519,66 @@ bool AssetsManager::LoadSharedAssets(std::string const& groupName) {
 
     std::cout << "[AssetsManager] Loading shared group: " << groupName << "\n";
     return PreloadSceneAssets(tempManifest);
+}
+
+//
+
+bool AssetsManager::IsAudioBGM(std::string const& id) const
+{
+    auto const& audioTable = getAudioRegContainer();
+    auto it = audioTable.find(id);
+    if (it == audioTable.end())
+    {
+        return false;
+    }
+
+    return it->second.audiotype == "BGM";
+}
+
+bool AssetsManager::IsAudioSFX(std::string const& id) const
+{
+    auto const& audioTable = getAudioRegContainer();
+    auto it = audioTable.find(id);
+    if (it == audioTable.end())
+    {
+        return false;
+    }
+
+    return it->second.audiotype == "SFX";
+}
+
+bool AssetsManager::UnloadSceneBGMOnly(SceneManifest const& manifest)
+{
+    bool allOk = true;
+
+    if (!mAudio)
+    {
+        std::cout << "[AssetsManager] [FAIL] AudioManager is null. Cannot unload scene BGM.\n";
+        return false;
+    }
+
+    std::cout << "\n[AssetsManager] ===== Unloading Scene BGM Only =====\n";
+    std::cout << "[AssetsManager] Scene: " << manifest.sceneName << "\n";
+
+    for (auto const& audioId : manifest.audio)
+    {
+        if (!IsAudioBGM(audioId))
+        {
+            continue; // skip SFX, keep global
+        }
+
+        if (!mAudio->UnloadAudio(audioId))
+        {
+            std::cout << "  [FAIL] Failed to unload BGM | id: " << audioId
+                << " | path: " << GetAudioPath(audioId) << "\n";
+            allOk = false;
+        }
+        else
+        {
+            std::cout << "  [OK] Unloaded BGM | id: " << audioId
+                << " | path: " << GetAudioPath(audioId) << "\n";
+        }
+    }
+
+    return allOk;
 }

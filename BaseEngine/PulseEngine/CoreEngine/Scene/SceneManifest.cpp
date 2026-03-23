@@ -98,3 +98,4 @@ bool LoadSceneManifestFile(SceneManifest& sm,std::string const& path) {
 bool SaveSceneManifestFile(SceneManifest const& sm, std::string const& path) {
     return JSONUtils::SaveObject(sm, path, "scenemanifest");
 }
+
