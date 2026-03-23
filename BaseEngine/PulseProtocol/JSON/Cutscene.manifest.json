@@ -1,0 +1,9 @@
+{ //audio and font already preloaded though
+    "scenemanifest": {
+        "sceneId": "Cutscene",
+        "textures": [],
+        "audio": [],
+        "fonts": [],
+        "animations": []
+    }
+}

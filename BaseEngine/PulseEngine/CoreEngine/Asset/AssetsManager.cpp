@@ -141,3 +141,275 @@ void AssetsManager::SetGraphicsManager(GraphicsManager* graphics)
 }
 
 
+bool AssetsManager::PreloadSceneAssets(SceneManifest const& manifest)
+{
+    bool allOk = true;
+
+    std::cout << "\n[AssetsManager] ===== Preloading Scene Assets =====\n";
+    std::cout << "[AssetsManager] Scene: " << manifest.sceneName << "\n";
+
+    // =========================================================
+    // Textures
+    // =========================================================
+    if (!mGraphics)
+    {
+        std::cout << "[AssetsManager] [FAIL] GraphicsManager is null. Cannot preload textures.\n";
+        allOk = false;
+    }
+    else
+    {
+        std::cout << "[AssetsManager] Textures:\n";
+        for (auto const& texId : manifest.textures)
+        {
+            std::string texPath = GetTexturePath(texId);
+
+            if (texPath.empty())
+            {
+                std::cout << "  [FAIL] Texture ID not found: " << texId << "\n";
+                allOk = false;
+                continue;
+            }
+
+            unsigned int handle = mGraphics->GetOrLoad(texId);
+            if (handle == 0u)
+            {
+                std::cout << "  [FAIL] Texture load failed"
+                    << " | id: " << texId
+                    << " | path: " << texPath << "\n";
+                allOk = false;
+            }
+            else
+            {
+                std::cout << "  [OK] Loaded Texture"
+                    << " | id: " << texId
+                    << " | path: " << texPath
+                    << " | handle: " << handle << "\n";
+            }
+        }
+    }
+
+    // =========================================================
+    // Audio
+    // =========================================================
+    if (!mAudio)
+    {
+        std::cout << "[AssetsManager] [FAIL] AudioManager is null. Cannot preload audio.\n";
+        allOk = false;
+    }
+    else
+    {
+        std::cout << "[AssetsManager] Audio:\n";
+        for (auto const& audioId : manifest.audio)
+        {
+            if (!HasAudio(audioId))
+            {
+                std::cout << "  [FAIL] Audio ID not found: " << audioId << "\n";
+                allOk = false;
+                continue;
+            }
+
+            auto const& table = getAudioRegContainer();
+            auto it = table.find(audioId);
+            if (it == table.end())
+            {
+                std::cout << "  [FAIL] Audio registry lookup failed: " << audioId << "\n";
+                allOk = false;
+                continue;
+            }
+
+            std::string const& audioType = it->second.audiotype;
+            std::string audioPath = GetAudioPath(audioId);
+
+            bool ok = false;
+            if (audioType == "BGM")
+                ok = mAudio->LoadBGM(audioId);
+            else if (audioType == "SFX")
+                ok = mAudio->LoadSFX(audioId);
+            else
+            {
+                std::cout << "  [FAIL] Unknown audio type"
+                    << " | id: " << audioId
+                    << " | type: " << audioType << "\n";
+                allOk = false;
+                continue;
+            }
+
+            if (!ok)
+            {
+                std::cout << "  [FAIL] Audio load failed"
+                    << " | id: " << audioId
+                    << " | type: " << audioType
+                    << " | path: " << audioPath << "\n";
+                allOk = false;
+            }
+            else
+            {
+                std::cout << "  [OK] Loaded Audio"
+                    << " | id: " << audioId
+                    << " | type: " << audioType
+                    << " | path: " << audioPath << "\n";
+            }
+        }
+    }
+
+    // =========================================================
+    // Fonts
+    // =========================================================
+    if (!mGraphics)
+    {
+        std::cout << "[AssetsManager] [FAIL] GraphicsManager is null. Cannot validate fonts.\n";
+        allOk = false;
+    }
+    else
+    {
+        std::cout << "[AssetsManager] Fonts:\n";
+        for (auto const& fontId : manifest.fonts)
+        {
+            std::string fontPath = GetFontPath(fontId);
+
+            if (fontPath.empty())
+            {
+                std::cout << "  [FAIL] Font ID not found: " << fontId << "\n";
+                allOk = false;
+                continue;
+            }
+
+            if (!mGraphics->GM_FindFont(fontId))
+            {
+                std::cout << "  [FAIL] Font not loaded/found"
+                    << " | id: " << fontId
+                    << " | path: " << fontPath << "\n";
+                allOk = false;
+            }
+            else
+            {
+                std::cout << "  [OK] Ready Font"
+                    << " | id: " << fontId
+                    << " | path: " << fontPath << "\n";
+            }
+        }
+    }
+
+    // =========================================================
+    // Animations
+    // =========================================================
+    std::cout << "[AssetsManager] Animations:\n";
+    for (auto const& animId : manifest.animations)
+    {
+        std::string animPath = GetAnimationPath(animId);
+
+        if (animPath.empty())
+        {
+            std::cout << "  [FAIL] Animation ID not found: " << animId << "\n";
+            allOk = false;
+        }
+        else
+        {
+            std::cout << "  [OK] Resolved Animation"
+                << " | id: " << animId
+                << " | path: " << animPath << "\n";
+        }
+    }
+
+    std::cout << "[AssetsManager] ===== Preload Complete ===== "
+        << (allOk ? "[SUCCESS]" : "[PARTIAL/FAILED]") << "\n\n";
+
+    return allOk;
+}
+bool AssetsManager::UnloadSceneAssets(SceneManifest const& manifest)
+{
+    bool allOk = true;
+
+    std::cout << "\n[AssetsManager] ===== Unloading Scene Assets =====\n";
+    std::cout << "[AssetsManager] Scene: " << manifest.sceneName << "\n";
+
+    // =========================================================
+    // Textures
+    // =========================================================
+    if (!mGraphics)
+    {
+        std::cout << "[AssetsManager] [FAIL] GraphicsManager is null. Cannot unload textures.\n";
+        allOk = false;
+    }
+    else
+    {
+        std::cout << "[AssetsManager] Textures:\n";
+        for (auto const& texId : manifest.textures)
+        {
+            std::string texPath = GetTexturePath(texId);
+
+            if (!mGraphics->EvictTexture(texId))
+            {
+                std::cout << "  [FAIL] Failed to unload texture"
+                    << " | id: " << texId
+                    << " | path: " << texPath << "\n";
+                allOk = false;
+            }
+            else
+            {
+                std::cout << "  [OK] Unloaded Texture"
+                    << " | id: " << texId
+                    << " | path: " << texPath << "\n";
+            }
+        }
+    }
+
+    // =========================================================
+    // Audio
+    // =========================================================
+    if (!mAudio)
+    {
+        std::cout << "[AssetsManager] [FAIL] AudioManager is null. Cannot unload audio.\n";
+        allOk = false;
+    }
+    else
+    {
+        std::cout << "[AssetsManager] Audio:\n";
+        for (auto const& audioId : manifest.audio)
+        {
+            std::string audioPath = GetAudioPath(audioId);
+
+            if (!mAudio->UnloadAudio(audioId))
+            {
+                std::cout << "  [FAIL] Failed to unload audio"
+                    << " | id: " << audioId
+                    << " | path: " << audioPath << "\n";
+                allOk = false;
+            }
+            else
+            {
+                std::cout << "  [OK] Unloaded Audio"
+                    << " | id: " << audioId
+                    << " | path: " << audioPath << "\n";
+            }
+        }
+    }
+
+    // =========================================================
+    // Fonts
+    // =========================================================
+    std::cout << "[AssetsManager] Fonts:\n";
+    for (auto const& fontId : manifest.fonts)
+    {
+        std::cout << "  [SKIP] Font unload not implemented"
+            << " | id: " << fontId
+            << " | path: " << GetFontPath(fontId) << "\n";
+    }
+
+    // =========================================================
+    // Animations
+    // =========================================================
+    std::cout << "[AssetsManager] Animations:\n";
+    for (auto const& animId : manifest.animations)
+    {
+        std::cout << "  [SKIP] Animation unload not implemented"
+            << " | id: " << animId
+            << " | path: " << GetAnimationPath(animId) << "\n";
+    }
+
+    std::cout << "[AssetsManager] ===== Unload Complete ===== "
+        << (allOk ? "[SUCCESS]" : "[PARTIAL/FAILED]") << "\n\n";
+
+    return allOk;
+}
+

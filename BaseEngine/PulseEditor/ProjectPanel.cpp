@@ -2,8 +2,9 @@
 /**
  * @file        ProjectPanel.cpp
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 79%
+ * @author      Leu Jun Yong (primary) - 70%
  *              Chloe Lau Rey En (secondary) - 20%
+ *              Ban Kai Wei Benjamin (secondary) - 9%
  *              Goh Pin Kai (secondary) - 1%
  * 
  * @brief       Implements the Project Panel (asset browser) for the editor.
@@ -107,13 +108,11 @@ namespace PulseEditor
         // This is the MOST RELIABLE method when working directory is set
         // to something like: build/PulseEngine/Assets/Textures/UI
 
-        size_t baseEnginePos = cwdStr.find("BaseEngine");
+        size_t baseEnginePos = cwdStr.find(RootFolderName);
         if (baseEnginePos != std::string::npos)
         {
-            //std::cout << "\n[ProjectPanel] Found 'BaseEngine' in path at position " << baseEnginePos << std::endl;
-
-            // Extract substring: everything up to and including "BaseEngine"
-            std::string baseEnginePart = cwdStr.substr(0, baseEnginePos + 10);  // "BaseEngine" = 10 chars
+            // Extract substring: everything up to and including the root folder name
+            std::string baseEnginePart = cwdStr.substr(0, baseEnginePos + std::string(RootFolderName).length());
             fs::path baseEnginePath(baseEnginePart);
             fs::path targetPath = baseEnginePath / "PulseProtocol" / "Assets";
 
@@ -127,7 +126,7 @@ namespace PulseEditor
         }
         else
         {
-            std::cout << "[ProjectPanel] Note: 'BaseEngine' not found in working directory path" << std::endl;
+            std::cout << "[ProjectPanel] Note: '" << RootFolderName << "' not found in working directory path" << std::endl;
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -190,8 +189,8 @@ namespace PulseEditor
         // ═══════════════════════════════════════════════════════════════
 
         std::cerr << "[ProjectPanel] Working Directory: " << cwd.string() << std::endl;
-        std::cerr << "[ProjectPanel] Expected structure: BaseEngine/PulseProtocol/Assets/" << std::endl;
-        std::cerr << "[ProjectPanel] Could not find 'BaseEngine' in path" << std::endl;
+        std::cerr << "[ProjectPanel] Expected structure: " << RootFolderName << "/PulseProtocol/Assets/" << std::endl;
+        std::cerr << "[ProjectPanel] Could not find '" << RootFolderName << "' in path" << std::endl;
         std::cerr << "[ProjectPanel] Walked up " << iterations << " directory levels without finding it" << std::endl;
         std::cerr << "\nTEAM BLOOP: Check your project structure and working directory!" << std::endl << std::endl;
 

@@ -1,0 +1,33 @@
+{ //audio and font already preloaded though
+    "scenemanifest": {
+        "sceneId": "Level2",
+        "textures": [
+            // Player
+            "dorian_idle1",
+            "dorian_idle2",
+            "dorian_sword",
+            "dorian_hurt",
+            // Rat
+            "rat_idle",
+            "rat_hurt",
+            "rat_walk",
+            "rat_attack",
+            "rat_death",
+            // Gorilla
+            "gorilla_idle",
+            "gorilla_walk",
+            "gorilla_attack",
+            "gorilla_hurt",
+            "gorilla_death",
+            // Bat
+            // VFX
+            "sword_slash_vfx",
+            "particle"
+        ],
+        "audio": [
+            "BGM_L2_TESTING"
+        ],
+        "fonts": [],
+        "animations": []
+    }
+}

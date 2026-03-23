@@ -42,16 +42,14 @@ namespace ScriptAPI
             Comp.animationSpeed = speed;
         }
 
-        // Convert C# string to C++ string
-        std::string nativeSpriteName = (FilePathToGame / "Assets" / "Textures" / "Characters").string()
-                                       + "/" + msclr::interop::marshal_as<std::string>(SpriteName) + ".png";
+        // Convert C# string to C++ string, then use SpriteName as the texture ID which will be looked up at texHandle_key container. 
+        std::string nativeSpriteName = msclr::interop::marshal_as<std::string>(SpriteName);
 
         if (g_coordinator->HasComponent<Framework::Renderable>(entityID))
         {
             auto& Comp = g_coordinator->GetComponent<Framework::Renderable>(entityID);
-            std::cout << Comp.spriteName;
             Comp.spriteName = nativeSpriteName;
-           // Comp.needsTextureReload = true;     // Trigger hot-swap
+            Comp.needsTextureReload = true;
         }
 
     }

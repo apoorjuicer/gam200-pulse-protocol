@@ -22,7 +22,7 @@
         "mdl_ref": 0.0,
         "shd_ref": 2.0,
         "useTexture": true,
-        "spriteName": "../../PulseProtocol/Assets/Textures/Enemies/bat_idle_724x535.png",
+        "spriteName": "bat_idle",
         "tintColor": {
           "r": 1.0,
           "g": 1.0,
@@ -39,6 +39,18 @@
         "columns": 4,
         "rows": 4,
         "animationSpeed": 12.0
+      }
+    },
+    {
+      "AABB": {
+        "min": {
+          "x": -20.0,
+          "y": -14.0
+        },
+        "max": {
+          "x": 20.0,
+          "y": 14.0
+        }
       }
     },
     {

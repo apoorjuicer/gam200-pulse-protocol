@@ -213,7 +213,9 @@ namespace JSONUtils {
         }
 
         IStreamWrapper isw(ifs);
-        outDoc.ParseStream(isw);
+        //outDoc.ParseStream(isw);
+        //IMPORTANT ALLOW COMMENTS
+        outDoc.ParseStream<rapidjson::kParseCommentsFlag>(isw);
 
         if (outDoc.HasParseError())
         {

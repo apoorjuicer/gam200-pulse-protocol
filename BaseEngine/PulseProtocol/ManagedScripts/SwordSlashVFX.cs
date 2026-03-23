@@ -29,7 +29,7 @@ public class SwordSlashVFX : Script
             // Scale speed so all frames finish in exactly SpawnDuration seconds
             float speed = VFXTotalFrames / SpawnDuration;
             Animation anim = GetAnimation();
-            anim.SetAnimation("../VFX/Sword_Slash_VFX_1099x392", VFXRows, VFXCols, VFXTotalFrames, speed);
+            anim.SetAnimation("sword_slash_vfx", VFXRows, VFXCols, VFXTotalFrames, speed);
             // fall through — start counting elapsed this same frame
         }
 
