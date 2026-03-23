@@ -22,7 +22,7 @@
         "mdl_ref": 0.0,
         "shd_ref": 2.0,
         "useTexture": true,
-        "spriteName": "../../PulseProtocol/Assets/Textures/Enemies/Gorilla_Idle_spritesheet_1459x977.png",
+        "spriteName": "gorilla_idle",
         "tintColor": {
           "r": 1.0,
           "g": 1.0,

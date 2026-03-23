@@ -76,7 +76,7 @@
         },
         {
             "id": "BlueGorillaEnemy",
-            "path": "Assets/Textures/Enemies/BlueGorillaEnemy.png",
+            "path": "Assets/Textures/Enemies/Gorilla/BlueGorillaEnemy.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
@@ -84,7 +84,7 @@
         },
         {
             "id": "RedGorillaEnemy",
-            "path": "Assets/Textures/Enemies/RedGorillaEnemy.png",
+            "path": "Assets/Textures/Enemies/Gorilla/RedGorillaEnemy.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
@@ -200,6 +200,39 @@
         {
             "id": "rat_death",
             "path": "Assets/Textures/Enemies/Rat/Rat_Death_spritesheet_764x456.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        //bat
+        {
+            "id": "bat_idle",
+            "path": "Assets/Textures/Enemies/bat_idle_724x535.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "bat_walk",
+            "path": "Assets/Textures/Enemies/bat_walk_724x535.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "bat_attack",
+            "path": "Assets/Textures/Enemies/bat_attack_724x535.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "bat_hurt",
+            "path": "Assets/Textures/Enemies/bat_hurt_724x535.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
@@ -788,14 +821,6 @@
         {
             "id": "health_tile011",
             "path": "Assets/Textures/UI/healthbar/tile011.png",
-            "vert_shader_path": "shader/sprite_vs.vert",
-            "frag_shader_path": "shader/sprite_fs.frag",
-            "mdl_ref": 1,
-            "shd_ref": 3
-        },
-        {
-            "id": "health_tile012",
-            "path": "Assets/Textures/UI/healthbar/tile012.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,

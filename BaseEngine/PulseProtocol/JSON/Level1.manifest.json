@@ -24,6 +24,10 @@
             "gorilla_hurt",
             "gorilla_death",
             // Bat
+            "bat_idle",
+            "bat_walk",
+            "bat_attack",
+            "bat_hurt",
             //settings
             "back_btn",
             "backhover_btn",

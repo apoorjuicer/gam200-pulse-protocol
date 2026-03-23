@@ -660,10 +660,10 @@ public class Bat: EnemyRhythmController
 {
     protected override void SetupSprites()
     {
-        IdleSpriteSheet = "../Enemies/bat_idle_724x535";
-        WalkSpriteSheet = "../Enemies/bat_walk_724x535";
-        AttackSpriteSheet = "../Enemies/bat_attack_724x535";
-        HurtSpriteSheet = "../Enemies/bat_hurt_724x535";
+        IdleSpriteSheet = "bat_idle";
+        WalkSpriteSheet = "bat_walk";
+        AttackSpriteSheet = "bat_attack";
+        HurtSpriteSheet = "bat_hurt";
         WeaknessCombo = "SAWD";
 
         IdleFrames = 15;
