@@ -42,6 +42,10 @@ set_target_properties(${EDITOR_NAME} PROPERTIES
     VS_GLOBAL_DisableFastUpToDateCheck true
 )
 
+# Pass the RootFolderName into editor too.
+get_filename_component(RootFolderName "${CMAKE_SOURCE_DIR}" NAME)
+target_compile_definitions(${EDITOR_NAME} PRIVATE RootFolderName="${RootFolderName}")
+
 target_link_libraries(${EDITOR_NAME} PRIVATE PulseEngine)
 
 # Nice Solution Explorer layout

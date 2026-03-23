@@ -181,7 +181,7 @@ namespace PulseEditor
         float itemSpacing = ImGui::GetStyle().ItemSpacing.x;
 
         // ------------------------------------------------------------
-        // Left side: Save Scene / Load Scene
+        // Left side: Save Scene / Load Scene / New Game / Load Other Games
         // ------------------------------------------------------------
         ImVec2 newTextSize = ImGui::CalcTextSize("New Scene");
         ImVec2 saveTextSize = ImGui::CalcTextSize("Save Scene");
@@ -276,7 +276,7 @@ namespace PulseEditor
 
                 // We then find BaseEngine to update ActiveGame.json with the new game name(so that it knows which game 2 load nxt time)
                 fs::path cur = fs::current_path();
-                while (cur.filename() != "BaseEngine" && cur.has_parent_path())
+                while (cur.filename() != RootFolderName && cur.has_parent_path())
                 {
                     cur = cur.parent_path();
                 }
@@ -399,7 +399,7 @@ namespace PulseEditor
 
                 // Find BaseEngine folder by walking up from current path
                 fs::path cur = fs::current_path();
-                while (cur.filename() != "BaseEngine" && cur.has_parent_path())
+                while (cur.filename() != RootFolderName && cur.has_parent_path())
                     cur = cur.parent_path();
 
                 fs::path gameRoot = cur / gameName;
