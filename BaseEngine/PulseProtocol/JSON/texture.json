@@ -1075,7 +1075,32 @@
         },
         {
             "id": "levelselect_border",
-            "path": "Assets/Textures/levelselect/LevelSelector.png.png",
+            "path": "Assets/Textures/levelselect/LevelSelector.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        //blankkeys
+        {
+            "id": "border_blankkey",
+            "path": "Assets/Textures/UI/blankkeys/border_blank_key.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "hit_blankkey",
+            "path": "Assets/Textures/UI/blankkeys/hit_blank_key.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "questionmark_blankkey",
+            "path": "Assets/Textures/UI/blankkeys/question_mark_blank_key.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
@@ -1125,14 +1150,6 @@
         {
             "id": "spear_attack_vfx",
             "path": "Assets/Textures/VFX/spear_attack_vfx.png",
-            "vert_shader_path": "shader/sprite_vs.vert",
-            "frag_shader_path": "shader/sprite_fs.frag",
-            "mdl_ref": 1,
-            "shd_ref": 2
-        },
-        {
-            "id": "bat_attack_vfx",
-            "path": "Assets/Textures/VFX/bat_attack_vfx.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,

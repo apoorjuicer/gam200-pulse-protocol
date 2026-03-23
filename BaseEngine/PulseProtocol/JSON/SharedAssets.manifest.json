@@ -92,7 +92,10 @@
                     "enemyhpbar",
                     //vfx
                     "particle",
-                    "sword_slash_vfx"
+                    "sword_slash_vfx",
+                    "bat_attack_vfx",
+                    "gun_attack_vfx",
+                    "spear_attack_vfx"
                 ],
                 "audio": [],
                 "fonts": [],

@@ -42,7 +42,13 @@
             "quityes_btn",
             "quityeshover_btn",
             "quitno_btn",
-            "quitnohover_btn"
+            "quitnohover_btn",
+            //levelselect
+            "levelselect_level1_Icon",
+            "levelselect_level2_Icon",
+            //"levelselect_level3_Icon",
+            "levelselect_start_BTN",
+            "levelselect_border"
         ],
         "audio": [
             "BGM_GENERAL"
