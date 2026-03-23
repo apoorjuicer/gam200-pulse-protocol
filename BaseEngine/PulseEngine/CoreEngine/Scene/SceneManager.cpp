@@ -569,12 +569,12 @@ void SceneManager::UnloadCurrentScene()
 		audioMgr->StopBGM();
 	}
 
-	// CLEAR THE ASSETS!
-	auto gfxMgr = g_coordinator->GetSystem<GraphicsManager>();
-	if (gfxMgr) {
-		gfxMgr->Clear();  // Calls glDeleteTextures()
-	}
-
+	// Comment out cos it clears the GPU texture that has been cached, ask elie if we do it every scene or at end of game cos idk tbh
+	//auto gfxMgr = g_coordinator->GetSystem<GraphicsManager>();
+	//if (gfxMgr) 
+	//{
+	//	gfxMgr->Clear();  // Calls glDeleteTextures()
+	//}
 
 	// Clear the Csharp script when scene change
 #ifdef _DEBUG

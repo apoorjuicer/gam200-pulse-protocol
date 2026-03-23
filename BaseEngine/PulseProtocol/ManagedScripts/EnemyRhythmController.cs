@@ -12,10 +12,10 @@ public class EnemyRhythmController : Script
     public static EnemyRhythmController? Instance { get; private set; }
 
     // === SPRITE SHEET SETTINGS ===
-    public string IdleSpriteSheet   = "../Enemies/Rat_Idle_spritesheet_764x456";
-    public string WalkSpriteSheet   = "../Enemies/Rat_Walk_spritesheet_764x456";
-    public string AttackSpriteSheet = "../Enemies/Rat_Attack_spritesheet_764x456";
-    public string HurtSpriteSheet   = "../Enemies/Rat_Hurt_spritesheet_764x456";
+    public string IdleSpriteSheet   = "rat_idle";
+    public string WalkSpriteSheet   = "rat_walk";
+    public string AttackSpriteSheet = "rat_attack";
+    public string HurtSpriteSheet   = "rat_hurt";
 
     public int IdleFrames = 15;
     public int IdleColumns = 4;
@@ -629,10 +629,10 @@ public class Gorilla: EnemyRhythmController
 {
     protected override void SetupSprites()
     {
-        IdleSpriteSheet = "../Enemies/Gorilla_Idle_spritesheet_1459x977";
-        WalkSpriteSheet = "../Enemies/Gorilla_Walk_spritesheet_1459x977";
-        AttackSpriteSheet = "../Enemies/Gorilla_Attack_spritesheet_1459x977";
-        HurtSpriteSheet = "../Enemies/Gorilla_Hurt_spritesheet_1459x977";
+        IdleSpriteSheet = "gorilla_idle";
+        WalkSpriteSheet = "gorilla_walk";
+        AttackSpriteSheet = "gorilla_attack";
+        HurtSpriteSheet = "gorilla_hurt";
         WeaknessCombo = "WASD";
 
         IdleFrames = 15;

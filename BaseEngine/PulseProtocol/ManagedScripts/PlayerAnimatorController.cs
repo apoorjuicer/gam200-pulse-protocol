@@ -14,9 +14,9 @@ public class PlayerAnimationController : Script
     // Sprite Sheet Paths
     // =========================
     // public string Idle1SpriteSheet = "../Characters/Dorian_Idle1_579x615";
-    public string Idle2SpriteSheet = "../Characters/Dorian_Idle2_579x615";
-    public string AttackSpriteSheet = "../Characters/Dorian_Sword_579x615";
-    public string HurtSpriteSheet = "../Characters/Dorian_Hurt_579x615";
+    public string Idle2SpriteSheet = "dorian_idle2";
+    public string AttackSpriteSheet = "dorian_sword";
+    public string HurtSpriteSheet = "dorian_hurt";
 
     // =========================
     // Sprite Sheet Dimensions
