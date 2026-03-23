@@ -54,6 +54,11 @@ public class NavigationButtons : Script
 
     private static bool wasEscPressed = false;
 
+    // Gamepad button constants
+    private const int GP_CROSS    = 0; // confirm / click
+    private const int GP_CIRCLE   = 1; // cancel / back
+    private const int GP_START    = 7; // Options button — pause toggle
+
     private static bool waitingForSceneTransition = false;
     private static string pendingScene = "";
 
@@ -117,8 +122,10 @@ public class NavigationButtons : Script
             currentScene = realScene;
         }
 
-        // ESC pause toggle (only in gameplay scenes)
-        if (input.IsKeyTriggered(256) && !wasEscPressed) // 256 = ESC (GLFW)
+        // ESC or gamepad Options button → pause toggle (only in gameplay scenes)
+        bool pauseTriggered = (input.IsKeyTriggered(256) && !wasEscPressed)  // 256 = ESC
+                           || input.IsGamepadButtonTriggered(GP_START);
+        if (pauseTriggered)
         {
             wasEscPressed = true;
 
@@ -332,7 +339,8 @@ public class NavigationButtons : Script
             isCurrentlyHovered = false;
         }
 
-        if (isHovered && input.IsMouseButtonTriggered(0))
+        // Click: left mouse button OR gamepad Cross button while hovering
+        if (isHovered && (input.IsMouseButtonTriggered(0) || input.IsGamepadButtonTriggered(GP_CROSS)))
         {
             PlayClickSound();
             OnClick();

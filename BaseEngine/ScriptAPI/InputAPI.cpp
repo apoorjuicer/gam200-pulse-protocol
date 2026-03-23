@@ -102,4 +102,40 @@ namespace ScriptAPI
 		if (!inputMgr) return false;
 		return inputMgr->isKeyReleased(keyCode);
 	}
+
+	// Gamepad
+	bool InputComponent::IsGamepadConnected::get()
+	{
+		auto inputMgr = Coordinator::GetInstance()->GetSystem<InputManager>();
+		if (!inputMgr) return false;
+		return inputMgr->isGamepadConnected();
+	}
+
+	bool InputComponent::IsGamepadButtonPressed(int button)
+	{
+		auto inputMgr = Coordinator::GetInstance()->GetSystem<InputManager>();
+		if (!inputMgr) return false;
+		return inputMgr->isGamepadButtonPressed(button);
+	}
+
+	bool InputComponent::IsGamepadButtonTriggered(int button)
+	{
+		auto inputMgr = Coordinator::GetInstance()->GetSystem<InputManager>();
+		if (!inputMgr) return false;
+		return inputMgr->isGamepadButtonTriggered(button);
+	}
+
+	bool InputComponent::IsGamepadButtonReleased(int button)
+	{
+		auto inputMgr = Coordinator::GetInstance()->GetSystem<InputManager>();
+		if (!inputMgr) return false;
+		return inputMgr->isGamepadButtonReleased(button);
+	}
+
+	float InputComponent::GetGamepadAxis(int axis)
+	{
+		auto inputMgr = Coordinator::GetInstance()->GetSystem<InputManager>();
+		if (!inputMgr) return 0.0f;
+		return inputMgr->getGamepadAxis(axis);
+	}
 }

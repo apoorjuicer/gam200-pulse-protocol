@@ -53,6 +53,17 @@ namespace ScriptAPI
 		bool IsKeyTriggered(int keyCode);
 		bool IsKeyReleased(int keyCode);
 
+		// FOR GAMEPAD/CONTROLLER (PS4 via Bluetooth)
+		// Button indices match GLFW_GAMEPAD_BUTTON_* constants:
+		//   0 = Cross(A), 1 = Circle(B), 2 = Square(X), 3 = Triangle(Y)
+		//   4 = L1, 5 = R1, 6 = Select/Share, 7 = Options/Start
+		//   11 = D-pad Up, 12 = D-pad Right, 13 = D-pad Down, 14 = D-pad Left
+		property bool IsGamepadConnected { bool get(); }
+		bool IsGamepadButtonPressed(int button);
+		bool IsGamepadButtonTriggered(int button);
+		bool IsGamepadButtonReleased(int button);
+		float GetGamepadAxis(int axis);
+
 	internal:
 		//Constructor when GetInputComponent() with Entity ID gets called
 		InputComponent(unsigned int ID);

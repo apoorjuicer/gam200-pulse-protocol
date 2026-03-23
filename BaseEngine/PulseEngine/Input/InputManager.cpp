@@ -90,12 +90,32 @@ void InputManager::Initialize(GLFWwindow* glfwWindow) {
 	// Store InputManager pointer in window for callback access
 	glfwSetWindowUserPointer(window, this);
 
+	// Register PS4 DualShock 4 SDL gamepad mappings so that
+	// glfwJoystickIsGamepad() returns true even without DS4Windows.
+	// Covers DS4 gen 1 (05C4) and gen 2 (09CC) on Windows.
+	const char* ps4Mappings =
+		"030000004c050000c405000000000000,PS4 Controller,"
+		"a:b1,b:b2,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,"
+		"guide:b12,leftshoulder:b4,leftstick:b10,lefttrigger:a3,"
+		"leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,"
+		"righttrigger:a4,rightx:a2,righty:a5,start:b9,x:b0,y:b3,"
+		"platform:Windows,\n"
+		"030000004c050000cc09000000000000,PS4 Controller,"
+		"a:b1,b:b2,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,"
+		"guide:b12,leftshoulder:b4,leftstick:b10,lefttrigger:a3,"
+		"leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,"
+		"righttrigger:a4,rightx:a2,righty:a5,start:b9,x:b0,y:b3,"
+		"platform:Windows,\n";
+	glfwUpdateGamepadMappings(ps4Mappings);
+
 	//std::cout << "[InputManager] Successfully initialized." << std::endl;
 }
 
-void InputManager::Update(float) {
+void InputManager::Update(float dt) {
+	lastDt = (dt > 0.0f) ? dt : 0.016f;
 	/*std::cout << "[INPUT MANAGER UPDATE]" << std::endl;*/
 	updateInputStates();
+	updateGamepadState();
 	processDebugToggles();
 
 	auto* coord = Coordinator::GetInstance();
@@ -306,4 +326,258 @@ bool InputManager::isMouseButtonReleased(int button) const {
 
 glm::vec2 InputManager::getMousePosition() const {
 	return mousePosition;
+}
+
+// -------------------------------------------------
+// C# accessor overrides: return gamepad virtual cursor when active
+// -------------------------------------------------
+float InputManager::GetMouseWorldPositionX() const {
+	if (gamepadCursorActive) return gamepadCursorWorld.x;
+	return mousePositionWorld.x;
+}
+
+float InputManager::GetMouseWorldPositionY() const {
+	if (gamepadCursorActive) return gamepadCursorWorld.y;
+	return mousePositionWorld.y;
+}
+
+bool InputManager::GetMouseInGameViewport() const {
+	if (gamepadCursorActive) return true;
+	return mouseInGameViewport;
+}
+
+// -------------------------------------------------
+// Dump raw joystick layout to console (called once on connect).
+// -------------------------------------------------
+static void DiagDumpRawJoystick(int jid)
+{
+	int btnCount = 0, axisCount = 0, hatCount = 0;
+	glfwGetJoystickButtons(jid, &btnCount);
+	const float* axes = glfwGetJoystickAxes(jid, &axisCount);
+	glfwGetJoystickHats(jid, &hatCount);
+
+	std::cout << "[Gamepad DIAG] Raw layout: " << btnCount
+		<< " buttons, " << axisCount << " axes, " << hatCount << " hats\n";
+	if (axes) {
+		for (int i = 0; i < axisCount; ++i)
+			std::cout << "[Gamepad DIAG]   Axis[" << i << "] at rest = " << axes[i] << "\n";
+	}
+	std::cout << "[Gamepad DIAG] Press buttons/move sticks to see raw indices in console.\n";
+}
+
+// -------------------------------------------------
+// Build a GLFWgamepadstate from raw joystick data (PS4 BT fallback).
+//
+// PS4 DualShock 4 raw HID on Windows Bluetooth (no DS4Windows):
+//   Buttons: Square=0, Cross=1, Circle=2, Triangle=3
+//            L1=4, R1=5, L2=6, R2=7, Share=8, Options=9, L3=10, R3=11
+//   Axes:    LeftX=0, LeftY=1, RightX=2, L2=3, R2=4, RightY=5
+//   Hat[0]:  D-pad bitmask
+// -------------------------------------------------
+static void BuildGamepadStateFromRawJoystick(int jid, GLFWgamepadstate& out)
+{
+	std::memset(&out, 0, sizeof(out));
+
+	int btnCount = 0, axisCount = 0, hatCount = 0;
+	const unsigned char* btns = glfwGetJoystickButtons(jid, &btnCount);
+	const float*         axes = glfwGetJoystickAxes(jid, &axisCount);
+	const unsigned char* hats = glfwGetJoystickHats(jid, &hatCount);
+
+	auto getBtn = [&](int idx) -> unsigned char {
+		return (btns && idx < btnCount && btns[idx] == GLFW_PRESS)
+			? GLFW_PRESS : GLFW_RELEASE;
+	};
+
+	// --- Diagnostic: print every raw button press (edge only) ---
+	// We keep a small static array so we only print on transition
+	static unsigned char prevRawBtns[32] = {};
+	if (btns) {
+		int check = (btnCount < 32) ? btnCount : 32;
+		for (int i = 0; i < check; ++i) {
+			if (btns[i] == GLFW_PRESS && prevRawBtns[i] != GLFW_PRESS)
+				std::cout << "[Gamepad DIAG] Raw button[" << i << "] PRESSED\n";
+			prevRawBtns[i] = btns[i];
+		}
+	}
+	// Diagnostic: print significant axis movements
+	static float prevRawAxes[8] = {};
+	if (axes) {
+		int check = (axisCount < 8) ? axisCount : 8;
+		for (int i = 0; i < check; ++i) {
+			bool nowBig  = std::abs(axes[i]) > 0.4f;
+			bool wasBig  = std::abs(prevRawAxes[i]) > 0.4f;
+			if (nowBig && !wasBig)
+				std::cout << "[Gamepad DIAG] Raw axis[" << i << "] = " << axes[i] << "\n";
+			prevRawAxes[i] = axes[i];
+		}
+	}
+
+	// --- Map to gamepad state ---
+	// Face buttons
+	out.buttons[GLFW_GAMEPAD_BUTTON_A] = getBtn(1);   // Cross
+	out.buttons[GLFW_GAMEPAD_BUTTON_B] = getBtn(2);   // Circle
+	out.buttons[GLFW_GAMEPAD_BUTTON_X] = getBtn(0);   // Square
+	out.buttons[GLFW_GAMEPAD_BUTTON_Y] = getBtn(3);   // Triangle
+	// Shoulder
+	out.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER]  = getBtn(4); // L1
+	out.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER] = getBtn(5); // R1
+	// Meta
+	out.buttons[GLFW_GAMEPAD_BUTTON_BACK]         = getBtn(8);  // Share
+	out.buttons[GLFW_GAMEPAD_BUTTON_START]        = getBtn(9);  // Options
+	out.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB]   = getBtn(10); // L3
+	out.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB]  = getBtn(11); // R3
+
+	// D-pad from hat
+	if (hats && hatCount > 0) {
+		out.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]    = (hats[0] & GLFW_HAT_UP)    ? GLFW_PRESS : GLFW_RELEASE;
+		out.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT] = (hats[0] & GLFW_HAT_RIGHT) ? GLFW_PRESS : GLFW_RELEASE;
+		out.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]  = (hats[0] & GLFW_HAT_DOWN)  ? GLFW_PRESS : GLFW_RELEASE;
+		out.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]  = (hats[0] & GLFW_HAT_LEFT)  ? GLFW_PRESS : GLFW_RELEASE;
+	}
+
+	// Axes
+	if (axes) {
+		if (axisCount > 0) out.axes[GLFW_GAMEPAD_AXIS_LEFT_X]        = axes[0];
+		if (axisCount > 1) out.axes[GLFW_GAMEPAD_AXIS_LEFT_Y]        = axes[1];
+		if (axisCount > 2) out.axes[GLFW_GAMEPAD_AXIS_RIGHT_X]       = axes[2];
+		if (axisCount > 5) out.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y]       = axes[5];
+		if (axisCount > 3) out.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER]  = axes[3];
+		if (axisCount > 4) out.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] = axes[4];
+	}
+}
+
+// -------------------------------------------------
+// Gamepad polling + virtual cursor
+// -------------------------------------------------
+void InputManager::updateGamepadState() {
+	previousGamepad   = currentGamepad;
+	bool wasConnected = gamepadConnected;
+	gamepadConnected  = false;
+
+	for (int jid = GLFW_JOYSTICK_1; jid <= GLFW_JOYSTICK_LAST; ++jid) {
+		if (!glfwJoystickPresent(jid)) continue;
+
+		bool newSlot  = (gamepadJoystickID != jid);
+		bool connected = false;
+
+		if (glfwJoystickIsGamepad(jid)) {
+			// Standard SDL-mapped path
+			if (glfwGetGamepadState(jid, &currentGamepad)) {
+				connected = true;
+				if (newSlot) {
+					std::cout << "[Gamepad] Connected (mapped): "
+						<< glfwGetGamepadName(jid) << " (slot " << jid << ")\n";
+					// Diagnostic for mapped path: print initial axis values
+					std::cout << "[Gamepad DIAG] Mapped axes at rest:\n";
+					for (int a = 0; a <= GLFW_GAMEPAD_AXIS_LAST; ++a)
+						std::cout << "[Gamepad DIAG]   Axis[" << a << "] = "
+							<< currentGamepad.axes[a] << "\n";
+				}
+			}
+		}
+		else {
+			// Raw joystick fallback (PS4 BT without mapping, etc.)
+			int btnCount = 0, axisCount = 0;
+			glfwGetJoystickButtons(jid, &btnCount);
+			glfwGetJoystickAxes(jid, &axisCount);
+
+			if (btnCount > 0 || axisCount > 0) {
+				if (newSlot) {
+					const char* name = glfwGetJoystickName(jid);
+					std::cout << "[Gamepad] Connected (raw fallback): "
+						<< (name ? name : "Unknown") << " (slot " << jid
+						<< ", btns=" << btnCount << ", axes=" << axisCount << ")\n";
+					DiagDumpRawJoystick(jid);
+				}
+				BuildGamepadStateFromRawJoystick(jid, currentGamepad);
+				connected = true;
+			}
+		}
+
+		if (connected) {
+			gamepadConnected = true;
+			if (newSlot) {
+				gamepadJoystickID  = jid;
+				gamepadCursorWorld = glm::vec2(0.0f, 0.0f);
+			}
+			break;
+		}
+	}
+
+	if (!gamepadConnected) {
+		if (wasConnected) {
+			std::cout << "[Gamepad] Disconnected.\n";
+			gamepadJoystickID  = -1;
+			gamepadCursorActive = false;
+		}
+		std::memset(&currentGamepad, 0, sizeof(currentGamepad));
+		return;
+	}
+
+	// --- Diagnostic: print mapped button triggers ---
+	for (int b = 0; b <= GLFW_GAMEPAD_BUTTON_LAST; ++b) {
+		if (currentGamepad.buttons[b] == GLFW_PRESS &&
+			previousGamepad.buttons[b] != GLFW_PRESS) {
+			const char* names[] = {
+				"Cross(A)","Circle(B)","Square(X)","Triangle(Y)",
+				"L1","R1","Select/Share","Start/Options","Guide",
+				"L3","R3","DUp","DRight","DDown","DLeft"
+			};
+			if (b < 15)
+				std::cout << "[Gamepad] Button[" << b << "] = " << names[b] << " triggered\n";
+		}
+	}
+
+	// --- Virtual cursor driven by left stick + D-pad ---
+	const float DEAD  = 0.15f;
+	const float SPEED = 1400.0f;
+
+	float lx = currentGamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_X];
+	float ly = currentGamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_Y];
+	if (std::abs(lx) < DEAD) lx = 0.0f;
+	if (std::abs(ly) < DEAD) ly = 0.0f;
+
+	if (currentGamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT] == GLFW_PRESS) lx += 1.0f;
+	if (currentGamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]  == GLFW_PRESS) lx -= 1.0f;
+	if (currentGamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]    == GLFW_PRESS) ly -= 1.0f;
+	if (currentGamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]  == GLFW_PRESS) ly += 1.0f;
+
+	if (lx != 0.0f || ly != 0.0f) {
+		gamepadCursorActive   = true;
+		gamepadCursorWorld.x += lx * SPEED * lastDt;
+		gamepadCursorWorld.y -= ly * SPEED * lastDt;
+		gamepadCursorWorld.x  = glm::clamp(gamepadCursorWorld.x, -1600.0f, 1600.0f);
+		gamepadCursorWorld.y  = glm::clamp(gamepadCursorWorld.y,  -900.0f,  900.0f);
+	}
+
+	// Return cursor control to mouse when it moves
+	double mx = 0.0, my = 0.0;
+	if (window) glfwGetCursorPos(window, &mx, &my);
+	static double prevMx = mx, prevMy = my;
+	if (std::abs(mx - prevMx) > 2.0 || std::abs(my - prevMy) > 2.0)
+		gamepadCursorActive = false;
+	prevMx = mx;
+	prevMy = my;
+}
+
+bool InputManager::isGamepadButtonPressed(int button) const {
+	if (!gamepadConnected || button < 0 || button > GLFW_GAMEPAD_BUTTON_LAST) return false;
+	return currentGamepad.buttons[button] == GLFW_PRESS;
+}
+
+bool InputManager::isGamepadButtonTriggered(int button) const {
+	if (!gamepadConnected || button < 0 || button > GLFW_GAMEPAD_BUTTON_LAST) return false;
+	return (currentGamepad.buttons[button] == GLFW_PRESS) &&
+		   (previousGamepad.buttons[button] != GLFW_PRESS);
+}
+
+bool InputManager::isGamepadButtonReleased(int button) const {
+	if (!gamepadConnected || button < 0 || button > GLFW_GAMEPAD_BUTTON_LAST) return false;
+	return (currentGamepad.buttons[button] != GLFW_PRESS) &&
+		   (previousGamepad.buttons[button] == GLFW_PRESS);
+}
+
+float InputManager::getGamepadAxis(int axis) const {
+	if (!gamepadConnected || axis < 0 || axis > GLFW_GAMEPAD_AXIS_LAST) return 0.0f;
+	return currentGamepad.axes[axis];
 }

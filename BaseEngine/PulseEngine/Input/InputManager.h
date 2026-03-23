@@ -79,9 +79,19 @@ public:
 	//======================= FOR C# ACCESS ================================
 	float GetMousePositionX() const { return mousePosition.x; }
 	float GetMousePositionY() const { return mousePosition.y; }
-	float GetMouseWorldPositionX() const { return mousePositionWorld.x; }
-	float GetMouseWorldPositionY() const { return mousePositionWorld.y; }
-	bool GetMouseInGameViewport() const { return mouseInGameViewport; }
+	float GetMouseWorldPositionX() const;
+	float GetMouseWorldPositionY() const;
+	bool GetMouseInGameViewport() const;
+
+	// -------------------------------------------------
+	// Gamepad/Controller: 3 states + axes
+	// PS4 via Bluetooth uses the standard SDL gamepad layout
+	// -------------------------------------------------
+	bool isGamepadConnected() const { return gamepadConnected; }
+	bool isGamepadButtonPressed(int button) const;
+	bool isGamepadButtonTriggered(int button) const;
+	bool isGamepadButtonReleased(int button) const;
+	float getGamepadAxis(int axis) const;
 
 private:
 	GLFWwindow* window = nullptr;
@@ -114,7 +124,19 @@ private:
 	bool stressToggleRequested = false;
 	bool debugCollisionEnabled = false;
 
+	// Gamepad state (GLFW_GAMEPAD_BUTTON_LAST = 14)
+	GLFWgamepadstate currentGamepad{};
+	GLFWgamepadstate previousGamepad{};
+	bool gamepadConnected = false;
+	int  gamepadJoystickID = -1;	// which GLFW_JOYSTICK_x is active
+
+	// Virtual cursor driven by gamepad (world-space coords, -1600..1600 x, -900..900 y)
+	glm::vec2 gamepadCursorWorld{ 0.0f, 0.0f };
+	bool gamepadCursorActive = false;	// true once gamepad has moved the cursor
+	float lastDt = 0.016f;				// cached from Update()
+
 	// for raw input functions
 	void updateInputStates();
+	void updateGamepadState();
 	void processDebugToggles();
 };
