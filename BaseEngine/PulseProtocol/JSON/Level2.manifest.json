@@ -1,28 +1,28 @@
 { //audio and font already preloaded though
     "scenemanifest": {
-        "sceneId": "Level2",
+        "sceneName": "Level2",
+        "sharedGroups": [
+            "GlobalUI",
+            "GameplayCommon"
+        ],
         "textures": [
-            // Player
-            "dorian_idle1",
-            "dorian_idle2",
-            "dorian_sword",
-            "dorian_hurt",
-            // Rat
-            "rat_idle",
-            "rat_hurt",
-            "rat_walk",
-            "rat_attack",
-            "rat_death",
-            // Gorilla
-            "gorilla_idle",
-            "gorilla_walk",
-            "gorilla_attack",
-            "gorilla_hurt",
-            "gorilla_death",
-            // Bat
-            // VFX
-            "sword_slash_vfx",
-            "particle"
+            "Level2_BG"
+            // "enemyicon_bat",
+            // "enemyicon_bat_grey",
+            // "enemyicon_rat",
+            // "enemyicon_rat_grey",
+            // //rat
+            // "rat_idle",
+            // "rat_hurt",
+            // "rat_walk",
+            // "rat_attack",
+            // "rat_death",
+            // //bat
+            // "bat_idle",
+            // "bat_hurt",
+            // "bat_walk",
+            // "bat_attack",
+            // "bat_death"
         ],
         "audio": [
             "BGM_L2_TESTING"

@@ -177,13 +177,18 @@ namespace PulseEditor
 
         (void)currentDir;  // Unused now, kept for API compatibility
 
-        // Convert absolute path to relative path for AssetsManager
-        std::string pathStr = GetRelativeAssetPath(item.fullPath);
-        std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
+        //// Convert absolute path to relative path for AssetsManager
+        //std::string pathStr = GetRelativeAssetPath(item.fullPath);
+        //std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
 
-        // Try relative path first
-        item.texID = mAssets.GetOrLoadTexture(pathStr);
+        //// Try relative path first
+        //item.texID = mAssets.GetOrLoadTexture(pathStr);
 
+        //new
+        std::string textureKey = ResolveTextureKeyForAsset(item.fullPath);
+        item.texID = mAssets.GetOrLoadTexture(textureKey);
+
+        //old stuff fallback
         // If failed, try absolute path as fallback
         if (item.texID == 0)
         {
@@ -590,6 +595,76 @@ namespace PulseEditor
             }
 
             ImGui::EndPopup();
+        }
+    }
+
+
+    std::string FindTextureRegistryIdByPath(std::string const& fullPath)
+    {
+        namespace fs = std::filesystem;
+        std::error_code ec;
+
+        fs::path target = fs::weakly_canonical(fs::absolute(fullPath), ec);
+        if (ec)
+            target = fs::path(fullPath).lexically_normal();
+
+        auto const& texTable = mAssets.getTexRegContainer();
+
+        for (auto const& [texId, texRes] : texTable)
+        {
+            fs::path regPath = texRes.path;
+
+            // If registry path is relative, anchor it to game root
+            if (regPath.is_relative())
+                regPath = FilePathToGame / regPath;
+
+            regPath = fs::weakly_canonical(fs::absolute(regPath), ec);
+            if (ec)
+                regPath = fs::path(texRes.path).lexically_normal();
+
+            if (regPath == target)
+                return texId;
+        }
+
+        return "";
+    }
+
+    std::string ResolveTextureKeyForAsset(std::string const& fullPath)
+    {
+        std::string texId = FindTextureRegistryIdByPath(fullPath);
+        if (!texId.empty())
+            return texId;
+
+        // fallback only for legacy/unregistered files
+        return GetRelativeAssetPath(fullPath);
+    }
+
+    void UpdateRenderablesUsingTextureKey(std::string const& oldKey, std::string const& newKey, unsigned int newTex)
+    {
+        namespace fs = std::filesystem;
+
+        if (auto* coord = Coordinator::GetInstance())
+        {
+            for (Entity e : coord->GetAllEntities())
+            {
+                if (!coord->HasComponent<Framework::Renderable>(e))
+                    continue;
+
+                auto& r = coord->GetComponent<Framework::Renderable>(e);
+
+                std::string oldBase = fs::path(oldKey).filename().string();
+                std::string spriteBase = fs::path(r.spriteName).filename().string();
+
+                bool exactMatch = (r.spriteName == oldKey);
+                bool filenameMatch = (!oldBase.empty() && spriteBase == oldBase);
+
+                if (exactMatch || filenameMatch)
+                {
+                    r.spriteName = newKey;
+                    r.textureID = newTex;
+                    r.needsTextureReload = false;
+                }
+            }
         }
     }
 

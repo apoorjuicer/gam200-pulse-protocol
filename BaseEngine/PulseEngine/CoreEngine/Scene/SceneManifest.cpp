@@ -71,6 +71,7 @@ void SceneManifest::Serialize(rapidjson::Value& out,
     WriteStringVector(out, "audio", audio, alloc);
     WriteStringVector(out, "fonts", fonts, alloc);
     WriteStringVector(out, "animations", animations, alloc);
+    WriteStringVector(out, "sharedGroups", sharedGroups, alloc);
     //WriteStringVector(out, "prefabs", prefabs, alloc);
 }
 
@@ -87,6 +88,7 @@ void SceneManifest::Deserialize(rapidjson::Value const& in) {
     ReadStringVector(in, "audio", audio);
     ReadStringVector(in, "fonts", fonts);
     ReadStringVector(in, "animations", animations);
+    ReadStringVector(in, "sharedGroups", sharedGroups);
     //ReadStringVector(in, "prefabs", prefabs);
 }
 //load/save
@@ -96,3 +98,4 @@ bool LoadSceneManifestFile(SceneManifest& sm,std::string const& path) {
 bool SaveSceneManifestFile(SceneManifest const& sm, std::string const& path) {
     return JSONUtils::SaveObject(sm, path, "scenemanifest");
 }
+

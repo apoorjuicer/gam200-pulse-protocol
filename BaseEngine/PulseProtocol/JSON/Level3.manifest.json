@@ -1,0 +1,18 @@
+{ //audio and font already preloaded though
+    "scenemanifest": {
+        "sceneName": "Level3",
+        "sharedGroups": [
+            "GlobalUI",
+            "GameplayCommon"
+        ],
+        "textures": [
+            "Level3_BG"
+        
+        ],
+        "audio": [
+            "BGM_L3_TESTING"
+        ],
+        "fonts": [],
+        "animations": []
+    }
+}
