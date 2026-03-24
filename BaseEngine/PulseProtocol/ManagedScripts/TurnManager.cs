@@ -36,7 +36,7 @@ public class TurnManager : Script
     // Config
     // =========================
     public int CountdownBeats = 4;
-    public int EnemyDisplayBeats = 4;  // with -1 backdating: transition beat + 3 more = 4 beats total. First key shows immediately, keys 2-4 on the next 3 beats. No idle beat at end.
+    public int EnemyDisplayBeats = 5;  // with -1 backdating: transition beat + 3 more = 4 beats total. First key shows immediately, keys 2-4 on the next 3 beats. No idle beat at end.
     public int PlayerInputBeats = 5;   // effective input beats   = PlayerInputBeats  - 1 = 4 (phaseStartBeat backdated by -1)
 
     // =========================
