@@ -1,145 +1,42 @@
 { //audio and font already preloaded though
     "scenemanifest": {
-        "sceneId": "Level1",
+        "sceneName": "Level1",
+        "sharedGroups": [
+            "GlobalUI",
+            "GameplayCommon"
+        ],
         "textures": [
-            "Level1_BG",
-            "Settings_BG",
-            "WinScreen_BG",
-            "Level1_BG",
-            "QuitScreen_BG",
-            "dorian_idle1",
-            "dorian_idle2",
-            "dorian_sword",
-            "dorian_hurt",
-            // Rat Rat Rat 
-            "rat_idle",
-            "rat_hurt",
-            "rat_walk",
-            "rat_attack",
-            "rat_death",
-            // Gorilla
-            "gorilla_idle",
-            "gorilla_walk",
-            "gorilla_attack",
-            "gorilla_hurt",
-            "gorilla_death",
-            // Bat
-            "bat_idle",
-            "bat_walk",
-            "bat_attack",
-            "bat_hurt",
-            //settings
-            "back_btn",
-            "backhover_btn",
-            "windowed_TEXT",
-            "windowedhover_TEXT",
-            "fullscreen_TEXT",
-            "fullscreenhover_TEXT",
-            "dropdownopen_BOX",
-            "dropdownclose_BOX",
-            "screen_TEXT",
-            "volume_TEXT",
-            "music_TEXT",
-            "sfx_TEXT",
-            "brightess_TEXT",
-            "slider_point",
-            "slider_fill",
-            "slider_empty",
-            //pause
-            "exit_btn",
-            "exithover_btn",
-            "pausequit_btn",
-            "pausequithover_btn",
-            "pauserestart_btn",
-            "pauserestarthover_btn",
-            "pausesettings_btn",
-            "pausesettingshover_btn",
-            "NextStage_btn",
-            "NextStagehover_btn",
-            //beatborder
-            "beatborder_transparent",
-            "beatborder_frame",
-            //playerinputS
-            "player_input_border",
-            "W_KEY_GREEN",
-            "A_KEY_GREEN",
-            "S_KEY_GREEN",
-            "D_KEY_GREEN",
-            "W_KEY_RED",
-            "A_KEY_RED",
-            "S_KEY_RED",
-            "D_KEY_RED",
-            "W_KEY_BLACK",
-            "A_KEY_BLACK",
-            "S_KEY_BLACK",
-            "D_KEY_BLACK",
-            //enemyicon
-            "enemyicon_gorilla",
-            "enemyicon_gorilla_grey",
-            "enemyicon_rat",
-            "enemyicon_rat_grey",
-            //pause
-            "exit_btn",
-            "exithover_btn",
-            "pausequit_btn",
-            "pausequithover_btn",
-            "pauserestart_btn",
-            "pauserestarthover_btn",
-            "pausesettings_btn",
-            "pausesettingshover_btn",
-            //settings
-            "back_btn",
-            "backhover_btn",
-            "windowed_TEXT",
-            "windowedhover_TEXT",
-            "fullscreen_TEXT",
-            "fullscreenhover_TEXT",
-            "dropdownopen_BOX",
-            "dropdownclose_BOX",
-            "screen_TEXT",
-            "volume_TEXT",
-            "music_TEXT",
-            "sfx_TEXT",
-            "brightess_TEXT",
-            "slider_point",
-            "slider_fill",
-            "slider_empty",
-            //healthbar
-            "back_glow_blue",
-            "back_glow_red",
-            "health_tile001",
-            "health_tile002",
-            "health_tile003",
-            "health_tile004",
-            "health_tile005",
-            "health_tile006",
-            "health_tile007",
-            "health_tile008",
-            "health_tile009",
-            "health_tile010",
-            "health_tile011",
-            //nextstage
-            "NextStage_btn",
-            "NextStagehover_btn",
-            //combotexts
-            "miss_ui",
-            "great_ui",
-            "perfect_ui",
-            "Level1_BG",
-            "Level1_BG",
-            "Level1_BG",
-            "Level1_BG",
-            "Level1_BG",
-            //vfx
-            "particle",
-            "sword_slash_vfx"
+            "Level1_BG"
+            // //rat
+            // "rat_idle",
+            // "rat_hurt",
+            // "rat_walk",
+            // "rat_attack",
+            // "rat_death",
+            // //gorilla
+            // "gorilla_idle",
+            // "gorilla_hurt",
+            // "gorilla_walk",
+            // "gorilla_attack",
+            // "gorilla_death",
+            // //bat
+            // "bat_idle",
+            // "bat_hurt",
+            // "bat_walk",
+            // "bat_attack",
+            // "bat_death",
+            // //enemyicon
+            // "enemyicon_gorilla",
+            // "enemyicon_gorilla_grey",
+            // "enemyicon_rat",
+            // "enemyicon_rat_grey",
+            // "enemyicon_bat",
+            // "enemyicon_bat_grey"
         ],
         "audio": [
             "BGM_L1_TESTING"
         ],
         "fonts": [],
-        "animations": [
-            //"dorian_idle1_ss"
-        ]
+        "animations": []
     }
 }
