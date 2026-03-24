@@ -16,6 +16,13 @@ public class InputBridge : Script
     public bool DebugBypassTurnLock = false;
     public bool DebugLogEveryFrame = false;
 
+    // PS4 gamepad button constants (GLFW_GAMEPAD_BUTTON_*)
+    // Triangle(Y=3)=W, Square(X=2)=A, Cross(A=0)=S, Circle(B=1)=D
+    private const int GP_TRIANGLE = 3; // W
+    private const int GP_SQUARE   = 2; // A
+    private const int GP_CROSS    = 0; // S
+    private const int GP_CIRCLE   = 1; // D
+
     // =========================
     // State
     // =========================
@@ -49,10 +56,11 @@ public class InputBridge : Script
             }
         }
 
-        bool curW = input.IsKeyPressed(KeyW);
-        bool curA = input.IsKeyPressed(KeyA);
-        bool curS = input.IsKeyPressed(KeyS);
-        bool curD = input.IsKeyPressed(KeyD);
+        // Keyboard OR gamepad face buttons (additive — either input works)
+        bool curW = input.IsKeyPressed(KeyW) || input.IsGamepadButtonPressed(GP_TRIANGLE);
+        bool curA = input.IsKeyPressed(KeyA) || input.IsGamepadButtonPressed(GP_SQUARE);
+        bool curS = input.IsKeyPressed(KeyS) || input.IsGamepadButtonPressed(GP_CROSS);
+        bool curD = input.IsKeyPressed(KeyD) || input.IsGamepadButtonPressed(GP_CIRCLE);
 
         bool tapW = curW && !prevW;
         bool tapA = curA && !prevA;

@@ -54,6 +54,22 @@ public class NavigationButtons : Script
 
     private static bool wasEscPressed = false;
 
+    // Gamepad button constants
+    private const int GP_CROSS    = 0; // confirm / click
+    private const int GP_CIRCLE   = 1; // cancel / back
+    private const int GP_START    = 7; // Options button — pause toggle
+    private const int GP_DPAD_UP    = 11;
+    private const int GP_DPAD_RIGHT = 12;
+    private const int GP_DPAD_DOWN  = 13;
+    private const int GP_DPAD_LEFT  = 14;
+
+    // D-pad navigation state (shared across all button instances)
+    private static readonly List<NavigationButtons> s_navCandidates = new List<NavigationButtons>();
+    private static readonly List<NavigationButtons> s_prevCandidates = new List<NavigationButtons>();
+    private static NavigationButtons s_focusedButton = null;
+    private static int s_navClearFrame   = -1;
+    private static int s_navHandledFrame = -1;
+
     private static bool waitingForSceneTransition = false;
     private static string pendingScene = "";
 
@@ -78,6 +94,12 @@ public class NavigationButtons : Script
 
             waitingForSceneTransition = false;
             pendingScene = "";
+
+            s_navCandidates.Clear();
+            s_prevCandidates.Clear();
+            s_focusedButton    = null;
+            s_navClearFrame    = -1;
+            s_navHandledFrame  = -1;
         }
 
         if (currentFrame != lastFrameCount)
@@ -117,8 +139,10 @@ public class NavigationButtons : Script
             currentScene = realScene;
         }
 
-        // ESC pause toggle (only in gameplay scenes)
-        if (input.IsKeyTriggered(256) && !wasEscPressed) // 256 = ESC (GLFW)
+        // ESC or gamepad Options button → pause toggle (only in gameplay scenes)
+        bool pauseTriggered = (input.IsKeyTriggered(256) && !wasEscPressed)  // 256 = ESC
+                           || input.IsGamepadButtonTriggered(GP_START);
+        if (pauseTriggered)
         {
             wasEscPressed = true;
 
@@ -308,8 +332,44 @@ public class NavigationButtons : Script
         float mx = input.WorldMouseX;
         float my = input.WorldMouseY;
 
-        // DONT process hover when mouse is outside viewport.
-        bool isHovered = input.InGameViewport && mx >= t.X - halfW && mx <= t.X + halfW && my >= t.Y - halfH && my <= t.Y + halfH;
+        // --- Register as D-pad nav candidate (visible, passed all overlay filters) ---
+        if (s_navClearFrame != currentFrame)
+        {
+            s_prevCandidates.Clear();
+            s_prevCandidates.AddRange(s_navCandidates);
+            s_navCandidates.Clear();
+            s_navClearFrame = currentFrame;
+        }
+        s_navCandidates.Add(this);
+
+        // --- Handle D-pad navigation once per frame, using previous frame's candidates ---
+        if (s_navHandledFrame != currentFrame)
+        {
+            s_navHandledFrame = currentFrame;
+            bool navFwd  = input.IsGamepadButtonTriggered(GP_DPAD_DOWN)  || input.IsGamepadButtonTriggered(GP_DPAD_RIGHT);
+            bool navBack = input.IsGamepadButtonTriggered(GP_DPAD_UP)    || input.IsGamepadButtonTriggered(GP_DPAD_LEFT);
+            if (navFwd || navBack)
+            {
+                int count = s_prevCandidates.Count;
+                if (count > 0)
+                {
+                    int idx = s_prevCandidates.IndexOf(s_focusedButton);
+                    if (idx < 0) idx = navFwd ? -1 : 0;
+                    idx = navFwd ? (idx + 1) % count : (idx - 1 + count) % count;
+                    s_focusedButton = s_prevCandidates[idx];
+                }
+            }
+        }
+
+        // Hover: mouse bounds check OR gamepad D-pad focus
+        bool isMouseHovered = input.InGameViewport && mx >= t.X - halfW && mx <= t.X + halfW && my >= t.Y - halfH && my <= t.Y + halfH;
+        bool isGamepadFocused = (this == s_focusedButton);
+
+        // Mouse movement releases gamepad focus so the two modes don't fight
+        if (isMouseHovered && !isGamepadFocused && s_focusedButton != null)
+            s_focusedButton = null;
+
+        bool isHovered = isMouseHovered || isGamepadFocused;
 
         if (isHovered && !isCurrentlyHovered)
         {
@@ -332,7 +392,8 @@ public class NavigationButtons : Script
             isCurrentlyHovered = false;
         }
 
-        if (isHovered && input.IsMouseButtonTriggered(0))
+        // Click: left mouse button OR gamepad Cross button while hovering
+        if (isHovered && (input.IsMouseButtonTriggered(0) || input.IsGamepadButtonTriggered(GP_CROSS)))
         {
             PlayClickSound();
             OnClick();

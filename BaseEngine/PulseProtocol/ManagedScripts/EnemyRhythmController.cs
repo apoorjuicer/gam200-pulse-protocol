@@ -661,7 +661,12 @@ public class EnemyRhythmController : Script
             TrySetWeakness();
         }
 
-        SetState(EnemyState.Idle);
+        // wait til the attack animation done then reset the state :P
+        if (attackCooldownTimer <= 0f)
+        {
+            SetState(EnemyState.Idle);
+        }
+            
     }
 
     protected virtual void SetupSprites()

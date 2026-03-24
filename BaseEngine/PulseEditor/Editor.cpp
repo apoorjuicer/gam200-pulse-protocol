@@ -600,6 +600,8 @@ namespace PulseEditor
         }
         ImGui::End();
 
+        DrawBuildSizeAnalyzerWindow();
+
         // ===== In-scene picking/dragging (gizmo) on the middle viewport =====
         PulseEditor::GameViewport vp;
         vp.x = (int)left_w;
