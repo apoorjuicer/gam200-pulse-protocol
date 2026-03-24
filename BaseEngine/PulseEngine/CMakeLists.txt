@@ -80,6 +80,10 @@ endif()
     # Define DLL export macro
     target_compile_definitions(${TARGET_NAME} PRIVATE DLL_API_EXPORT)
 
+    # Look at what the folder name we are in and make that the RootFolderName
+    get_filename_component(RootFolderName "${CMAKE_SOURCE_DIR}" NAME)
+    target_compile_definitions(${TARGET_NAME} PRIVATE RootFolderName="${RootFolderName}")
+
     # IMPORTANT: keep your old behavior:
     # - Editor build: ENABLE_EDITOR is defined
     # - Game build:  ENABLE_EDITOR is NOT defined

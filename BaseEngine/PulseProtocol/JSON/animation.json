@@ -7,7 +7,87 @@
             "columns": 1,
             "rows": 1,
             "animationSpeed": 2.0
+        },
+        {
+            "id": "dorian_idle1_ss",
+            "path": "Assets/Spritesheet/Dorian/Dorian_Idle1_579x615.png",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
+        },
+        {
+            "id": "dorian_idle2_ss",
+            "path": "Assets/Spritesheet/Dorian/Dorian_Idle2_579x615.png",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
+        },
+        {
+            "id": "dorian_sword_ss",
+            "path": "Assets/Spritesheet/Dorian/Dorian_Sword_579x615.png",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
+        },
+        {
+            "id": "dorian_hurt_ss",
+            "path": "Assets/Spritesheet/Dorian/Dorian_Hurt_579x615.png",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
+        },
+        //rat
+        {
+            "id": "rat_idle_ss",
+            "path": "Assets/Spritesheet/Rat/Rat_Idle_spritesheet_764x456.png",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
+        },
+        {
+            "id": "rat_walk_ss",
+            "path": "Assets/Spritesheet/Rat/Rat_Walk_spritesheet_764x456.png",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
+        },
+        {
+            "id": "rat_hurt_ss",
+            "path": "Assets/Spritesheet/Rat/Rat_Hurt_spritesheet_764x456.png",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
+        },
+        {
+            "id": "rat_attack_ss",
+            "path": "Assets/Spritesheet/Rat/Rat_Attack_spritesheet_764x456.png",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
+        },
+        {
+            "id": "rat_hurt_ss",
+            "path": "Assets/Spritesheet/Rat/Rat_Hurt_spritesheet_764x456.png",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
+        },
+        {
+            "id": "health_bar_ss",
+            "path": "Assets/Spritesheet/Rat/health_bar_528x248_going_down.png",
+            "totalFrames": 1,
+            "columns": 1,
+            "rows": 1,
+            "animationSpeed": 2.0
         }
     ]
 }
-

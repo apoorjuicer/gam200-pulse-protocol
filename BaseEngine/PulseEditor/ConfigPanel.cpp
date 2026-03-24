@@ -28,7 +28,7 @@ namespace PulseEditor
         GetModuleFileNameA(GetModuleHandleA("PulseEngine.dll"), exePath, MAX_PATH);
         std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
         auto baseEngineDir = currentDir;
-        while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+        while (baseEngineDir.filename() != RootFolderName && baseEngineDir.has_parent_path())
             baseEngineDir = baseEngineDir.parent_path();
         return FilePathToGame / "JSON" / "config.json";
     };
@@ -87,7 +87,7 @@ namespace PulseEditor
             std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
 
             auto baseEngineDir = currentDir;
-            while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+            while (baseEngineDir.filename() != RootFolderName && baseEngineDir.has_parent_path())
                 baseEngineDir = baseEngineDir.parent_path();
 
             std::filesystem::path savePath = FilePathToGame / "JSON" / "config.json";
@@ -107,7 +107,7 @@ namespace PulseEditor
             std::filesystem::path currentDir = std::filesystem::path(exePath).parent_path();
 
             auto baseEngineDir = currentDir;
-            while (baseEngineDir.filename() != "BaseEngine" && baseEngineDir.has_parent_path())
+            while (baseEngineDir.filename() != RootFolderName && baseEngineDir.has_parent_path())
                 baseEngineDir = baseEngineDir.parent_path();
 
             std::filesystem::path sourcePath = FilePathToGame / "JSON" / "config.json";
