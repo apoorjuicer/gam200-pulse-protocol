@@ -1208,6 +1208,7 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
                         "spriteName": "rat_idle",
                         "tintColor": {
