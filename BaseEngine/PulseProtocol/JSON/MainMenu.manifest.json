@@ -48,7 +48,27 @@
             "levelselect_level2_Icon",
             //"levelselect_level3_Icon",
             "levelselect_start_BTN",
-            "levelselect_border"
+            "levelselect_border",
+            //settings animation frames
+            "settings1",
+            "settings2",
+            "settings3",
+            "settings4",
+            "settings5",
+            "settings6",
+            "settings7",
+            "settings8",
+            "settings9",
+            "settings10",
+            "settings11",
+            "settings12",
+            "settings13",
+            "settings14",
+            "settings15",
+            "settings16",
+            "settings17",
+            "settings18",
+            "settings19"
         ],
         "audio": [
             "BGM_GENERAL"

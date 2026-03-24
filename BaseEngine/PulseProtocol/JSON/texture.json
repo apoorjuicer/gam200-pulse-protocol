@@ -115,14 +115,6 @@
             "shd_ref": 1
         },
         {
-            "id": "Settings_BG",
-            "path": "Assets/Textures/Backgrounds/Settings0000.jpg",
-            "vert_shader_path": "shader/bg_vs.vert",
-            "frag_shader_path": "shader/bg_fs.frag",
-            "mdl_ref": 0,
-            "shd_ref": 1
-        },
-        {
             "id": "WinScreen_BG",
             "path": "Assets/Textures/Backgrounds/win screen.png",
             "vert_shader_path": "shader/bg_vs.vert",
@@ -394,7 +386,7 @@
             "mdl_ref": 1,
             "shd_ref": 3
         },
-        //wasd key
+        //wasd key (player & enemy)
         {
             "id": "W_KEY_GREEN",
             "path": "Assets/Textures/UI/WASDKeys/PlayerInputGREENW.png",
@@ -459,7 +451,6 @@
             "mdl_ref": 1,
             "shd_ref": 3
         },
-        //
         {
             "id": "W_KEY_BLACK",
             "path": "Assets/Textures/UI/WASDKeys/EKeyW.png",
@@ -492,6 +483,7 @@
             "mdl_ref": 1,
             "shd_ref": 3
         },
+        // main menu UI
         {
             "id": "continue_mainmenu_btn",
             "path": "Assets/Textures/UI/Buttons/mainmenu/continue.png",
@@ -974,7 +966,8 @@
             "mdl_ref": 1,
             "shd_ref": 3
         },
-        //pause
+        
+        //pause menu
         {
             "id": "exit_btn",
             "path": "Assets/Textures/UI/pause/Exit.png",
@@ -1154,6 +1147,312 @@
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
             "shd_ref": 2
+        },
+
+        // pause/setting background animation frames
+        {
+            "id": "settings1",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0000.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings2",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0001.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings3",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0003.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings4",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0004.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+                {
+            "id": "settings5",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0005.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings6",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0006.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings7",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0007.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings8",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0008.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings9",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0009.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings10",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0010.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings11",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0011.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings12",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0012.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+                {
+            "id": "settings13",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0013.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings14",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0014.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings15",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0015.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings16",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0016.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+                {
+            "id": "settings17",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0017.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings18",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0018.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "settings19",
+            "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0019.jpg",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause1",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0000.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause2",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0001.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause3",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0002.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause4",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0003.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+                {
+            "id": "pause5",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0004.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause6",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0006.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause7",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0007.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause8",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0008.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause9",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0009.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause10",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0010.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause11",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0011.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause12",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0012.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause13",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0013.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause14",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0014.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause15",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0015.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause16",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0016.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause17",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0017.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause18",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0018.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "pause19",
+            "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0019.png",
+            "vert_shader_path": "shader/sprite_BG.vert",
+            "frag_shader_path": "shader/sprite_BG.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
         }
     ]
 }

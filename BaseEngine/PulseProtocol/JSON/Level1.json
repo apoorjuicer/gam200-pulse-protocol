@@ -705,9 +705,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/pause5.png",
+                        "spriteName": "pause1",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -736,7 +736,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "PauseBackgroundAnimator"
+                            "PauseAnimatedBackground"
                         ]
                     }
                 },
@@ -771,7 +771,7 @@
                     "transform": {
                         "position": {
                             "x": -750.0,
-                            "y": -50.0
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -852,7 +852,7 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": -50.0
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 209.99998474121094,
@@ -933,7 +933,7 @@
                     "transform": {
                         "position": {
                             "x": 750.0,
-                            "y": -50.0
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -2545,13 +2545,13 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "SettingsOverlay"
+                            "SettingsAnimatedBackground"
                         ]
                     }
                 },
                 {
                     "name": {
-                        "name": "BG_PlaceholderImg"
+                        "name": "SettingsMenuBG"
                     }
                 },
                 {
