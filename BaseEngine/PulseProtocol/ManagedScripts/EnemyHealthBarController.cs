@@ -34,9 +34,6 @@ public class EnemyHealthBarController : Script
     public float GlobalOffsetY = 0f;
     public float ScaleX = 176f;
     public float ScaleY = 33f;
-    public float MinScaleX = 176f;
-    public float MaxScaleX = 260f;
-    public float ScaleXFromEnemyFactor = 0.23f;
 
     private int lastFrame = -1;
     private int lastBlocks = -1;
@@ -78,15 +75,8 @@ public class EnemyHealthBarController : Script
 
         barTf.X = enemyTf.X + offsetX;
         barTf.Y = enemyTf.Y + offsetY;
-
-        float autoScaleX = enemyTf.ScaleX * ScaleXFromEnemyFactor;
-        if (autoScaleX < MinScaleX) autoScaleX = MinScaleX;
-        if (autoScaleX > MaxScaleX) autoScaleX = MaxScaleX;
-
-        // Preserve original texture aspect ratio (176x33).
-        float autoScaleY = autoScaleX * (33f / 176f);
-        barTf.ScaleX = autoScaleX;
-        barTf.ScaleY = autoScaleY;
+        barTf.ScaleX = ScaleX;
+        barTf.ScaleY = ScaleY;
 
         int blocks = EnemyRhythmController.Instance.GetHealthBarBlockCount();
         if (blocks < 2) blocks = 2;
