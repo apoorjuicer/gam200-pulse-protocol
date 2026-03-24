@@ -82,4 +82,9 @@ namespace PulseEditor
     // Draw error popup for invalid file imports
     void DrawImportErrorPopup(bool& showError, const std::string& invalidFile, const std::string& targetFolder, FolderType targetType);
 
+
+    std::string FindTextureRegistryIdByPath(std::string const& fullPath);
+    std::string ResolveTextureKeyForAsset(std::string const& fullPath);
+    void UpdateRenderablesUsingTextureKey(std::string const& oldKey, std::string const& newKey, unsigned int newTex);
+
 }  // namespace PulseEditor
