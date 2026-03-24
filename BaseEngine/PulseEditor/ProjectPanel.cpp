@@ -568,10 +568,15 @@ namespace PulseEditor
                             namespace fs = std::filesystem;
 
                             // Use GetRelativeAssetPath to get the correct absolute path
-                            std::string spritePath = GetRelativeAssetPath(item.fullPath);
+                            /*std::string spritePath = GetRelativeAssetPath(item.fullPath);
 
                             rend.spriteName = spritePath;
-                            rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);
+                            rend.textureID = mAssets.GetOrLoadTexture(rend.spriteName);*/
+
+                            std::string textureKey = ResolveTextureKeyForAsset(item.fullPath);
+
+                            rend.spriteName = textureKey;
+                            rend.textureID = mAssets.GetOrLoadTexture(textureKey);
 
                             // Auto-detect spritesheet based on filename
                             std::string filename = fs::path(rend.spriteName).filename().string();

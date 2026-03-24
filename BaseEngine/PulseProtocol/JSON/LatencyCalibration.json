@@ -27,7 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": false,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/Backgrounds/Calibrator BG.png",
+                        "spriteName": "Calibrator_BG",
                         "tintColor": {
                             "r": 0.0,
                             "g": 0.0,
@@ -622,7 +622,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/pauserestart.png",
+                        "spriteName": "pauserestart_btn",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -697,7 +697,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/NextStage.png",
+                        "spriteName": "NextStage_btn",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,

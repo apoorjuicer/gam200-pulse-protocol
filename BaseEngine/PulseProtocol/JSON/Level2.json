@@ -1208,9 +1208,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/Characters/../Enemies/Rat_Idle_spritesheet_764x456.png",
+                        "spriteName": "rat_idle",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
