@@ -639,7 +639,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 	SceneManifest manifest;
 	if (LoadManifestForScene(resolvedPath, manifest))
 	{
-		// Load shared groups first
+		// Load shared groups first, if not loaded yet
 		for (auto const& groupName : manifest.sharedGroups)
 		{
 			if (!mAssets.LoadSharedAssets(groupName))

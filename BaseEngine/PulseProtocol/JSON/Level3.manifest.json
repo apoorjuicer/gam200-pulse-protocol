@@ -6,23 +6,8 @@
             "GameplayCommon"
         ],
         "textures": [
-            "Level3_BG",
-            "enemyicon_bat",
-            "enemyicon_bat_grey",
-            "enemyicon_rat",
-            "enemyicon_rat_grey",
-            //rat
-            "rat_idle",
-            "rat_hurt",
-            "rat_walk",
-            "rat_attack",
-            "rat_death",
-            //bat
-            "bat_idle",
-            "bat_hurt",
-            "bat_walk",
-            "bat_attack",
-            "bat_death"
+            "Level3_BG"
+        
         ],
         "audio": [
             "BGM_L3_TESTING"

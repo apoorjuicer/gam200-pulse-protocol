@@ -20,6 +20,7 @@
 // namespace Framework {
 #include <fstream>
 #include <filesystem>
+#include <unordered_set>
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
 #include <Serialization/Serialization.h>
@@ -320,6 +321,14 @@ bool AssetsManager::UnloadSceneAssets(SceneManifest const& manifest)
         {
             std::string texPath = GetTexturePath(texId);
 
+            if (IsTextureInAnySharedGroup(texId))
+            {
+                std::cout << "  [SKIP] Shared texture remains loaded"
+                    << " | id: " << texId
+                    << " | path: " << texPath << "\n";
+                continue;
+            }
+
             if (!mGraphics->EvictTexture(texId))
             {
                 std::cout << "  [FAIL] Failed to unload texture"
@@ -488,8 +497,48 @@ bool AssetsManager::LoadSharedManifestFromFile(std::string const& path) {
 }
 
 //group name is like 
+//bool AssetsManager::LoadSharedAssets(std::string const& groupName) {
+//    namespace fs = std::filesystem;
+//
+//    if (!mSharedManifestLoaded)
+//    {
+//        fs::path sharedManifestPath = FilePathToGame / "JSON" / "SharedAssets.manifest.json";
+//
+//        if (!LoadSharedManifestFromFile(sharedManifestPath.string()))
+//        {
+//            std::cerr << "[AssetsManager] Failed to load shared manifest file.\n";
+//            return false;
+//        }
+//    }
+//
+//    auto it = mSharedManifest.groups.find(groupName);
+//    if (it == mSharedManifest.groups.end())
+//    {
+//        std::cerr << "[AssetsManager] Shared group not found: "
+//            << groupName << "\n";
+//        return false;
+//    }
+//
+//    SceneManifest tempManifest;
+//    tempManifest.sceneName = "shared:" + groupName;
+//    tempManifest.textures = it->second.textures;
+//    tempManifest.audio = it->second.audio;
+//    tempManifest.fonts = it->second.fonts;
+//    tempManifest.animations = it->second.animations;
+//
+//    std::cout << "[AssetsManager] Loading shared group: " << groupName << "\n";
+//    return PreloadSceneAssets(tempManifest);
+//}
+
 bool AssetsManager::LoadSharedAssets(std::string const& groupName) {
     namespace fs = std::filesystem;
+
+    if (IsSharedGroupLoaded(groupName))
+    {
+        std::cout << "[AssetsManager] Shared group already loaded: "
+            << groupName << "\n";
+        return true;
+    }
 
     if (!mSharedManifestLoaded)
     {
@@ -518,7 +567,14 @@ bool AssetsManager::LoadSharedAssets(std::string const& groupName) {
     tempManifest.animations = it->second.animations;
 
     std::cout << "[AssetsManager] Loading shared group: " << groupName << "\n";
-    return PreloadSceneAssets(tempManifest);
+
+    if (!PreloadSceneAssets(tempManifest))
+    {
+        return false;
+    }
+
+    MarkSharedGroupLoaded(groupName);
+    return true;
 }
 
 //
@@ -581,4 +637,32 @@ bool AssetsManager::UnloadSceneBGMOnly(SceneManifest const& manifest)
     }
 
     return allOk;
+}
+
+bool AssetsManager::IsTextureInAnySharedGroup(std::string const& texId) const
+{
+    for (auto const& [groupName, group] : mSharedManifest.groups)
+    {
+        auto it = std::find(group.textures.begin(), group.textures.end(), texId);
+        if (it != group.textures.end())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool AssetsManager::IsSharedGroupLoaded(std::string const& groupName) const
+{
+    return mLoadedSharedGroups.find(groupName) != mLoadedSharedGroups.end();
+}
+
+void AssetsManager::MarkSharedGroupLoaded(std::string const& groupName)
+{
+    mLoadedSharedGroups.insert(groupName);
+}
+
+void AssetsManager::MarkSharedGroupUnloaded(std::string const& groupName)
+{
+    mLoadedSharedGroups.erase(groupName);
 }

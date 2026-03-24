@@ -17,6 +17,7 @@
 #pragma once
 #include "pch/pch_temp.h"
 #include "Resources/AssetRegistry.h"
+#include <unordered_set>
 // #include "../Graphics/GraphicsManager.h"
 // #include "../Audio/AudioManager.h"
 #include "../Scene/SceneManifest.h"
@@ -102,11 +103,18 @@ public:
     bool IsAudioBGM(std::string const& id) const;
     bool IsAudioSFX(std::string const& id) const;
 
+    bool IsTextureInAnySharedGroup(std::string const& texId) const;
+
+    bool IsSharedGroupLoaded(std::string const& groupName) const;
+    void MarkSharedGroupLoaded(std::string const& groupName);
+    void MarkSharedGroupUnloaded(std::string const& groupName);
 private:
     AssetRegistry mRegistry; // owned
     SharedAssetsManifest mSharedManifest; //owned
     bool mSharedManifestLoaded = false;
     AudioManager* mAudio = nullptr;    // non-owning
     GraphicsManager* mGraphics = nullptr;   // non-owning
+
+    std::unordered_set<std::string> mLoadedSharedGroups;
 };
 #pragma warning(pop)
