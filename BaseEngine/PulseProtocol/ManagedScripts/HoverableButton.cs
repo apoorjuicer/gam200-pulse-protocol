@@ -346,8 +346,22 @@ public class NavigationButtons : Script
         if (s_navHandledFrame != currentFrame)
         {
             s_navHandledFrame = currentFrame;
-            bool navFwd  = input.IsGamepadButtonTriggered(GP_DPAD_DOWN)  || input.IsGamepadButtonTriggered(GP_DPAD_RIGHT);
-            bool navBack = input.IsGamepadButtonTriggered(GP_DPAD_UP)    || input.IsGamepadButtonTriggered(GP_DPAD_LEFT);
+
+            // D-pad navigation only active in menus / overlays — not during gameplay,
+            // to prevent D-pad game inputs from accidentally focusing UI buttons.
+            bool inMenuOrOverlay = realScene == "MainMenu" || realScene == "Settings" ||
+                                   realScene == "HowToPlay" ||
+                                   realScene == "LatencyCalibration" ||
+                                   realScene == "VisualLatencyCalibration" ||
+                                   ShowPauseOverlay || ShowQuitOverlay ||
+                                   ShowSettingsOverlay || ShowHowToPlayOverlay;
+
+            // Clear any lingering focus when returning to gameplay
+            if (!inMenuOrOverlay && s_focusedButton != null)
+                s_focusedButton = null;
+
+            bool navFwd  = inMenuOrOverlay && (input.IsGamepadButtonTriggered(GP_DPAD_DOWN)  || input.IsGamepadButtonTriggered(GP_DPAD_RIGHT));
+            bool navBack = inMenuOrOverlay && (input.IsGamepadButtonTriggered(GP_DPAD_UP)    || input.IsGamepadButtonTriggered(GP_DPAD_LEFT));
             if (navFwd || navBack)
             {
                 int count = s_prevCandidates.Count;
