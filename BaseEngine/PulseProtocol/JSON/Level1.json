@@ -130,7 +130,8 @@
                     "script": {
                         "ScriptName": [
                             "PlayerAnimationController",
-                            "PlayerHealth"
+                            "PlayerHealth",
+                            "Cheats"
                         ]
                     }
                 },

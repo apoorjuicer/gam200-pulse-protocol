@@ -490,7 +490,10 @@ public class EnemyRhythmController : Script
 
     private void AttackPlayer()
     {
-        if (isDead) return;
+        if (isDead || Cheats.invincible)
+        {
+            return;
+        }
 
         int attackDamage = GetHealth().damage;
         Console.WriteLine($"[Enemy] ATTACKING PLAYER for {attackDamage} damage!");
