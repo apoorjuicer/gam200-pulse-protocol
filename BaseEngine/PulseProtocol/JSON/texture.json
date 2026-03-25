@@ -493,7 +493,7 @@
             "shd_ref": 3
         },
         {
-            "id": "continue_hover_mainmenu_btn",
+            "id": "continue_mainmenu_btn_hover",
             "path": "Assets/Textures/UI/Buttons/mainmenu/continue_hover.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
@@ -509,7 +509,7 @@
             "shd_ref": 3
         },
         {
-            "id": "newgame_hover_mainmenu_btn",
+            "id": "newgame_mainmenu_btn_hover",
             "path": "Assets/Textures/UI/Buttons/mainmenu/new game_hover.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
@@ -525,7 +525,7 @@
             "shd_ref": 3
         },
         {
-            "id": "quit_hover_mainmenu_btn",
+            "id": "quit_mainmenu_btn_hover",
             "path": "Assets/Textures/UI/Buttons/mainmenu/quit_hover.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
@@ -541,7 +541,7 @@
             "shd_ref": 3
         },
         {
-            "id": "settings_hover_mainmenu_btn",
+            "id": "settings_mainmenu_btn_hover",
             "path": "Assets/Textures/UI/Buttons/mainmenu/settings_hover.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
@@ -558,7 +558,7 @@
             "shd_ref": 3
         },
         {
-            "id": "backhover_btn",
+            "id": "back_btn_hover",
             "path": "Assets/Textures/UI/Settings/back_hover.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
@@ -687,7 +687,7 @@
             "shd_ref": 3
         },
         {
-            "id": "howtoplayhover_btn",
+            "id": "howtoplay_btn_hover",
             "path": "Assets/Textures/UI/Buttons/mainmenu/HowtoPlay_hover.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
@@ -712,7 +712,7 @@
             "shd_ref": 3
         },
         {
-            "id": "quityeshover_btn",
+            "id": "quityes_btn_hover",
             "path": "Assets/Textures/UI/quitprompt/quityes_hover.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
@@ -728,7 +728,7 @@
             "shd_ref": 3
         },
         {
-            "id": "quitnohover_btn",
+            "id": "quitno_btn_hover",
             "path": "Assets/Textures/UI/quitprompt/quitno_hover.png",
             "vert_shader_path": "shader/font_vs.vert",
             "frag_shader_path": "shader/font_fs.frag",
@@ -942,7 +942,7 @@
             "shd_ref": 3
         },
         {
-            "id": "NextStagehover_btn",
+            "id": "NextStage_btn_hover",
             "path": "Assets/Textures/UI/winscreen/NextStage_hover.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
@@ -959,7 +959,7 @@
             "shd_ref": 3
         },
         {
-            "id": "homehover_btn",
+            "id": "home_btn_hover",
             "path": "Assets/Textures/UI/winscreen/home_hover.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
@@ -977,7 +977,7 @@
             "shd_ref": 3
         },
         {
-            "id": "exithover_btn",
+            "id": "exit_btn_hover",
             "path": "Assets/Textures/UI/pause/Exit_hover.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
@@ -993,7 +993,7 @@
             "shd_ref": 3
         },
         {
-            "id": "pausequithover_btn",
+            "id": "pausequit_btn_hover",
             "path": "Assets/Textures/UI/pause/pausequit_hover.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
@@ -1009,7 +1009,7 @@
             "shd_ref": 3
         },
         {
-            "id": "pauserestarthover_btn",
+            "id": "pauserestart_btn_hover",
             "path": "Assets/Textures/UI/pause/pauserestart_hover.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
@@ -1025,7 +1025,7 @@
             "shd_ref": 3
         },
         {
-            "id": "pausesettingshover_btn",
+            "id": "pausesettings_btn_hover",
             "path": "Assets/Textures/UI/pause/pausesettings_hover.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",

@@ -7,16 +7,16 @@
         "textures": [
             "MainMenu_BG",
             "continue_mainmenu_btn",
-            "continue_hover_mainmenu_btn",
+            "continue_mainmenu_btn_hover",
             "newgame_mainmenu_btn",
-            "newgame_hover_mainmenu_btn",
+            "newgame_mainmenu_btn_hover",
             "quit_mainmenu_btn",
-            "quit_hover_mainmenu_btn",
+            "quit_mainmenu_btn_hover",
             "settings_mainmenu_btn",
-            "settings_hover_mainmenu_btn",
+            "settings_mainmenu_btn_hover",
             //htp
             "howtoplay_btn",
-            "howtoplayhover_btn",
+            "howtoplay_btn_hover",
             "howtoplaypressed_btn",
             "htp_1",
             "htp_2",
@@ -40,9 +40,9 @@
             //quitprompt
             "QuitScreen_BG",
             "quityes_btn",
-            "quityeshover_btn",
+            "quityes_btn_hover",
             "quitno_btn",
-            "quitnohover_btn",
+            "quitno_btn_hover",
             //levelselect
             "levelselect_level1_Icon",
             "levelselect_level2_Icon",
