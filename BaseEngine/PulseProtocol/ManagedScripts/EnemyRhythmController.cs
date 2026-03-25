@@ -119,7 +119,7 @@ public class EnemyRhythmController : Script
             return;
         }
 
-        // ONLY FOR BEN TO TEST 
+        // ONLY FOR BEN TO TEST (Cheat code for killing enemy)
         InputComponent input = GetInput();
         if (input.IsKeyTriggered(32) && TurnManager.Instance != null && !TurnManager.Instance.IsInputLocked)
         {

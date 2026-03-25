@@ -626,7 +626,11 @@ public class NavigationButtons : Script
     Application.SetPaused(false);
 
     currentScene = nextScene;
-    Scene.LoadScene(nextScene);
+
+    // Load loading screen first then the nxt level
+    LoadingScreenScript.NextLevel = currentScene;
+    Scene.LoadScene("LoadingScreenScene");
+    //Scene.LoadScene(nextScene);
 }
 
 

@@ -111,7 +111,13 @@ public class CutscenePanel : Script
                 Console.WriteLine("[Cutscene] Skipped!");
                 sharedCutsceneFinished = true;
                 NavigationButtons.LastEnteredLevel = "Level1";
-                Scene.LoadScene("Level1");
+
+                //(Im making it load loading screen scene then after about 3 frames go 2 lvl 1)
+                // redefine this var to lvl 1 so in the LoadingScreenScript script, it will load this ltrrrrrr
+                LoadingScreenScript.NextLevel = "Level1"; 
+                Scene.LoadScene("LoadingScreenScene");
+                //Scene.LoadScene("Level1");
+
                 return;
             }
 
@@ -123,7 +129,11 @@ public class CutscenePanel : Script
                 sharedCutsceneFinished = true;
                 Console.WriteLine("[Cutscene] Complete! Loading Level1...");
                 NavigationButtons.LastEnteredLevel = "Level1";
-                Scene.LoadScene("Level1");
+
+                // Same for here, look up^^^
+                LoadingScreenScript.NextLevel = "Level1";
+                Scene.LoadScene("LoadingScreenScene");
+                //Scene.LoadScene("Level1");
                 return;
             }
         }

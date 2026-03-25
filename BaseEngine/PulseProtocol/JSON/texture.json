@@ -141,7 +141,7 @@
         //loadingscreen
         {
             "id": "loadingscreen_BG",
-            "path": "Assets/Textures/levelselect/loading_screen.png",
+            "path": "Assets/Textures/Backgrounds/loading_screen.png",
             "vert_shader_path": "shader/sprite_BG.vert",
             "frag_shader_path": "shader/sprite_BG.frag",
             "mdl_ref": 0,
