@@ -17,11 +17,12 @@ public class InputBridge : Script
     public bool DebugLogEveryFrame = false;
 
     // PS4 gamepad button constants (GLFW_GAMEPAD_BUTTON_*)
-    // Triangle(Y=3)=W, Square(X=2)=A, Cross(A=0)=S, Circle(B=1)=D
+    // Triangle(Y=3)=W, Circle(X=2)=A, Cross(A=0)=S, Square(B=1)=D
     private const int GP_TRIANGLE = 3; // W
-    private const int GP_SQUARE   = 2; // A
-    private const int GP_CROSS    = 0; // S
-    private const int GP_CIRCLE   = 1; // D
+    private const int GP_CIRCLE = 2; // A
+    private const int GP_SQUARE = 1; // D
+    private const int GP_CROSS  = 0; // S
+
 
     // =========================
     // State

@@ -19,6 +19,11 @@ public class VisualLatencyCalibrator : Script
     private const int KeyEnter = 257;
     private const int KeySpace = 32;
 
+    // Gamepad button constants
+    private const int GP_SQUARE = 2;  // confirm / start  (GLFW: Cross=0, Circle=1, Square=2, Triangle=3)
+    private const int GP_R1     = 5;  // flash earlier    (GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER)
+    private const int GP_L1     = 4;  // flash later      (GLFW_GAMEPAD_BUTTON_LEFT_BUMPER)
+
     // -------------------------------------------------------------------------
     // Internal state
     // -------------------------------------------------------------------------
@@ -33,7 +38,7 @@ public class VisualLatencyCalibrator : Script
     // Held-key auto-repeat
     private float rightHeld = 0f;
     private float leftHeld  = 0f;
-    private const float HoldDelay = 0.35f;
+    private const float HoldDelay = 0.1f;
     private const float HoldRate  = 0.06f;
 
     public override void Update()
@@ -56,7 +61,8 @@ public class VisualLatencyCalibrator : Script
         if (!adjusting)
         {
             var inp = GetInput();
-            if (inp.IsKeyTriggered(KeyEnter) || inp.IsKeyTriggered(KeySpace))
+            if (inp.IsKeyTriggered(KeyEnter) || inp.IsKeyTriggered(KeySpace)
+                || inp.IsGamepadButtonTriggered(GP_SQUARE))
             {
                 beatInterval = spb;
 
@@ -104,15 +110,15 @@ public class VisualLatencyCalibrator : Script
         float maxS  = MaxOffsetMs  / 1000f;
         var   input = GetInput();
 
-        bool rightDown = input.IsKeyPressed(KeyRight);
-        bool leftDown  = input.IsKeyPressed(KeyLeft);
+        bool rightDown = input.IsKeyPressed(KeyRight) || input.IsGamepadButtonPressed(GP_R1);
+        bool leftDown  = input.IsKeyPressed(KeyLeft)  || input.IsGamepadButtonPressed(GP_L1);
 
         rightHeld = rightDown ? rightHeld + dt : 0f;
         leftHeld  = leftDown  ? leftHeld  + dt : 0f;
 
-        bool stepRight = input.IsKeyTriggered(KeyRight)
+        bool stepRight = input.IsKeyTriggered(KeyRight) || input.IsGamepadButtonTriggered(GP_R1)
                          || (rightHeld > HoldDelay && rightHeld % HoldRate < dt);
-        bool stepLeft  = input.IsKeyTriggered(KeyLeft)
+        bool stepLeft  = input.IsKeyTriggered(KeyLeft)  || input.IsGamepadButtonTriggered(GP_L1)
                          || (leftHeld  > HoldDelay && leftHeld  % HoldRate < dt);
 
         if (stepRight)
@@ -127,7 +133,8 @@ public class VisualLatencyCalibrator : Script
         }
 
         if (timeSinceStart > 1.0f &&
-            (input.IsKeyTriggered(KeyEnter) || input.IsKeyTriggered(KeySpace)))
+            (input.IsKeyTriggered(KeyEnter) || input.IsKeyTriggered(KeySpace)
+             || input.IsGamepadButtonTriggered(GP_SQUARE)))
         {
             Conductor.CalibratedDisplayOffset       = previewOffset;
             Conductor.Instance.DisplayLatencyOffset = previewOffset;

@@ -306,7 +306,7 @@
                 },
                 {
                     "TextComponent": {
-                        "text": "Press ENTER to begin",
+                        "text": "Press ENTER/\u25A1 to begin",
                         "font_id": "barlow_semibold_font",
                         "offset": {
                             "x": 0.0,
