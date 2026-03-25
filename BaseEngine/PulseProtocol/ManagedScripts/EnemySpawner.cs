@@ -50,13 +50,23 @@ public class EnemySpawner : Script
     //     EnemyIconType.Rat
     // };
 
-    private List<EnemyIconType> EnemyContainer = new List<EnemyIconType> // chloe: i just change to rat for now since this is the reason why it wasnt spawning the next enemies
+    public string CurrentScene = "";
+    private List<EnemyIconType> EnemyContainer1 = new List<EnemyIconType> // chloe: i just change to rat for now since this is the reason why it wasnt spawning the next enemies
     {
         EnemyIconType.Rat,
         EnemyIconType.Gorilla,
         EnemyIconType.Bat,
         EnemyIconType.Rat
     };
+
+    private List<EnemyIconType> EnemyContainer2 = new List<EnemyIconType>
+    {
+        EnemyIconType.Rat,
+        EnemyIconType.Bat,
+        EnemyIconType.Gorilla,
+        EnemyIconType.Rat
+    };
+
 
     public override void Update()
     {
@@ -134,6 +144,7 @@ public class EnemySpawner : Script
         Console.WriteLine($"  Prefab: {EnemyPrefabName}");
         Console.WriteLine($"  Spawn position: ({SpawnX}, {SpawnY})");
 
+        CurrentScene = Scene.GetCurrentScene();
         SetupEnemyQueue();
 
         pendingSpawn = SpawnImmediatelyOnStart;
@@ -150,14 +161,25 @@ public class EnemySpawner : Script
         //for (int i = 0; i < totalIcons; i++)
         //    enemyQueue.Enqueue(EnemyIconType.Rat);
 
-
-
-        // use my container for the enemyQueue UI instead,cos the queue is a fking enum of int when factory takes in string
-        foreach (EnemyIconType type in EnemyContainer)
+        // Add enemy container for each lvl here VVV
+        if (CurrentScene == "Level1")
         {
-            enemyQueue.Enqueue(type);
+            // use my container for the enemyQueue UI instead,cos the queue is a fking enum of int when factory takes in string
+            foreach (EnemyIconType type in EnemyContainer1)
+            {
+                enemyQueue.Enqueue(type);
+            }
         }
-        EnemiesToSpawn = EnemyContainer.Count;
+
+        else if (CurrentScene == "Level2")
+        {
+            foreach (EnemyIconType type in EnemyContainer2)
+            {
+                enemyQueue.Enqueue(type);
+            }
+        }
+
+        EnemiesToSpawn = enemyQueue.Count();
 
         Console.WriteLine($"[EnemySpawner] Enemy queue setup with {enemyQueue.Count} enemies");
     }
