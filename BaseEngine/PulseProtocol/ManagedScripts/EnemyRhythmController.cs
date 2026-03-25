@@ -119,14 +119,6 @@ public class EnemyRhythmController : Script
             return;
         }
 
-        // ONLY FOR BEN TO TEST (Cheat code for killing enemy)
-        InputComponent input = GetInput();
-        if (input.IsKeyTriggered(32) && TurnManager.Instance != null && !TurnManager.Instance.IsInputLocked)
-        {
-            TakeDamage(10f);
-            Console.WriteLine($"TESTING!!!!!!! DO 5 damage! HP remaining: {Health}\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        }
-
         if (!playerFound)
         {
             TryFindPlayer();
