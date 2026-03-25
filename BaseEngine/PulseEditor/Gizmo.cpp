@@ -14,7 +14,7 @@
  *              Reproduction or disclosure of this file or its contents without the
  *              prior written consent of DigiPen Institute of Technology is prohibited.
  */
-/******************************************************************************/
+ /******************************************************************************/
 
 #include "pch/pch_temp.h"
 
@@ -159,10 +159,10 @@ namespace PulseEditor
         GizmoHandle activeHandle = GizmoHandle::None;
 
         // Starting values when drag began
-        glm::vec2 dragStartScreen{0, 0};
-        Vector2 dragStartWorld{0, 0};
-        Vector2 entityStartPos{0, 0};
-        Vector2 entityStartScale{0, 0};
+        glm::vec2 dragStartScreen{ 0, 0 };
+        Vector2 dragStartWorld{ 0, 0 };
+        Vector2 entityStartPos{ 0, 0 };
+        Vector2 entityStartScale{ 0, 0 };
         float entityStartRotation = 0.0f;
         float dragStartAngle = 0.0f;
 
@@ -176,12 +176,12 @@ namespace PulseEditor
     // HELPER FUNCTIONS
     // =========================================================================
 
-    static inline glm::vec2 ToGlm(const Vector2 &v) { return {v.x, v.y}; }
-    static inline Vector2 ToV2(const glm::vec2 &v) { return {v.x, v.y}; }
+    static inline glm::vec2 ToGlm(const Vector2& v) { return { v.x, v.y }; }
+    static inline Vector2 ToV2(const glm::vec2& v) { return { v.x, v.y }; }
 
     // Compute letterboxed game draw rectangle (uses GLApp values)
-    static void ComputeGameDrawRect(const GameViewport &vp, float &drawX, float &drawY,
-                                    float &drawW, float &drawH, float &scale)
+    static void ComputeGameDrawRect(const GameViewport& vp, float& drawX, float& drawY,
+        float& drawW, float& drawH, float& scale)
     {
         const float worldW = GetWorldWidth();
         const float worldH = GetWorldHeight();
@@ -196,13 +196,13 @@ namespace PulseEditor
     }
 
     // Point in rectangle check
-    static bool PointInRect(const glm::vec2 &pt, const glm::vec2 &min, const glm::vec2 &max)
+    static bool PointInRect(const glm::vec2& pt, const glm::vec2& min, const glm::vec2& max)
     {
         return pt.x >= min.x && pt.x <= max.x && pt.y >= min.y && pt.y <= max.y;
     }
 
     // Point near line segment check
-    static bool PointNearLine(const glm::vec2 &pt, const glm::vec2 &a, const glm::vec2 &b, float threshold)
+    static bool PointNearLine(const glm::vec2& pt, const glm::vec2& a, const glm::vec2& b, float threshold)
     {
         glm::vec2 ab = b - a;
         glm::vec2 ap = pt - a;
@@ -215,14 +215,14 @@ namespace PulseEditor
     }
 
     // Point near circle check
-    static bool PointNearCircle(const glm::vec2 &pt, const glm::vec2 &center, float radius, float thickness)
+    static bool PointNearCircle(const glm::vec2& pt, const glm::vec2& center, float radius, float thickness)
     {
         float dist = glm::length(pt - center);
         return dist >= (radius - thickness) && dist <= (radius + thickness);
     }
 
     // Get angle from center to point
-    static float GetAngle(const glm::vec2 &center, const glm::vec2 &pt)
+    static float GetAngle(const glm::vec2& center, const glm::vec2& pt)
     {
         return std::atan2(pt.y - center.y, pt.x - center.x);
     }
@@ -241,7 +241,7 @@ namespace PulseEditor
     // WORLD <-> SCREEN CONVERSION
     // =========================================================================
 
-    glm::vec2 WorldToScreen(const Vector2 &wpos, const GameViewport &vp)
+    glm::vec2 WorldToScreen(const Vector2& wpos, const GameViewport& vp)
     {
         const float worldW = GetWorldWidth();
         const float worldH = GetWorldHeight();
@@ -256,10 +256,10 @@ namespace PulseEditor
 
         const float x = drawX + (ndc.x * 0.5f + 0.5f) * drawW;
         const float y = drawY + (1.0f - (ndc.y * 0.5f + 0.5f)) * drawH;
-        return {x, y};
+        return { x, y };
     }
 
-    Vector2 ScreenToWorld(glm::vec2 screen, const GameViewport &vp)
+    Vector2 ScreenToWorld(glm::vec2 screen, const GameViewport& vp)
     {
         const float worldW = GetWorldWidth();
         const float worldH = GetWorldHeight();
@@ -277,7 +277,7 @@ namespace PulseEditor
         const glm::mat3 invAll = glm::inverse(Cam * N);
 
         const glm::vec3 w = invAll * ndc;
-        return Vector2{w.x, w.y};
+        return Vector2{ w.x, w.y };
     }
 
     // =========================================================================
@@ -285,8 +285,8 @@ namespace PulseEditor
     // =========================================================================
 
     // Draw arrow (for move gizmo)
-    static void DrawArrow(ImDrawList *dl, const glm::vec2 &from, const glm::vec2 &to,
-                          ImU32 color, float thickness, float headSize, float uiScale)
+    static void DrawArrow(ImDrawList* dl, const glm::vec2& from, const glm::vec2& to,
+        ImU32 color, float thickness, float headSize, float uiScale)
     {
         ImVec2 f(from.x / uiScale, from.y / uiScale);
         ImVec2 t(to.x / uiScale, to.y / uiScale);
@@ -309,8 +309,8 @@ namespace PulseEditor
     }
 
     // Draw move gizmo (Unity-style arrows)
-    static GizmoHandle DrawMoveGizmo(ImDrawList *dl, const glm::vec2 &center,
-                                     const glm::vec2 &mouse, float uiScale)
+    static GizmoHandle DrawMoveGizmo(ImDrawList* dl, const glm::vec2& center,
+        const glm::vec2& mouse, float uiScale)
     {
         using namespace GizmoConfig;
         GizmoHandle hovered = GizmoHandle::None;
@@ -359,8 +359,8 @@ namespace PulseEditor
     }
 
     // Draw scale gizmo (Unity-style boxes)
-    static GizmoHandle DrawScaleGizmo(ImDrawList *dl, const glm::vec2 &center,
-                                      const glm::vec2 &mouse, float uiScale)
+    static GizmoHandle DrawScaleGizmo(ImDrawList* dl, const glm::vec2& center,
+        const glm::vec2& mouse, float uiScale)
     {
         using namespace GizmoConfig;
         GizmoHandle hovered = GizmoHandle::None;
@@ -384,9 +384,9 @@ namespace PulseEditor
 
         // Check hover
         bool hoverX = PointInRect(mouse, xBoxMin, xBoxMax) ||
-                      PointNearLine(mouse, center, xEnd, HIT_PADDING);
+            PointNearLine(mouse, center, xEnd, HIT_PADDING);
         bool hoverY = PointInRect(mouse, yBoxMin, yBoxMax) ||
-                      PointNearLine(mouse, center, yEnd, HIT_PADDING);
+            PointNearLine(mouse, center, yEnd, HIT_PADDING);
         bool hoverCenter = PointInRect(mouse, centerMin, centerMax);
 
         if (hoverCenter)
@@ -429,8 +429,8 @@ namespace PulseEditor
     }
 
     // Draw rotate gizmo (Unity-style ring)
-    static GizmoHandle DrawRotateGizmo(ImDrawList *dl, const glm::vec2 &center,
-                                       const glm::vec2 &mouse, float uiScale)
+    static GizmoHandle DrawRotateGizmo(ImDrawList* dl, const glm::vec2& center,
+        const glm::vec2& mouse, float uiScale)
     {
         using namespace GizmoConfig;
         GizmoHandle hovered = GizmoHandle::None;
@@ -464,63 +464,75 @@ namespace PulseEditor
         return hovered;
     }
 
-    // Draw mode indicator (top-left corner)
-    static void DrawModeIndicator()
+    // [CHANGED] Replaced the floating tool panel with a tiny non-interactive
+    // mode label. The user switches modes with 1/2/3 keys. The label just
+    // confirms which mode is currently active without cluttering the viewport.
+    static void DrawModeIndicator(const GameViewport& vp)
     {
-        ImGui::SetNextWindowPos(ImVec2(10, 60), ImGuiCond_Always);
-        ImGui::SetNextWindowBgAlpha(0.75f);
+        // vp.x/y are in framebuffer pixels — divide by DPI scale to get ImGui logical pixels
+        ImGuiIO& io = ImGui::GetIO();
+        const float sx_ui = io.DisplayFramebufferScale.x > 0.f ? io.DisplayFramebufferScale.x : 1.f;
 
-        ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration |
-                                 ImGuiWindowFlags_AlwaysAutoResize |
-                                 ImGuiWindowFlags_NoSavedSettings |
-                                 ImGuiWindowFlags_NoFocusOnAppearing |
-                                 ImGuiWindowFlags_NoNav |
-                                 ImGuiWindowFlags_NoMove;
+        // Position in the top-left corner of the viewport, not the screen
+        ImGui::SetNextWindowPos(ImVec2(vp.x / sx_ui + 8.0f, vp.y / sx_ui + 8.0f), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowBgAlpha(0.82f);
 
-        if (ImGui::Begin("##GizmoModeIndicator", nullptr, flags))
+        // [CHANGED] Removed NoDecoration and NoMove so the panel has a title bar
+        // with a collapse arrow (user can minimize it) and can be dragged anywhere
+        // in the viewport. NoInputs also removed so buttons remain clickable.
+        ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize |
+            ImGuiWindowFlags_NoSavedSettings |
+            ImGuiWindowFlags_NoFocusOnAppearing |
+            ImGuiWindowFlags_NoNav;
+
+        if (ImGui::Begin("Gizmo Controls##GizmoModeIndicator", nullptr, flags))
         {
-            // Mode buttons (Unity-style toolbar)
-            const char *icons[] = {"1", "2", "3"};
-            const char *tooltips[] = {"Move Tool (1)", "Scale Tool (2)", "Rotate Tool (3)"};
-            GizmoMode modes[] = {GizmoMode::Move, GizmoMode::Scale, GizmoMode::Rotate};
+            struct ToolDef {
+                GizmoMode mode;
+                const char* icon;
+                const char* label;
+                const char* key;
+                ImVec4 activeColor;
+            };
 
-            for (int i = 0; i < 3; ++i)
+            ToolDef tools[] = {
+                { GizmoMode::Move,   "->", "Move",   "[1]", ImVec4(1.0f, 0.85f, 0.25f, 1.0f) },
+                { GizmoMode::Scale,  "<>", "Scale",  "[2]", ImVec4(0.4f, 0.85f, 1.0f,  1.0f) },
+                { GizmoMode::Rotate, "()", "Rotate", "[3]", ImVec4(0.5f, 1.0f,  0.5f,  1.0f) },
+            };
+
+            for (auto& t : tools)
             {
-                if (i > 0)
-                    ImGui::SameLine();
-
-                bool isActive = (g_gizmo.mode == modes[i]);
-                if (isActive)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.5f, 0.8f, 1.0f));
-                }
-
-                if (ImGui::Button(icons[i], ImVec2(30, 25)))
-                {
-                    g_gizmo.mode = modes[i];
-                }
+                bool isActive = (g_gizmo.mode == t.mode);
 
                 if (isActive)
-                {
-                    ImGui::PopStyleColor();
-                }
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.42f, 0.72f, 1.0f));
+                else
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.18f, 0.18f, 0.18f, 1.0f));
 
-                if (ImGui::IsItemHovered())
+                std::string btnLabel = std::string(t.icon) + "  " + t.label + "  " + t.key
+                    + "##tool" + t.key;
+                if (ImGui::Button(btnLabel.c_str(), ImVec2(130, 26)))
+                    g_gizmo.mode = t.mode;
+
+                ImGui::PopStyleColor();
+
+                if (isActive)
                 {
-                    ImGui::SetTooltip("%s", tooltips[i]);
+                    ImVec2 min = ImGui::GetItemRectMin();
+                    ImVec2 max = ImGui::GetItemRectMax();
+                    ImGui::GetWindowDrawList()->AddLine(
+                        ImVec2(min.x, max.y - 2),
+                        ImVec2(max.x, max.y - 2),
+                        ImGui::ColorConvertFloat4ToU32(t.activeColor), 3.0f);
                 }
             }
 
-            // Current mode text
             ImGui::Separator();
-            const char *modeNames[] = {"Move", "Scale", "Rotate"};
-            ImVec4 modeColors[] = {
-                ImVec4(1.0f, 0.85f, 0.3f, 1.0f), // Yellow
-                ImVec4(0.5f, 0.8f, 1.0f, 1.0f),  // Light blue
-                ImVec4(0.3f, 0.7f, 1.0f, 1.0f)   // Blue
-            };
+            ImGui::TextColored(ImVec4(0.55f, 0.55f, 0.55f, 1.0f), "Active: ");
+            ImGui::SameLine();
             int modeIdx = static_cast<int>(g_gizmo.mode);
-            ImGui::TextColored(modeColors[modeIdx], "%s", modeNames[modeIdx]);
+            ImGui::TextColored(tools[modeIdx].activeColor, "%s", tools[modeIdx].label);
         }
         ImGui::End();
     }
@@ -643,7 +655,7 @@ namespace PulseEditor
         }
 
         // Draw mode indicator UI
-        DrawModeIndicator();
+        DrawModeIndicator(vp);
 
         // ---------------------------------------------------------------------
         // VALIDATE SELECTED ENTITY
