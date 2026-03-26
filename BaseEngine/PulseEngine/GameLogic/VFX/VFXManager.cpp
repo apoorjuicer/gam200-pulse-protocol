@@ -31,13 +31,6 @@ void VFXManager::OnBeat()
     mCamFx.AddBeatPunch(punch);
 }
 
-void VFXManager::OnJudgement(const std::string& judgement, const glm::vec2& worldPos)
-{
-    if (judgement == "PERFECT")      SpawnForPerfect(worldPos);
-    else if (judgement == "GOOD")    SpawnForGood(worldPos);
-    else                              SpawnForMiss(worldPos);
-}
-
 void VFXManager::SpawnForMiss(const glm::vec2& p)
 {
     ParticleSpawnDesc d;
