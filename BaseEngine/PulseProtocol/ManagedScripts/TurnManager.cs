@@ -36,8 +36,11 @@ public class TurnManager : Script
     // Config
     // =========================
     public int CountdownBeats = 4;
-    public int EnemyDisplayBeats = 5;  // with -1 backdating: transition beat + 3 more = 4 beats total. First key shows immediately, keys 2-4 on the next 3 beats. No idle beat at end.
-    public int PlayerInputBeats = 5;   // effective input beats   = PlayerInputBeats  - 1 = 4 (phaseStartBeat backdated by -1)
+    public int EnemyDisplayBeats = 5;  // with -1 backdating: 4 enemy key beats + 1 dedicated player-turn-start beat.
+    public int PlayerInputBeats = 5;   // with -1 backdating: beats 2-5 flash slots 0-3, beat 5 also resolves.
+
+    public string EnemyTurnSFX = "SFX_Enemy_Ping";
+    public string PlayerTurnSFX = "SFX_Player_Ping";
 
     // =========================
     // State
@@ -130,6 +133,23 @@ public class TurnManager : Script
                 break;
 
             case TurnPhase.PlayerInput:
+                // Flash outline for the current slot — runs even on the resolution beat
+                // so slot 3 flashes at the same time as resolution (no extra beat)
+                {
+                    int slotToFlash = beatsInPhase - 2; // beatsInPhase=1 is prep/transition, skip it
+                    if (slotToFlash >= 0 && slotToFlash < 4)
+                    {
+                        float beatDur = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat : 0.5f;
+                        PlayerSlotBeatPulse.TriggerFlash(slotToFlash, beatDur);          // gold colour
+                        PlayerSlotBeatPulse.TriggerScale(slotToFlash, beatDur);          // moderate scale (default 0.3)
+                        ComboDisplayManager.TriggerPlayerSlotPulse(slotToFlash, beatDur); // question mark scale
+                    }
+
+                    // Beat 6 (beatsInPhase=2): switch announcer from GET READY to INPUT NOW
+                    if (beatsInPhase == 2)
+                        TurnAnnouncerUI.Instance?.ShowGo();
+                }
+
                 if (beatsInPhase >= PlayerInputBeats)
                 {
                     ResolvePlayerInput();
@@ -180,6 +200,9 @@ public class TurnManager : Script
         // accidentally match a beat in the new session and block the first key press.
         ComboSystem.Instance?.ResetCombo();
 
+        // Reset static slot detection so new instances can re-register on level reload.
+        PlayerSlotBeatPulse.ResetDetection();
+
         Console.WriteLine("[TurnManager] Initializing...");
 
         if (Conductor.Instance != null)
@@ -205,9 +228,8 @@ public class TurnManager : Script
         Console.WriteLine($"[TurnManager] Displaying combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input LOCKED");
 
-        // AudioComponent audio = GetAudio();
-        // audio.PlaySFX("SFX_Enemy_Ping");
-       
+        GetAudio().PlaySFX(EnemyTurnSFX);
+
         if (ComboSystem.Instance != null)
         {
             ComboSystem.Instance.ResetCombo();
@@ -235,14 +257,21 @@ public class TurnManager : Script
         Console.WriteLine($"[TurnManager] Input the combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input UNLOCKED");
 
-        // AudioComponent audio = GetAudio();
-        // audio.PlaySFX("SFX_Player_Ping");
+        GetAudio().PlaySFX(PlayerTurnSFX);
 
         // Enemy freezes during player input (handled in EnemyRhythmController.HandleBeat)
 
         // Just fade out enemy slots, don't stop the reveal
         if (ComboDisplayManager.Instance != null)
             ComboDisplayManager.Instance.FadeOutEnemySlots();
+
+        // Scale all 4 outlines simultaneously on the prep beat (mirrors question mark pop)
+        float prepDur = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat * 0.6f : 0.3f;
+        for (int i = 0; i < 4; i++)
+        {
+            PlayerSlotBeatPulse.TriggerFlash(i, prepDur);   // gold colour
+            PlayerSlotBeatPulse.TriggerScale(i, prepDur, 0.9f); // large scale
+        }
     }
 
     private void ResolvePlayerInput()

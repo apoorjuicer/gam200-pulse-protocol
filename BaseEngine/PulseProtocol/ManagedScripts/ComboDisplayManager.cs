@@ -198,10 +198,15 @@ public class ComboDisplayManager : Script
         isFadingOut = false;
         // Prime to one beat before current so the first key fires on this beat boundary,
         // keeping all keys on the same beat-gated path as keys 2-4.
-        lastRevealBeat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() - 1 : -1;
+        lastRevealBeat = Conductor.Instance != null ? Conductor.Instance.GetVisualCurrentBeat() - 1 : -1;
 
         ClearEnemySlotsInstant();
-        ClearPlayerSlots();
+        float beatDur = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat : 0.5f;
+        for (int i = 0; i < weakness.Length && i < 4; i++)
+        {
+            if (playerSlots.ContainsKey(i))
+                playerSlots[i].ShowBlankFadeToDim(weakness[i], beatDur);
+        }
 
         Console.WriteLine($"[ComboDisplayManager] Starting beat reveal for: {weakness}");
     }
@@ -229,7 +234,7 @@ public class ComboDisplayManager : Script
         if (Conductor.Instance == null) return;
 
 
-        int currentBeat = Conductor.Instance!.GetCurrentBeat();
+        int currentBeat = Conductor.Instance!.GetVisualCurrentBeat();
 
         if (currentBeat <= lastRevealBeat) return;
         lastRevealBeat = currentBeat;
@@ -299,6 +304,15 @@ public class ComboDisplayManager : Script
         }
     }
 
+    private void ShowDimmedPlayerSlots(string weakness)
+    {
+        for (int i = 0; i < weakness.Length && i < 4; i++)
+        {
+            if (playerSlots.ContainsKey(i))
+                playerSlots[i].ShowBlankDim(weakness[i]);
+        }
+    }
+
     private void ClearEnemySlotsInstant()
     {
         for (int i = 0; i < 4; i++)
@@ -311,6 +325,12 @@ public class ComboDisplayManager : Script
     // =========================
     // Helper Funcs
     // =========================
+    public static void TriggerPlayerSlotPulse(int slotIndex, float duration)
+    {
+        if (playerSlots.ContainsKey(slotIndex))
+            playerSlots[slotIndex].TriggerScalePulse(duration);
+    }
+
     public static bool IsSlotRegistered(int slotIndex, ComboKeySlot slot)
     {
         if (slot.GetIsEnemySlot())
@@ -336,15 +356,17 @@ public class ComboDisplayManager : Script
     {
         if (currentWeakness.Length == 0) return;
 
-        // isRevealing = false;
+        for (int i = 0; i < currentWeakness.Length; i++)
+        {
+            if (playerSlots.ContainsKey(i))
+                playerSlots[i].ShowBlankPop(currentWeakness[i]);
+        }
 
-        if (playerSlots.ContainsKey(0))
-            playerSlots[0].StartCountdown(currentWeakness[0]);
-
-        countdownCurrentSlot = 1;
-        isCountingDown = true;
-        lastCountdownBeat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() : -1;
+        countdownCurrentSlot = currentWeakness.Length;
+        isCountingDown = false;
         pendingCountdownStart = false;
+        lastInputProgress = 0;
+        Console.WriteLine("[ComboDisplayManager] All player slots revealed simultaneously");
     }
 
     public void FadeOutEnemySlots()

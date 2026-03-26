@@ -139,7 +139,7 @@ public class ComboSystem : Script
         float beatDuration = Conductor.Instance!.GetBeatDuration();
         // Back-date by half a frame: InputBridge detects taps one frame late (prev/cur polling),
         // so the press likely happened ~0.5 frames ago on average.
-        float currentSongTime = Conductor.Instance!.GetAdjustedSongTime();
+        float currentSongTime = Conductor.Instance!.GetVisualAdjustedSongTime();
 
         float timeSince = (currentSongTime % beatDuration + beatDuration) % beatDuration;
         float timeUntilNext = beatDuration - timeSince;
@@ -153,9 +153,10 @@ public class ComboSystem : Script
         // One-key-per-beat gate
         // =========================
         
-        int targetBeat = (timeSince <= timeUntilNext)
-            ? Conductor.Instance!.GetCurrentBeat()
-            : Conductor.Instance!.GetCurrentBeat() + 1;
+        // Always gate against the current beat — never look ahead to beat+1.
+        // Looking ahead caused wrong-key presses near the end of beat N to consume
+        // beat N+1's slot, blocking the player from pressing on the actual next beat.
+        int targetBeat = Conductor.Instance!.GetVisualCurrentBeat();
 
         if (targetBeat == lastInputBeat)
         {

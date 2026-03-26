@@ -1276,13 +1276,6 @@
                         "orderInLayer": 5,
                         "z": 0.0
                     }
-                },
-                {
-                    "Children": {
-                        "children": [
-                            39
-                        ]
-                    }
                 }
             ]
         },

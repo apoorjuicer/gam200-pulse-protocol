@@ -473,9 +473,7 @@ public class EnemyRhythmController : Script
         TransformComponent myTf = GetTransform();
         myTf.X -= StepDistance;
 
-        string stepSFX = stepSFXToggle ? "SFX_Rat_Steps_2" : "SFX_Rat_Steps_1";
         stepSFXToggle = !stepSFXToggle;
-        GetAudio().PlaySFX(stepSFX);
 
         Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}");
     }

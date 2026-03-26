@@ -65,7 +65,7 @@ public class ComboKeySlot : Script
     private bool isPopping = false;
     private float popTimer = 0f;
     public float PopDuration = 0.15f;
-    public float PopScale = 1.4f; // this is for enhancing the "pop" animation
+    public float PopScale = 1.9f; // this is for enhancing the "pop" animation
 
     // PLAYER pop animation (when correct input)
     private bool isPoppingCorrect = false;
@@ -80,6 +80,21 @@ public class ComboKeySlot : Script
     private bool isShowingCorrectHint = false;
     private float correctHintTimer = 0f;
     private char correctKey = ' ';
+
+    // Beat-synced scale pulse (triggered per-slot during player turn)
+    public  float BeatScaleAmp        = 0.3f;
+    private float _scalePulseTimer    = 0f;
+    private float _scalePulseTotalDur = 0.5f;
+
+    // Fade-in from dim (0.2) to full (1.0) when player turn starts
+    private bool  _inFadeIn       = false;
+    private float _fadeInTimer    = 0f;
+    private float _fadeInDuration = 0.5f;
+
+    // Fade-out from full (1.0) back to dim (0.2) when enemy turn resets
+    private bool  _isFadingToDim    = false;
+    private float _fadeToDimTimer   = 0f;
+    private float _fadeToDimDuration = 0.5f;
 
     // =========================
     // Update
@@ -221,6 +236,46 @@ public class ComboKeySlot : Script
             }
         }
 
+
+        // =========================
+        // Fade-in (dim → full on player turn start)
+        // =========================
+        if (_inFadeIn)
+        {
+            _fadeInTimer += Time.DeltaTime;
+            float t01 = Math.Min(_fadeInTimer / _fadeInDuration, 1f);
+            float eased = 1f - (1f - t01) * (1f - t01);
+            GetFade().SetAlpha(0.2f + 0.8f * eased);
+            if (t01 >= 1f) _inFadeIn = false;
+        }
+
+        // =========================
+        // Fade-out (full → dim on enemy turn reset)
+        // =========================
+        if (_isFadingToDim)
+        {
+            _fadeToDimTimer += Time.DeltaTime;
+            float t01 = Math.Min(_fadeToDimTimer / _fadeToDimDuration, 1f);
+            // ease-out: fast drop then settles slowly at dim
+            float eased = 1f - (1f - t01) * (1f - t01);
+            GetFade().SetAlpha(1.0f - 0.8f * eased);
+            if (t01 >= 1f) _isFadingToDim = false;
+        }
+
+        // =========================
+        // Beat scale pulse (per-slot, player turn)
+        // =========================
+        if (_scalePulseTimer > 0f && !isPopping && !isPoppingCorrect && !isScaling)
+        {
+            _scalePulseTimer -= Time.DeltaTime;
+            if (_scalePulseTimer < 0f) _scalePulseTimer = 0f;
+            float ft    = _scalePulseTimer / _scalePulseTotalDur; // always 0..1, no NaN
+            float eased = (float)System.Math.Sqrt(ft); // ease-out: holds big, eases back
+            var bt = GetTransform();
+            bt.ScaleX = baseScaleX * (1f + BeatScaleAmp * eased);
+            bt.ScaleY = baseScaleY * (1f + BeatScaleAmp * eased);
+        }
+
         // =========================
         // Display Timer
         // =========================
@@ -272,6 +327,9 @@ public class ComboKeySlot : Script
         isScaling = false;
         isShowingResult = false;
         isShowingCorrectHint = false;
+        _inFadeIn = false;
+        _isFadingToDim = false;
+        GetFade().SetAlpha(1.0f);
 
         var sprite = GetSprite();
         sprite.Texture = GetGreenSpriteForKey(key);
@@ -293,6 +351,9 @@ public class ComboKeySlot : Script
         isScaling = false;
         isShowingResult = false;
         isShowingCorrectHint = false;
+        _inFadeIn = false;
+        _isFadingToDim = false;
+        GetFade().SetAlpha(1.0f);
 
         var sprite = GetSprite();
         sprite.Texture = GetRedSpriteForKey(pressedKey);
@@ -395,6 +456,8 @@ public class ComboKeySlot : Script
         isShowingResult = false;
         isShowingCorrectHint = false;
         isPoppingCorrect = false;
+        _inFadeIn = false;
+        _isFadingToDim = false;
     }
 
     public void Hide()
@@ -445,6 +508,119 @@ public class ComboKeySlot : Script
             case 'D': return RedDSprite;
             default: return RedWSprite;
         }
+    }
+
+    // FOR PLAYER SLOTS: snap from dim to full + pop, called at player turn start
+    public void ShowBlankPop(char expectedKey)
+    {
+        if (IsEnemySlot) return;
+
+        correctKey = expectedKey;
+
+        var sprite = GetSprite();
+        if (!sprite.HasSprite()) return;
+
+        sprite.Texture = BlankSprite;
+        sprite.SetTint(1f, 1f, 1f, 1f);
+
+        var fade = GetFade();
+        fade.SetAlpha(0.2f); // start dim, fade-in to full over one beat
+
+        var transform = GetTransform();
+        transform.IsVisible = true;
+        transform.ScaleX = baseScaleX * PopScale;
+        transform.ScaleY = baseScaleY * PopScale;
+
+        isPopping = true;
+        popTimer = 0f;
+        isScaling = false;
+        isShowingResult = false;
+        isShowingCorrectHint = false;
+        isPoppingCorrect = false;
+        _isFadingToDim = false;
+
+        _fadeInDuration = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat : 0.5f;
+        _fadeInTimer = 0f;
+        _inFadeIn = true;
+    }
+
+    // FOR PLAYER SLOTS: show blank/dim during enemy turn (not yet pressable)
+    public void ShowBlankDim(char expectedKey)
+    {
+        if (IsEnemySlot) return;
+
+        correctKey = expectedKey;
+
+        var sprite = GetSprite();
+        if (!sprite.HasSprite()) return;
+
+        sprite.Texture = BlankSprite;
+        sprite.SetTint(1f, 1f, 1f, 1f);
+
+        var fade = GetFade();
+        fade.SetAlpha(0.2f); // dim — not pressable yet
+
+        var transform = GetTransform();
+        transform.IsVisible = true;
+        transform.ScaleX = baseScaleX;
+        transform.ScaleY = baseScaleY;
+
+        isPopping = false;
+        isScaling = false;
+        isShowingResult = false;
+        isShowingCorrectHint = false;
+        isPoppingCorrect = false;
+        _inFadeIn = false;
+        _isFadingToDim = false;
+    }
+
+    // FOR PLAYER SLOTS: smoothly fade from full opacity back to dim when enemy turn resets
+    public void ShowBlankFadeToDim(char expectedKey, float duration)
+    {
+        if (IsEnemySlot) return;
+
+        correctKey = expectedKey;
+
+        var sprite = GetSprite();
+        if (!sprite.HasSprite()) return;
+
+        sprite.Texture = BlankSprite;
+        sprite.SetTint(1f, 1f, 1f, 1f);
+
+        var transform = GetTransform();
+        bool wasVisible = transform.IsVisible;
+        transform.IsVisible = true;
+        transform.ScaleX = baseScaleX;
+        transform.ScaleY = baseScaleY;
+
+        isPopping = false;
+        isScaling = false;
+        isShowingResult = false;
+        isShowingCorrectHint = false;
+        isPoppingCorrect = false;
+        _inFadeIn = false;
+
+        var fade = GetFade();
+        if (wasVisible)
+        {
+            fade.SetAlpha(1.0f);
+            _fadeToDimDuration = duration;
+            _fadeToDimTimer    = 0f;
+            _isFadingToDim     = true;
+        }
+        else
+        {
+            fade.SetAlpha(0.2f);
+            _isFadingToDim = false;
+        }
+    }
+
+    // Trigger a brief scale pulse on this slot (called beat-by-beat during player turn)
+    public void TriggerScalePulse(float duration)
+    {
+        if (IsEnemySlot) return;
+        _scalePulseTotalDur = duration;
+        _scalePulseTimer    = duration;
     }
 
     // FOR ENEMY INPUT EFFECT ONLY!!!!
