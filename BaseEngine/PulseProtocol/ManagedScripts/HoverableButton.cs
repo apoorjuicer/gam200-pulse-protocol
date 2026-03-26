@@ -66,7 +66,7 @@ public class NavigationButtons : Script
     // D-pad navigation state (shared across all button instances)
     private static readonly List<NavigationButtons> s_navCandidates = new List<NavigationButtons>();
     private static readonly List<NavigationButtons> s_prevCandidates = new List<NavigationButtons>();
-    private static NavigationButtons s_focusedButton = null;
+    private static NavigationButtons? s_focusedButton = null;
     private static int s_navClearFrame   = -1;
     private static int s_navHandledFrame = -1;
 
@@ -367,7 +367,7 @@ public class NavigationButtons : Script
                 int count = s_prevCandidates.Count;
                 if (count > 0)
                 {
-                    int idx = s_prevCandidates.IndexOf(s_focusedButton);
+                    int idx = s_focusedButton != null ? s_prevCandidates.IndexOf(s_focusedButton) : -1;
                     if (idx < 0) idx = navFwd ? -1 : 0;
                     idx = navFwd ? (idx + 1) % count : (idx - 1 + count) % count;
                     s_focusedButton = s_prevCandidates[idx];
