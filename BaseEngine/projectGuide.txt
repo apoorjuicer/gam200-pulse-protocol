@@ -18,7 +18,6 @@
 
 
 [ 1. PREREQUISITES ]
-
 Visual Studio 2022:
 - Download: https://visualstudio.microsoft.com/downloads/
 - Required workload: 
@@ -48,7 +47,6 @@ Important: Do NOT download SDK or Installer - you need "Binaries" only!
 
 
 [ 2. PROJECT SETTINGS (DEBUG VS RELEASE) ]
-
 Debug Mode (Default):
 - Includes debugging symbols, slower performance
 - Console shows detailed logs
@@ -65,43 +63,52 @@ To Switch in Visual Studio:
 
 
 [ 3. EDITOR MODE VS GAME-ONLY MODE ]
+Both modes are always available in the same solution (build/PulseEngine.sln).
+No need to regenerate the solution to switch between them.
 
-Editor Mode (run_editor.bat):
+Editor Mode (PulseEditor):
 - Full level editor with ImGui interface
 - Use for: Level design, debugging, profiling
+- How to run: set PulseEditor as startup project, press F5
 
-Game-Only Mode (run_game.bat):
+Game-Only Mode (active game, e.g. PulseProtocol):
 - Game without editor UI
-- Use for: Testing gameplay, demos
+- Use for: Testing gameplay, demo video
+- How to run: set PulseProtocol as startup project, press F5
 
-Switching Between Modes:
-1. Close Visual Studio
-2. Run clean.bat
-3. Run run_editor.bat OR run_game.bat
-4. Reopen build/MyEngine.sln
+Switching Between the 2 Modes in Visual Studio:
+1. In Solution Explorer, right-click PulseEditor or PulseProtocol
+2. Select "Set as Startup Project"
+3. Press F5
 
+Note: The active game is determined by ActiveGame.json.
+If you change it, you are required to re-run run.bat to reconfigure CMake.
 
 [ 4. HOW TO BUILD ]
-
 First Time Setup:
-1. Extract BaseEngine.zip
-2. Double-click run_editor.bat (or run_game.bat)
-3. Open build/MyEngine.sln in Visual Studio 2022
-4. Startup project is already auto-set
+1. Double-click run.bat (configures CMake, builds PulseEditor, and runs it)
+3. Open build/PulseEngine.sln in Visual Studio 2022
+4. PulseEditor is already the default startup project
 5. Press F5 to build and run
+
+Running Specific Targets via run.bat:
+  run.bat                          - Editor mode (default): configure, build, run PulseEditor
+  run.bat editor [Debug|Release]   - Build and run PulseEditor
+  run.bat game   [Debug|Release]   - Build and run the active game (e.g. PulseProtocol)
+  run.bat all    [Debug|Release]   - Build all targets (nothing runs)
+  run.bat sln                      - Open build/PulseEngine.sln directly
+  run.bat clean                    - Delete entire build folder
 
 Regenerating Solution:
 1. Close Visual Studio
-2. Run clean.bat
-3. Run run_editor.bat or run_game.bat
-4. Reopen build/MyEngine.sln
+2. Run clean.bat (or: run.bat clean)
+3. Run run.bat
+4. Reopen build/PulseEngine.sln
 
 
 [ 5. BATCH FILE REFERENCE ]
-
-run_editor.bat  -  Generates solution WITH editor
-run_game.bat    -  Generates solution WITHOUT editor (game only)
-clean.bat       -  Removes build folder (run before switching modes)
+run.bat      -  All-in-one: configure, build, and run (see Section 4 for full usage)
+clean.bat    -  Removes the entire build folder
 
 [ 6. How to add scripts]
 - First, in the ManagedScripts folder, add a new .cs file. Exp: New_Script_Goes_Here.cs
