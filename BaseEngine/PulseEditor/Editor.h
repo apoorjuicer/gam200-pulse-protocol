@@ -23,6 +23,7 @@
 #include "Hierarchy.h"
 #include "Inspector.h"
 #include "TopBarPanel.h"
+#include "BuildSizeAnalyzer.h"
 #include "DebugConsole.h"
 #include "ProfilingTab.h"
 #include "LayerManagerPanel.h"

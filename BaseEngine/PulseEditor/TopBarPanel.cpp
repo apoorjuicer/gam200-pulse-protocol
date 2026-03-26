@@ -22,6 +22,7 @@
 #include "TopBarPanel.h"
 #include "Editor.h"
 #include "LayerManagerPanel.h"  // For syncing layer visibility
+#include "BuildSizeAnalyzer.h"
 #include <imgui.h>
 
 // engine headers
@@ -159,6 +160,7 @@ namespace PulseEditor
 
         ImGuiWindowFlags top_flags =
             ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_MenuBar |
             ImGuiWindowFlags_NoScrollbar |
             ImGuiWindowFlags_NoScrollWithMouse |
             ImGuiWindowFlags_NoMove |
@@ -176,6 +178,12 @@ namespace PulseEditor
         }
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
+
+        if (ImGui::BeginMenuBar())
+        {
+            DrawBuildSizeAnalyzerMenu();
+            ImGui::EndMenuBar();
+        }
 
         ImVec2 framePadding = ImGui::GetStyle().FramePadding;
         float itemSpacing = ImGui::GetStyle().ItemSpacing.x;

@@ -130,7 +130,8 @@
                     "script": {
                         "ScriptName": [
                             "PlayerAnimationController",
-                            "PlayerHealth"
+                            "PlayerHealth",
+                            "Cheats"
                         ]
                     }
                 },
@@ -705,9 +706,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseEngine/Assets/Textures/UI/pause5.png",
+                        "spriteName": "pause1",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -736,7 +737,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "PauseBackgroundAnimator"
+                            "PauseAnimatedBackground"
                         ]
                     }
                 },
@@ -771,7 +772,7 @@
                     "transform": {
                         "position": {
                             "x": -750.0,
-                            "y": -50.0
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -852,7 +853,7 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": -50.0
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 209.99998474121094,
@@ -933,7 +934,7 @@
                     "transform": {
                         "position": {
                             "x": 750.0,
-                            "y": -50.0
+                            "y": 0.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -1095,7 +1096,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": false,
+                        "visible": true,
                         "alignment": 0
                     }
                 }
@@ -1208,9 +1209,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/Characters/../Enemies/Rat_Idle_spritesheet_764x456.png",
+                        "spriteName": "rat_idle",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -3351,13 +3352,13 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "SettingsOverlay"
+                            "SettingsAnimatedBackground"
                         ]
                     }
                 },
                 {
                     "name": {
-                        "name": "BG_PlaceholderImg"
+                        "name": "SettingsMenuBG"
                     }
                 },
                 {
@@ -5089,6 +5090,57 @@
                         ],
                         "visible": true,
                         "alignment": 0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": { "x": 0.0, "y": 680.0 },
+                        "scale": { "x": 200.0, "y": 200.0 },
+                        "rotation": { "x": 0.0, "y": 0.0 },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0, "shd_ref": 0.0, "useTexture": false,
+                        "spriteName": "",
+                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
+                        "glow": { "enabled": false, "intensity": 1.0, "r": 1.0, "g": 1.0, "b": 1.0 }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0, "elapsedTime": 0.0,
+                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 1.0
+                    }
+                },
+                {
+                    "script": { "ScriptName": [ "ControllerNotification" ] }
+                },
+                {
+                    "name": { "name": "ControllerNotificationText" }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "Text", "mask": 8,
+                        "sortingLayer": 3, "orderInLayer": 10, "z": 0.0
+                    }
+                },
+                {
+                    "TextComponent": {
+                        "text": "",
+                        "font_id": "barlow_semibold_font",
+                        "offset": { "x": 0.0, "y": 0.0 },
+                        "font_size": 40.0,
+                        "color": [ 1.0, 1.0, 1.0 ],
+                        "visible": false,
+                        "alignment": 1
                     }
                 }
             ]

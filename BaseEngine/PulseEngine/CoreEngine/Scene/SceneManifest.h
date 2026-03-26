@@ -10,6 +10,7 @@ struct SceneManifest
     std::vector<std::string> audio;
     std::vector<std::string> fonts;
     std::vector<std::string> animations;
+    std::vector<std::string> sharedGroups;
      //std::vector<std::string> prefabs; 
 
     void Serialize(rapidjson::Value& out,

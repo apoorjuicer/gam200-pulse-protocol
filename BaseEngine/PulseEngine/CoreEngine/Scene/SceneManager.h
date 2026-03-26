@@ -2,8 +2,10 @@
 /**
  * @file       SceneManager.h
  * @project    Pulse Protocol
- * @author     Chia Wei Xuan Rachael - 95%
+ * @author     Chia Wei Xuan Rachael - 90%
  * @author     Goh Pin Kai (secondary) - 5%
+ * @author     Ban Kai Wei Benjamin (secondary) - 5%
+ * 
  * @brief      Scene management system that inherits from Systems base class.
  *             Provides interface for scene lifecycle operations, entity tracking,
  *             and JSON serialization of game scenes.
@@ -126,10 +128,16 @@ public:
 	// Grab SceneEentity container (for CoreEngine, Hot Reload, fill in the script again)
 	const std::vector<Entity>& GetSceneEntities() const { return SceneEntityList; }
 
+
 private:
 	std::string PreviousScene;		// For change detection in Update()
 	std::string LastScene;			// For ESC navigation - the scene we came FROM
 	std::vector<Entity> SceneEntityList;
+
+	std::filesystem::path GetManifestPathForScene(std::string const& sceneNameOrPath) const;
+	bool LoadManifestForScene(std::string const& sceneNameOrPath, SceneManifest& outManifest) const;
+	void UnloadCurrentSceneAssets();
+
 
 
 	void Deserialize(const rapidjson::Value& in);
