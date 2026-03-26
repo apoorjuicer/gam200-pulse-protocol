@@ -30,8 +30,8 @@ public class PlayerAnimationController : Script
     public int Idle2Frames = 15;
 
     public int AttackRows = 4;
-    public int AttackColumns = 4;
-    public int AttackFrames = 15;
+    public int AttackColumns = 5;
+    public int AttackFrames = 18;
 
     public int HurtRows = 4;
     public int HurtColumns = 4;
