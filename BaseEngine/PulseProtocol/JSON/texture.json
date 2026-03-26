@@ -166,7 +166,7 @@
         },
         {
             "id": "BlueGorillaEnemy",
-            "path": "Assets/Textures/Enemies/BlueGorillaEnemy.png",
+            "path": "Assets/Textures/Enemies/Gorilla/BlueGorillaEnemy.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
@@ -174,7 +174,7 @@
         },
         {
             "id": "RedGorillaEnemy",
-            "path": "Assets/Textures/Enemies/RedGorillaEnemy.png",
+            "path": "Assets/Textures/Enemies/Gorilla/RedGorillaEnemy.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,

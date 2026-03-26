@@ -261,7 +261,7 @@ void GraphicsManager::Initialize()
         else
         {
             auto baseEngineDir = currentDir;
-            while (baseEngineDir.filename() != "BaseEngine")
+            while (baseEngineDir.filename() != RootFolderName)
             {
                 auto parent = baseEngineDir.parent_path();
                 if (parent.empty() || parent == baseEngineDir)
