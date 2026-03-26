@@ -155,8 +155,7 @@ public:
     FontData const *GM_FindFont(std::string const &id) const;
     GLuint const *GM_FindTextureHandle(std::string const &id) const;
 
-    bool EvictTexture(std::string const& idOrPath);
-    bool HasTextureLoaded(std::string const& id) const;
+    bool   EvictTexture(std::string const& idOrPath);
 
     void SetRegistry(AssetRegistry* registry);
 

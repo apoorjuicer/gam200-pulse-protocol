@@ -1,6 +1,6 @@
 { //audio and font already preloaded though
     "scenemanifest": {
-        "sceneName": "LatencyCalibration",
+        "sceneId": "LatencyCalibration",
         "textures": [
             "Calibrator_BG",
             "NextStage_btn",
@@ -8,7 +8,9 @@
             "pauserestart_btn",
             "pauserestarthover_btn"
         ],
-        "audio": [],
+        "audio": [
+            "BGM_L2_TESTING"
+        ],
         "fonts": [],
         "animations": []
     }

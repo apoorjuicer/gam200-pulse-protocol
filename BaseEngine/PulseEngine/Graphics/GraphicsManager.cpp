@@ -207,14 +207,14 @@ void GraphicsManager::Initialize()
         }
     }
 
-    //if (!LoadTexturesFromRegistry())
-    //{
-    //    std::cerr << "[GraphicsManager] Failed to load some textures from asset registry.\n";
-    //}
-    //else
-    //{
-    //    std::cout << "[GraphicsManager] Successfully loaded textures from  asset registry.\n";
-    //}
+    if (!LoadTexturesFromRegistry())
+    {
+        std::cerr << "[GraphicsManager] Failed to load some textures from asset registry.\n";
+    }
+    else
+    {
+        std::cout << "[GraphicsManager] Successfully loaded textures from  asset registry.\n";
+    }
 
     // create white texture for colored quads
     InitWhiteTexture();
@@ -871,11 +871,6 @@ bool GraphicsManager::EvictTexture(std::string const& idOrPath)
     }
 
     return true;
-}
-
-bool GraphicsManager::HasTextureLoaded(std::string const& id) const
-{
-    return texHandle_key.find(id) != texHandle_key.end();
 }
 
 // std::ostream& operator<<(std::ostream& os, const FontData& fd)
