@@ -39,9 +39,6 @@
 #include "Components/DisplayName.h"
 #include "Components/EntityType.h"
 #include "Components/ParentChild.h"
-#include "StateMachine/StateMachine.h"
-#include "../../StateMachine/FSMComponent.h"
-#include "../../StateMachine/GameplayFSMSystem.h"
 
 
 #include "Audio/AudioSource.h"
@@ -850,8 +847,6 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<LogicComponent>();
 	g_coordinator->RegisterComponent<PrefabInstance>();
 	g_coordinator->RegisterComponent<NamingComponent>();
-	g_coordinator->RegisterComponent<FSMComponent>();
-	g_coordinator->RegisterComponent<FSM>();
 
 	// Register your systems here, ORDER = UPDATE ORDER every frame
 	// 1. Input   -read raw input first
@@ -867,7 +862,6 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<CollisionManager>();
 	g_coordinator->RegisterSystem<SceneManager>();
-	g_coordinator->RegisterSystem<GameplayFSMSystem>();
 
 	// for clearing script when scene change. pass an instance of scenemanager
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
@@ -879,13 +873,6 @@ void CoreEngine::Setup()
 	collisionSig.set(g_coordinator->GetComponentType<AABB>());
 	collisionSig.set(g_coordinator->GetComponentType<Health>());
 	g_coordinator->SetSystemSignature<CollisionManager>(collisionSig);
-
-	Signature fsmSig;
-	//fsmSig.set(g_coordinator->GetComponentType<FSMComponent>());
-	fsmSig.set(g_coordinator->GetComponentType<FSM>());
-	fsmSig.set(g_coordinator->GetComponentType<Health>());
-	fsmSig.set(g_coordinator->GetComponentType<Framework::Transform>());
-	g_coordinator->SetSystemSignature<GameplayFSMSystem>(fsmSig);
 
 	Signature inputSig;
 	inputSig.set(g_coordinator->GetComponentType<Framework::Transform>());

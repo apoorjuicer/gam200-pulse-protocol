@@ -151,12 +151,6 @@ public class TestScript2 : Script
         Vector2 max = Vector2.Max(a, b);
         Console.WriteLine($"Min: ({min.X}, {min.Y}) vs (1, 2)\n");
         Console.WriteLine($"Max: ({max.X}, {max.Y}) vs (3, 4)\n");
-        FSMComponentAPI fsm = GetFSM();
-        //Console.WriteLine($" State: {fsm.GetState()}");
-        fsm.RequestMove(true);
-        fsm.RequestAttack();
-        fsm.NotifyDamage();
-        fsm.ClearRequests();
 
     }
 }
