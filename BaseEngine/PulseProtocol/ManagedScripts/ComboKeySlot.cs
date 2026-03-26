@@ -4,9 +4,11 @@
 * @project     Pulse Protocol
 * @author      Carrie Lam (70%)
 *              Chloe Lau (30%)
-* @brief       Represents a single key slot in the combo UI, handling sprite
-*              detection, registration, and animations for enemy reveals and
-*              player input feedback (correct, wrong, countdown, pop effects).
+* @brief       Represents a single key slot in the combo UI, handling sprite detection,
+*              registration, and animations for enemy reveals and player input feedback
+*              (correct, wrong, countdown, pop effects). Extended with dim-always-visible
+*              behaviour (0.2 alpha during enemy turn), fade-in on player turn start,
+*              fade-out back to dim on enemy turn reset, and per-slot beat scale pulse.
 *
 * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the

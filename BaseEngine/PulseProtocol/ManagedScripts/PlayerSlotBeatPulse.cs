@@ -1,3 +1,16 @@
+/******************************************************************************/
+/**
+* @file        PlayerSlotBeatPulse.cs
+* @project     Pulse Protocol
+* @author      Chloe Lau Rey En
+* @brief       Handles per-slot gold colour flash and scale pulse on the player
+*              input key slot outlines, triggered externally by beat events in TurnManager.
+*
+* @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+*              Reproduction or disclosure of this file or its contents without the
+*              prior written consent of DigiPen Institute of Technology is prohibited.
+*
+/******************************************************************************/
 using System;
 using System.Collections.Generic;
 using ScriptAPI;

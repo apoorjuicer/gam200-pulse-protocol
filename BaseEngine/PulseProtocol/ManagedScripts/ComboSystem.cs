@@ -1,4 +1,20 @@
-﻿using System;
+﻿/******************************************************************************/
+/**
+* @file        ComboSystem.cs
+* @project     Pulse Protocol
+* @author      Carrie Lam (70%)
+*              Chloe Lau (30%)
+* @brief       Validates player key input against the enemy weakness combo, 
+*              handling beat-timing judgement (PERFECT/GREAT/MISS) and one-key-per-beat
+*              gating.
+*
+* @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+*              Reproduction or disclosure of this file or its contents without the
+*              prior written consent of DigiPen Institute of Technology is prohibited.
+*
+/******************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using ScriptAPI;
 

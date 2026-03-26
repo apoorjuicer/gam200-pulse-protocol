@@ -1,3 +1,19 @@
+/******************************************************************************/
+/**
+* @file        TurnAnnouncer.cs
+* @project     Pulse Protocol
+* @author      Carrie Lam (70%)
+*              Chloe Lau (30%)
+* @brief       Displays phase announcer text with beat-synced animations to cue
+*              the player on the current turn state: static "MEMORIZE!" during
+*              enemy turn, pulsing brightness "GET READY..." on the prep beat,
+*              and a scale-pop "INPUT NOW!" when player input opens.
+*
+* @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+*              Reproduction or disclosure of this file or its contents without the
+*              prior written consent of DigiPen Institute of Technology is prohibited.
+*
+/******************************************************************************/
 using System;
 using ScriptAPI;
 

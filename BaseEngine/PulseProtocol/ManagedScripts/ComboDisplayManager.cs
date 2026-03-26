@@ -4,8 +4,10 @@
 * @project     Pulse Protocol
 * @author      Carrie Lam (70%)
 *              Chloe Lau (30%)
-* @brief       Manages beat-synced reveal, staggered fade-out, and player input
-*              feedback for combo key slot UI during enemy encounters.
+* @brief       Manages beat-synced reveal, staggered fade-out, and player input feedback
+*              for combo key slot UI during enemy encounters. Updated to keep player
+*              slots dimly visible during enemy turn instead of hiding them, with smooth fade
+*              transitions between turn phases and per-slot question mark scale pulse support.
 *
 * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the

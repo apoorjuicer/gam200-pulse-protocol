@@ -6,7 +6,10 @@
 *              Chloe Lau (30%)
 * @brief       Controls the beat-driven turn loop between enemy and player phases
 *              (Countdown, EnemyDisplay, PlayerInput, Resolution), coordinating
-*              phase transitions and combo resolution each session.
+*              phase transitions and combo resolution each session. Extended to
+*              drive beat-synced outline flash and scale pulses, with a large
+*              simultaneous pop on the prep beat and per-slot staggered pulses
+*              during player input beats.
 *
 * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the
