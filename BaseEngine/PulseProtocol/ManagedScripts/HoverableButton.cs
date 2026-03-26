@@ -697,7 +697,12 @@ public class NavigationButtons : Script
                 VisualLatencyCalibrator.Instance?.Reset();
                 return;
             }
-            Scene.RestartScene();
+            //Scene.RestartScene();
+
+            // make it load loading screen when we restart instead of it freezing at the pause menu
+            LoadingScreenScript.NextLevel = Scene.GetCurrentScene();
+            Scene.LoadScene("LoadingScreenScene");
+
             return;
         }
 
