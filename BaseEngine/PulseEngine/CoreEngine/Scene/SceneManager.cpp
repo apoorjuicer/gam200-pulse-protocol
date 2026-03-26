@@ -37,7 +37,6 @@
 #include "Components/EntityType.h"
 #include "Components/ParentChild.h"
 #include "Components/DisplayName.h"
-#include "StateMachine/StateMachine.h"
 #include "CoreEngine/Factory/Factory.h"
 #include "CoreEngine/Core/CoreEngine.h" // for FilePathToGame
 //#include "CoreEngine/Core/CoreEngine.h"  // For GetFunctionPtr
@@ -309,17 +308,6 @@ void SceneManager::SaveCurrentScene()
 			componentsArray.PushBack(ComponentObj, alloc);
 		}
 
-		if (g_coordinator->HasComponent<FSM>(entity))
-		{
-			Value ComponentObj(rapidjson::kObjectType);
-			Value FSMVal;
-
-			auto& fsm = g_coordinator->GetComponent<FSM>(entity);
-			fsm.Serialize(FSMVal, alloc);
-
-			ComponentObj.AddMember("State", FSMVal, alloc);
-			componentsArray.PushBack(ComponentObj, alloc);
-		}
 
 		if (g_coordinator->HasComponent<Name>(entity))
 		{
@@ -756,24 +744,6 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 				LogicComponent l;
 				l.Deserialize(component["script"]);
 				g_coordinator->AddComponent<LogicComponent>(entity, l);
-			}
-
-			if (component.HasMember("State") && component["State"].IsObject())
-			{
-				FSM f;
-				f.Deserialize(component["State"]);
-
-				std::cout << "[Factory] Loaded FSM - CurrentState: "
-					<< static_cast<int>(f.CurrentState) << std::endl;
-
-				g_coordinator->AddComponent<FSM>(entity, f);
-
-				if (g_coordinator->HasComponent<FSM>(entity))
-				{
-					auto& fsm = g_coordinator->GetComponent<FSM>(entity);
-					std::cout << "[Factory] FSM component added successfully! State: "
-						<< static_cast<int>(fsm.CurrentState) << std::endl;
-				}
 			}
 
 			if (component.HasMember("name") && component["name"].IsObject())

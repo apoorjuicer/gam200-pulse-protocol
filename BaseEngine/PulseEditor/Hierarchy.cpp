@@ -38,7 +38,7 @@
 
 namespace PulseEditor
 {
-    
+
     // -------------------------------------------------------------------------
     // CONFIGURATION CONSTANTS (Change these to customize behavior)
     // -------------------------------------------------------------------------
@@ -69,9 +69,27 @@ namespace PulseEditor
         char renameBuffer[256] = "";
         bool justStartedRenaming = false;
         Name beforeEdit{};
+        // [ADDED] True when the user tried to confirm a name already used by
+        // another entity. Keeps the input open and shows a red warning.
+        bool showDuplicateWarning = false;
     };
 
     static RenameState s_renameState;
+
+    // Returns true if any other alive entity already uses this name.
+    static bool NameAlreadyExists(const std::string& name, Entity excludeEntity)
+    {
+        auto* g = Coordinator::GetInstance();
+        if (!g) return false;
+        for (Entity e : g->GetAllEntities())
+        {
+            if (e == excludeEntity) continue;
+            if (!g->IsAlive(e)) continue;
+            if (g->HasComponent<Name>(e) && g->GetComponent<Name>(e).name == name)
+                return true;
+        }
+        return false;
+    }
 
     // -------------------------------------------------------------------------
     // HELPER FUNCTIONS
@@ -175,7 +193,7 @@ namespace PulseEditor
             s_renameState.renamingEntity = entity;
             //Undo name
             s_renameState.beforeEdit = g_coordinator->GetComponent<Name>(entity);
-            std::cout << "[Hierarchy RENAME] before : " << s_renameState.beforeEdit.name <<"\n";
+            std::cout << "[Hierarchy RENAME] before : " << s_renameState.beforeEdit.name << "\n";
             std::string currentName = g_coordinator->GetComponent<Name>(entity).name;
             std::strncpy(s_renameState.renameBuffer, currentName.c_str(), sizeof(s_renameState.renameBuffer) - 1);
             s_renameState.renameBuffer[sizeof(s_renameState.renameBuffer) - 1] = '\0';
@@ -194,6 +212,17 @@ namespace PulseEditor
                 std::string newName = s_renameState.renameBuffer;
                 if (!newName.empty())
                 {
+                    // Block save if the name already belongs to another entity.
+                    // Keep the input open with a red warning until they fix it.
+                    if (NameAlreadyExists(newName, s_renameState.renamingEntity))
+                    {
+                        s_renameState.showDuplicateWarning = true;
+                        s_renameState.justStartedRenaming = true; // re-focus input
+                        return; // do NOT close or save
+                    }
+
+                    s_renameState.showDuplicateWarning = false;
+
                     //Undo name
                     Name after;
                     after.name = newName;
@@ -221,6 +250,7 @@ namespace PulseEditor
         s_renameState.renamingEntity = INVALID_ENTITY;
         s_renameState.renameBuffer[0] = '\0';
         s_renameState.justStartedRenaming = false;
+        s_renameState.showDuplicateWarning = false;
     }
 
     // =====================================================
@@ -332,6 +362,14 @@ namespace PulseEditor
         // ═══════════════════════════════════════════════════════════════════════
         if (isRenaming)
         {
+            // Live duplicate check — tint the input red while typing a taken name
+            std::string currentBuffer = s_renameState.renameBuffer;
+            bool isDuplicate = !currentBuffer.empty()
+                && NameAlreadyExists(currentBuffer, s_renameState.renamingEntity);
+
+            if (isDuplicate)
+                ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.55f, 0.1f, 0.1f, 1.0f));
+
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 
             if (s_renameState.justStartedRenaming)
@@ -349,6 +387,13 @@ namespace PulseEditor
             {
                 FinishRenaming(true);
             }
+
+            if (isDuplicate)
+                ImGui::PopStyleColor();
+
+            // Red warning text below the input when name is taken
+            if (isDuplicate)
+                ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "Name already exists!");
 
             if (ImGui::IsKeyPressed(ImGuiKey_Escape))
             {
@@ -607,14 +652,14 @@ namespace PulseEditor
             //Factory factory;
             selectedHandle = PushCreateDefault(mUndo, Editorfactory, entityDisplayOrder, handleOf);
             selectedEntity = selectedHandle ? selectedHandle->id : INVALID_ENTITY;
-           // Entity newEntity = factory.DefaultObj();
-            //if (newEntity != INVALID_ENTITY)
-            //{
-            //    //entityDisplayOrder.push_back(newEntity);
-            //    //selectedEntity = newEntity;
+            // Entity newEntity = factory.DefaultObj();
+             //if (newEntity != INVALID_ENTITY)
+             //{
+             //    //entityDisplayOrder.push_back(newEntity);
+             //    //selectedEntity = newEntity;
 
-            //    selectedHandle = PushCreateDefault(mUndo, factory, entityDisplayOrder);
-            //}
+             //    selectedHandle = PushCreateDefault(mUndo, factory, entityDisplayOrder);
+             //}
         }
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("Create Empty GameObject");
@@ -632,16 +677,16 @@ namespace PulseEditor
         {
             if (selectedHandle && selectedHandle->id != INVALID_ENTITY)
             {
-               // Entity toDelete = selectedEntity;
+                // Entity toDelete = selectedEntity;
 
-               // // Collect the whole subtree (root + all descendants)
-               // std::vector<Entity> entitiesToDelete;
-               // HierarchyHelpers::PrepareDeleteWithChildren(toDelete, entitiesToDelete);
+                // // Collect the whole subtree (root + all descendants)
+                // std::vector<Entity> entitiesToDelete;
+                // HierarchyHelpers::PrepareDeleteWithChildren(toDelete, entitiesToDelete);
 
-               //// Factory factory;
-               // PushDeleteEntity(mUndo, Editorfactory, entityDisplayOrder, selectedHandle, handleOf);
-               // selectedHandle.reset();
-               // selectedEntity = INVALID_ENTITY;
+                //// Factory factory;
+                // PushDeleteEntity(mUndo, Editorfactory, entityDisplayOrder, selectedHandle, handleOf);
+                // selectedHandle.reset();
+                // selectedEntity = INVALID_ENTITY;
 
                 PushDeleteSubtree(mUndo, Editorfactory, entityDisplayOrder, handleOf,
                     selectedEntity, selectedEntity, selectedHandle);
@@ -759,4 +804,4 @@ namespace PulseEditor
     }
 
 
-}// end of namespace
+}

@@ -39,9 +39,6 @@
 #include "Components/DisplayName.h"
 #include "Components/EntityType.h"
 #include "Components/ParentChild.h"
-#include "StateMachine/StateMachine.h"
-#include "../../StateMachine/FSMComponent.h"
-#include "../../StateMachine/GameplayFSMSystem.h"
 
 
 #include "Audio/AudioSource.h"
@@ -850,8 +847,6 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterComponent<LogicComponent>();
 	g_coordinator->RegisterComponent<PrefabInstance>();
 	g_coordinator->RegisterComponent<NamingComponent>();
-	g_coordinator->RegisterComponent<FSMComponent>();
-	g_coordinator->RegisterComponent<FSM>();
 
 	// Register your systems here, ORDER = UPDATE ORDER every frame
 	// 1. Input   -read raw input first
@@ -867,7 +862,6 @@ void CoreEngine::Setup()
 	g_coordinator->RegisterSystem<AudioManager>();
 	g_coordinator->RegisterSystem<CollisionManager>();
 	g_coordinator->RegisterSystem<SceneManager>();
-	g_coordinator->RegisterSystem<GameplayFSMSystem>();
 
 	// for clearing script when scene change. pass an instance of scenemanager
 	auto sceneManager = g_coordinator->GetSystem<SceneManager>();
@@ -879,13 +873,6 @@ void CoreEngine::Setup()
 	collisionSig.set(g_coordinator->GetComponentType<AABB>());
 	collisionSig.set(g_coordinator->GetComponentType<Health>());
 	g_coordinator->SetSystemSignature<CollisionManager>(collisionSig);
-
-	Signature fsmSig;
-	//fsmSig.set(g_coordinator->GetComponentType<FSMComponent>());
-	fsmSig.set(g_coordinator->GetComponentType<FSM>());
-	fsmSig.set(g_coordinator->GetComponentType<Health>());
-	fsmSig.set(g_coordinator->GetComponentType<Framework::Transform>());
-	g_coordinator->SetSystemSignature<GameplayFSMSystem>(fsmSig);
 
 	Signature inputSig;
 	inputSig.set(g_coordinator->GetComponentType<Framework::Transform>());
@@ -1131,16 +1118,17 @@ void CoreEngine::RenderDebugDraw()
 	if (!g_inputSystem)
 		return;
 
-	const float aspect = (WindowHeight > 0)
-		? static_cast<float>(WindowWidth) / static_cast<float>(WindowHeight)
-		: (16.0f / 9.0f);
+	// Match the camera used by sprite rendering so debug boxes align with sprites.
+	// Sprites are drawn with ZoomNDC applied in NDC space (zoom * ndc + center_ndc),
+	// so the equivalent ortho half-extents are VIRTUAL / (2 * zoom), and the ortho
+	// center in world space is -(cam.center_ndc * halfExtent).
+	const auto& cam = Framework::GameState::IsPlaying() ? GLApp::gGameCamera : GLApp::gEditorCamera;
+	const float halfW = static_cast<float>(GLApp::VIRTUAL_W) / (2.0f * cam.zoom);
+	const float halfH = static_cast<float>(GLApp::VIRTUAL_H) / (2.0f * cam.zoom);
+	const float cx = -cam.center.x * halfW;
+	const float cy = -cam.center.y * halfH;
 
-	// reference world height
-	const float worldH = 900.0f;
-	const float worldW = worldH * aspect;
-
-	glm::mat4 projection = glm::ortho(-worldW * 0.5f, worldW * 0.5f,
-		-worldH * 0.5f, worldH * 0.5f);
+	glm::mat4 projection = glm::ortho(cx - halfW, cx + halfW, cy - halfH, cy + halfH);
 	DebugDraw::Begin(projection);
 
 	// --- VFX Particles ---
@@ -1225,12 +1213,23 @@ void CoreEngine::RenderDebugDraw()
 		}
 	}
 
+	DebugDraw::End(); // end world-space pass (F1-F6, particles)
+
 	// F7 - Collision AABB Debug
+	// Uses the sprite's own mdl_to_ndc_xform so the box perfectly tracks the sprite.
+	// AABB min/max are stored in /50 design units (50 units = one Scale dimension),
+	// which equals model-space when divided by 50 (model quad is -0.5..0.5).
+	// We submit pre-computed NDC positions, so DebugDraw uses an identity MVP.
 	if (g_inputSystem->isDebugCollisionEnabled())
 	{
+		DebugDraw::Begin(glm::mat4(1.0f)); // identity — vertices already in NDC
+
 		auto collisionSystem = g_coordinator->GetSystem<CollisionManager>();
 		if (collisionSystem)
 		{
+			// Same camera the sprite batch uses
+			const glm::mat3 ZoomNDC = GLApp::BuildPanZoomNDC(cam);
+
 			for (auto& entity : collisionSystem->EntityMember)
 			{
 				if (!g_coordinator->HasComponent<Framework::Transform>(entity) ||
@@ -1238,23 +1237,41 @@ void CoreEngine::RenderDebugDraw()
 					continue;
 
 				auto& transform = g_coordinator->GetComponent<Framework::Transform>(entity);
-				auto& baseAABB = g_coordinator->GetComponent<AABB>(entity);
+				auto& baseAABB  = g_coordinator->GetComponent<AABB>(entity);
 
-				AABB worldAABB = collisionSystem->BuildAABBFromTransform(transform, baseAABB);
+				// Build the same modelToNDC used by the sprite renderer
+				glm::mat3 M        = glm::make_mat3(transform.mdl_to_ndc_xform.Begin());
+				glm::mat3 modelNDC = ZoomNDC * M;
 
-				glm::vec2 min = { worldAABB.min.x, worldAABB.min.y };
-				glm::vec2 max = { worldAABB.max.x, worldAABB.max.y };
+				// Convert /50 design units → model space (model quad spans -0.5..0.5)
+				constexpr float INV50 = 1.0f / 50.0f;
+				glm::vec2 corners[4] = {
+					{ baseAABB.min.x * INV50, baseAABB.min.y * INV50 },
+					{ baseAABB.max.x * INV50, baseAABB.min.y * INV50 },
+					{ baseAABB.max.x * INV50, baseAABB.max.y * INV50 },
+					{ baseAABB.min.x * INV50, baseAABB.max.y * INV50 },
+				};
+
+				// Transform each corner to NDC via the sprite's matrix
+				glm::vec2 ndc[4];
+				for (int i = 0; i < 4; ++i)
+				{
+					glm::vec3 h = modelNDC * glm::vec3(corners[i], 1.0f);
+					ndc[i] = { h.x, h.y };
+				}
 
 				// Green box = collision box
-				DebugDraw::DrawRect(min, max, { 0.0f, 1.0f, 0.0f });
+				for (int i = 0; i < 4; ++i)
+					DebugDraw::DrawLine(ndc[i], ndc[(i + 1) % 4], { 0.0f, 1.0f, 0.0f });
 
-				// Red point = entity center
-				DebugDraw::DrawPoint({ transform.Pos.x, transform.Pos.y }, 4.0f, { 1.0f, 0.0f, 0.0f });
+				// Red point = sprite center in NDC
+				glm::vec3 c = modelNDC * glm::vec3(0.0f, 0.0f, 1.0f);
+				DebugDraw::DrawPoint({ c.x, c.y }, 4.0f, { 1.0f, 0.0f, 0.0f });
 			}
 		}
-	}
 
-	DebugDraw::End();
+		DebugDraw::End();
+	}
 
 	//// ---------------------------------------------------------------------
 	//// F7: spawn/delete 1,000 moving sprites (hero)

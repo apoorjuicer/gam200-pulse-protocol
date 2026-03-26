@@ -125,14 +125,6 @@ public class EnemyRhythmController : Script
             return;
         }
 
-        // ONLY FOR BEN TO TEST 
-        InputComponent input = GetInput();
-        if (input.IsKeyTriggered(32) && TurnManager.Instance != null && !TurnManager.Instance.IsInputLocked)
-        {
-            TakeDamage(10f);
-            Console.WriteLine($"TESTING!!!!!!! DO 5 damage! HP remaining: {Health}\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        }
-
         if (!playerFound)
         {
             TryFindPlayer();
@@ -499,7 +491,10 @@ public class EnemyRhythmController : Script
 
     private void AttackPlayer()
     {
-        if (isDead) return;
+        if (isDead || Cheats.invincible)
+        {
+            return;
+        }
 
         int attackDamage = GetHealth().damage;
         Console.WriteLine($"[Enemy] ATTACKING PLAYER for {attackDamage} damage!");

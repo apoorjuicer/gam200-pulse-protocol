@@ -66,7 +66,7 @@ public class NavigationButtons : Script
     // D-pad navigation state (shared across all button instances)
     private static readonly List<NavigationButtons> s_navCandidates = new List<NavigationButtons>();
     private static readonly List<NavigationButtons> s_prevCandidates = new List<NavigationButtons>();
-    private static NavigationButtons s_focusedButton = null;
+    private static NavigationButtons? s_focusedButton = null;
     private static int s_navClearFrame   = -1;
     private static int s_navHandledFrame = -1;
 
@@ -346,14 +346,28 @@ public class NavigationButtons : Script
         if (s_navHandledFrame != currentFrame)
         {
             s_navHandledFrame = currentFrame;
-            bool navFwd  = input.IsGamepadButtonTriggered(GP_DPAD_DOWN)  || input.IsGamepadButtonTriggered(GP_DPAD_RIGHT);
-            bool navBack = input.IsGamepadButtonTriggered(GP_DPAD_UP)    || input.IsGamepadButtonTriggered(GP_DPAD_LEFT);
+
+            // D-pad navigation only active in menus / overlays — not during gameplay,
+            // to prevent D-pad game inputs from accidentally focusing UI buttons.
+            bool inMenuOrOverlay = realScene == "MainMenu" || realScene == "Settings" ||
+                                   realScene == "HowToPlay" ||
+                                   realScene == "LatencyCalibration" ||
+                                   realScene == "VisualLatencyCalibration" ||
+                                   ShowPauseOverlay || ShowQuitOverlay ||
+                                   ShowSettingsOverlay || ShowHowToPlayOverlay;
+
+            // Clear any lingering focus when returning to gameplay
+            if (!inMenuOrOverlay && s_focusedButton != null)
+                s_focusedButton = null;
+
+            bool navFwd  = inMenuOrOverlay && (input.IsGamepadButtonTriggered(GP_DPAD_DOWN)  || input.IsGamepadButtonTriggered(GP_DPAD_RIGHT));
+            bool navBack = inMenuOrOverlay && (input.IsGamepadButtonTriggered(GP_DPAD_UP)    || input.IsGamepadButtonTriggered(GP_DPAD_LEFT));
             if (navFwd || navBack)
             {
                 int count = s_prevCandidates.Count;
                 if (count > 0)
                 {
-                    int idx = s_prevCandidates.IndexOf(s_focusedButton);
+                    int idx = s_focusedButton != null ? s_prevCandidates.IndexOf(s_focusedButton) : -1;
                     if (idx < 0) idx = navFwd ? -1 : 0;
                     idx = navFwd ? (idx + 1) % count : (idx - 1 + count) % count;
                     s_focusedButton = s_prevCandidates[idx];
@@ -626,7 +640,11 @@ public class NavigationButtons : Script
     Application.SetPaused(false);
 
     currentScene = nextScene;
-    Scene.LoadScene(nextScene);
+
+    // Load loading screen first then the nxt level
+    LoadingScreenScript.NextLevel = currentScene;
+    Scene.LoadScene("LoadingScreenScene");
+    //Scene.LoadScene(nextScene);
 }
 
 
@@ -679,7 +697,12 @@ public class NavigationButtons : Script
                 VisualLatencyCalibrator.Instance?.Reset();
                 return;
             }
-            Scene.RestartScene();
+            //Scene.RestartScene();
+
+            // make it load loading screen when we restart instead of it freezing at the pause menu
+            LoadingScreenScript.NextLevel = Scene.GetCurrentScene();
+            Scene.LoadScene("LoadingScreenScene");
+
             return;
         }
 

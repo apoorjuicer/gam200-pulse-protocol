@@ -36,9 +36,6 @@ public:
     // Call explicitly to trigger a camera zoom punch (e.g. from Conductor.cs on each beat)
     void OnBeat();
 
-    // Call with judgement string ("MISS", "GOOD", "PERFECT") to spawn particles + shake
-    void OnJudgement(const std::string& judgement, const glm::vec2& worldPos);
-
     // --- Separate designer APIs ---
     // Trigger camera shake only (amplitude = NDC displacement strength, ~0.02-0.08)
     void ShakeCamera(float amplitude, float decay);

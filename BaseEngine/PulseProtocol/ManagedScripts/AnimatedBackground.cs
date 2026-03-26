@@ -1,9 +1,9 @@
 /******************************************************************************/
 /**
-* @file        PauseAnimatorBackground.cs
+* @file        AnimatedBackground.cs
 * @project     Pulse Protocol
 * @author      Chloe Lau Rey En
-* @brief       Animates the pause screen background with randomised frame timing,
+* @brief       Animates the pause and settings screen background with randomised frame timing,
 *              including occasional freezes and flickers for an organic feel.
 *
 * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
@@ -15,7 +15,7 @@
 using System;
 using ScriptAPI;
 
-public class PauseBackgroundAnimator : Script
+public class AnimatedBackground : Script
 {
     private int currentFrame = 1;
     private float frameTimer = 0f;
@@ -23,11 +23,16 @@ public class PauseBackgroundAnimator : Script
     private bool reverse = false;
     private Random rand = new Random();
 
+    // DEFAULT VALUES; WILL GET OVERRIDEN
+    protected virtual bool ShouldShow() => false;
+    protected virtual string FramePrefix() => "";
+    protected virtual int TotalFrames() => 14;
+
     public override void Update()
     {
         TransformComponent t = GetTransform();
         SpriteComponent sprite = GetSprite();
-        bool isShowing = NavigationButtons.ShowPauseOverlay;
+        bool isShowing = ShouldShow();
         
         t.IsVisible = isShowing;
         
@@ -73,15 +78,31 @@ public class PauseBackgroundAnimator : Script
             else
             {
                 currentFrame++;
-                if (currentFrame > 14)
+                if (currentFrame > TotalFrames())
                 {
-                    currentFrame = 13;
+                    currentFrame = TotalFrames() - 1;
                     reverse = true;
                 }
             }
             
-            sprite.Texture = $"../../PulseProtocol/Assets/Textures/UI/pause{currentFrame}.png";
+            sprite.Texture = $"{FramePrefix()}{currentFrame}";
             frameTimer = 0f;
         }
     }
+}
+
+// pause menu animation overlay
+public class PauseAnimatedBackground : AnimatedBackground
+{
+    protected override bool ShouldShow() => NavigationButtons.ShowPauseOverlay;
+    protected override string FramePrefix() => "pause";
+        protected override int TotalFrames() => 19;
+}
+
+// settings menu animation overlay
+public class SettingsAnimatedBackground : AnimatedBackground
+{
+    protected override bool ShouldShow() => NavigationButtons.ShowSettingsOverlay;
+    protected override string FramePrefix() => "settings";
+    protected override int TotalFrames() => 19;
 }

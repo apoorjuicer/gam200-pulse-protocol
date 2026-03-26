@@ -9,7 +9,6 @@ public class ScriptName : Script
     public override void Update()
     {
         //Firstly, to get get a component:
-        FSMComponentAPI fsm = GetFSM();
         Animation anim = GetAnimation();
         SpriteComponent s = GetSprite();
         InputComponent input = GetInput();
@@ -106,14 +105,6 @@ public class ScriptName : Script
         // 9. Vector2 for audio I think? TLDR, vec2 is now able to use in C#
         float x = 5, y = 5;
         Vector2 v = new Vector2(x,y);
-
-
-        // 10. State Machine
-        fsm.GetState();          // Get current state (Idle/Moving/Attack/Damage/Death)
-        fsm.RequestMove(true);   // request movement on/off
-        fsm.RequestAttack();     // trigger attack
-        fsm.NotifyDamage();      // notify taken damage
-        fsm.ClearRequests();     // clear all pending requests
 
         // 11. Mouse/Keyboard API 
         float PosX, PosY;

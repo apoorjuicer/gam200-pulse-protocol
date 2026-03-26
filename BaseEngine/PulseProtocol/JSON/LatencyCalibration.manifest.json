@@ -4,9 +4,9 @@
         "textures": [
             "Calibrator_BG",
             "NextStage_btn",
-            "NextStagehover_btn",
+            "NextStage_btn_hover",
             "pauserestart_btn",
-            "pauserestarthover_btn"
+            "pauserestart_btn_hover"
         ],
         "audio": [],
         "fonts": [],

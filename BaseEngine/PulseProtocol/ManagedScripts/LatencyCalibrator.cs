@@ -46,7 +46,8 @@ public class LatencyCalibrator : Script
         if (!calibrating)
         {
             var inp = GetInput();
-            if (inp.IsKeyTriggered(257) || inp.IsKeyTriggered(32)) // Enter / Space
+            if (inp.IsKeyTriggered(257) || inp.IsKeyTriggered(32) // Enter / Space
+                || inp.IsGamepadButtonTriggered(2))               // Square (GLFW button 2)
             {
                 beatInterval = 60f / CalibBPM;
                 calibOrigin  = songTime + beatInterval; // first tick 1 beat from now
@@ -68,7 +69,7 @@ public class LatencyCalibrator : Script
             nextPingTime += beatInterval;
         }
 
-        if (GetInput().IsKeyTriggered(32)) // Space
+        if (GetInput().IsKeyTriggered(32) || GetInput().IsGamepadButtonTriggered(2)) // Space / Square
         {
             // Debounce: ignore a tap that arrives within half a beat of the last one.
             // This prevents accidental double-taps counting as two samples.

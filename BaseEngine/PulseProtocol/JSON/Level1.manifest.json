@@ -6,7 +6,7 @@
             "GameplayCommon"
         ],
         "textures": [
-            "Level1_BG"
+            "Level1_BG",
             // //rat
             // "rat_idle",
             // "rat_hurt",
@@ -32,6 +32,27 @@
             // "enemyicon_rat_grey",
             // "enemyicon_bat",
             // "enemyicon_bat_grey"
+
+            // pause animated frames
+            "pause1",
+            "pause2",
+            "pause3",
+            "pause4",
+            "pause5",
+            "pause6",
+            "pause7",
+            "pause8",
+            "pause9",
+            "pause10",
+            "pause11",
+            "pause12",
+            "pause13",
+            "pause14",
+            "pause15",
+            "pause16",
+            "pause17",
+            "pause18",
+            "pause19"
         ],
         "audio": [
             "BGM_L1_TESTING"
