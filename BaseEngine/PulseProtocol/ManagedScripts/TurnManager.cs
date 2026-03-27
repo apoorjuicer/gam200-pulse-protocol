@@ -38,6 +38,7 @@ public class TurnManager : Script
     public int CountdownBeats = 4;
     public int EnemyDisplayBeats = 5;  // with -1 backdating: transition beat + 3 more = 4 beats total. First key shows immediately, keys 2-4 on the next 3 beats. No idle beat at end.
     public int PlayerInputBeats = 5;   // effective input beats   = PlayerInputBeats  - 1 = 4 (phaseStartBeat backdated by -1)
+    private int currentEnemyDisplayBeats = 4; // can be overridden per-turn by SetEnemyDisplayBeats()
 
     // =========================
     // State
@@ -116,7 +117,7 @@ public class TurnManager : Script
                 break;
 
             case TurnPhase.EnemyDisplay:
-                if (beatsInPhase >= EnemyDisplayBeats)
+                if (beatsInPhase >= currentEnemyDisplayBeats)
                 {
                     ComboDisplayManager.Instance?.StartPlayerCountdownEarly();
                     StartPlayerInput(); // unlock input on the same beat
@@ -125,7 +126,7 @@ public class TurnManager : Script
                 }
                 else
                 {
-                    Console.WriteLine($"[TurnManager] Enemy Display Beat {beatsInPhase + 1}/{EnemyDisplayBeats}");
+                    Console.WriteLine($"[TurnManager] Enemy Display Beat {beatsInPhase + 1}/{currentEnemyDisplayBeats}");
                 }
                 break;
 
@@ -196,10 +197,17 @@ public class TurnManager : Script
     // =========================
     // Phase Transitions
     // =========================
+    public void SetEnemyDisplayBeats(int n)
+    {
+        currentEnemyDisplayBeats = n;
+        Console.WriteLine($"[TurnManager] EnemyDisplay beats set to: {n}");
+    }
+
     private void StartEnemyDisplay()
     {
         currentPhase = TurnPhase.EnemyDisplay;
         phaseStartBeat = Conductor.Instance!.GetCurrentBeat() - 1;
+        currentEnemyDisplayBeats = EnemyDisplayBeats; // restore default (4); boss overrides before reveal starts
 
         Console.WriteLine("[TurnManager] === ENEMY TURN ===");
         Console.WriteLine($"[TurnManager] Displaying combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
@@ -325,7 +333,7 @@ public class TurnManager : Script
             case TurnPhase.Countdown:
                 return CountdownBeats - beatsInPhase;
             case TurnPhase.EnemyDisplay:
-                return EnemyDisplayBeats - beatsInPhase;
+                return currentEnemyDisplayBeats - beatsInPhase;
             case TurnPhase.PlayerInput:
                 return PlayerInputBeats - beatsInPhase;
             default:

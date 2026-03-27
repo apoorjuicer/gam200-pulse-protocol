@@ -17,6 +17,10 @@
             "path": "JSON/Level1.json"
         },
         {
+            "id": "bosstest_scene",
+            "path": "JSON/BossTest.json"
+        },
+        {
             "id": "gamewin_scene",
             "path": "JSON/GameWin.json"
         },

@@ -13,6 +13,7 @@
 |CountdownUI.cs|Shows 3,2,1,GO! tint pulses during TurnPhase.Countdown by reacting to beats from Conductor.cs|
 |CutscenePanel.cs|Staggered pair slide in cutscene: Each panel currently handles its own animation, with a shared timer via statics|
 |DebugDisplayScript.cs|In-game FPS + top profiling system overlay text|
+|BossRhythmController.cs|Two-phase boss: Phase 1 cycles fixed combos (WASD/WAWA/DASD), Phase 2 generates random 3–6 key combos with a DING cue beat. Stationary — attacks on failure, no movement.|
 |EnemyRhythmController.cs|Enemy AI - steps toward player on beats, attacks on contact, holds WeaknessCombo \& handles death|
 |EnemySpawner.cs|Spawns enemies from prefab one at a time, manages enemy queue and notifies OrderSlipUIController.cs|
 |HealthBarController.cs|Drives health bar sprite frames (tile001-tile012) based on PlayerHealth.GetHealthPercent()|
@@ -29,6 +30,7 @@
 |ScreenModeDropdown.cs|Fullscreen/Windowed toggle dropdown (DropdownToggle, DropdownOpenFollower, DropdownOptionFullscreen, DropdownOptionWindowed, DropdownClosedLabelFullscreen/Windowed)|
 |StageClear.cs|StageClearElement: Shows stage clear UI when StageClear() is called globally|
 |TurnManager.cs|Drives turn phases: Countdown -> EnemyDisplay -> PlayerInput -> Resolution|
+|SwordSlashVFX.cs|Spawned by PlayerAnimatorController on attack — positions at player + 300x, plays 10-frame slash animation synced to attack duration, then self-destructs|
 |VisualBeatSystem.cs|Pulses border's scale and opacity on each beat using Conductor.cs song time|
 
 ## 

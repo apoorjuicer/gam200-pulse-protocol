@@ -17,25 +17,6 @@
 using System;
 using ScriptAPI;
 
-/// <summary>
-/// Cutscene Panel Controller (Paired + Staggered)
-/// =================================================
-/// Attach this script to EVERY panel entity (Panel1 through Panel14).
-/// 
-/// Pairs: (1+2), (3+4), (5+6), (7+8), (9+10), (11+12), (13+14)
-/// 
-/// Entry: Left panel slides in first, then right panel follows after a short stagger.
-/// Exit:  Both panels slide upward together simultaneously.
-/// 
-/// POSITIONING:
-///   Set 'targetX' on each panel entity in the inspector to control where it sits.
-///   - Left panels (1,3,5...): use negative values like -700
-///   - Right panels (2,4,6...): use positive values like 700
-///   - Adjust per panel to account for different panel sizes
-///   If targetX is left at 0, it will use the defaults (-700 / 700).
-///
-/// Press SPACE to skip. Loads Level1 when done.
-/// </summary>
 public class CutscenePanel : Script
 {
     // =========================
@@ -91,6 +72,8 @@ public class CutscenePanel : Script
     private bool initialized = false;
     private bool isTimerOwner = false;
     private float myTargetX = 0f;
+    private float mySlideStartInGroup = 0f;  // when within the group this panel starts sliding in
+    private float myHoldStart = 0f;          // when all panels in this group are fully in
 
     public override void Update()
     {
@@ -161,9 +144,43 @@ public class CutscenePanel : Script
         //Console.WriteLine($"[PEEPEEPOOPOO] Panel: {myPanelIndex} | Pair: {myPanelIndex / 2}\n\n\n\n\n\n");
 
 
-        // Pair info
+        // Pair/group assignment
+        // Panel 2 (index 2) joins group 0 as the third panel, staggered after panels 0 and 1.
+        // Panel 3 (index 3) becomes the first (left) panel of group 1 since index 2 vacated it.
+        // All other panels use the default index/2 formula.
         myPairIndex = myPanelIndex / 2;
         isLeftPanel = (myPanelIndex % 2) == 0;
+
+        // Use instance fields directly here — sStaggerDelay/sSlideInDuration may not be set yet
+        // (panel 0 sets the statics later in its init block, after this runs).
+        float sd = staggerDelay;
+        float si = slideInDuration;
+
+        if (myPanelIndex <= 1)
+        {
+            // Group 0 normal panels: hold start delayed to wait for the third panel (index 2)
+            mySlideStartInGroup = isLeftPanel ? 0f : sd;
+            myHoldStart = sd * 2 + si;
+        }
+        else if (myPanelIndex == 2)
+        {
+            // Third panel of group 0: slides in at staggerDelay*2
+            myPairIndex = 0;
+            mySlideStartInGroup = sd * 2;
+            myHoldStart = sd * 2 + si;
+        }
+        else if (myPanelIndex == 3)
+        {
+            // First panel of group 1 (was right panel of a pair — now leads solo)
+            mySlideStartInGroup = 0f;
+            myHoldStart = sd + si;
+        }
+        else
+        {
+            // All remaining panels: default stagger and hold
+            mySlideStartInGroup = isLeftPanel ? 0f : sd;
+            myHoldStart = sd + si;
+        }
 
         // Determine this panel's X position
         if (targetX != 0f)
@@ -194,12 +211,10 @@ public class CutscenePanel : Script
             sOffScreenAbove = offScreenAbove;
             sCenterY = centerY;
 
-            // Pair total = stagger + slideIn + hold + slideOut
-            // The pair "starts" when the LEFT panel begins sliding in.
-            // RIGHT panel starts sliding in after staggerDelay.
-            // Hold begins after BOTH panels are in (i.e. after stagger + slideIn).
-            // Both exit together after hold.
-            sPairTotalDuration = sStaggerDelay + sSlideInDuration + sHoldDuration + sSlideOutDuration;
+            // Pair total: for group 0 (triple), hold starts after staggerDelay*2 + slideIn.
+            // Other groups (pairs) use staggerDelay + slideIn.
+            // We use the triple timing as the canonical pair duration so group 0 gets full hold time.
+            sPairTotalDuration = sStaggerDelay * 2 + sSlideInDuration + sHoldDuration + sSlideOutDuration;
 
             float totalDuration = (totalPairs - 1) * (sPairTotalDuration - sOverlapDuration) + sPairTotalDuration;
             Console.WriteLine($"[Cutscene] Timer owner: Panel 1");
@@ -246,14 +261,9 @@ public class CutscenePanel : Script
         // Hold starts at localTime = staggerDelay + slideInDuration (both are in)
         // Both exit at localTime = staggerDelay + slideInDuration + holdDuration
 
-        float mySlideStart;
-        if (isLeftPanel)
-            mySlideStart = 0f;                 // Left panel enters immediately
-        else
-            mySlideStart = sStaggerDelay;       // Right panel enters after stagger
-
+        float mySlideStart = mySlideStartInGroup;
         float mySlideEnd = mySlideStart + sSlideInDuration;
-        float holdStart = sStaggerDelay + sSlideInDuration;  // Both are in after this
+        float holdStart = myHoldStart;
         float holdEnd = holdStart + sHoldDuration;
         float exitEnd = sPairTotalDuration;
 

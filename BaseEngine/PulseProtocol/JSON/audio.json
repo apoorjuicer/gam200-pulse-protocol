@@ -188,6 +188,13 @@
             "loop": false,
             "volume": 1.0,
             "audiotype": "SFX"
+        },
+        {
+            "id": "SFX_Enemy_Ping",
+            "path": "Assets/Sound/Enemy/SFX_Enemy_Ping.mp3",
+            "loop": false,
+            "volume": 1.0,
+            "audiotype": "SFX"
         }
     ]
 }

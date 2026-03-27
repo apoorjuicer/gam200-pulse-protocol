@@ -5,7 +5,7 @@ public class SwordSlashVFX : Script
 {
     public static float SpawnX = 0f;
     public static float SpawnY = 0f;
-    // Duration of the attack animation — VFX lives for exactly this long
+    // Duration of the attack animation VFX lives for exactly this long
     public static float SpawnDuration = 0.5f;
 
     private const int VFXTotalFrames = 10;
@@ -25,6 +25,8 @@ public class SwordSlashVFX : Script
             var tr = GetTransform();
             tr.X = SpawnX;
             tr.Y = SpawnY;
+            tr.ScaleX = 1200f;
+            tr.ScaleY = 450f;
 
             // Scale speed so all frames finish in exactly SpawnDuration seconds
             float speed = VFXTotalFrames / SpawnDuration;

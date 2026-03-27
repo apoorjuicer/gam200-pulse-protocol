@@ -412,7 +412,7 @@ public class EnemyRhythmController : Script
         }
     }
 
-    private void HandleBeat(int beat)
+    protected virtual void HandleBeat(int beat)
     {
         if (TurnManager.Instance == null) return;
 
@@ -480,7 +480,7 @@ public class EnemyRhythmController : Script
         Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}");
     }
 
-    private void AttackPlayer()
+    protected virtual void AttackPlayer()
     {
         if (isDead || Cheats.invincible)
         {
@@ -545,7 +545,7 @@ public class EnemyRhythmController : Script
         Console.WriteLine("==============================================");
     }
 
-    public void ExecuteFailurePunishment()
+    public virtual void ExecuteFailurePunishment()
     {
         Console.WriteLine("[Enemy] ExecuteFailurePunishment() called");
 
@@ -596,7 +596,7 @@ public class EnemyRhythmController : Script
         }
     }
 
-    public void ResetMovementForNewTurn()
+    public virtual void ResetMovementForNewTurn()
     {
         // Don't clobber the death animation state if this enemy is already dying
         if (isDead) return;

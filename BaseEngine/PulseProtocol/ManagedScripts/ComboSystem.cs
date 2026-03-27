@@ -13,6 +13,7 @@ public class ComboSystem : Script
     // Config
     // =========================
     public int maxComboLength = 4;
+    private int currentMaxComboLength = 4; // can be overridden per-turn by SetComboLength()
 
     // Timing windows (seconds): Distance to the nearest beat boundary.
     // At 120 BPM (beatDuration = 0.5s), max possible delta is 0.25s.
@@ -237,13 +238,19 @@ public class ComboSystem : Script
             perfectStreak = 0;
         }
 
-        if (currentCombo.Count >= maxComboLength)
+        if (currentCombo.Count >= currentMaxComboLength)
             EvaluateCombo();
     }
 
     public bool HasCompletedCombo()
     {
         return comboCompleted;
+    }
+
+    public void SetComboLength(int n)
+    {
+        currentMaxComboLength = n;
+        Console.WriteLine($"[ComboSystem] Combo length set to: {n}");
     }
 
     public void ResetCombo()
@@ -253,6 +260,7 @@ public class ComboSystem : Script
         hitResults.Clear();
         comboCompleted = false;
         lastInputBeat = -1;
+        currentMaxComboLength = maxComboLength; // restore default (4) after boss turns
     }
 
     // =========================

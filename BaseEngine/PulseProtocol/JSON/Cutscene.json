@@ -6,12 +6,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -680.0790405273438,
-                            "y": 11.5384521484375
+                            "x": -630.0791015625,
+                            "y": 26.92303466796875
                         },
                         "scale": {
-                            "x": 800.0,
-                            "y": 600.0
+                            "x": 900.0,
+                            "y": 829.60400390625
                         },
                         "rotation": {
                             "x": 0.0,
@@ -27,12 +27,19 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 1.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/Cutscene/1.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -74,12 +81,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 715.676513671875,
-                            "y": 11.0
+                            "x": 861.8306274414063,
+                            "y": 405.2307434082031
                         },
                         "scale": {
-                            "x": 800.0,
-                            "y": 600.0
+                            "x": 700.0,
+                            "y": 429.529541015625
                         },
                         "rotation": {
                             "x": 0.0,
@@ -95,12 +102,19 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 2.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/Cutscene/2.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -163,12 +177,19 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 3.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/Cutscene/3.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -231,12 +252,19 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 4.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/Cutscene/4.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -305,6 +333,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -373,6 +408,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -441,6 +483,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -509,6 +558,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -577,6 +633,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -645,6 +708,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -713,6 +783,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -781,6 +858,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -849,6 +933,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -917,6 +1008,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -949,6 +1047,74 @@
                         "sortingLayer": 2,
                         "orderInLayer": 1,
                         "z": 100.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 1600.0,
+                            "y": 900.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "../../PulseProtocol/Assets/Textures/Backgrounds/Pause_SS_V1_1x14.png",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "BG"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
                     }
                 }
             ]
