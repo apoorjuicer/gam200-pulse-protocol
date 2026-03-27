@@ -55,6 +55,11 @@ public class TurnManager : Script
     private bool gameStarted = false;
     private bool prevGameReady = false; // used to detect new play sessions on reused script objects
 
+    // Time-based player slot pulses (mirrors SlotOffsets, runs every frame)
+    private bool playerInputPhaseActive = false;
+    private float playerInputStartTime = 0f;
+    private bool[] slotPulsed = new bool[4];
+
     public bool IsPlayerTurn => currentPhase == TurnPhase.PlayerInput;
     public bool IsInputLocked => currentPhase != TurnPhase.PlayerInput;
 
@@ -85,6 +90,26 @@ public class TurnManager : Script
             return;
 
         int currentBeat = Conductor.Instance!.GetCurrentBeat();
+
+        // Time-based player slot pulses — must run every frame, not just on beats
+        if (playerInputPhaseActive && GameStart.Ready)
+        {
+            float elapsed = Conductor.Instance.GetAdjustedSongTime() - playerInputStartTime;
+            float[] offsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0.0f, 0.5f, 1.0f, 1.5f };
+            int[] visualSlots = EnemyRhythmController.Instance?.VisualSlotIndices;
+            float beatDur = Conductor.Instance.SecondsPerBeat;
+            for (int i = 0; i < slotPulsed.Length && i < offsets.Length; i++)
+            {
+                if (!slotPulsed[i] && elapsed >= offsets[i])
+                {
+                    slotPulsed[i] = true;
+                    int vs = (visualSlots != null && i < visualSlots.Length) ? visualSlots[i] : i;
+                    PlayerSlotBeatPulse.TriggerFlash(vs, beatDur);
+                    PlayerSlotBeatPulse.TriggerScale(vs, beatDur);
+                    ComboDisplayManager.TriggerPlayerSlotPulse(vs, beatDur);
+                }
+            }
+        }
 
         // Only process on new beats
         if (currentBeat == lastBeat)
@@ -136,19 +161,8 @@ public class TurnManager : Script
                 break;
 
             case TurnPhase.PlayerInput:
-                // Flash outline for the current slot — runs even on the resolution beat
-                // so slot 3 flashes at the same time as resolution (no extra beat)
                 {
-                    int slotToFlash = beatsInPhase - 2; // beatsInPhase=1 is prep/transition, skip it
-                    if (slotToFlash >= 0 && slotToFlash < 4)
-                    {
-                        float beatDur = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat : 0.5f;
-                        PlayerSlotBeatPulse.TriggerFlash(slotToFlash, beatDur);          // gold colour
-                        PlayerSlotBeatPulse.TriggerScale(slotToFlash, beatDur);          // moderate scale (default 0.3)
-                        ComboDisplayManager.TriggerPlayerSlotPulse(slotToFlash, beatDur); // question mark scale
-                    }
-
-                    // Beat 6 (beatsInPhase=2): switch announcer from GET READY to INPUT NOW
+                    // Beat 2: switch announcer from GET READY to INPUT NOW
                     if (beatsInPhase == 2)
                         TurnAnnouncerUI.Instance?.ShowGo();
                 }
@@ -198,6 +212,8 @@ public class TurnManager : Script
         phaseStartBeat = -1;
         lastBeat = -1;
         gameStarted = false;
+        playerInputPhaseActive = false;
+        for (int i = 0; i < slotPulsed.Length; i++) slotPulsed[i] = false;
 
         // Clear ComboSystem state so lastInputBeat (from a previous session) can't
         // accidentally match a beat in the new session and block the first key press.
@@ -268,18 +284,34 @@ public class TurnManager : Script
         if (ComboDisplayManager.Instance != null)
             ComboDisplayManager.Instance.FadeOutEnemySlots();
 
-        // Scale all 4 outlines simultaneously on the prep beat (mirrors question mark pop)
-        float prepDur = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat * 0.6f : 0.3f;
-        for (int i = 0; i < 4; i++)
+        // Dynamically set PlayerInputBeats so the last slot has time to pulse AND be pressed.
+        // Formula: 1 beat delay offset + beats for last slot + 2 beats input window, +1 for beatsInPhase offset.
+        float[] offsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0.0f, 0.5f, 1.0f, 1.5f };
+        float lastOffset = offsets.Length > 0 ? offsets[offsets.Length - 1] : 1.5f;
+        float beatDuration = Conductor.Instance!.SecondsPerBeat;
+        PlayerInputBeats = (int)Math.Ceiling(lastOffset / beatDuration) + 4;
+
+        // Start time-based slot pulses using SlotOffsets.
+        // +1 beat delay so slot 0 (offset=0.0) fires 1 beat in, not immediately.
+        playerInputStartTime = Conductor.Instance!.GetAdjustedSongTime() + beatDuration;
+        playerInputPhaseActive = true;
+        for (int i = 0; i < slotPulsed.Length; i++) slotPulsed[i] = false;
+
+        // Small scale pop on all active slots to signal turn start (no gold flash — avoids confusion with per-slot pulses)
+        float prepDur = beatDuration * 0.6f;
+        int comboLen = EnemyRhythmController.Instance?.WeaknessCombo.Length ?? 4;
+        int[] prepVisualSlots = EnemyRhythmController.Instance?.VisualSlotIndices;
+        for (int i = 0; i < comboLen && i < 4; i++)
         {
-            PlayerSlotBeatPulse.TriggerFlash(i, prepDur);   // gold colour
-            PlayerSlotBeatPulse.TriggerScale(i, prepDur, 0.9f); // large scale
+            int vs = (prepVisualSlots != null && i < prepVisualSlots.Length) ? prepVisualSlots[i] : i;
+            PlayerSlotBeatPulse.TriggerScale(vs, prepDur, 0.9f);
         }
     }
 
     private void ResolvePlayerInput()
     {
         currentPhase = TurnPhase.Resolution;
+        playerInputPhaseActive = false;
 
         bool success = false;
         if (ComboSystem.Instance != null)

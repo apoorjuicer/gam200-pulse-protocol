@@ -104,6 +104,12 @@ public class ComboKeySlot : Script
     private float _appearFadeInTimer   = 0f;
     private float _currentAlpha        = 0f; // tracked so ShowBlankFadeToDim knows current state
 
+    // Fade from current alpha → 0 then hide (unused slots when enemy turn starts)
+    private bool  _isFadingToHidden       = false;
+    private float _fadeToHiddenTimer      = 0f;
+    private float _fadeToHiddenDuration   = 0.5f;
+    private float _fadeToHiddenStartAlpha = 0f;
+
     // =========================
     // Update
     // =========================
@@ -298,6 +304,25 @@ public class ComboKeySlot : Script
             _currentAlpha = 0.2f * eased;
             GetFade().SetAlpha(_currentAlpha);
             if (t01 >= 1f) _inAppearFadeIn = false;
+        }
+
+        // =========================
+        // Fade to hidden (unused slots during enemy turn)
+        // =========================
+        if (_isFadingToHidden)
+        {
+            _fadeToHiddenTimer += Time.DeltaTime;
+            float t01 = Math.Min(_fadeToHiddenTimer / _fadeToHiddenDuration, 1f);
+            float eased = t01 * t01; // ease-in: slow start, quicker end
+            _currentAlpha = _fadeToHiddenStartAlpha * (1f - eased);
+            GetFade().SetAlpha(_currentAlpha);
+            if (t01 >= 1f)
+            {
+                _isFadingToHidden = false;
+                var ht = GetTransform();
+                ht.IsVisible = false;
+                _currentAlpha = 0f;
+            }
         }
 
         // =========================
@@ -502,7 +527,30 @@ public class ComboKeySlot : Script
         _inFadeIn = false;
         _isFadingToDim = false;
         _inAppearFadeIn = false;
+        _isFadingToHidden = false;
         _currentAlpha = 0f;
+    }
+
+    // Smoothly fade from current alpha → 0, then hide. Used for unused player slots.
+    public void FadeToHidden(float duration)
+    {
+        if (IsEnemySlot) return;
+
+        var transform = GetTransform();
+        if (!transform.IsVisible || _currentAlpha <= 0f)
+        {
+            HideInstant();
+            return;
+        }
+
+        _fadeToHiddenStartAlpha = _currentAlpha;
+        _fadeToHiddenDuration   = Math.Max(duration, 0.05f);
+        _fadeToHiddenTimer      = 0f;
+        _isFadingToHidden       = true;
+
+        _inFadeIn       = false;
+        _isFadingToDim  = false;
+        _inAppearFadeIn = false;
     }
 
     public void Hide()
@@ -585,6 +633,7 @@ public class ComboKeySlot : Script
         isPoppingCorrect = false;
         _isFadingToDim = false;
         _inAppearFadeIn = false;
+        _isFadingToHidden = false;
 
         _fadeInDuration = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat : 0.5f;
         _fadeInTimer = 0f;
@@ -621,6 +670,7 @@ public class ComboKeySlot : Script
         _inFadeIn = false;
         _isFadingToDim = false;
         _inAppearFadeIn = false;
+        _isFadingToHidden = false;
     }
 
     // FOR PLAYER SLOTS: smoothly fade from full opacity back to dim when enemy turn resets
@@ -649,6 +699,7 @@ public class ComboKeySlot : Script
         isPoppingCorrect = false;
         _inFadeIn = false;
         _inAppearFadeIn = false;
+        _isFadingToHidden = false;
 
         var fade = GetFade();
         // Only do the flash-to-full-then-dim animation when coming from full opacity (e.g. after player turn).

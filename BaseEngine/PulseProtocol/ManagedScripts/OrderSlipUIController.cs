@@ -1,7 +1,7 @@
 using System;
 using ScriptAPI;
 
-public enum EnemyIconType { None, Rat, Bat, Gorilla }
+public enum EnemyIconType { None, Rat, Bat, BlueGorilla }
 
 public class OrderSlipUIController : Script
 {
@@ -131,8 +131,8 @@ public class OrderSlipUIController : Script
         {
             case EnemyIconType.Rat: return "enemy icon rat.png";
             case EnemyIconType.Bat: return "enemy icon bat.png";
-            case EnemyIconType.Gorilla: return "enemy icon gorilla.png";
-            default: return "";//"Icon_None";
+            case EnemyIconType.BlueGorilla: return "enemy icon gorilla.png";
+            default: return "";
         }
     }
 
@@ -142,8 +142,8 @@ public class OrderSlipUIController : Script
         {
             case EnemyIconType.Rat: return "enemy icon rat greyed.png";
             case EnemyIconType.Bat: return "enemy icon bat greyed.png";
-            case EnemyIconType.Gorilla: return "enemy icon gorilla greyed.png";
-            default: return "";//"Icon_None";
+            case EnemyIconType.BlueGorilla: return "enemy icon gorilla greyed.png";
+            default: return "";
         }
     }
 }

@@ -54,17 +54,24 @@ public class EnemySpawner : Script
     private List<EnemyIconType> EnemyContainer1 = new List<EnemyIconType> // chloe: i just change to rat for now since this is the reason why it wasnt spawning the next enemies
     {
         EnemyIconType.Rat,
-        EnemyIconType.Gorilla,
-        EnemyIconType.Bat,
+        EnemyIconType.Rat,
+        EnemyIconType.BlueGorilla,
+        EnemyIconType.Rat,
+        EnemyIconType.BlueGorilla,
         EnemyIconType.Rat
     };
 
     private List<EnemyIconType> EnemyContainer2 = new List<EnemyIconType>
     {
         EnemyIconType.Rat,
+        EnemyIconType.BlueGorilla,
+        EnemyIconType.Rat,
         EnemyIconType.Bat,
-        EnemyIconType.Gorilla,
-        EnemyIconType.Rat
+        EnemyIconType.Rat,
+        EnemyIconType.Bat,
+        EnemyIconType.BlueGorilla,
+        EnemyIconType.Bat,
+        EnemyIconType.BlueGorilla
     };
 
 
@@ -241,8 +248,8 @@ public class EnemySpawner : Script
         switch (type)
         {
             case EnemyIconType.Rat: return "Rat_Enemy";
-            case EnemyIconType.Bat: return "Bat_Enemy"; 
-            case EnemyIconType.Gorilla: return "Gorilla_Enemy";
+            case EnemyIconType.Bat: return "Bat_Enemy";
+            case EnemyIconType.BlueGorilla: return "BlueGorilla_Enemy";
             default: return "";
         }
     }
