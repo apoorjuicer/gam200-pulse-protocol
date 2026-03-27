@@ -20,9 +20,9 @@ using ScriptAPI;
 /// <summary>
 /// Cutscene Panel Controller (Paired + Staggered)
 /// =================================================
-/// Attach this script to EVERY panel entity (Panel1 through Panel14).
-/// 
-/// Pairs: (1+2), (3+4), (5+6), (7+8), (9+10), (11+12), (13+14)
+/// Attach this script to EVERY panel entity (Panel1 through Panel8).
+///
+/// Pairs: (1+2), (3+4), (5+6), (7+8)
 /// 
 /// Entry: Left panel slides in first, then right panel follows after a short stagger.
 /// Exit:  Both panels slide upward together simultaneously.
@@ -42,8 +42,8 @@ public class CutscenePanel : Script
     // Timing Configuration
     // =========================
     public float slideInDuration = 0.8f;     // Time for one panel to slide into view
-    public float staggerDelay = 0.3f;        // Delay before the second panel in a pair starts sliding in
-    public float holdDuration = 2.0f;        // Time pair stays fully visible (after both are in)
+    public float staggerDelay = 1.5f;        // Delay before the second panel in a pair starts sliding in
+    public float holdDuration = 1.8f;        // Time pair stays fully visible (after both are in)
     public float slideOutDuration = 0.8f;    // Time for both to slide out together
     public float overlapDuration = 0.6f;     // Overlap between current pair exiting and next pair entering
 
@@ -69,7 +69,7 @@ public class CutscenePanel : Script
     private static float sharedElapsedTime = 0f;
     private static bool sharedCutsceneFinished = false;
     private static int sharedInitCount = 0;
-    private static int totalPairs = 7;
+    private static int totalPairs = 4;
 
     // Cached timing values (set once during init)
     private static float sPairTotalDuration = 0f;
