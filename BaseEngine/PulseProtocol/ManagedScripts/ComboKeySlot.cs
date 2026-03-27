@@ -98,6 +98,12 @@ public class ComboKeySlot : Script
     private float _fadeToDimTimer   = 0f;
     private float _fadeToDimDuration = 0.5f;
 
+    // Appear fade-in (0 → dim) when the level/session first starts
+    public float AppearFadeInDuration = 1.0f;
+    private bool  _inAppearFadeIn      = false;
+    private float _appearFadeInTimer   = 0f;
+    private float _currentAlpha        = 0f; // tracked so ShowBlankFadeToDim knows current state
+
     // =========================
     // Update
     // =========================
@@ -153,6 +159,21 @@ public class ComboKeySlot : Script
             HideInstant();
             hasRegistered = true;
             Console.WriteLine($"[ComboKeySlot] ✓ Slot {SlotIndex} registered as {(IsEnemySlot ? "Enemy" : "Player")} slot");
+
+            // Player slots: immediately show blank question mark and fade in from invisible
+            if (!IsEnemySlot && sprite.HasSprite())
+            {
+                sprite.Texture = BlankSprite;
+                sprite.SetTint(1f, 1f, 1f, 1f);
+                GetFade().SetAlpha(0f);
+                _currentAlpha = 0f;
+                var t = GetTransform();
+                t.IsVisible = true;
+                t.ScaleX = baseScaleX;
+                t.ScaleY = baseScaleY;
+                _inAppearFadeIn = true;
+                _appearFadeInTimer = 0f;
+            }
         }
 
         // =========================
@@ -247,7 +268,8 @@ public class ComboKeySlot : Script
             _fadeInTimer += Time.DeltaTime;
             float t01 = Math.Min(_fadeInTimer / _fadeInDuration, 1f);
             float eased = 1f - (1f - t01) * (1f - t01);
-            GetFade().SetAlpha(0.2f + 0.8f * eased);
+            _currentAlpha = 0.2f + 0.8f * eased;
+            GetFade().SetAlpha(_currentAlpha);
             if (t01 >= 1f) _inFadeIn = false;
         }
 
@@ -260,8 +282,22 @@ public class ComboKeySlot : Script
             float t01 = Math.Min(_fadeToDimTimer / _fadeToDimDuration, 1f);
             // ease-out: fast drop then settles slowly at dim
             float eased = 1f - (1f - t01) * (1f - t01);
-            GetFade().SetAlpha(1.0f - 0.8f * eased);
+            _currentAlpha = 1.0f - 0.8f * eased;
+            GetFade().SetAlpha(_currentAlpha);
             if (t01 >= 1f) _isFadingToDim = false;
+        }
+
+        // =========================
+        // Appear fade-in (0 → dim at level/session start)
+        // =========================
+        if (_inAppearFadeIn)
+        {
+            _appearFadeInTimer += Time.DeltaTime;
+            float t01 = Math.Min(_appearFadeInTimer / AppearFadeInDuration, 1f);
+            float eased = 1f - (1f - t01) * (1f - t01);
+            _currentAlpha = 0.2f * eased;
+            GetFade().SetAlpha(_currentAlpha);
+            if (t01 >= 1f) _inAppearFadeIn = false;
         }
 
         // =========================
@@ -320,6 +356,7 @@ public class ComboKeySlot : Script
         scaleTimer = 0f;
         isShowingResult = false;
         isShowingCorrectHint = false;
+        _inAppearFadeIn = false;
     }
 
     public void ShowCorrect(char key)
@@ -331,6 +368,8 @@ public class ComboKeySlot : Script
         isShowingCorrectHint = false;
         _inFadeIn = false;
         _isFadingToDim = false;
+        _inAppearFadeIn = false;
+        _currentAlpha = 1.0f;
         GetFade().SetAlpha(1.0f);
 
         var sprite = GetSprite();
@@ -355,6 +394,8 @@ public class ComboKeySlot : Script
         isShowingCorrectHint = false;
         _inFadeIn = false;
         _isFadingToDim = false;
+        _inAppearFadeIn = false;
+        _currentAlpha = 1.0f;
         GetFade().SetAlpha(1.0f);
 
         var sprite = GetSprite();
@@ -460,6 +501,8 @@ public class ComboKeySlot : Script
         isPoppingCorrect = false;
         _inFadeIn = false;
         _isFadingToDim = false;
+        _inAppearFadeIn = false;
+        _currentAlpha = 0f;
     }
 
     public void Hide()
@@ -527,6 +570,7 @@ public class ComboKeySlot : Script
 
         var fade = GetFade();
         fade.SetAlpha(0.2f); // start dim, fade-in to full over one beat
+        _currentAlpha = 0.2f;
 
         var transform = GetTransform();
         transform.IsVisible = true;
@@ -540,6 +584,7 @@ public class ComboKeySlot : Script
         isShowingCorrectHint = false;
         isPoppingCorrect = false;
         _isFadingToDim = false;
+        _inAppearFadeIn = false;
 
         _fadeInDuration = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat : 0.5f;
         _fadeInTimer = 0f;
@@ -561,6 +606,7 @@ public class ComboKeySlot : Script
 
         var fade = GetFade();
         fade.SetAlpha(0.2f); // dim — not pressable yet
+        _currentAlpha = 0.2f;
 
         var transform = GetTransform();
         transform.IsVisible = true;
@@ -574,6 +620,7 @@ public class ComboKeySlot : Script
         isPoppingCorrect = false;
         _inFadeIn = false;
         _isFadingToDim = false;
+        _inAppearFadeIn = false;
     }
 
     // FOR PLAYER SLOTS: smoothly fade from full opacity back to dim when enemy turn resets
@@ -601,11 +648,15 @@ public class ComboKeySlot : Script
         isShowingCorrectHint = false;
         isPoppingCorrect = false;
         _inFadeIn = false;
+        _inAppearFadeIn = false;
 
         var fade = GetFade();
-        if (wasVisible)
+        // Only do the flash-to-full-then-dim animation when coming from full opacity (e.g. after player turn).
+        // If the slot is already at dim or invisible (e.g. level start), just snap to dim.
+        if (wasVisible && _currentAlpha > 0.5f)
         {
             fade.SetAlpha(1.0f);
+            _currentAlpha = 1.0f;
             _fadeToDimDuration = duration;
             _fadeToDimTimer    = 0f;
             _isFadingToDim     = true;
@@ -613,6 +664,7 @@ public class ComboKeySlot : Script
         else
         {
             fade.SetAlpha(0.2f);
+            _currentAlpha = 0.2f;
             _isFadingToDim = false;
         }
     }
