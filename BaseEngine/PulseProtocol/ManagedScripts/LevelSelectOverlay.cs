@@ -234,6 +234,7 @@ public class LevelSelectSelector : Script
 public class LevelSelectStartDisc : Script
 {
     private bool initialized = false;
+    private bool wasStartHovered = false;
     private float baseScaleX;
     private float baseScaleY;
     private const float SpinSpeed = 45.0f;
@@ -282,6 +283,13 @@ public class LevelSelectStartDisc : Script
         float startNy = (my - t.Y) / (baseScaleY * StartHitboxScale);
         bool isStartHovered = input.InGameViewport && (startNx * startNx + startNy * startNy <= 1.0f);
 
+        if (isStartHovered && !wasStartHovered)
+        {
+            AudioComponent audio = GetAudio();
+            audio.PlaySFX("SFX_Button_Hover");
+        }
+        wasStartHovered = isStartHovered;
+
         if (!isDiscHovered)
             t.RotX += SpinSpeed * Time.DeltaTime;
 
@@ -293,6 +301,9 @@ public class LevelSelectStartDisc : Script
 
         if (isStartHovered && input.IsMouseButtonTriggered(0))
         {
+            AudioComponent audio = GetAudio();
+            audio.PlaySFX("SFX_Button_Select");
+
             string sceneToLoad = NavigationButtons.SelectedLevelScene;
             if (!LevelSelectCard.IsSceneUnlocked(sceneToLoad))
                 return;

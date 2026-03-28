@@ -54,12 +54,20 @@ public static class DropdownState
 // ======================================================
 public class DropdownToggle : Script
 {
+    private static bool startupModeApplied = false;
     private bool initialized = false;
     private float baseScaleX;
     private float baseScaleY;
 
     public override void Update()
     {
+        if (!startupModeApplied)
+        {
+            startupModeApplied = true;
+            bool wantFullscreen = UserSettingsStore.GetFullscreen();
+            ToggleScreenAPI.SetFullscreen(wantFullscreen);
+        }
+
         InputComponent input = GetInput();
         TransformComponent t = GetTransform();
 
@@ -209,6 +217,7 @@ public class DropdownOptionFullscreen : Script
         if (hovered && input.IsMouseButtonTriggered(0))
         {
             ToggleScreenAPI.ToggleFullscreen();
+            UserSettingsStore.SetFullscreen(ToggleScreenAPI.IsFullscreen());
             DropdownState.ScreenDropdownOpen = false;
         }
     }
@@ -292,6 +301,7 @@ public class DropdownOptionWindowed : Script
         if (hovered && input.IsMouseButtonTriggered(0))
         {
             ToggleScreenAPI.ToggleFullscreen();
+            UserSettingsStore.SetFullscreen(ToggleScreenAPI.IsFullscreen());
             DropdownState.ScreenDropdownOpen = false;
         }
     }

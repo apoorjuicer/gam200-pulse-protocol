@@ -77,6 +77,10 @@ public class NavigationButtons : Script
     private static bool waitingForSceneTransition = false;
     private static string pendingScene = "";
 
+    // Used by background scripts to avoid one-frame visual gaps when switching
+    // from pause overlay to settings overlay in gameplay scenes.
+    public static bool IsSettingsOpenedFromPause => openedSettingsFromPause;
+
     public override void Update()
     {
         // Reset history when a new Play session starts (frame count resets to 0)
