@@ -1,4 +1,20 @@
-﻿using System;
+﻿/******************************************************************************/
+/**
+* @file        ComboSystem.cs
+* @project     Pulse Protocol
+* @author      Carrie Lam (70%)
+*              Chloe Lau (30%)
+* @brief       Validates player key input against the enemy weakness combo, 
+*              handling beat-timing judgement (PERFECT/GREAT/MISS) and one-key-per-beat
+*              gating.
+*
+* @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+*              Reproduction or disclosure of this file or its contents without the
+*              prior written consent of DigiPen Institute of Technology is prohibited.
+*
+/******************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using ScriptAPI;
 
@@ -47,7 +63,11 @@ public class ComboSystem : Script
     // Cache beat duration so we can measure distance to NEXT beat
     private float cachedBeatDuration = 0.5f; // fallback default (~120 BPM)
 
-    private int lastInputBeat = -1;
+    // per slot time gate (replaced one key per beat gate)
+    private float lastAcceptedPressTime = -999f;
+    private float minTimeBetweenPresses = 0.25f;
+
+    // private int lastInputBeat = -1;
 
     // =========================
     // Enemy Weakness (injected)
@@ -118,6 +138,22 @@ public class ComboSystem : Script
         currentEnemyWeakness = weaknessCombo;
         maxComboLength = weaknessCombo.Length;
         ResetCombo();
+
+        // calc min time between presses from slotoffsets so fast patterns with 0.25 gaps are not blocked
+        float[] offsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0.0f, 0.5f, 1.0f, 1.5f };
+        if (offsets.Length >= 2)
+        {
+            float minGap = float.MaxValue;
+            for (int i = 1; i < offsets.Length; i++) {
+                float gap = offsets[i] - offsets[i - 1];
+                if (gap < minGap) minGap = gap;
+            }
+            minTimeBetweenPresses = minGap * 0.8f;
+        }
+        else {
+            minTimeBetweenPresses = cachedBeatDuration * 0.8f;
+        }
+
         Console.WriteLine($"[ComboSystem] Weakness set to: {weaknessCombo} (length: {maxComboLength})");
     }
 
@@ -139,7 +175,7 @@ public class ComboSystem : Script
         float beatDuration = Conductor.Instance!.GetBeatDuration();
         // Back-date by half a frame: InputBridge detects taps one frame late (prev/cur polling),
         // so the press likely happened ~0.5 frames ago on average.
-        float currentSongTime = Conductor.Instance!.GetAdjustedSongTime();
+        float currentSongTime = Conductor.Instance!.GetVisualAdjustedSongTime();
 
         float timeSince = (currentSongTime % beatDuration + beatDuration) % beatDuration;
         float timeUntilNext = beatDuration - timeSince;
@@ -152,17 +188,12 @@ public class ComboSystem : Script
         // =========================
         // One-key-per-beat gate
         // =========================
-        
-        int targetBeat = (timeSince <= timeUntilNext)
-            ? Conductor.Instance!.GetCurrentBeat()
-            : Conductor.Instance!.GetCurrentBeat() + 1;
-
-        if (targetBeat == lastInputBeat)
+        float timeSinceLastPress = currentSongTime - lastAcceptedPressTime;
+        if (timeSinceLastPress < minTimeBetweenPresses)
         {
-            Console.WriteLine($"[ComboSystem] [{key}] IGNORED — beat slot {targetBeat} already used (one key per beat)");
+            Console.WriteLine($"[ComboSystem] [{key}] IGNORED - too soon after last press ({timeSinceLastPress:F3}s < {minTimeBetweenPresses:F3}s)");
             return;
         }
-        lastInputBeat = targetBeat;
 
         // =========================
         // Judgement
@@ -181,8 +212,7 @@ public class ComboSystem : Script
         
         if (judgement == "MISS")
         {
-            Console.WriteLine($"[ComboSystem] [{key}] MISS — pressed too far from beat (Δ={delta:F3}s). Slot {targetBeat} freed.");
-            lastInputBeat = -1; // free the slot so they can retry on the same beat window
+            Console.WriteLine($"[ComboSystem] [{key}] MISS — pressed too far from beat (Δ={delta:F3}s). Slot freed.");
             ScoreManager.Instance?.AddScore("MISS");
             if (ComboDisplayManager.Instance != null)
                 ComboDisplayManager.Instance.ShowJudgement("MISS");
@@ -191,6 +221,7 @@ public class ComboSystem : Script
             return;
         }
 
+        lastAcceptedPressTime = currentSongTime;
         hitResults.Add(judgement);
         currentCombo.Add(key);
 
@@ -252,7 +283,7 @@ public class ComboSystem : Script
         currentCombo.Clear();
         hitResults.Clear();
         comboCompleted = false;
-        lastInputBeat = -1;
+        lastAcceptedPressTime = -999f;
     }
 
     // =========================

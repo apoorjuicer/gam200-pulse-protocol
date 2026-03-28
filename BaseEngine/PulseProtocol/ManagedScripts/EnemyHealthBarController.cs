@@ -29,7 +29,6 @@ public class EnemyHealthBarController : Script
         "../../PulseProtocol/Assets/Textures/UI/enemy_hp4_04.png"
     };
 
-    // Global nudges if needed.
     public float GlobalOffsetX = 0f;
     public float GlobalOffsetY = 0f;
     public float ScaleX = 176f;
@@ -61,7 +60,6 @@ public class EnemyHealthBarController : Script
 
         barTf.IsVisible = true;
 
-        // Follow active enemy (centered-under enemy with per-type tuning).
         var enemyTf = EnemyRhythmController.Instance.GetTransform();
         float offsetX =
             GlobalOffsetX +

@@ -35,7 +35,7 @@ public class Conductor : Script
     public static float CalibratedOffset = 0.125f;
 
     // Set by VisualLatencyCalibrator — how many seconds to pre-fire visuals to compensate for display pipeline lag.
-    public static float CalibratedDisplayOffset = 0f;
+    public static float CalibratedDisplayOffset = 0.05f;
 
     // Compensates for FMOD output buffer lag (~90ms hardware delay).
     public float MusicLatencyOffset = 0.125f;
@@ -45,7 +45,7 @@ public class Conductor : Script
     public float DisplayLatencyOffset = 0f;
 
     // Compensates for where beat 1 actually starts in the BGM audio file.
-    public float BeatStartOffset = 0.75f;
+    public float BeatStartOffset = 0.024f;
 
     public override void Update()
     {
@@ -140,6 +140,12 @@ public class Conductor : Script
     }
 
     public int GetCurrentBeat() => lastBeat;
+
+    public int GetVisualCurrentBeat()
+    {
+        float visualTime = cachedAdjustedTime + DisplayLatencyOffset;
+        return (int)Math.Floor(visualTime / secondsPerBeat);
+    }
     public float GetSongTime() => songTime;
 
     public float GetAdjustedSongTime() => cachedAdjustedTime;

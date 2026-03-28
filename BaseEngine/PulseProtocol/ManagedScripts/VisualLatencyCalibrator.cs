@@ -168,7 +168,7 @@ public class VisualLatencyCalibrator : Script
     public void Skip()
     {
         if (Conductor.Instance != null)
-            Conductor.Instance.DisplayLatencyOffset = originalOffset;
+            Conductor.Instance.DisplayLatencyOffset = Conductor.CalibratedDisplayOffset;
 
         Console.WriteLine("[VisualLatencyCalibrator] Skipped — keeping existing DisplayLatencyOffset.");
         Scene.LoadScene(NextScene);

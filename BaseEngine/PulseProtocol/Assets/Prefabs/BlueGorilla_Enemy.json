@@ -55,7 +55,7 @@
     },
     {
       "name": {
-        "name": "Gorilla_Enemy"
+        "name": "BlueGorilla_Enemy"
       }
     },
     {
@@ -76,7 +76,7 @@
     {
       "script": {
         "ScriptName": [
-          "Gorilla"
+          "BlueGorilla"
         ]
       }
     }
