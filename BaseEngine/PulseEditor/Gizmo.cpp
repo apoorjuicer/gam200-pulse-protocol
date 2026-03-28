@@ -17,6 +17,7 @@
  /******************************************************************************/
 
 #include "pch/pch_temp.h"
+#include "../../imgui/imgui_internal.h"  // for GImGui->HoveredWindow (viewport blocking check)
 
 // Core editor / engine headers
 //#include "Editor.h" // for GameViewport, GizmoState, selectedEntity, INVALID_ENTITY
@@ -550,7 +551,30 @@ namespace PulseEditor
             return;
 
         // -----------------------------------------------------------------------------
-       // CAMERA PAN 
+        // VIEWPORT BLOCKING CHECK
+        // Prevent any viewport interaction when a panel or modal covers the viewport.
+        // Two cases:
+        //   1. A modal/popup is open (e.g. "New Scene" dialog).
+        //   2. A floating panel window has been dragged on top of the viewport.
+        //      "LayoutOverlay" is the expected background window over the viewport;
+        //      any other hovered window means something is blocking it.
+        // -----------------------------------------------------------------------------
+        bool viewportBlocked = false;
+        {
+            if (ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel))
+            {
+                viewportBlocked = true;
+            }
+            else
+            {
+                ImGuiWindow* hovWin = GImGui->HoveredWindow;
+                if (hovWin && strcmp(hovWin->Name, "LayoutOverlay") != 0)
+                    viewportBlocked = true;
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+       // CAMERA PAN
        // -----------------------------------------------------------------------------
         {
             window = glfwGetCurrentContext();
@@ -602,7 +626,7 @@ namespace PulseEditor
 
             if (!PulseEditor::IsPlaying())
             {
-                if (allowCamera && ImGui::IsMouseDown(ImGuiMouseButton_Middle))
+                if (allowCamera && !viewportBlocked && ImGui::IsMouseDown(ImGuiMouseButton_Middle))
                 {
                     double dx = curX - lastX;
                     double dy = curY - lastY;
@@ -621,7 +645,7 @@ namespace PulseEditor
             auto& activeCam = GLApp::gEditorCamera;
 
             // Only zoom in editor mode, and only if mouse is over the game viewport
-            if (!PulseEditor::IsPlaying() && allowCamera && wheel != 0.0f)
+            if (!PulseEditor::IsPlaying() && allowCamera && !viewportBlocked && wheel != 0.0f)
             {
                 const float oldZ = activeCam.zoom;
                 const float step = 1.12f;
@@ -687,6 +711,54 @@ namespace PulseEditor
                 g_gizmo.activeHandle = GizmoHandle::None;
             }
             s_lastKnownScene = currentScene;
+        }
+
+        // ---------------------------------------------------------------------
+        // PANEL DRAG DESELECT
+        // Clear selection whenever the user grabs a panel title bar to move it.
+        // GImGui->MovingWindow is non-null for every frame a window is being dragged.
+        // ---------------------------------------------------------------------
+        if (GImGui->MovingWindow != nullptr)
+        {
+            selectedEntity = INVALID_ENTITY;
+            selectedHandle = nullptr;
+            g_gizmo.dragging = false;
+            g_gizmo.active = INVALID_ENTITY;
+            g_gizmo.activeHandle = GizmoHandle::None;
+        }
+
+        // ---------------------------------------------------------------------
+        // TOPBAR / BUILD SIZE ANALYZER CLICK DESELECT
+        // Clear selection when the user clicks the TopBar (any button or the
+        // Tools menu and its popup children) or the Build Size Analyzer panel
+        // (catches docked-tab drag starts as well as regular clicks).
+        // We walk the ParentWindow chain so that menu popups, which have their
+        // own window name, are still recognised as belonging to TopBar.
+        // ---------------------------------------------------------------------
+        {
+            ImGuiWindow* hovWin = GImGui->HoveredWindow;
+            if (hovWin && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+            {
+                bool shouldDeselect = false;
+                for (ImGuiWindow* w = hovWin; w != nullptr; w = w->ParentWindow)
+                {
+                    if (strcmp(w->Name, "TopBar") == 0 ||
+                        strcmp(w->Name, "Build Size Analyzer") == 0)
+                    {
+                        shouldDeselect = true;
+                        break;
+                    }
+                }
+
+                if (shouldDeselect)
+                {
+                    selectedEntity = INVALID_ENTITY;
+                    selectedHandle = nullptr;
+                    g_gizmo.dragging = false;
+                    g_gizmo.active = INVALID_ENTITY;
+                    g_gizmo.activeHandle = GizmoHandle::None;
+                }
+            }
         }
 
         // Don't allow gizmo interaction during play mode
@@ -892,7 +964,7 @@ namespace PulseEditor
         // ---------------------------------------------------------------------
         // MOUSE INPUT HANDLING
         // ---------------------------------------------------------------------
-        if (inGameRect && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+        if (inGameRect && !viewportBlocked && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
         {
             // Priority: Gizmo handle > Entity selection
             if (selectedEntity != INVALID_ENTITY && hoveredHandle != GizmoHandle::None)
