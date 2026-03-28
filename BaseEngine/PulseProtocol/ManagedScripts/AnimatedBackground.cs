@@ -94,7 +94,9 @@ public class AnimatedBackground : Script
 // pause menu animation overlay
 public class PauseAnimatedBackground : AnimatedBackground
 {
-    protected override bool ShouldShow() => NavigationButtons.ShowPauseOverlay;
+    protected override bool ShouldShow() =>
+        NavigationButtons.ShowPauseOverlay ||
+        (NavigationButtons.ShowSettingsOverlay && NavigationButtons.IsSettingsOpenedFromPause);
     protected override string FramePrefix() => "pause";
         protected override int TotalFrames() => 19;
 }

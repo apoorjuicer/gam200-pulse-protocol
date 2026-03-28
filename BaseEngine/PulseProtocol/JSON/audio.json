@@ -4,28 +4,28 @@
             "id": "BGM_L1",
             "path": "Assets/Sound/BG & Ambience/BGM_L1_Theme.mp3",
             "loop": true,
-            "volume": 1.0,
+            "volume": 0.134,
             "audiotype": "BGM"
         },
         {
             "id": "BGM_L1_TESTING",
             "path": "Assets/Sound/BG & Ambience/BGM_Level_1 _V4.mp3",
             "loop": true,
-            "volume": 1.0,
+            "volume": 0.146,
             "audiotype": "BGM"
         },
         {
             "id": "BGM_L2_TESTING",
             "path": "Assets/Sound/BG & Ambience/BGM_Level_2_V2.mp3",
             "loop": true,
-            "volume": 1.0,
+            "volume": 0.144,
             "audiotype": "BGM"
         },
         {
             "id": "BGM_GENERAL",
             "path": "Assets/Sound/BG & Ambience/TEMP_Menu_Demo_V1.mp3",
             "loop": true,
-            "volume": 1.0,
+            "volume": 0.147,
             "audiotype": "BGM"
         },
         {
@@ -39,154 +39,154 @@
             "id": "SFX_W_Key",
             "path": "Assets/Sound/Keys/SFX_W_Key.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.208,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_A_Key",
             "path": "Assets/Sound/Keys/SFX_A_Key.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.673,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_S_Key",
             "path": "Assets/Sound/Keys/SFX_S_Key.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.392,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_D_Key",
             "path": "Assets/Sound/Keys/SFX_D_Key.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.374,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_Invalid_Key",
             "path": "Assets/Sound/Keys/SFX_Invalid_Key.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.225,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_WrongInput",
             "path": "Assets/Sound/Keys/SFX_WrongInput.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.357,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_WrongInput_2",
             "path": "Assets/Sound/Keys/SFX_WrongInput_2.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.33,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_SwordSwing_1",
             "path": "Assets/Sound/Player/SFX_SwordSwing_1.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.213,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_SwordSwing_2",
             "path": "Assets/Sound/Player/SFX_SwordSwing_2.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.242,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_Border_Beat",
             "path": "Assets/Sound/UI/SFX_Border_Beat.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.401,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_Button_Hover",
             "path": "Assets/Sound/UI/SFX_Button_Hover.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.244,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_Button_Select",
             "path": "Assets/Sound/UI/SFX_Button_Select.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.256,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_ComboEstablished_1",
             "path": "Assets/Sound/UI/SFX_ComboEstablished_1.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.477,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_ComboStreakBroken",
             "path": "Assets/Sound/UI/SFX_ComboStreakBroken.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.203,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_GameOver_1",
             "path": "Assets/Sound/UI/SFX_GameOver_1.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.092,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_Screen_Close_1",
             "path": "Assets/Sound/UI/SFX_Screen_Close_1.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.165,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_Screen_Transition_1",
             "path": "Assets/Sound/UI/SFX_Screen_Transition_1.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.105,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_Screen_Transition_2",
             "path": "Assets/Sound/UI/SFX_Screen_Transition_2.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.25,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_UI_PopUp",
             "path": "Assets/Sound/UI/SFX_UI_PopUp.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.33,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_UI_Popup_2",
             "path": "Assets/Sound/UI/SFX_UI_Popup_2.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.199,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_Enemy_Ping",
             "path": "Assets/Sound/Keys/SFX_Enemy_Ping.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.122,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_Player_Ping",
             "path": "Assets/Sound/Keys/SFX_Player_Ping.mp3",
             "loop": false,
-            "volume": 1.0,
+            "volume": 0.161,
             "audiotype": "SFX"
         }
     ]
