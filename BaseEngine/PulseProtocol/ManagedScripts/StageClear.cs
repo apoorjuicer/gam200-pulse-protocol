@@ -11,6 +11,7 @@ public class StageClearElement : Script
     public static void StageClear()
     {
         NavigationButtons.SetStageClearPaused(true);
+        NavigationButtons.ReportLevelCleared(Scene.GetCurrentScene());
         IsCleared = true;
         Console.WriteLine("[StageClear]  StageClear() called");
     }
