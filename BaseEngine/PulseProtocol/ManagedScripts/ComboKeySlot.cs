@@ -33,16 +33,16 @@ public class ComboKeySlot : Script
     public string DSprite = "../../PulseProtocol/Assets/Textures/UI/D.png";
 
     // Player fill sprites
-    public string BlankSprite = "../../PulseProtocol/Assets/Textures/UI/question mark blank key.png";
-    public string GreenWSprite = "../../PulseProtocol/Assets/Textures/UI/Player Input GREEN W.png";
-    public string GreenASprite = "../../PulseProtocol/Assets/Textures/UI/Player Input GREEN A.png";
-    public string GreenSSprite = "../../PulseProtocol/Assets/Textures/UI/Player Input GREEN S.png";
-    public string GreenDSprite = "../../PulseProtocol/Assets/Textures/UI/Player Input GREEN D.png";
+    public string BlankSprite = "questionmark_blankkey";
+    public string GreenWSprite = "W_KEY_GREEN";
+    public string GreenASprite = "A_KEY_GREEN";
+    public string GreenSSprite = "S_KEY_GREEN";
+    public string GreenDSprite = "D_KEY_GREEN";
 
-    public string RedWSprite = "../../PulseProtocol/Assets/Textures/UI/Player Input RED W.png";
-    public string RedASprite = "../../PulseProtocol/Assets/Textures/UI/Player Input RED A.png";
-    public string RedSSprite = "../../PulseProtocol/Assets/Textures/UI/Player Input RED S.png";
-    public string RedDSprite = "../../PulseProtocol/Assets/Textures/UI/Player Input RED D.png";
+    public string RedWSprite = "W_KEY_RED";
+    public string RedASprite = "A_KEY_RED";
+    public string RedSSprite = "S_KEY_RED";
+    public string RedDSprite = "D_KEY_RED";
 
     public float DisplayDuration = 0.5f;
     public float ScaleAnimDuration = 0.15f;

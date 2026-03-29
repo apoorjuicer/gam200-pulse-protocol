@@ -105,7 +105,24 @@ Full Level Progression: Currently you are only able to defeat one enemy before y
 HP Progression: If you fail to input the combo successfully before the enemy reaches you, you die instantly at the moment.
 
 
-[ 6. TEAM ROSTER ]
+[ 6. CHEAT CODES ]
+
+Level Skip:
+-----------
+Shift + 1  : Skip to Level 1
+Shift + 2  : Skip to Level 2
+Shift + 3  : Skip to Level 3
+
+In-Game Cheats:
+---------------
+I          : Toggle player invincibility (player takes no damage)
+K          : Instantly kill the current enemy (deals 99999 damage)
+O          : Clear the current wave (triggers the stage clear overlay)
+
+Note: Cheat codes only work when you are in the levels.
+
+
+[ 7. TEAM ROSTER ]
 
 Chloe Lau Rey En (IMGD)
 - Role: Product Manager

@@ -129,9 +129,9 @@ public class OrderSlipUIController : Script
     {
         switch (type)
         {
-            case EnemyIconType.Rat: return "enemy icon rat.png";
-            case EnemyIconType.Bat: return "enemy icon bat.png";
-            case EnemyIconType.BlueGorilla: return "enemy icon gorilla.png";
+            case EnemyIconType.Rat: return "enemyicon_rat";
+            case EnemyIconType.Bat: return "enemyicon_bat";
+            case EnemyIconType.BlueGorilla: return "enemyicon_gorilla";
             default: return "";
         }
     }
@@ -140,9 +140,9 @@ public class OrderSlipUIController : Script
     {
         switch (type)
         {
-            case EnemyIconType.Rat: return "enemy icon rat greyed.png";
-            case EnemyIconType.Bat: return "enemy icon bat greyed.png";
-            case EnemyIconType.BlueGorilla: return "enemy icon gorilla greyed.png";
+            case EnemyIconType.Rat: return "enemyicon_rat_grey";
+            case EnemyIconType.Bat: return "enemyicon_bat_grey";
+            case EnemyIconType.BlueGorilla: return "enemyicon_gorilla_grey";
             default: return "";
         }
     }

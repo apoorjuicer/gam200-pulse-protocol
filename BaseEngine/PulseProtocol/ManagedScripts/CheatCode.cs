@@ -44,12 +44,11 @@ public class Cheats: Script
                 Scene.LoadScene(LoadingScreen);
             }
 
-            // for ltr
-            //else if(input.IsKeyTriggered(Key3))
-            //{
-            //    LoadingScreenScript.NextLevel = Level3;
-            //    Scene.LoadScene(LoadingScreen);
-            //}
+            else if(input.IsKeyTriggered(Key3))
+            {
+                LoadingScreenScript.NextLevel = Level3;
+                Scene.LoadScene(LoadingScreen);
+            }
         }
 
         // Clear wave
