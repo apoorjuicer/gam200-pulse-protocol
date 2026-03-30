@@ -157,6 +157,8 @@ namespace PulseEditor
         static bool s_showNewGamePopup = false;
         static char s_newGameNameBuf[128] = {};
         static std::string s_newGameResult;
+        static bool s_openGameSwitchedAfterCreate = false;
+        static std::string s_newGameCreatedPath;
 
         ImGuiWindowFlags top_flags =
             ImGuiWindowFlags_NoTitleBar |
@@ -306,14 +308,23 @@ namespace PulseEditor
                 
 
                 // Show a message that tell user need to restart the entire editor as FilePathToGame takes effect only on next time it launches
-                ImGui::OpenPopup("GameSwitched");
+                ImGui::OpenPopup("Game Switched");
             }
         }
 
-        if (ImGui::BeginPopupModal("GameSwitched", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        ImGui::SetNextWindowSize(ImVec2(520, 0), ImGuiCond_Always);
+        if (ImGui::BeginPopupModal("Game Switched", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::Text("Game project switched!");
             ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "CMake cache auto-cleared.");
+            if (!s_newGameCreatedPath.empty())
+            {
+                ImGui::Separator();
+                ImGui::Text("Project created at:");
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.4f, 1.0f));
+                ImGui::TextWrapped("%s", s_newGameCreatedPath.c_str());
+                ImGui::PopStyleColor();
+            }
             ImGui::Separator();
             ImGui::Text("Next steps:");
             ImGui::BulletText("Close Visual Studio");
@@ -321,6 +332,7 @@ namespace PulseEditor
             ImGui::BulletText("Reopen PulseEngine.sln");
             if (ImGui::Button("OK"))
             {
+                s_newGameCreatedPath.clear();
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();
@@ -329,7 +341,7 @@ namespace PulseEditor
         // For new scene
         if (ImGui::BeginPopupModal("New Scene Name", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
-            ImGui::Text("Enter a name for the new game project:");
+            ImGui::Text("Enter a name for the new scene:");
             ImGui::InputText("##gamename", s_newGameNameBuf, sizeof(s_newGameNameBuf));
 
             if (!s_newGameResult.empty())
@@ -710,8 +722,9 @@ namespace PulseEditor
                         }
                     }
 
-                    s_newGameResult = "Game '" + gameName + "' created! CMake cache auto-cleared.\n"
-                                      "Close VS -> run ran.bat -> reopen .sln";
+                    s_newGameCreatedPath = gameRoot.string();
+                    s_openGameSwitchedAfterCreate = true;
+                    ImGui::CloseCurrentPopup();
                 }
                 else
                 {
@@ -727,6 +740,13 @@ namespace PulseEditor
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();
+        }
+
+        // Re-open the GameSwitched info popup after a successful New Game creation
+        if (s_openGameSwitchedAfterCreate)
+        {
+            ImGui::OpenPopup("Game Switched");
+            s_openGameSwitchedAfterCreate = false;
         }
 
         // ------------------------------------------------------------

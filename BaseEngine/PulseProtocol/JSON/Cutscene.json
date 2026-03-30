@@ -10,8 +10,8 @@
                             "y": 11.5384521484375
                         },
                         "scale": {
-                            "x": 800.0,
-                            "y": 600.0
+                            "x": 1078.0,
+                            "y": 646.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -27,7 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 1.png",
+                        "spriteName": "Assets/Textures/Cutscene/1.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -78,8 +78,8 @@
                             "y": 11.0
                         },
                         "scale": {
-                            "x": 800.0,
-                            "y": 600.0
+                            "x": 1078.0,
+                            "y": 646.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -95,7 +95,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 2.png",
+                        "spriteName": "Assets/Textures/Cutscene/2.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -146,8 +146,8 @@
                             "y": -300.0
                         },
                         "scale": {
-                            "x": 800.0,
-                            "y": 600.0
+                            "x": 1078.0,
+                            "y": 646.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -163,7 +163,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 3.png",
+                        "spriteName": "Assets/Textures/Cutscene/3.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -214,8 +214,8 @@
                             "y": -300.0
                         },
                         "scale": {
-                            "x": 800.0,
-                            "y": 600.0
+                            "x": 1078.0,
+                            "y": 646.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -231,7 +231,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 4.png",
+                        "spriteName": "Assets/Textures/Cutscene/4.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -282,8 +282,8 @@
                             "y": 300.0
                         },
                         "scale": {
-                            "x": 800.0,
-                            "y": 600.0
+                            "x": 1078.0,
+                            "y": 646.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -299,7 +299,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 5.png",
+                        "spriteName": "Assets/Textures/Cutscene/5.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -350,8 +350,8 @@
                             "y": 300.0
                         },
                         "scale": {
-                            "x": 800.0,
-                            "y": 600.0
+                            "x": 1078.0,
+                            "y": 646.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -367,7 +367,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 6.png",
+                        "spriteName": "Assets/Textures/Cutscene/6.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -418,8 +418,8 @@
                             "y": 300.0
                         },
                         "scale": {
-                            "x": 800.0,
-                            "y": 600.0
+                            "x": 1078.0,
+                            "y": 646.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -435,7 +435,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 7.png",
+                        "spriteName": "Assets/Textures/Cutscene/7.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -486,8 +486,8 @@
                             "y": 300.0
                         },
                         "scale": {
-                            "x": 800.0,
-                            "y": 600.0
+                            "x": 1078.0,
+                            "y": 646.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -503,7 +503,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 8.png",
+                        "spriteName": "Assets/Textures/Cutscene/8.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -532,414 +532,6 @@
                 {
                     "name": {
                         "name": "Panel8"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 1,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -3809.23095703125,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 800.0,
-                            "y": 600.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 9.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "CutscenePanel"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Panel9"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 1,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -3809.23095703125,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 800.0,
-                            "y": 600.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 10.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "CutscenePanel"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Panel10"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 1,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -3873.845947265625,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 800.0,
-                            "y": 600.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 11.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "CutscenePanel"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Panel11"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 1,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -3237.0283203125,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 800.0,
-                            "y": 600.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 12.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "CutscenePanel"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Panel12"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 1,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -3067.572265625,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 800.0,
-                            "y": 600.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 13.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "CutscenePanel"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Panel13"
-                    }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI",
-                        "mask": 4,
-                        "sortingLayer": 2,
-                        "orderInLayer": 1,
-                        "z": 100.0
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": {
-                            "x": -3643.72216796875,
-                            "y": 300.0
-                        },
-                        "scale": {
-                            "x": 800.0,
-                            "y": 600.0
-                        },
-                        "rotation": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "isVisible": true,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
-                        "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/Draft Cutscene/cutscene panel 14.png",
-                        "tintColor": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0,
-                            "a": 1.0
-                        }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0,
-                        "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
-                        "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [
-                            "CutscenePanel"
-                        ]
-                    }
-                },
-                {
-                    "name": {
-                        "name": "Panel14"
                     }
                 },
                 {

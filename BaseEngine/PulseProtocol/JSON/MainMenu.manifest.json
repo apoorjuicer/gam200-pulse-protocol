@@ -44,6 +44,8 @@
             "quitno_btn",
             "quitno_btn_hover",
             //levelselect
+            "levelselect_bg_no_disc",
+            "levelselect_start_disc",
             "levelselect_level1_Icon",
             "levelselect_level2_Icon",
             //"levelselect_level3_Icon",
