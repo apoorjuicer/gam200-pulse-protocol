@@ -209,6 +209,7 @@ public class DropdownOptionFullscreen : Script
         if (hovered && input.IsMouseButtonTriggered(0))
         {
             ToggleScreenAPI.ToggleFullscreen();
+            UserSettingsStore.SetFullscreen(ToggleScreenAPI.IsFullscreen());
             DropdownState.ScreenDropdownOpen = false;
         }
     }
@@ -292,6 +293,7 @@ public class DropdownOptionWindowed : Script
         if (hovered && input.IsMouseButtonTriggered(0))
         {
             ToggleScreenAPI.ToggleFullscreen();
+            UserSettingsStore.SetFullscreen(ToggleScreenAPI.IsFullscreen());
             DropdownState.ScreenDropdownOpen = false;
         }
     }

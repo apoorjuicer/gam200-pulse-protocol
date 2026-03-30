@@ -448,8 +448,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "QuitOverlay",
-                            "SfxKnob"
+                            "QuitOverlay"
                         ]
                     }
                 },
