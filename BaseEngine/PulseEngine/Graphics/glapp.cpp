@@ -91,7 +91,7 @@ void GLApp::init(/*float inputEditorWidth, float inputEditorHeight*/)
 {
 	gBatch.Init(/*maxSprites*/ 10000);
 	
-	GLApp::VPSS shdr_strs{
+	GLApp::VPSS shdr_strs{	//shd_ref
 		std::make_pair(test_vs,    test_fs),    // 0 - test
 		std::make_pair(bg_vs,      bg_fs),      // 1 - background
 		std::make_pair(sprite_vs,  sprite_fs),  // 2 - sprites (supports tint)
@@ -135,15 +135,21 @@ inline AABB PixelsToModelAABB(const AABB& bb, int texW, int texH) {
 	glm::vec2 minPx(bb.min.x, bb.min.y);
 	glm::vec2 maxPx(bb.max.x, bb.max.y);
 
+	// top edge: -texH/2
+	// bottom edge: +texH/2
 	glm::vec2 texHalf(texW * 0.5f, texH * 0.5f);
 	glm::vec2 invTex(1.0f / float(texW), 1.0f / float(texH));
-
+	// VBO becomes -0.5 to +0.5 in both axes.
 	glm::vec2 minLocal = (minPx - texHalf) * invTex;
 	glm::vec2 maxLocal = (maxPx - texHalf) * invTex;
 
 	out.min.x = minLocal.x; out.min.y = minLocal.y;
 	out.max.x = maxLocal.x; out.max.y = maxLocal.y;
 	return out;
+
+	// All in all: 
+	// mdl_ref becomes 0 for background quads 
+	// mdl_ref becomes 1 for sprites
 }
 
 // Convert a framebuffer pixel to NDC inside the current game viewport

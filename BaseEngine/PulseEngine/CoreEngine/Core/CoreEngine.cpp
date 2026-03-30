@@ -1217,7 +1217,8 @@ void CoreEngine::RenderDebugDraw()
 	// F7 - Collision AABB Debug
 	// Uses the sprite's own mdl_to_ndc_xform so the box perfectly tracks the sprite.
 	// AABB min/max are stored in /50 design units (50 units = one Scale dimension),
-	// which equals model-space when divided by 50 (model quad is -0.5..0.5).
+	// which equals 
+	// -space when divided by 50 (model quad is -0.5..0.5).
 	// We submit pre-computed NDC positions, so DebugDraw uses an identity MVP.
 	if (g_inputSystem->isDebugCollisionEnabled())
 	{

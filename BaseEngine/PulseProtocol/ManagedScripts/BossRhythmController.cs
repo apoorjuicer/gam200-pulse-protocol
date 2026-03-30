@@ -28,10 +28,10 @@ public class BossRhythmController : EnemyRhythmController
     protected override void SetupSprites()
     {
         // Reuse Gorilla sheets until boss-specific assets are available.
-        IdleSpriteSheet   = "../Enemies/Gorilla_Idle_spritesheet_1459x977";
-        WalkSpriteSheet   = "../Enemies/Gorilla_Walk_spritesheet_1459x977";
-        AttackSpriteSheet = "../Enemies/Gorilla_Attack_spritesheet_1459x977";
-        HurtSpriteSheet   = "../Enemies/Gorilla_Hurt_spritesheet_1459x977";
+        IdleSpriteSheet   = "gorilla_idle";
+        WalkSpriteSheet   = "gorilla_walk";
+        AttackSpriteSheet = "gorilla_attack";
+        HurtSpriteSheet   = "gorilla_hurt";
 
         IdleFrames = 15;   IdleColumns = 4;   IdleRows = 4;
         WalkFrames = 30;   WalkColumns = 6;   WalkRows = 5;
@@ -105,8 +105,8 @@ public class BossRhythmController : EnemyRhythmController
         string combo = isPhase2 ? BuildPhase2Weakness() : BuildPhase1Weakness();
 
         // Configure variable-length systems before injecting the combo.
-        ComboSystem.Instance?.SetComboLength(combo.Length);
-        TurnManager.Instance?.SetEnemyDisplayBeats(combo.Length + 1); // +1 so all keys reveal before transition
+        if (ComboSystem.Instance != null) ComboSystem.Instance.maxComboLength = combo.Length;
+        if (TurnManager.Instance != null) TurnManager.Instance.EnemyDisplayBeats = combo.Length + 1; // +1 so all keys reveal before transition
 
         // Set the public field (used by TurnManager display log) and inject into ComboSystem.
         WeaknessCombo = combo;
