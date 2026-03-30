@@ -256,11 +256,16 @@ public class TurnManager : Script
             ComboSystem.Instance.ResetCombo();
         }
 
-        // Reset enemy movement for new turn
+        // Reset enemy movement for new turn (may randomize WeaknessCombo)
         if (EnemyRhythmController.Instance != null)
         {
             EnemyRhythmController.Instance.ResetMovementForNewTurn();
         }
+
+        // Re-sync weakness AFTER ResetMovementForNewTurn so ComboSystem always has the
+        // current (possibly newly randomized) combo — fixes green+MISS on turn 2+.
+        if (ComboSystem.Instance != null && EnemyRhythmController.Instance != null)
+            ComboSystem.Instance.SetEnemyWeakness(EnemyRhythmController.Instance.WeaknessCombo);
 
         // BEAT REVEAL!
         if (ComboDisplayManager.Instance != null && EnemyRhythmController.Instance != null)
@@ -372,6 +377,11 @@ public class TurnManager : Script
     {
         return currentPhase;
     }
+
+    // Returns the visual time at which slot 0 is expected to be pressed.
+    // ComboSystem uses this to measure timing against each slot's specific beat
+    // so syncopated patterns (e.g. Bat's 0.25s offsets) work correctly.
+    public float GetPlayerInputStartTime() => playerInputStartTime;
 
     public int GetBeatsInCurrentPhase()
     {
