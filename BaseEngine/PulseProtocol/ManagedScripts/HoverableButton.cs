@@ -54,7 +54,11 @@ public class NavigationButtons : Script
     private bool buttonInitialized = false;
     private bool lastPauseState = false;
     private bool isPauseButton = false;
-    private float hoverScaleBoost = 1.05f;
+    private float hoverScaleBoost = 1.0f;
+    private const float ButtonHitboxScaleX = 1.0f;
+    private const float ButtonHitboxScaleY = 1.0f;
+    private const float ButtonHitboxPadX = 120.0f;
+    private const float ButtonHitboxPadY = 30.0f;
 
     private static bool wasEscPressed = false;
 
@@ -345,8 +349,8 @@ public class NavigationButtons : Script
         float baseScaleX = isCurrentlyHovered ? currentScaleX / hoverScaleBoost : currentScaleX;
         float baseScaleY = isCurrentlyHovered ? currentScaleY / hoverScaleBoost : currentScaleY;
 
-        float halfW = baseScaleX / 2f;
-        float halfH = baseScaleY / 2f;
+        float halfW = (baseScaleX * ButtonHitboxScaleX * 0.5f) + ButtonHitboxPadX;
+        float halfH = (baseScaleY * ButtonHitboxScaleY * 0.5f) + ButtonHitboxPadY;
         float mx = input.WorldMouseX;
         float my = input.WorldMouseY;
 

@@ -14,7 +14,6 @@
 
 int main()
 {
-
     CoreEngine engine;
     Engine = &engine;           // global pointer declared in CoreEngine.h,
                                 // defined once in CoreEngine.cpp
