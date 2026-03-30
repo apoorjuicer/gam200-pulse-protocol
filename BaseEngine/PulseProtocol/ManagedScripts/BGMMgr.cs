@@ -29,8 +29,10 @@ public class GeneralBGM : Script
 
         if (!started)
         {
-            // Don't set volume here - the MusicKnob slider handles it
-            audio.SetSfxVolume(0.25f); // <-- THIS IS THE DEFAULT VOLUME FOR SFX
+            // Apply saved user mix at scene start so startup and settings-open behavior match.
+            audio.SetMasterVolume(UserSettingsStore.GetSliderValue("Volume", 1.0f));
+            audio.SetMusicVolume(UserSettingsStore.GetSliderValue("Music", 1.0f));
+            audio.SetSfxVolume(UserSettingsStore.GetSliderValue("SFX", 0.25f));
             audio.PlayBGM();
             BGMManager.CurrentTrack = "General";
             Console.WriteLine("BGM: Playing General music");
@@ -72,8 +74,10 @@ public class LevelBGM : Script
 
         if (!started)
         {
-            // Don't set volume here - the MusicKnob slider handles it
-            audio.SetSfxVolume(0.25f); // <-- THIS IS THE DEFAULT VOLUME FOR SFX
+            // Apply saved user mix at scene start so startup and settings-open behavior match.
+            audio.SetMasterVolume(UserSettingsStore.GetSliderValue("Volume", 1.0f));
+            audio.SetMusicVolume(UserSettingsStore.GetSliderValue("Music", 1.0f));
+            audio.SetSfxVolume(UserSettingsStore.GetSliderValue("SFX", 0.1f));
 
             audio.PlayBGM();
             //audio.PlayBGM("LVL 1 BGM 90 MILI OFF TEST");

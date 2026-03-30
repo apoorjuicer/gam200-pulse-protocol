@@ -39,10 +39,28 @@ public class EnemyRhythmController : Script
     // === RHYTHM SETTINGS ===
     public RhythmType RhythmType = RhythmType.Syncopated;
     public float StepDistance = 50f;
+    public float[] SlotOffsets = new float[] { 0.0f, 0.5f };
+    // Which UI slot positions (0-3) each key occupies.
+    // Rat uses {0, 1} — two consecutive beats, no gap.
+    public int[] VisualSlotIndices = new int[] { 0, 1 };
+
+    // If true, WeaknessCombo is re-randomized each turn (2 distinct keys from WASD)
+    public bool RandomizeWeakness = true;
+    // If true, VisualSlotIndices is re-randomized each turn (shifts where keys appear visually)
+    public bool RandomizeVisualSlots = true;
+    private static readonly Random _rng = new Random();
 
     // === COMBAT SETTINGS ===
     public int AttackDamage = 5;
     public float Health = 15f;
+    public int MaxHP { get; private set; } = 1;
+
+    // === HEALTH BAR SETTINGS ===
+    public int HealthBarBlockCount = 4;
+    public float HealthBarOffsetX = -102f;
+    public float HealthBarOffsetY = -55f;
+    public float HealthBarScaleOffsetXFactor = 0f;
+    public float HealthBarScaleOffsetYFactor = 0.78f;
 
     // === COLLISION SETTINGS ===
     // "AABB"     = box collision (uses AABB components, may be affected by BroadPhase filtering)
@@ -65,7 +83,7 @@ public class EnemyRhythmController : Script
     private bool playerFound = false;
 
     // === WEAKNESS ===
-    public string WeaknessCombo = "WAWA";
+    public string WeaknessCombo = "WA";
 
     // === INTERNAL STATE ===
     private bool initialized = false;
@@ -236,6 +254,9 @@ public class EnemyRhythmController : Script
 
         HealthComponent eh = GetHealth();
         Health = eh.hp;
+        MaxHP = Math.Max(1, eh.hp);
+        if (HealthBarBlockCount < 2) HealthBarBlockCount = 2;
+        if (HealthBarBlockCount > 4) HealthBarBlockCount = 4;
         eh.isAlive = true;
         Console.WriteLine($"[Enemy] Initialized at ({tf.X:F1}, {tf.Y:F1}) | Health: {eh.hp}");
         Console.WriteLine($"[Enemy] Collision mode: {CollisionMode} | ManualAttackRange: {ManualAttackRange}");
@@ -473,9 +494,7 @@ public class EnemyRhythmController : Script
         TransformComponent myTf = GetTransform();
         myTf.X -= StepDistance;
 
-        string stepSFX = stepSFXToggle ? "SFX_Rat_Steps_2" : "SFX_Rat_Steps_1";
         stepSFXToggle = !stepSFXToggle;
-        GetAudio().PlaySFX(stepSFX);
 
         Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}");
     }
@@ -525,6 +544,21 @@ public class EnemyRhythmController : Script
         if (h.hp <= 0)
             Die();
     }
+
+    public int GetCurrentHP() => GetHealth().hp;
+
+    public float GetHealthPercent()
+    {
+        int hp = GetHealth().hp;
+        if (hp < 0) hp = 0;
+        return (float)hp / MaxHP;
+    }
+
+    public int GetHealthBarBlockCount() => HealthBarBlockCount;
+    public float GetHealthBarOffsetX() => HealthBarOffsetX;
+    public float GetHealthBarOffsetY() => HealthBarOffsetY;
+    public float GetHealthBarScaleOffsetXFactor() => HealthBarScaleOffsetXFactor;
+    public float GetHealthBarScaleOffsetYFactor() => HealthBarScaleOffsetYFactor;
 
     private void Die()
     {
@@ -604,6 +638,32 @@ public class EnemyRhythmController : Script
         Console.WriteLine("[Enemy] ResetMovementForNewTurn() - resetting step counter");
         movementStepsTaken = 0;
 
+        if (RandomizeWeakness)
+        {
+            char[] keys = { 'W', 'A', 'S', 'D' };
+            int i0 = _rng.Next(4);
+            int i1;
+            do { i1 = _rng.Next(4); } while (i1 == i0);
+            WeaknessCombo = "" + keys[i0] + keys[i1];
+            Console.WriteLine($"[Enemy] Randomized combo: {WeaknessCombo}");
+        }
+
+        if (RandomizeVisualSlots)
+        {
+            // Two consecutive slots — no gap between keys
+            int[][] slotPool = new int[][] { new int[] { 0, 1 }, new int[] { 1, 2 }, new int[] { 2, 3 } };
+            VisualSlotIndices = slotPool[_rng.Next(slotPool.Length)];
+
+            // Derive SlotOffsets from visual positions so timing matches what the player sees.
+            // Each slot index represents 1 beat (SecondsPerBeat each).
+            float slotDur = Conductor.Instance?.SecondsPerBeat ?? 0.5f;
+            SlotOffsets = new float[VisualSlotIndices.Length];
+            for (int i = 0; i < VisualSlotIndices.Length; i++)
+                SlotOffsets[i] = VisualSlotIndices[i] * slotDur;
+
+            Console.WriteLine($"[Enemy] Randomized visual slots: [{string.Join(",", VisualSlotIndices)}], offsets: [{string.Join(",", SlotOffsets)}]");
+        }
+
         if (!weaknessSet)
         {
             weaknessRetryCount = 0;
@@ -633,7 +693,7 @@ public class Gorilla: EnemyRhythmController
         WalkSpriteSheet = "gorilla_walk";
         AttackSpriteSheet = "gorilla_attack";
         HurtSpriteSheet = "gorilla_hurt";
-        WeaknessCombo = "WASD";
+        WeaknessCombo = "WAS";
 
         IdleFrames = 15;
         IdleColumns = 4;
@@ -653,6 +713,60 @@ public class Gorilla: EnemyRhythmController
         
         AnimationSpeed = 12f;
         SizeMultiplier = 5.0f;
+
+        // first key, empty beat, then two close keys
+        SlotOffsets = new float[] { 0.0f, 1.0f, 1.5f };
+        VisualSlotIndices = new int[] { 0, 2, 3 }; // slot 1 intentionally empty to show the beat gap
+        RandomizeWeakness = false;
+        RandomizeVisualSlots = false;
+
+        HealthBarOffsetX = 0f;
+        HealthBarScaleOffsetXFactor = -0.24f;
+        HealthBarOffsetY = -110f;
+        HealthBarScaleOffsetYFactor = 0.76f;
+    }
+}
+
+public class BlueGorilla : EnemyRhythmController
+{
+    protected override void SetupSprites()
+    {
+        // Uses gorilla sprites until artist delivers blue gorilla sheets
+        IdleSpriteSheet = "gorilla_idle";
+        WalkSpriteSheet = "gorilla_walk";
+        AttackSpriteSheet = "gorilla_attack";
+        HurtSpriteSheet = "gorilla_hurt";
+        WeaknessCombo = "DWS";  // same 3-key length, different keys from Gorilla's WAS
+
+        IdleFrames = 15;
+        IdleColumns = 4;
+        IdleRows = 4;
+
+        WalkFrames = 30;
+        WalkColumns = 6;
+        WalkRows = 5;
+
+        AttackFrames = 30;
+        AttackColumns = 6;
+        AttackRows = 5;
+
+        HurtFrames = 15;
+        HurtColumns = 4;
+        HurtRows = 4;
+
+        AnimationSpeed = 12f;
+        SizeMultiplier = 5.0f;
+
+        // same rhythm pattern as Gorilla: first key, empty beat, then two close keys
+        SlotOffsets = new float[] { 0.0f, 1.0f, 1.5f };
+        VisualSlotIndices = new int[] { 0, 2, 3 }; // slot 1 intentionally empty to show the beat gap
+        RandomizeWeakness = false;
+        RandomizeVisualSlots = false;
+
+        HealthBarOffsetX = 0f;
+        HealthBarScaleOffsetXFactor = -0.24f;
+        HealthBarOffsetY = -110f;
+        HealthBarScaleOffsetYFactor = 0.76f;
     }
 }
 
@@ -684,5 +798,12 @@ public class Bat: EnemyRhythmController
 
         AnimationSpeed = 12f;
         SizeMultiplier = 2.0f;
+
+        // syncopated: quick pair, pause, quick pair
+        SlotOffsets = new float[] { 0.0f, 0.25f, 1.0f, 1.25f };
+        RandomizeWeakness = false;
+        RandomizeVisualSlots = false;
+
+        HealthBarOffsetX = 40f;
     }
 }

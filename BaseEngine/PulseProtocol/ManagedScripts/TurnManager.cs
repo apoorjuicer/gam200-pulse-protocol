@@ -6,7 +6,10 @@
 *              Chloe Lau (30%)
 * @brief       Controls the beat-driven turn loop between enemy and player phases
 *              (Countdown, EnemyDisplay, PlayerInput, Resolution), coordinating
-*              phase transitions and combo resolution each session.
+*              phase transitions and combo resolution each session. Extended to
+*              drive beat-synced outline flash and scale pulses, with a large
+*              simultaneous pop on the prep beat and per-slot staggered pulses
+*              during player input beats.
 *
 * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the
@@ -36,9 +39,11 @@ public class TurnManager : Script
     // Config
     // =========================
     public int CountdownBeats = 4;
-    public int EnemyDisplayBeats = 5;  // with -1 backdating: transition beat + 3 more = 4 beats total. First key shows immediately, keys 2-4 on the next 3 beats. No idle beat at end.
-    public int PlayerInputBeats = 5;   // effective input beats   = PlayerInputBeats  - 1 = 4 (phaseStartBeat backdated by -1)
-    private int currentEnemyDisplayBeats = 4; // can be overridden per-turn by SetEnemyDisplayBeats()
+    public int EnemyDisplayBeats = 5;  // with -1 backdating: 4 enemy key beats + 1 dedicated player-turn-start beat.
+    public int PlayerInputBeats = 5;   // with -1 backdating: beats 2-5 flash slots 0-3, beat 5 also resolves.
+
+    public string EnemyTurnSFX = "SFX_Enemy_Ping";
+    public string PlayerTurnSFX = "SFX_Player_Ping";
 
     // =========================
     // State
@@ -49,6 +54,11 @@ public class TurnManager : Script
     private bool initialized = false;
     private bool gameStarted = false;
     private bool prevGameReady = false; // used to detect new play sessions on reused script objects
+
+    // Time-based player slot pulses (mirrors SlotOffsets, runs every frame)
+    private bool playerInputPhaseActive = false;
+    private float playerInputStartTime = 0f;
+    private bool[] slotPulsed = new bool[4];
 
     public bool IsPlayerTurn => currentPhase == TurnPhase.PlayerInput;
     public bool IsInputLocked => currentPhase != TurnPhase.PlayerInput;
@@ -80,6 +90,28 @@ public class TurnManager : Script
             return;
 
         int currentBeat = Conductor.Instance!.GetCurrentBeat();
+
+        // Time-based player slot pulses — must run every frame, not just on beats
+        if (playerInputPhaseActive && GameStart.Ready)
+        {
+            float elapsed = Conductor.Instance.GetVisualAdjustedSongTime() - playerInputStartTime;
+            float[] offsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0.0f, 0.5f, 1.0f, 1.5f };
+            int[] visualSlots = EnemyRhythmController.Instance?.VisualSlotIndices;
+            float beatDur = Conductor.Instance.SecondsPerBeat;
+            for (int i = 0; i < slotPulsed.Length && i < offsets.Length; i++)
+            {
+                if (!slotPulsed[i] && elapsed >= offsets[i])
+                {
+                    slotPulsed[i] = true;
+                    int vs = (visualSlots != null && i < visualSlots.Length) ? visualSlots[i] : i;
+                    PlayerSlotBeatPulse.TriggerFlash(vs, beatDur);
+                    PlayerSlotBeatPulse.TriggerScale(vs, beatDur);
+                    ComboDisplayManager.TriggerPlayerSlotPulse(vs, beatDur);
+                    if (i == 0)
+                        GetAudio().PlaySFX(PlayerTurnSFX);
+                }
+            }
+        }
 
         // Only process on new beats
         if (currentBeat == lastBeat)
@@ -117,7 +149,7 @@ public class TurnManager : Script
                 break;
 
             case TurnPhase.EnemyDisplay:
-                if (beatsInPhase >= currentEnemyDisplayBeats)
+                if (beatsInPhase >= EnemyDisplayBeats)
                 {
                     ComboDisplayManager.Instance?.StartPlayerCountdownEarly();
                     StartPlayerInput(); // unlock input on the same beat
@@ -126,11 +158,17 @@ public class TurnManager : Script
                 }
                 else
                 {
-                    Console.WriteLine($"[TurnManager] Enemy Display Beat {beatsInPhase + 1}/{currentEnemyDisplayBeats}");
+                    Console.WriteLine($"[TurnManager] Enemy Display Beat {beatsInPhase + 1}/{EnemyDisplayBeats}");
                 }
                 break;
 
             case TurnPhase.PlayerInput:
+                {
+                    // Beat 2: switch announcer from GET READY to INPUT NOW
+                    if (beatsInPhase == 2)
+                        TurnAnnouncerUI.Instance?.ShowGo();
+                }
+
                 if (beatsInPhase >= PlayerInputBeats)
                 {
                     ResolvePlayerInput();
@@ -176,10 +214,15 @@ public class TurnManager : Script
         phaseStartBeat = -1;
         lastBeat = -1;
         gameStarted = false;
+        playerInputPhaseActive = false;
+        for (int i = 0; i < slotPulsed.Length; i++) slotPulsed[i] = false;
 
         // Clear ComboSystem state so lastInputBeat (from a previous session) can't
         // accidentally match a beat in the new session and block the first key press.
         ComboSystem.Instance?.ResetCombo();
+
+        // Reset static slot detection so new instances can re-register on level reload.
+        PlayerSlotBeatPulse.ResetDetection();
 
         Console.WriteLine("[TurnManager] Initializing...");
 
@@ -197,25 +240,17 @@ public class TurnManager : Script
     // =========================
     // Phase Transitions
     // =========================
-    public void SetEnemyDisplayBeats(int n)
-    {
-        currentEnemyDisplayBeats = n;
-        Console.WriteLine($"[TurnManager] EnemyDisplay beats set to: {n}");
-    }
-
     private void StartEnemyDisplay()
     {
         currentPhase = TurnPhase.EnemyDisplay;
         phaseStartBeat = Conductor.Instance!.GetCurrentBeat() - 1;
-        currentEnemyDisplayBeats = EnemyDisplayBeats; // restore default (4); boss overrides before reveal starts
 
         Console.WriteLine("[TurnManager] === ENEMY TURN ===");
         Console.WriteLine($"[TurnManager] Displaying combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input LOCKED");
 
-        // AudioComponent audio = GetAudio();
-        // audio.PlaySFX("SFX_Enemy_Ping");
-       
+        GetAudio().PlaySFX(EnemyTurnSFX);
+
         if (ComboSystem.Instance != null)
         {
             ComboSystem.Instance.ResetCombo();
@@ -243,19 +278,41 @@ public class TurnManager : Script
         Console.WriteLine($"[TurnManager] Input the combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input UNLOCKED");
 
-        // AudioComponent audio = GetAudio();
-        // audio.PlaySFX("SFX_Player_Ping");
-
         // Enemy freezes during player input (handled in EnemyRhythmController.HandleBeat)
 
         // Just fade out enemy slots, don't stop the reveal
         if (ComboDisplayManager.Instance != null)
             ComboDisplayManager.Instance.FadeOutEnemySlots();
+
+        // Dynamically set PlayerInputBeats so the last slot has time to pulse AND be pressed.
+        // Formula: 1 beat delay offset + beats for last slot + 2 beats input window, +1 for beatsInPhase offset.
+        float[] offsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0.0f, 0.5f, 1.0f, 1.5f };
+        float lastOffset = offsets.Length > 0 ? offsets[offsets.Length - 1] : 1.5f;
+        float beatDuration = Conductor.Instance!.SecondsPerBeat;
+        PlayerInputBeats = (int)Math.Ceiling(lastOffset / beatDuration) + 4;
+
+        // Snap playerInputStartTime to the next visual beat boundary so slot 0
+        // fires exactly on the spike, not DisplayLatencyOffset ms after it.
+        float visualNow = Conductor.Instance!.GetVisualAdjustedSongTime();
+        playerInputStartTime = (float)Math.Floor(visualNow / beatDuration) * beatDuration + beatDuration;
+        playerInputPhaseActive = true;
+        for (int i = 0; i < slotPulsed.Length; i++) slotPulsed[i] = false;
+
+        // Small scale pop on all active slots to signal turn start (no gold flash — avoids confusion with per-slot pulses)
+        float prepDur = beatDuration * 0.6f;
+        int comboLen = EnemyRhythmController.Instance?.WeaknessCombo.Length ?? 4;
+        int[] prepVisualSlots = EnemyRhythmController.Instance?.VisualSlotIndices;
+        for (int i = 0; i < comboLen && i < 4; i++)
+        {
+            int vs = (prepVisualSlots != null && i < prepVisualSlots.Length) ? prepVisualSlots[i] : i;
+            PlayerSlotBeatPulse.TriggerScale(vs, prepDur, 0.9f);
+        }
     }
 
     private void ResolvePlayerInput()
     {
         currentPhase = TurnPhase.Resolution;
+        playerInputPhaseActive = false;
 
         bool success = false;
         if (ComboSystem.Instance != null)
@@ -333,7 +390,7 @@ public class TurnManager : Script
             case TurnPhase.Countdown:
                 return CountdownBeats - beatsInPhase;
             case TurnPhase.EnemyDisplay:
-                return currentEnemyDisplayBeats - beatsInPhase;
+                return EnemyDisplayBeats - beatsInPhase;
             case TurnPhase.PlayerInput:
                 return PlayerInputBeats - beatsInPhase;
             default:

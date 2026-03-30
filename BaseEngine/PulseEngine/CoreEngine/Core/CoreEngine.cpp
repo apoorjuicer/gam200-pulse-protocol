@@ -17,7 +17,7 @@
  /******************************************************************************/
 
 #define WIN32_LEAN_AND_MEAN
-#define NOMINMAX 
+#define NOMINMAX
 #include <windows.h>			   // for OutputDebugString, etc.
 #include <mmsystem.h>			   // for timeGetTime()
 #pragma comment(lib, "winmm.lib")  //shortcut instead of doing in CMake
@@ -529,8 +529,10 @@ static void EnsureGameProjectPath()
 
 void CoreEngine::Init()
 {
+	timeBeginPeriod(1); // Set Windows timer resolution to 1ms for accurate Sleep() in frame cap
+
 	// Get and set the file directory for game name(FilePathToGame)
-	EnsureGameProjectPath(); 
+	EnsureGameProjectPath();
 
 	// FilePathToGame is already set correctly by EnsureGameProjectPath() above.
 	// It handles both dev (BaseEngine/GameName) and release (exe folder) cases.
@@ -631,20 +633,8 @@ void CoreEngine::Init()
 	{
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-		glfwSetWindowMonitor(
-			window,
-			monitor,
-			0, 0,
-			mode->width,
-			mode->height,
-			mode->refreshRate
-		);
+		glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
 		m_isFullscreen = true;
-	}
-	else
-	{
-		glfwSetWindowPos(window, m_windowedX, m_windowedY);
-		m_isFullscreen = false;
 	}
 
 	// --- Scroll wheel callback (for Editor + ImGui) ---
@@ -1067,7 +1057,14 @@ void CoreEngine::GameLoop()
 
         // --- Present frame ---
         glfwSwapBuffers(window);
-		
+
+        // --- 60 FPS cap ---
+        const unsigned TARGET_FRAME_MS = 16; // ~60fps (16.67ms)
+        unsigned frameElapsed = timeGetTime() - CurrentFrame;
+        if (frameElapsed < TARGET_FRAME_MS) {
+            Sleep(TARGET_FRAME_MS - frameElapsed);
+        }
+
         profiler->Reset();
     }
 }
@@ -1075,6 +1072,8 @@ void CoreEngine::GameLoop()
 
 void CoreEngine::Exit()
 {
+	timeEndPeriod(1); // Restore Windows timer resolution
+
 	stopScriptEngine(); // stop the Csharp Scripts from using "bridge". iykyk
 
 	auto g_coordinator = Coordinator::GetInstance();
@@ -1557,20 +1556,14 @@ void CoreEngine::SetFullscreen(bool fullscreen)
 	{
 		glfwGetWindowPos(window, &m_windowedX, &m_windowedY);
 		glfwGetWindowSize(window, &m_windowedW, &m_windowedH);
-
-		glfwSetWindowMonitor(window, monitor, 0, 0,
-			mode->width, mode->height, mode->refreshRate);
+		glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
 		m_isFullscreen = true;
 	}
 	else
 	{
 		const int restoreW = (m_windowedW > 0) ? m_windowedW : config.GetWindowWidth();
 		const int restoreH = (m_windowedH > 0) ? m_windowedH : config.GetWindowHeight();
-
-		glfwSetWindowMonitor(window, nullptr,
-			m_windowedX, m_windowedY,
-			restoreW, restoreH,
-			GLFW_DONT_CARE);
+		glfwSetWindowMonitor(window, nullptr, m_windowedX, m_windowedY, restoreW, restoreH, GLFW_DONT_CARE);
 		m_isFullscreen = false;
 	}
 

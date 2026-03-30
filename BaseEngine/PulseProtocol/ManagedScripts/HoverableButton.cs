@@ -15,6 +15,8 @@
 using ScriptAPI;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 
 public class NavigationButtons : Script
 {
@@ -39,6 +41,8 @@ public class NavigationButtons : Script
 
     // === SETTINGS OVERLAY (inside MainMenu scene) ===
     public static bool ShowSettingsOverlay = false;
+    public static bool ShowLevelSelectOverlay = false;
+    public static string SelectedLevelScene = "Level1";
 
     private string pauseTexture = "";
     private string pauseHoverTexture = "";
@@ -50,7 +54,11 @@ public class NavigationButtons : Script
     private bool buttonInitialized = false;
     private bool lastPauseState = false;
     private bool isPauseButton = false;
-    private float hoverScaleBoost = 1.05f;
+    private float hoverScaleBoost = 1.0f;
+    private const float ButtonHitboxScaleX = 1.0f;
+    private const float ButtonHitboxScaleY = 1.0f;
+    private const float ButtonHitboxPadX = 120.0f;
+    private const float ButtonHitboxPadY = 30.0f;
 
     private static bool wasEscPressed = false;
 
@@ -69,9 +77,14 @@ public class NavigationButtons : Script
     private static NavigationButtons? s_focusedButton = null;
     private static int s_navClearFrame   = -1;
     private static int s_navHandledFrame = -1;
+    private static bool s_resumeCountdownActive = false;
 
     private static bool waitingForSceneTransition = false;
     private static string pendingScene = "";
+
+    // Used by background scripts to avoid one-frame visual gaps when switching
+    // from pause overlay to settings overlay in gameplay scenes.
+    public static bool IsSettingsOpenedFromPause => openedSettingsFromPause;
 
     public override void Update()
     {
@@ -82,12 +95,15 @@ public class NavigationButtons : Script
             sceneHistory.Clear();
             currentScene = "";
             LastGameplayScene = "";
+            LastClearedLevel = LevelProgressStore.LoadLastClearedLevel();
 
             ShowQuitOverlay = false;
             ShowPauseOverlay = false;
             ShowHowToPlayOverlay = false;
             HtpPage = 1;
             ShowSettingsOverlay = false;
+            ShowLevelSelectOverlay = false;
+            SelectedLevelScene = "Level1";
 
             wasEscPressed = false;
             s_appliedGamePause = false;
@@ -218,6 +234,11 @@ public class NavigationButtons : Script
                 if (isBackBtn) shouldBeVisible = true;
                 else if (isMainMenuBtn) shouldBeVisible = false;
             }
+            else if (ShowLevelSelectOverlay)
+            {
+                if (isBackBtn) shouldBeVisible = false;
+                else if (isMainMenuBtn) shouldBeVisible = false;
+            }
             else
             {
                 if (isBackBtn) shouldBeVisible = false;
@@ -253,7 +274,8 @@ public class NavigationButtons : Script
         {
             bool isPauseMenuOpen = ShowPauseOverlay;
             bool isPauseSettingsOpen = ShowSettingsOverlay && openedSettingsFromPause;
-            bool shouldGameBePaused = isPauseMenuOpen || isPauseSettingsOpen || stageClearPaused;
+            bool shouldGameBePaused = isPauseMenuOpen || isPauseSettingsOpen || stageClearPaused
+                || s_resumeCountdownActive;
 
             if (isPauseMenuOpen != lastPauseState)
             {
@@ -327,8 +349,8 @@ public class NavigationButtons : Script
         float baseScaleX = isCurrentlyHovered ? currentScaleX / hoverScaleBoost : currentScaleX;
         float baseScaleY = isCurrentlyHovered ? currentScaleY / hoverScaleBoost : currentScaleY;
 
-        float halfW = baseScaleX / 2f;
-        float halfH = baseScaleY / 2f;
+        float halfW = (baseScaleX * ButtonHitboxScaleX * 0.5f) + ButtonHitboxPadX;
+        float halfH = (baseScaleY * ButtonHitboxScaleY * 0.5f) + ButtonHitboxPadY;
         float mx = input.WorldMouseX;
         float my = input.WorldMouseY;
 
@@ -432,7 +454,10 @@ public class NavigationButtons : Script
     {
         // Leaving MainMenu? don't carry Settings overlay across scenes
         if (newScene != "MainMenu")
+        {
             ShowSettingsOverlay = false;
+            ShowLevelSelectOverlay = false;
+        }
 
         if (!string.IsNullOrEmpty(currentScene))
         {
@@ -476,6 +501,7 @@ public class NavigationButtons : Script
         ShowQuitOverlay = false;
         ShowHowToPlayOverlay = false;
         ShowSettingsOverlay = false;
+        ShowLevelSelectOverlay = false;
 
         Application.SetPaused(false);
         Scene.LoadScene("MainMenu");
@@ -536,6 +562,7 @@ public class NavigationButtons : Script
         ShowQuitOverlay = false;
         ShowPauseOverlay = false;
         ShowHowToPlayOverlay = false;
+        ShowLevelSelectOverlay = false;
 
         ShowSettingsOverlay = true;
     }
@@ -543,6 +570,7 @@ public class NavigationButtons : Script
     private static void HideSettings()
     {
         ShowSettingsOverlay = false;
+        ShowLevelSelectOverlay = false;
 
         if (openedSettingsFromPause)
         {
@@ -555,6 +583,44 @@ public class NavigationButtons : Script
     public static void SetStageClearPaused(bool value)
     {
         stageClearPaused = value;
+    }
+
+    public static void ReportLevelCleared(string sceneName)
+    {
+        if (string.IsNullOrEmpty(sceneName))
+            return;
+
+        if (!sceneName.ToLower().Contains("level"))
+            return;
+
+        int newLevel = ExtractTrailingNumber(sceneName);
+        int prevLevel = ExtractTrailingNumber(LastClearedLevel);
+
+        // Keep the highest unlocked level progression.
+        if (newLevel > prevLevel)
+        {
+            LastClearedLevel = sceneName;
+            LevelProgressStore.SaveLastClearedLevel(sceneName);
+        }
+    }
+
+    private static int ExtractTrailingNumber(string sceneName)
+    {
+        if (string.IsNullOrEmpty(sceneName))
+            return 0;
+
+        int i = sceneName.Length - 1;
+        while (i >= 0 && char.IsDigit(sceneName[i]))
+            i--;
+
+        if (i == sceneName.Length - 1)
+            return 0;
+
+        string numberPart = sceneName.Substring(i + 1);
+        if (int.TryParse(numberPart, out int levelNum))
+            return levelNum;
+
+        return 0;
     }
 
     private bool TryGetNextLevelSceneName(string sceneName, out string nextScene)
@@ -672,6 +738,19 @@ public class NavigationButtons : Script
         if (tex.Contains("exit"))
         {
             ShowPauseOverlay = false;
+            s_resumeCountdownActive = true;
+
+            PauseResumeCountdown? countdown = PauseResumeCountdown.Instance;
+            if (countdown != null)
+            {
+                countdown.StartCountdown();
+            }
+            else
+            {
+                s_resumeCountdownActive = false;
+                Application.SetPaused(false);
+            }
+
             return;
         }
 
@@ -753,6 +832,7 @@ public class NavigationButtons : Script
         {
             if (!waitingForSceneTransition)
             {
+                ShowLevelSelectOverlay = false;
                 GetAudio().FadeOutMusic(0.4f);
                 waitingForSceneTransition = true;
                 pendingScene = "Cutscene";
@@ -762,6 +842,17 @@ public class NavigationButtons : Script
 
         if (tex.Contains("continue"))
         {
+            if (Scene.GetCurrentScene() == "MainMenu")
+            {
+                ShowQuitOverlay = false;
+                ShowPauseOverlay = false;
+                ShowHowToPlayOverlay = false;
+                ShowSettingsOverlay = false;
+                ShowLevelSelectOverlay = true;
+                SelectedLevelScene = "Level1";
+                return;
+            }
+
             string sceneToLoad = "";
 
             if (!string.IsNullOrEmpty(LastClearedLevel))
@@ -832,7 +923,7 @@ public class NavigationButtons : Script
                 return;
             }
             StageClearElement.ResetStageClear();
-            LastClearedLevel = currentScene;
+            ReportLevelCleared(currentScene);
             ContinueToNextLevel();
             return;
         }
@@ -859,7 +950,22 @@ public class NavigationButtons : Script
             return;
         }
     }
+
+    public static void NotifyResumeCountdownFinished()
+    {
+        s_resumeCountdownActive = false;
+        ShowPauseOverlay = false;
+        ShowQuitOverlay = false;
+
+        if (openedSettingsFromPause)
+        {
+            ShowSettingsOverlay = false;
+            openedSettingsFromPause = false;
+        }
+    }
 }
+
+//end ofclass navigation buttons
 
 public class QuitOverlay : Script
 {
@@ -934,4 +1040,74 @@ public class SettingsOverlay : Script
         TransformComponent t = GetTransform();
         t.IsVisible = NavigationButtons.ShowSettingsOverlay;
     }
+}
+
+internal static class LevelProgressStore
+{
+    private const string SaveFileName = "level_progress.json";
+
+    private static readonly string[] CandidatePaths = new[]
+    {
+        Path.Combine("PulseProtocol", "JSON", SaveFileName),
+        Path.Combine("..", "..", "PulseProtocol", "JSON", SaveFileName),
+        Path.Combine("..", "..", "..", "PulseProtocol", "JSON", SaveFileName),
+        SaveFileName
+    };
+
+    private sealed class ProgressData
+    {
+        public string LastClearedLevel { get; set; } = "";
+    }
+
+    public static string LoadLastClearedLevel()
+    {
+        foreach (string path in CandidatePaths)
+        {
+            try
+            {
+                if (!File.Exists(path))
+                    continue;
+
+                string json = File.ReadAllText(path);
+                ProgressData? data = JsonSerializer.Deserialize<ProgressData>(json);
+                if (!string.IsNullOrWhiteSpace(data?.LastClearedLevel))
+                    return data.LastClearedLevel!;
+            }
+            catch
+            {
+                // Try next candidate path.
+            }
+        }
+
+        return "";
+    }
+
+    public static void SaveLastClearedLevel(string sceneName)
+    {
+        if (string.IsNullOrWhiteSpace(sceneName))
+            return;
+
+        string json = JsonSerializer.Serialize(
+            new ProgressData { LastClearedLevel = sceneName },
+            new JsonSerializerOptions { WriteIndented = true });
+
+        foreach (string path in CandidatePaths)
+        {
+            try
+            {
+                string? dir = Path.GetDirectoryName(path);
+                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                    continue;
+
+                File.WriteAllText(path, json);
+                return;
+            }
+            catch
+            {
+                // Try next candidate path.
+            }
+        }
+    }
+
+
 }

@@ -57,6 +57,8 @@ public abstract class AudioSliderKnobBase : Script
     }
 
     public static Dictionary<string, SliderState> States = new Dictionary<string, SliderState>();
+    private static bool s_persistedLoaded = false;
+    private static bool s_appliedAudioOnce = false;
 
     // ---- runtime ----
     private bool initialized = false;
@@ -79,20 +81,8 @@ public abstract class AudioSliderKnobBase : Script
         InputComponent input = GetInput();
         TransformComponent t = GetTransform();
 
-        // =========================================================
-        // IMPORTANT: When the settings UI is hidden, these slider
-        // scripts must NOT respond to mouse input.
-        //
-        // In this project, the sliders live on the Settings overlay
-        // inside MainMenu, so we also gate on ShowSettingsOverlay.
-        // =========================================================
-        if (!t.IsVisible || (Scene.GetCurrentScene() == "MainMenu" && !NavigationButtons.ShowSettingsOverlay))
-        {
-            // Cancel any in-progress drag so it can't keep moving while hidden.
-            dragging = false;
-            dragJustStarted = false;
-            return;
-        }
+        EnsurePersistedStateLoaded();
+        ApplyPersistedAudioOnce();
 
         BindHeldIfNeeded(input);
 
@@ -139,6 +129,21 @@ public abstract class AudioSliderKnobBase : Script
 
             PublishState(ToValue01(t.X));
             initialized = true;
+        }
+
+        // =========================================================
+        // IMPORTANT: When the settings UI is hidden, these slider
+        // scripts must NOT respond to mouse input.
+        //
+        // We still initialize/sync above while hidden so the first
+        // visible frame does not flash incorrect default values.
+        // =========================================================
+        if (!t.IsVisible || (Scene.GetCurrentScene() == "MainMenu" && !NavigationButtons.ShowSettingsOverlay))
+        {
+            // Cancel any in-progress drag so it can't keep moving while hidden.
+            dragging = false;
+            dragJustStarted = false;
+            return;
         }
         else
         {
@@ -228,6 +233,45 @@ public abstract class AudioSliderKnobBase : Script
             GetAudio().SetSfxVolume(v01);
     }
 
+    private void EnsurePersistedStateLoaded()
+    {
+        if (s_persistedLoaded)
+            return;
+
+        s_persistedLoaded = true;
+
+        LoadTag("Volume", 1.0f);
+        LoadTag("Music", 1.0f);
+        LoadTag("SFX", 0.25f);
+        LoadTag("Brightness", 1.0f);
+        LoadTag("Latency", 0.5f);
+    }
+
+    private void LoadTag(string tag, float fallback)
+    {
+        SliderState st;
+        if (States.ContainsKey(tag))
+            st = States[tag];
+        else
+            st = new SliderState();
+
+        st.Value01 = UserSettingsStore.GetSliderValue(tag, fallback);
+        States[tag] = st;
+    }
+
+    private void ApplyPersistedAudioOnce()
+    {
+        if (s_appliedAudioOnce)
+            return;
+
+        s_appliedAudioOnce = true;
+
+        AudioComponent audio = GetAudio();
+        audio.SetMasterVolume(UserSettingsStore.GetSliderValue("Volume", 1.0f));
+        audio.SetMusicVolume(UserSettingsStore.GetSliderValue("Music", 1.0f));
+        audio.SetSfxVolume(UserSettingsStore.GetSliderValue("SFX", 0.25f));
+    }
+
     private void RecomputeTrack(TransformComponent knobT)
     {
         float knobHalfW = knobT.ScaleX * 0.5f;
@@ -275,6 +319,7 @@ public abstract class AudioSliderKnobBase : Script
         st.Value01 = Clamp(value01, 0.0f, 1.0f);
         st.TrackY = lockedY;
         States[FixedTag] = st;
+        UserSettingsStore.SetSliderValue(FixedTag, st.Value01);
     }
 
     private SliderState GetState()
@@ -404,10 +449,6 @@ public abstract class AudioSliderFillBase : Script
     public override void Update()
     {
         TransformComponent t = GetTransform();
-
-        // If the settings overlay is hidden, keep fill from updating.
-        if (!t.IsVisible || (Scene.GetCurrentScene() == "MainMenu" && !NavigationButtons.ShowSettingsOverlay))
-            return;
 
         if (!initialized)
         {
