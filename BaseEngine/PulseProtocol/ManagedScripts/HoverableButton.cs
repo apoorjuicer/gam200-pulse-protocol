@@ -54,7 +54,11 @@ public class NavigationButtons : Script
     private bool buttonInitialized = false;
     private bool lastPauseState = false;
     private bool isPauseButton = false;
-    private float hoverScaleBoost = 1.05f;
+    private float hoverScaleBoost = 1.0f;
+    private const float ButtonHitboxScaleX = 1.0f;
+    private const float ButtonHitboxScaleY = 1.0f;
+    private const float ButtonHitboxPadX = 120.0f;
+    private const float ButtonHitboxPadY = 30.0f;
 
     private static bool wasEscPressed = false;
 
@@ -73,6 +77,7 @@ public class NavigationButtons : Script
     private static NavigationButtons? s_focusedButton = null;
     private static int s_navClearFrame   = -1;
     private static int s_navHandledFrame = -1;
+    private static bool s_resumeCountdownActive = false;
 
     private static bool waitingForSceneTransition = false;
     private static string pendingScene = "";
@@ -269,7 +274,8 @@ public class NavigationButtons : Script
         {
             bool isPauseMenuOpen = ShowPauseOverlay;
             bool isPauseSettingsOpen = ShowSettingsOverlay && openedSettingsFromPause;
-            bool shouldGameBePaused = isPauseMenuOpen || isPauseSettingsOpen || stageClearPaused;
+            bool shouldGameBePaused = isPauseMenuOpen || isPauseSettingsOpen || stageClearPaused
+                || s_resumeCountdownActive;
 
             if (isPauseMenuOpen != lastPauseState)
             {
@@ -343,8 +349,8 @@ public class NavigationButtons : Script
         float baseScaleX = isCurrentlyHovered ? currentScaleX / hoverScaleBoost : currentScaleX;
         float baseScaleY = isCurrentlyHovered ? currentScaleY / hoverScaleBoost : currentScaleY;
 
-        float halfW = baseScaleX / 2f;
-        float halfH = baseScaleY / 2f;
+        float halfW = (baseScaleX * ButtonHitboxScaleX * 0.5f) + ButtonHitboxPadX;
+        float halfH = (baseScaleY * ButtonHitboxScaleY * 0.5f) + ButtonHitboxPadY;
         float mx = input.WorldMouseX;
         float my = input.WorldMouseY;
 
@@ -732,6 +738,19 @@ public class NavigationButtons : Script
         if (tex.Contains("exit"))
         {
             ShowPauseOverlay = false;
+            s_resumeCountdownActive = true;
+
+            PauseResumeCountdown? countdown = PauseResumeCountdown.Instance;
+            if (countdown != null)
+            {
+                countdown.StartCountdown();
+            }
+            else
+            {
+                s_resumeCountdownActive = false;
+                Application.SetPaused(false);
+            }
+
             return;
         }
 
@@ -931,7 +950,22 @@ public class NavigationButtons : Script
             return;
         }
     }
+
+    public static void NotifyResumeCountdownFinished()
+    {
+        s_resumeCountdownActive = false;
+        ShowPauseOverlay = false;
+        ShowQuitOverlay = false;
+
+        if (openedSettingsFromPause)
+        {
+            ShowSettingsOverlay = false;
+            openedSettingsFromPause = false;
+        }
+    }
 }
+
+//end ofclass navigation buttons
 
 public class QuitOverlay : Script
 {
@@ -1074,4 +1108,6 @@ internal static class LevelProgressStore
             }
         }
     }
+
+
 }
