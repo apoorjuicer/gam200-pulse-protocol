@@ -94,7 +94,7 @@ public class TurnManager : Script
         // Time-based player slot pulses — must run every frame, not just on beats
         if (playerInputPhaseActive && GameStart.Ready)
         {
-            float elapsed = Conductor.Instance.GetAdjustedSongTime() - playerInputStartTime;
+            float elapsed = Conductor.Instance.GetVisualAdjustedSongTime() - playerInputStartTime;
             float[] offsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0.0f, 0.5f, 1.0f, 1.5f };
             int[] visualSlots = EnemyRhythmController.Instance?.VisualSlotIndices;
             float beatDur = Conductor.Instance.SecondsPerBeat;
@@ -107,6 +107,8 @@ public class TurnManager : Script
                     PlayerSlotBeatPulse.TriggerFlash(vs, beatDur);
                     PlayerSlotBeatPulse.TriggerScale(vs, beatDur);
                     ComboDisplayManager.TriggerPlayerSlotPulse(vs, beatDur);
+                    if (i == 0)
+                        GetAudio().PlaySFX(PlayerTurnSFX);
                 }
             }
         }
@@ -276,8 +278,6 @@ public class TurnManager : Script
         Console.WriteLine($"[TurnManager] Input the combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input UNLOCKED");
 
-        GetAudio().PlaySFX(PlayerTurnSFX);
-
         // Enemy freezes during player input (handled in EnemyRhythmController.HandleBeat)
 
         // Just fade out enemy slots, don't stop the reveal
@@ -291,9 +291,10 @@ public class TurnManager : Script
         float beatDuration = Conductor.Instance!.SecondsPerBeat;
         PlayerInputBeats = (int)Math.Ceiling(lastOffset / beatDuration) + 4;
 
-        // Start time-based slot pulses using SlotOffsets.
-        // +1 beat delay so slot 0 (offset=0.0) fires 1 beat in, not immediately.
-        playerInputStartTime = Conductor.Instance!.GetAdjustedSongTime() + beatDuration;
+        // Snap playerInputStartTime to the next visual beat boundary so slot 0
+        // fires exactly on the spike, not DisplayLatencyOffset ms after it.
+        float visualNow = Conductor.Instance!.GetVisualAdjustedSongTime();
+        playerInputStartTime = (float)Math.Floor(visualNow / beatDuration) * beatDuration + beatDuration;
         playerInputPhaseActive = true;
         for (int i = 0; i < slotPulsed.Length; i++) slotPulsed[i] = false;
 

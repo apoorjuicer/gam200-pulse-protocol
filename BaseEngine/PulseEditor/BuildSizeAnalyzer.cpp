@@ -29,6 +29,7 @@ namespace PulseEditor
         };
 
         static bool s_windowOpen = false;
+        static bool s_requestOpenPopup = false;
         static bool s_initialized = false;
         static bool s_loadedSelectionFromDisk = false;
         static std::filesystem::path s_assetsRoot;
@@ -348,6 +349,7 @@ namespace PulseEditor
     void OpenBuildSizeAnalyzerWindow()
     {
         s_windowOpen = true;
+        s_requestOpenPopup = true;
         if (!EnsureInitialized())
         {
             return;
@@ -375,11 +377,20 @@ namespace PulseEditor
             return;
         }
 
-        const bool wasOpen = s_windowOpen;
-        ImGui::SetNextWindowSize(ImVec2(900.0f, 520.0f), ImGuiCond_FirstUseEver);
-        if (!ImGui::Begin("Build Size Analyzer", &s_windowOpen))
+        if (s_requestOpenPopup)
         {
-            ImGui::End();
+            ImGui::OpenPopup("Build Size Analyzer");
+            s_requestOpenPopup = false;
+        }
+
+        const bool wasOpen = s_windowOpen;
+        ImGui::SetNextWindowSize(ImVec2(900.0f, 520.0f), ImGuiCond_Appearing);
+        const ImGuiWindowFlags modalFlags =
+            ImGuiWindowFlags_NoDocking |
+            ImGuiWindowFlags_NoCollapse;
+
+        if (!ImGui::BeginPopupModal("Build Size Analyzer", &s_windowOpen, modalFlags))
+        {
             if (wasOpen && !s_windowOpen)
             {
                 SaveSelectionToDisk();
@@ -390,7 +401,7 @@ namespace PulseEditor
         if (!EnsureInitialized())
         {
             ImGui::TextUnformatted(s_statusMessage.c_str());
-            ImGui::End();
+            ImGui::EndPopup();
             return;
         }
 
@@ -477,7 +488,7 @@ namespace PulseEditor
             ImGui::TextWrapped("%s", s_statusMessage.c_str());
         }
 
-        ImGui::End();
+        ImGui::EndPopup();
 
         if (wasOpen && !s_windowOpen)
         {

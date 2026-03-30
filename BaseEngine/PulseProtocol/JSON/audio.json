@@ -4,21 +4,21 @@
             "id": "BGM_L1",
             "path": "Assets/Sound/BG & Ambience/BGM_L1_Theme.mp3",
             "loop": true,
-            "volume": 0.134,
+            "volume": 0.9,
             "audiotype": "BGM"
         },
         {
             "id": "BGM_L1_TESTING",
             "path": "Assets/Sound/BG & Ambience/BGM_Level_1 _V4.mp3",
             "loop": true,
-            "volume": 0.146,
+            "volume": 0.9,
             "audiotype": "BGM"
         },
         {
             "id": "BGM_L2_TESTING",
             "path": "Assets/Sound/BG & Ambience/BGM_Level_2_V2.mp3",
             "loop": true,
-            "volume": 0.144,
+            "volume": 0.5,
             "audiotype": "BGM"
         },
         {

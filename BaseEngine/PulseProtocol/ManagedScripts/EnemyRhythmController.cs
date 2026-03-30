@@ -39,10 +39,10 @@ public class EnemyRhythmController : Script
     // === RHYTHM SETTINGS ===
     public RhythmType RhythmType = RhythmType.Syncopated;
     public float StepDistance = 50f;
-    public float[] SlotOffsets = new float[] { 0.0f, 1.0f };
-    // Which UI slot positions (0-3) each key occupies. Allows gaps for rhythm clarity.
-    // Rat uses {0, 2} — key 1 on beat 1, empty slot 1, key 2 on beat 3.
-    public int[] VisualSlotIndices = new int[] { 0, 2 };
+    public float[] SlotOffsets = new float[] { 0.0f, 0.5f };
+    // Which UI slot positions (0-3) each key occupies.
+    // Rat uses {0, 1} — two consecutive beats, no gap.
+    public int[] VisualSlotIndices = new int[] { 0, 1 };
 
     // If true, WeaknessCombo is re-randomized each turn (2 distinct keys from WASD)
     public bool RandomizeWeakness = true;
@@ -653,8 +653,8 @@ public class EnemyRhythmController : Script
 
         if (RandomizeVisualSlots)
         {
-            // First key always at slot 0; second key at slot 2 or 3 for varied gap lengths
-            int[][] slotPool = new int[][] { new int[] { 0, 2 }, new int[] { 0, 3 } };
+            // Two consecutive slots — no gap between keys
+            int[][] slotPool = new int[][] { new int[] { 0, 1 }, new int[] { 1, 2 }, new int[] { 2, 3 } };
             VisualSlotIndices = slotPool[_rng.Next(slotPool.Length)];
 
             // Derive SlotOffsets from visual positions so timing matches what the player sees.
