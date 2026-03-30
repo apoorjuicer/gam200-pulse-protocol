@@ -435,7 +435,7 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": 450.0
+                            "y": 12.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -484,7 +484,8 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "LevelCountdown"
+                            "LevelCountdown",
+                            "PauseResumeCountdown"
                         ]
                     }
                 },
@@ -1096,7 +1097,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": false,
+                        "visible": true,
                         "alignment": 0
                     }
                 }
