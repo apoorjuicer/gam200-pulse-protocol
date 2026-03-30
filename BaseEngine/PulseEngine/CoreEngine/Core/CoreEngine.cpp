@@ -61,6 +61,70 @@ std::filesystem::path FilePathToGame;
 using HelloWorldFunctionPtr = void(*)(void);
 using InitFunctionPtr = void(*)(CoreEngine*);
 
+namespace
+{
+	bool TryLoadStartupFullscreenFromUserSettings(const std::filesystem::path& gameRoot, bool& fullscreenOut)
+	{
+		const std::filesystem::path settingsPath = gameRoot / "JSON" / "user_settings.json";
+		if (!std::filesystem::exists(settingsPath))
+			return false;
+
+		rapidjson::Document doc;
+		if (!JSONUtils::ReadJSONFromFile(doc, settingsPath) || !doc.IsObject())
+			return false;
+
+		auto it = doc.FindMember("Fullscreen");
+		if (it == doc.MemberEnd() || !it->value.IsBool())
+			return false;
+
+		fullscreenOut = it->value.GetBool();
+		return true;
+	}
+
+	void PersistFullscreenToUserSettings(const std::filesystem::path& gameRoot, bool fullscreen)
+	{
+		if (gameRoot.empty())
+			return;
+
+		auto writeFullscreen = [fullscreen](const std::filesystem::path& settingsPath)
+		{
+			rapidjson::Document doc;
+			if (!JSONUtils::ReadJSONFromFile(doc, settingsPath) || !doc.IsObject())
+			{
+				doc.SetObject();
+			}
+
+			auto& alloc = doc.GetAllocator();
+			if (doc.HasMember("Fullscreen"))
+			{
+				doc["Fullscreen"].SetBool(fullscreen);
+			}
+			else
+			{
+				doc.AddMember(rapidjson::Value("Fullscreen", alloc), rapidjson::Value(fullscreen), alloc);
+			}
+
+			if (!JSONUtils::WriteJSONToFile(doc, settingsPath, true))
+			{
+				std::cerr << "[CoreEngine] WARNING: Failed to persist fullscreen setting to "
+					<< settingsPath << "\n";
+			}
+		};
+
+		// Runtime settings used by the running executable.
+		writeFullscreen(gameRoot / "JSON" / "user_settings.json");
+
+		// Source-tree settings (helps keep editor/source JSON in sync with runtime toggles).
+		const std::filesystem::path sourceSettings =
+			gameRoot / ".." / ".." / ".." / ".." / "PulseProtocol" / "JSON" / "user_settings.json";
+		if (std::filesystem::weakly_canonical(sourceSettings) !=
+			std::filesystem::weakly_canonical(gameRoot / "JSON" / "user_settings.json"))
+		{
+			writeFullscreen(sourceSettings);
+		}
+	}
+}
+
 Framework::Transform* CoreEngine::GetTransformComponent(int ID)
 {
 	auto g_coordinator = Coordinator::GetInstance();
@@ -555,6 +619,16 @@ void CoreEngine::Init()
 
 	std::cout << "WindowWidth is: " << WindowWidth << "\n";
 	std::cout << "WindowHeight is: " << WindowHeight << "\n";
+
+	// Apply cached fullscreen preference early so every scene (including calibration)
+	// starts with the user's last selected screen mode.
+	bool cachedFullscreen = false;
+	if (TryLoadStartupFullscreenFromUserSettings(FilePathToGame, cachedFullscreen))
+	{
+		m_startupFullscreen = cachedFullscreen;
+		std::cout << "[CoreEngine] Startup fullscreen from user_settings.json: "
+			<< (m_startupFullscreen ? "true" : "false") << "\n";
+	}
 
 	///*saving config data*/ //tested saving works
 	// std::string newConfigPath = "../../PulseEngine/JSON/config2.json";
@@ -1580,6 +1654,9 @@ void CoreEngine::SetFullscreen(bool fullscreen)
 		if (auto g = Coordinator::GetInstance()->GetSystem<GraphicsManager>())
 			g->OnResize(fbw, fbh);
 	}
+
+	// Persist immediately on every actual mode change (UI toggle, hotkey toggle, etc.).
+	PersistFullscreenToUserSettings(FilePathToGame, m_isFullscreen);
 }
 
 
