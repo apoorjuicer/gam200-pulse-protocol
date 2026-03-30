@@ -27,7 +27,7 @@ public class CutsceneSkipHint : Script
         InputComponent   input = GetInput();
 
         // Switch prompt based on active input device
-        text.SetText(input.IsGamepadConnected ? "Press Cross to skip" : "Press SPACE to skip");
+        text.SetText(input.IsGamepadConnected ? "Press CROSS to skip" : "Press SPACE to skip");
 
         if (elapsed < fadeInDelay)
         {
