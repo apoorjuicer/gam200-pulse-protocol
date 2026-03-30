@@ -82,7 +82,7 @@
                                                 "transform":  {
                                                                   "position":  {
                                                                                    "x":  -867.1965942382813,
-                                                                                   "y":  -75.29593658447266
+                                                                                   "y":  -125.29593658447266
                                                                                },
                                                                   "scale":  {
                                                                                 "x":  800.0,
@@ -152,12 +152,12 @@
                                             {
                                                 "AABB":  {
                                                              "min":  {
-                                                                         "x":  -19,
-                                                                         "y":  -22
+                                                                         "x":  -19.0,
+                                                                         "y":  -22.0
                                                                      },
                                                              "max":  {
-                                                                         "x":  1,
-                                                                         "y":  23
+                                                                         "x":  1.0,
+                                                                         "y":  23.0
                                                                      }
                                                          }
                                             },
@@ -437,7 +437,7 @@
                                                 "transform":  {
                                                                   "position":  {
                                                                                    "x":  0.0,
-                                                                                   "y":  450.0
+                                                                                   "y":  12.0
                                                                                },
                                                                   "scale":  {
                                                                                 "x":  200.0,
@@ -486,7 +486,8 @@
                                             {
                                                 "script":  {
                                                                "ScriptName":  [
-                                                                                  "LevelCountdown"
+                                                                                  "LevelCountdown",
+                                                                                  "PauseResumeCountdown"
                                                                               ]
                                                            }
                                             },
@@ -1193,7 +1194,7 @@
                                                 "transform":  {
                                                                   "position":  {
                                                                                    "x":  927.0,
-                                                                                   "y":  -205.93309020996094
+                                                                                   "y":  -255.93309020996094
                                                                                },
                                                                   "scale":  {
                                                                                 "x":  350.0,
@@ -1277,13 +1278,6 @@
                                                                  "sortingLayer":  1,
                                                                  "orderInLayer":  5,
                                                                  "z":  0.0
-                                                             }
-                                            },
-                                            {
-                                                "Children":  {
-                                                                 "children":  [
-                                                                                  60
-                                                                              ]
                                                              }
                                             }
                                         ]
@@ -2550,13 +2544,13 @@
                                             {
                                                 "script":  {
                                                                "ScriptName":  [
-                                                                                  "SettingsOverlay"
+                                                                                  "SettingsAnimatedBackground"
                                                                               ]
                                                            }
                                             },
                                             {
                                                 "name":  {
-                                                             "name":  "BG_PlaceholderImg"
+                                                             "name":  "SettingsMenuBG"
                                                          }
                                             },
                                             {
@@ -2564,7 +2558,7 @@
                                                                  "layerName":  "UI",
                                                                  "mask":  4,
                                                                  "sortingLayer":  2,
-                                                                 "orderInLayer":  15,
+                                                                 "orderInLayer":  34,
                                                                  "z":  0.0
                                                              }
                                             }
@@ -5082,7 +5076,7 @@
                                             },
                                             {
                                                 "TextComponent":  {
-                                                                      "text":  "Score  0\nCombo  0Ã—",
+                                                                      "text":  "Score  0\nCombo  0×",
                                                                       "font_id":  "barlow_font",
                                                                       "offset":  {
                                                                                      "x":  0.0,
@@ -5097,156 +5091,6 @@
                                                                       "visible":  true,
                                                                       "alignment":  0
                                                                   }
-                                            }
-                                        ]
-                     },
-                     {
-                         "components":  [
-                                            {
-                                                "transform":  {
-                                                                  "position":  {
-                                                                                   "x":  0.0,
-                                                                                   "y":  0.0
-                                                                               },
-                                                                  "scale":  {
-                                                                                "x":  176.0,
-                                                                                "y":  33.0
-                                                                            },
-                                                                  "rotation":  {
-                                                                                   "x":  0.0,
-                                                                                   "y":  0.0
-                                                                               },
-                                                                  "isVisible":  true,
-                                                                  "visibilityTimer":  0.0,
-                                                                  "autoHide":  false
-                                                              }
-                                            },
-                                            {
-                                                "render":  {
-                                                               "mdl_ref":  0.0,
-                                                               "shd_ref":  2.0,
-                                                               "useTexture":  true,
-                                                               "spriteName":  "../../PulseProtocol/Assets/Textures/UI/enemy_hp4_00.png",
-                                                               "tintColor":  {
-                                                                                 "r":  1.0,
-                                                                                 "g":  1.0,
-                                                                                 "b":  1.0,
-                                                                                 "a":  1.0
-                                                                             },
-                                                               "glow":  {
-                                                                            "enabled":  false,
-                                                                            "intensity":  1.0,
-                                                                            "r":  1.0,
-                                                                            "g":  1.0,
-                                                                            "b":  1.0
-                                                                        }
-                                                           }
-                                            },
-                                            {
-                                                "animation":  {
-                                                                  "currentFrame":  0,
-                                                                  "elapsedTime":  0.0,
-                                                                  "totalFrames":  1,
-                                                                  "columns":  1,
-                                                                  "rows":  1,
-                                                                  "animationSpeed":  0.0
-                                                              }
-                                            },
-                                            {
-                                                "script":  {
-                                                               "ScriptName":  [
-                                                                                  "EnemyHealthBarController"
-                                                                              ]
-                                                           }
-                                            },
-                                            {
-                                                "name":  {
-                                                             "name":  "EnemyHealthBar"
-                                                         }
-                                            },
-                                            {
-                                                "layerTag":  {
-                                                                 "layerName":  "World",
-                                                                 "mask":  2,
-                                                                 "sortingLayer":  1,
-                                                                 "orderInLayer":  20,
-                                                                 "z":  0.0
-                                                             }
-                                            }
-                                        ]
-                     },
-                     {
-                         "components":  [
-                                            {
-                                                "transform":  {
-                                                                  "position":  {
-                                                                                   "x":  0.0,
-                                                                                   "y":  0.0
-                                                                               },
-                                                                  "scale":  {
-                                                                                "x":  1600.0,
-                                                                                "y":  900.0
-                                                                            },
-                                                                  "rotation":  {
-                                                                                   "x":  0.0,
-                                                                                   "y":  0.0
-                                                                               },
-                                                                  "isVisible":  false,
-                                                                  "visibilityTimer":  0.0,
-                                                                  "autoHide":  false
-                                                              }
-                                            },
-                                            {
-                                                "render":  {
-                                                               "mdl_ref":  0.0,
-                                                               "shd_ref":  1.0,
-                                                               "useTexture":  true,
-                                                               "spriteName":  "Assets/Textures/Backgrounds/Settings0000.jpg",
-                                                               "tintColor":  {
-                                                                                 "r":  1.0,
-                                                                                 "g":  1.0,
-                                                                                 "b":  1.0,
-                                                                                 "a":  1.0
-                                                                             },
-                                                               "glow":  {
-                                                                            "enabled":  false,
-                                                                            "intensity":  1.0,
-                                                                            "r":  1.0,
-                                                                            "g":  1.0,
-                                                                            "b":  1.0
-                                                                        }
-                                                           }
-                                            },
-                                            {
-                                                "animation":  {
-                                                                  "currentFrame":  0,
-                                                                  "elapsedTime":  0.0,
-                                                                  "totalFrames":  1,
-                                                                  "columns":  1,
-                                                                  "rows":  1,
-                                                                  "animationSpeed":  2.0
-                                                              }
-                                            },
-                                            {
-                                                "script":  {
-                                                               "ScriptName":  [
-                                                                                  "SettingsAnimatedBackground"
-                                                                              ]
-                                                           }
-                                            },
-                                            {
-                                                "name":  {
-                                                             "name":  "SettingsMenuBG"
-                                                         }
-                                            },
-                                            {
-                                                "layerTag":  {
-                                                                 "layerName":  "UI",
-                                                                 "mask":  4,
-                                                                 "sortingLayer":  2,
-                                                                 "orderInLayer":  15,
-                                                                 "z":  0.0
-                                                             }
                                             }
                                         ]
                      },
@@ -5340,6 +5184,81 @@
                                                                       "visible":  false,
                                                                       "alignment":  1
                                                                   }
+                                            }
+                                        ]
+                     },
+                     {
+                         "components":  [
+                                            {
+                                                "transform":  {
+                                                                  "position":  {
+                                                                                   "x":  0.0,
+                                                                                   "y":  0.0
+                                                                               },
+                                                                  "scale":  {
+                                                                                "x":  176.0,
+                                                                                "y":  33.0
+                                                                            },
+                                                                  "rotation":  {
+                                                                                   "x":  0.0,
+                                                                                   "y":  0.0
+                                                                               },
+                                                                  "isVisible":  true,
+                                                                  "visibilityTimer":  0.0,
+                                                                  "autoHide":  false
+                                                              }
+                                            },
+                                            {
+                                                "render":  {
+                                                               "mdl_ref":  0.0,
+                                                               "shd_ref":  2.0,
+                                                               "useTexture":  true,
+                                                               "spriteName":  "../../PulseProtocol/Assets/Textures/UI/enemy_hp4_00.png",
+                                                               "tintColor":  {
+                                                                                 "r":  1.0,
+                                                                                 "g":  1.0,
+                                                                                 "b":  1.0,
+                                                                                 "a":  1.0
+                                                                             },
+                                                               "glow":  {
+                                                                            "enabled":  false,
+                                                                            "intensity":  1.0,
+                                                                            "r":  1.0,
+                                                                            "g":  1.0,
+                                                                            "b":  1.0
+                                                                        }
+                                                           }
+                                            },
+                                            {
+                                                "animation":  {
+                                                                  "currentFrame":  0,
+                                                                  "elapsedTime":  0.0,
+                                                                  "totalFrames":  1,
+                                                                  "columns":  1,
+                                                                  "rows":  1,
+                                                                  "animationSpeed":  0.0
+                                                              }
+                                            },
+                                            {
+                                                "script":  {
+                                                               "ScriptName":  [
+                                                                                  "EnemyHealthBarController"
+                                                                              ]
+                                                           }
+                                            },
+                                            {
+                                                "name":  {
+                                                             "name":  "EnemyHealthBar"
+                                                         }
+                                            },
+                                            {
+                                                "layerTag":  {
+                                                                 "layerName":  "World",
+                                                                 "mask":  2,
+                                                                 "sortingLayer":  1,
+                                                                 "orderInLayer":  20,
+                                                                 "z":  0.0
+                                                             }
                                             }
                                         ]
                      }
