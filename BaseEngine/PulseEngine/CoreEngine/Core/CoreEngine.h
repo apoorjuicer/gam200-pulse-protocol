@@ -87,7 +87,6 @@ public:
 	void SetStartupFullscreen(bool fullscreen) { m_startupFullscreen = fullscreen; }
 	bool IsFullscreen() const { return m_isFullscreen; }
 
-
 	// --- For Delta Time API :D  ---
 public:
 	// Returns DeltaTime, but returns 0 if game is paused

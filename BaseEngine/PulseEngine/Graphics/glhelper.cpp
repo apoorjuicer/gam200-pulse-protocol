@@ -116,6 +116,7 @@ bool GLHelper::init(GLint awidth, GLint aheight, std::string atitle) {
 	}
 
 	glfwMakeContextCurrent(GLHelper::ptr_window);
+	glfwSwapInterval(1); // Enable VSync
 
 	setup_event_callbacks();
 
