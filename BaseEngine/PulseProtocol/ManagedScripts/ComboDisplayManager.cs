@@ -234,7 +234,19 @@ public class ComboDisplayManager : Script
         revealIndex = 0;
         isRevealing = true;
         isFadingOut = false;
-        revealStartTime = Conductor.Instance != null ? Conductor.Instance.GetAdjustedSongTime() : 0f;
+
+        // Snap to the nearest beat boundary using visual time (same clock as VisualBeatSystem)
+        // so all keys align with the border pulse, not just the first one.
+        if (Conductor.Instance != null)
+        {
+            float visualTime = Conductor.Instance.GetVisualAdjustedSongTime();
+            float spb = Conductor.Instance.SecondsPerBeat;
+            revealStartTime = (float)Math.Floor(visualTime / spb) * spb;
+        }
+        else
+        {
+            revealStartTime = 0f;
+        }
         revealSlotOffsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0.0f, 0.5f, 1.0f, 1.5f };
         currentVisualSlots = EnemyRhythmController.Instance?.VisualSlotIndices ?? new int[] { 0, 1, 2, 3 };
 
@@ -277,7 +289,8 @@ public class ComboDisplayManager : Script
     {
         if (Conductor.Instance == null) return;
 
-        float elapsed = Conductor.Instance.GetAdjustedSongTime() - revealStartTime;
+        // Use visual time (same clock as VisualBeatSystem) so keys stay in sync with border pulse
+        float elapsed = Conductor.Instance.GetVisualAdjustedSongTime() - revealStartTime;
 
         while (revealIndex < revealCombo.Length && revealIndex < revealSlotOffsets.Length)
         {

@@ -134,11 +134,9 @@ public class PlayerSlotBeatPulse : Script
         {
             _flashTimer -= dt;
             float ft     = Clamp01(_flashTimer / _flashTotalDuration);
-            // ease-out: sqrt keeps it gold longer, then drifts back to white
-            float eased  = (float)Math.Sqrt(ft);
-            _currentR    = Lerp(1f, targetR, eased);
-            _currentG    = Lerp(1f, targetG, eased);
-            _currentB    = Lerp(1f, targetB, eased);
+            _currentR    = Lerp(1f, targetR, ft);
+            _currentG    = Lerp(1f, targetG, ft);
+            _currentB    = Lerp(1f, targetB, ft);
         }
         else
         {
@@ -159,8 +157,7 @@ public class PlayerSlotBeatPulse : Script
             _scaleTimer -= dt;
             if (_scaleTimer < 0f) _scaleTimer = 0f;
             float ft    = _scaleTimer / _scaleTotalDur;
-            float eased = (float)Math.Sqrt(ft);
-            float scale = 1f + _scaleAmpActive * eased;
+            float scale = 1f + _scaleAmpActive * ft;
             t.ScaleX = _baseScaleX * scale;
             t.ScaleY = _baseScaleY * scale;
         }

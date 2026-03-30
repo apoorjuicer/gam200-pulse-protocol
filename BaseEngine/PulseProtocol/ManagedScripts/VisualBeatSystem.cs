@@ -68,12 +68,13 @@ public class VisualBeatSystem : Script
 
         float phase = songTime / subBeat;
         phase = phase - (float)Math.Floor(phase); // 0..1
+        if (phase > 0.5f) phase -= 1.0f;          // -0.5..0.5, symmetric around the beat
 
         // =========================
-        // Pulse curve (high at beat, decays as it closes)
+        // Pulse curve (peaks exactly on the beat, fades symmetrically before and after)
         // =========================
         float w = Math.Max(0.0001f, width);
-        float pulse = (float)Math.Exp(-(phase * phase) / (2f * w * w)); // ~1 at beat, -> 0 after
+        float pulse = (float)Math.Exp(-(phase * phase) / (2f * w * w)); // ~1 at beat, -> 0 before/after
 
         // =========================
         // Scale: open on beat, close back
