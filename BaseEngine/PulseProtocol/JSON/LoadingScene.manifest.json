@@ -2,11 +2,11 @@
     "scenemanifest": {
         "sceneName": "LoadingScreenScene",
         "sharedGroups": [
-
+            "GameplayCommon"
         ],
         "textures": [
-            "loadingscreen_BG"
-
+            "loadingscreen_BG",
+            "Level1_BG"
         ],
         "audio": [
             
