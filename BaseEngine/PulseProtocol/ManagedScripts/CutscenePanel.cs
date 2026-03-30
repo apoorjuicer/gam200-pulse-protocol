@@ -71,6 +71,8 @@ public class CutscenePanel : Script
     private static int sharedInitCount = 0;
     private static int totalPairs = 4;
 
+    public static bool IsCutsceneFinished => sharedCutsceneFinished;
+
     // Cached timing values (set once during init)
     private static float sPairTotalDuration = 0f;
     private static float sStaggerDelay = 0f;
@@ -106,18 +108,12 @@ public class CutscenePanel : Script
         if (isTimerOwner)
         {
             InputComponent input = GetInput();
-            if (input.IsKeyTriggered(32))
+            if (input.IsKeyTriggered(32) || input.IsGamepadButtonTriggered(0))
             {
                 Console.WriteLine("[Cutscene] Skipped!");
                 sharedCutsceneFinished = true;
-                NavigationButtons.LastEnteredLevel = "Level1";
-
-                //(Im making it load loading screen scene then after about 3 frames go 2 lvl 1)
-                // redefine this var to lvl 1 so in the LoadingScreenScript script, it will load this ltrrrrrr
-                LoadingScreenScript.NextLevel = "Level1"; 
-                Scene.LoadScene("LoadingScreenScene");
-                //Scene.LoadScene("Level1");
-
+                NavigationButtons.ShowLevelSelectOverlay = true;
+                Scene.LoadScene("MainMenu");
                 return;
             }
 
@@ -127,13 +123,9 @@ public class CutscenePanel : Script
             if (sharedElapsedTime >= totalDuration)
             {
                 sharedCutsceneFinished = true;
-                Console.WriteLine("[Cutscene] Complete! Loading Level1...");
-                NavigationButtons.LastEnteredLevel = "Level1";
-
-                // Same for here, look up^^^
-                LoadingScreenScript.NextLevel = "Level1";
-                Scene.LoadScene("LoadingScreenScene");
-                //Scene.LoadScene("Level1");
+                Console.WriteLine("[Cutscene] Complete! Loading Level Select...");
+                NavigationButtons.ShowLevelSelectOverlay = true;
+                Scene.LoadScene("MainMenu");
                 return;
             }
         }

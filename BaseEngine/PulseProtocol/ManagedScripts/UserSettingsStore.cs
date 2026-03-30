@@ -21,7 +21,6 @@ internal static class UserSettingsStore
         public float SFX { get; set; } = 0.25f;
         public float Brightness { get; set; } = 1.0f;
         public float Latency { get; set; } = 0.5f;
-        public bool Fullscreen { get; set; } = false;
     }
 
     private static bool loaded = false;
@@ -55,22 +54,6 @@ internal static class UserSettingsStore
 
         if (changed)
             Save();
-    }
-
-    public static bool GetFullscreen()
-    {
-        EnsureLoaded();
-        return cached.Fullscreen;
-    }
-
-    public static void SetFullscreen(bool fullscreen)
-    {
-        EnsureLoaded();
-        if (cached.Fullscreen == fullscreen)
-            return;
-
-        cached.Fullscreen = fullscreen;
-        Save();
     }
 
     private static string NormalizeTag(string tag)
