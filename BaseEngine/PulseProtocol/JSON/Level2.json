@@ -27,7 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/Backgrounds/Background2.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/Backgrounds/Level3_BG.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -363,9 +363,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/border_transparent.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/border/border_transparent.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
