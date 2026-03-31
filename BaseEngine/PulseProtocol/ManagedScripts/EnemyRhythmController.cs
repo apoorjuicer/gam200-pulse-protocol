@@ -47,7 +47,7 @@ public class EnemyRhythmController : Script
     // If true, WeaknessCombo is re-randomized each turn (2 distinct keys from WASD)
     public bool RandomizeWeakness = true;
     // If true, VisualSlotIndices is re-randomized each turn (shifts where keys appear visually)
-    public bool RandomizeVisualSlots = true;
+    public bool RandomizeVisualSlots = false;
     private static readonly Random _rng = new Random();
 
     // === COMBAT SETTINGS ===
@@ -253,11 +253,14 @@ public class EnemyRhythmController : Script
         TrySetWeakness();
 
         HealthComponent eh = GetHealth();
+        MaxHP = Math.Max(1, eh.hp);
         Health = eh.hp;
         MaxHP = Math.Max(1, eh.hp);
         if (HealthBarBlockCount < 2) HealthBarBlockCount = 2;
         if (HealthBarBlockCount > 4) HealthBarBlockCount = 4;
         eh.isAlive = true;
+        if (HealthBarBlockCount < 2) HealthBarBlockCount = 2;
+        if (HealthBarBlockCount > 4) HealthBarBlockCount = 4;
         Console.WriteLine($"[Enemy] Initialized at ({tf.X:F1}, {tf.Y:F1}) | Health: {eh.hp}");
         Console.WriteLine($"[Enemy] Collision mode: {CollisionMode} | ManualAttackRange: {ManualAttackRange}");
         Console.WriteLine($"[Enemy] AttackDamage: {AttackDamage}");

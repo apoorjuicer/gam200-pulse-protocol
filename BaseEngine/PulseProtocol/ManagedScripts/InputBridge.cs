@@ -136,7 +136,9 @@ public class InputBridge : Script
                     // Console.WriteLine("[InputBridge] SUCCESS! Applying damage immediately.");
                     float playerDamage = PlayerHealth.Instance != null ? PlayerHealth.Instance.GetHealth().damage : 10;
                     EnemyRhythmController.Instance?.TakeDamage(playerDamage);
-                    PlayerAnimationController.Instance?.PlayAttack();
+
+                    // argument is the enemies own weakness combo that was made at enemyrhythmcontroller.cs
+                    PlayerAnimationController.Instance?.PlayAttack(ComboSystem.Instance.GetExpectedCombo());  
                 }
                 // else
                 // {
