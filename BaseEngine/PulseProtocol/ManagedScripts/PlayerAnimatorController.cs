@@ -143,8 +143,35 @@ public class PlayerAnimationController : Script
     // Public API
     // =========================
 
-    public void PlayAttack()
+    public void PlayAttack(string combo) // param is the enemies weakness combo
     {
+        // update as we continue with more combo ig.
+        switch (combo.Length)
+        {
+            case 2: 
+                AttackSpriteSheet = "dorian_gun";   //bat
+                AttackRows = 5;
+                AttackColumns = 6;
+                AttackFrames = 29;
+                break;
+            case 3: 
+                AttackSpriteSheet = "dorian_spear"; //gorilla
+                AttackRows = 4;
+                AttackColumns = 5;
+                AttackFrames = 18;
+                break;
+            case 4: 
+                AttackSpriteSheet = "dorian_sword"; //rat
+                AttackRows = 4;
+                AttackColumns = 5;
+                AttackFrames = 18;
+                break;
+
+            default: // imma just put this as the defualt cos idk wut else 2 put 
+                AttackSpriteSheet = "dorian_sword"; 
+                break; 
+        }
+
         // Don't interrupt an ongoing attack
         if (currentState == PlayerAnimState.Attack && waitingForStateEnd)
         {
