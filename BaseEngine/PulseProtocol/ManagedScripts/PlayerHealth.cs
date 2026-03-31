@@ -85,6 +85,9 @@ public class PlayerHealth : Script
 
         Console.WriteLine($"[PlayerHealth] Took {damage} damage! HP: {h.hp}/{maxHP}");
 
+        // Controller rumble feedback on damage
+        GetInput().RumbleGamepad(1.0f, 1.0f, 0.4f);
+
         if (h.hp > 0)
         {
             FlashRed();

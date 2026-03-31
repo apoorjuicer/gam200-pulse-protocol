@@ -92,6 +92,7 @@ public:
 	bool isGamepadButtonTriggered(int button) const;
 	bool isGamepadButtonReleased(int button) const;
 	float getGamepadAxis(int axis) const;
+	void rumbleGamepad(float leftMotor, float rightMotor, float durationSec);
 
 private:
 	GLFWwindow* window = nullptr;
@@ -134,6 +135,9 @@ private:
 	glm::vec2 gamepadCursorWorld{ 0.0f, 0.0f };
 	bool gamepadCursorActive = false;	// true once gamepad has moved the cursor
 	float lastDt = 0.016f;				// cached from Update()
+
+	// Rumble timer
+	float rumbleTimeRemaining = 0.0f;
 
 	// for raw input functions
 	void updateInputStates();
