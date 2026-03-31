@@ -75,6 +75,7 @@ public class CutscenePanel : Script
     private const float SkipTransitionDuration = 0.5f;
     private static bool s_sceneChangeIssued = false;
     private static string s_sceneSessionTag = "";
+    private static bool s_waitingForEntryFade = true;
 
     public static bool IsCutsceneFinished => sharedCutsceneFinished;
 
@@ -106,6 +107,12 @@ public class CutscenePanel : Script
         if (!initialized)
         {
             Initialize();
+            return;
+        }
+
+        if (WaitForEntryFadeComplete())
+        {
+            HoldPanelHidden();
             return;
         }
 
@@ -170,6 +177,7 @@ public class CutscenePanel : Script
             s_waitingForSkipTransition = false;
             s_skipTransitionTimer = 0f;
             s_sceneChangeIssued = false;
+            s_waitingForEntryFade = true;
         }
 
         //Console.WriteLine($"[DAS PRETTY GAY IF U ASK ME] sharedInitCount: {sharedInitCount}, sharedCutsceneFinished: {sharedCutsceneFinished}\n\n\n\n\n\n\n");
@@ -237,6 +245,32 @@ public class CutscenePanel : Script
         Console.WriteLine($"[CutscenePanel] Panel {myPanelIndex + 1} -> Pair {myPairIndex + 1} ({side}) X={myTargetX}");
 
         initialized = true;
+    }
+
+    private bool WaitForEntryFadeComplete()
+    {
+        if (!s_waitingForEntryFade)
+            return false;
+
+        string currentScene = Scene.GetCurrentScene();
+        if (NavigationButtons.IsPostLoadFadePendingForScene(currentScene))
+            return true;
+
+        if (!FadeAPI.IsFadeDone())
+            return true;
+
+        s_waitingForEntryFade = false;
+        return false;
+    }
+
+    private void HoldPanelHidden()
+    {
+        TransformComponent tf = GetTransform();
+        SpriteComponent sprite = GetSprite();
+        tf.IsVisible = false;
+        tf.X = myTargetX;
+        tf.Y = sOffScreenBelow != 0f ? sOffScreenBelow : offScreenBelow;
+        SetAlpha(sprite, 0f);
     }
 
     private void GoToLevelSelectWithFadeIn()
