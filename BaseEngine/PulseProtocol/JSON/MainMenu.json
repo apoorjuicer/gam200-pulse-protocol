@@ -78,8 +78,8 @@
                             "y": 0.0
                         },
                         "scale": {
-                            "x": 400.0,
-                            "y": 135.0
+                            "x": 800.0,
+                            "y": 270.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -92,7 +92,7 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
+                        "mdl_ref": 1.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/new game.png",
@@ -159,8 +159,8 @@
                             "y": -230.0
                         },
                         "scale": {
-                            "x": 400.0,
-                            "y": 135.0
+                            "x": 800.0,
+                            "y": 270.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -173,7 +173,7 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
+                        "mdl_ref": 1.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/continue.png",
@@ -240,8 +240,8 @@
                             "y": -460.0
                         },
                         "scale": {
-                            "x": 400.0,
-                            "y": 135.0
+                            "x": 800.0,
+                            "y": 270.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -254,7 +254,7 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
+                        "mdl_ref": 1.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/settings.png",
@@ -321,8 +321,8 @@
                             "y": -690.0
                         },
                         "scale": {
-                            "x": 400.0,
-                            "y": 135.0
+                            "x": 800.0,
+                            "y": 270.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -335,8 +335,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/quit.png",
                         "tintColor": {
@@ -409,7 +409,7 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -493,24 +493,24 @@
                             "y": -300.0
                         },
                         "scale": {
-                            "x": 250.0,
-                            "y": 130.0
+                            "x": 500.0,
+                            "y": 260.0
                         },
                         "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/quit yes.png",
+                        "spriteName": "quityes_btn",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -574,24 +574,24 @@
                             "y": -300.0
                         },
                         "scale": {
-                            "x": 250.0,
-                            "y": 130.0
+                            "x": 500.0,
+                            "y": 260.0
                         },
                         "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/quit no.png",
+                        "spriteName": "quitno_btn",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -669,8 +669,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 3.0,
                         "useTexture": true,
                         "spriteName": "",
                         "tintColor": {
@@ -1054,8 +1054,8 @@
                             "y": 600.0
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 200.0,
+                            "y": 200.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1068,8 +1068,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/Exit.png",
                         "tintColor": {
@@ -1130,8 +1130,8 @@
                             "y": 600.0
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 200.0,
+                            "y": 200.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1144,8 +1144,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/NextStage.png",
                         "tintColor": {
@@ -1281,8 +1281,8 @@
                             "y": 258.6278991699219
                         },
                         "scale": {
-                            "x": 300.0,
-                            "y": 40.0
+                            "x": 600.0,
+                            "y": 80.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1295,8 +1295,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/Volume_.png",
                         "tintColor": {
@@ -1365,8 +1365,8 @@
                             "y": 135.0
                         },
                         "scale": {
-                            "x": 1140.0,
-                            "y": 30.0
+                            "x": 2280.0,
+                            "y": 60.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1379,8 +1379,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/slider bar bottom.png",
                         "tintColor": {
@@ -1445,8 +1445,8 @@
                             "y": 135.0
                         },
                         "scale": {
-                            "x": 50.0,
-                            "y": 30.0
+                            "x": 100.0,
+                            "y": 60.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1459,8 +1459,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/slider.png",
                         "tintColor": {
@@ -1526,8 +1526,8 @@
                             "y": 135.0
                         },
                         "scale": {
-                            "x": 542.4365234375,
-                            "y": 20.0
+                            "x": 1084.873046875,
+                            "y": 40.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1540,8 +1540,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/slider bar fill.png",
                         "tintColor": {
@@ -1607,8 +1607,8 @@
                             "y": -64.5322265625
                         },
                         "scale": {
-                            "x": 230.0,
-                            "y": 40.0
+                            "x": 460.0,
+                            "y": 80.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1621,8 +1621,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/Music_.png",
                         "tintColor": {
@@ -1691,8 +1691,8 @@
                             "y": -188.16012573242188
                         },
                         "scale": {
-                            "x": 1140.0,
-                            "y": 30.0
+                            "x": 2280.0,
+                            "y": 60.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1705,8 +1705,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/slider bar bottom.png",
                         "tintColor": {
@@ -1771,8 +1771,8 @@
                             "y": -188.16012573242188
                         },
                         "scale": {
-                            "x": 56.0,
-                            "y": 30.0
+                            "x": 112.0,
+                            "y": 60.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1785,8 +1785,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/slider.png",
                         "tintColor": {
@@ -1852,8 +1852,8 @@
                             "y": -188.16012573242188
                         },
                         "scale": {
-                            "x": 1117.2000732421875,
-                            "y": 20.0
+                            "x": 2234.400146484375,
+                            "y": 40.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1866,8 +1866,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/slider bar fill.png",
                         "tintColor": {
@@ -1933,22 +1933,22 @@
                             "y": 501.78802490234375
                         },
                         "scale": {
-                            "x": 300.0,
-                            "y": 40.0
+                            "x": 600.0,
+                            "y": 80.0
                         },
                         "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/Screen_.png",
                         "tintColor": {
@@ -2474,22 +2474,22 @@
                             "y": 508.07684326171875
                         },
                         "scale": {
-                            "x": 380.0,
-                            "y": 58.89337158203125
+                            "x": 760.0,
+                            "y": 117.7867431640625
                         },
                         "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": false,
+                        "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "Assets/Textures/UI/dropdown close.png",
                         "tintColor": {
@@ -3407,9 +3407,18 @@
             "components": [
                 {
                     "transform": {
-                        "position": { "x": 0.0, "y": 680.0 },
-                        "scale": { "x": 200.0, "y": 200.0 },
-                        "rotation": { "x": 0.0, "y": 0.0 },
+                        "position": {
+                            "x": 0.0,
+                            "y": 680.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -3417,37 +3426,70 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0, "shd_ref": 0.0, "useTexture": false,
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": false,
                         "spriteName": "",
-                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
-                        "glow": { "enabled": false, "intensity": 1.0, "r": 1.0, "g": 1.0, "b": 1.0 }
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
                     }
                 },
                 {
                     "animation": {
-                        "currentFrame": 0, "elapsedTime": 0.0,
-                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 1.0
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 1.0
                     }
                 },
                 {
-                    "script": { "ScriptName": [ "ControllerNotification" ] }
+                    "script": {
+                        "ScriptName": [
+                            "ControllerNotification"
+                        ]
+                    }
                 },
                 {
-                    "name": { "name": "ControllerNotificationText" }
+                    "name": {
+                        "name": "ControllerNotificationText"
+                    }
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI", "mask": 4,
-                        "sortingLayer": 2, "orderInLayer": 100, "z": 0.0
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 100,
+                        "z": 0.0
                     }
                 },
                 {
                     "TextComponent": {
                         "text": "",
                         "font_id": "barlow_semibold_font",
-                        "offset": { "x": 0.0, "y": 0.0 },
+                        "offset": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
                         "font_size": 40.0,
-                        "color": [ 1.0, 1.0, 1.0 ],
+                        "color": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
                         "visible": false,
                         "alignment": 1
                     }
