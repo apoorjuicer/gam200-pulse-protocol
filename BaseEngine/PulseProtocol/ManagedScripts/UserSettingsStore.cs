@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Diagnostics;
 using System.Text.Json;
 
 internal static class UserSettingsStore
@@ -19,7 +20,7 @@ internal static class UserSettingsStore
 
     private static bool loaded = false;
     private static Data cached = new Data();
-    private static List<string>? resolvedPaths;
+    private static string? canonicalPath;
 
     public static float GetSliderValue(string tag, float fallback)
     {
@@ -87,25 +88,19 @@ internal static class UserSettingsStore
             return;
 
         loaded = true;
+        string targetPath = GetCanonicalPath();
 
-        foreach (string path in GetCandidatePaths())
+        // Canonical location first.
+        if (TryLoadFromPath(targetPath))
+            return;
+
+        // One-time migration read from legacy locations.
+        foreach (string path in GetLegacyReadPaths())
         {
-            try
+            if (TryLoadFromPath(path))
             {
-                if (!File.Exists(path))
-                    continue;
-
-                string json = File.ReadAllText(path);
-                Data? data = JsonSerializer.Deserialize<Data>(json);
-                if (data != null)
-                {
-                    cached = data;
-                    return;
-                }
-            }
-            catch
-            {
-                // Keep defaults if bad file/path.
+                Save(); // migrate to canonical path
+                return;
             }
         }
     }
@@ -113,74 +108,147 @@ internal static class UserSettingsStore
     private static void Save()
     {
         string json = JsonSerializer.Serialize(cached, new JsonSerializerOptions { WriteIndented = true });
-        bool wroteAny = false;
-
-        foreach (string path in GetCandidatePaths())
+        string path = GetCanonicalPath();
+        try
         {
-            try
-            {
-                string? dir = Path.GetDirectoryName(path);
-                if (!string.IsNullOrEmpty(dir))
-                    Directory.CreateDirectory(dir);
+            string? dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(dir))
+                Directory.CreateDirectory(dir);
 
-                File.WriteAllText(path, json);
-                wroteAny = true;
-            }
-            catch
-            {
-                // Try next candidate path.
-            }
+            File.WriteAllText(path, json);
         }
-
-        if (!wroteAny)
-            Console.WriteLine("[UserSettingsStore] WARNING: Failed to save user_settings.json to all candidate paths.");
+        catch
+        {
+            Console.WriteLine("[UserSettingsStore] WARNING: Failed to save user_settings.json to canonical path: " + path);
+        }
     }
 
-    private static List<string> GetCandidatePaths()
+    private static bool TryLoadFromPath(string path)
     {
-        if (resolvedPaths != null)
-            return resolvedPaths;
+        try
+        {
+            if (!File.Exists(path))
+                return false;
 
+            string json = File.ReadAllText(path);
+            Data? data = JsonSerializer.Deserialize<Data>(json);
+            if (data == null)
+                return false;
+
+            cached = data;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string GetCanonicalPath()
+    {
+        if (!string.IsNullOrEmpty(canonicalPath))
+            return canonicalPath!;
+
+        string baseDir = AppContext.BaseDirectory;
+        string cwd = Directory.GetCurrentDirectory();
+        string exeDir = "";
+        try
+        {
+            string? exePath = Process.GetCurrentProcess().MainModule?.FileName;
+            if (!string.IsNullOrEmpty(exePath))
+                exeDir = Path.GetDirectoryName(exePath) ?? "";
+        }
+        catch
+        {
+            // fallback below
+        }
+
+        // Single shared runtime location in build tree:
+        //   BaseEngine/build/PulseProtocol/JSON/user_settings.json
+        string? buildSharedPath = FindBuildPulseProtocolSettingsPath(exeDir)
+                               ?? FindBuildPulseProtocolSettingsPath(cwd)
+                               ?? FindBuildPulseProtocolSettingsPath(baseDir);
+
+        if (!string.IsNullOrEmpty(buildSharedPath))
+            canonicalPath = buildSharedPath;
+        else if (!string.IsNullOrEmpty(exeDir))
+            canonicalPath = Path.GetFullPath(Path.Combine(exeDir, "..", "JSON", SaveFileName));
+        else
+            canonicalPath = Path.GetFullPath(Path.Combine(cwd, "JSON", SaveFileName));
+
+        // Extra safety fallback if path resolution somehow fails.
+        if (string.IsNullOrWhiteSpace(canonicalPath))
+            canonicalPath = Path.GetFullPath(Path.Combine(baseDir, "JSON", SaveFileName));
+
+        return canonicalPath!;
+    }
+
+    private static string? FindBuildPulseProtocolSettingsPath(string startDir)
+    {
+        if (string.IsNullOrWhiteSpace(startDir))
+            return null;
+
+        try
+        {
+            string current = Path.GetFullPath(startDir);
+            for (int i = 0; i < 12; i++)
+            {
+                // Case 1: current is .../build
+                string candidateFromBuildRoot = Path.Combine(current, "PulseProtocol", "JSON");
+                if (Directory.Exists(candidateFromBuildRoot))
+                    return Path.GetFullPath(Path.Combine(candidateFromBuildRoot, SaveFileName));
+
+                // Case 2: current is .../build/PulseProtocol/<config>
+                string candidateFromConfigDir = Path.Combine(current, "..", "JSON");
+                if (Directory.Exists(candidateFromConfigDir))
+                    return Path.GetFullPath(Path.Combine(candidateFromConfigDir, SaveFileName));
+
+                string? parent = Path.GetDirectoryName(current);
+                if (string.IsNullOrEmpty(parent) || string.Equals(parent, current, StringComparison.OrdinalIgnoreCase))
+                    break;
+
+                current = parent;
+            }
+        }
+        catch
+        {
+            // ignore and fallback
+        }
+
+        return null;
+    }
+
+    private static List<string> GetLegacyReadPaths()
+    {
+        string baseDir = AppContext.BaseDirectory;
+        string cwd = Directory.GetCurrentDirectory();
+        string canonical = GetCanonicalPath();
         var unique = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var ordered = new List<string>();
 
-        void AddCandidate(string path)
+        void Add(string p)
         {
             try
             {
-                string full = Path.GetFullPath(path);
-                if (unique.Add(full))
+                string full = Path.GetFullPath(p);
+                if (!full.Equals(canonical, StringComparison.OrdinalIgnoreCase) && unique.Add(full))
                     ordered.Add(full);
             }
             catch
             {
-                // Ignore malformed path candidates.
+                // ignore
             }
         }
 
-        string baseDir = AppContext.BaseDirectory;
-        string cwd = Directory.GetCurrentDirectory();
+        Add(Path.Combine("PulseProtocol", "JSON", SaveFileName));
+        Add(Path.Combine("..", "..", "PulseProtocol", "JSON", SaveFileName));
+        Add(Path.Combine("..", "..", "..", "PulseProtocol", "JSON", SaveFileName));
+        Add(Path.Combine("..", "..", "..", "..", "PulseProtocol", "JSON", SaveFileName));
+        Add(Path.Combine(cwd, "PulseProtocol", "JSON", SaveFileName));
+        Add(Path.Combine(baseDir, "..", "..", "..", "..", "PulseProtocol", "JSON", SaveFileName));
+        Add(Path.Combine(baseDir, "JSON", SaveFileName));
+        Add(SaveFileName);
 
-        // Runtime output (works for both game/editor executable folders).
-        AddCandidate(Path.Combine(baseDir, "JSON", SaveFileName));
-
-        // Project source JSON folder from build outputs:
-        //   BaseEngine/build/PulseProtocol/Debug -> ../../../../PulseProtocol/JSON
-        //   BaseEngine/build/PulseEditor/Debug   -> ../../../../PulseProtocol/JSON
-        AddCandidate(Path.Combine(baseDir, "..", "..", "..", "..", "PulseProtocol", "JSON", SaveFileName));
-
-        // CWD fallbacks.
-        AddCandidate(Path.Combine(cwd, "JSON", SaveFileName));
-        AddCandidate(Path.Combine(cwd, "PulseProtocol", "JSON", SaveFileName));
-
-        // Legacy relative fallbacks.
-        AddCandidate(Path.Combine("PulseProtocol", "JSON", SaveFileName));
-        AddCandidate(Path.Combine("..", "..", "PulseProtocol", "JSON", SaveFileName));
-        AddCandidate(Path.Combine("..", "..", "..", "PulseProtocol", "JSON", SaveFileName));
-        AddCandidate(Path.Combine("..", "..", "..", "..", "PulseProtocol", "JSON", SaveFileName));
-        AddCandidate(SaveFileName);
-
-        resolvedPaths = ordered;
-        return resolvedPaths;
+        return ordered;
     }
 }

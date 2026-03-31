@@ -161,6 +161,17 @@ void SceneManager::Update(float dt)
 	}
 }
 
+bool SceneManager::ConsumeSceneLoadedPulse()
+{
+	if (!m_sceneLoadCompletedPulse)
+	{
+		return false;
+	}
+
+	m_sceneLoadCompletedPulse = false;
+	return true;
+}
+
 
 
 void SceneManager::SaveCurrentScene()
@@ -608,6 +619,8 @@ void SceneManager::UnloadCurrentScene()
 
 void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE JSON FILE 
 {
+	m_sceneLoadCompletedPulse = false;
+
 	// Reset countdown/beat state on scene load
 	g_countdownFinished = false;
 
@@ -1098,6 +1111,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 
 	PreviousScene = CurrentScene;
+	m_sceneLoadCompletedPulse = true;
 
 #ifdef _DEBUG
 	std::cout << "\n===================================================" << std::endl;

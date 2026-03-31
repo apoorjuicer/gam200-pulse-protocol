@@ -74,6 +74,8 @@ public:
 	void SaveCurrentScene();
 	void UnloadCurrentScene();
 	void RestartCurrentScene();
+	bool ConsumeSceneLoadedPulse();
+	bool HasSceneLoadedPulse() const { return m_sceneLoadCompletedPulse; }
 
 	std::string CurrentScene; // i need this public for me to call in other systems when i press the nbutton in hovered state
 
@@ -144,6 +146,7 @@ private:
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
 
 	CoreEngine* m_coreEngine = nullptr;
+	bool m_sceneLoadCompletedPulse = false;
 };
 //ALL ENTITY IN THE ARRAY MUST BE EXACTLY LIKE A PREFAB. But it is not a prefab, just all its component. (for scene json)
 

@@ -63,9 +63,30 @@ using InitFunctionPtr = void(*)(CoreEngine*);
 
 namespace
 {
+	std::filesystem::path ResolveSharedUserSettingsPath(const std::filesystem::path& gameRoot)
+	{
+		// Single shared runtime settings location:
+		//   .../build/PulseProtocol/JSON/user_settings.json
+		if (!gameRoot.empty())
+		{
+			const std::filesystem::path devBuildShared =
+				gameRoot.parent_path() / "build" / "PulseProtocol" / "JSON" / "user_settings.json";
+			if (std::filesystem::exists(devBuildShared.parent_path()))
+				return devBuildShared;
+
+			const std::filesystem::path viaConfigParent = gameRoot.parent_path() / "JSON" / "user_settings.json";
+			if (std::filesystem::exists(viaConfigParent.parent_path()))
+				return viaConfigParent;
+
+			return gameRoot / "JSON" / "user_settings.json";
+		}
+
+		return std::filesystem::path("user_settings.json");
+	}
+
 	bool TryLoadStartupFullscreenFromUserSettings(const std::filesystem::path& gameRoot, bool& fullscreenOut)
 	{
-		const std::filesystem::path settingsPath = gameRoot / "JSON" / "user_settings.json";
+		const std::filesystem::path settingsPath = ResolveSharedUserSettingsPath(gameRoot);
 		if (!std::filesystem::exists(settingsPath))
 			return false;
 
@@ -112,16 +133,7 @@ namespace
 		};
 
 		// Runtime settings used by the running executable.
-		writeFullscreen(gameRoot / "JSON" / "user_settings.json");
-
-		// Source-tree settings (helps keep editor/source JSON in sync with runtime toggles).
-		const std::filesystem::path sourceSettings =
-			gameRoot / ".." / ".." / ".." / ".." / "PulseProtocol" / "JSON" / "user_settings.json";
-		if (std::filesystem::weakly_canonical(sourceSettings) !=
-			std::filesystem::weakly_canonical(gameRoot / "JSON" / "user_settings.json"))
-		{
-			writeFullscreen(sourceSettings);
-		}
+		writeFullscreen(ResolveSharedUserSettingsPath(gameRoot));
 	}
 }
 

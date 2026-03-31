@@ -70,6 +70,11 @@ public class CutscenePanel : Script
     private static bool sharedCutsceneFinished = false;
     private static int sharedInitCount = 0;
     private static int totalPairs = 4;
+    private static bool s_waitingForSkipTransition = false;
+    private static float s_skipTransitionTimer = 0f;
+    private const float SkipTransitionDuration = 0.5f;
+    private static bool s_sceneChangeIssued = false;
+    private static string s_sceneSessionTag = "";
 
     public static bool IsCutsceneFinished => sharedCutsceneFinished;
 
@@ -102,6 +107,24 @@ public class CutscenePanel : Script
             return;
         }
 
+        if (isTimerOwner && s_waitingForSkipTransition)
+        {
+            s_skipTransitionTimer -= Time.DeltaTime;
+            bool timeDone = s_skipTransitionTimer <= 0f;
+            bool screenFadeDone = FadeAPI.IsFadeDone();
+
+            if (timeDone)
+                FadeAPI.SetAlpha(1.0f);
+
+            if (timeDone && screenFadeDone)
+            {
+                s_waitingForSkipTransition = false;
+                s_skipTransitionTimer = 0f;
+                GoToLevelSelectWithFadeIn();
+            }
+            return;
+        }
+
         if (sharedCutsceneFinished)
             return;
 
@@ -111,9 +134,7 @@ public class CutscenePanel : Script
             if (input.IsKeyTriggered(32) || input.IsGamepadButtonTriggered(0))
             {
                 Console.WriteLine("[Cutscene] Skipped!");
-                sharedCutsceneFinished = true;
-                NavigationButtons.ShowLevelSelectOverlay = true;
-                Scene.LoadScene("MainMenu");
+                BeginSkipTransition();
                 return;
             }
 
@@ -122,10 +143,8 @@ public class CutscenePanel : Script
             float totalDuration = (totalPairs - 1) * (sPairTotalDuration - sOverlapDuration) + sPairTotalDuration;
             if (sharedElapsedTime >= totalDuration)
             {
-                sharedCutsceneFinished = true;
                 Console.WriteLine("[Cutscene] Complete! Loading Level Select...");
-                NavigationButtons.ShowLevelSelectOverlay = true;
-                Scene.LoadScene("MainMenu");
+                GoToLevelSelectWithFadeIn();
                 return;
             }
         }
@@ -138,11 +157,17 @@ public class CutscenePanel : Script
     // =========================
     private void Initialize()
     {
-        // reset the count back 2 0 if u finish the cutscene. Pressing space also make it true soooooo, yeah das all folks :>
-        if (sharedCutsceneFinished)
+        // Reset shared state only once per cutscene scene session.
+        string currentScene = Scene.GetCurrentScene();
+        if (!string.Equals(s_sceneSessionTag, currentScene, StringComparison.OrdinalIgnoreCase))
         {
+            s_sceneSessionTag = currentScene;
             sharedInitCount = 0;
+            sharedElapsedTime = 0f;
             sharedCutsceneFinished = false;
+            s_waitingForSkipTransition = false;
+            s_skipTransitionTimer = 0f;
+            s_sceneChangeIssued = false;
         }
 
         //Console.WriteLine($"[DAS PRETTY GAY IF U ASK ME] sharedInitCount: {sharedInitCount}, sharedCutsceneFinished: {sharedCutsceneFinished}\n\n\n\n\n\n\n");
@@ -210,6 +235,33 @@ public class CutscenePanel : Script
         Console.WriteLine($"[CutscenePanel] Panel {myPanelIndex + 1} -> Pair {myPairIndex + 1} ({side}) X={myTargetX}");
 
         initialized = true;
+    }
+
+    private void GoToLevelSelectWithFadeIn()
+    {
+        if (s_sceneChangeIssued)
+            return;
+
+        s_sceneChangeIssued = true;
+        sharedCutsceneFinished = true;
+        NavigationButtons.CutsceneLevelSelectLock = true;
+        NavigationButtons.ShowLevelSelectOverlay = true;
+        NavigationButtons.PendingSceneFadeIn = true;
+        s_sceneSessionTag = "";
+        Scene.LoadScene("MainMenu");
+    }
+
+    private void BeginSkipTransition()
+    {
+        if (s_waitingForSkipTransition)
+            return;
+
+        sharedCutsceneFinished = true;
+        s_waitingForSkipTransition = true;
+        s_skipTransitionTimer = SkipTransitionDuration;
+        FadeAPI.Stop();
+        FadeAPI.SetAlpha(0.0f);
+        FadeAPI.FadeOut(SkipTransitionDuration);
     }
 
     // =========================

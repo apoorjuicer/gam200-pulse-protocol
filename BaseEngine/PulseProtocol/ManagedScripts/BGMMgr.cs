@@ -29,6 +29,10 @@ public class GeneralBGM : Script
 
         if (!started)
         {
+            // Cutscene-entry Level Select must be silent.
+            if (NavigationButtons.CutsceneLevelSelectLock)
+                return;
+
             // Apply saved user mix at scene start so startup and settings-open behavior match.
             audio.SetMasterVolume(UserSettingsStore.GetSliderValue("Volume", 1.0f));
             audio.SetMusicVolume(UserSettingsStore.GetSliderValue("Music", 1.0f));

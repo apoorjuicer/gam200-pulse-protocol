@@ -32,6 +32,7 @@ public class NavigationButtons : Script
 
     // === OVERLAY STATE ===
     public static bool ShowQuitOverlay = false;
+    public static bool ShowNewGameResetOverlay = false;
     public static bool ShowPauseOverlay = false;
     public static bool ShowHowToPlayOverlay = false;
     public static int HtpPage = 1; // 1, 2, or 3
@@ -42,7 +43,9 @@ public class NavigationButtons : Script
     // === SETTINGS OVERLAY (inside MainMenu scene) ===
     public static bool ShowSettingsOverlay = false;
     public static bool ShowLevelSelectOverlay = false;
+    public static bool CutsceneLevelSelectLock = false;
     public static string SelectedLevelScene = "Level1";
+    public static bool PendingSceneFadeIn = false;
 
     private string pauseTexture = "";
     private string pauseHoverTexture = "";
@@ -81,6 +84,18 @@ public class NavigationButtons : Script
 
     private static bool waitingForSceneTransition = false;
     private static string pendingScene = "";
+    private static bool pendingClearOverlaysOnSceneSwitch = false;
+    private static float sceneTransitionTimer = 0.0f;
+    private static int sceneTransitionTickFrame = -1;
+    private const float SceneTransitionDuration = 0.5f;
+    private static string s_prevSceneForMainMenuFade = "";
+    private static int s_lastMainMenuFadeFrame = -1;
+    private static bool s_mainMenuFadeArmed = true;
+    private static bool waitingForMenuOverlayTransition = false;
+    private static float menuOverlayTransitionTimer = 0.0f;
+    private static int menuOverlayTransitionTickFrame = -1;
+    private static int pendingMenuOverlayTarget = 0; // 1 = LevelSelect, 2 = Settings, 3 = MainMenuBase
+    private const float MenuOverlayTransitionDuration = 0.2f;
 
     // Used by background scripts to avoid one-frame visual gaps when switching
     // from pause overlay to settings overlay in gameplay scenes.
@@ -103,13 +118,25 @@ public class NavigationButtons : Script
             HtpPage = 1;
             ShowSettingsOverlay = false;
             ShowLevelSelectOverlay = false;
+            CutsceneLevelSelectLock = false;
             SelectedLevelScene = "Level1";
+            PendingSceneFadeIn = false;
+            s_prevSceneForMainMenuFade = "";
+            s_lastMainMenuFadeFrame = -1;
+            s_mainMenuFadeArmed = true;
 
             wasEscPressed = false;
             s_appliedGamePause = false;
 
             waitingForSceneTransition = false;
             pendingScene = "";
+            pendingClearOverlaysOnSceneSwitch = false;
+            sceneTransitionTimer = 0.0f;
+            sceneTransitionTickFrame = -1;
+            waitingForMenuOverlayTransition = false;
+            menuOverlayTransitionTimer = 0.0f;
+            menuOverlayTransitionTickFrame = -1;
+            pendingMenuOverlayTarget = 0;
 
             s_navCandidates.Clear();
             s_prevCandidates.Clear();
@@ -130,22 +157,103 @@ public class NavigationButtons : Script
 
         string realScene = Scene.GetCurrentScene();
 
+        // Arm whenever we are outside MainMenu.
+        if (!string.IsNullOrEmpty(realScene) && realScene != "MainMenu")
+            s_mainMenuFadeArmed = true;
+
+        // Detect scene entry and keep compatibility with pending flag flow.
+        if (!string.IsNullOrEmpty(realScene) && realScene != s_prevSceneForMainMenuFade)
+        {
+            if (realScene == "MainMenu")
+                PendingSceneFadeIn = true;
+
+            s_prevSceneForMainMenuFade = realScene;
+        }
+
+        if ((PendingSceneFadeIn || s_mainMenuFadeArmed) &&
+            realScene == "MainMenu" &&
+            !waitingForSceneTransition &&
+            !waitingForMenuOverlayTransition &&
+            s_lastMainMenuFadeFrame != Time.FrameCount)
+        {
+            FadeAPI.Stop();
+            FadeAPI.SetAlpha(1.0f);
+            FadeAPI.FadeIn(SceneTransitionDuration);
+            s_lastMainMenuFadeFrame = Time.FrameCount;
+            PendingSceneFadeIn = false;
+            s_mainMenuFadeArmed = false;
+        }
+
         if (waitingForSceneTransition)
         {
-            AudioComponent audio = GetAudio();
-
-            // Go next only after BGM has finished/stopped
-            if (!audio.IsBGMPlaying())
+            if (sceneTransitionTickFrame != Time.FrameCount)
             {
-                waitingForSceneTransition = false;
+                sceneTransitionTickFrame = Time.FrameCount;
 
-                string targetScene = pendingScene;
-                pendingScene = "";
+                float dt = Time.DeltaTime;
+                if (dt <= 0.0f)
+                    dt = 0.016f; // keep transition progressing even while gameplay is paused
+                sceneTransitionTimer -= dt;
+                bool timeDone = sceneTransitionTimer <= 0.0f;
+                bool screenFadeDone = FadeAPI.IsFadeDone();
+                if (timeDone)
+                    FadeAPI.SetAlpha(1.0f);
+                if (timeDone && screenFadeDone)
+                {
+                    // Keep the screen fully dark right before scene switch to avoid one-frame flashes.
+                    waitingForSceneTransition = false;
 
-                if (!string.IsNullOrEmpty(targetScene))
-                    NavigateTo(targetScene);
+                    string targetScene = pendingScene;
+                    pendingScene = "";
+                    bool clearOverlays = pendingClearOverlaysOnSceneSwitch;
+                    pendingClearOverlaysOnSceneSwitch = false;
+                    sceneTransitionTimer = 0.0f;
+                    sceneTransitionTickFrame = -1;
+
+                    if (clearOverlays)
+                    {
+                        ShowPauseOverlay = false;
+                        ShowQuitOverlay = false;
+                        ShowNewGameResetOverlay = false;
+                        ShowHowToPlayOverlay = false;
+                        ShowSettingsOverlay = false;
+                        ShowLevelSelectOverlay = false;
+                    }
+
+                    if (!string.IsNullOrEmpty(targetScene))
+                    {
+                        // Resume only at the handoff moment so gameplay does not continue during fade.
+                        Application.SetPaused(false);
+                        NavigateTo(targetScene);
+                    }
+                }
             }
 
+            return;
+        }
+
+        if (waitingForMenuOverlayTransition)
+        {
+            if (menuOverlayTransitionTickFrame != Time.FrameCount)
+            {
+                menuOverlayTransitionTickFrame = Time.FrameCount;
+
+                menuOverlayTransitionTimer -= Time.DeltaTime;
+                bool timeDone = menuOverlayTransitionTimer <= 0.0f;
+                bool screenFadeDone = FadeAPI.IsFadeDone();
+                if (timeDone)
+                    FadeAPI.SetAlpha(1.0f);
+
+                if (timeDone && screenFadeDone)
+                {
+                    ApplyMenuOverlayTransitionTarget();
+                    FadeAPI.FadeIn(MenuOverlayTransitionDuration);
+                    waitingForMenuOverlayTransition = false;
+                    menuOverlayTransitionTimer = 0.0f;
+                    menuOverlayTransitionTickFrame = -1;
+                    pendingMenuOverlayTarget = 0;
+                }
+            }
             return;
         }
 
@@ -267,6 +375,34 @@ public class NavigationButtons : Script
         if (!t.IsVisible)
             return;
 
+        // MainMenu Continue lock: grey out + fully non-interactable until progress exists.
+        bool isMainMenuContinueButton =
+            realScene == "MainMenu" &&
+            defaultTexture.ToLower().Contains("continue");
+        bool continueUnlocked = HasProgressCache();
+        if (isMainMenuContinueButton && !continueUnlocked)
+        {
+            SpriteComponent continueSprite = GetSprite();
+            continueSprite.SetTint(0.45f, 0.45f, 0.45f, 1.0f);
+
+            if (isCurrentlyHovered)
+            {
+                continueSprite.Texture = defaultTexture;
+                t.ScaleX = t.ScaleX / hoverScaleBoost;
+                t.ScaleY = t.ScaleY / hoverScaleBoost;
+                isCurrentlyHovered = false;
+            }
+
+            if (s_focusedButton == this)
+                s_focusedButton = null;
+
+            return;
+        }
+        else if (isMainMenuContinueButton)
+        {
+            GetSprite().SetTint(1.0f, 1.0f, 1.0f, 1.0f);
+        }
+
         // =========================================================
         // Pause button swaps to Exit while pause overlay is shown
         // =========================================================
@@ -326,7 +462,7 @@ public class NavigationButtons : Script
 
         bool isOverlayButton = isQuitOverlayButton || isPauseOverlayButton;
 
-        if ((ShowQuitOverlay || ShowPauseOverlay) && !isOverlayButton)
+        if ((ShowQuitOverlay || ShowNewGameResetOverlay || ShowPauseOverlay) && !isOverlayButton)
         {
             if (isCurrentlyHovered)
             {
@@ -340,7 +476,7 @@ public class NavigationButtons : Script
             return;
         }
 
-        if (ShowQuitOverlay && isPauseOverlayButton && !isQuitOverlayButton) return;
+        if ((ShowQuitOverlay || ShowNewGameResetOverlay) && isPauseOverlayButton && !isQuitOverlayButton) return;
         if (ShowPauseOverlay && isQuitOverlayButton && !isPauseOverlayButton) return;
         if (ShowHowToPlayOverlay && !isHowToPlayOverlayButton) return;
 
@@ -375,7 +511,7 @@ public class NavigationButtons : Script
                                    realScene == "HowToPlay" ||
                                    realScene == "LatencyCalibration" ||
                                    realScene == "VisualLatencyCalibration" ||
-                                   ShowPauseOverlay || ShowQuitOverlay ||
+                                   ShowPauseOverlay || ShowQuitOverlay || ShowNewGameResetOverlay ||
                                    ShowSettingsOverlay || ShowHowToPlayOverlay;
 
             // Clear any lingering focus when returning to gameplay
@@ -496,15 +632,33 @@ public class NavigationButtons : Script
     {
         sceneHistory.Clear();
         currentScene = "MainMenu";
-
-        ShowPauseOverlay = false;
-        ShowQuitOverlay = false;
-        ShowHowToPlayOverlay = false;
-        ShowSettingsOverlay = false;
-        ShowLevelSelectOverlay = false;
-
+        CutsceneLevelSelectLock = false;
         Application.SetPaused(false);
-        Scene.LoadScene("MainMenu");
+        BeginSceneTransition("MainMenu", true, true);
+    }
+
+    private void BeginSceneTransition(string targetScene, bool fadeInOnMainMenu, bool clearOverlaysAfterFade)
+    {
+        if (waitingForSceneTransition || string.IsNullOrEmpty(targetScene))
+            return;
+
+        if (fadeInOnMainMenu && targetScene == "MainMenu")
+            PendingSceneFadeIn = true;
+        else
+            PendingSceneFadeIn = false;
+
+        GetAudio().FadeOutMusic(SceneTransitionDuration);
+        // Keep gameplay frozen for the entire fade transition.
+        Application.SetPaused(true);
+        FadeAPI.Stop();
+        FadeAPI.SetAlpha(0.0f);
+        FadeAPI.FadeOut(SceneTransitionDuration);
+
+        waitingForSceneTransition = true;
+        pendingScene = targetScene;
+        pendingClearOverlaysOnSceneSwitch = clearOverlaysAfterFade;
+        sceneTransitionTimer = SceneTransitionDuration;
+        sceneTransitionTickFrame = -1;
     }
 
     private void PlayHoverSound()
@@ -515,7 +669,7 @@ public class NavigationButtons : Script
                                     texLower.Contains("pausequit") || texLower.Contains("pauserestart") ||
                                     texLower.Contains("pausesettings");
 
-        if (ShowQuitOverlay && !isQuitOverlayButton)
+        if ((ShowQuitOverlay || ShowNewGameResetOverlay) && !isQuitOverlayButton)
             return;
 
         if (ShowPauseOverlay && !isPauseOverlayButton)
@@ -560,6 +714,7 @@ public class NavigationButtons : Script
     {
         // Close other overlays just in case
         ShowQuitOverlay = false;
+        ShowNewGameResetOverlay = false;
         ShowPauseOverlay = false;
         ShowHowToPlayOverlay = false;
         ShowLevelSelectOverlay = false;
@@ -685,6 +840,7 @@ public class NavigationButtons : Script
 
         // Make sure game is not stuck paused when falling back
         ShowQuitOverlay = false;
+        ShowNewGameResetOverlay = false;
         ShowPauseOverlay = false;
         ShowHowToPlayOverlay = false;
         ShowSettingsOverlay = false;
@@ -697,6 +853,7 @@ public class NavigationButtons : Script
 
     // Clear UI/overlay states before changing scene
     ShowQuitOverlay = false;
+    ShowNewGameResetOverlay = false;
     ShowPauseOverlay = false;
     ShowHowToPlayOverlay = false;
     ShowSettingsOverlay = false;
@@ -756,16 +913,12 @@ public class NavigationButtons : Script
 
         if (tex.Contains("pausequit"))
         {
-            ShowPauseOverlay = false;
-            Application.SetPaused(false);
             GoToMainMenu();
             return;
         }
 
         if (tex.Contains("pauserestart"))
         {
-            ShowPauseOverlay = false;
-            Application.SetPaused(false);
             if (Scene.GetCurrentScene() == "LatencyCalibration")
             {
                 LatencyCalibrator.Instance?.Reset();
@@ -780,7 +933,7 @@ public class NavigationButtons : Script
 
             // make it load loading screen when we restart instead of it freezing at the pause menu
             LoadingScreenScript.NextLevel = Scene.GetCurrentScene();
-            Scene.LoadScene("LoadingScreenScene");
+            BeginSceneTransition("LoadingScreenScene", false, true);
 
             return;
         }
@@ -795,17 +948,15 @@ public class NavigationButtons : Script
 
         if (tex.Contains("restartyes"))
         {
-            Application.SetPaused(false);
-
             if (!string.IsNullOrEmpty(LastGameplayScene))
             {
                 currentScene = LastGameplayScene;
-                Scene.LoadScene(LastGameplayScene);
+                BeginSceneTransition(LastGameplayScene, false, true);
             }
             else
             {
                 currentScene = "MainMenu";
-                Scene.LoadScene("MainMenu");
+                BeginSceneTransition("MainMenu", true, true);
             }
             return;
         }
@@ -816,27 +967,54 @@ public class NavigationButtons : Script
             return;
         }
 
+        // Stage clear replay button (restart current gameplay level).
+        // Must be checked before "start" / New Game matching.
+        if (tex.Contains("restart") && !tex.Contains("pause") && !tex.Contains("yes") && !tex.Contains("no"))
+        {
+            StageClearElement.ResetStageClear();
+            LoadingScreenScript.NextLevel = Scene.GetCurrentScene();
+            BeginSceneTransition("LoadingScreenScene", false, true);
+            return;
+        }
+
         if (tex.Contains("quit yes"))
         {
+            if (ShowNewGameResetOverlay)
+            {
+                ShowNewGameResetOverlay = false;
+                ResetProgressForNewGame();
+                BeginNewGameFlow();
+                return;
+            }
             Application.Quit();
             return;
         }
 
         if (tex.Contains("quit no"))
         {
+            if (ShowNewGameResetOverlay)
+            {
+                ShowNewGameResetOverlay = false;
+                return;
+            }
             ShowQuitOverlay = false;
             return;
         }
 
         if (tex.Contains("new game") || tex.Contains("new_game") || tex.Contains("start"))
         {
-            if (!waitingForSceneTransition)
+            if (Scene.GetCurrentScene() == "MainMenu" && HasProgressCache())
             {
+                ShowQuitOverlay = false;
+                ShowNewGameResetOverlay = true;
+                ShowPauseOverlay = false;
+                ShowHowToPlayOverlay = false;
+                ShowSettingsOverlay = false;
                 ShowLevelSelectOverlay = false;
-                GetAudio().FadeOutMusic(0.4f);
-                waitingForSceneTransition = true;
-                pendingScene = "Cutscene";
+                return;
             }
+
+            BeginNewGameFlow();
             return;
         }
 
@@ -844,12 +1022,10 @@ public class NavigationButtons : Script
         {
             if (Scene.GetCurrentScene() == "MainMenu")
             {
-                ShowQuitOverlay = false;
-                ShowPauseOverlay = false;
-                ShowHowToPlayOverlay = false;
-                ShowSettingsOverlay = false;
-                ShowLevelSelectOverlay = true;
-                SelectedLevelScene = "Level1";
+                if (!HasProgressCache())
+                    return;
+
+                BeginMainMenuOverlayTransitionToLevelSelect();
                 return;
             }
 
@@ -881,18 +1057,29 @@ public class NavigationButtons : Script
 
         if (tex.Contains("settings") || tex.Contains("options"))
         {
+            if (Scene.GetCurrentScene() == "MainMenu")
+            {
+                BeginMainMenuOverlayTransitionToSettings();
+                return;
+            }
             ShowSettings();
             return;
         }
 
         if (tex.Contains("back") || tex.Contains("return"))
         {
+            if (Scene.GetCurrentScene() == "MainMenu" && ShowSettingsOverlay)
+            {
+                BeginMainMenuOverlayTransitionToBase();
+                return;
+            }
             HideSettings();
             return;
         }
 
         if (tex.Contains("quit"))
         {
+            ShowNewGameResetOverlay = false;
             ShowQuitOverlay = true;
             return;
         }
@@ -956,6 +1143,7 @@ public class NavigationButtons : Script
         s_resumeCountdownActive = false;
         ShowPauseOverlay = false;
         ShowQuitOverlay = false;
+        ShowNewGameResetOverlay = false;
 
         if (openedSettingsFromPause)
         {
@@ -963,16 +1151,159 @@ public class NavigationButtons : Script
             openedSettingsFromPause = false;
         }
     }
+
+    public static void BeginMainMenuOverlayTransitionToLevelSelect()
+    {
+        CutsceneLevelSelectLock = false;
+        BeginMenuOverlayTransition(1);
+    }
+
+    public static void BeginMainMenuOverlayTransitionToSettings()
+    {
+        BeginMenuOverlayTransition(2);
+    }
+
+    public static void BeginMainMenuOverlayTransitionToBase()
+    {
+        BeginMenuOverlayTransition(3);
+    }
+
+    private static void BeginMenuOverlayTransition(int target)
+    {
+        if (waitingForSceneTransition || waitingForMenuOverlayTransition)
+            return;
+
+        pendingMenuOverlayTarget = target;
+        waitingForMenuOverlayTransition = true;
+        menuOverlayTransitionTimer = MenuOverlayTransitionDuration;
+        menuOverlayTransitionTickFrame = -1;
+        PendingSceneFadeIn = false;
+        FadeAPI.Stop();
+        FadeAPI.SetAlpha(0.0f);
+        FadeAPI.FadeOut(MenuOverlayTransitionDuration);
+    }
+
+    private static void ApplyMenuOverlayTransitionTarget()
+    {
+        if (pendingMenuOverlayTarget == 1)
+        {
+            ShowQuitOverlay = false;
+            ShowNewGameResetOverlay = false;
+            ShowPauseOverlay = false;
+            ShowHowToPlayOverlay = false;
+            ShowSettingsOverlay = false;
+            ShowLevelSelectOverlay = true;
+            SelectedLevelScene = "Level1";
+            return;
+        }
+
+        if (pendingMenuOverlayTarget == 2)
+        {
+            ShowQuitOverlay = false;
+            ShowNewGameResetOverlay = false;
+            ShowPauseOverlay = false;
+            ShowHowToPlayOverlay = false;
+            ShowLevelSelectOverlay = false;
+            ShowSettingsOverlay = true;
+            return;
+        }
+
+        if (pendingMenuOverlayTarget == 3)
+        {
+            ShowQuitOverlay = false;
+            ShowNewGameResetOverlay = false;
+            ShowPauseOverlay = false;
+            ShowHowToPlayOverlay = false;
+            ShowLevelSelectOverlay = false;
+            ShowSettingsOverlay = false;
+        }
+    }
+
+    private static bool HasProgressCache()
+    {
+        if (!string.IsNullOrWhiteSpace(LastClearedLevel))
+            return true;
+
+        return !string.IsNullOrWhiteSpace(LevelProgressStore.LoadLastClearedLevel());
+    }
+
+    private void BeginNewGameFlow()
+    {
+        if (waitingForSceneTransition)
+            return;
+
+        ShowLevelSelectOverlay = false;
+        ShowNewGameResetOverlay = false;
+        GetAudio().FadeOutMusic(SceneTransitionDuration);
+        PendingSceneFadeIn = false;
+        FadeAPI.Stop();
+        // Reset alpha each trigger so repeat transitions always animate from clear -> dark.
+        FadeAPI.SetAlpha(0.0f);
+        FadeAPI.FadeOut(SceneTransitionDuration);
+        waitingForSceneTransition = true;
+        pendingScene = "Cutscene";
+        sceneTransitionTimer = SceneTransitionDuration;
+        sceneTransitionTickFrame = -1;
+    }
+
+    private static void ResetProgressForNewGame()
+    {
+        LastClearedLevel = "";
+        LastEnteredLevel = "";
+        LevelProgressStore.ClearProgress();
+    }
 }
 
 //end ofclass navigation buttons
 
 public class QuitOverlay : Script
 {
+    private const string QuitPromptTexture = "Assets/Textures/Backgrounds/quit screen.png";
+    private const string NewGamePromptTexture = "Assets/Textures/Backgrounds/Background3.png";
+    private const float QuitPromptAlpha = 1.0f;
+    private const float NewGamePromptAlpha = 0.82f;
+
     public override void Update()
     {
         TransformComponent t = GetTransform();
-        t.IsVisible = NavigationButtons.ShowQuitOverlay;
+        bool visible = NavigationButtons.ShowQuitOverlay || NavigationButtons.ShowNewGameResetOverlay;
+        t.IsVisible = visible;
+        if (!visible)
+            return;
+
+        // This script also exists on Yes/No; only skin the full-screen popup background.
+        bool isPopupBackground = t.ScaleX > 1000.0f && t.ScaleY > 600.0f;
+        if (!isPopupBackground)
+            return;
+
+        SpriteComponent sprite = GetSprite();
+        if (NavigationButtons.ShowNewGameResetOverlay)
+        {
+            sprite.Texture = NewGamePromptTexture;
+            sprite.SetTint(1.0f, 1.0f, 1.0f, NewGamePromptAlpha);
+        }
+        else
+        {
+            sprite.Texture = QuitPromptTexture;
+            sprite.SetTint(1.0f, 1.0f, 1.0f, QuitPromptAlpha);
+        }
+    }
+}
+
+public class NewGameResetPromptText : Script
+{
+    public override void Update()
+    {
+        bool visible = NavigationButtons.ShowNewGameResetOverlay;
+        TransformComponent t = GetTransform();
+        t.IsVisible = visible;
+
+        TextComponentAPI text = GetTextComponent();
+        text.SetVisible(visible);
+        if (!visible)
+            return;
+
+        text.SetText("Start a new game?\nYour saved progress will be erased.");
     }
 }
 
@@ -1109,5 +1440,41 @@ internal static class LevelProgressStore
         }
     }
 
+    public static void ClearProgress()
+    {
+        foreach (string path in CandidatePaths)
+        {
+            try
+            {
+                if (File.Exists(path))
+                    File.Delete(path);
+            }
+            catch
+            {
+                // Try next candidate path.
+            }
+        }
+    }
 
+
+}
+
+public class MainMenuAutoFadeIn : Script
+{
+    private const float MainMenuFadeInDuration = 0.5f;
+    private bool ran = false;
+
+    public override void Update()
+    {
+        if (ran)
+            return;
+
+        if (!string.Equals(Scene.GetCurrentScene(), "MainMenu", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        ran = true;
+        FadeAPI.Stop();
+        FadeAPI.SetAlpha(1.0f);
+        FadeAPI.FadeIn(MainMenuFadeInDuration);
+    }
 }

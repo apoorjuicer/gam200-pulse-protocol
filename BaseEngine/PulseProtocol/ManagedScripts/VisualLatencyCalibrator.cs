@@ -40,11 +40,21 @@ public class VisualLatencyCalibrator : Script
     private float leftHeld  = 0f;
     private const float HoldDelay = 0.1f;
     private const float HoldRate  = 0.06f;
+    private bool audioMixApplied = false;
 
     public override void Update()
     {
         Instance = this;
         if (done) return;
+
+        if (!audioMixApplied)
+        {
+            audioMixApplied = true;
+            AudioComponent audio = GetAudio();
+            audio.SetMasterVolume(UserSettingsStore.GetSliderValue("Volume", 1.0f));
+            audio.SetMusicVolume(UserSettingsStore.GetSliderValue("Music", 1.0f));
+            audio.SetSfxVolume(UserSettingsStore.GetSliderValue("SFX", 0.25f));
+        }
 
         // Allow Conductor to tick in this scene
         GameStart.Ready = true;
