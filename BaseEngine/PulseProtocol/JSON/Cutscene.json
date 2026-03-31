@@ -6,6 +6,67 @@
                 {
                     "transform": {
                         "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 1600.0,
+                            "y": 900.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "Assets/Textures/Backgrounds/Background2.png",
+                        "tintColor": {
+                            "r": 0.0,
+                            "g": 0.0,
+                            "b": 0.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 1.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "CutsceneBG"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "Background",
+                        "mask": 1,
+                        "sortingLayer": 0,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
                             "x": -680.0790405273438,
                             "y": 11.5384521484375
                         },
@@ -541,6 +602,134 @@
                         "sortingLayer": 2,
                         "orderInLayer": 1,
                         "z": 100.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 1050.0,
+                            "y": -800.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 1.0,
+                        "shd_ref": 3.0,
+                        "useTexture": false,
+                        "spriteName": "",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 1.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [ "CutsceneSkipHint" ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "CutsceneSkipHint"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 10,
+                        "z": 100.0
+                    }
+                },
+                {
+                    "TextComponent": {
+                        "text": "Press SPACE to skip",
+                        "font_id": "barlow_semibold_font",
+                        "offset": { "x": 0.0, "y": 0.0 },
+                        "font_size": 28.0,
+                        "color": [ 1.0, 1.0, 1.0 ],
+                        "visible": true,
+                        "alignment": 1
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": { "x": 0.0, "y": 680.0 },
+                        "scale": { "x": 200.0, "y": 200.0 },
+                        "rotation": { "x": 0.0, "y": 0.0 },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0, "shd_ref": 0.0, "useTexture": false,
+                        "spriteName": "",
+                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
+                        "glow": { "enabled": false, "intensity": 1.0, "r": 1.0, "g": 1.0, "b": 1.0 }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0, "elapsedTime": 0.0,
+                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 1.0
+                    }
+                },
+                {
+                    "script": { "ScriptName": [ "ControllerNotification" ] }
+                },
+                {
+                    "name": { "name": "ControllerNotificationText" }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI", "mask": 4,
+                        "sortingLayer": 2, "orderInLayer": 100, "z": 0.0
+                    }
+                },
+                {
+                    "TextComponent": {
+                        "text": "",
+                        "font_id": "barlow_semibold_font",
+                        "offset": { "x": 0.0, "y": 0.0 },
+                        "font_size": 40.0,
+                        "color": [ 1.0, 1.0, 1.0 ],
+                        "visible": false,
+                        "alignment": 1
                     }
                 }
             ]

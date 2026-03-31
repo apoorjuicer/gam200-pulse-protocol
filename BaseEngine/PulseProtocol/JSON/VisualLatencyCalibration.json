@@ -848,8 +848,8 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "Text", "mask": 8,
-                        "sortingLayer": 3, "orderInLayer": 10, "z": 0.0
+                        "layerName": "UI", "mask": 4,
+                        "sortingLayer": 2, "orderInLayer": 100, "z": 0.0
                     }
                 },
                 {
