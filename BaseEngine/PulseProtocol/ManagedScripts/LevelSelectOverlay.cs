@@ -276,6 +276,9 @@ public class LevelSelectSelector : Script
 
 public class LevelSelectStartDisc : Script
 {
+    private static bool s_waitingForSceneTransition = false;
+    private static string s_pendingScene = "";
+
     private bool initialized = false;
     private bool wasStartHovered = false;
     private float baseScaleX;
@@ -287,6 +290,28 @@ public class LevelSelectStartDisc : Script
 
     public override void Update()
     {
+        if (s_waitingForSceneTransition)
+        {
+            AudioComponent audio = GetAudio();
+            if (!audio.IsBGMPlaying())
+            {
+                s_waitingForSceneTransition = false;
+
+                string sceneToLoad = s_pendingScene;
+                s_pendingScene = "";
+
+                if (string.IsNullOrEmpty(sceneToLoad) || !Scene.SceneExists(sceneToLoad))
+                    sceneToLoad = "Level1";
+
+                NavigationButtons.ShowLevelSelectOverlay = false;
+                NavigationButtons.currentScene = sceneToLoad;
+                NavigationButtons.LastEnteredLevel = sceneToLoad;
+                LoadingScreenScript.NextLevel = sceneToLoad;
+                Scene.LoadScene("LoadingScreenScene");
+            }
+            return;
+        }
+
         TransformComponent t = GetTransform();
         bool visible = NavigationButtons.ShowLevelSelectOverlay &&
                        !NavigationButtons.ShowSettingsOverlay &&
@@ -357,11 +382,9 @@ public class LevelSelectStartDisc : Script
             if (string.IsNullOrEmpty(sceneToLoad) || !Scene.SceneExists(sceneToLoad))
                 sceneToLoad = "Level1";
 
-            NavigationButtons.ShowLevelSelectOverlay = false;
-            NavigationButtons.currentScene = sceneToLoad;
-            NavigationButtons.LastEnteredLevel = sceneToLoad;
-            LoadingScreenScript.NextLevel = sceneToLoad;
-            Scene.LoadScene("LoadingScreenScene");
+            audio.FadeOutMusic(0.4f);
+            s_pendingScene = sceneToLoad;
+            s_waitingForSceneTransition = true;
         }
     }
 }
