@@ -376,7 +376,10 @@ public class NavigationButtons : Script
             s_navCandidates.Clear();
             s_navClearFrame = currentFrame;
         }
-        s_navCandidates.Add(this);
+        // Skip buttons that are hidden via scale=0 (e.g. dropdown options use this trick
+        // instead of IsVisible=false, so we must check scale to avoid ghost candidates).
+        if (t.ScaleX > 0.5f && t.ScaleY > 0.5f)
+            s_navCandidates.Add(this);
 
         // --- Handle D-pad navigation once per frame, using previous frame's candidates ---
         if (s_navHandledFrame != currentFrame)
@@ -389,6 +392,7 @@ public class NavigationButtons : Script
                                    realScene == "HowToPlay" ||
                                    realScene == "LatencyCalibration" ||
                                    realScene == "VisualLatencyCalibration" ||
+                                   realScene == "GameLose" ||
                                    ShowPauseOverlay || ShowQuitOverlay ||
                                    ShowSettingsOverlay || ShowHowToPlayOverlay;
 
@@ -396,8 +400,25 @@ public class NavigationButtons : Script
             if (!inMenuOrOverlay && s_focusedButton != null)
                 s_focusedButton = null;
 
-            bool navFwd  = inMenuOrOverlay && !AudioSliderKnobBase.IsAnySliderFocused && (input.IsGamepadButtonTriggered(GP_DPAD_DOWN)  || input.IsGamepadButtonTriggered(GP_DPAD_RIGHT));
-            bool navBack = inMenuOrOverlay && !AudioSliderKnobBase.IsAnySliderFocused && (input.IsGamepadButtonTriggered(GP_DPAD_UP)    || input.IsGamepadButtonTriggered(GP_DPAD_LEFT));
+            // Scenes/overlays with side-by-side horizontal buttons use Left/Right to navigate.
+            // All other menus use Up/Down. Left/Right is reserved for slider value adjustment.
+            bool _noSliderOrDropdown = !AudioSliderKnobBase.IsAnySliderFocused && !DropdownState.IsDropdownFocused;
+            bool _useHorizontalNav = ShowQuitOverlay
+                                     || ShowPauseOverlay
+                                     || realScene == "LatencyCalibration"
+                                     || realScene == "VisualLatencyCalibration"
+                                     || realScene == "GameLose";
+            bool navFwd, navBack;
+            if (_useHorizontalNav)
+            {
+                navFwd  = inMenuOrOverlay && _noSliderOrDropdown && input.IsGamepadButtonTriggered(GP_DPAD_RIGHT);
+                navBack = inMenuOrOverlay && _noSliderOrDropdown && input.IsGamepadButtonTriggered(GP_DPAD_LEFT);
+            }
+            else
+            {
+                navFwd  = inMenuOrOverlay && _noSliderOrDropdown && input.IsGamepadButtonTriggered(GP_DPAD_DOWN);
+                navBack = inMenuOrOverlay && _noSliderOrDropdown && input.IsGamepadButtonTriggered(GP_DPAD_UP);
+            }
             if (navFwd || navBack)
             {
                 int count = s_prevCandidates.Count;
@@ -405,10 +426,25 @@ public class NavigationButtons : Script
                 {
                     int idx = s_focusedButton != null ? s_prevCandidates.IndexOf(s_focusedButton) : -1;
                     if (idx < 0) idx = navFwd ? -1 : 0;
-                    idx = navFwd ? (idx + 1) % count : (idx - 1 + count) % count;
-                    s_focusedButton = s_prevCandidates[idx];
+                    int nextIdx = navFwd ? (idx + 1) : (idx - 1 + count) % count;
+                    bool inSettings = ShowSettingsOverlay || realScene == "Settings";
+                    if (navFwd && nextIdx >= count && inSettings)
+                    {
+                        // Past the last button in settings → hand focus to the screen mode dropdown
+                        s_focusedButton = null;
+                        DropdownState.IsDropdownFocused = true;
+                    }
+                    else
+                    {
+                        s_focusedButton = s_prevCandidates[nextIdx % count];
+                    }
                 }
             }
+
+            // When a slider or the dropdown has gamepad focus, clear button focus so the
+            // back arrow doesn't stay highlighted and Cross can't fire on a stale button.
+            if ((AudioSliderKnobBase.IsAnySliderFocused || DropdownState.IsDropdownFocused) && s_focusedButton != null)
+                s_focusedButton = null;
         }
 
         // Hover: mouse bounds check OR gamepad D-pad focus
@@ -442,8 +478,9 @@ public class NavigationButtons : Script
             isCurrentlyHovered = false;
         }
 
-        // Click: left mouse button OR gamepad Cross button while hovering
-        if (isHovered && (input.IsMouseButtonTriggered(0) || input.IsGamepadButtonTriggered(GP_CROSS)))
+        // Click: left mouse button OR gamepad Cross button while hovering.
+        // Cross is blocked when the screen mode dropdown has gamepad focus (DropdownToggle handles it).
+        if (isHovered && (input.IsMouseButtonTriggered(0) || (!DropdownState.IsDropdownFocused && input.IsGamepadButtonTriggered(GP_CROSS))))
         {
             PlayClickSound();
             OnClick();

@@ -95,7 +95,22 @@ public abstract class AudioSliderKnobBase : Script
     public static bool IsAnySliderFocused => s_focusedIdx >= 0;
 
     // Called from HoverableButton when the settings panel closes.
-    public static void ClearFocus() { s_focusedIdx = -1; }
+    public static void ClearFocus()
+    {
+        s_focusedIdx = -1;
+        s_prevSettingsOpen = false;  // force auto-focus to re-trigger when settings next opens
+        DropdownState.IsDropdownFocused = false;
+    }
+
+    // Called from DropdownToggle when the user navigates down into sliders.
+    // Records the frame so the nav handler suppresses the same D-pad press that caused the transfer.
+    public static void FocusFirstSlider()
+    {
+        s_focusedIdx = 0;
+        s_focusTransferFrame = Time.FrameCount;
+    }
+
+    private static int s_focusTransferFrame = -1;
 
     private bool  m_focused    = false;
     private float m_baseScaleX = 0f;
@@ -224,7 +239,8 @@ public abstract class AudioSliderKnobBase : Script
         s_sliders.Add(this);
 
         // Handle D-pad input once per frame (uses prev-frame list for stable ordering).
-        if (s_sliderNavFrame != _frameNow && s_prevSliders.Count > 0)
+        // Skip when the screen mode dropdown has focus — DropdownToggle handles D-pad then.
+        if (s_sliderNavFrame != _frameNow && s_prevSliders.Count > 0 && !DropdownState.IsDropdownFocused)
         {
             s_sliderNavFrame = _frameNow;
 
@@ -235,12 +251,28 @@ public abstract class AudioSliderKnobBase : Script
 
             int _count = s_prevSliders.Count;
 
-            // Up/Down cycles between sliders; pressing past the ends releases focus
-            // back to NavigationButtons so the back button can be reached.
-            if (s_focusedIdx >= 0 && (_dUp || _dDown))
+            // Up/Down cycles between sliders.
+            // UP past the first slider → focus the screen mode dropdown.
+            // DOWN past the last slider → release to NavigationButtons (back button).
+            // Suppress on s_focusTransferFrame: that D-pad press came from DropdownToggle
+            // and must not be re-consumed here.
+            bool _suppressNav = (_frameNow == s_focusTransferFrame);
+            if (s_focusedIdx >= 0 && (_dUp || _dDown) && !_suppressNav)
             {
                 int _next = s_focusedIdx + (_dDown ? 1 : -1);
-                s_focusedIdx = (_next < 0 || _next >= _count) ? -1 : _next;
+                if (_next < 0)
+                {
+                    s_focusedIdx = -1;
+                    DropdownState.IsDropdownFocused = true;
+                }
+                else if (_next >= _count)
+                {
+                    // Already at the last slider — stay here, D-pad Down does nothing.
+                }
+                else
+                {
+                    s_focusedIdx = _next;
+                }
             }
 
             // Left/Right adjusts the focused slider (auto-focuses first/last if none focused).
