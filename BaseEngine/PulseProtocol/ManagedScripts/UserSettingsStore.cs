@@ -1,18 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
 internal static class UserSettingsStore
 {
     private const string SaveFileName = "user_settings.json";
-
-    private static readonly string[] CandidatePaths = new[]
-    {
-        Path.Combine("PulseProtocol", "JSON", SaveFileName),
-        Path.Combine("..", "..", "PulseProtocol", "JSON", SaveFileName),
-        Path.Combine("..", "..", "..", "PulseProtocol", "JSON", SaveFileName),
-        SaveFileName
-    };
 
     private sealed class Data
     {
@@ -26,6 +19,7 @@ internal static class UserSettingsStore
 
     private static bool loaded = false;
     private static Data cached = new Data();
+    private static List<string>? resolvedPaths;
 
     public static float GetSliderValue(string tag, float fallback)
     {
@@ -94,7 +88,7 @@ internal static class UserSettingsStore
 
         loaded = true;
 
-        foreach (string path in CandidatePaths)
+        foreach (string path in GetCandidatePaths())
         {
             try
             {
@@ -119,22 +113,74 @@ internal static class UserSettingsStore
     private static void Save()
     {
         string json = JsonSerializer.Serialize(cached, new JsonSerializerOptions { WriteIndented = true });
+        bool wroteAny = false;
 
-        foreach (string path in CandidatePaths)
+        foreach (string path in GetCandidatePaths())
         {
             try
             {
                 string? dir = Path.GetDirectoryName(path);
-                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-                    continue;
+                if (!string.IsNullOrEmpty(dir))
+                    Directory.CreateDirectory(dir);
 
                 File.WriteAllText(path, json);
-                return;
+                wroteAny = true;
             }
             catch
             {
-                // Try next candidate.
+                // Try next candidate path.
             }
         }
+
+        if (!wroteAny)
+            Console.WriteLine("[UserSettingsStore] WARNING: Failed to save user_settings.json to all candidate paths.");
+    }
+
+    private static List<string> GetCandidatePaths()
+    {
+        if (resolvedPaths != null)
+            return resolvedPaths;
+
+        var unique = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var ordered = new List<string>();
+
+        void AddCandidate(string path)
+        {
+            try
+            {
+                string full = Path.GetFullPath(path);
+                if (unique.Add(full))
+                    ordered.Add(full);
+            }
+            catch
+            {
+                // Ignore malformed path candidates.
+            }
+        }
+
+        string baseDir = AppContext.BaseDirectory;
+        string cwd = Directory.GetCurrentDirectory();
+
+        // Runtime output (works for both game/editor executable folders).
+        AddCandidate(Path.Combine(baseDir, "JSON", SaveFileName));
+
+        // Project source JSON folder from build outputs:
+        //   BaseEngine/build/PulseProtocol/Debug -> ../../../../PulseProtocol/JSON
+        //   BaseEngine/build/PulseEditor/Debug   -> ../../../../PulseProtocol/JSON
+        AddCandidate(Path.Combine(baseDir, "..", "..", "..", "..", "PulseProtocol", "JSON", SaveFileName));
+
+        // CWD fallbacks.
+        AddCandidate(Path.Combine(cwd, "JSON", SaveFileName));
+        AddCandidate(Path.Combine(cwd, "PulseProtocol", "JSON", SaveFileName));
+
+        // Legacy relative fallbacks.
+        AddCandidate(Path.Combine("PulseProtocol", "JSON", SaveFileName));
+        AddCandidate(Path.Combine("..", "..", "PulseProtocol", "JSON", SaveFileName));
+        AddCandidate(Path.Combine("..", "..", "..", "PulseProtocol", "JSON", SaveFileName));
+        AddCandidate(Path.Combine("..", "..", "..", "..", "PulseProtocol", "JSON", SaveFileName));
+        AddCandidate(SaveFileName);
+
+        resolvedPaths = ordered;
+        return resolvedPaths;
     }
 }

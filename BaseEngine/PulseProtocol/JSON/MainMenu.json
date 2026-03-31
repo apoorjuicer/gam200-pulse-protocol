@@ -448,8 +448,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "QuitOverlay",
-                            "SfxKnob"
+                            "QuitOverlay"
                         ]
                     }
                 },
@@ -3130,7 +3129,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/levelselect/LevelSelector.png",
+                        "spriteName": "Assets/Textures/levelselect/Level Selector Blue.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -3438,8 +3437,8 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "Text", "mask": 8,
-                        "sortingLayer": 3, "orderInLayer": 10, "z": 0.0
+                        "layerName": "UI", "mask": 4,
+                        "sortingLayer": 2, "orderInLayer": 100, "z": 0.0
                     }
                 },
                 {

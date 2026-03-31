@@ -35,6 +35,15 @@ public class LevelSelectCard : Script
     private static bool s_centerSettled = false;
     private static int s_settleFrame = -1;
 
+    // Gamepad navigation state (shared, managed by myIndex==0 instance)
+    private static bool s_gpNavThisFrame = false;
+    private static int s_gpNavFrame = -1;
+    private static bool s_stickLeftWasActive = false;
+    private static bool s_stickRightWasActive = false;
+    private const int GP_DPAD_RIGHT = 12;
+    private const int GP_DPAD_LEFT  = 14;
+    private const float StickDeadzone = 0.5f;
+
     private bool initialized = false;
     private int myIndex = 0;
     private string levelScene = "Level1";
@@ -105,6 +114,40 @@ public class LevelSelectCard : Script
             {
                 s_selectedIndex = myIndex;
                 NavigationButtons.SelectedLevelScene = levelScene;
+            }
+        }
+
+        // Gamepad navigation — only one instance handles it per frame
+        if (s_gpNavFrame != Time.FrameCount)
+        {
+            s_gpNavFrame = Time.FrameCount;
+            s_gpNavThisFrame = false;
+        }
+
+        if (!s_gpNavThisFrame && myIndex == 0)
+        {
+            float stickX = input.GetGamepadAxis(0);
+            bool stickLeft  = stickX < -StickDeadzone;
+            bool stickRight = stickX >  StickDeadzone;
+
+            bool navLeft  = input.IsGamepadButtonTriggered(GP_DPAD_LEFT)  || (stickLeft  && !s_stickLeftWasActive);
+            bool navRight = input.IsGamepadButtonTriggered(GP_DPAD_RIGHT) || (stickRight && !s_stickRightWasActive);
+
+            s_stickLeftWasActive  = stickLeft;
+            s_stickRightWasActive = stickRight;
+
+            if (navLeft || navRight)
+            {
+                s_gpNavThisFrame = true;
+                int next = s_selectedIndex + (navRight ? 1 : -1);
+                next = Math.Max(0, Math.Min(s_sceneOrder.Length - 1, next));
+                if (next != s_selectedIndex)
+                {
+                    s_selectedIndex = next;
+                    NavigationButtons.SelectedLevelScene = s_sceneOrder[s_selectedIndex];
+                    AudioComponent audio = GetAudio();
+                    audio.PlaySFX("SFX_Button_Hover");
+                }
             }
         }
 
@@ -299,7 +342,10 @@ public class LevelSelectStartDisc : Script
         t.ScaleX += (targetScaleX - t.ScaleX) * scaleLerp;
         t.ScaleY += (targetScaleY - t.ScaleY) * scaleLerp;
 
-        if (isStartHovered && input.IsMouseButtonTriggered(0))
+        bool startPressed = (isStartHovered && input.IsMouseButtonTriggered(0))
+                         || (LevelSelectCard.IsCenterSettled && input.IsGamepadButtonTriggered(0));
+
+        if (startPressed)
         {
             AudioComponent audio = GetAudio();
             audio.PlaySFX("SFX_Button_Select");

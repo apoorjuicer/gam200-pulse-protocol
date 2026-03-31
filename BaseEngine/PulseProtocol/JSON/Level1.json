@@ -435,7 +435,7 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": 450.0
+                            "y": 12.0
                         },
                         "scale": {
                             "x": 200.0,
@@ -484,7 +484,8 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "LevelCountdown"
+                            "LevelCountdown",
+                            "PauseResumeCountdown"
                         ]
                     }
                 },
@@ -1096,7 +1097,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": false,
+                        "visible": true,
                         "alignment": 0
                     }
                 }
@@ -5153,10 +5154,10 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "Text",
-                        "mask": 8,
-                        "sortingLayer": 3,
-                        "orderInLayer": 10,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 100,
                         "z": 0.0
                     }
                 },
