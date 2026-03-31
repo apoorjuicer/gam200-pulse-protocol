@@ -101,6 +101,8 @@ public class CutscenePanel : Script
 
     public override void Update()
     {
+        NavigationButtons.TryProcessPendingPostLoadFadeIn();
+
         if (!initialized)
         {
             Initialize();

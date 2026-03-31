@@ -87,6 +87,9 @@ public class NavigationButtons : Script
     private static bool pendingClearOverlaysOnSceneSwitch = false;
     private static float sceneTransitionTimer = 0.0f;
     private static int sceneTransitionTickFrame = -1;
+    private static bool waitingForPostLoadFadeIn = false;
+    private static string pendingPostLoadFadeScene = "";
+    private static float pendingPostLoadFadeDuration = 0.0f;
     private const float SceneTransitionDuration = 0.5f;
     private static string s_prevSceneForMainMenuFade = "";
     private static int s_lastMainMenuFadeFrame = -1;
@@ -133,6 +136,9 @@ public class NavigationButtons : Script
             pendingClearOverlaysOnSceneSwitch = false;
             sceneTransitionTimer = 0.0f;
             sceneTransitionTickFrame = -1;
+            waitingForPostLoadFadeIn = false;
+            pendingPostLoadFadeScene = "";
+            pendingPostLoadFadeDuration = 0.0f;
             waitingForMenuOverlayTransition = false;
             menuOverlayTransitionTimer = 0.0f;
             menuOverlayTransitionTickFrame = -1;
@@ -156,6 +162,7 @@ public class NavigationButtons : Script
         TransformComponent t = GetTransform();
 
         string realScene = Scene.GetCurrentScene();
+        TryProcessPendingPostLoadFadeIn();
 
         // Arm whenever we are outside MainMenu.
         if (!string.IsNullOrEmpty(realScene) && realScene != "MainMenu")
@@ -222,8 +229,24 @@ public class NavigationButtons : Script
 
                     if (!string.IsNullOrEmpty(targetScene))
                     {
+                        bool usePostLoadFade = ShouldUsePostLoadFadeTransition(targetScene);
+                        if (usePostLoadFade)
+                        {
+                            waitingForPostLoadFadeIn = true;
+                            pendingPostLoadFadeScene = targetScene;
+                            pendingPostLoadFadeDuration = SceneTransitionDuration;
+                            PendingSceneFadeIn = false;
+                        }
+                        else
+                        {
+                            waitingForPostLoadFadeIn = false;
+                            pendingPostLoadFadeScene = "";
+                            pendingPostLoadFadeDuration = 0.0f;
+                        }
+
                         // Resume only at the handoff moment so gameplay does not continue during fade.
                         Application.SetPaused(false);
+                        FadeAPI.SetAlpha(1.0f); // stay black while next scene loads
                         NavigateTo(targetScene);
                     }
                 }
@@ -659,6 +682,52 @@ public class NavigationButtons : Script
         pendingClearOverlaysOnSceneSwitch = clearOverlaysAfterFade;
         sceneTransitionTimer = SceneTransitionDuration;
         sceneTransitionTickFrame = -1;
+    }
+
+    private static bool ShouldUsePostLoadFadeTransition(string targetScene)
+    {
+        if (string.IsNullOrEmpty(targetScene))
+            return false;
+
+        if (string.Equals(targetScene, "LoadingScreenScene", StringComparison.OrdinalIgnoreCase))
+            return false; // level flow owns its own loading-screen transition
+
+        if (string.Equals(targetScene, "LatencyCalibration", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(targetScene, "VisualLatencyCalibration", StringComparison.OrdinalIgnoreCase))
+            return false; // keep calibration pages on their existing transition behavior
+
+        return !targetScene.StartsWith("Level", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsPostLoadFadePendingForScene(string sceneName)
+    {
+        if (!waitingForPostLoadFadeIn || string.IsNullOrEmpty(sceneName))
+            return false;
+
+        return string.Equals(pendingPostLoadFadeScene, sceneName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static void TryProcessPendingPostLoadFadeIn()
+    {
+        if (!waitingForPostLoadFadeIn)
+            return;
+
+        string currentScene = Scene.GetCurrentScene();
+        if (string.IsNullOrEmpty(currentScene) ||
+            !string.Equals(currentScene, pendingPostLoadFadeScene, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        if (!Scene.ConsumeSceneLoadedPulse())
+            return;
+
+        FadeAPI.Stop();
+        FadeAPI.SetAlpha(1.0f);
+        float fadeDuration = pendingPostLoadFadeDuration > 0.0f ? pendingPostLoadFadeDuration : SceneTransitionDuration;
+        FadeAPI.FadeIn(fadeDuration);
+
+        waitingForPostLoadFadeIn = false;
+        pendingPostLoadFadeScene = "";
+        pendingPostLoadFadeDuration = 0.0f;
     }
 
     private void PlayHoverSound()
@@ -1229,21 +1298,9 @@ public class NavigationButtons : Script
 
     private void BeginNewGameFlow()
     {
-        if (waitingForSceneTransition)
-            return;
-
         ShowLevelSelectOverlay = false;
         ShowNewGameResetOverlay = false;
-        GetAudio().FadeOutMusic(SceneTransitionDuration);
-        PendingSceneFadeIn = false;
-        FadeAPI.Stop();
-        // Reset alpha each trigger so repeat transitions always animate from clear -> dark.
-        FadeAPI.SetAlpha(0.0f);
-        FadeAPI.FadeOut(SceneTransitionDuration);
-        waitingForSceneTransition = true;
-        pendingScene = "Cutscene";
-        sceneTransitionTimer = SceneTransitionDuration;
-        sceneTransitionTickFrame = -1;
+        BeginSceneTransition("Cutscene", false, true);
     }
 
     private static void ResetProgressForNewGame()
