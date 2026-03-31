@@ -203,7 +203,7 @@ public class NavigationButtons : Script
                 sceneTransitionTimer -= dt;
                 bool timeDone = sceneTransitionTimer <= 0.0f;
                 bool screenFadeDone = FadeAPI.IsFadeDone();
-                if (timeDone)
+                if (screenFadeDone || timeDone)
                     FadeAPI.SetAlpha(1.0f);
                 if (timeDone && screenFadeDone)
                 {
@@ -665,6 +665,11 @@ public class NavigationButtons : Script
         if (waitingForSceneTransition || string.IsNullOrEmpty(targetScene))
             return;
 
+        // Clear stale post-load requests from earlier transitions.
+        waitingForPostLoadFadeIn = false;
+        pendingPostLoadFadeScene = "";
+        pendingPostLoadFadeDuration = 0.0f;
+
         if (fadeInOnMainMenu && targetScene == "MainMenu")
             PendingSceneFadeIn = true;
         else
@@ -709,6 +714,9 @@ public class NavigationButtons : Script
 
     public static void TryProcessPendingPostLoadFadeIn()
     {
+        if (waitingForSceneTransition || waitingForMenuOverlayTransition)
+            return;
+
         if (!waitingForPostLoadFadeIn)
             return;
 
