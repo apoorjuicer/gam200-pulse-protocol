@@ -61,6 +61,7 @@ public class NavigationButtons : Script
     private const float ButtonHitboxPadY = 30.0f;
 
     private static bool wasEscPressed = false;
+    private static bool wasCircleHandled = false;
 
     // Gamepad button constants
     private const int GP_CROSS    = 0; // confirm / click
@@ -121,6 +122,7 @@ public class NavigationButtons : Script
         if (currentFrame != lastFrameCount)
         {
             wasEscPressed = false;
+            wasCircleHandled = false;
         }
 
         lastFrameCount = currentFrame;
@@ -170,6 +172,18 @@ public class NavigationButtons : Script
                 !realScene.Equals("HowToPlay"))
             {
                 ShowPauseOverlay = !ShowPauseOverlay;
+            }
+        }
+
+        // Gamepad Circle → go back / close settings.
+        if (!wasCircleHandled && input.IsGamepadButtonTriggered(GP_CIRCLE))
+        {
+            if (ShowSettingsOverlay || realScene == "Settings")
+            {
+                wasCircleHandled = true;
+                AudioSliderKnobBase.ClearFocus();
+                GoBack();
+                return;
             }
         }
 
@@ -382,8 +396,8 @@ public class NavigationButtons : Script
             if (!inMenuOrOverlay && s_focusedButton != null)
                 s_focusedButton = null;
 
-            bool navFwd  = inMenuOrOverlay && (input.IsGamepadButtonTriggered(GP_DPAD_DOWN)  || input.IsGamepadButtonTriggered(GP_DPAD_RIGHT));
-            bool navBack = inMenuOrOverlay && (input.IsGamepadButtonTriggered(GP_DPAD_UP)    || input.IsGamepadButtonTriggered(GP_DPAD_LEFT));
+            bool navFwd  = inMenuOrOverlay && !AudioSliderKnobBase.IsAnySliderFocused && (input.IsGamepadButtonTriggered(GP_DPAD_DOWN)  || input.IsGamepadButtonTriggered(GP_DPAD_RIGHT));
+            bool navBack = inMenuOrOverlay && !AudioSliderKnobBase.IsAnySliderFocused && (input.IsGamepadButtonTriggered(GP_DPAD_UP)    || input.IsGamepadButtonTriggered(GP_DPAD_LEFT));
             if (navFwd || navBack)
             {
                 int count = s_prevCandidates.Count;
@@ -571,6 +585,7 @@ public class NavigationButtons : Script
     {
         ShowSettingsOverlay = false;
         ShowLevelSelectOverlay = false;
+        AudioSliderKnobBase.ClearFocus();
 
         if (openedSettingsFromPause)
         {
