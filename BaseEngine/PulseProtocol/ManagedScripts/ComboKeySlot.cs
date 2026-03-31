@@ -32,6 +32,10 @@ public class ComboKeySlot : Script
     public string SSprite = "../../PulseProtocol/Assets/Textures/UI/S.png";
     public string DSprite = "../../PulseProtocol/Assets/Textures/UI/D.png";
 
+    // Empty gap slot sprites (shown on slots not used by the current enemy's pattern)
+    public string PlayerEmptySprite = "playeremptykey";
+    public string EnemyEmptySprite  = "enemyemptykey";
+
     // Player fill sprites
     public string BlankSprite = "../../PulseProtocol/Assets/Textures/UI/question mark blank key.png";
     public string GreenWSprite = "../../PulseProtocol/Assets/Textures/UI/Player Input GREEN W.png";
@@ -505,6 +509,36 @@ public class ComboKeySlot : Script
         Console.WriteLine($"[ComboKeySlot] Slot {SlotIndex} ({(IsEnemySlot ? "Enemy" : "Player")}) fading out over {duration}s");
     }
 
+    // Show the empty-gap PNG for this slot (used when the enemy pattern doesn't use this slot position)
+    public void ShowEmpty()
+    {
+        var sprite = GetSprite();
+        if (!sprite.HasSprite()) return;
+
+        sprite.Texture = IsEnemySlot ? EnemyEmptySprite : PlayerEmptySprite;
+        sprite.SetTint(1f, 1f, 1f, 1f);
+
+        var transform = GetTransform();
+        transform.IsVisible = true;
+        transform.ScaleX = baseScaleX > 0f ? baseScaleX : 1f;
+        transform.ScaleY = baseScaleY > 0f ? baseScaleY : 1f;
+
+        float alpha = IsEnemySlot ? 1f : 0.2f;
+        GetFade().SetAlpha(alpha);
+        _currentAlpha = alpha;
+
+        isShowing         = false;
+        isScaling         = false;
+        isPopping         = false;
+        isPoppingCorrect  = false;
+        isShowingResult   = false;
+        isShowingCorrectHint = false;
+        _inFadeIn         = false;
+        _isFadingToDim    = false;
+        _isFadingToHidden = false;
+        _inAppearFadeIn   = false;
+    }
+
     public void HideInstant()
     {
         var sprite = GetSprite();
@@ -726,6 +760,27 @@ public class ComboKeySlot : Script
         if (IsEnemySlot) return;
         _scalePulseTotalDur = duration;
         _scalePulseTimer    = duration;
+    }
+
+    // Pop animation for gap (empty) slots — same bounce as ShowKeyPop but uses the empty sprite
+    public void ShowEmptyPop()
+    {
+        var sprite = GetSprite();
+        if (!sprite.HasSprite()) return;
+
+        sprite.Texture = IsEnemySlot ? EnemyEmptySprite : PlayerEmptySprite;
+
+        var fade = GetFade();
+        fade.SetAlpha(IsEnemySlot ? 1.0f : 0.2f);
+
+        var transform = GetTransform();
+        transform.IsVisible = true;
+        transform.ScaleX = baseScaleX * PopScale;
+        transform.ScaleY = baseScaleY * PopScale;
+
+        isPopping = true;
+        popTimer = 0f;
+        isShowing = false;
     }
 
     // FOR ENEMY INPUT EFFECT ONLY!!!!

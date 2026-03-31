@@ -172,15 +172,27 @@ public class ComboSystem : Script
             return;
         }
 
-        float beatDuration = Conductor.Instance!.GetBeatDuration();
-        // Back-date by half a frame: InputBridge detects taps one frame late (prev/cur polling),
-        // so the press likely happened ~0.5 frames ago on average.
         float currentSongTime = Conductor.Instance!.GetVisualAdjustedSongTime();
 
-        float timeSince = (currentSongTime % beatDuration + beatDuration) % beatDuration;
-        float timeUntilNext = beatDuration - timeSince;
-        
-        float delta = Math.Min(timeSince, timeUntilNext);
+        // Measure delta against this slot's specific expected press time.
+        // The old "% beatDuration" only worked when all offsets were beat multiples.
+        // Syncopated patterns like Bat (0.25s offsets) fall between beats and always
+        // gave MISS with that approach — this fixes it.
+        float[] slotOffsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0f, 0.5f, 1f, 1.5f };
+        int slotIndex = currentCombo.Count;
+        float delta;
+        if (TurnManager.Instance != null && slotIndex < slotOffsets.Length)
+        {
+            float expectedTime = TurnManager.Instance.GetPlayerInputStartTime() + slotOffsets[slotIndex];
+            delta = Math.Abs(currentSongTime - expectedTime);
+        }
+        else
+        {
+            // Fallback: nearest beat boundary
+            float beatDuration = Conductor.Instance!.GetBeatDuration();
+            float timeSince = (currentSongTime % beatDuration + beatDuration) % beatDuration;
+            delta = Math.Min(timeSince, beatDuration - timeSince);
+        }
 
         // Clamp to zero in case of floating-point drift
         if (delta < 0f) delta = 0f;
@@ -238,7 +250,7 @@ public class ComboSystem : Script
         // miss combo resets
         ScoreManager.Instance?.AddScore(visualJudgement);
 
-        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s, sinceBeat={timeSince:F3}s, untilNext={timeUntilNext:F3}s)");
+        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s from slot {slotIndex} expected time)");
         Console.WriteLine($"[ComboSystem]   Progress: {currentCombo.Count}/{maxComboLength} | Expected: {(currentCombo.Count <= currentEnemyWeakness.Length ? currentEnemyWeakness[currentCombo.Count - 1].ToString() : "?")} | Got: {key}");
 
 
