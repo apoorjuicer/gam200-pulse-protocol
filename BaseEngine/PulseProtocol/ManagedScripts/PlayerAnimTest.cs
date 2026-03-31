@@ -50,7 +50,7 @@ public class PlayerAnimTest : Script
             Console.WriteLine("[AnimTest] >> Triggering Attack");
             autoCycling = false;
             if (PlayerAnimationController.Instance != null)
-                PlayerAnimationController.Instance.PlayAttack();
+                PlayerAnimationController.Instance.PlayAttack(ComboSystem.Instance.GetExpectedCombo());
             else
                 Console.WriteLine("[AnimTest] ERROR: PlayerAnimationController.Instance is null!");
         }
@@ -118,7 +118,7 @@ public class PlayerAnimTest : Script
                 break;
             case 1:
                 Console.WriteLine("[AnimTest] [Cycle] -> Attack");
-                ctrl.PlayAttack();
+                ctrl.PlayAttack(ComboSystem.Instance.GetExpectedCombo());
                 break;
             case 2:
                 Console.WriteLine("[AnimTest] [Cycle] -> Hurt");

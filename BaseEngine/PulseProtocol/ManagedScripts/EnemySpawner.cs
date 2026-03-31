@@ -14,7 +14,7 @@ public class EnemySpawner : Script
     // =========================
     public string EnemyPrefabName = "Rat_Enemy";
     public float SpawnX = 800f;
-    public float SpawnY = 300f;
+    public float SpawnY = 350f;
 
     public int EnemiesToSpawn = 3;
     public float SpawnInterval = 0.5f; // keep small for testing

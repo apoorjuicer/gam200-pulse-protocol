@@ -99,6 +99,14 @@
             "shd_ref": 1
         },
         {
+            "id": "Level3_BG",
+            "path": "Assets/Textures/Backgrounds/Background3.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
             "id": "LoseScreen_BG",
             "path": "Assets/Textures/Backgrounds/Lose screen.png",
             "vert_shader_path": "shader/bg_vs.vert",
@@ -339,6 +347,79 @@
         {
             "id": "bat_death",
             "path": "Assets/Textures/Enemies/Bat/bat_death724x535.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        //Boss
+        {
+            "id": "boss_idle",
+            "path": "Assets/Textures/Enemies/Boss/Gorilla_Idle_spritesheet_1459x977.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "boss_hurt",
+            "path": "Assets/Textures/Enemies/Boss/Gorilla_Hurt_spritesheet_1459x977.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "boss_death",
+            "path": "Assets/Textures/Enemies/Boss/Gorilla_Death_spritesheet_1459x977.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "boss_attack1",
+            "path": "Assets/Textures/Enemies/Boss/dorian_sword_1113x787.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "boss_attack2",
+            "path": "Assets/Textures/Enemies/Boss/dorian_spear_1113x787.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "boss_attack3",
+            "path": "Assets/Textures/Enemies/Boss/dorian_gun_1113x787.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "boss_move1",
+            "path": "Assets/Textures/Enemies/Boss/Rat_Walk_spritesheet_764x456.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "boss_move2",
+            "path": "Assets/Textures/Enemies/Boss/Gorilla_Walk_spritesheet_1459x977.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "boss_move3",
+            "path": "Assets/Textures/Enemies/Boss/bat_walk_724x535.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
@@ -966,7 +1047,6 @@
             "mdl_ref": 1,
             "shd_ref": 3
         },
-        
         //pause menu
         {
             "id": "exit_btn",
@@ -1180,7 +1260,6 @@
             "mdl_ref": 1,
             "shd_ref": 2
         },
-
         // pause/setting background animation frames
         {
             "id": "settings1",
@@ -1214,7 +1293,7 @@
             "mdl_ref": 0,
             "shd_ref": 1
         },
-                {
+        {
             "id": "settings5",
             "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0005.jpg",
             "vert_shader_path": "shader/sprite_BG.vert",
@@ -1278,7 +1357,7 @@
             "mdl_ref": 0,
             "shd_ref": 1
         },
-                {
+        {
             "id": "settings13",
             "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0013.jpg",
             "vert_shader_path": "shader/sprite_BG.vert",
@@ -1310,7 +1389,7 @@
             "mdl_ref": 0,
             "shd_ref": 1
         },
-                {
+        {
             "id": "settings17",
             "path": "Assets/Textures/Backgrounds/setting animation frames/Settings0017.jpg",
             "vert_shader_path": "shader/sprite_BG.vert",
@@ -1366,7 +1445,7 @@
             "mdl_ref": 0,
             "shd_ref": 1
         },
-                {
+        {
             "id": "pause5",
             "path": "Assets/Textures/Backgrounds/pause animation frames/Pause0004.png",
             "vert_shader_path": "shader/sprite_BG.vert",
