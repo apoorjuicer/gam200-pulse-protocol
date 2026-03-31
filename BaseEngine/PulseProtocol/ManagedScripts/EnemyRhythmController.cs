@@ -47,7 +47,7 @@ public class EnemyRhythmController : Script
     // If true, WeaknessCombo is re-randomized each turn (2 distinct keys from WASD)
     public bool RandomizeWeakness = true;
     // If true, VisualSlotIndices is re-randomized each turn (shifts where keys appear visually)
-    public bool RandomizeVisualSlots = true;
+    public bool RandomizeVisualSlots = false;
     private static readonly Random _rng = new Random();
 
     // === COMBAT SETTINGS ===
