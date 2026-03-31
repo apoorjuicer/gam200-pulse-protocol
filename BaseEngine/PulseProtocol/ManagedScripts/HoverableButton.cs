@@ -175,7 +175,7 @@ public class NavigationButtons : Script
             }
         }
 
-        // Gamepad Circle → go back / close settings.
+        // Gamepad Circle → go back / close settings / resume from pause.
         if (!wasCircleHandled && input.IsGamepadButtonTriggered(GP_CIRCLE))
         {
             if (ShowSettingsOverlay || realScene == "Settings")
@@ -183,6 +183,21 @@ public class NavigationButtons : Script
                 wasCircleHandled = true;
                 AudioSliderKnobBase.ClearFocus();
                 GoBack();
+                return;
+            }
+            else if (ShowPauseOverlay)
+            {
+                wasCircleHandled = true;
+                ShowPauseOverlay = false;
+                s_resumeCountdownActive = true;
+                PauseResumeCountdown? countdown = PauseResumeCountdown.Instance;
+                if (countdown != null)
+                    countdown.StartCountdown();
+                else
+                {
+                    s_resumeCountdownActive = false;
+                    Application.SetPaused(false);
+                }
                 return;
             }
         }
@@ -394,7 +409,8 @@ public class NavigationButtons : Script
                                    realScene == "VisualLatencyCalibration" ||
                                    realScene == "GameLose" ||
                                    ShowPauseOverlay || ShowQuitOverlay ||
-                                   ShowSettingsOverlay || ShowHowToPlayOverlay;
+                                   ShowSettingsOverlay || ShowHowToPlayOverlay ||
+                                   stageClearPaused;
 
             // Clear any lingering focus when returning to gameplay
             if (!inMenuOrOverlay && s_focusedButton != null)
@@ -405,6 +421,7 @@ public class NavigationButtons : Script
             bool _noSliderOrDropdown = !AudioSliderKnobBase.IsAnySliderFocused && !DropdownState.IsDropdownFocused;
             bool _useHorizontalNav = ShowQuitOverlay
                                      || ShowPauseOverlay
+                                     || stageClearPaused
                                      || realScene == "LatencyCalibration"
                                      || realScene == "VisualLatencyCalibration"
                                      || realScene == "GameLose";
