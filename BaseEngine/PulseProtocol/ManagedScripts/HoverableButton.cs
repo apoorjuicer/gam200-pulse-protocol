@@ -172,7 +172,17 @@ public class NavigationButtons : Script
         if (!string.IsNullOrEmpty(realScene) && realScene != s_prevSceneForMainMenuFade)
         {
             if (realScene == "MainMenu")
+            {
+                // Scene-entry safety reset: prevent stale overlays from flashing
+                // when MainMenu has just loaded and is about to fade in.
+                ShowQuitOverlay = false;
+                ShowNewGameResetOverlay = false;
+                ShowPauseOverlay = false;
+                ShowHowToPlayOverlay = false;
+                ShowSettingsOverlay = false;
+
                 PendingSceneFadeIn = true;
+            }
 
             s_prevSceneForMainMenuFade = realScene;
         }
