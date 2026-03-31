@@ -27,7 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/Backgrounds/Background3.png",
+                        "spriteName": "Level3_BG",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -79,11 +79,11 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -867.1965942382813,
-                            "y": -159.14208984375
+                            "x": -867.1965942382812,
+                            "y": -109.14208984375
                         },
                         "scale": {
-                            "x": 800.0,
+                            "x": 800,
                             "y": 849.7409057617188
                         },
                         "rotation": {
@@ -363,9 +363,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 2.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/border_transparent.png",
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/border/border_transparent.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1191,12 +1191,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 977.0,
-                            "y": -299.010009765625
+                            "x": 977,
+                            "y": -249.010009765625
                         },
                         "scale": {
-                            "x": 350.0,
-                            "y": 230.0
+                            "x": 350,
+                            "y": 230
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1528,12 +1528,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -600.0,
-                            "y": -640.0
+                            "x": -360,
+                            "y": -620
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 90,
+                            "y": 90
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1608,12 +1608,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -200.0,
-                            "y": -640.0
+                            "x": -120,
+                            "y": -620
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 90,
+                            "y": 90
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1688,12 +1688,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 200.0,
-                            "y": -640.0
+                            "x": 120,
+                            "y": -620
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 90,
+                            "y": 90
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1768,12 +1768,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 600.0,
-                            "y": -640.0
+                            "x": 360,
+                            "y": -620
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 90,
+                            "y": 90
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2656,12 +2656,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -700.0,
-                            "y": 250.0
+                            "x": -360,
+                            "y": 415
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 90,
+                            "y": 90
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2736,12 +2736,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -236.0,
-                            "y": 250.0
+                            "x": -120,
+                            "y": 415
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 90,
+                            "y": 90
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2816,12 +2816,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 195.38499450683594,
-                            "y": 250.0
+                            "x": 120,
+                            "y": 415
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 90,
+                            "y": 90
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2896,12 +2896,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 700.0,
-                            "y": 250.0
+                            "x": 360,
+                            "y": 415
                         },
                         "scale": {
-                            "x": 100.0,
-                            "y": 100.0
+                            "x": 90,
+                            "y": 90
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2976,12 +2976,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -603.6439208984375,
-                            "y": -640.9230346679688
+                            "x": -365.192,
+                            "y": -618.846
                         },
                         "scale": {
-                            "x": 89.57219696044922,
-                            "y": 81.90200805664063
+                            "x": 79.507,
+                            "y": 77
                         },
                         "rotation": {
                             "x": 0.0,
@@ -3056,12 +3056,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -205.9861297607422,
-                            "y": -640.0
+                            "x": -125.19200000000001,
+                            "y": -618.846
                         },
                         "scale": {
-                            "x": 87.78251647949219,
-                            "y": 82.32746124267578
+                            "x": 79.507,
+                            "y": 77
                         },
                         "rotation": {
                             "x": 0.0,
@@ -3136,12 +3136,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 593.3912963867188,
-                            "y": -641.2968139648438
+                            "x": 354.808,
+                            "y": -618.846
                         },
                         "scale": {
-                            "x": 87.63788604736328,
-                            "y": 80.96159362792969
+                            "x": 79.507,
+                            "y": 77
                         },
                         "rotation": {
                             "x": 0.0,
@@ -3216,12 +3216,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 194.4175567626953,
-                            "y": -641.296875
+                            "x": 114.80799999999999,
+                            "y": -618.846
                         },
                         "scale": {
-                            "x": 87.12000274658203,
-                            "y": 80.95999908447266
+                            "x": 79.507,
+                            "y": 77
                         },
                         "rotation": {
                             "x": 0.0,
@@ -5154,10 +5154,10 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "Text",
-                        "mask": 8,
-                        "sortingLayer": 3,
-                        "orderInLayer": 10,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 100,
                         "z": 0.0
                     }
                 },
@@ -5177,6 +5177,81 @@
                         ],
                         "visible": false,
                         "alignment": 1
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0,
+                            "y": 0
+                        },
+                        "scale": {
+                            "x": 176,
+                            "y": 33
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0,
+                        "shd_ref": 2,
+                        "useTexture": true,
+                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/enemy_hp4_00.png",
+                        "tintColor": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1,
+                            "a": 1
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1,
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "EnemyHealthBarController"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "EnemyHealthBar"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 100,
+                        "z": 0
                     }
                 }
             ]
