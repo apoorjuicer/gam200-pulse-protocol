@@ -83,7 +83,7 @@
                             "y": -159.14208984375
                         },
                         "scale": {
-                            "x": 800.0,
+                            "x": 1248.0,
                             "y": 849.7409057617188
                         },
                         "rotation": {
@@ -100,7 +100,7 @@
                         "mdl_ref": 1.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/Characters/../Characters/Dorian_Idle2_579x615.png",
+                        "spriteName": "dorian_idle2",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1195,8 +1195,8 @@
                             "y": -299.010009765625
                         },
                         "scale": {
-                            "x": 350.0,
-                            "y": 230.0
+                            "x": 700.0,
+                            "y": 460.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1209,8 +1209,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "rat_idle",
                         "tintColor": {
