@@ -1138,6 +1138,24 @@ public class NavigationButtons : Script
                 sceneToLoad = "Cutscene";
             }
 
+            // Stage clear Continue should fade out before scene handoff.
+            if (StageClearElement.IsCleared)
+            {
+                StageClearElement.ResetStageClear();
+
+                if (!string.IsNullOrEmpty(sceneToLoad) &&
+                    sceneToLoad.StartsWith("Level", StringComparison.OrdinalIgnoreCase))
+                {
+                    LoadingScreenScript.NextLevel = sceneToLoad;
+                    BeginSceneTransition("LoadingScreenScene", false, true);
+                    return;
+                }
+
+                bool fadeInOnMainMenu = string.Equals(sceneToLoad, "MainMenu", StringComparison.OrdinalIgnoreCase);
+                BeginSceneTransition(sceneToLoad, fadeInOnMainMenu, true);
+                return;
+            }
+
             NavigateTo(sceneToLoad);
             return;
         }
@@ -1179,6 +1197,12 @@ public class NavigationButtons : Script
 
         if (tex.Contains("home"))
         {
+            ShowQuitOverlay = false;
+            ShowNewGameResetOverlay = false;
+            ShowPauseOverlay = false;
+            ShowHowToPlayOverlay = false;
+            ShowSettingsOverlay = false;
+            ShowLevelSelectOverlay = false;
             StageClearElement.ResetStageClear();
             GoToMainMenu();
             return;
