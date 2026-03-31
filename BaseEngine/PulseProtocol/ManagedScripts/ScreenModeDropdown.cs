@@ -128,22 +128,24 @@ public class DropdownToggle : Script
 
             if (DropdownState.ScreenDropdownOpen)
             {
-                // Cross or D-pad L/R confirms the visible option
-                if (_cross || _dLeft || _dRight)
+                // Cross confirms the visible option (toggle screen mode)
+                if (_cross)
                 {
                     ToggleScreenAPI.ToggleFullscreen();
                     UserSettingsStore.SetFullscreen(ToggleScreenAPI.IsFullscreen());
                     DropdownState.ScreenDropdownOpen = false;
+                    DropdownState.IsDropdownFocused  = false;
+                    AudioSliderKnobBase.FocusFirstSlider();
                     return;
                 }
-                // Circle cancels without selecting
-                if (_circle)
+                // Circle or D-pad Down: cancel without changing mode, move to Volume slider
+                if (_circle || _dDown)
                 {
                     DropdownState.ScreenDropdownOpen = false;
+                    DropdownState.IsDropdownFocused  = false;
+                    AudioSliderKnobBase.FocusFirstSlider();
                     return;
                 }
-                // D-pad Up/Down: intentionally do nothing — keeps the dropdown open so the
-                // user can still confirm with Cross without it disappearing under them.
             }
             else
             {
