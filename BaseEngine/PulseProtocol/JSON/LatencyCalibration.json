@@ -92,7 +92,7 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
+                        "mdl_ref": 1.0,
                         "shd_ref": 0.0,
                         "useTexture": true,
                         "spriteName": "",
@@ -161,15 +161,15 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 3.0,
                         "useTexture": true,
                         "spriteName": "",
                         "tintColor": {
@@ -247,15 +247,15 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 3.0,
                         "useTexture": true,
                         "spriteName": "",
                         "tintColor": {
@@ -340,15 +340,15 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 3.0,
                         "useTexture": true,
                         "spriteName": "",
                         "tintColor": {
@@ -426,15 +426,15 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 3.0,
                         "useTexture": true,
                         "spriteName": "",
                         "tintColor": {
@@ -519,14 +519,14 @@
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
+                        "mdl_ref": 1.0,
                         "shd_ref": 0.0,
                         "useTexture": true,
                         "spriteName": "",
@@ -605,8 +605,8 @@
                             "y": -500.0
                         },
                         "scale": {
-                            "x": 150.0,
-                            "y": 150.0
+                            "x": 300.0,
+                            "y": 300.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -619,8 +619,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "pauserestart_btn",
                         "tintColor": {
@@ -680,8 +680,8 @@
                             "y": -500.0
                         },
                         "scale": {
-                            "x": 150.0,
-                            "y": 150.0
+                            "x": 300.0,
+                            "y": 300.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -694,8 +694,8 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0,
-                        "shd_ref": 1.0,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "NextStage_btn",
                         "tintColor": {
@@ -750,9 +750,18 @@
             "components": [
                 {
                     "transform": {
-                        "position": { "x": 0.0, "y": 680.0 },
-                        "scale": { "x": 200.0, "y": 200.0 },
-                        "rotation": { "x": 0.0, "y": 0.0 },
+                        "position": {
+                            "x": 0.0,
+                            "y": 680.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -760,37 +769,70 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0, "shd_ref": 0.0, "useTexture": false,
+                        "mdl_ref": 1.0,
+                        "shd_ref": 3.0,
+                        "useTexture": false,
                         "spriteName": "",
-                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
-                        "glow": { "enabled": false, "intensity": 1.0, "r": 1.0, "g": 1.0, "b": 1.0 }
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
                     }
                 },
                 {
                     "animation": {
-                        "currentFrame": 0, "elapsedTime": 0.0,
-                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 1.0
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 1.0
                     }
                 },
                 {
-                    "script": { "ScriptName": [ "ControllerNotification" ] }
+                    "script": {
+                        "ScriptName": [
+                            "ControllerNotification"
+                        ]
+                    }
                 },
                 {
-                    "name": { "name": "ControllerNotificationText" }
+                    "name": {
+                        "name": "ControllerNotificationText"
+                    }
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI", "mask": 4,
-                        "sortingLayer": 2, "orderInLayer": 100, "z": 0.0
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 100,
+                        "z": 0.0
                     }
                 },
                 {
                     "TextComponent": {
                         "text": "",
                         "font_id": "barlow_semibold_font",
-                        "offset": { "x": 0.0, "y": 0.0 },
+                        "offset": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
                         "font_size": 40.0,
-                        "color": [ 1.0, 1.0, 1.0 ],
+                        "color": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
                         "visible": false,
                         "alignment": 1
                     }
