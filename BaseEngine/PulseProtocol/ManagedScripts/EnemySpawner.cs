@@ -74,6 +74,18 @@ public class EnemySpawner : Script
         EnemyIconType.BlueGorilla
     };
 
+    private List<EnemyIconType> EnemyContainer3 = new List<EnemyIconType>
+    {
+        EnemyIconType.Rat,
+        EnemyIconType.BlueGorilla,
+        EnemyIconType.Rat,
+        EnemyIconType.Bat,
+        EnemyIconType.Rat,
+        EnemyIconType.Bat,
+        EnemyIconType.BlueGorilla,
+        EnemyIconType.Bat,
+        EnemyIconType.BlueGorilla
+    };
 
     public override void Update()
     {
@@ -181,6 +193,14 @@ public class EnemySpawner : Script
         else if (CurrentScene == "Level2")
         {
             foreach (EnemyIconType type in EnemyContainer2)
+            {
+                enemyQueue.Enqueue(type);
+            }
+        }
+
+        else if (CurrentScene == "Level3")
+        {
+            foreach (EnemyIconType type in EnemyContainer3)
             {
                 enemyQueue.Enqueue(type);
             }
