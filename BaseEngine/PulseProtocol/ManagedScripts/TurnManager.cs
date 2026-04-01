@@ -97,7 +97,7 @@ public class TurnManager : Script
         {
             float elapsed = Conductor.Instance.GetVisualAdjustedSongTime() - playerInputStartTime;
             float[] offsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0.0f, 0.5f, 1.0f, 1.5f };
-            int[] visualSlots = EnemyRhythmController.Instance?.VisualSlotIndices;
+            int[] visualSlots = EnemyRhythmController.Instance?.VisualSlotIndices ?? new int[] { 0, 1, 2, 3 };
             float beatDur = Conductor.Instance.SecondsPerBeat;
             for (int i = 0; i < slotPulsed.Length && i < offsets.Length; i++)
             {
@@ -182,20 +182,19 @@ public class TurnManager : Script
 
             case TurnPhase.PlayerInput:
                 {
-                    // Beat 1: switch announcer from GET READY to INPUT NOW (immediate call-and-response)
                     if (beatsInPhase == 1)
                         TurnAnnouncerUI.Instance?.ShowGo();
-                }
 
-                if (beatsInPhase >= PlayerInputBeats)
-                {
-                    ResolvePlayerInput();
+                    if (beatsInPhase >= PlayerInputBeats)
+                    {
+                        ResolvePlayerInput();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[TurnManager] Player Input Beat {beatsInPhase + 1}/{PlayerInputBeats}");
+                    }
+                    break;
                 }
-                else
-                {
-                    Console.WriteLine($"[TurnManager] Player Input Beat {beatsInPhase + 1}/{PlayerInputBeats}");
-                }
-                break;
 
             case TurnPhase.Resolution:
                 // Wait for the death animation to finish before advancing.

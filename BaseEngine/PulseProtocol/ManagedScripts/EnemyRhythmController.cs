@@ -39,10 +39,10 @@ public class EnemyRhythmController : Script
     // === RHYTHM SETTINGS ===
     public RhythmType RhythmType = RhythmType.Syncopated;
     public float StepDistance = 50f;
-    public float[] SlotOffsets = new float[] { 0.0f, 0.5f };
+    public float[] SlotOffsets = new float[] { 0.0f, 0.5f, 1.0f, 1.5f };
     // Which UI slot positions (0-3) each key occupies.
-    // Rat uses {0, 1} — two consecutive beats, no gap.
-    public int[] VisualSlotIndices = new int[] { 0, 1 };
+    // Rat uses all 4 slots — no gaps, just press everything on the beat.
+    public int[] VisualSlotIndices = new int[] { 0, 1, 2, 3 };
 
     // If true, WeaknessCombo is re-randomized each turn (2 distinct keys from WASD)
     public bool RandomizeWeakness = true;
@@ -83,7 +83,7 @@ public class EnemyRhythmController : Script
     private bool playerFound = false;
 
     // === WEAKNESS ===
-    public string WeaknessCombo = "WA";
+    public string WeaknessCombo = "WASD";
 
     // === INTERNAL STATE ===
     private bool initialized = false;
@@ -644,10 +644,13 @@ public class EnemyRhythmController : Script
         if (RandomizeWeakness)
         {
             char[] keys = { 'W', 'A', 'S', 'D' };
-            int i0 = _rng.Next(4);
-            int i1;
-            do { i1 = _rng.Next(4); } while (i1 == i0);
-            WeaknessCombo = "" + keys[i0] + keys[i1];
+            for (int i = keys.Length - 1; i > 0; i--)
+            {
+                int j = _rng.Next(i + 1);
+                char tmp = keys[i]; keys[i] = keys[j]; keys[j] = tmp;
+            }
+            int count = Math.Min(SlotOffsets.Length, keys.Length);
+            WeaknessCombo = new string(keys, 0, count);
             Console.WriteLine($"[Enemy] Randomized combo: {WeaknessCombo}");
         }
 

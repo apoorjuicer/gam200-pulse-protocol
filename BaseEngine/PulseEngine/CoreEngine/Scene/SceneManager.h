@@ -3,8 +3,9 @@
  * @file       SceneManager.h
  * @project    Pulse Protocol
  * @author     Chia Wei Xuan Rachael - 90%
- * @author     Goh Pin Kai (secondary) - 5%
+ * @author     Goh Pin Kai (secondary) - 4%
  * @author     Ban Kai Wei Benjamin (secondary) - 5%
+ * @author     Leu Jun Yong (secondary) - 1%
  * 
  * @brief      Scene management system that inherits from Systems base class.
  *             Provides interface for scene lifecycle operations, entity tracking,
@@ -74,6 +75,8 @@ public:
 	void SaveCurrentScene();
 	void UnloadCurrentScene();
 	void RestartCurrentScene();
+	bool ConsumeSceneLoadedPulse();
+	bool HasSceneLoadedPulse() const { return m_sceneLoadCompletedPulse; }
 
 	std::string CurrentScene; // i need this public for me to call in other systems when i press the nbutton in hovered state
 
@@ -144,6 +147,7 @@ private:
 	void Serialize(rapidjson::Value& out, rapidjson::Document::AllocatorType& alloc) const;
 
 	CoreEngine* m_coreEngine = nullptr;
+	bool m_sceneLoadCompletedPulse = false;
 };
 //ALL ENTITY IN THE ARRAY MUST BE EXACTLY LIKE A PREFAB. But it is not a prefab, just all its component. (for scene json)
 
