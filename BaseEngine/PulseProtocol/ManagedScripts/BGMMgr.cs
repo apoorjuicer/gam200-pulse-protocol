@@ -172,7 +172,7 @@ public class LevelSelectBGM : Script
             _lastSelected   = selected;
             _restoreGeneral = false;
 
-            if (!s_trackMap.TryGetValue(selected, out string newTrack))
+            if (!s_trackMap.TryGetValue(selected, out string? newTrack))
             {
                
                 if (_state != State.Idle)
