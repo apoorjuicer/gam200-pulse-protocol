@@ -79,12 +79,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -867.1965942382812,
+                            "x": -867.1965942382813,
                             "y": -109.14208984375
                         },
                         "scale": {
-                            "x": 800,
-                            "y": 849.7409057617188
+                            "x": 1200.0,
+                            "y": 850.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1191,12 +1191,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 977,
+                            "x": 977.0,
                             "y": -249.010009765625
                         },
                         "scale": {
-                            "x": 350,
-                            "y": 230
+                            "x": 350.0,
+                            "y": 230.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1528,12 +1528,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -360,
-                            "y": -620
+                            "x": -360.0,
+                            "y": -620.0
                         },
                         "scale": {
-                            "x": 90,
-                            "y": 90
+                            "x": 90.0,
+                            "y": 90.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1608,12 +1608,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -120,
-                            "y": -620
+                            "x": -120.0,
+                            "y": -620.0
                         },
                         "scale": {
-                            "x": 90,
-                            "y": 90
+                            "x": 90.0,
+                            "y": 90.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1688,12 +1688,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 120,
-                            "y": -620
+                            "x": 120.0,
+                            "y": -620.0
                         },
                         "scale": {
-                            "x": 90,
-                            "y": 90
+                            "x": 90.0,
+                            "y": 90.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -1768,12 +1768,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 360,
-                            "y": -620
+                            "x": 360.0,
+                            "y": -620.0
                         },
                         "scale": {
-                            "x": 90,
-                            "y": 90
+                            "x": 90.0,
+                            "y": 90.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2665,12 +2665,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -360,
-                            "y": 415
+                            "x": -360.0,
+                            "y": 415.0
                         },
                         "scale": {
-                            "x": 90,
-                            "y": 90
+                            "x": 90.0,
+                            "y": 90.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2745,12 +2745,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -120,
-                            "y": 415
+                            "x": -120.0,
+                            "y": 415.0
                         },
                         "scale": {
-                            "x": 90,
-                            "y": 90
+                            "x": 90.0,
+                            "y": 90.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2825,12 +2825,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 120,
-                            "y": 415
+                            "x": 120.0,
+                            "y": 415.0
                         },
                         "scale": {
-                            "x": 90,
-                            "y": 90
+                            "x": 90.0,
+                            "y": 90.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2905,12 +2905,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 360,
-                            "y": 415
+                            "x": 360.0,
+                            "y": 415.0
                         },
                         "scale": {
-                            "x": 90,
-                            "y": 90
+                            "x": 90.0,
+                            "y": 90.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2985,12 +2985,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -365.192,
-                            "y": -618.846
+                            "x": -365.1919860839844,
+                            "y": -618.8460083007813
                         },
                         "scale": {
-                            "x": 79.507,
-                            "y": 77
+                            "x": 79.50700378417969,
+                            "y": 77.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -3065,12 +3065,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -125.19200000000001,
-                            "y": -618.846
+                            "x": -125.19200134277344,
+                            "y": -618.8460083007813
                         },
                         "scale": {
-                            "x": 79.507,
-                            "y": 77
+                            "x": 79.50700378417969,
+                            "y": 77.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -3145,12 +3145,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 354.808,
-                            "y": -618.846
+                            "x": 354.8080139160156,
+                            "y": -618.8460083007813
                         },
                         "scale": {
-                            "x": 79.507,
-                            "y": 77
+                            "x": 79.50700378417969,
+                            "y": 77.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -3225,12 +3225,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 114.80799999999999,
-                            "y": -618.846
+                            "x": 114.80799865722656,
+                            "y": -618.8460083007813
                         },
                         "scale": {
-                            "x": 79.507,
-                            "y": 77
+                            "x": 79.50700378417969,
+                            "y": 77.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -5195,51 +5195,51 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 0,
-                            "y": 0
+                            "x": 0.0,
+                            "y": 0.0
                         },
                         "scale": {
-                            "x": 176,
-                            "y": 33
+                            "x": 176.0,
+                            "y": 33.0
                         },
                         "rotation": {
-                            "x": 0,
-                            "y": 0
+                            "x": 0.0,
+                            "y": 0.0
                         },
                         "isVisible": true,
-                        "visibilityTimer": 0,
+                        "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0,
-                        "shd_ref": 2,
+                        "mdl_ref": 0.0,
+                        "shd_ref": 2.0,
                         "useTexture": true,
                         "spriteName": "../../PulseProtocol/Assets/Textures/UI/enemy_hp4_00.png",
                         "tintColor": {
-                            "r": 1,
-                            "g": 1,
-                            "b": 1,
-                            "a": 1
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
                         },
                         "glow": {
                             "enabled": false,
-                            "intensity": 1,
-                            "r": 1,
-                            "g": 1,
-                            "b": 1
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0,
+                        "elapsedTime": 0.0,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
-                        "animationSpeed": 0
+                        "animationSpeed": 0.0
                     }
                 },
                 {
@@ -5260,7 +5260,7 @@
                         "mask": 2,
                         "sortingLayer": 1,
                         "orderInLayer": 100,
-                        "z": 0
+                        "z": 0.0
                     }
                 }
             ]
@@ -5270,51 +5270,51 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 0,
-                            "y": 0
+                            "x": 0.0,
+                            "y": 0.0
                         },
                         "scale": {
-                            "x": 1600,
-                            "y": 900
+                            "x": 1600.0,
+                            "y": 900.0
                         },
                         "rotation": {
-                            "x": 0,
-                            "y": 0
+                            "x": 0.0,
+                            "y": 0.0
                         },
                         "isVisible": true,
-                        "visibilityTimer": 0,
+                        "visibilityTimer": 0.0,
                         "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0,
-                        "shd_ref": 1,
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
                         "spriteName": "loadingscreen_BG",
                         "tintColor": {
-                            "r": 1,
-                            "g": 1,
-                            "b": 1,
-                            "a": 1
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
                         },
                         "glow": {
                             "enabled": false,
-                            "intensity": 1,
-                            "r": 1,
-                            "g": 1,
-                            "b": 1
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
                 {
                     "animation": {
                         "currentFrame": 0,
-                        "elapsedTime": 0,
+                        "elapsedTime": 0.0,
                         "totalFrames": 1,
                         "columns": 1,
                         "rows": 1,
-                        "animationSpeed": 1
+                        "animationSpeed": 1.0
                     }
                 },
                 {
@@ -5335,11 +5335,10 @@
                         "mask": 4,
                         "sortingLayer": 10,
                         "orderInLayer": 500,
-                        "z": 0
+                        "z": 0.0
                     }
                 }
             ]
         }
     ]
 }
-
