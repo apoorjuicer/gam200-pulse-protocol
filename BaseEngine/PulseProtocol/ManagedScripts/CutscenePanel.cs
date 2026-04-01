@@ -129,7 +129,7 @@ public class CutscenePanel : Script
             {
                 s_waitingForSkipTransition = false;
                 s_skipTransitionTimer = 0f;
-                GoToLevelSelectWithFadeIn();
+                GoToLevel1AfterCutscene();
             }
             return;
         }
@@ -152,8 +152,8 @@ public class CutscenePanel : Script
             float totalDuration = (totalPairs - 1) * (sPairTotalDuration - sOverlapDuration) + sPairTotalDuration;
             if (sharedElapsedTime >= totalDuration)
             {
-                Console.WriteLine("[Cutscene] Complete! Loading Level Select...");
-                GoToLevelSelectWithFadeIn();
+                Console.WriteLine("[Cutscene] Complete! Loading Level1...");
+                GoToLevel1AfterCutscene();
                 return;
             }
         }
@@ -273,18 +273,29 @@ public class CutscenePanel : Script
         SetAlpha(sprite, 0f);
     }
 
-    private void GoToLevelSelectWithFadeIn()
+    private void GoToLevel1AfterCutscene()
     {
         if (s_sceneChangeIssued)
             return;
 
         s_sceneChangeIssued = true;
         sharedCutsceneFinished = true;
-        NavigationButtons.CutsceneLevelSelectLock = true;
-        NavigationButtons.ShowLevelSelectOverlay = true;
-        NavigationButtons.PendingSceneFadeIn = true;
+        NavigationButtons.ShowLevelSelectOverlay = false;
         s_sceneSessionTag = "";
-        Scene.LoadScene("MainMenu");
+
+        const string targetScene = "Level1";
+        NavigationButtons.currentScene = targetScene;
+        NavigationButtons.LastEnteredLevel = targetScene;
+
+        if (NavigationButtons.ShouldUseLoadingScreenForScene(targetScene))
+        {
+            LoadingScreenScript.NextLevel = targetScene;
+            Scene.LoadScene("LoadingScreenScene");
+            return;
+        }
+
+        NavigationButtons.QueuePostLoadFadeIn(targetScene, 0.5f);
+        Scene.LoadScene(targetScene);
     }
 
     private void BeginSkipTransition()

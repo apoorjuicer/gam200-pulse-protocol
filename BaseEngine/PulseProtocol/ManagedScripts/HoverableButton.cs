@@ -43,7 +43,6 @@ public class NavigationButtons : Script
     // === SETTINGS OVERLAY (inside MainMenu scene) ===
     public static bool ShowSettingsOverlay = false;
     public static bool ShowLevelSelectOverlay = false;
-    public static bool CutsceneLevelSelectLock = false;
     public static string SelectedLevelScene = "Level1";
     public static bool PendingSceneFadeIn = false;
 
@@ -91,10 +90,13 @@ public class NavigationButtons : Script
     private static bool waitingForPostLoadFadeIn = false;
     private static string pendingPostLoadFadeScene = "";
     private static float pendingPostLoadFadeDuration = 0.0f;
+    private static bool forcePostLoadFadeForNextTransition = false;
+    private static bool s_initialLevel1LoadingUsed = false;
+    private const string RestartSceneSentinel = "__RESTART_CURRENT_SCENE__";
+    private static bool pendingStageClearResetOnSceneSwitch = false;
     private const float SceneTransitionDuration = 0.5f;
     private static string s_prevSceneForMainMenuFade = "";
     private static int s_lastMainMenuFadeFrame = -1;
-    private static bool s_mainMenuFadeArmed = true;
     private static bool waitingForMenuOverlayTransition = false;
     private static float menuOverlayTransitionTimer = 0.0f;
     private static int menuOverlayTransitionTickFrame = -1;
@@ -122,12 +124,10 @@ public class NavigationButtons : Script
             HtpPage = 1;
             ShowSettingsOverlay = false;
             ShowLevelSelectOverlay = false;
-            CutsceneLevelSelectLock = false;
             SelectedLevelScene = "Level1";
             PendingSceneFadeIn = false;
             s_prevSceneForMainMenuFade = "";
             s_lastMainMenuFadeFrame = -1;
-            s_mainMenuFadeArmed = true;
 
             wasEscPressed = false;
             s_appliedGamePause = false;
@@ -140,6 +140,8 @@ public class NavigationButtons : Script
             waitingForPostLoadFadeIn = false;
             pendingPostLoadFadeScene = "";
             pendingPostLoadFadeDuration = 0.0f;
+            s_initialLevel1LoadingUsed = false;
+            pendingStageClearResetOnSceneSwitch = false;
             waitingForMenuOverlayTransition = false;
             menuOverlayTransitionTimer = 0.0f;
             menuOverlayTransitionTickFrame = -1;
@@ -166,10 +168,6 @@ public class NavigationButtons : Script
         string realScene = Scene.GetCurrentScene();
         TryProcessPendingPostLoadFadeIn();
 
-        // Arm whenever we are outside MainMenu.
-        if (!string.IsNullOrEmpty(realScene) && realScene != "MainMenu")
-            s_mainMenuFadeArmed = true;
-
         // Detect scene entry and keep compatibility with pending flag flow.
         if (!string.IsNullOrEmpty(realScene) && realScene != s_prevSceneForMainMenuFade)
         {
@@ -182,14 +180,12 @@ public class NavigationButtons : Script
                 ShowPauseOverlay = false;
                 ShowHowToPlayOverlay = false;
                 ShowSettingsOverlay = false;
-
-                PendingSceneFadeIn = true;
             }
 
             s_prevSceneForMainMenuFade = realScene;
         }
 
-        if ((PendingSceneFadeIn || s_mainMenuFadeArmed) &&
+        if (PendingSceneFadeIn &&
             realScene == "MainMenu" &&
             !waitingForSceneTransition &&
             !waitingForMenuOverlayTransition &&
@@ -200,7 +196,6 @@ public class NavigationButtons : Script
             FadeAPI.FadeIn(SceneTransitionDuration);
             s_lastMainMenuFadeFrame = Time.FrameCount;
             PendingSceneFadeIn = false;
-            s_mainMenuFadeArmed = false;
         }
 
         if (waitingForSceneTransition)
@@ -239,9 +234,24 @@ public class NavigationButtons : Script
                         ShowLevelSelectOverlay = false;
                     }
 
+                    if (pendingStageClearResetOnSceneSwitch)
+                    {
+                        StageClearElement.ResetStageClear();
+                        pendingStageClearResetOnSceneSwitch = false;
+                    }
+
                     if (!string.IsNullOrEmpty(targetScene))
                     {
-                        bool usePostLoadFade = ShouldUsePostLoadFadeTransition(targetScene);
+                        if (string.Equals(targetScene, RestartSceneSentinel, StringComparison.Ordinal))
+                        {
+                            Application.SetPaused(false);
+                            FadeAPI.SetAlpha(1.0f);
+                            Scene.RestartScene();
+                            return;
+                        }
+
+                        bool usePostLoadFade = forcePostLoadFadeForNextTransition || ShouldUsePostLoadFadeTransition(targetScene);
+                        forcePostLoadFadeForNextTransition = false;
                         if (usePostLoadFade)
                         {
                             waitingForPostLoadFadeIn = true;
@@ -353,9 +363,9 @@ public class NavigationButtons : Script
 
             if (string.IsNullOrEmpty(currentScene))
             {
-                // Prefer engine scene name; fall back to old heuristic if empty
+                // Prefer engine scene name; fall back to MainMenu if empty
                 string sc = Scene.GetCurrentScene();
-                currentScene = string.IsNullOrEmpty(sc) ? DetectCurrentScene() : sc;
+                currentScene = string.IsNullOrEmpty(sc) ? "MainMenu" : sc;
             }
 
             int dotIndex = defaultTexture.LastIndexOf('.');
@@ -673,20 +683,6 @@ public class NavigationButtons : Script
         }
     }
 
-    private string DetectCurrentScene()
-    {
-        string tex = defaultTexture.ToLower();
-
-        if (tex.Contains("new game") || tex.Contains("new_game") || tex.Contains("settings") || tex.Contains("continue") || tex.Contains("quit"))
-            return "MainMenu";
-
-        // Settings is now an overlay inside MainMenu, so back still means MainMenu
-        if (tex.Contains("back"))
-            return "MainMenu";
-
-        return "MainMenu";
-    }
-
     private void NavigateTo(string newScene)
     {
         // Leaving MainMenu? don't carry Settings overlay across scenes
@@ -733,9 +729,65 @@ public class NavigationButtons : Script
     {
         sceneHistory.Clear();
         currentScene = "MainMenu";
-        CutsceneLevelSelectLock = false;
         Application.SetPaused(false);
         BeginSceneTransition("MainMenu", true, true);
+    }
+
+    private void ResetImmediateNoFadeState()
+    {
+        waitingForSceneTransition = false;
+        pendingScene = "";
+        pendingClearOverlaysOnSceneSwitch = false;
+        sceneTransitionTimer = 0.0f;
+        sceneTransitionTickFrame = -1;
+        waitingForPostLoadFadeIn = false;
+        pendingPostLoadFadeScene = "";
+        pendingPostLoadFadeDuration = 0.0f;
+        forcePostLoadFadeForNextTransition = false;
+        waitingForMenuOverlayTransition = false;
+        menuOverlayTransitionTimer = 0.0f;
+        menuOverlayTransitionTickFrame = -1;
+        pendingMenuOverlayTarget = 0;
+        pendingStageClearResetOnSceneSwitch = false;
+        PendingSceneFadeIn = false;
+        LoadingScreenScript.PendingLevel1Transition = false;
+        LoadingScreenScript.PendingLevel1LoadingOverlay = false;
+        LoadingScreenScript.PendingLevel2LoadingOverlay = false;
+        LoadingScreenScript.BlockLevelStartCountdown = false;
+
+        ShowQuitOverlay = false;
+        ShowNewGameResetOverlay = false;
+        ShowPauseOverlay = false;
+        ShowHowToPlayOverlay = false;
+        ShowSettingsOverlay = false;
+        ShowLevelSelectOverlay = false;
+        openedSettingsFromPause = false;
+        Application.SetPaused(false);
+        FadeAPI.Stop();
+        FadeAPI.SetAlpha(0.0f);
+    }
+
+    private void LoadSceneImmediateNoFade(string targetScene, bool clearHistory)
+    {
+        if (string.IsNullOrEmpty(targetScene))
+            return;
+
+        ResetImmediateNoFadeState();
+
+        if (clearHistory)
+            sceneHistory.Clear();
+
+        if (targetScene.StartsWith("Level", StringComparison.OrdinalIgnoreCase))
+            LastEnteredLevel = targetScene;
+
+        currentScene = targetScene;
+        Scene.LoadScene(targetScene);
+    }
+
+    private void RestartSceneImmediateNoFade()
+    {
+        ResetImmediateNoFadeState();
+        Scene.RestartScene();
     }
 
     private void BeginSceneTransition(string targetScene, bool fadeInOnMainMenu, bool clearOverlaysAfterFade)
@@ -782,12 +834,38 @@ public class NavigationButtons : Script
         return !targetScene.StartsWith("Level", StringComparison.OrdinalIgnoreCase);
     }
 
+    public static bool ShouldUseLoadingScreenForScene(string targetScene)
+    {
+        if (string.IsNullOrEmpty(targetScene))
+            return false;
+
+        if (!string.Equals(targetScene, "Level1", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (s_initialLevel1LoadingUsed)
+            return false;
+
+        s_initialLevel1LoadingUsed = true;
+        return true;
+    }
+
     public static bool IsPostLoadFadePendingForScene(string sceneName)
     {
         if (!waitingForPostLoadFadeIn || string.IsNullOrEmpty(sceneName))
             return false;
 
         return string.Equals(pendingPostLoadFadeScene, sceneName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static void QueuePostLoadFadeIn(string sceneName, float duration)
+    {
+        if (string.IsNullOrEmpty(sceneName))
+            return;
+
+        waitingForPostLoadFadeIn = true;
+        pendingPostLoadFadeScene = sceneName;
+        pendingPostLoadFadeDuration = duration > 0.0f ? duration : SceneTransitionDuration;
+        PendingSceneFadeIn = false;
     }
 
     public static void TryProcessPendingPostLoadFadeIn()
@@ -838,17 +916,6 @@ public class NavigationButtons : Script
     {
         AudioComponent audio = GetAudio();
         audio.PlaySFX("SFX_Button_Select");
-    }
-
-    public static void LoadGameplayScene(string sceneName)
-    {
-        ShowSettingsOverlay = false;
-
-        string previous = string.IsNullOrEmpty(currentScene) ? "MainMenu" : currentScene;
-        LastGameplayScene = previous;
-        currentScene = sceneName;
-
-        Scene.LoadScene(sceneName);
     }
 
     public static void GoToGameLose()
@@ -1020,10 +1087,14 @@ public class NavigationButtons : Script
 
     currentScene = nextScene;
 
-    // Load loading screen first then the nxt level
-    LoadingScreenScript.NextLevel = currentScene;
-    BeginSceneTransition("LoadingScreenScene", false, true);
-    //Scene.LoadScene(nextScene);
+    if (ShouldUseLoadingScreenForScene(currentScene))
+    {
+        LoadingScreenScript.NextLevel = currentScene;
+        BeginSceneTransition("LoadingScreenScene", false, true);
+        return;
+    }
+
+    BeginSceneTransitionWithPostLoadFade(currentScene, true);
 }
 
 
@@ -1075,6 +1146,13 @@ public class NavigationButtons : Script
 
         if (tex.Contains("pauserestart"))
         {
+            if (StageClearElement.IsCleared)
+            {
+                StageClearElement.ResetStageClear();
+                RestartSceneImmediateNoFade();
+                return;
+            }
+
             if (Scene.GetCurrentScene() == "LatencyCalibration")
             {
                 LatencyCalibrator.Instance?.Reset();
@@ -1085,11 +1163,8 @@ public class NavigationButtons : Script
                 VisualLatencyCalibrator.Instance?.Reset();
                 return;
             }
-            //Scene.RestartScene();
 
-            // make it load loading screen when we restart instead of it freezing at the pause menu
-            LoadingScreenScript.NextLevel = Scene.GetCurrentScene();
-            BeginSceneTransition("LoadingScreenScene", false, true);
+            BeginRestartTransition(true);
 
             return;
         }
@@ -1104,6 +1179,14 @@ public class NavigationButtons : Script
 
         if (tex.Contains("restartyes"))
         {
+            string realScene = Scene.GetCurrentScene();
+            if (string.Equals(realScene, "GameLose", StringComparison.OrdinalIgnoreCase))
+            {
+                string restartTarget = !string.IsNullOrEmpty(LastGameplayScene) ? LastGameplayScene : "MainMenu";
+                LoadSceneImmediateNoFade(restartTarget, string.Equals(restartTarget, "MainMenu", StringComparison.OrdinalIgnoreCase));
+                return;
+            }
+
             if (!string.IsNullOrEmpty(LastGameplayScene))
             {
                 currentScene = LastGameplayScene;
@@ -1119,7 +1202,20 @@ public class NavigationButtons : Script
 
         if (tex.Contains("restartno"))
         {
+            if (string.Equals(Scene.GetCurrentScene(), "GameLose", StringComparison.OrdinalIgnoreCase))
+            {
+                LoadSceneImmediateNoFade("MainMenu", true);
+                return;
+            }
+
             GoToMainMenu();
+            return;
+        }
+
+        if (tex.Contains("win_restart_btn"))
+        {
+            StageClearElement.ResetStageClear();
+            RestartSceneImmediateNoFade();
             return;
         }
 
@@ -1127,9 +1223,15 @@ public class NavigationButtons : Script
         // Must be checked before "start" / New Game matching.
         if (tex.Contains("restart") && !tex.Contains("pause") && !tex.Contains("yes") && !tex.Contains("no"))
         {
-            StageClearElement.ResetStageClear();
-            LoadingScreenScript.NextLevel = Scene.GetCurrentScene();
-            BeginSceneTransition("LoadingScreenScene", false, true);
+            if (StageClearElement.IsCleared)
+            {
+                StageClearElement.ResetStageClear();
+                RestartSceneImmediateNoFade();
+                return;
+            }
+
+            pendingStageClearResetOnSceneSwitch = true;
+            BeginRestartTransition(true);
             return;
         }
 
@@ -1207,21 +1309,14 @@ public class NavigationButtons : Script
                 sceneToLoad = "Cutscene";
             }
 
-            // Stage clear Continue should fade out before scene handoff.
+            // Stage clear Continue should switch immediately with no fade.
             if (StageClearElement.IsCleared)
             {
                 StageClearElement.ResetStageClear();
-
-                if (!string.IsNullOrEmpty(sceneToLoad) &&
-                    sceneToLoad.StartsWith("Level", StringComparison.OrdinalIgnoreCase))
-                {
-                    LoadingScreenScript.NextLevel = sceneToLoad;
-                    BeginSceneTransition("LoadingScreenScene", false, true);
-                    return;
-                }
-
-                bool fadeInOnMainMenu = string.Equals(sceneToLoad, "MainMenu", StringComparison.OrdinalIgnoreCase);
-                BeginSceneTransition(sceneToLoad, fadeInOnMainMenu, true);
+                if (string.IsNullOrEmpty(sceneToLoad))
+                    sceneToLoad = "MainMenu";
+                bool clearHistory = string.Equals(sceneToLoad, "MainMenu", StringComparison.OrdinalIgnoreCase);
+                LoadSceneImmediateNoFade(sceneToLoad, clearHistory);
                 return;
             }
 
@@ -1266,6 +1361,13 @@ public class NavigationButtons : Script
 
         if (tex.Contains("home"))
         {
+            if (StageClearElement.IsCleared)
+            {
+                StageClearElement.ResetStageClear();
+                LoadSceneImmediateNoFade("MainMenu", true);
+                return;
+            }
+
             ShowQuitOverlay = false;
             ShowNewGameResetOverlay = false;
             ShowPauseOverlay = false;
@@ -1289,6 +1391,23 @@ public class NavigationButtons : Script
                 VisualLatencyCalibrator.Instance?.Skip();
                 return;
             }
+
+            if (StageClearElement.IsCleared)
+            {
+                string stageScene = Scene.GetCurrentScene();
+                if (!string.IsNullOrEmpty(stageScene))
+                    currentScene = stageScene;
+
+                string nextScene;
+                if (!TryGetNextLevelSceneName(currentScene, out nextScene) || !Scene.SceneExists(nextScene))
+                    nextScene = "MainMenu";
+
+                StageClearElement.ResetStageClear();
+                ReportLevelCleared(currentScene);
+                LoadSceneImmediateNoFade(nextScene, string.Equals(nextScene, "MainMenu", StringComparison.OrdinalIgnoreCase));
+                return;
+            }
+
             StageClearElement.ResetStageClear();
             ReportLevelCleared(currentScene);
             ContinueToNextLevel();
@@ -1334,7 +1453,6 @@ public class NavigationButtons : Script
 
     public static void BeginMainMenuOverlayTransitionToLevelSelect()
     {
-        CutsceneLevelSelectLock = false;
         BeginMenuOverlayTransition(1);
     }
 
@@ -1414,6 +1532,26 @@ public class NavigationButtons : Script
         BeginSceneTransition("Cutscene", false, true);
     }
 
+    private void BeginSceneTransitionWithPostLoadFade(string targetScene, bool clearOverlaysAfterFade)
+    {
+        if (string.IsNullOrEmpty(targetScene))
+            return;
+
+        forcePostLoadFadeForNextTransition = true;
+        BeginSceneTransition(targetScene, false, clearOverlaysAfterFade);
+    }
+
+    private void BeginRestartTransition(bool clearOverlaysAfterFade)
+    {
+        string restartSceneName = Scene.GetCurrentScene();
+        if (string.IsNullOrEmpty(restartSceneName))
+            restartSceneName = currentScene;
+
+        BeginSceneTransition(RestartSceneSentinel, false, clearOverlaysAfterFade);
+        if (waitingForSceneTransition && !string.IsNullOrEmpty(restartSceneName))
+            QueuePostLoadFadeIn(restartSceneName, SceneTransitionDuration);
+    }
+
     private static void ResetProgressForNewGame()
     {
         LastClearedLevel = "";
@@ -1421,8 +1559,6 @@ public class NavigationButtons : Script
         LevelProgressStore.ClearProgress();
     }
 }
-
-//end ofclass navigation buttons
 
 public class QuitOverlay : Script
 {
@@ -1629,7 +1765,6 @@ internal static class LevelProgressStore
 
 public class MainMenuAutoFadeIn : Script
 {
-    private const float MainMenuFadeInDuration = 0.5f;
     private bool ran = false;
 
     public override void Update()
@@ -1641,8 +1776,9 @@ public class MainMenuAutoFadeIn : Script
             return;
 
         ran = true;
+        // MainMenu no longer auto-fades on entry.
+        // Fade-in should be controlled explicitly by NavigationButtons.PendingSceneFadeIn.
         FadeAPI.Stop();
-        FadeAPI.SetAlpha(1.0f);
-        FadeAPI.FadeIn(MainMenuFadeInDuration);
+        FadeAPI.SetAlpha(0.0f);
     }
 }

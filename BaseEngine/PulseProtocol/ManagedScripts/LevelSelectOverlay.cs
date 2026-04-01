@@ -278,7 +278,6 @@ public class LevelSelectStartDisc : Script
     private static string s_pendingScene = "";
     private static float s_sceneTransitionTimer = 0.0f;
     private static int s_transitionTickFrame = -1;
-    private static bool s_cutsceneMusicSilenced = false;
     private const float SceneTransitionDuration = 0.5f;
 
     private bool initialized = false;
@@ -299,7 +298,6 @@ public class LevelSelectStartDisc : Script
             s_pendingScene = "";
             s_sceneTransitionTimer = 0.0f;
             s_transitionTickFrame = -1;
-            s_cutsceneMusicSilenced = false;
             return;
         }
 
@@ -332,9 +330,16 @@ public class LevelSelectStartDisc : Script
                     NavigationButtons.ShowLevelSelectOverlay = false;
                     NavigationButtons.currentScene = sceneToLoad;
                     NavigationButtons.LastEnteredLevel = sceneToLoad;
-                    NavigationButtons.CutsceneLevelSelectLock = false;
-                    LoadingScreenScript.NextLevel = sceneToLoad;
-                    Scene.LoadScene("LoadingScreenScene");
+                    if (NavigationButtons.ShouldUseLoadingScreenForScene(sceneToLoad))
+                    {
+                        LoadingScreenScript.NextLevel = sceneToLoad;
+                        Scene.LoadScene("LoadingScreenScene");
+                    }
+                    else
+                    {
+                        NavigationButtons.QueuePostLoadFadeIn(sceneToLoad, SceneTransitionDuration);
+                        Scene.LoadScene(sceneToLoad);
+                    }
                 }
             }
             return;
@@ -348,17 +353,7 @@ public class LevelSelectStartDisc : Script
 
         t.IsVisible = visible;
         if (!visible)
-        {
-            s_cutsceneMusicSilenced = false;
             return;
-        }
-
-        if (NavigationButtons.CutsceneLevelSelectLock && !s_cutsceneMusicSilenced)
-        {
-            AudioComponent audio = GetAudio();
-            audio.StopBGM();
-            s_cutsceneMusicSilenced = true;
-        }
 
         if (!initialized)
         {
@@ -384,7 +379,7 @@ public class LevelSelectStartDisc : Script
         wasStartHovered = isStartHovered;
 
         // Rotation pause now uses the same center hitbox as hover SFX/scale.
-        if (!isStartHovered && !NavigationButtons.CutsceneLevelSelectLock)
+        if (!isStartHovered)
             t.RotX += SpinSpeed * Time.DeltaTime;
 
         float targetScaleX = isStartHovered ? baseScaleX * StartHoverScaleBoost : baseScaleX;
@@ -434,8 +429,7 @@ public class LevelSelectBackButton : Script
         bool visible = NavigationButtons.ShowLevelSelectOverlay &&
                        !NavigationButtons.ShowSettingsOverlay &&
                        !NavigationButtons.ShowQuitOverlay &&
-                       !NavigationButtons.ShowHowToPlayOverlay &&
-                       !NavigationButtons.CutsceneLevelSelectLock;
+                       !NavigationButtons.ShowHowToPlayOverlay;
         t.IsVisible = visible;
 
         if (!visible)
