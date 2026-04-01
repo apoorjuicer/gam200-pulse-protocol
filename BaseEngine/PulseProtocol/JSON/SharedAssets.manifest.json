@@ -78,6 +78,7 @@
                     "NextStage_btn",
                     "NextStage_btn_hover",
                     //playerinputS
+                    //keys
                     "player_input_border",
                     "W_KEY_GREEN",
                     "A_KEY_GREEN",
@@ -91,6 +92,15 @@
                     "A_KEY_BLACK",
                     "S_KEY_BLACK",
                     "D_KEY_BLACK",
+                    //controler player input
+                    "Controller_Red_O",
+                    "Controller_Red_X",
+                    "Controller_Red_TRI",
+                    "Controller_Red_SQ",
+                    "Controller_Green_O",
+                    "Controller_Green_X",
+                    "Controller_Green_TRI",
+                    "Controller_Green_SQ",
                     //beatborder
                     "beatborder_transparent",
                     "beatborder_frame",

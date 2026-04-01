@@ -48,6 +48,17 @@ public class ComboKeySlot : Script
     public string RedSSprite = "S_KEY_RED";
     public string RedDSprite = "D_KEY_RED";
 
+    // Controller fill sprites
+    public string GreenTriSprite = "Controller_Green_TRI";
+    public string GreenSqSprite = "Controller_Green_SQ";
+    public string GreenXSprite_Controller = "Controller_Green_X";
+    public string GreenOSprite = "Controller_Green_O";
+
+    public string RedTriSprite = "Controller_Red_TRI";
+    public string RedSqSprite = "Controller_Red_SQ";
+    public string RedXSprite_Controller = "Controller_Red_X";
+    public string RedOSprite = "Controller_Red_O";
+
     public float DisplayDuration = 0.5f;
     public float ScaleAnimDuration = 0.15f;
     public float ResultDisplayDuration = 0.3f;
@@ -114,6 +125,9 @@ public class ComboKeySlot : Script
     private float _fadeToHiddenDuration   = 0.5f;
     private float _fadeToHiddenStartAlpha = 0f;
 
+    private static bool _preferControllerUI = false;
+    private static bool _inputModeInitialized = false;
+
     // =========================
     // Update
     // =========================
@@ -141,17 +155,17 @@ public class ComboKeySlot : Script
 
             string fileName = System.IO.Path.GetFileName(texturePath.ToLower());
 
-            // Check green sprites FIRST
-            if      (fileName == "player input green w.png") { IsEnemySlot = false; SlotIndex = 0; }
-            else if (fileName == "player input green a.png") { IsEnemySlot = false; SlotIndex = 1; }
-            else if (fileName == "player input green s.png") { IsEnemySlot = false; SlotIndex = 2; }
-            else if (fileName == "player input green d.png") { IsEnemySlot = false; SlotIndex = 3; }
+            // Check player row identifiers first
+            if (fileName == "player input green w.png" || fileName == "w_key_green" || fileName == "controller_green_tri") { IsEnemySlot = false; SlotIndex = 0; }
+            else if (fileName == "player input green a.png" || fileName == "a_key_green" || fileName == "controller_green_sq") { IsEnemySlot = false; SlotIndex = 1; }
+            else if (fileName == "player input green s.png" || fileName == "s_key_green" || fileName == "controller_green_x") { IsEnemySlot = false; SlotIndex = 2; }
+            else if (fileName == "player input green d.png" || fileName == "d_key_green" || fileName == "controller_green_o") { IsEnemySlot = false; SlotIndex = 3; }
 
             // Then enemy row
-            else if (fileName == "ekeyw.png") { IsEnemySlot = true;  SlotIndex = 0; }
-            else if (fileName == "ekeya.png") { IsEnemySlot = true;  SlotIndex = 1; }
-            else if (fileName == "ekeys.png") { IsEnemySlot = true;  SlotIndex = 2; }
-            else if (fileName == "ekeyd.png") { IsEnemySlot = true;  SlotIndex = 3; }
+            else if (fileName == "ekeyw.png" || fileName == "w_key_black") { IsEnemySlot = true; SlotIndex = 0; }
+            else if (fileName == "ekeya.png" || fileName == "a_key_black") { IsEnemySlot = true; SlotIndex = 1; }
+            else if (fileName == "ekeys.png" || fileName == "s_key_black") { IsEnemySlot = true; SlotIndex = 2; }
+            else if (fileName == "ekeyd.png" || fileName == "d_key_black") { IsEnemySlot = true; SlotIndex = 3; }
 
             // Then single letter player row
             else if (fileName == "w.png") { IsEnemySlot = false; SlotIndex = 0; }
@@ -599,8 +613,58 @@ public class ComboKeySlot : Script
     // =========================
     public bool GetIsEnemySlot() => IsEnemySlot;
 
+    private bool UsingControllerUI()
+    {
+        InputComponent input = GetInput();
+
+        bool controllerConnected = input.IsGamepadConnected;
+
+        bool controllerUsed =
+            input.IsGamepadButtonPressed(3) ||  // Triangle -> W
+            input.IsGamepadButtonPressed(1) ||  // Square   -> A
+            input.IsGamepadButtonPressed(0) ||  // Cross    -> S
+            input.IsGamepadButtonPressed(2);    // Circle   -> D
+
+        bool keyboardUsed =
+            input.IsKeyPressed(87) ||  // W
+            input.IsKeyPressed(65) ||  // A
+            input.IsKeyPressed(83) ||  // S
+            input.IsKeyPressed(68);    // D
+
+        if (!_inputModeInitialized)
+        {
+            _preferControllerUI = controllerConnected || controllerUsed;
+            _inputModeInitialized = true;
+        }
+
+        // Force fallback to keyboard if controller is gone
+        if (!controllerConnected)
+            _preferControllerUI = false;
+
+        if (controllerUsed)
+            _preferControllerUI = true;
+
+        if (keyboardUsed)
+            _preferControllerUI = false;
+
+        return _preferControllerUI;
+    }
     private string GetSpriteForKey(char key)
     {
+        if (UsingControllerUI())
+        {
+            switch (key)
+            {
+                case 'W': return GreenTriSprite;
+                case 'A': return GreenOSprite;
+                case 'S': return GreenXSprite_Controller;
+                case 'D': return GreenSqSprite;
+                default:
+                    Console.WriteLine($"[ComboKeySlot] Unknown key: {key}");
+                    return GreenTriSprite;
+            }
+        }
+
         switch (key)
         {
             case 'W': return WSprite;
@@ -615,6 +679,18 @@ public class ComboKeySlot : Script
 
     private string GetGreenSpriteForKey(char key)
     {
+        if (UsingControllerUI())
+        {
+            switch (key)
+            {
+                case 'W': return GreenTriSprite;
+                case 'A': return GreenOSprite;
+                case 'S': return GreenXSprite_Controller;
+                case 'D': return GreenSqSprite;
+                default: return GreenTriSprite;
+            }
+        }
+
         switch (key)
         {
             case 'W': return GreenWSprite;
@@ -627,6 +703,18 @@ public class ComboKeySlot : Script
 
     private string GetRedSpriteForKey(char key)
     {
+        if (UsingControllerUI())
+        {
+            switch (key)
+            {
+                case 'W': return GreenTriSprite;
+                case 'A': return GreenOSprite;
+                case 'S': return GreenXSprite_Controller;
+                case 'D': return GreenSqSprite;
+                default: return RedTriSprite;
+            }
+        }
+
         switch (key)
         {
             case 'W': return RedWSprite;

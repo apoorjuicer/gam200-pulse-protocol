@@ -564,6 +564,72 @@
             "mdl_ref": 1,
             "shd_ref": 3
         },
+        //red controller key
+        {
+            "id": "Controller_Red_O",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_RED_O.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "Controller_Red_X",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_RED_X.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "Controller_Red_SQ",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_RED_SQUARE.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "Controller_Red_TRI",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_RED_TRIANGLE.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        //green controller key
+        {
+            "id": "Controller_Green_O",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_Green_O.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "Controller_Green_X",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_Green_X.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "Controller_Green_SQ",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_Green_SQUARE.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "Controller_Green_TRI",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_Green_TRIANGLE.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
         // main menu UI
         {
             "id": "continue_mainmenu_btn",
