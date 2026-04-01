@@ -26,5 +26,8 @@ namespace ScriptAPI
 		static System::String^ GetCurrentScene();
 
 		static bool SceneExists(System::String^ Filename);
+
+		// Returns true once when a scene has fully finished loading.
+		static bool ConsumeSceneLoadedPulse();
 	};
 }

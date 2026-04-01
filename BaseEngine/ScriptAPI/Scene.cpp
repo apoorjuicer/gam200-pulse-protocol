@@ -84,4 +84,21 @@ namespace ScriptAPI
 		return sceneManager->SceneExists(sceneName);
 	}
 
+	bool Scene::ConsumeSceneLoadedPulse()
+	{
+		auto* coord = Coordinator::GetInstance();
+		if (!coord)
+		{
+			return false;
+		}
+
+		auto sceneManager = coord->GetSystem<SceneManager>();
+		if (!sceneManager)
+		{
+			return false;
+		}
+
+		return sceneManager->ConsumeSceneLoadedPulse();
+	}
+
 }

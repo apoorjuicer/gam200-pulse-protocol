@@ -2244,7 +2244,8 @@
                     "Children": {
                         "children": [
                             28,
-                            29
+                            29,
+                            30
                         ]
                     }
                 }
@@ -2255,7 +2256,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 400.0,
+                            "x": 500.0,
                             "y": -150.0
                         },
                         "scale": {
@@ -2336,7 +2337,7 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -400.0,
+                            "x": -500.0,
                             "y": -150.0
                         },
                         "scale": {
@@ -2418,11 +2419,11 @@
                     "transform": {
                         "position": {
                             "x": 0.0,
-                            "y": 0.0
+                            "y": -150.0
                         },
                         "scale": {
-                            "x": 200.0,
-                            "y": 200.0
+                            "x": 150.0,
+                            "y": 150.0
                         },
                         "rotation": {
                             "x": 0.0,
@@ -2436,9 +2437,9 @@
                 {
                     "render": {
                         "mdl_ref": 0.0,
-                        "shd_ref": 0.0,
+                        "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "",
+                        "spriteName": "Assets/Textures/UI/win_restart_btn.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -2465,16 +2466,24 @@
                     }
                 },
                 {
+                    "script": {
+                        "ScriptName": [
+                            "StageClearElement",
+                            "NavigationButtons"
+                        ]
+                    }
+                },
+                {
                     "name": {
-                        "name": "P(StageClear) O(StageLose)"
+                        "name": "Replay"
                     }
                 },
                 {
                     "layerTag": {
-                        "layerName": "World",
-                        "mask": 2,
-                        "sortingLayer": 1,
-                        "orderInLayer": 0,
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 20,
                         "z": 0.0
                     }
                 },
@@ -5255,6 +5264,82 @@
                     }
                 }
             ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0,
+                            "y": 0
+                        },
+                        "scale": {
+                            "x": 1600,
+                            "y": 900
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0,
+                        "shd_ref": 1,
+                        "useTexture": true,
+                        "spriteName": "loadingscreen_BG",
+                        "tintColor": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1,
+                            "a": 1
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1,
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 1
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "Level2LoadingOverlayTransition"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Level2LoadingOverlay"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 10,
+                        "orderInLayer": 500,
+                        "z": 0
+                    }
+                }
+            ]
         }
     ]
 }
+
