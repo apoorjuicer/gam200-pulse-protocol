@@ -173,23 +173,23 @@ public class LevelSelectCard : Script
         if (offset < -1) offset = -1;
 
         float targetX = 0.0f;
-        float targetY = 160.0f;
+        float targetY = 180.0f;
         float targetScaleX = 420.0f;
-        float targetScaleY = 470.0f;
+        float targetScaleY = 420.0f;
 
         if (offset < 0)
         {
             targetX = -920.0f;
             targetY = 140.0f;
             targetScaleX = 360.0f;
-            targetScaleY = 400.0f;
+            targetScaleY = 360.0f;
         }
         else if (offset > 0)
         {
             targetX = 920.0f;
             targetY = 140.0f;
             targetScaleX = 360.0f;
-            targetScaleY = 400.0f;
+            targetScaleY = 360.0f;
         }
 
         float lerp = Math.Min(1.0f, Time.DeltaTime * 10.0f);
@@ -212,9 +212,9 @@ public class LevelSelectCard : Script
     }
 
     public static float SelectedX => 0.0f;
-    public static float SelectedY => 160.0f;
+    public static float SelectedY => 180.0f;
     public static float SelectedScaleX => 420.0f;
-    public static float SelectedScaleY => 470.0f;
+    public static float SelectedScaleY => 420.0f;
     public static bool IsCenterSettled => s_centerSettled;
 
     private static int GetSceneIndex(string scene)
@@ -259,6 +259,10 @@ public class LevelSelectCard : Script
 
 public class LevelSelectSelector : Script
 {
+    private const float FadeInDuration = 0.35f;
+    private float _alpha = 0.0f;
+    private bool _wasVisible = false;
+
     public override void Update()
     {
         TransformComponent t = GetTransform();
@@ -268,20 +272,41 @@ public class LevelSelectSelector : Script
                        !NavigationButtons.ShowHowToPlayOverlay &&
                        LevelSelectCard.IsCenterSettled;
 
-        t.IsVisible = visible;
         if (!visible)
+        {
+            if (_wasVisible)
+            {
+                _alpha = 0.0f;
+                _wasVisible = false;
+                SpriteComponent s = GetSprite();
+                s.TintA = 0.0f;
+            }
+            t.IsVisible = false;
             return;
+        }
+
+        // First frame visible: snap position to target, start from alpha 0
+        if (!_wasVisible)
+        {
+            _alpha = 0.0f;
+            _wasVisible = true;
+            t.X = LevelSelectCard.SelectedX;
+            t.Y = LevelSelectCard.SelectedY;
+            t.ScaleX = LevelSelectCard.SelectedScaleX * 1.20f;
+            t.ScaleY = LevelSelectCard.SelectedScaleY * 1.20f;
+        }
+
+        t.IsVisible = true;
+
+        _alpha = Math.Min(1.0f, _alpha + Time.DeltaTime / FadeInDuration);
+        SpriteComponent sprite = GetSprite();
+        sprite.TintA = _alpha;
 
         float lerp = Math.Min(1.0f, Time.DeltaTime * 12.0f);
-        float targetX = LevelSelectCard.SelectedX;
-        float targetY = LevelSelectCard.SelectedY;
-        float targetScaleX = LevelSelectCard.SelectedScaleX * 1.20f;
-        float targetScaleY = LevelSelectCard.SelectedScaleY * 1.20f;
-
-        t.X += (targetX - t.X) * lerp;
-        t.Y += (targetY - t.Y) * lerp;
-        t.ScaleX += (targetScaleX - t.ScaleX) * lerp;
-        t.ScaleY += (targetScaleY - t.ScaleY) * lerp;
+        t.X += (LevelSelectCard.SelectedX - t.X) * lerp;
+        t.Y += (LevelSelectCard.SelectedY - t.Y) * lerp;
+        t.ScaleX += (LevelSelectCard.SelectedScaleX * 1.20f - t.ScaleX) * lerp;
+        t.ScaleY += (LevelSelectCard.SelectedScaleY * 1.20f - t.ScaleY) * lerp;
     }
 }
 
