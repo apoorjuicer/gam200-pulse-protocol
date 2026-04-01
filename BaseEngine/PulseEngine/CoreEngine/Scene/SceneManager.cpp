@@ -3,8 +3,9 @@
  * @file       SceneManager.cpp
  * @project    Pulse Protocol
  * @author     Chia Wei Xuan Rachael - 90%
- * @author     Goh Pin Kai (secondary) - 5%
+ * @author     Goh Pin Kai (secondary) - 4%
  * @author     Ban Kai Wei Benjamin (secondary) - 5%
+ * @author     Leu Jun Yong (secondary) - 1%
  * 
  * @brief      Manages scene lifecycle, serialization, and entity ownership across
  *             game scenes (MainMene and level1 for now) .

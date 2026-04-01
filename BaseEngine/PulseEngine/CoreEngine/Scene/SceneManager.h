@@ -3,8 +3,9 @@
  * @file       SceneManager.h
  * @project    Pulse Protocol
  * @author     Chia Wei Xuan Rachael - 90%
- * @author     Goh Pin Kai (secondary) - 5%
+ * @author     Goh Pin Kai (secondary) - 4%
  * @author     Ban Kai Wei Benjamin (secondary) - 5%
+ * @author     Leu Jun Yong (secondary) - 1%
  * 
  * @brief      Scene management system that inherits from Systems base class.
  *             Provides interface for scene lifecycle operations, entity tracking,

@@ -3,7 +3,8 @@
 * @file        CutscenePanel.cs
 * @project     Pulse Protocol
 * @author      Carrie Lam (85%)
-*              Chloe Lau (15%)
+* @author      Chloe Lau (13%)
+* @author      Leu Jun Yong (2%)
 * @brief       Controls staggered slide-in and simultaneous slide-out animations
 *              for paired cutscene panels, with shared timing state across all
 *              panel instances and space-to-skip support.

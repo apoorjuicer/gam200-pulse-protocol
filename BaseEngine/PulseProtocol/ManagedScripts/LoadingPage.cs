@@ -1,3 +1,16 @@
+/******************************************************************************/
+/**
+ * @file        LoadingPage.cs
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 100%
+ * @brief       Handles loading screen timing, fade flow, and next-scene handoff.
+ *
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
+
 using System;
 using ScriptAPI;
 // Call loading screen scene and the png will have this script where it just loads the png then loads level 1 after like 3 frames
