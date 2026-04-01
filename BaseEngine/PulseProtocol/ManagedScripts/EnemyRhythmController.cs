@@ -53,7 +53,7 @@ public class EnemyRhythmController : Script
     // === COMBAT SETTINGS ===
     public int AttackDamage = 5;
     public float Health = 15f;
-    public int MaxHP { get; private set; } = 1;
+    public int MaxHP { get; protected set; } = 1;
 
     // === HEALTH BAR SETTINGS ===
     public int HealthBarBlockCount = 4;
@@ -526,7 +526,7 @@ public class EnemyRhythmController : Script
         }
     }
 
-    public void TakeDamage(float dmg)
+    public virtual void TakeDamage(float dmg)
     {
         if (isDead) return; 
 
@@ -563,7 +563,7 @@ public class EnemyRhythmController : Script
     public float GetHealthBarScaleOffsetXFactor() => HealthBarScaleOffsetXFactor;
     public float GetHealthBarScaleOffsetYFactor() => HealthBarScaleOffsetYFactor;
 
-    private void Die()
+    protected virtual void Die()
     {
         if (isDead) return;
 
@@ -633,7 +633,7 @@ public class EnemyRhythmController : Script
         }
     }
 
-    public void ResetMovementForNewTurn()
+    public virtual void ResetMovementForNewTurn()
     {
         // Don't clobber the death animation state if this enemy is already dying
         if (isDead) return;

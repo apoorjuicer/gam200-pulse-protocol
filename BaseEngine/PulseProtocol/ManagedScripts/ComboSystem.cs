@@ -148,7 +148,11 @@ public class ComboSystem : Script
                 float gap = offsets[i] - offsets[i - 1];
                 if (gap < minGap) minGap = gap;
             }
-            minTimeBetweenPresses = minGap * 0.8f;
+            // Gate must never block two consecutive valid presses within their great windows.
+            // Minimum valid time between press N (at worst: +greatWindow late) and press N+1
+            // (at best: -greatWindow early) = minGap - 2*greatWindow.
+            // Floor at 0.05s to prevent bounce-registration from a single physical keypress.
+            minTimeBetweenPresses = Math.Max(0.05f, minGap - 2f * greatWindow);
         }
         else {
             minTimeBetweenPresses = cachedBeatDuration * 0.8f;

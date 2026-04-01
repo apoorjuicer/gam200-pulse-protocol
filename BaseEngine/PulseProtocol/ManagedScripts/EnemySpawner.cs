@@ -74,6 +74,12 @@ public class EnemySpawner : Script
         EnemyIconType.BlueGorilla
     };
 
+    // Boss-only queue for isolated testing
+    private List<EnemyIconType> EnemyContainerBossTest = new List<EnemyIconType>
+    {
+        EnemyIconType.Boss
+    };
+
     private List<EnemyIconType> EnemyContainer3 = new List<EnemyIconType>
     {
         EnemyIconType.Rat,
@@ -84,7 +90,8 @@ public class EnemySpawner : Script
         EnemyIconType.Bat,
         EnemyIconType.BlueGorilla,
         EnemyIconType.Bat,
-        EnemyIconType.BlueGorilla
+        EnemyIconType.BlueGorilla,
+        EnemyIconType.Boss
     };
 
     public override void Update()
@@ -206,6 +213,14 @@ public class EnemySpawner : Script
             }
         }
 
+        else if (CurrentScene == "BossTest")
+        {
+            foreach (EnemyIconType type in EnemyContainerBossTest)
+            {
+                enemyQueue.Enqueue(type);
+            }
+        }
+
         EnemiesToSpawn = enemyQueue.Count();
 
         Console.WriteLine($"[EnemySpawner] Enemy queue setup with {enemyQueue.Count} enemies");
@@ -270,6 +285,7 @@ public class EnemySpawner : Script
             case EnemyIconType.Rat: return "Rat_Enemy";
             case EnemyIconType.Bat: return "Bat_Enemy";
             case EnemyIconType.BlueGorilla: return "BlueGorilla_Enemy";
+            case EnemyIconType.Boss: return "Boss_Enemy";
             default: return "";
         }
     }

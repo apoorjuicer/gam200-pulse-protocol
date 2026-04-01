@@ -68,6 +68,7 @@ public class ComboDisplayManager : Script
     private int gapRevealIndex = 0;
 
     private string currentWeakness = "";
+    private bool _inputPageFlipped = false;
 
     // =========================
     // Registration
@@ -127,18 +128,20 @@ public class ComboDisplayManager : Script
         if (isCountingDown && Conductor.Instance != null) {
             float elapsed = Conductor.Instance.GetAdjustedSongTime() - countdownStartTime;
 
-            while (countdownCurrentSlot < currentWeakness.Length && countdownCurrentSlot < currentSlotOffsets.Length) {
+            int countdownCap = Math.Min(currentWeakness.Length, _inputPageFlipped ? currentWeakness.Length : 4);
+            while (countdownCurrentSlot < countdownCap && countdownCurrentSlot < currentSlotOffsets.Length) {
                 float targetTime = currentSlotOffsets[countdownCurrentSlot] - ScaleAnimatedTime;
                 if (elapsed < targetTime) break;
 
+                int slotIdx = _inputPageFlipped ? countdownCurrentSlot : countdownCurrentSlot;
                 int alreadyPressed = ComboSystem.Instance != null ? ComboSystem.Instance.GetComboProgress() : 0;
-                if (countdownCurrentSlot >= alreadyPressed && playerSlots.ContainsKey(countdownCurrentSlot))
-                    playerSlots[countdownCurrentSlot].StartCountdown(currentWeakness[countdownCurrentSlot]);
+                if (countdownCurrentSlot >= alreadyPressed && playerSlots.ContainsKey(VisualSlot(countdownCurrentSlot)))
+                    playerSlots[VisualSlot(countdownCurrentSlot)].StartCountdown(currentWeakness[countdownCurrentSlot]);
 
                 countdownCurrentSlot++;
             }
 
-            if (countdownCurrentSlot >= currentWeakness.Length)
+            if (countdownCurrentSlot >= countdownCap)
                 isCountingDown = false;
         }
 
@@ -203,6 +206,41 @@ public class ComboDisplayManager : Script
         }
 
         lastInputProgress = currentProgress;
+
+        // Page-flip for 6/8-key combos: when player finishes page 1 (4 keys), show page 2 slots
+        if (!_inputPageFlipped && currentWeakness.Length > 4 && currentProgress >= 4)
+        {
+            _inputPageFlipped = true;
+            int page2Count = currentWeakness.Length - 4;
+
+            // Show anticipation for page-2 keys
+            for (int i = 4; i < currentWeakness.Length; i++)
+            {
+                int vs = VisualSlot(i); // wraps: 4→0, 5→1, 6→2, 7→3
+                if (playerSlots.ContainsKey(vs))
+                    playerSlots[vs].ShowBlankDim(currentWeakness[i]);
+            }
+            // Clear slots that have no page-2 key (e.g. slots 2,3 for a 6-key combo)
+            for (int s = page2Count; s < 4; s++)
+            {
+                if (playerSlots.ContainsKey(s)) playerSlots[s].ShowEmpty();
+            }
+
+            // Restart countdown for page-2 slots, offset relative to page-2 start
+            if (EnemyRhythmController.Instance?.SlotOffsets != null)
+            {
+                float[] allOffsets = EnemyRhythmController.Instance.SlotOffsets;
+                float page2StartOffset = allOffsets[4];
+                currentSlotOffsets = new float[page2Count];
+                for (int i = 0; i < page2Count; i++)
+                    currentSlotOffsets[i] = allOffsets[4 + i] - page2StartOffset;
+            }
+            countdownCurrentSlot = 4;
+            countdownStartTime = Conductor.Instance != null ? Conductor.Instance.GetAdjustedSongTime() : 0f;
+            isCountingDown = true;
+
+            Console.WriteLine("[ComboDisplayManager] Page flip: showing page-2 keys");
+        }
     }
 
     // =========================
@@ -246,14 +284,11 @@ public class ComboDisplayManager : Script
         revealIndex = 0;
         isRevealing = true;
         isFadingOut = false;
+        _inputPageFlipped = false;
 
-        // Snap to the nearest beat boundary using visual time (same clock as VisualBeatSystem)
-        // so all keys align with the border pulse, not just the first one.
         if (Conductor.Instance != null)
         {
-            float visualTime = Conductor.Instance.GetVisualAdjustedSongTime();
-            float spb = Conductor.Instance.SecondsPerBeat;
-            revealStartTime = (float)Math.Floor(visualTime / spb) * spb;
+            revealStartTime = Conductor.Instance.GetVisualAdjustedSongTime();
         }
         else
         {
@@ -348,6 +383,18 @@ public class ComboDisplayManager : Script
         if (revealIndex >= revealCombo.Length)
         {
             isRevealing = false;
+
+            // For combos > 4 where page 2 doesn't fill all 4 slots:
+            // slots that had page-1 keys but no page-2 key still show the old key just clear them.
+            if (revealCombo.Length > 4 && revealCombo.Length % 4 != 0)
+            {
+                int page2Count = revealCombo.Length % 4;
+                for (int s = page2Count; s < 4; s++)
+                {
+                    if (enemySlots.ContainsKey(s)) enemySlots[s].ShowEmpty();
+                }
+            }
+
             Console.WriteLine("[ComboDisplayManager] Beat reveal complete");
         }
     }
@@ -506,14 +553,14 @@ public class ComboDisplayManager : Script
             if (!isUsed) playerSlots[i].ShowEmpty();
         }
 
-        for (int i = 0; i < currentWeakness.Length; i++)
+        for (int i = 0; i < Math.Min(currentWeakness.Length, 4); i++)
         {
             int vs = VisualSlot(i);
             if (playerSlots.ContainsKey(vs))
                 playerSlots[vs].ShowBlankDim(currentWeakness[i]);
         }
 
-        countdownCurrentSlot = currentWeakness.Length;
+        countdownCurrentSlot = Math.Min(currentWeakness.Length, 4);
         isCountingDown = false;
         pendingCountdownStart = false;
         lastInputProgress = 0;
