@@ -119,7 +119,11 @@ I          : Toggle player invincibility (player takes no damage)
 K          : Instantly kill the current enemy (deals 99999 damage)
 O          : Clear the current wave (triggers the stage clear overlay)
 
-Note: Cheat codes only work when you are in the levels.
+Note: These cheat codes above only work when you are in the levels.
+
+CutScene Skip Cheats:
+---------------------
+Space Bar  : Skip the opening cutscene when its being shown.
 
 
 [ 7. TEAM ROSTER ]
