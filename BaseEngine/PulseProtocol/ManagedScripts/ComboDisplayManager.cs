@@ -286,24 +286,14 @@ public class ComboDisplayManager : Script
         ClearEnemySlotsInstant();
         float beatDur = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat : 0.5f;
 
-        // Show empty PNG on enemy gap slots (positions not used by this enemy's pattern)
-        for (int s = 0; s < 4; s++)
-        {
-            if (!enemySlots.ContainsKey(s)) continue;
-            bool isGap = true;
-            for (int j = 0; j < currentVisualSlots.Length; j++)
-                if (currentVisualSlots[j] == s) { isGap = false; break; }
-            if (isGap) enemySlots[s].ShowEmpty();
-        }
-
-        // Show empty PNG on gap player slots; active slots get ShowBlankFadeToDim
+        // Hide player gap slots so they pop in on the beat via HandleGapReveal, matching input behaviour
         for (int i = 0; i < 4; i++)
         {
             if (!playerSlots.ContainsKey(i)) continue;
             bool isUsed = false;
             for (int j = 0; j < weakness.Length && j < 4; j++)
                 if (VisualSlot(j) == i) { isUsed = true; break; }
-            if (!isUsed) playerSlots[i].ShowEmpty();
+            if (!isUsed) playerSlots[i].HideInstant();
         }
 
         for (int i = 0; i < weakness.Length && i < 4; i++)
@@ -416,6 +406,29 @@ public class ComboDisplayManager : Script
             judgementScript.ShowJudgement(judgement);
         else
             Console.WriteLine("[ComboDisplayManager] ⚠️ Judgement display not registered!");
+    }
+
+    public void ShowGapMissKey(char key)
+    {
+        if (gapVisualSlots.Length == 0) return;
+        if (TurnManager.Instance == null || Conductor.Instance == null) return;
+
+        float currentTime = Conductor.Instance.GetVisualAdjustedSongTime();
+        float playerStart = TurnManager.Instance.GetPlayerInputStartTime();
+        float beatDur = Conductor.Instance.SecondsPerBeat;
+        float window = ComboSystem.Instance != null ? ComboSystem.Instance.greatWindow : 0.15f;
+
+        for (int i = 0; i < gapVisualSlots.Length; i++)
+        {
+            float expectedTime = playerStart + gapVisualSlots[i] * beatDur;
+            if (Math.Abs(currentTime - expectedTime) <= window)
+            {
+                int s = gapVisualSlots[i];
+                if (playerSlots.ContainsKey(s))
+                    playerSlots[s].ShowWrong(key, key);
+                return;
+            }
+        }
     }
 
     private void ClearPlayerSlots()
