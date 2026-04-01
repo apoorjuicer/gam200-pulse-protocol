@@ -15,9 +15,6 @@
 using System;
 using ScriptAPI;
 
-// ============================================
-// USE THIS FOR: MainMenu, Settings
-// ============================================
 public class GeneralBGM : Script
 {
     private bool started = false;
@@ -39,17 +36,17 @@ public class GeneralBGM : Script
             started = true;
         }
 
-        // Pause / Resume BGM based on game pause state
-        bool isPaused = Application.IsPaused(); // If your API uses another getter, swap this line
+        
+        bool isPaused = Application.IsPaused(); 
 
         if (isPaused && !wasPaused)
         {
-            audio.PauseBGM();   // If your API uses another name, replace here
+            audio.PauseBGM();
             Console.WriteLine("BGM: Paused");
         }
         else if (!isPaused && wasPaused)
         {
-            audio.ResumeBGM();  // If your API uses another name, replace here
+            audio.ResumeBGM();
             Console.WriteLine("BGM: Resumed");
         }
 
@@ -110,9 +107,145 @@ public class LevelBGM : Script
 }
 
 // ============================================
-// STATIC MANAGER - Tracks state across scenes
+// STATIC MANAGER
 // ============================================
 public static class BGMManager
 {
     public static string CurrentTrack = "";
+}
+
+public class LevelSelectBGM : Script
+{
+    
+    private static readonly System.Collections.Generic.Dictionary<string, string> s_trackMap
+        = new System.Collections.Generic.Dictionary<string, string>
+    {
+        { "Level1", "BGM_L1_TESTING" },
+        { "Level2", "BGM_L2_TESTING" },
+        // { "Level3", "BGM_L3_TESTING" },
+    };
+
+    private const float FadeDuration    = 1.5f;   // fade-in / fade-out length (seconds)
+    private const float CrossFadeDuration = 0.6f; // quick crossfade when switching levels
+    private const float PreviewDuration = 20.0f;  // seconds of full-volume play before looping
+
+    private enum State { Idle, FadingOut, FadingIn, Playing }
+
+    private State  _state           = State.Idle;
+    private float  _timer           = 0.0f;
+    private string _activeTrack     = "";
+    private string _lastSelected    = "";
+    private bool   _wasOverlayOpen  = false;
+    private bool   _restoreGeneral  = false; // true = fade-out is heading back to general BGM
+
+    public override void Update()
+    {
+        AudioComponent audio  = GetAudio();
+        bool   overlayOpen    = NavigationButtons.ShowLevelSelectOverlay;
+        string selected       = NavigationButtons.SelectedLevelScene;
+
+        bool justOpened      = overlayOpen  && !_wasOverlayOpen;
+        bool justClosed      = !overlayOpen && _wasOverlayOpen;
+        bool selectionChanged = overlayOpen && selected != _lastSelected;
+
+        _wasOverlayOpen = overlayOpen;
+
+        
+        if (justClosed)
+        {
+            _lastSelected  = "";
+            _activeTrack   = "";
+            _restoreGeneral = true;
+
+            if (_state != State.Idle)
+            {
+                audio.FadeOutMusic(FadeDuration);
+                _timer = FadeDuration;
+                _state = State.FadingOut;
+            }
+            return;
+        }
+
+        
+        if (justOpened || selectionChanged)
+        {
+            _lastSelected   = selected;
+            _restoreGeneral = false;
+
+            if (!s_trackMap.TryGetValue(selected, out string newTrack))
+            {
+               
+                if (_state != State.Idle)
+                {
+                    audio.FadeOutMusic(FadeDuration);
+                    _activeTrack = "";
+                    _timer = FadeDuration;
+                    _state = State.FadingOut;
+                }
+                return;
+            }
+
+            if (newTrack != _activeTrack)
+            {
+                _activeTrack = newTrack;
+                
+                float fadeTime = selectionChanged && !justOpened ? CrossFadeDuration : FadeDuration;
+                audio.FadeOutMusic(fadeTime);
+                _timer = fadeTime;
+                _state = State.FadingOut;
+            }
+            return;
+        }
+
+        
+        if (_state == State.Idle)
+            return;
+
+        
+        _timer -= Time.DeltaTime;
+
+        switch (_state)
+        {
+            case State.FadingOut:
+                if (_timer <= 0.0f)
+                {
+                    if (_restoreGeneral)
+                    {
+                        audio.PlayBGM("BGM_GENERAL");
+                        audio.FadeInMusic(FadeDuration);
+                        _restoreGeneral = false;
+                        _state = State.Idle;
+                    }
+                    else if (!string.IsNullOrEmpty(_activeTrack))
+                    {
+                        audio.PlayBGM(_activeTrack);
+                        audio.FadeInMusic(FadeDuration);
+                        _timer = FadeDuration;
+                        _state = State.FadingIn;
+                    }
+                    else
+                    {
+                        _state = State.Idle;
+                    }
+                }
+                break;
+
+            case State.FadingIn:
+                if (_timer <= 0.0f)
+                {
+                    _timer = PreviewDuration;
+                    _state = State.Playing;
+                }
+                break;
+
+            case State.Playing:
+                if (_timer <= 0.0f)
+                {
+                    audio.FadeOutMusic(FadeDuration);
+                    _timer = FadeDuration;
+                    _state = State.FadingOut;
+                }
+                break;
+        }
+    }
 }

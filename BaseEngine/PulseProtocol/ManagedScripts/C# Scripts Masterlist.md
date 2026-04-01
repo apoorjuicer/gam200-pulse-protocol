@@ -4,7 +4,7 @@
 |-|-|
 |AudioSliderCore.cs|Abstract base classes for draggable audio slider knobs and fill bars|
 |AudioSliderWrappers.cs|Implemented slider types: VolumeKnob/Fill, MusicKnob/Fill, SFXKnob/Fill, BrightnessKnob/Fill|
-|BGMMgr.cs|LevelBGM starts level and audio and resets the Conductor clock. GeneralBGM plays menu music|
+|BGMMgr.cs|LevelBGM starts level and audio and resets the Conductor clock. GeneralBGM plays menu music. LevelSelectBGM fades in/out level preview BGM while the level-select overlay is open|
 |ComboDisplayManager.cs|Central hub for combo visual feedback: coordinates ComboKeySlot.cs and ComboJudgmentDisplay.cs.|
 |ComboJudgementDisplay.cs|Shows PERFECT/GREAT/MISS sprites for a short duration|
 |ComboKeySlot.cs|Individual WASD key sprite slot: Shows/Hides with timer on each input|
