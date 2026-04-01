@@ -127,16 +127,8 @@ public class PlayerAnimationController : Script
     // Taking damage reverts to Idle2 (dropped guard)
     private void GoToIdle()
     {
-        // if (hasAttacked)
-        // {
-        //     SetAnimState(PlayerAnimState.Idle1);
-        //     Console.WriteLine("[PlayerAnim] -> Idle1 (armed stance)");
-        // }
-        // else
-        // {
-            SetAnimState(PlayerAnimState.Idle2);
-            Console.WriteLine("[PlayerAnim] -> Idle2 (unarmed stance)");
-        // }
+        SetAnimState(PlayerAnimState.Idle2);
+        Console.WriteLine("[PlayerAnim] -> Idle2 (unarmed stance)");
     }
 
     // =========================
@@ -167,9 +159,12 @@ public class PlayerAnimationController : Script
                 AttackFrames = 18;
                 break;
 
-            default: // imma just put this as the defualt cos idk wut else 2 put 
-                AttackSpriteSheet = "dorian_sword"; 
-                break; 
+            default: // imma just put this as the defualt cos idk wut else 2 put
+                AttackSpriteSheet = "dorian_sword";
+                AttackRows = 4;
+                AttackColumns = 5;
+                AttackFrames = 18;
+                break;
         }
 
         // Don't interrupt an ongoing attack

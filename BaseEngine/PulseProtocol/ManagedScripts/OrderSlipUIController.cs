@@ -1,7 +1,7 @@
 using System;
 using ScriptAPI;
 
-public enum EnemyIconType { None, Rat, Bat, BlueGorilla }
+public enum EnemyIconType { None, Rat, Bat, BlueGorilla, Boss }
 
 public class OrderSlipUIController : Script
 {

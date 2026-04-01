@@ -42,6 +42,10 @@ public class TurnManager : Script
     public int EnemyDisplayBeats = 4;  // with -1 backdating: 3 beats shown in switch + initial beat N = 4 enemy beats total. Transition fires on beat 4, player slot 0 fires on beat 5 (no gap).
     public int PlayerInputBeats = 5;   // with -1 backdating: beats 2-5 flash slots 0-3, beat 5 also resolves.
 
+    // Boss overrides: set by BossEnemyController to extend phases for longer combos. Cleared after each turn.
+    public static int? EnemyDisplayBeatsOverride = null;
+    public static int? PlayerInputBeatsOverride  = null;
+
     public string EnemyTurnSFX = "SFX_Enemy_Ping";
     public string PlayerTurnSFX = "SFX_Player_Ping";
 
@@ -167,7 +171,7 @@ public class TurnManager : Script
                 break;
 
             case TurnPhase.EnemyDisplay:
-                if (beatsInPhase >= EnemyDisplayBeats)
+                if (beatsInPhase >= (EnemyDisplayBeatsOverride ?? EnemyDisplayBeats))
                 {
                     ComboDisplayManager.Instance?.StartPlayerCountdownEarly();
                     StartPlayerInput(); // unlock input on the same beat
@@ -185,13 +189,13 @@ public class TurnManager : Script
                     if (beatsInPhase == 1)
                         TurnAnnouncerUI.Instance?.ShowGo();
 
-                    if (beatsInPhase >= PlayerInputBeats)
+                    if (beatsInPhase >= (PlayerInputBeatsOverride ?? PlayerInputBeats))
                     {
                         ResolvePlayerInput();
                     }
                     else
                     {
-                        Console.WriteLine($"[TurnManager] Player Input Beat {beatsInPhase + 1}/{PlayerInputBeats}");
+                        Console.WriteLine($"[TurnManager] Player Input Beat {beatsInPhase + 1}/{PlayerInputBeatsOverride ?? PlayerInputBeats}");
                     }
                     break;
                 }
@@ -223,7 +227,7 @@ public class TurnManager : Script
         }
         Instance = this;
 
-        // Full state reset — GameStart.Ready is a static bool that persists between
+        // Full state reset: GameStart.Ready is a static bool that persists between
         // play sessions. If it's stale-true, TurnManager would skip the countdown.
         // Resetting it here forces LevelCountdown to re-run its 3-2-1-GO sequence.
         GameStart.Ready = false;
@@ -232,6 +236,8 @@ public class TurnManager : Script
         lastBeat = -1;
         gameStarted = false;
         playerInputPhaseActive = false;
+        EnemyDisplayBeatsOverride = null;
+        PlayerInputBeatsOverride  = null;
         for (int i = 0; i < slotPulsed.Length; i++) slotPulsed[i] = false;
 
         // Clear ComboSystem state so lastInputBeat (from a previous session) can't
@@ -261,6 +267,9 @@ public class TurnManager : Script
     {
         currentPhase = TurnPhase.EnemyDisplay;
         phaseStartBeat = Conductor.Instance!.GetCurrentBeat() - 1;
+
+        // Return player to idle at the start of every enemy turn.
+        PlayerAnimationController.Instance?.ForceIdle();
 
         Console.WriteLine("[TurnManager] === ENEMY TURN ===");
         Console.WriteLine($"[TurnManager] Displaying combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
@@ -306,16 +315,15 @@ public class TurnManager : Script
         if (ComboDisplayManager.Instance != null)
             ComboDisplayManager.Instance.FadeOutEnemySlots();
 
-        PlayerInputBeats = 5; // 4 effective beats (phaseStartBeat is backdated by 1)
-
         // Snap playerInputStartTime to the next visual beat boundary — this is the beat
         // immediately after the enemy's last beat, so slot 0 fires with no gap.
         float beatDuration = Conductor.Instance!.SecondsPerBeat;
         float visualNow = Conductor.Instance!.GetVisualAdjustedSongTime();
         playerInputStartTime = (float)Math.Floor(visualNow / beatDuration) * beatDuration + beatDuration;
         playerInputPhaseActive = true;
-        for (int i = 0; i < slotPulsed.Length; i++) slotPulsed[i] = false;
-        for (int i = 0; i < gapSlotPulsed.Length; i++) gapSlotPulsed[i] = false;
+        int slotCount = EnemyRhythmController.Instance?.SlotOffsets?.Length ?? 4;
+        slotPulsed = new bool[slotCount];
+        gapSlotPulsed = new bool[4];
     }
 
     private void ResolvePlayerInput()
@@ -366,6 +374,10 @@ public class TurnManager : Script
             for (int i = entered; i < expected; i++)
                 ScoreManager.Instance.AddScore("MISS");
         }
+
+        // Clear boss beat overrides so normal enemies are never affected next turn
+        EnemyDisplayBeatsOverride = null;
+        PlayerInputBeatsOverride  = null;
 
         // Reset for next turn
         if (ComboSystem.Instance != null)
