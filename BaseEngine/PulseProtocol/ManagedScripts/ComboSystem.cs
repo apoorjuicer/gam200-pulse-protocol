@@ -227,9 +227,11 @@ public class ComboSystem : Script
             Console.WriteLine($"[ComboSystem] [{key}] MISS — pressed too far from beat (Δ={delta:F3}s). Slot freed.");
             ScoreManager.Instance?.AddScore("MISS");
             if (ComboDisplayManager.Instance != null)
+            {
                 ComboDisplayManager.Instance.ShowJudgement("MISS");
+                ComboDisplayManager.Instance.ShowGapMissKey(key);
+            }
             VisualBeatSystem.Instance?.FlashJudgement("MISS");
-            // Camera shake feedback for a bad press can be added here via VFXAPI.ShakeCamera / VFXAPI.SpawnParticles
             return;
         }
 
