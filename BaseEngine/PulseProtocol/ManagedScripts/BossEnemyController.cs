@@ -13,6 +13,7 @@ public class BossEnemyController : EnemyRhythmController
     // Internal Boss State
     // =========================
     private int _bossPhase = 1;   // 1 or 2
+    public static int BossPhase { get; private set; } = 0; // 0 = inactive, 1 = phase 1, 2 = phase 2
     private static readonly Random _bossRng = new Random();
 
     // Phase 1 combo pool mirrors exact values from existing enemies
@@ -75,12 +76,15 @@ public class BossEnemyController : EnemyRhythmController
         RandomizeVisualSlots = false;
 
         _bossPhase = 1;
+        BossPhase  = 1;
     }
 
     public override void TakeDamage(float dmg)
     {
         if (_bossPhase == 1)
         {
+            if (isDead) return;
+
             // Let base apply damage to the health component
             var h = GetHealth();
             int prev = h.hp;
@@ -88,9 +92,14 @@ public class BossEnemyController : EnemyRhythmController
             if (h.hp < 0) h.hp = 0;
             Console.WriteLine($"[Boss] Phase 1 took {dmg} damage! HP: {h.hp}/{prev}");
 
+            // Capture VFX position from this entity's context
+            var tf = GetTransform();
+            HitVFX.SpawnX = tf.X;
+            HitVFX.SpawnY = tf.Y;
+
             // Spawn damage indicator
-            EnemyDamageIndicator.SpawnX = GetTransform().X;
-            EnemyDamageIndicator.SpawnY = GetTransform().Y;
+            EnemyDamageIndicator.SpawnX = tf.X;
+            EnemyDamageIndicator.SpawnY = tf.Y;
             EnemyDamageIndicator.DamageText = "-" + ((int)dmg).ToString();
             Factory.Instantiate("EnemyDamageIndicator");
 
@@ -102,7 +111,7 @@ public class BossEnemyController : EnemyRhythmController
         }
         else
         {
-            // Phase 2: normal death path via base
+            // Phase 2: normal death path via base (includes pendingDeath deferral)
             base.TakeDamage(dmg);
         }
     }
@@ -111,6 +120,7 @@ public class BossEnemyController : EnemyRhythmController
     {
         Console.WriteLine("[Boss] === PHASE TRANSITION: Phase 1 -> Phase 2 ===");
         _bossPhase = 2;
+        BossPhase  = 2;
 
         // Restore HP for phase 2
         var h = GetHealth();
