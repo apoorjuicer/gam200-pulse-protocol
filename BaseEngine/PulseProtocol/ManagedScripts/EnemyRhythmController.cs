@@ -16,6 +16,7 @@ public class EnemyRhythmController : Script
     public string WalkSpriteSheet   = "rat_walk";
     public string AttackSpriteSheet = "rat_attack";
     public string HurtSpriteSheet   = "rat_hurt";
+    public string DeathSpriteSheet  = "rat_death";
 
     public int IdleFrames = 15;
     public int IdleColumns = 4;
@@ -32,6 +33,10 @@ public class EnemyRhythmController : Script
     public int HurtFrames = 15;
     public int HurtColumns = 4;
     public int HurtRows = 4;
+
+    public int DeathFrames = 15;
+    public int DeathColumns = 4;
+    public int DeathRows = 4;
 
     public float AnimationSpeed = 12f;
     public float SizeMultiplier = 2.0f;
@@ -171,7 +176,7 @@ public class EnemyRhythmController : Script
             if (waitingToDie)
             {
                 deathTimer += Time.DeltaTime;
-                if (deathTimer >= 2.5f)
+                if (deathTimer >= DeathFrames / AnimationSpeed)
                 {
                     TransformComponent tf = GetTransform();
                     tf.IsVisible = false;
@@ -431,7 +436,7 @@ public class EnemyRhythmController : Script
                 anim.SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, AnimationSpeed);
                 break;
             case EnemyState.Dead:
-                anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, AnimationSpeed);
+                anim.SetAnimation(DeathSpriteSheet, DeathRows, DeathColumns, DeathFrames, AnimationSpeed);
                 break;
         }
     }
@@ -716,7 +721,12 @@ public class Gorilla: EnemyRhythmController
         HurtFrames = 15;
         HurtColumns = 4;
         HurtRows = 4;
-        
+
+        DeathSpriteSheet = "gorilla_death";
+        DeathFrames = 15;
+        DeathColumns = 4;
+        DeathRows = 4;
+
         AnimationSpeed = 12f;
         SizeMultiplier = 5.0f;
 
@@ -760,6 +770,11 @@ public class BlueGorilla : EnemyRhythmController
         HurtColumns = 4;
         HurtRows = 4;
 
+        DeathSpriteSheet = "gorilla_death";
+        DeathFrames = 15;
+        DeathColumns = 4;
+        DeathRows = 4;
+
         AnimationSpeed = 12f;
         SizeMultiplier = 5.0f;
 
@@ -801,6 +816,11 @@ public class Bat: EnemyRhythmController
         HurtFrames = 15;
         HurtColumns = 4;
         HurtRows = 4;
+
+        DeathSpriteSheet = "bat_death";
+        DeathFrames = 15;
+        DeathColumns = 4;
+        DeathRows = 4;
 
         AnimationSpeed = 12f;
         SizeMultiplier = 2.0f;
