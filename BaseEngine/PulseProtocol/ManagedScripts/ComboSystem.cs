@@ -341,6 +341,9 @@ public class ComboSystem : Script
         {
             Console.WriteLine("[ComboSystem] ✅ COMBO SUCCESS!");
             PlayerDidSuccessfulCombo = true;
+            // Fire SFX immediately here — InputBridge's audio component is persistent
+            // (not tied to the enemy entity), so this works even after the enemy dies.
+            InputBridge.Instance?.PlayEstablishSFX();
         }
         else
         {

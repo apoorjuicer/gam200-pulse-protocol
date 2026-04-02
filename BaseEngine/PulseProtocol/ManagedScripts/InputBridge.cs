@@ -25,6 +25,11 @@ public class InputBridge : Script
 
 
     // =========================
+    // Global Access (Singleton)
+    // =========================
+    public static InputBridge? Instance { get; private set; }
+
+    // =========================
     // State
     // =========================
     private bool initialized = false;
@@ -90,6 +95,7 @@ public class InputBridge : Script
     // =========================
     private void Initialize()
     {
+        Instance = this;
         Console.WriteLine("[InputBridge] ===== INITIALIZED =====");
         Console.WriteLine("[InputBridge] Using C# edge detection (IsKeyPressed + prev state)");
         Console.WriteLine("[InputBridge] TurnManager lock is ACTIVE");
@@ -129,7 +135,8 @@ public class InputBridge : Script
         {
             if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
             {
-                audio.PlaySFX("SFX_ComboEstablished_1");
+                // SFX_ComboEstablished_1 is played immediately inside ComboSystem.EvaluateCombo()
+                // via InputBridge.Instance to avoid the entity-update-order race condition.
                 float playerDamage = PlayerHealth.Instance != null ? PlayerHealth.Instance.GetHealth().damage : 10;
                 EnemyRhythmController.Instance?.TakeDamage(playerDamage);
                 PlayerAnimationController.Instance?.PlayAttack(ComboSystem.Instance.GetExpectedCombo());
@@ -140,6 +147,19 @@ public class InputBridge : Script
                 breakSfxPlayed = true;
             }
         }
+    }
+
+    // Called by ComboSystem immediately when combo is confirmed correct —
+    // uses InputBridge's audio component (persistent, not enemy-tied).
+    public void PlayEstablishSFX()
+    {
+        GetAudio().PlaySFX("SFX_ComboEstablished_1");
+    }
+
+    public void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 
     // =========================
