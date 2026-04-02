@@ -30,21 +30,33 @@ public class Conductor : Script
         return 60.0f / BPM;
     }
 
-    // default vals calibrated for my com but
-    // LatencyCalibrator will override this thing AFTER test so every new Conductor instance reads it on init.
+    // The audio latency offset measured by LatencyCalibrator (tap-to-beat test).
+    // Accounts for the delay between when FMOD reports an audio position and when the sound
+    // actually reaches the player's ears (hardware output buffer, speaker/headphone lag, etc.).
+    // LatencyCalibrator overwrites this after the test so every new Conductor instance reads
+    // the player's measured value on init. Default is a rough estimate for a typical setup.
     public static float CalibratedOffset = 0.125f;
 
-    // Set by VisualLatencyCalibrator — how many seconds to pre-fire visuals to compensate for display pipeline lag.
+    // The visual latency offset measured by VisualLatencyCalibrator (flash-reaction test).
+    // Accounts for the delay between when a frame is submitted and when the player sees it
+    // (GPU pipeline, VSync frame-hold, monitor response time, etc.).
+    // Overwrites CalibratedDisplayOffset so visuals are pre-fired early enough to appear on-beat.
     public static float CalibratedDisplayOffset = 0.05f;
 
-    // Compensates for FMOD output buffer lag (~90ms hardware delay).
+    // Per-instance copy of CalibratedOffset, applied each frame to songTime.
+    // Shifts the beat clock backward so the beat fires in sync with what the player hears,
+    // compensating for FMOD output buffer lag (~90 ms on typical hardware).
     public float MusicLatencyOffset = 0.125f;
 
-    // Compensates for how many seconds the display pipeline delays rendered frames.
-    // Positive = pre-fire visuals earlier to compensate for a slow monitor / VSync frame-hold.
+    // Per-instance copy of CalibratedDisplayOffset, applied only to visual queries
+    // (GetVisualCurrentBeat / GetVisualAdjustedSongTime).
+    // Positive value = pre-fire visuals earlier to compensate for a slow monitor / VSync frame-hold.
+    // Does NOT affect the gameplay beat clock — only what visual systems see.
     public float DisplayLatencyOffset = 0f;
 
-    // Compensates for where beat 1 actually starts in the BGM audio file.
+    // Per-song phase correction: how many seconds into the audio file beat 1 actually starts.
+    // Set to 0.024s because the BGM audio file has ~24 ms of silence / lead-in before the
+    // first beat hits. Subtract this so beat 0 lines up with the true musical downbeat.
     public float BeatStartOffset = 0.024f;
 
     public override void Update()
