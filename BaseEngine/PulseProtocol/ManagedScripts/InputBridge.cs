@@ -135,8 +135,7 @@ public class InputBridge : Script
         {
             if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
             {
-                // SFX_ComboEstablished_1 is played immediately inside ComboSystem.EvaluateCombo()
-                // via InputBridge.Instance to avoid the entity-update-order race condition.
+                audio.PlaySFX("SFX_ComboEstablished_1");
                 float playerDamage = PlayerHealth.Instance != null ? PlayerHealth.Instance.GetHealth().damage : 10;
                 EnemyRhythmController.Instance?.TakeDamage(playerDamage);
                 PlayerAnimationController.Instance?.PlayAttack(ComboSystem.Instance.GetExpectedCombo());
@@ -147,13 +146,6 @@ public class InputBridge : Script
                 breakSfxPlayed = true;
             }
         }
-    }
-
-    // Called by ComboSystem immediately when combo is confirmed correct —
-    // uses InputBridge's audio component (persistent, not enemy-tied).
-    public void PlayEstablishSFX()
-    {
-        GetAudio().PlaySFX("SFX_ComboEstablished_1");
     }
 
     public void OnDestroy()

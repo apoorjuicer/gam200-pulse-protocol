@@ -33,6 +33,13 @@
                             "g": 0.0,
                             "b": 0.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -67,12 +74,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -680.0790405273438,
-                            "y": 11.5384521484375
+                            "x": -701.98681640625,
+                            "y": -40.769290924072266
                         },
                         "scale": {
-                            "x": 1078.0,
-                            "y": 646.0
+                            "x": 894.739990234375,
+                            "y": 639.5399780273438
                         },
                         "rotation": {
                             "x": 0.0,
@@ -94,6 +101,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -135,18 +149,18 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 715.676513671875,
-                            "y": 11.0
+                            "x": 876.4763793945313,
+                            "y": 7.307760238647461
                         },
                         "scale": {
-                            "x": 1078.0,
-                            "y": 646.0
+                            "x": 877.4488525390625,
+                            "y": 542.2265625
                         },
                         "rotation": {
-                            "x": 0.0,
+                            "x": 3.2360000610351563,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -162,6 +176,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -203,18 +224,18 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -3609.8310546875,
-                            "y": -300.0
+                            "x": -799.4911499023438,
+                            "y": -240.84024047851563
                         },
                         "scale": {
-                            "x": 1078.0,
-                            "y": 646.0
+                            "x": 967.378662109375,
+                            "y": 615.2272338867188
                         },
                         "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -230,6 +251,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -271,18 +299,18 @@
                 {
                     "transform": {
                         "position": {
-                            "x": 3390.31787109375,
-                            "y": -300.0
+                            "x": 1019.4266357421875,
+                            "y": 242.23202514648438
                         },
                         "scale": {
-                            "x": 1078.0,
-                            "y": 646.0
+                            "x": 859.89892578125,
+                            "y": 645.10400390625
                         },
                         "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -298,6 +326,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -339,12 +374,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -4160.0,
-                            "y": 300.0
+                            "x": -667.850341796875,
+                            "y": 244.41534423828125
                         },
                         "scale": {
-                            "x": 1078.0,
-                            "y": 646.0
+                            "x": 930.6373901367188,
+                            "y": 588.59228515625
                         },
                         "rotation": {
                             "x": 0.0,
@@ -366,6 +401,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -407,15 +449,15 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -4201.53857421875,
-                            "y": 300.0
+                            "x": 681.509765625,
+                            "y": -156.3020477294922
                         },
                         "scale": {
-                            "x": 1078.0,
-                            "y": 646.0
+                            "x": 925.9968872070313,
+                            "y": 650.062255859375
                         },
                         "rotation": {
-                            "x": 0.0,
+                            "x": 2.9835562705993652,
                             "y": 0.0
                         },
                         "isVisible": true,
@@ -434,6 +476,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -475,12 +524,12 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -4238.46142578125,
-                            "y": 300.0
+                            "x": -741.4871826171875,
+                            "y": -339.09381103515625
                         },
                         "scale": {
-                            "x": 1078.0,
-                            "y": 646.0
+                            "x": 847.7435302734375,
+                            "y": 498.2251892089844
                         },
                         "rotation": {
                             "x": 0.0,
@@ -502,6 +551,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -543,15 +599,15 @@
                 {
                     "transform": {
                         "position": {
-                            "x": -3800.0,
-                            "y": 300.0
+                            "x": 821.8221435546875,
+                            "y": 400.5654296875
                         },
                         "scale": {
-                            "x": 1078.0,
-                            "y": 646.0
+                            "x": 761.3104858398438,
+                            "y": 524.1397094726563
                         },
                         "rotation": {
-                            "x": 0.0,
+                            "x": 0.45899999141693115,
                             "y": 0.0
                         },
                         "isVisible": true,
@@ -570,6 +626,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -638,6 +701,13 @@
                             "g": 1.0,
                             "b": 1.0,
                             "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
                         }
                     }
                 },
@@ -653,7 +723,9 @@
                 },
                 {
                     "script": {
-                        "ScriptName": [ "CutsceneSkipHint" ]
+                        "ScriptName": [
+                            "CutsceneSkipHint"
+                        ]
                     }
                 },
                 {
@@ -674,9 +746,16 @@
                     "TextComponent": {
                         "text": "Press SPACE to skip",
                         "font_id": "barlow_semibold_font",
-                        "offset": { "x": 0.0, "y": 0.0 },
+                        "offset": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
                         "font_size": 28.0,
-                        "color": [ 1.0, 1.0, 1.0 ],
+                        "color": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
                         "visible": true,
                         "alignment": 1
                     }
@@ -687,9 +766,18 @@
             "components": [
                 {
                     "transform": {
-                        "position": { "x": 0.0, "y": 680.0 },
-                        "scale": { "x": 200.0, "y": 200.0 },
-                        "rotation": { "x": 0.0, "y": 0.0 },
+                        "position": {
+                            "x": 0.0,
+                            "y": 680.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -697,37 +785,70 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0, "shd_ref": 0.0, "useTexture": false,
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": false,
                         "spriteName": "",
-                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
-                        "glow": { "enabled": false, "intensity": 1.0, "r": 1.0, "g": 1.0, "b": 1.0 }
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
                     }
                 },
                 {
                     "animation": {
-                        "currentFrame": 0, "elapsedTime": 0.0,
-                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 1.0
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 1.0
                     }
                 },
                 {
-                    "script": { "ScriptName": [ "ControllerNotification" ] }
+                    "script": {
+                        "ScriptName": [
+                            "ControllerNotification"
+                        ]
+                    }
                 },
                 {
-                    "name": { "name": "ControllerNotificationText" }
+                    "name": {
+                        "name": "ControllerNotificationText"
+                    }
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI", "mask": 4,
-                        "sortingLayer": 2, "orderInLayer": 100, "z": 0.0
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 100,
+                        "z": 0.0
                     }
                 },
                 {
                     "TextComponent": {
                         "text": "",
                         "font_id": "barlow_semibold_font",
-                        "offset": { "x": 0.0, "y": 0.0 },
+                        "offset": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
                         "font_size": 40.0,
-                        "color": [ 1.0, 1.0, 1.0 ],
+                        "color": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
                         "visible": false,
                         "alignment": 1
                     }

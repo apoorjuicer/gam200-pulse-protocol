@@ -479,6 +479,12 @@ public class ComboDisplayManager : Script
         }
     }
 
+    public void HideAllSlots()
+    {
+        ClearEnemySlotsInstant();
+        ClearPlayerSlots();
+    }
+
     private void ClearPlayerSlots()
     {
         if (DebugLogging) Console.WriteLine("[ComboDisplayManager] Clearing player slots");

@@ -636,6 +636,8 @@ public class EnemyRhythmController : Script
         deathNotified = false;
         SetState(EnemyState.Dead);
 
+        ComboDisplayManager.Instance?.HideAllSlots();
+
 
         Console.WriteLine("[Enemy] DEFEATED!");
         Console.WriteLine("==============================================");
