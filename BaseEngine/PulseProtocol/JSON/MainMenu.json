@@ -740,7 +740,7 @@
                             0.912053108215332,
                             1.0
                         ],
-                        "visible": true,
+                        "visible": false,
                         "alignment": 0
                     }
                 }
@@ -2381,7 +2381,7 @@
                 {
                     "audiosource": {
                         "audio_id": "BGM_GENERAL",
-                        "volume": 0.5,
+                        "volume": 0.800000011920929,
                         "loop": true,
                         "playOnAwake": false
                     }
@@ -2392,9 +2392,18 @@
             "components": [
                 {
                     "transform": {
-                        "position": { "x": 0.0, "y": 0.0 },
-                        "scale": { "x": 1.0, "y": 1.0 },
-                        "rotation": { "x": 0.0, "y": 0.0 },
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 1.0,
+                            "y": 1.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
                         "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -2424,7 +2433,7 @@
                 {
                     "audiosource": {
                         "audio_id": "BGM_L1_TESTING",
-                        "volume": 0.9,
+                        "volume": 0.8999999761581421,
                         "loop": true,
                         "playOnAwake": false
                     }
@@ -3550,9 +3559,18 @@
             "components": [
                 {
                     "transform": {
-                        "position": { "x": 0.0, "y": 680.0 },
-                        "scale": { "x": 200.0, "y": 200.0 },
-                        "rotation": { "x": 0.0, "y": 0.0 },
+                        "position": {
+                            "x": 0.0,
+                            "y": 680.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
                         "isVisible": true,
                         "visibilityTimer": 0.0,
                         "autoHide": false
@@ -3560,37 +3578,70 @@
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0, "shd_ref": 0.0, "useTexture": false,
+                        "mdl_ref": 0.0,
+                        "shd_ref": 0.0,
+                        "useTexture": false,
                         "spriteName": "",
-                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
-                        "glow": { "enabled": false, "intensity": 1.0, "r": 1.0, "g": 1.0, "b": 1.0 }
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
                     }
                 },
                 {
                     "animation": {
-                        "currentFrame": 0, "elapsedTime": 0.0,
-                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 1.0
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 1.0
                     }
                 },
                 {
-                    "script": { "ScriptName": [ "ControllerNotification" ] }
+                    "script": {
+                        "ScriptName": [
+                            "ControllerNotification"
+                        ]
+                    }
                 },
                 {
-                    "name": { "name": "ControllerNotificationText" }
+                    "name": {
+                        "name": "ControllerNotificationText"
+                    }
                 },
                 {
                     "layerTag": {
-                        "layerName": "UI", "mask": 4,
-                        "sortingLayer": 2, "orderInLayer": 100, "z": 0.0
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 100,
+                        "z": 0.0
                     }
                 },
                 {
                     "TextComponent": {
                         "text": "",
                         "font_id": "barlow_semibold_font",
-                        "offset": { "x": 0.0, "y": 0.0 },
+                        "offset": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
                         "font_size": 40.0,
-                        "color": [ 1.0, 1.0, 1.0 ],
+                        "color": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
                         "visible": false,
                         "alignment": 1
                     }
