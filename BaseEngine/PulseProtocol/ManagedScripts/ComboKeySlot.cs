@@ -707,10 +707,10 @@ public class ComboKeySlot : Script
         {
             switch (key)
             {
-                case 'W': return GreenTriSprite;
-                case 'A': return GreenOSprite;
-                case 'S': return GreenXSprite_Controller;
-                case 'D': return GreenSqSprite;
+                case 'W': return RedTriSprite;
+                case 'A': return RedOSprite;
+                case 'S': return RedXSprite_Controller;
+                case 'D': return RedSqSprite;
                 default: return RedTriSprite;
             }
         }
