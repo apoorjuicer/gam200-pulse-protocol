@@ -613,6 +613,7 @@ public class NavigationButtons : Script
             // All other menus use Up/Down. Left/Right is reserved for slider value adjustment.
             bool _noSliderOrDropdown = !AudioSliderKnobBase.IsAnySliderFocused && !DropdownState.IsDropdownFocused;
             bool _useHorizontalNav = ShowQuitOverlay
+                                     || ShowNewGameResetOverlay
                                      || ShowPauseOverlay
                                      || stageClearPaused
                                      || realScene == "LatencyCalibration"

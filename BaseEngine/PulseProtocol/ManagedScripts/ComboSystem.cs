@@ -341,6 +341,7 @@ public class ComboSystem : Script
         {
             Console.WriteLine("[ComboSystem] ✅ COMBO SUCCESS!");
             PlayerDidSuccessfulCombo = true;
+            GetInput().RumbleGamepad(1.0f, 1.0f, 0.3f);
         }
         else
         {
