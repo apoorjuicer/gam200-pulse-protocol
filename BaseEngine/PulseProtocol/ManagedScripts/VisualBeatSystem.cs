@@ -40,13 +40,23 @@ public class VisualBeatSystem : Script
     {
         Instance = this;
 
+        TransformComponent t = GetTransform();
+        SpriteComponent s = GetSprite();
+
+        // During stage clear, keep border fully hidden and stop beat animation.
+        if (StageClearElement.IsCleared)
+        {
+            t.IsVisible = false;
+            return;
+        }
+
+        if (!t.IsVisible)
+            t.IsVisible = true;
+
         if (Conductor.Instance == null) return;
 
         float spb = Conductor.Instance!.SecondsPerBeat;
         if (spb <= 0.0001f) return;
-
-        TransformComponent t = GetTransform();
-        SpriteComponent s = GetSprite();
 
         // Cache initial scale once
         if (!_cachedBaseScale)

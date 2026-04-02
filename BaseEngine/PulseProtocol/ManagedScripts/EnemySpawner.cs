@@ -104,6 +104,9 @@ public class EnemySpawner : Script
             return;
         }
 
+        if (StageClearElement.IsCleared)
+            return;
+
         // UI init after a few frames
         framesSinceStart++;
         if (!uiInitialized && framesSinceStart >= WAIT_FRAMES)
