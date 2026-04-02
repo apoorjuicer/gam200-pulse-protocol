@@ -13,7 +13,7 @@ public class ControllerNotification : Script
     {
         var   input = GetInput();
         var   text  = GetTextComponent();
-        float dt    = Time.DeltaTime;
+        float dt    = Time.DeltaTime > 0f ? Time.DeltaTime : 0.016f; // count down even while paused
 
         bool connected = input.IsGamepadConnected;
 
