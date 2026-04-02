@@ -19,10 +19,10 @@ public class VisualLatencyCalibrator : Script
     private const int KeyEnter = 257;
     private const int KeySpace = 32;
 
-    // Gamepad button constants
-    private const int GP_SQUARE = 2;  // confirm / start  (GLFW: Cross=0, Circle=1, Square=2, Triangle=3)
-    private const int GP_R1     = 5;  // flash earlier    (GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER)
-    private const int GP_L1     = 4;  // flash later      (GLFW_GAMEPAD_BUTTON_LEFT_BUMPER)
+    // Gamepad button constants — see InputConstants.cs
+    private const int GP_SQUARE = InputConstants.GP_SQUARE;  // confirm / start
+    private const int GP_R1     = InputConstants.GP_R1;      // flash earlier
+    private const int GP_L1     = InputConstants.GP_L1;      // flash later
 
     // -------------------------------------------------------------------------
     // Internal state

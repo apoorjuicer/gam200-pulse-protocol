@@ -66,12 +66,12 @@ public class DropdownToggle : Script
     private float baseScaleX;
     private float baseScaleY;
 
-    private const int GP_CROSS      = 0;
-    private const int GP_CIRCLE     = 1;
-    private const int GP_DPAD_UP    = 11;
-    private const int GP_DPAD_RIGHT = 12;
-    private const int GP_DPAD_DOWN  = 13;
-    private const int GP_DPAD_LEFT  = 14;
+    private const int GP_CROSS      = InputConstants.GP_CROSS;
+    private const int GP_CIRCLE     = InputConstants.GP_CIRCLE;
+    private const int GP_DPAD_UP    = InputConstants.GP_DPAD_UP;
+    private const int GP_DPAD_RIGHT = InputConstants.GP_DPAD_RIGHT;
+    private const int GP_DPAD_DOWN  = InputConstants.GP_DPAD_DOWN;
+    private const int GP_DPAD_LEFT  = InputConstants.GP_DPAD_LEFT;
 
     // Scale multiplier applied to the header sprite when it has gamepad focus.
     public float FocusScaleBoost = 1.15f;
