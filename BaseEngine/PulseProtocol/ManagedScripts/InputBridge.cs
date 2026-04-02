@@ -33,6 +33,8 @@ public class InputBridge : Script
     private bool prevS = false;
     private bool prevD = false;
     private bool prevInvalidKeyDown = false;
+    private bool wasInputLocked = true;  // tracks lock state to detect player-turn start
+    private bool breakSfxPlayed = false; // ensures break SFX only fires once per turn
 
     // =========================
     // Update Loop
@@ -47,7 +49,14 @@ public class InputBridge : Script
 
         if (!DebugBypassTurnLock)
         {
-            if (TurnManager.Instance == null || TurnManager.Instance.IsInputLocked)
+            bool isLocked = TurnManager.Instance == null || TurnManager.Instance.IsInputLocked;
+
+            // Detect the moment the player turn starts (locked → unlocked) to reset per-turn state
+            if (wasInputLocked && !isLocked)
+                breakSfxPlayed = false;
+            wasInputLocked = isLocked;
+
+            if (isLocked)
             {
                 prevW = input.IsKeyPressed(KeyW);
                 prevA = input.IsKeyPressed(KeyA);
@@ -106,50 +115,35 @@ public class InputBridge : Script
     // =========================
     private void OnKeyPressed(char key)
     {
-        string phase = TurnManager.Instance != null ? TurnManager.Instance.GetCurrentPhase().ToString() : "NO_TM";
-        int beat = Conductor.Instance != null ? Conductor.Instance.GetCurrentBeat() : -1;
-        int progress = ComboSystem.Instance != null ? ComboSystem.Instance.GetComboProgress() : -1;
-        int expectedLen = ComboSystem.Instance?.GetExpectedCombo()?.Length ?? -1;
+        if (ComboSystem.Instance == null) return;
 
-        // Console.WriteLine($"[InputBridge] Key {key} pressed! (Phase={phase}, Beat={beat}, ComboProgress={progress}/{expectedLen})");
+        AudioComponent audio = GetAudio();
 
-        if (ComboSystem.Instance != null)
+        // Register input first so we know the outcome before deciding SFX
+        ComboSystem.Instance.RegisterInput(key);
+
+        if (ComboSystem.Instance.HasCompletedCombo())
         {
-            // Check if key is correct BEFORE registering
-            string expected = ComboSystem.Instance.GetExpectedCombo();
-            int currentProgress = ComboSystem.Instance.GetComboProgress();
-            bool isCorrect = currentProgress < expected.Length &&
-                             key == expected[currentProgress];
-
-            // Play correct or wrong SFX depending on the key pressed
-            AudioComponent audio = GetAudio();
-            audio.PlaySFX(isCorrect ? "SFX_W_Key" : "SFX_Invalid_Key"); // the SFX_W_Key is just placeholder for now; will replace once have a SFX for correct key input
-
-            // Forward to ComboSystem
-            ComboSystem.Instance.RegisterInput(key);
-
-            if (ComboSystem.Instance.HasCompletedCombo())
+            if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
             {
-                // Console.WriteLine("[InputBridge] Combo sequence complete!");
-                if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
-                {
-                    // Console.WriteLine("[InputBridge] SUCCESS! Applying damage immediately.");
-                    float playerDamage = PlayerHealth.Instance != null ? PlayerHealth.Instance.GetHealth().damage : 10;
-                    EnemyRhythmController.Instance?.TakeDamage(playerDamage);
-
-                    // argument is the enemies own weakness combo that was made at enemyrhythmcontroller.cs
-                    PlayerAnimationController.Instance?.PlayAttack(ComboSystem.Instance.GetExpectedCombo());  
-                }
-                // else
-                // {
-                //     Console.WriteLine("[InputBridge] FAILED!");
-                // }
+                audio.PlaySFX("SFX_ComboEstablished_1");
+                float playerDamage = PlayerHealth.Instance != null ? PlayerHealth.Instance.GetHealth().damage : 10;
+                EnemyRhythmController.Instance?.TakeDamage(playerDamage);
+                PlayerAnimationController.Instance?.PlayAttack(ComboSystem.Instance.GetExpectedCombo());
+            }
+            else if (!breakSfxPlayed)
+            {
+                // Play immediately on the beat the combo breaks — flag prevents replaying
+                // on subsequent key presses this turn. TurnManager handles the no-input case.
+                audio.PlaySFX("SFX_ComboStreakBroken");
+                breakSfxPlayed = true;
             }
         }
-        // else
-        // {
-        //     Console.WriteLine("[InputBridge] WARNING: ComboSystem.Instance is null!");
-        // }
+        else
+        {
+            // Combo still in progress — key was accepted, play per-key SFX
+            audio.PlaySFX("SFX_W_Key");
+        }
     }
 
     // =========================

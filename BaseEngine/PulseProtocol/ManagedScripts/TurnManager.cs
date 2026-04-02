@@ -58,6 +58,7 @@ public class TurnManager : Script
     private bool initialized = false;
     private bool gameStarted = false;
     private bool prevGameReady = false; // used to detect new play sessions on reused script objects
+    private bool resolutionPending = false; // deferred one frame so InputBridge can process last-beat input
 
     // Time-based player slot pulses (mirrors SlotOffsets, runs every frame)
     private bool playerInputPhaseActive = false;
@@ -95,6 +96,16 @@ public class TurnManager : Script
             return;
 
         int currentBeat = Conductor.Instance!.GetCurrentBeat();
+
+        // Deferred resolution: fired the frame AFTER the resolution beat so that
+        // InputBridge has one frame to process any key pressed on the same frame
+        // the beat fired, regardless of entity update order.
+        if (resolutionPending)
+        {
+            resolutionPending = false;
+            ResolvePlayerInput();
+            return;
+        }
 
         // Time-based player slot pulses — must run every frame, not just on beats
         if (playerInputPhaseActive && GameStart.Ready)
@@ -191,7 +202,8 @@ public class TurnManager : Script
 
                     if (beatsInPhase >= (PlayerInputBeatsOverride ?? PlayerInputBeats))
                     {
-                        ResolvePlayerInput();
+                        // Defer one frame so InputBridge can process any key on this beat first.
+                        resolutionPending = true;
                     }
                     else
                     {
@@ -236,6 +248,7 @@ public class TurnManager : Script
         lastBeat = -1;
         gameStarted = false;
         playerInputPhaseActive = false;
+        resolutionPending = false;
         EnemyDisplayBeatsOverride = null;
         PlayerInputBeatsOverride  = null;
         for (int i = 0; i < slotPulsed.Length; i++) slotPulsed[i] = false;
@@ -304,6 +317,7 @@ public class TurnManager : Script
         phaseStartBeat = Conductor.Instance!.GetCurrentBeat() - 1;
 
         ComboSystem.Instance?.ResetCombo();
+        resolutionPending = false;
 
         Console.WriteLine("[TurnManager] === PLAYER TURN ===");
         Console.WriteLine($"[TurnManager] Input the combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
@@ -354,9 +368,15 @@ public class TurnManager : Script
             Console.WriteLine("[TurnManager] ? Player failed!");
             Console.WriteLine("[TurnManager] Enemy attacks and moves remaining steps!");
 
-            // // PLAY FAILURE SOUND
-            // AudioComponent audio = GetAudio();
-            // audio.PlaySFX("SFX_ComboStreakBroken");  // Failure sound!
+            // Only play break SFX here if InputBridge never played it already.
+            // InputBridge plays it immediately when a wrong key / MISS fires (comboCompleted = true).
+            // If comboCompleted is still false, the player pressed nothing or pressed partially
+            // without triggering an early fail — play it here instead.
+            if (ComboSystem.Instance == null || !ComboSystem.Instance.HasCompletedCombo())
+            {
+                AudioComponent audio = GetAudio();
+                audio.PlaySFX("SFX_ComboStreakBroken");
+            }
 
 
             // Enemy executes punishment

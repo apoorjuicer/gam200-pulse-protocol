@@ -228,7 +228,7 @@ public class ComboSystem : Script
         
         if (judgement == "MISS")
         {
-            Console.WriteLine($"[ComboSystem] [{key}] MISS — pressed too far from beat (Δ={delta:F3}s). Slot freed.");
+            Console.WriteLine($"[ComboSystem] [{key}] MISS — pressed too far from beat (Δ={delta:F3}s). Combo failed.");
             ScoreManager.Instance?.AddScore("MISS");
             if (ComboDisplayManager.Instance != null)
             {
@@ -236,6 +236,8 @@ public class ComboSystem : Script
                 ComboDisplayManager.Instance.ShowGapMissKey(key);
             }
             VisualBeatSystem.Instance?.FlashJudgement("MISS");
+            PlayerDidSuccessfulCombo = false;
+            comboCompleted = true;
             return;
         }
 
@@ -243,17 +245,28 @@ public class ComboSystem : Script
         hitResults.Add(judgement);
         currentCombo.Add(key);
 
-        // === VISUAL FEEDBACK ===
-        // If the key is wrong, always show MISS visually regardless of timing, if not might mess up w the timing
+        // === WRONG KEY CHECK ===
+        // Wrong key = immediate combo fail, no matter the timing
         string visualJudgement = judgement;
         if (currentCombo.Count <= currentEnemyWeakness.Length)
         {
             char expectedKey = currentEnemyWeakness[currentCombo.Count - 1];
             if (key != expectedKey)
+            {
                 visualJudgement = "MISS";
+                Console.WriteLine($"[ComboSystem] [{key}] MISS — wrong key (expected '{expectedKey}'). Combo failed.");
+                ScoreManager.Instance?.AddScore("MISS");
+                if (ComboDisplayManager.Instance != null)
+                {
+                    ComboDisplayManager.Instance.ShowJudgement("MISS");
+                }
+                VisualBeatSystem.Instance?.FlashJudgement("MISS");
+                PlayerDidSuccessfulCombo = false;
+                comboCompleted = true;
+                return;
+            }
         }
 
-        // miss combo resets
         ScoreManager.Instance?.AddScore(visualJudgement);
 
         Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s from slot {slotIndex} expected time)");

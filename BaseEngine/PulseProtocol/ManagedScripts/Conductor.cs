@@ -35,13 +35,13 @@ public class Conductor : Script
     // actually reaches the player's ears (hardware output buffer, speaker/headphone lag, etc.).
     // LatencyCalibrator overwrites this after the test so every new Conductor instance reads
     // the player's measured value on init. Default is a rough estimate for a typical setup.
-    public static float CalibratedOffset = 0.125f;
+    public static float CalibratedOffset = 0.08f;
 
     // The visual latency offset measured by VisualLatencyCalibrator (flash-reaction test).
     // Accounts for the delay between when a frame is submitted and when the player sees it
     // (GPU pipeline, VSync frame-hold, monitor response time, etc.).
     // Overwrites CalibratedDisplayOffset so visuals are pre-fired early enough to appear on-beat.
-    public static float CalibratedDisplayOffset = 0.05f;
+    public static float CalibratedDisplayOffset = 0.0f;
 
     // Per-instance copy of CalibratedOffset, applied each frame to songTime.
     // Shifts the beat clock backward so the beat fires in sync with what the player hears,
