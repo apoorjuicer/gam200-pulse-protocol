@@ -30,9 +30,9 @@
         },
         {
             "id": "BGM_GENERAL",
-            "path": "Assets/Sound/BG & Ambience/TEMP_Menu_Demo_V1.mp3",
+            "path": "Assets/Sound/BG & Ambience/BGM_General.mp3",
             "loop": true,
-            "volume": 0.147,
+            "volume": 0.2,
             "audiotype": "BGM"
         },
         {
@@ -116,14 +116,14 @@
             "id": "SFX_Button_Hover",
             "path": "Assets/Sound/UI/SFX_Button_Hover.mp3",
             "loop": false,
-            "volume": 0.244,
+            "volume": 0.8,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_Button_Select",
             "path": "Assets/Sound/UI/SFX_Button_Select.mp3",
             "loop": false,
-            "volume": 0.256,
+            "volume": 0.8,
             "audiotype": "SFX"
         },
         {
