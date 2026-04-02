@@ -45,7 +45,11 @@ public class VisualLatencyCalibrator : Script
     public override void Update()
     {
         Instance = this;
-        if (done) return;
+        if (done)
+        {
+            NavigationButtons.ReturnToSettingsAfterCalibration();
+            return;
+        }
 
         if (!audioMixApplied)
         {
@@ -181,7 +185,7 @@ public class VisualLatencyCalibrator : Script
             Conductor.Instance.DisplayLatencyOffset = Conductor.CalibratedDisplayOffset;
 
         Console.WriteLine("[VisualLatencyCalibrator] Skipped — keeping existing DisplayLatencyOffset.");
-        Scene.LoadScene(NextScene);
+        NavigationButtons.ReturnToSettingsAfterCalibration();
     }
 
     // Read-only access for UI scripts

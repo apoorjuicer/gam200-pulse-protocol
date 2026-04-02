@@ -713,6 +713,22 @@
             "shd_ref": 3
         },
         {
+            "id": "calibration_btn",
+            "path": "Assets/Textures/UI/calibration.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "calibration_btn_hover",
+            "path": "Assets/Textures/UI/calibration_hover.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
             "id": "windowed_TEXT",
             "path": "Assets/Textures/UI/Settings/windowed_.png",
             "vert_shader_path": "shader/font_vs.vert",
@@ -1304,7 +1320,7 @@
         },
         {
             "id": "bat_attack_vfx",
-            "path": "Assets/Textures/VFX/Sword_Slash_VFX_1099x392.png",
+            "path": "Assets/Textures/VFX/bat_attack_vfx.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,

@@ -140,12 +140,6 @@ public class PlayerAnimationController : Script
         // update as we continue with more combo ig.
         switch (combo.Length)
         {
-            case 2: 
-                AttackSpriteSheet = "dorian_gun";   //bat
-                AttackRows = 5;
-                AttackColumns = 6;
-                AttackFrames = 29;
-                break;
             case 3: 
                 AttackSpriteSheet = "dorian_spear"; //gorilla
                 AttackRows = 4;
@@ -153,10 +147,21 @@ public class PlayerAnimationController : Script
                 AttackFrames = 18;
                 break;
             case 4: 
-                AttackSpriteSheet = "dorian_sword"; //rat
-                AttackRows = 4;
-                AttackColumns = 5;
-                AttackFrames = 18;
+                if(EnemySpawner.enemyQueue.Peek() == EnemyIconType.Rat)
+                { 
+                    AttackSpriteSheet = "dorian_sword"; //rat
+                    AttackRows = 4;
+                    AttackColumns = 5;
+                    AttackFrames = 18;
+                }
+
+                else if(EnemySpawner.enemyQueue.Peek() == EnemyIconType.Bat)
+                {
+                    AttackSpriteSheet = "dorian_gun";   //bat
+                    AttackRows = 5;
+                    AttackColumns = 6;
+                    AttackFrames = 29;
+                }
                 break;
 
             default: // imma just put this as the defualt cos idk wut else 2 put

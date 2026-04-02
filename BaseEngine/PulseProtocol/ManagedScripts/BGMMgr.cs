@@ -90,19 +90,21 @@ public class LevelBGM : Script
 
         // Pause / Resume BGM based on game pause state
         bool isPaused = Application.IsPaused(); // If your API uses another getter, swap this line
+        bool stageClearActive = StageClearElement.IsCleared;
 
-        if (isPaused && !wasPaused)
+        if (!stageClearActive && isPaused && !wasPaused)
         {
             audio.PauseBGM();   // If your API uses another name, replace here
             Console.WriteLine("BGM: Paused");
         }
-        else if (!isPaused && wasPaused)
+        else if (!stageClearActive && !isPaused && wasPaused)
         {
             audio.ResumeBGM();  // If your API uses another name, replace here
             Console.WriteLine("BGM: Resumed");
         }
 
-        wasPaused = isPaused;
+        // During stage clear, keep BGM running even though gameplay is paused.
+        wasPaused = !stageClearActive && isPaused;
     }
 }
 
