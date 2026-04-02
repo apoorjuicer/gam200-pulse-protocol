@@ -24,7 +24,8 @@ public class EnemySpawner : Script
     // =========================
     // UI / Queue
     // =========================
-    private Queue<EnemyIconType> enemyQueue = new Queue<EnemyIconType>(); // public enum EnemyIconType { None, Rat, Bat, Gorilla }
+    // I made this public static so i can use them in playeranimationcontroller.cs for different hero attack animations
+    public static Queue<EnemyIconType> enemyQueue = new Queue<EnemyIconType>(); // public enum EnemyIconType { None, Rat, Bat, Gorilla }
     public static int enemyQueueID = 0;
     private bool uiInitialized = false;
     private int framesSinceStart = 0;

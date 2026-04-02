@@ -1304,7 +1304,7 @@
         },
         {
             "id": "bat_attack_vfx",
-            "path": "Assets/Textures/VFX/Sword_Slash_VFX_1099x392.png",
+            "path": "Assets/Textures/VFX/bat_attack_vfx.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
