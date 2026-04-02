@@ -3655,7 +3655,7 @@
                         "position": { "x": 980.0, "y": 500.0 },
                         "scale": { "x": 200.0, "y": 80.0 },
                         "rotation": { "x": 0.0, "y": 0.0 },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
