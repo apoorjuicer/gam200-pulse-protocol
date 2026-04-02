@@ -1578,7 +1578,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "GlowOutlineScript"
+                            "PlayerSlotBeatPulse"
                         ]
                     }
                 },
@@ -1658,7 +1658,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "GlowOutlineScript"
+                            "PlayerSlotBeatPulse"
                         ]
                     }
                 },
@@ -1738,7 +1738,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "GlowOutlineScript"
+                            "PlayerSlotBeatPulse"
                         ]
                     }
                 },
@@ -1818,7 +1818,7 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "GlowOutlineScript"
+                            "PlayerSlotBeatPulse"
                         ]
                     }
                 },

@@ -18,7 +18,14 @@
             "id": "BGM_L2_TESTING",
             "path": "Assets/Sound/BG & Ambience/BGM_Level_2_V2.mp3",
             "loop": true,
-            "volume": 0.5,
+            "volume": 0.9,
+            "audiotype": "BGM"
+        },
+        {
+            "id": "BGM_L3",
+            "path": "Assets/Sound/BG & Ambience/BGM_Level_3.mp3",
+            "loop": true,
+            "volume": 0.9,
             "audiotype": "BGM"
         },
         {
@@ -46,7 +53,7 @@
             "id": "SFX_A_Key",
             "path": "Assets/Sound/Keys/SFX_A_Key.mp3",
             "loop": false,
-            "volume": 0.673,
+            "volume": 1.0,
             "audiotype": "SFX"
         },
         {
