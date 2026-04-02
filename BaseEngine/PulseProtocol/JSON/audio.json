@@ -46,7 +46,7 @@
             "id": "SFX_W_Key",
             "path": "Assets/Sound/Keys/SFX_W_Key.mp3",
             "loop": false,
-            "volume": 0.9,
+            "volume": 0.6,
             "audiotype": "SFX"
         },
         {
@@ -130,14 +130,14 @@
             "id": "SFX_ComboEstablished_1",
             "path": "Assets/Sound/UI/SFX_ComboEstablished_1.mp3",
             "loop": false,
-            "volume": 0.477,
+            "volume": 0.6,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_ComboStreakBroken",
             "path": "Assets/Sound/UI/SFX_ComboStreakBroken.mp3",
             "loop": false,
-            "volume": 0.203,
+            "volume": 0.6,
             "audiotype": "SFX"
         },
         {
@@ -186,14 +186,14 @@
             "id": "SFX_Enemy_Ping",
             "path": "Assets/Sound/Keys/SFX_Enemy_Ping.mp3",
             "loop": false,
-            "volume": 0.122,
+            "volume": 0.9,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_Player_Ping",
             "path": "Assets/Sound/Keys/SFX_Player_Ping.mp3",
             "loop": false,
-            "volume": 0.161,
+            "volume": 0.9,
             "audiotype": "SFX"
         }
     ]
