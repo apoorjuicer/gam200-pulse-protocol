@@ -7,6 +7,8 @@
                     //Settings
                     "back_btn",
                     "back_btn_hover",
+                    "calibration_btn",
+                    "calibration_btn_hover",
                     "windowed_TEXT",
                     "fullscreen_TEXT",
                     "dropdownopen_BOX",

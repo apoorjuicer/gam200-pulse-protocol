@@ -102,6 +102,7 @@ public class NavigationButtons : Script
     private static int menuOverlayTransitionTickFrame = -1;
     private static int pendingMenuOverlayTarget = 0; // 1 = LevelSelect, 2 = Settings, 3 = MainMenuBase
     private const float MenuOverlayTransitionDuration = 0.2f;
+    private static bool openSettingsOnMainMenuEntry = false;
 
     // Used by background scripts to avoid one-frame visual gaps when switching
     // from pause overlay to settings overlay in gameplay scenes.
@@ -146,6 +147,7 @@ public class NavigationButtons : Script
             menuOverlayTransitionTimer = 0.0f;
             menuOverlayTransitionTickFrame = -1;
             pendingMenuOverlayTarget = 0;
+            openSettingsOnMainMenuEntry = false;
 
             s_navCandidates.Clear();
             s_prevCandidates.Clear();
@@ -168,6 +170,14 @@ public class NavigationButtons : Script
         string realScene = Scene.GetCurrentScene();
         TryProcessPendingPostLoadFadeIn();
 
+        // Stage-clear must hard-lock gameplay pause regardless of which button updates first.
+        if (StageClearElement.IsCleared)
+        {
+            stageClearPaused = true;
+            if (!Application.IsPaused())
+                Application.SetPaused(true);
+        }
+
         // Detect scene entry and keep compatibility with pending flag flow.
         if (!string.IsNullOrEmpty(realScene) && realScene != s_prevSceneForMainMenuFade)
         {
@@ -179,7 +189,9 @@ public class NavigationButtons : Script
                 ShowNewGameResetOverlay = false;
                 ShowPauseOverlay = false;
                 ShowHowToPlayOverlay = false;
-                ShowSettingsOverlay = false;
+                ShowSettingsOverlay = openSettingsOnMainMenuEntry;
+                ShowLevelSelectOverlay = false;
+                openSettingsOnMainMenuEntry = false;
             }
 
             s_prevSceneForMainMenuFade = realScene;
@@ -514,7 +526,9 @@ public class NavigationButtons : Script
 
                 if (shouldGameBePaused)
                 {
-                    audio.PauseBGM();
+                    // Keep win BGM playing during stage clear; pause BGM only for normal pause flows.
+                    if (!stageClearPaused)
+                        audio.PauseBGM();
                 }
                 else
                 {
@@ -961,6 +975,8 @@ public class NavigationButtons : Script
     public static void SetStageClearPaused(bool value)
     {
         stageClearPaused = value;
+        if (value && !Application.IsPaused())
+            Application.SetPaused(true);
     }
 
     public static void ReportLevelCleared(string sceneName)
@@ -1324,6 +1340,17 @@ public class NavigationButtons : Script
             return;
         }
 
+        if (tex.Contains("calibration"))
+        {
+            if (!string.Equals(Scene.GetCurrentScene(), "MainMenu", StringComparison.OrdinalIgnoreCase) ||
+                !ShowSettingsOverlay)
+                return;
+
+            // Start the 2-step calibration flow from MainMenu Settings.
+            NavigateTo("LatencyCalibration");
+            return;
+        }
+
         if (tex.Contains("settings") || tex.Contains("options"))
         {
             if (Scene.GetCurrentScene() == "MainMenu")
@@ -1557,6 +1584,22 @@ public class NavigationButtons : Script
         LastClearedLevel = "";
         LastEnteredLevel = "";
         LevelProgressStore.ClearProgress();
+    }
+
+    public static void ReturnToSettingsAfterCalibration()
+    {
+        openSettingsOnMainMenuEntry = true;
+
+        ShowQuitOverlay = false;
+        ShowNewGameResetOverlay = false;
+        ShowPauseOverlay = false;
+        ShowHowToPlayOverlay = false;
+        ShowLevelSelectOverlay = false;
+        ShowSettingsOverlay = true;
+        openedSettingsFromPause = false;
+
+        currentScene = "MainMenu";
+        Scene.LoadScene("MainMenu");
     }
 }
 

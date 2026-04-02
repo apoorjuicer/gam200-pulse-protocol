@@ -29,6 +29,13 @@
             "audiotype": "BGM"
         },
         {
+            "id": "BGM_Game_Win",
+            "path": "Assets/Sound/BG & Ambience/BGM_Game_Win.mp3",
+            "loop": true,
+            "volume": 0.5,
+            "audiotype": "BGM"
+        },
+        {
             "id": "SFX_Ambience_Alarm",
             "path": "Assets/Sound/BG & Ambience/SFX_Ambience_Alarm.wav",
             "loop": false,
