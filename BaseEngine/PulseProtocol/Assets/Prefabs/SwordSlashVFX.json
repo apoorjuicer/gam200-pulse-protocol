@@ -9,11 +9,11 @@
       "transform": {
         "position": {
           "x": -45.0,
-          "y": -250.0
+          "y": -150.0
         },
         "scale": {
-          "x": 1099.0,
-          "y": 392.0
+          "x": 465.0,
+          "y": 518.0
         },
         "rotation": {
           "x": 0.0,
@@ -27,7 +27,7 @@
         "mdl_ref": 1.0,
         "shd_ref": 2.0,
         "useTexture": true,
-        "spriteName": "sword_slash_vfx",
+        "spriteName": "swordslash",
         "tintColor": {
           "r": 1.0,
           "g": 1.0,
@@ -40,9 +40,9 @@
       "animation": {
         "currentFrame": 0,
         "elapsedTime": 0.0,
-        "totalFrames": 10,
-        "columns": 2,
-        "rows": 5,
+        "totalFrames": 6,
+        "columns": 3,
+        "rows": 2,
         "animationSpeed": 2.0
       }
     },

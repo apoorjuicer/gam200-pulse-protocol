@@ -87,11 +87,8 @@ public class EnemySpawner : Script
         EnemyIconType.BlueGorilla,
         EnemyIconType.Rat,
         EnemyIconType.Bat,
-        EnemyIconType.Rat,
-        EnemyIconType.Bat,
         EnemyIconType.BlueGorilla,
         EnemyIconType.Bat,
-        EnemyIconType.BlueGorilla,
         EnemyIconType.Boss
     };
 
