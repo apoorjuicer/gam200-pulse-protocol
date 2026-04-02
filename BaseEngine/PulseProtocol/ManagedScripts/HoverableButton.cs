@@ -343,6 +343,12 @@ public class NavigationButtons : Script
         {
             if (ShowSettingsOverlay || realScene == "Settings")
             {
+                // If the screen mode dropdown is open, Circle belongs to it (closes dropdown only)
+                if (DropdownState.ScreenDropdownOpen)
+                {
+                    wasCircleHandled = true;
+                    return;
+                }
                 wasCircleHandled = true;
                 AudioSliderKnobBase.ClearFocus();
                 GoBack();
