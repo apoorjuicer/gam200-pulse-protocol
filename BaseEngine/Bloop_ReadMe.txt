@@ -107,22 +107,27 @@ HP Progression: If you fail to input the combo successfully before the enemy rea
 
 [ 6. CHEAT CODES ]
 
-Level Skip:
------------
+Level Skip Cheat Code:
+----------------------
 Shift + 1  : Skip to Level 1
 Shift + 2  : Skip to Level 2
 Shift + 3  : Skip to Level 3
 
-In-Game Cheats:
----------------
+In-Game Cheat Code:
+-------------------
 I          : Toggle player invincibility (player takes no damage)
 K          : Instantly kill the current enemy (deals 99999 damage)
 O          : Clear the current wave (triggers the stage clear overlay)
 
+
+In-Game Controller Cheat Code: 
+------------------------------
+L1 + R1 + Triangle : Instantly kill the current enemy (deals 99999 damage)
+
 Note: These cheat codes above only work when you are in the levels.
 
-CutScene Skip Cheats:
----------------------
+Skip Cut Scene Cheat Code:
+--------------------------
 Space Bar  : Skip the opening cutscene when its being shown.
 
 
