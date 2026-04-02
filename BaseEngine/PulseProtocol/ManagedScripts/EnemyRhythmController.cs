@@ -1,7 +1,7 @@
 ﻿using System;
 using ScriptAPI;
 
-public enum EnemyState { Idle, Moving, Attacking, Dead }
+public enum EnemyState { Idle, Moving, Attacking, Hurt, Dead }
 public enum RhythmType { OneBeat, TwoBeat, Syncopated, FourBeat }
 
 public class EnemyRhythmController : Script
@@ -95,18 +95,21 @@ public class EnemyRhythmController : Script
     private int initializedForEntityID = -1; // Guards against C# object reuse across sessions
     private int lastBeat = -1;
     private bool animPaused = false;
-    private bool isDead = false;
+    protected bool isDead = false;
     public bool IsDying => isDead;  // True from Die() until Instance is cleared after animation
     private EnemyState currentState = EnemyState.Idle;
 
     private float attackCooldownTimer = 0f;
+    private float hurtTimer = 0f;
     private float deathTimer = 0f;
     private bool waitingToDie = false;
     private bool deathNotified = false;  // true once spawner has been told to continue
+    private bool pendingDeath = false;          // true when hp hit 0 but hurt animation hasn't played yet
+    private float pendingDeathFallbackTimer = 0f; // safety: die after 3s if hurt never triggered
 
     // Track movement during enemy turn
     private int movementStepsTaken = 0;
-    private int maxMovementSteps = 4;
+    protected int maxMovementSteps = 4;
 
     // Once the enemy reaches the player, it STOPS moving entirely
     private bool hasReachedPlayer = false;
@@ -203,6 +206,24 @@ public class EnemyRhythmController : Script
             }
         }
 
+        if (hurtTimer > 0f)
+        {
+            hurtTimer -= Time.DeltaTime;
+            if (hurtTimer <= 0f)
+            {
+                if (currentState == EnemyState.Hurt)
+                    FinishHurt();
+            }
+        }
+
+        // Safety fallback: if hurt was never triggered (e.g. cheat kill), die after 3 seconds
+        if (pendingDeath && !isDead && currentState != EnemyState.Hurt)
+        {
+            pendingDeathFallbackTimer += Time.DeltaTime;
+            if (pendingDeathFallbackTimer >= 3f)
+                Die();
+        }
+
         if (Conductor.Instance != null)
         {
             int currentBeat = Conductor.Instance.GetCurrentBeat();
@@ -227,6 +248,9 @@ public class EnemyRhythmController : Script
         hasReachedPlayer = false;
         movementStepsTaken = 0;
         attackCooldownTimer = 0f;
+        hurtTimer = 0f;
+        pendingDeath = false;
+        pendingDeathFallbackTimer = 0f;
         collisionCheckCount = 0;
         playerFound = false;
         playerEntityID = -1;
@@ -435,6 +459,9 @@ public class EnemyRhythmController : Script
             case EnemyState.Attacking:
                 anim.SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, AnimationSpeed);
                 break;
+            case EnemyState.Hurt:
+                anim.SetAnimation(HurtSpriteSheet, HurtRows, HurtColumns, HurtFrames, AnimationSpeed);
+                break;
             case EnemyState.Dead:
                 anim.SetAnimation(DeathSpriteSheet, DeathRows, DeathColumns, DeathFrames, AnimationSpeed);
                 break;
@@ -444,6 +471,9 @@ public class EnemyRhythmController : Script
     private void HandleBeat(int beat)
     {
         if (TurnManager.Instance == null) return;
+
+        // Don't interrupt hurt animation
+        if (currentState == EnemyState.Hurt) return;
 
         TurnPhase currentPhase = TurnManager.Instance!.GetCurrentPhase();
 
@@ -507,6 +537,8 @@ public class EnemyRhythmController : Script
         Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}");
     }
 
+    protected virtual void OnAttackStart() { }
+
     private void AttackPlayer()
     {
         if (isDead || Cheats.invincible)
@@ -517,6 +549,7 @@ public class EnemyRhythmController : Script
         int attackDamage = GetHealth().damage;
         Console.WriteLine($"[Enemy] ATTACKING PLAYER for {attackDamage} damage!");
         SetState(EnemyState.Attacking);
+        OnAttackStart();
 
         attackCooldownTimer = AttackFrames / AnimationSpeed;
 
@@ -533,7 +566,7 @@ public class EnemyRhythmController : Script
 
     public virtual void TakeDamage(float dmg)
     {
-        if (isDead) return; 
+        if (isDead || pendingDeath) return;
 
         HealthComponent h = GetHealth();
         int prev = h.hp;
@@ -542,15 +575,23 @@ public class EnemyRhythmController : Script
         if (h.hp < 0) h.hp = 0;
         Console.WriteLine($"[Enemy] Took {dmg} damage! HP: {h.hp}/{prev}");
 
+        // Capture position for VFX (must be done from this entity's context for correct coords)
+        var tf = GetTransform();
+        HitVFX.SpawnX = tf.X;
+        HitVFX.SpawnY = tf.Y;
+
         // Spawn damage indicator
-        EnemyDamageIndicator.SpawnX = GetTransform().X;
-        EnemyDamageIndicator.SpawnY = GetTransform().Y;
+        EnemyDamageIndicator.SpawnX = tf.X;
+        EnemyDamageIndicator.SpawnY = tf.Y;
         EnemyDamageIndicator.DamageText = "-" + ((int)dmg).ToString();
-        // Console.WriteLine($"[DamageIndicator] Spawning at X:{GetTransform().X} Y:{GetTransform().Y}");
+        // Console.WriteLine($"[DamageIndicator] Spawning at X:{tf.X} Y:{tf.Y}");
         Factory.Instantiate("EnemyDamageIndicator");
 
         if (h.hp <= 0)
-            Die();
+        {
+            pendingDeath = true;
+            pendingDeathFallbackTimer = 0f;
+        }
     }
 
     public int GetCurrentHP() => GetHealth().hp;
@@ -567,6 +608,21 @@ public class EnemyRhythmController : Script
     public float GetHealthBarOffsetY() => HealthBarOffsetY;
     public float GetHealthBarScaleOffsetXFactor() => HealthBarScaleOffsetXFactor;
     public float GetHealthBarScaleOffsetYFactor() => HealthBarScaleOffsetYFactor;
+
+    public void TriggerHurtAnimation()
+    {
+        if (isDead) return;
+        SetState(EnemyState.Hurt);
+        hurtTimer = HurtFrames / AnimationSpeed;
+    }
+
+    private void FinishHurt()
+    {
+        if (pendingDeath)
+            Die();
+        else
+            SetState(EnemyState.Idle);
+    }
 
     protected virtual void Die()
     {
@@ -682,7 +738,7 @@ public class EnemyRhythmController : Script
         }
 
         // wait til the attack animation done then reset the state :P
-        if (attackCooldownTimer <= 0f)
+        if (attackCooldownTimer <= 0f && currentState != EnemyState.Hurt)
         {
             SetState(EnemyState.Idle);
         }
@@ -831,5 +887,14 @@ public class Bat: EnemyRhythmController
         RandomizeVisualSlots = false;
 
         HealthBarOffsetX = 40f;
+    }
+
+    protected override void OnAttackStart()
+    {
+        var tf = GetTransform();
+        SwordSlashVFX.SpawnX = tf.X - 600f;  // in front of bat (toward player)
+        SwordSlashVFX.SpawnY = tf.Y;
+        SwordSlashVFX.SpawnDuration = AttackFrames / AnimationSpeed;
+        Factory.Instantiate("BatAttackVFX");
     }
 }

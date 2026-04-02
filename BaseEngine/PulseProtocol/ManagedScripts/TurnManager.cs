@@ -216,12 +216,18 @@ public class TurnManager : Script
                 }
 
             case TurnPhase.Resolution:
-                // Wait for the death animation to finish before advancing.
-                // IsDying stays true for 2.5s after Die() fires; only becomes null
-                // once the animation completes and the spawner is notified.
+                // Step 1: wait for death animation to fully finish and new enemy to be ready.
+                // IsDying is true from Die() until the animation completes and spawner is notified.
                 if (EnemyRhythmController.Instance == null || EnemyRhythmController.Instance!.IsDying)
                 {
                     Console.WriteLine("[TurnManager] Resolution: waiting for death animation / next enemy...");
+                    break;
+                }
+                // Step 2: wait until we land on a bar-aligned beat so the new "1 2 3 4"
+                // always starts cleanly, regardless of how long the death animation took.
+                if (currentBeat % CountdownBeats != 0)
+                {
+                    Console.WriteLine($"[TurnManager] Resolution: waiting for bar alignment (beat {currentBeat}, need multiple of {CountdownBeats})...");
                     break;
                 }
                 StartEnemyDisplay();

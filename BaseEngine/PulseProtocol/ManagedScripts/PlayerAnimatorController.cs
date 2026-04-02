@@ -57,6 +57,10 @@ public class PlayerAnimationController : Script
     private bool waitingForStateEnd = false;
     private bool animPaused = false;
 
+    // Delayed hit VFX
+    private bool  pendingHitVFX   = false;
+    private float hitVFXTimer     = 0f;
+
     public override void Update()
     {
         if (!initialized)
@@ -99,6 +103,21 @@ public class PlayerAnimationController : Script
                 waitingForStateEnd = false;
                 Console.WriteLine($"[PlayerAnim] {currentState} finished -> returning to idle");
                 GoToIdle();
+            }
+        }
+
+        // Spawn hit VFX on the enemy after attack animation finishes
+        if (pendingHitVFX)
+        {
+            hitVFXTimer -= Time.DeltaTime;
+            if (hitVFXTimer <= 0f)
+            {
+                pendingHitVFX = false;
+                if (EnemyRhythmController.Instance != null)
+                {
+                    Factory.Instantiate("HitVFX");
+                    EnemyRhythmController.Instance.TriggerHurtAnimation();
+                }
             }
         }
     }
@@ -188,13 +207,38 @@ public class PlayerAnimationController : Script
 
         waitingForStateEnd = true;
         stateTimer = 0f;
-        stateDuration = AttackFrames / GetBeatSyncedSpeed(AttackFrames);
 
-        // Spawn sword slash VFX — lives for exactly one attack animation cycle
+        if (AttackSpriteSheet == "dorian_gun")
+        {
+            float gunSpeed = GetBeatSyncedSpeed(18);
+            GetAnimation().SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, gunSpeed);
+            stateDuration = AttackFrames / gunSpeed;
+        }
+        else
+        {
+            stateDuration = AttackFrames / GetBeatSyncedSpeed(AttackFrames);
+        }
+
+        // Queue hit VFX to spawn on enemy after this attack animation finishes
+        pendingHitVFX = true;
+        hitVFXTimer   = stateDuration;
+
+        // Spawn attack VFX each enemy type has its own prefab with correct scale/dimensions
         SwordSlashVFX.SpawnX = GetTransform().X + 300f;
         SwordSlashVFX.SpawnY = GetTransform().Y;
         SwordSlashVFX.SpawnDuration = stateDuration;
-        Factory.Instantiate("SwordSlashVFX");
+        switch (EnemySpawner.enemyQueue.Count > 0 ? EnemySpawner.enemyQueue.Peek() : EnemyIconType.None)
+        {
+            case EnemyIconType.BlueGorilla:
+                Factory.Instantiate("SpearAttackVFX");
+                break;
+            case EnemyIconType.Bat:
+                Factory.Instantiate("GunAttackVFX");
+                break;
+            default: // Rat and anything else
+                Factory.Instantiate("SwordSlashVFX");
+                break;
+        }
     }
 
     public void PlayHurt()
