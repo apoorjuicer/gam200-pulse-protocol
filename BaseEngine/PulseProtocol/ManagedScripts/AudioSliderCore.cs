@@ -2,7 +2,8 @@
 /**
  * @file        AudioSliderCore.cs
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 100%
+ * @author      Leu Jun Yong - 80%
+ * @author      Goh Pin Kai - 20%
  *
  * @brief       main audio slider logic (mouse input, dragging, clamping, converting knob position to volume value).
  *
