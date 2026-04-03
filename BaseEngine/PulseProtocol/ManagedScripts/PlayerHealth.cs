@@ -26,9 +26,9 @@ public class PlayerHealth : Script
     public int PlayerEntityID { get; private set; }
 
     // PS4 cheat: hold L1 + R1, then press Triangle to kill enemy
-    private const int GP_L1       = 4;
-    private const int GP_R1       = 5;
-    private const int GP_TRIANGLE = 3;
+    private const int GP_L1       = InputConstants.GP_L1;
+    private const int GP_R1       = InputConstants.GP_R1;
+    private const int GP_TRIANGLE = InputConstants.GP_TRIANGLE;
 
     // =========================
     // Update Loop
@@ -104,7 +104,7 @@ public class PlayerHealth : Script
         Console.WriteLine($"[PlayerHealth] Took {damage} damage! HP: {h.hp}/{maxHP}");
 
         // Controller rumble feedback on damage
-        GetInput().RumbleGamepad(1.0f, 1.0f, 0.4f);
+        GetInput().RumbleGamepad(1.0f, 1.0f, 1.2f);
 
         if (h.hp > 0)
         {

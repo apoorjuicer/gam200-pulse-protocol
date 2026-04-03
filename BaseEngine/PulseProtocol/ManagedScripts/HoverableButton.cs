@@ -65,14 +65,14 @@ public class NavigationButtons : Script
     private static bool wasEscPressed = false;
     private static bool wasCircleHandled = false;
 
-    // Gamepad button constants
-    private const int GP_CROSS    = 0; // confirm / click
-    private const int GP_CIRCLE   = 1; // cancel / back
-    private const int GP_START    = 7; // Options button — pause toggle
-    private const int GP_DPAD_UP    = 11;
-    private const int GP_DPAD_RIGHT = 12;
-    private const int GP_DPAD_DOWN  = 13;
-    private const int GP_DPAD_LEFT  = 14;
+    // Gamepad button constants — see InputConstants.cs
+    private const int GP_CROSS      = InputConstants.GP_CROSS;
+    private const int GP_CIRCLE     = InputConstants.GP_CIRCLE;
+    private const int GP_START      = InputConstants.GP_START;
+    private const int GP_DPAD_UP    = InputConstants.GP_DPAD_UP;
+    private const int GP_DPAD_RIGHT = InputConstants.GP_DPAD_RIGHT;
+    private const int GP_DPAD_DOWN  = InputConstants.GP_DPAD_DOWN;
+    private const int GP_DPAD_LEFT  = InputConstants.GP_DPAD_LEFT;
 
     // D-pad navigation state (shared across all button instances)
     private static readonly List<NavigationButtons> s_navCandidates = new List<NavigationButtons>();
@@ -321,8 +321,10 @@ public class NavigationButtons : Script
         }
 
         // ESC or gamepad Options button → pause toggle (only in gameplay scenes)
-        bool pauseTriggered = (input.IsKeyTriggered(256) && !wasEscPressed)  // 256 = ESC
-                           || input.IsGamepadButtonTriggered(GP_START);
+        // Both are guarded by wasEscPressed so only the first HoverableButton instance
+        // to run this frame processes the toggle (prevents even-count cancellation).
+        bool pauseTriggered = (input.IsKeyTriggered(256) || input.IsGamepadButtonTriggered(GP_START))
+                           && !wasEscPressed;
         if (pauseTriggered)
         {
             wasEscPressed = true;
@@ -343,6 +345,12 @@ public class NavigationButtons : Script
         {
             if (ShowSettingsOverlay || realScene == "Settings")
             {
+                // If the screen mode dropdown is open, Circle belongs to it (closes dropdown only)
+                if (DropdownState.ScreenDropdownOpen)
+                {
+                    wasCircleHandled = true;
+                    return;
+                }
                 wasCircleHandled = true;
                 AudioSliderKnobBase.ClearFocus();
                 GoBack();
@@ -613,6 +621,7 @@ public class NavigationButtons : Script
             // All other menus use Up/Down. Left/Right is reserved for slider value adjustment.
             bool _noSliderOrDropdown = !AudioSliderKnobBase.IsAnySliderFocused && !DropdownState.IsDropdownFocused;
             bool _useHorizontalNav = ShowQuitOverlay
+                                     || ShowNewGameResetOverlay
                                      || ShowPauseOverlay
                                      || stageClearPaused
                                      || realScene == "LatencyCalibration"

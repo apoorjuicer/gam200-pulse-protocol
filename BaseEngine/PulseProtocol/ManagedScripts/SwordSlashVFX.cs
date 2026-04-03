@@ -42,10 +42,6 @@ public class SwordSlashVFX : Script
                     anim.SetAnimation("spear_attack_vfx", 4, 4, 13, speed);
                     break;
 
-                case EnemyIconType.Bat:
-                    anim.SetAnimation("bat_attack_vfx", 5, 5, 22, speed);
-                    break;
-
                 case EnemyIconType.Boss:
                     break;
 

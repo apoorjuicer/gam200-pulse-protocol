@@ -58,7 +58,7 @@ public class TurnManager : Script
     private bool initialized = false;
     private bool gameStarted = false;
     private bool prevGameReady = false; // used to detect new play sessions on reused script objects
-    private bool resolutionPending = false; // deferred one frame so InputBridge can process last-beat input
+    private int resolutionPendingFrames = 0; // counts down: 2→1→0 then resolves, giving InputBridge 2 frames to process last-beat input regardless of entity update order
 
     // Time-based player slot pulses (mirrors SlotOffsets, runs every frame)
     private bool playerInputPhaseActive = false;
@@ -97,13 +97,16 @@ public class TurnManager : Script
 
         int currentBeat = Conductor.Instance!.GetCurrentBeat();
 
-        // Deferred resolution: fired the frame AFTER the resolution beat so that
-        // InputBridge has one frame to process any key pressed on the same frame
-        // the beat fired, regardless of entity update order.
-        if (resolutionPending)
+        // Deferred resolution: counts down 2 frames before resolving so InputBridge
+        // always gets at least one full frame to process last-beat input regardless
+        // of which entity updates first.
+        if (resolutionPendingFrames > 0)
         {
-            resolutionPending = false;
-            ResolvePlayerInput();
+            resolutionPendingFrames--;
+            if (resolutionPendingFrames == 0)
+            {
+                ResolvePlayerInput();
+            }
             return;
         }
 
@@ -203,7 +206,7 @@ public class TurnManager : Script
                     if (beatsInPhase >= (PlayerInputBeatsOverride ?? PlayerInputBeats))
                     {
                         // Defer one frame so InputBridge can process any key on this beat first.
-                        resolutionPending = true;
+                        resolutionPendingFrames = 2;
                     }
                     else
                     {
@@ -254,7 +257,7 @@ public class TurnManager : Script
         lastBeat = -1;
         gameStarted = false;
         playerInputPhaseActive = false;
-        resolutionPending = false;
+        resolutionPendingFrames = 0;
         EnemyDisplayBeatsOverride = null;
         PlayerInputBeatsOverride  = null;
         for (int i = 0; i < slotPulsed.Length; i++) slotPulsed[i] = false;
@@ -323,7 +326,7 @@ public class TurnManager : Script
         phaseStartBeat = Conductor.Instance!.GetCurrentBeat() - 1;
 
         ComboSystem.Instance?.ResetCombo();
-        resolutionPending = false;
+        resolutionPendingFrames = 0;
 
         Console.WriteLine("[TurnManager] === PLAYER TURN ===");
         Console.WriteLine($"[TurnManager] Input the combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");

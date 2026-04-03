@@ -632,15 +632,12 @@ void CoreEngine::Init()
 	std::cout << "WindowWidth is: " << WindowWidth << "\n";
 	std::cout << "WindowHeight is: " << WindowHeight << "\n";
 
-	// Apply cached fullscreen preference early so every scene (including calibration)
-	// starts with the user's last selected screen mode.
-	bool cachedFullscreen = false;
-	if (TryLoadStartupFullscreenFromUserSettings(FilePathToGame, cachedFullscreen))
-	{
-		m_startupFullscreen = cachedFullscreen;
-		std::cout << "[CoreEngine] Startup fullscreen from user_settings.json: "
-			<< (m_startupFullscreen ? "true" : "false") << "\n";
-	}
+	// m_startupFullscreen is set by the entry point (GameMain/EditorMain) via
+	// SetStartupFullscreen() before Init() is called. Do NOT read it from
+	// user_settings.json here — that would overwrite the per-project default
+	// (game = fullscreen, editor = windowed).
+	std::cout << "[CoreEngine] Startup fullscreen: "
+		<< (m_startupFullscreen ? "true" : "false") << "\n";
 
 	///*saving config data*/ //tested saving works
 	// std::string newConfigPath = "../../PulseEngine/JSON/config2.json";

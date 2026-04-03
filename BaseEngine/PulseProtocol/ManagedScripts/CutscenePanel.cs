@@ -2,9 +2,10 @@
 /**
 * @file        CutscenePanel.cs
 * @project     Pulse Protocol
-* @author      Carrie Lam (85%)
+* @author      Carrie Lam (83%)
 * @author      Chloe Lau (13%)
 * @author      Leu Jun Yong (2%)
+* @author      Goh Pin Kai (2%)
 * @brief       Controls staggered slide-in and simultaneous slide-out animations
 *              for paired cutscene panels, with shared timing state across all
 *              panel instances and space-to-skip support.
@@ -167,9 +168,13 @@ public class CutscenePanel : Script
     // =========================
     private void Initialize()
     {
-        // Reset shared state only once per cutscene scene session.
+        // Reset shared state when scene changes OR when this is the very first panel
+        // initializing (sharedInitCount == 0), which means it's a fresh scene load
+        // even if the session tag wasn't cleared (e.g. OnDestroy not called on scene change).
         string currentScene = Scene.GetCurrentScene();
-        if (!string.Equals(s_sceneSessionTag, currentScene, StringComparison.OrdinalIgnoreCase))
+        bool sceneChanged = !string.Equals(s_sceneSessionTag, currentScene, StringComparison.OrdinalIgnoreCase);
+        bool freshStart = sharedInitCount == 0 || sharedInitCount >= totalPairs * 2;
+        if (sceneChanged || freshStart)
         {
             s_sceneSessionTag = currentScene;
             sharedInitCount = 0;
@@ -193,17 +198,10 @@ public class CutscenePanel : Script
         myPairIndex = myPanelIndex / 2;
         isLeftPanel = (myPanelIndex % 2) == 0;
 
-        // Determine this panel's X position
-        if (targetX != 0f)
-        {
-            // Use the value set in the inspector
-            myTargetX = targetX;
-        }
-        else
-        {
-            // Use defaults
-            myTargetX = isLeftPanel ? defaultLeftX : defaultRightX;
-        }
+        // Read X and Y directly from the saved transform position
+        TransformComponent savedTf = GetTransform();
+        myTargetX = savedTf.X;
+        centerY = savedTf.Y;
 
         // First panel sets up shared state
         if (myPanelIndex == 0)
@@ -389,13 +387,13 @@ public class CutscenePanel : Script
             float t = (localTime - mySlideStart) / sSlideInDuration;
             float eased = EaseOutCubic(t);
 
-            tf.Y = Lerp(sOffScreenBelow, sCenterY, eased);
+            tf.Y = Lerp(sOffScreenBelow, centerY, eased);
             SetAlpha(sprite, Lerp(0.2f, 1f, eased));
         }
         else if (localTime < holdEnd)
         {
             // === HOLDING (or waiting for other panel to finish sliding in) ===
-            tf.Y = sCenterY;
+            tf.Y = centerY;
             SetAlpha(sprite, 1f);
         }
         else
@@ -404,7 +402,7 @@ public class CutscenePanel : Script
             float t = (localTime - holdEnd) / sSlideOutDuration;
             float eased = EaseInCubic(t);
 
-            tf.Y = Lerp(sCenterY, sOffScreenAbove, eased);
+            tf.Y = Lerp(centerY, sOffScreenAbove, eased);
             SetAlpha(sprite, Lerp(1f, 0f, eased));
         }
     }
@@ -434,5 +432,16 @@ public class CutscenePanel : Script
     private float EaseInCubic(float t)
     {
         return t * t * t;
+    }
+
+    public void OnDestroy()
+    {
+        // Reset static state so the next scene load always triggers a full reinitialize.
+        s_sceneSessionTag = "";
+        sharedInitCount = 0;
+        sharedCutsceneFinished = false;
+        s_waitingForSkipTransition = false;
+        s_sceneChangeIssued = false;
+        s_waitingForEntryFade = true;
     }
 }

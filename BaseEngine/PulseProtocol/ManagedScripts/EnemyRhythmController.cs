@@ -109,7 +109,7 @@ public class EnemyRhythmController : Script
 
     // Track movement during enemy turn
     private int movementStepsTaken = 0;
-    private int maxMovementSteps = 4;
+    protected int maxMovementSteps = 4;
 
     // Once the enemy reaches the player, it STOPS moving entirely
     private bool hasReachedPlayer = false;
@@ -537,6 +537,8 @@ public class EnemyRhythmController : Script
         Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}");
     }
 
+    protected virtual void OnAttackStart() { }
+
     private void AttackPlayer()
     {
         if (isDead || Cheats.invincible)
@@ -547,6 +549,7 @@ public class EnemyRhythmController : Script
         int attackDamage = GetHealth().damage;
         Console.WriteLine($"[Enemy] ATTACKING PLAYER for {attackDamage} damage!");
         SetState(EnemyState.Attacking);
+        OnAttackStart();
 
         attackCooldownTimer = AttackFrames / AnimationSpeed;
 
@@ -632,6 +635,8 @@ public class EnemyRhythmController : Script
         deathTimer = 0f;
         deathNotified = false;
         SetState(EnemyState.Dead);
+
+        ComboDisplayManager.Instance?.HideAllSlots();
 
 
         Console.WriteLine("[Enemy] DEFEATED!");
@@ -884,5 +889,14 @@ public class Bat: EnemyRhythmController
         RandomizeVisualSlots = false;
 
         HealthBarOffsetX = 40f;
+    }
+
+    protected override void OnAttackStart()
+    {
+        var tf = GetTransform();
+        SwordSlashVFX.SpawnX = tf.X - 600f;  // in front of bat (toward player)
+        SwordSlashVFX.SpawnY = tf.Y;
+        SwordSlashVFX.SpawnDuration = AttackFrames / AnimationSpeed;
+        Factory.Instantiate("BatAttackVFX");
     }
 }

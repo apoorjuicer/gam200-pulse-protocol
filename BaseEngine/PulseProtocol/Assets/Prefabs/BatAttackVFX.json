@@ -49,7 +49,7 @@
     {
       "script": {
         "ScriptName": [
-          "SwordSlashVFX"
+          "BatAttackVFX"
         ]
       }
     },

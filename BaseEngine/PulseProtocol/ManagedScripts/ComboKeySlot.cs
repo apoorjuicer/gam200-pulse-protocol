@@ -2,8 +2,9 @@
 /**
 * @file        ComboKeySlot.cs
 * @project     Pulse Protocol
-* @author      Carrie Lam (70%)
-*              Chloe Lau (30%)
+* @author      Carrie Lam (65%)
+*              Chloe Lau (25%)
+*              Reginald (10%)
 * @brief       Represents a single key slot in the combo UI, handling sprite detection,
 *              registration, and animations for enemy reveals and player input feedback
 *              (correct, wrong, countdown, pop effects). Extended with dim-always-visible
@@ -127,6 +128,12 @@ public class ComboKeySlot : Script
 
     private static bool _preferControllerUI = false;
     private static bool _inputModeInitialized = false;
+    private static bool _wasControllerConnected = false;
+    private bool _prevPreferControllerUI = false;
+
+    private enum SpriteType { None, EnemyKey, GreenPlayer, RedPlayer }
+    private SpriteType _displayedSpriteType = SpriteType.None;
+    private char _displayedKey = '\0';
 
     // =========================
     // Update
@@ -197,6 +204,30 @@ public class ComboKeySlot : Script
                 t.ScaleY = baseScaleY;
                 _inAppearFadeIn = true;
                 _appearFadeInTimer = 0f;
+            }
+        }
+
+        // =========================
+        // Hot-swap: refresh sprite when controller/keyboard mode changes
+        // =========================
+        {
+            bool currentMode = UsingControllerUI();
+            if (currentMode != _prevPreferControllerUI)
+            {
+                _prevPreferControllerUI = currentMode;
+                if (_displayedSpriteType != SpriteType.None && _displayedKey != '\0')
+                {
+                    var s = GetSprite();
+                    if (s.HasSprite())
+                    {
+                        switch (_displayedSpriteType)
+                        {
+                            case SpriteType.EnemyKey:    s.Texture = GetSpriteForKey(_displayedKey);    break;
+                            case SpriteType.GreenPlayer: s.Texture = GetGreenSpriteForKey(_displayedKey); break;
+                            case SpriteType.RedPlayer:   s.Texture = GetRedSpriteForKey(_displayedKey);  break;
+                        }
+                    }
+                }
             }
         }
 
@@ -400,6 +431,8 @@ public class ComboKeySlot : Script
         isShowingResult = false;
         isShowingCorrectHint = false;
         _inAppearFadeIn = false;
+        _displayedKey = '\0';
+        _displayedSpriteType = SpriteType.None;
     }
 
     public void ShowCorrect(char key)
@@ -418,6 +451,8 @@ public class ComboKeySlot : Script
         var sprite = GetSprite();
         sprite.Texture = GetGreenSpriteForKey(key);
         sprite.SetTint(1f, 1f, 1f, 1f);
+        _displayedKey = key;
+        _displayedSpriteType = SpriteType.GreenPlayer;
 
         var transform = GetTransform();
         transform.IsVisible = true;
@@ -444,18 +479,22 @@ public class ComboKeySlot : Script
         var sprite = GetSprite();
         sprite.Texture = GetRedSpriteForKey(pressedKey);
         sprite.SetTint(1f, 1f, 1f, 1f);
+        _displayedKey = pressedKey;
+        _displayedSpriteType = SpriteType.RedPlayer;
 
         var transform = GetTransform();
         transform.IsVisible = true;
         transform.ScaleX = baseScaleX;
         transform.ScaleY = baseScaleY;
-    }   
+    }
 
     private void ShowCorrectHint()
     {
         var sprite = GetSprite();
         sprite.Texture = GetGreenSpriteForKey(correctKey);
         sprite.SetTint(1f, 1f, 1f, 1f);
+        _displayedKey = correctKey;
+        _displayedSpriteType = SpriteType.GreenPlayer;
 
         var transform = GetTransform();
         transform.IsVisible = true;
@@ -476,6 +515,8 @@ public class ComboKeySlot : Script
         }
 
         sprite.Texture = GetSpriteForKey(key);
+        _displayedKey = key;
+        _displayedSpriteType = SpriteType.EnemyKey;
 
         var fade = GetFade();
         fade.SetAlpha(1.0f);
@@ -499,6 +540,8 @@ public class ComboKeySlot : Script
         }
 
         sprite.Texture = GetSpriteForKey(key);
+        _displayedKey = key;
+        _displayedSpriteType = SpriteType.EnemyKey;
 
         var fade = GetFade();
         fade.SetAlpha(1.0f);
@@ -577,6 +620,8 @@ public class ComboKeySlot : Script
         _inAppearFadeIn = false;
         _isFadingToHidden = false;
         _currentAlpha = 0f;
+        _displayedKey = '\0';
+        _displayedSpriteType = SpriteType.None;
     }
 
     // Smoothly fade from current alpha → 0, then hide. Used for unused player slots.
@@ -606,6 +651,8 @@ public class ComboKeySlot : Script
         var transform = GetTransform();
         transform.IsVisible = false;
         isShowing = false;
+        _displayedKey = '\0';
+        _displayedSpriteType = SpriteType.None;
     }
 
     // =========================
@@ -619,33 +666,21 @@ public class ComboKeySlot : Script
 
         bool controllerConnected = input.IsGamepadConnected;
 
-        bool controllerUsed =
-            input.IsGamepadButtonPressed(3) ||  // Triangle -> W
-            input.IsGamepadButtonPressed(1) ||  // Square   -> A
-            input.IsGamepadButtonPressed(0) ||  // Cross    -> S
-            input.IsGamepadButtonPressed(2);    // Circle   -> D
-
-        bool keyboardUsed =
-            input.IsKeyPressed(87) ||  // W
-            input.IsKeyPressed(65) ||  // A
-            input.IsKeyPressed(83) ||  // S
-            input.IsKeyPressed(68);    // D
-
         if (!_inputModeInitialized)
         {
-            _preferControllerUI = controllerConnected || controllerUsed;
+            _preferControllerUI = controllerConnected;
             _inputModeInitialized = true;
         }
 
-        // Force fallback to keyboard if controller is gone
+        // Reconnected -> switch back to controller UI immediately
+        if (controllerConnected && !_wasControllerConnected)
+            _preferControllerUI = true;
+
+        // Disconnected -> switch to keyboard UI immediately
         if (!controllerConnected)
             _preferControllerUI = false;
 
-        if (controllerUsed)
-            _preferControllerUI = true;
-
-        if (keyboardUsed)
-            _preferControllerUI = false;
+        _wasControllerConnected = controllerConnected;
 
         return _preferControllerUI;
     }
@@ -756,6 +791,8 @@ public class ComboKeySlot : Script
         _isFadingToDim = false;
         _inAppearFadeIn = false;
         _isFadingToHidden = false;
+        _displayedKey = '\0';
+        _displayedSpriteType = SpriteType.None;
 
         _fadeInDuration = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat : 0.5f;
         _fadeInTimer = 0f;
@@ -793,6 +830,8 @@ public class ComboKeySlot : Script
         _isFadingToDim = false;
         _inAppearFadeIn = false;
         _isFadingToHidden = false;
+        _displayedKey = '\0';
+        _displayedSpriteType = SpriteType.None;
     }
 
     // FOR PLAYER SLOTS: smoothly fade from full opacity back to dim when enemy turn resets
@@ -822,6 +861,8 @@ public class ComboKeySlot : Script
         _inFadeIn = false;
         _inAppearFadeIn = false;
         _isFadingToHidden = false;
+        _displayedKey = '\0';
+        _displayedSpriteType = SpriteType.None;
 
         var fade = GetFade();
         // Only do the flash-to-full-then-dim animation when coming from full opacity (e.g. after player turn).
@@ -878,6 +919,8 @@ public class ComboKeySlot : Script
         if (!sprite.HasSprite()) return;
 
         sprite.Texture = GetSpriteForKey(key);
+        _displayedKey = key;
+        _displayedSpriteType = SpriteType.EnemyKey;
 
         var fade = GetFade();
         fade.SetAlpha(1.0f);

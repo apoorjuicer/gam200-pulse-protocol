@@ -81,10 +81,10 @@ public abstract class AudioSliderKnobBase : Script
     private static float s_pendingAdj       = 0f;
     private static int   s_pendingAdjFrame  = -1;
 
-    private const int GP_DPAD_UP    = 11;
-    private const int GP_DPAD_RIGHT = 12;
-    private const int GP_DPAD_DOWN  = 13;
-    private const int GP_DPAD_LEFT  = 14;
+    private const int GP_DPAD_UP    = InputConstants.GP_DPAD_UP;
+    private const int GP_DPAD_RIGHT = InputConstants.GP_DPAD_RIGHT;
+    private const int GP_DPAD_DOWN  = InputConstants.GP_DPAD_DOWN;
+    private const int GP_DPAD_LEFT  = InputConstants.GP_DPAD_LEFT;
 
     // How much each D-pad L/R press adjusts the value (0–1 scale).
     public float ControllerStep = 0.05f;

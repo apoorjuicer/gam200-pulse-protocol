@@ -207,7 +207,17 @@ public class PlayerAnimationController : Script
 
         waitingForStateEnd = true;
         stateTimer = 0f;
-        stateDuration = AttackFrames / GetBeatSyncedSpeed(AttackFrames);
+
+        if (AttackSpriteSheet == "dorian_gun")
+        {
+            float gunSpeed = GetBeatSyncedSpeed(18);
+            GetAnimation().SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, gunSpeed);
+            stateDuration = AttackFrames / gunSpeed;
+        }
+        else
+        {
+            stateDuration = AttackFrames / GetBeatSyncedSpeed(AttackFrames);
+        }
 
         // Queue hit VFX to spawn on enemy after this attack animation finishes
         pendingHitVFX = true;
@@ -223,7 +233,7 @@ public class PlayerAnimationController : Script
                 Factory.Instantiate("SpearAttackVFX");
                 break;
             case EnemyIconType.Bat:
-                Factory.Instantiate("BatAttackVFX");
+                Factory.Instantiate("GunAttackVFX");
                 break;
             default: // Rat and anything else
                 Factory.Instantiate("SwordSlashVFX");

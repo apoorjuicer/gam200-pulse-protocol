@@ -16,7 +16,9 @@ using System;
 
 public class LevelSelectOverlay : Script
 {
-    private const int GP_CIRCLE = 1;
+    private const int GP_CIRCLE     = InputConstants.GP_CIRCLE;
+    private const int GP_DPAD_RIGHT = InputConstants.GP_DPAD_RIGHT;
+    private const int GP_DPAD_LEFT  = InputConstants.GP_DPAD_LEFT;
 
     public override void Update()
     {
@@ -51,8 +53,9 @@ public class LevelSelectCard : Script
     private static int s_gpNavFrame = -1;
     private static bool s_stickLeftWasActive = false;
     private static bool s_stickRightWasActive = false;
-    private const int GP_DPAD_RIGHT = 12;
-    private const int GP_DPAD_LEFT  = 14;
+
+    private const int GP_DPAD_RIGHT = InputConstants.GP_DPAD_RIGHT;
+    private const int GP_DPAD_LEFT  = InputConstants.GP_DPAD_LEFT;
     private const float StickDeadzone = 0.5f;
 
     private bool initialized = false;

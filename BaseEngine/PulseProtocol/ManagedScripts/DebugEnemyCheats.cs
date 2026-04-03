@@ -6,9 +6,9 @@ public class DebugEnemyCheats : Script
     public int KillKey = 75;
 
     // PS4 controller: hold L1 + R1, then press Triangle
-    private const int GP_TRIANGLE = 3;
-    private const int GP_L1       = 4;
-    private const int GP_R1       = 5;
+    private const int GP_TRIANGLE = InputConstants.GP_TRIANGLE;
+    private const int GP_L1       = InputConstants.GP_L1;
+    private const int GP_R1       = InputConstants.GP_R1;
 
     private bool m_started = false;
 

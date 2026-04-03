@@ -321,14 +321,15 @@ public class ComboDisplayManager : Script
         ClearEnemySlotsInstant();
         float beatDur = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat : 0.5f;
 
-        // Hide player gap slots so they pop in on the beat via HandleGapReveal, matching input behaviour
+        // Show gap player slots empty immediately — they stay visible the whole enemy turn,
+        // no hide/pop-in. Only the enemy gap slots pop in on their beat.
         for (int i = 0; i < 4; i++)
         {
             if (!playerSlots.ContainsKey(i)) continue;
             bool isUsed = false;
             for (int j = 0; j < weakness.Length && j < 4; j++)
                 if (VisualSlot(j) == i) { isUsed = true; break; }
-            if (!isUsed) playerSlots[i].HideInstant();
+            if (!isUsed) playerSlots[i].ShowEmpty();
         }
 
         for (int i = 0; i < weakness.Length && i < 4; i++)
@@ -409,7 +410,7 @@ public class ComboDisplayManager : Script
             if (elapsed < gapRevealOffsets[gapRevealIndex]) break;
             int s = gapVisualSlots[gapRevealIndex];
             if (enemySlots.ContainsKey(s)) enemySlots[s].ShowEmptyPop();
-            if (playerSlots.ContainsKey(s)) playerSlots[s].ShowEmptyPop();
+            // Player gap slots are already showing empty from StartComboReveal — no pop needed
             gapRevealIndex++;
         }
 
@@ -476,6 +477,12 @@ public class ComboDisplayManager : Script
                 return;
             }
         }
+    }
+
+    public void HideAllSlots()
+    {
+        ClearEnemySlotsInstant();
+        ClearPlayerSlots();
     }
 
     private void ClearPlayerSlots()

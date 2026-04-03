@@ -25,6 +25,11 @@ public class InputBridge : Script
 
 
     // =========================
+    // Global Access (Singleton)
+    // =========================
+    public static InputBridge? Instance { get; private set; }
+
+    // =========================
     // State
     // =========================
     private bool initialized = false;
@@ -33,7 +38,6 @@ public class InputBridge : Script
     private bool prevS = false;
     private bool prevD = false;
     private bool prevInvalidKeyDown = false;
-    private bool wasInputLocked = true;  // tracks lock state to detect player-turn start
     private bool breakSfxPlayed = false; // ensures break SFX only fires once per turn
 
     // =========================
@@ -49,14 +53,7 @@ public class InputBridge : Script
 
         if (!DebugBypassTurnLock)
         {
-            bool isLocked = TurnManager.Instance == null || TurnManager.Instance.IsInputLocked;
-
-            // Detect the moment the player turn starts (locked → unlocked) to reset per-turn state
-            if (wasInputLocked && !isLocked)
-                breakSfxPlayed = false;
-            wasInputLocked = isLocked;
-
-            if (isLocked)
+            if (TurnManager.Instance == null || TurnManager.Instance.IsInputLocked)
             {
                 prevW = input.IsKeyPressed(KeyW);
                 prevA = input.IsKeyPressed(KeyA);
@@ -98,6 +95,7 @@ public class InputBridge : Script
     // =========================
     private void Initialize()
     {
+        Instance = this;
         Console.WriteLine("[InputBridge] ===== INITIALIZED =====");
         Console.WriteLine("[InputBridge] Using C# edge detection (IsKeyPressed + prev state)");
         Console.WriteLine("[InputBridge] TurnManager lock is ACTIVE");
@@ -119,7 +117,18 @@ public class InputBridge : Script
 
         AudioComponent audio = GetAudio();
 
-        // Register input first so we know the outcome before deciding SFX
+        // If the combo is not yet completed, this is a fresh turn — reset the break flag.
+        // More reliable than tracking the lock→unlock transition, because it doesn't depend
+        // on entity update order.
+        if (!ComboSystem.Instance.HasCompletedCombo())
+            breakSfxPlayed = false;
+
+        // Keys 1-3: play click instantly. Last key: play establish/break instead (no click).
+        bool isLastKey = !ComboSystem.Instance.HasCompletedCombo() &&
+                         ComboSystem.Instance.GetComboProgress() + 1 >= ComboSystem.Instance.GetExpectedCombo().Length;
+        if (!isLastKey)
+            audio.PlaySFX("SFX_W_Key");
+
         ComboSystem.Instance.RegisterInput(key);
 
         if (ComboSystem.Instance.HasCompletedCombo())
@@ -133,17 +142,16 @@ public class InputBridge : Script
             }
             else if (!breakSfxPlayed)
             {
-                // Play immediately on the beat the combo breaks — flag prevents replaying
-                // on subsequent key presses this turn. TurnManager handles the no-input case.
                 audio.PlaySFX("SFX_ComboStreakBroken");
                 breakSfxPlayed = true;
             }
         }
-        else
-        {
-            // Combo still in progress — key was accepted, play per-key SFX
-            audio.PlaySFX("SFX_W_Key");
-        }
+    }
+
+    public void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 
     // =========================
