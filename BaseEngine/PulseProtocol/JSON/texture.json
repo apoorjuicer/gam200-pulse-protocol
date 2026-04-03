@@ -901,7 +901,7 @@
         //howtoplay cut scene
         {
             "id": "htp_1",
-            "path": "Assets/Textures/UI/howtoplay/HTP_1.png",
+            "path": "Assets/Textures/UI/howtoplay/NEW_HTP_1.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
@@ -909,7 +909,7 @@
         },
         {
             "id": "htp_2",
-            "path": "Assets/Textures/UI/howtoplay/HTP_2.png",
+            "path": "Assets/Textures/UI/howtoplay/NEW_HTP_2.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
@@ -917,7 +917,7 @@
         },
         {
             "id": "htp_3",
-            "path": "Assets/Textures/UI/howtoplay/HTP_3.png",
+            "path": "Assets/Textures/UI/howtoplay/NEW_HTP_3.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
