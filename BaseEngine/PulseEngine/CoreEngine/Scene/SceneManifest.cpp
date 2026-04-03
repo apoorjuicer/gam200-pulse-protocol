@@ -1,3 +1,18 @@
+/******************************************************************************/
+/**
+ * @file        SceneManifest.cpp
+ * @project     Pulse Protocol
+ * @author      Ban Kai Wei Benjamin 
+ * 
+ * @brief       Parses and writes scene manifest JSON, storing scene asset lists 
+ *              and shared asset groups for loading and saving
+ *              
+ *
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
 
 
 #include "pch/pch_temp.h"

@@ -1,3 +1,19 @@
+/******************************************************************************/
+/**
+ * @file        SceneManifest.h
+ * @project     Pulse Protocol
+ * @author      Ban Kai Wei Benjamin 
+ * 
+ * @brief       Scene manifest storing asset registry IDs required by a scene, 
+ *              with JSON serialization and file load/save 
+ *              
+ *
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
+
 #pragma once
 #include <vector>
 #include <string>
