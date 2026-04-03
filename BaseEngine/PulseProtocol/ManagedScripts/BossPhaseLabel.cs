@@ -3,11 +3,19 @@ using ScriptAPI;
 
 public class BossPhaseLabel : Script
 {
-    private bool initialized = false;
-    private int  lastPhase   = 0;
+    private bool initialized    = false;
+    private int  lastPhase      = 0;
+    private bool prevGameReady  = false;
 
     public override void Update()
     {
+        // Detect new play session
+        if (initialized && prevGameReady && !GameStart.Ready)
+        {
+            initialized = false;
+        }
+        prevGameReady = GameStart.Ready;
+
         if (!initialized)
         {
             Initialize();
@@ -26,13 +34,14 @@ public class BossPhaseLabel : Script
     private void Initialize()
     {
         initialized = true;
-        lastPhase   = BossEnemyController.BossPhase;
+
+        BossEnemyController.ResetPhase();
+        lastPhase = 0;
 
         var text = GetTextComponent();
         text.SetAlignment(1);
         text.SetColor(1f, 1f, 1f);
-
-        UpdateLabel(lastPhase);
+        text.SetVisible(false);
     }
 
     private void UpdateLabel(int phase)

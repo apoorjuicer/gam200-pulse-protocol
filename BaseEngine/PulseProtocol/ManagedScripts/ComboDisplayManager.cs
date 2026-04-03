@@ -481,6 +481,7 @@ public class ComboDisplayManager : Script
 
     public void HideAllSlots()
     {
+        lastInputProgress = ComboSystem.Instance?.GetComboProgress() ?? lastInputProgress;
         ClearEnemySlotsInstant();
         ClearPlayerSlots();
     }

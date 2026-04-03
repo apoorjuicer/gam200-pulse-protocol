@@ -96,7 +96,8 @@ public class EnemyRhythmController : Script
     private int lastBeat = -1;
     private bool animPaused = false;
     protected bool isDead = false;
-    public bool IsDying => isDead;  // True from Die() until Instance is cleared after animation
+    public bool IsDying => isDead;        // True from Die() until Instance is cleared after animation
+    public bool IsPendingDeath => pendingDeath; // True from killing blow until Die() plays out
     private EnemyState currentState = EnemyState.Idle;
 
     private float attackCooldownTimer = 0f;
@@ -591,6 +592,7 @@ public class EnemyRhythmController : Script
         {
             pendingDeath = true;
             pendingDeathFallbackTimer = 0f;
+            ComboDisplayManager.Instance?.HideAllSlots();
         }
     }
 
@@ -612,6 +614,12 @@ public class EnemyRhythmController : Script
     public void TriggerHurtAnimation()
     {
         if (isDead) return;
+        // If this hit was the killing blow, skip the hurt animation and go straight to death
+        if (pendingDeath)
+        {
+            Die();
+            return;
+        }
         SetState(EnemyState.Hurt);
         hurtTimer = HurtFrames / AnimationSpeed;
     }

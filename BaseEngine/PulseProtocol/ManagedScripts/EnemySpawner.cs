@@ -84,11 +84,11 @@ public class EnemySpawner : Script
     private List<EnemyIconType> EnemyContainer3 = new List<EnemyIconType>
     {
         EnemyIconType.Rat,
+        EnemyIconType.Bat,
+        EnemyIconType.BlueGorilla,
+        EnemyIconType.Bat,
         EnemyIconType.BlueGorilla,
         EnemyIconType.Rat,
-        EnemyIconType.Bat,
-        EnemyIconType.BlueGorilla,
-        EnemyIconType.Bat,
         EnemyIconType.Boss
     };
 

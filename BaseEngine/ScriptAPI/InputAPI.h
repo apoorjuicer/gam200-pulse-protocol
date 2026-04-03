@@ -2,8 +2,9 @@
 /**
 * @file        InputAPI.h
 * @project     Pulse Protocol
-* @author      Chloe Lau Rey En
-* @brief       Wrapper for mouse input access from C# scripts
+* @author      Chloe Lau Rey En - (95%)
+* @author      Goh Pin Kai - (5%)
+* @brief       Wrapper for mouse & gamepad input access from C# scripts
 *
 * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the

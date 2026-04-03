@@ -89,6 +89,16 @@ public class ScoreManager : Script
                           $"Total={totalScore} | Combo={combo} (tier ×{tier}) | MaxCombo={maxCombo}");
     }
 
+    public void RestoreCombo(int value)
+    {
+        if (value > combo)
+        {
+            combo = value;
+            if (combo > maxCombo) maxCombo = combo;
+            Console.WriteLine($"[ScoreManager] Combo restored to {combo} after bar-alignment wait");
+        }
+    }
+
     public void ResetScore()
     {
         totalScore       = 0;

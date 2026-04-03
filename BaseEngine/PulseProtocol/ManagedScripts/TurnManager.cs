@@ -59,6 +59,7 @@ public class TurnManager : Script
     private bool gameStarted = false;
     private bool prevGameReady = false; // used to detect new play sessions on reused script objects
     private int resolutionPendingFrames = 0; // counts down: 2→1→0 then resolves, giving InputBridge 2 frames to process last-beat input regardless of entity update order
+    private int comboAtLastSuccess = -1;     // saved after a successful kill; restored at the start of the next turn to survive the bar-alignment wait
 
     // Time-based player slot pulses (mirrors SlotOffsets, runs every frame)
     private bool playerInputPhaseActive = false;
@@ -110,8 +111,12 @@ public class TurnManager : Script
             return;
         }
 
-        // Time-based player slot pulses — must run every frame, not just on beats
-        if (playerInputPhaseActive && GameStart.Ready)
+        bool killingBlowDealt = ComboSystem.Instance?.HasCompletedCombo() == true
+            && (EnemyRhythmController.Instance?.IsPendingDeath == true
+                || EnemyRhythmController.Instance?.IsDying == true);
+        if (playerInputPhaseActive && GameStart.Ready
+            && currentPhase == TurnPhase.PlayerInput
+            && !killingBlowDealt)
         {
             float elapsed = Conductor.Instance.GetVisualAdjustedSongTime() - playerInputStartTime;
             float[] offsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0.0f, 0.5f, 1.0f, 1.5f };
@@ -216,15 +221,14 @@ public class TurnManager : Script
                 }
 
             case TurnPhase.Resolution:
-                // Step 1: wait for death animation to fully finish and new enemy to be ready.
-                // IsDying is true from Die() until the animation completes and spawner is notified.
-                if (EnemyRhythmController.Instance == null || EnemyRhythmController.Instance!.IsDying)
+                if (EnemyRhythmController.Instance == null
+                    || EnemyRhythmController.Instance!.IsDying
+                    || EnemyRhythmController.Instance!.IsPendingDeath)
                 {
                     Console.WriteLine("[TurnManager] Resolution: waiting for death animation / next enemy...");
                     break;
                 }
-                // Step 2: wait until we land on a bar-aligned beat so the new "1 2 3 4"
-                // always starts cleanly, regardless of how long the death animation took.
+                // Wait for bar alignment so every enemy's phase always starts on beat 1.
                 if (currentBeat % CountdownBeats != 0)
                 {
                     Console.WriteLine($"[TurnManager] Resolution: waiting for bar alignment (beat {currentBeat}, need multiple of {CountdownBeats})...");
@@ -258,6 +262,7 @@ public class TurnManager : Script
         gameStarted = false;
         playerInputPhaseActive = false;
         resolutionPendingFrames = 0;
+        comboAtLastSuccess = -1;
         EnemyDisplayBeatsOverride = null;
         PlayerInputBeatsOverride  = null;
         for (int i = 0; i < slotPulsed.Length; i++) slotPulsed[i] = false;
@@ -289,6 +294,12 @@ public class TurnManager : Script
     {
         currentPhase = TurnPhase.EnemyDisplay;
         phaseStartBeat = Conductor.Instance!.GetCurrentBeat() - 1;
+
+        if (comboAtLastSuccess >= 0)
+        {
+            ScoreManager.Instance?.RestoreCombo(comboAtLastSuccess);
+            comboAtLastSuccess = -1;
+        }
 
         // Return player to idle at the start of every enemy turn.
         PlayerAnimationController.Instance?.ForceIdle();
@@ -368,12 +379,11 @@ public class TurnManager : Script
             // when the combo was completed — no need to apply it again here.
             Console.WriteLine("[TurnManager] Player succeeded! (damage applied at combo completion)");
 
-            // // PLAY SUCCESS SOUND
-            // AudioComponent audio = GetAudio();
-            // audio.PlaySFX("SFX_ComboEstablished_1");
+            comboAtLastSuccess = ScoreManager.Instance?.Combo ?? -1;
         }
         else
         {
+            comboAtLastSuccess = -1;
             Console.WriteLine("[TurnManager] ? Player failed!");
             Console.WriteLine("[TurnManager] Enemy attacks and moves remaining steps!");
 
@@ -386,7 +396,6 @@ public class TurnManager : Script
                 AudioComponent audio = GetAudio();
                 audio.PlaySFX("SFX_ComboStreakBroken");
             }
-
 
             // Enemy executes punishment
             if (EnemyRhythmController.Instance != null)

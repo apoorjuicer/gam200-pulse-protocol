@@ -14,6 +14,8 @@ public class BossEnemyController : EnemyRhythmController
     // =========================
     private int _bossPhase = 1;   // 1 or 2
     public static int BossPhase { get; private set; } = 0; // 0 = inactive, 1 = phase 1, 2 = phase 2
+
+    public static void ResetPhase() { BossPhase = 0; }
     private static readonly Random _bossRng = new Random();
 
     // Phase 1 combo pool mirrors exact values from existing enemies
