@@ -147,10 +147,13 @@ public class InputBridge : Script
         if (!isLastKey)
             audio.PlaySFX(isCorrectKey ? "SFX_W_Key" : "SFX_Invalid_Key");
 
+        int progressBefore = ComboSystem.Instance.GetComboProgress();
         ComboSystem.Instance.RegisterInput(key);
+        bool timingAccepted = ComboSystem.Instance.GetComboProgress() > progressBefore
+                              || ComboSystem.Instance.PlayerDidSuccessfulCombo;
 
-        // Always update the visual for the slot we just consumed
-        ComboDisplayManager.Instance?.ForceShowPlayerKeyFeedback(slotIndex, key, isCorrectKey, expectedCombo[slotIndex]);
+        // Show green only if the key was correct AND timing was within the window
+        ComboDisplayManager.Instance?.ForceShowPlayerKeyFeedback(slotIndex, key, isCorrectKey && timingAccepted, expectedCombo[slotIndex]);
 
         // Last beat: outcome
         if (isLastKey)

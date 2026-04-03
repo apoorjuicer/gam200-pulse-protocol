@@ -35,7 +35,7 @@ public class Conductor : Script
     // actually reaches the player's ears (hardware output buffer, speaker/headphone lag, etc.).
     // LatencyCalibrator overwrites this after the test so every new Conductor instance reads
     // the player's measured value on init. Default is a rough estimate for a typical setup.
-    public static float CalibratedOffset = 0.08f;
+    public static float CalibratedOffset = 0.13f;
 
     // The visual latency offset measured by VisualLatencyCalibrator (flash-reaction test).
     // Accounts for the delay between when a frame is submitted and when the player sees it

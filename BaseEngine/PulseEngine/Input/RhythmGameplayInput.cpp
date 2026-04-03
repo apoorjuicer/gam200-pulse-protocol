@@ -256,7 +256,7 @@ std::string RhythmGameplayInput::getTimingFeedback()
     if (musicPosition <= 0.0)
         return "MISS";
 
-    double beatPosition = fmod(musicPosition, beatInterval);
+    double beatPosition = fmod(musicPosition + 0.1, beatInterval);
     double distance = std::min(beatPosition, beatInterval - beatPosition);
 
     if (distance <= 0.075)
