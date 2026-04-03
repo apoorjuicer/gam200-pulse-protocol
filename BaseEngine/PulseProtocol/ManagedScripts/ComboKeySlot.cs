@@ -2,9 +2,8 @@
 /**
 * @file        ComboKeySlot.cs
 * @project     Pulse Protocol
-* @author      Carrie Lam (65%)
-*              Chloe Lau (25%)
-*              Reginald (10%)
+* @author      Carrie Lam (70%)
+*              Chloe Lau (30%)
 * @brief       Represents a single key slot in the combo UI, handling sprite detection,
 *              registration, and animations for enemy reveals and player input feedback
 *              (correct, wrong, countdown, pop effects). Extended with dim-always-visible
@@ -666,21 +665,38 @@ public class ComboKeySlot : Script
 
         bool controllerConnected = input.IsGamepadConnected;
 
+        bool controllerUsed =
+            input.IsGamepadButtonPressed(3) ||  // Triangle -> W
+            input.IsGamepadButtonPressed(1) ||  // Square   -> A
+            input.IsGamepadButtonPressed(0) ||  // Cross    -> S
+            input.IsGamepadButtonPressed(2);    // Circle   -> D
+
+        bool keyboardUsed =
+            input.IsKeyPressed(87) ||  // W
+            input.IsKeyPressed(65) ||  // A
+            input.IsKeyPressed(83) ||  // S
+            input.IsKeyPressed(68);    // D
+
         if (!_inputModeInitialized)
         {
-            _preferControllerUI = controllerConnected;
+            _preferControllerUI = controllerConnected || controllerUsed;
             _inputModeInitialized = true;
         }
 
-        // Reconnected -> switch back to controller UI immediately
+        // Switch to controller UI when controller is reconnected mid-game
         if (controllerConnected && !_wasControllerConnected)
             _preferControllerUI = true;
+        _wasControllerConnected = controllerConnected;
 
-        // Disconnected -> switch to keyboard UI immediately
+        // Force fallback to keyboard if controller is gone
         if (!controllerConnected)
             _preferControllerUI = false;
 
-        _wasControllerConnected = controllerConnected;
+        if (controllerUsed)
+            _preferControllerUI = true;
+
+        if (keyboardUsed)
+            _preferControllerUI = false;
 
         return _preferControllerUI;
     }
