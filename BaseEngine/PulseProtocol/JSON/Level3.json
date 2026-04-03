@@ -27,7 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Level3_BG",
+                        "spriteName": "Level1_BG",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
