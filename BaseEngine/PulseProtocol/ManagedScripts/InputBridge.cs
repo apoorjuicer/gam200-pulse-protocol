@@ -137,6 +137,9 @@ public class InputBridge : Script
             {
                 audio.PlaySFX("SFX_ComboEstablished_1");
                 float playerDamage = PlayerHealth.Instance != null ? PlayerHealth.Instance.GetHealth().damage : 10;
+                int comboLen = ComboSystem.Instance.GetExpectedCombo().Length;
+                if (comboLen == 6) playerDamage = 10f;
+                else if (comboLen == 8) playerDamage = 15f;
                 EnemyRhythmController.Instance?.TakeDamage(playerDamage);
                 PlayerAnimationController.Instance?.PlayAttack(ComboSystem.Instance.GetExpectedCombo());
             }
