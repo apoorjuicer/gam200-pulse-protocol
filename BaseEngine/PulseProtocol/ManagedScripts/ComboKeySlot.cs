@@ -2,8 +2,9 @@
 /**
 * @file        ComboKeySlot.cs
 * @project     Pulse Protocol
-* @author      Carrie Lam (70%)
-*              Chloe Lau (30%)
+* @author      Carrie Lam (65%)
+*              Chloe Lau (25%)
+*              Reginald (10%)
 * @brief       Represents a single key slot in the combo UI, handling sprite detection,
 *              registration, and animations for enemy reveals and player input feedback
 *              (correct, wrong, countdown, pop effects). Extended with dim-always-visible
@@ -665,38 +666,21 @@ public class ComboKeySlot : Script
 
         bool controllerConnected = input.IsGamepadConnected;
 
-        bool controllerUsed =
-            input.IsGamepadButtonPressed(3) ||  // Triangle -> W
-            input.IsGamepadButtonPressed(1) ||  // Square   -> A
-            input.IsGamepadButtonPressed(0) ||  // Cross    -> S
-            input.IsGamepadButtonPressed(2);    // Circle   -> D
-
-        bool keyboardUsed =
-            input.IsKeyPressed(87) ||  // W
-            input.IsKeyPressed(65) ||  // A
-            input.IsKeyPressed(83) ||  // S
-            input.IsKeyPressed(68);    // D
-
         if (!_inputModeInitialized)
         {
-            _preferControllerUI = controllerConnected || controllerUsed;
+            _preferControllerUI = controllerConnected;
             _inputModeInitialized = true;
         }
 
-        // Switch to controller UI when controller is reconnected mid-game
+        // Reconnected -> switch back to controller UI immediately
         if (controllerConnected && !_wasControllerConnected)
             _preferControllerUI = true;
-        _wasControllerConnected = controllerConnected;
 
-        // Force fallback to keyboard if controller is gone
+        // Disconnected -> switch to keyboard UI immediately
         if (!controllerConnected)
             _preferControllerUI = false;
 
-        if (controllerUsed)
-            _preferControllerUI = true;
-
-        if (keyboardUsed)
-            _preferControllerUI = false;
+        _wasControllerConnected = controllerConnected;
 
         return _preferControllerUI;
     }
