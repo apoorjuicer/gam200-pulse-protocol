@@ -307,5 +307,69 @@ public class ScriptName : Script
         //   GetGlow().SetEnabled(true);
         //   GetGlow().SetColor(1f, 0f, 0f);   // red glow
         //   GetGlow().GlowTo(3.0f, 1.0f);     // ramp up over 1 second
+
+
+        // 19. Gamepad/Controller API
+        //     Accessed through the same InputComponent as keyboard/mouse.
+        //     Supports PS4 (Bluetooth) and Xbox controllers via GLFW gamepad layout.
+        //
+        //     Use InputConstants for readable button names instead of raw indices:
+        //       InputConstants.GP_CROSS      = 0   (PS4: ×   / Xbox: A)
+        //       InputConstants.GP_CIRCLE     = 1   (PS4: ○   / Xbox: B)
+        //       InputConstants.GP_SQUARE     = 2   (PS4: □   / Xbox: X)
+        //       InputConstants.GP_TRIANGLE   = 3   (PS4: △   / Xbox: Y)
+        //       InputConstants.GP_L1         = 4   (PS4: L1  / Xbox: LB)
+        //       InputConstants.GP_R1         = 5   (PS4: R1  / Xbox: RB)
+        //       InputConstants.GP_START      = 7   (PS4: Options / Xbox: Menu)
+        //       InputConstants.GP_DPAD_UP    = 11
+        //       InputConstants.GP_DPAD_RIGHT = 12
+        //       InputConstants.GP_DPAD_DOWN  = 13
+        //       InputConstants.GP_DPAD_LEFT  = 14
+        //
+        //     Axes (GetGamepadAxis):
+        //       0 = Left stick X,  1 = Left stick Y
+        //       2 = Right stick X, 3 = Right stick Y
+        //       4 = L2 trigger,    5 = R2 trigger  (range: -1.0 to 1.0)
+
+        bool connected = input.IsGamepadConnected;            // true if a gamepad is plugged in
+
+        // Button states — same 3-state model as keyboard/mouse
+        input.IsGamepadButtonPressed(InputConstants.GP_CROSS);    // held down
+        input.IsGamepadButtonTriggered(InputConstants.GP_CROSS);  // just pressed this frame
+        input.IsGamepadButtonReleased(InputConstants.GP_CROSS);   // just released this frame
+
+        // Analog axes (-1.0 to 1.0)
+        float leftStickX  = input.GetGamepadAxis(0);
+        float leftStickY  = input.GetGamepadAxis(1);
+        float rightStickX = input.GetGamepadAxis(2);
+        float rightStickY = input.GetGamepadAxis(3);
+        float l2Trigger   = input.GetGamepadAxis(4);
+        float r2Trigger   = input.GetGamepadAxis(5);
+
+        // Rumble: leftMotor and rightMotor are 0.0-1.0 intensity; durationSec is how long
+        input.RumbleGamepad(0.5f, 0.5f, 0.2f);   // light rumble for 0.2 s (e.g. button confirm)
+        input.RumbleGamepad(1.0f, 1.0f, 0.5f);   // strong rumble for 0.5 s (e.g. hit taken)
+        input.RumbleGamepad(0.0f, 0.0f, 0.0f);   // stop rumble immediately
+
+        // Example - detect any face button press and rumble:
+        //   if (input.IsGamepadConnected &&
+        //       input.IsGamepadButtonTriggered(InputConstants.GP_CROSS))
+        //   {
+        //       input.RumbleGamepad(0.4f, 0.4f, 0.1f);
+        //   }
+
+
+        // 20. Screen Mode API (ToggleScreenAPI)
+        //     Static class for switching between fullscreen and windowed mode at runtime.
+        //     Typically called from settings UI scripts.
+
+        ToggleScreenAPI.ToggleFullscreen();               // switch between fullscreen and windowed
+        ToggleScreenAPI.SetFullscreen(true);              // force fullscreen
+        ToggleScreenAPI.SetFullscreen(false);             // force windowed
+        bool isFullscreen = ToggleScreenAPI.IsFullscreen(); // returns bool — true if currently fullscreen
+
+        // Example - settings button that persists the choice:
+        //   ToggleScreenAPI.ToggleFullscreen();
+        //   UserSettingsStore.SetFullscreen(ToggleScreenAPI.IsFullscreen());
     }
 }
