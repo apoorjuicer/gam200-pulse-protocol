@@ -148,7 +148,11 @@ public class ComboSystem : Script
                 float gap = offsets[i] - offsets[i - 1];
                 if (gap < minGap) minGap = gap;
             }
-            minTimeBetweenPresses = minGap * 0.8f;
+            // Gate must never block two consecutive valid presses within their great windows.
+            // Minimum valid time between press N (at worst: +greatWindow late) and press N+1
+            // (at best: -greatWindow early) = minGap - 2*greatWindow.
+            // Floor at 0.05s to prevent bounce-registration from a single physical keypress.
+            minTimeBetweenPresses = Math.Max(0.05f, minGap - 2f * greatWindow);
         }
         else {
             minTimeBetweenPresses = cachedBeatDuration * 0.8f;
@@ -172,15 +176,27 @@ public class ComboSystem : Script
             return;
         }
 
-        float beatDuration = Conductor.Instance!.GetBeatDuration();
-        // Back-date by half a frame: InputBridge detects taps one frame late (prev/cur polling),
-        // so the press likely happened ~0.5 frames ago on average.
         float currentSongTime = Conductor.Instance!.GetVisualAdjustedSongTime();
 
-        float timeSince = (currentSongTime % beatDuration + beatDuration) % beatDuration;
-        float timeUntilNext = beatDuration - timeSince;
-        
-        float delta = Math.Min(timeSince, timeUntilNext);
+        // Measure delta against this slot's specific expected press time.
+        // The old "% beatDuration" only worked when all offsets were beat multiples.
+        // Syncopated patterns like Bat (0.25s offsets) fall between beats and always
+        // gave MISS with that approach — this fixes it.
+        float[] slotOffsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0f, 0.5f, 1f, 1.5f };
+        int slotIndex = currentCombo.Count;
+        float delta;
+        if (TurnManager.Instance != null && slotIndex < slotOffsets.Length)
+        {
+            float expectedTime = TurnManager.Instance.GetPlayerInputStartTime() + slotOffsets[slotIndex];
+            delta = Math.Abs(currentSongTime - expectedTime);
+        }
+        else
+        {
+            // Fallback: nearest beat boundary
+            float beatDuration = Conductor.Instance!.GetBeatDuration();
+            float timeSince = (currentSongTime % beatDuration + beatDuration) % beatDuration;
+            delta = Math.Min(timeSince, beatDuration - timeSince);
+        }
 
         // Clamp to zero in case of floating-point drift
         if (delta < 0f) delta = 0f;
@@ -212,12 +228,16 @@ public class ComboSystem : Script
         
         if (judgement == "MISS")
         {
-            Console.WriteLine($"[ComboSystem] [{key}] MISS — pressed too far from beat (Δ={delta:F3}s). Slot freed.");
+            Console.WriteLine($"[ComboSystem] [{key}] MISS — pressed too far from beat (Δ={delta:F3}s). Combo failed.");
             ScoreManager.Instance?.AddScore("MISS");
             if (ComboDisplayManager.Instance != null)
+            {
                 ComboDisplayManager.Instance.ShowJudgement("MISS");
+                ComboDisplayManager.Instance.ShowGapMissKey(key);
+            }
             VisualBeatSystem.Instance?.FlashJudgement("MISS");
-            // Camera shake feedback for a bad press can be added here via VFXAPI.ShakeCamera / VFXAPI.SpawnParticles
+            PlayerDidSuccessfulCombo = false;
+            comboCompleted = true;
             return;
         }
 
@@ -225,20 +245,31 @@ public class ComboSystem : Script
         hitResults.Add(judgement);
         currentCombo.Add(key);
 
-        // === VISUAL FEEDBACK ===
-        // If the key is wrong, always show MISS visually regardless of timing, if not might mess up w the timing
+        // === WRONG KEY CHECK ===
+        // Wrong key = immediate combo fail, no matter the timing
         string visualJudgement = judgement;
         if (currentCombo.Count <= currentEnemyWeakness.Length)
         {
             char expectedKey = currentEnemyWeakness[currentCombo.Count - 1];
             if (key != expectedKey)
+            {
                 visualJudgement = "MISS";
+                Console.WriteLine($"[ComboSystem] [{key}] MISS — wrong key (expected '{expectedKey}'). Combo failed.");
+                ScoreManager.Instance?.AddScore("MISS");
+                if (ComboDisplayManager.Instance != null)
+                {
+                    ComboDisplayManager.Instance.ShowJudgement("MISS");
+                }
+                VisualBeatSystem.Instance?.FlashJudgement("MISS");
+                PlayerDidSuccessfulCombo = false;
+                comboCompleted = true;
+                return;
+            }
         }
 
-        // miss combo resets
         ScoreManager.Instance?.AddScore(visualJudgement);
 
-        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s, sinceBeat={timeSince:F3}s, untilNext={timeUntilNext:F3}s)");
+        Console.WriteLine($"[ComboSystem] [{key}] Timing: {judgement} (Δ={delta:F3}s from slot {slotIndex} expected time)");
         Console.WriteLine($"[ComboSystem]   Progress: {currentCombo.Count}/{maxComboLength} | Expected: {(currentCombo.Count <= currentEnemyWeakness.Length ? currentEnemyWeakness[currentCombo.Count - 1].ToString() : "?")} | Got: {key}");
 
 
@@ -310,6 +341,7 @@ public class ComboSystem : Script
         {
             Console.WriteLine("[ComboSystem] ✅ COMBO SUCCESS!");
             PlayerDidSuccessfulCombo = true;
+            GetInput().RumbleGamepad(1.0f, 1.0f, 0.3f);
         }
         else
         {

@@ -21,6 +21,12 @@ public class LevelCountdown : Script
     {
 
         var text = GetTextComponent();
+        if (LoadingScreenScript.BlockLevelStartCountdown)
+        {
+            text.SetVisible(false);
+            return;
+        }
+
         if (!started)
         {
             started = true;

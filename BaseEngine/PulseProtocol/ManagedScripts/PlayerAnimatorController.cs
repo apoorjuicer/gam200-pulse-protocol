@@ -57,6 +57,10 @@ public class PlayerAnimationController : Script
     private bool waitingForStateEnd = false;
     private bool animPaused = false;
 
+    // Delayed hit VFX
+    private bool  pendingHitVFX   = false;
+    private float hitVFXTimer     = 0f;
+
     public override void Update()
     {
         if (!initialized)
@@ -101,6 +105,21 @@ public class PlayerAnimationController : Script
                 GoToIdle();
             }
         }
+
+        // Spawn hit VFX on the enemy after attack animation finishes
+        if (pendingHitVFX)
+        {
+            hitVFXTimer -= Time.DeltaTime;
+            if (hitVFXTimer <= 0f)
+            {
+                pendingHitVFX = false;
+                if (EnemyRhythmController.Instance != null)
+                {
+                    Factory.Instantiate("HitVFX");
+                    EnemyRhythmController.Instance.TriggerHurtAnimation();
+                }
+            }
+        }
     }
 
     private void Initialize()
@@ -127,24 +146,51 @@ public class PlayerAnimationController : Script
     // Taking damage reverts to Idle2 (dropped guard)
     private void GoToIdle()
     {
-        // if (hasAttacked)
-        // {
-        //     SetAnimState(PlayerAnimState.Idle1);
-        //     Console.WriteLine("[PlayerAnim] -> Idle1 (armed stance)");
-        // }
-        // else
-        // {
-            SetAnimState(PlayerAnimState.Idle2);
-            Console.WriteLine("[PlayerAnim] -> Idle2 (unarmed stance)");
-        // }
+        SetAnimState(PlayerAnimState.Idle2);
+        Console.WriteLine("[PlayerAnim] -> Idle2 (unarmed stance)");
     }
 
     // =========================
     // Public API
     // =========================
 
-    public void PlayAttack()
+    public void PlayAttack(string combo) // param is the enemies weakness combo
     {
+        // update as we continue with more combo ig.
+        switch (combo.Length)
+        {
+            case 3: 
+                AttackSpriteSheet = "dorian_spear"; //gorilla
+                AttackRows = 4;
+                AttackColumns = 5;
+                AttackFrames = 18;
+                break;
+            case 4: 
+                if(EnemySpawner.enemyQueue.Peek() == EnemyIconType.Rat)
+                { 
+                    AttackSpriteSheet = "dorian_sword"; //rat
+                    AttackRows = 4;
+                    AttackColumns = 5;
+                    AttackFrames = 18;
+                }
+
+                else if(EnemySpawner.enemyQueue.Peek() == EnemyIconType.Bat)
+                {
+                    AttackSpriteSheet = "dorian_gun";   //bat
+                    AttackRows = 5;
+                    AttackColumns = 6;
+                    AttackFrames = 29;
+                }
+                break;
+
+            default: // imma just put this as the defualt cos idk wut else 2 put
+                AttackSpriteSheet = "dorian_sword";
+                AttackRows = 4;
+                AttackColumns = 5;
+                AttackFrames = 18;
+                break;
+        }
+
         // Don't interrupt an ongoing attack
         if (currentState == PlayerAnimState.Attack && waitingForStateEnd)
         {
@@ -161,13 +207,38 @@ public class PlayerAnimationController : Script
 
         waitingForStateEnd = true;
         stateTimer = 0f;
-        stateDuration = AttackFrames / GetBeatSyncedSpeed(AttackFrames);
 
-        // Spawn sword slash VFX — lives for exactly one attack animation cycle
+        if (AttackSpriteSheet == "dorian_gun")
+        {
+            float gunSpeed = GetBeatSyncedSpeed(18);
+            GetAnimation().SetAnimation(AttackSpriteSheet, AttackRows, AttackColumns, AttackFrames, gunSpeed);
+            stateDuration = AttackFrames / gunSpeed;
+        }
+        else
+        {
+            stateDuration = AttackFrames / GetBeatSyncedSpeed(AttackFrames);
+        }
+
+        // Queue hit VFX to spawn on enemy after this attack animation finishes
+        pendingHitVFX = true;
+        hitVFXTimer   = stateDuration;
+
+        // Spawn attack VFX each enemy type has its own prefab with correct scale/dimensions
         SwordSlashVFX.SpawnX = GetTransform().X + 300f;
         SwordSlashVFX.SpawnY = GetTransform().Y;
         SwordSlashVFX.SpawnDuration = stateDuration;
-        Factory.Instantiate("SwordSlashVFX");
+        switch (EnemySpawner.enemyQueue.Count > 0 ? EnemySpawner.enemyQueue.Peek() : EnemyIconType.None)
+        {
+            case EnemyIconType.BlueGorilla:
+                Factory.Instantiate("SpearAttackVFX");
+                break;
+            case EnemyIconType.Bat:
+                Factory.Instantiate("GunAttackVFX");
+                break;
+            default: // Rat and anything else
+                Factory.Instantiate("SwordSlashVFX");
+                break;
+        }
     }
 
     public void PlayHurt()

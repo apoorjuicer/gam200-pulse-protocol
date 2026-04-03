@@ -2,7 +2,8 @@
 /**
 * @file        Scene.h
 * @project     Pulse Protocol
-* @author      Chia Wei Xuan Rachael - 100%
+* @author      Chia Wei Xuan Rachael - 95%
+* @author      Leu Jun Yong (secondary) - 5%
 * @brief	   C++/CLI wrapper providing static scene loading functionality directly 
 *              accessible to C# scripts within the ScriptAPI namespace.
 *
@@ -26,5 +27,8 @@ namespace ScriptAPI
 		static System::String^ GetCurrentScene();
 
 		static bool SceneExists(System::String^ Filename);
+
+		// Returns true once when a scene has fully finished loading.
+		static bool ConsumeSceneLoadedPulse();
 	};
 }

@@ -63,6 +63,7 @@ namespace ScriptAPI
 		bool IsGamepadButtonTriggered(int button);
 		bool IsGamepadButtonReleased(int button);
 		float GetGamepadAxis(int axis);
+		void RumbleGamepad(float leftMotor, float rightMotor, float durationSec);
 
 	internal:
 		//Constructor when GetInputComponent() with Entity ID gets called

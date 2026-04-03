@@ -2,8 +2,10 @@
 /**
 * @file        CutscenePanel.cs
 * @project     Pulse Protocol
-* @author      Carrie Lam (85%)
-*              Chloe Lau (15%)
+* @author      Carrie Lam (83%)
+* @author      Chloe Lau (13%)
+* @author      Leu Jun Yong (2%)
+* @author      Goh Pin Kai (2%)
 * @brief       Controls staggered slide-in and simultaneous slide-out animations
 *              for paired cutscene panels, with shared timing state across all
 *              panel instances and space-to-skip support.
@@ -70,6 +72,12 @@ public class CutscenePanel : Script
     private static bool sharedCutsceneFinished = false;
     private static int sharedInitCount = 0;
     private static int totalPairs = 4;
+    private static bool s_waitingForSkipTransition = false;
+    private static float s_skipTransitionTimer = 0f;
+    private const float SkipTransitionDuration = 0.5f;
+    private static bool s_sceneChangeIssued = false;
+    private static string s_sceneSessionTag = "";
+    private static bool s_waitingForEntryFade = true;
 
     public static bool IsCutsceneFinished => sharedCutsceneFinished;
 
@@ -96,9 +104,35 @@ public class CutscenePanel : Script
 
     public override void Update()
     {
+        NavigationButtons.TryProcessPendingPostLoadFadeIn();
+
         if (!initialized)
         {
             Initialize();
+            return;
+        }
+
+        if (WaitForEntryFadeComplete())
+        {
+            HoldPanelHidden();
+            return;
+        }
+
+        if (isTimerOwner && s_waitingForSkipTransition)
+        {
+            s_skipTransitionTimer -= Time.DeltaTime;
+            bool timeDone = s_skipTransitionTimer <= 0f;
+            bool screenFadeDone = FadeAPI.IsFadeDone();
+
+            if (timeDone)
+                FadeAPI.SetAlpha(1.0f);
+
+            if (timeDone && screenFadeDone)
+            {
+                s_waitingForSkipTransition = false;
+                s_skipTransitionTimer = 0f;
+                GoToLevel1AfterCutscene();
+            }
             return;
         }
 
@@ -111,9 +145,7 @@ public class CutscenePanel : Script
             if (input.IsKeyTriggered(32) || input.IsGamepadButtonTriggered(0))
             {
                 Console.WriteLine("[Cutscene] Skipped!");
-                sharedCutsceneFinished = true;
-                NavigationButtons.ShowLevelSelectOverlay = true;
-                Scene.LoadScene("MainMenu");
+                BeginSkipTransition();
                 return;
             }
 
@@ -122,10 +154,8 @@ public class CutscenePanel : Script
             float totalDuration = (totalPairs - 1) * (sPairTotalDuration - sOverlapDuration) + sPairTotalDuration;
             if (sharedElapsedTime >= totalDuration)
             {
-                sharedCutsceneFinished = true;
-                Console.WriteLine("[Cutscene] Complete! Loading Level Select...");
-                NavigationButtons.ShowLevelSelectOverlay = true;
-                Scene.LoadScene("MainMenu");
+                Console.WriteLine("[Cutscene] Complete! Loading Level1...");
+                GoToLevel1AfterCutscene();
                 return;
             }
         }
@@ -138,11 +168,22 @@ public class CutscenePanel : Script
     // =========================
     private void Initialize()
     {
-        // reset the count back 2 0 if u finish the cutscene. Pressing space also make it true soooooo, yeah das all folks :>
-        if (sharedCutsceneFinished)
+        // Reset shared state when scene changes OR when this is the very first panel
+        // initializing (sharedInitCount == 0), which means it's a fresh scene load
+        // even if the session tag wasn't cleared (e.g. OnDestroy not called on scene change).
+        string currentScene = Scene.GetCurrentScene();
+        bool sceneChanged = !string.Equals(s_sceneSessionTag, currentScene, StringComparison.OrdinalIgnoreCase);
+        bool freshStart = sharedInitCount == 0 || sharedInitCount >= totalPairs * 2;
+        if (sceneChanged || freshStart)
         {
+            s_sceneSessionTag = currentScene;
             sharedInitCount = 0;
+            sharedElapsedTime = 0f;
             sharedCutsceneFinished = false;
+            s_waitingForSkipTransition = false;
+            s_skipTransitionTimer = 0f;
+            s_sceneChangeIssued = false;
+            s_waitingForEntryFade = true;
         }
 
         //Console.WriteLine($"[DAS PRETTY GAY IF U ASK ME] sharedInitCount: {sharedInitCount}, sharedCutsceneFinished: {sharedCutsceneFinished}\n\n\n\n\n\n\n");
@@ -157,17 +198,10 @@ public class CutscenePanel : Script
         myPairIndex = myPanelIndex / 2;
         isLeftPanel = (myPanelIndex % 2) == 0;
 
-        // Determine this panel's X position
-        if (targetX != 0f)
-        {
-            // Use the value set in the inspector
-            myTargetX = targetX;
-        }
-        else
-        {
-            // Use defaults
-            myTargetX = isLeftPanel ? defaultLeftX : defaultRightX;
-        }
+        // Read X and Y directly from the saved transform position
+        TransformComponent savedTf = GetTransform();
+        myTargetX = savedTf.X;
+        centerY = savedTf.Y;
 
         // First panel sets up shared state
         if (myPanelIndex == 0)
@@ -210,6 +244,70 @@ public class CutscenePanel : Script
         Console.WriteLine($"[CutscenePanel] Panel {myPanelIndex + 1} -> Pair {myPairIndex + 1} ({side}) X={myTargetX}");
 
         initialized = true;
+    }
+
+    private bool WaitForEntryFadeComplete()
+    {
+        if (!s_waitingForEntryFade)
+            return false;
+
+        string currentScene = Scene.GetCurrentScene();
+        if (NavigationButtons.IsPostLoadFadePendingForScene(currentScene))
+            return true;
+
+        if (!FadeAPI.IsFadeDone())
+            return true;
+
+        s_waitingForEntryFade = false;
+        return false;
+    }
+
+    private void HoldPanelHidden()
+    {
+        TransformComponent tf = GetTransform();
+        SpriteComponent sprite = GetSprite();
+        tf.IsVisible = false;
+        tf.X = myTargetX;
+        tf.Y = sOffScreenBelow != 0f ? sOffScreenBelow : offScreenBelow;
+        SetAlpha(sprite, 0f);
+    }
+
+    private void GoToLevel1AfterCutscene()
+    {
+        if (s_sceneChangeIssued)
+            return;
+
+        s_sceneChangeIssued = true;
+        sharedCutsceneFinished = true;
+        NavigationButtons.ShowLevelSelectOverlay = false;
+        s_sceneSessionTag = "";
+
+        const string targetScene = "Level1";
+        NavigationButtons.currentScene = targetScene;
+        NavigationButtons.LastEnteredLevel = targetScene;
+
+        if (NavigationButtons.ShouldUseLoadingScreenForScene(targetScene))
+        {
+            LoadingScreenScript.NextLevel = targetScene;
+            Scene.LoadScene("LoadingScreenScene");
+            return;
+        }
+
+        NavigationButtons.QueuePostLoadFadeIn(targetScene, 0.5f);
+        Scene.LoadScene(targetScene);
+    }
+
+    private void BeginSkipTransition()
+    {
+        if (s_waitingForSkipTransition)
+            return;
+
+        sharedCutsceneFinished = true;
+        s_waitingForSkipTransition = true;
+        s_skipTransitionTimer = SkipTransitionDuration;
+        FadeAPI.Stop();
+        FadeAPI.SetAlpha(0.0f);
+        FadeAPI.FadeOut(SkipTransitionDuration);
     }
 
     // =========================
@@ -289,13 +387,13 @@ public class CutscenePanel : Script
             float t = (localTime - mySlideStart) / sSlideInDuration;
             float eased = EaseOutCubic(t);
 
-            tf.Y = Lerp(sOffScreenBelow, sCenterY, eased);
+            tf.Y = Lerp(sOffScreenBelow, centerY, eased);
             SetAlpha(sprite, Lerp(0.2f, 1f, eased));
         }
         else if (localTime < holdEnd)
         {
             // === HOLDING (or waiting for other panel to finish sliding in) ===
-            tf.Y = sCenterY;
+            tf.Y = centerY;
             SetAlpha(sprite, 1f);
         }
         else
@@ -304,7 +402,7 @@ public class CutscenePanel : Script
             float t = (localTime - holdEnd) / sSlideOutDuration;
             float eased = EaseInCubic(t);
 
-            tf.Y = Lerp(sCenterY, sOffScreenAbove, eased);
+            tf.Y = Lerp(centerY, sOffScreenAbove, eased);
             SetAlpha(sprite, Lerp(1f, 0f, eased));
         }
     }
@@ -334,5 +432,16 @@ public class CutscenePanel : Script
     private float EaseInCubic(float t)
     {
         return t * t * t;
+    }
+
+    public void OnDestroy()
+    {
+        // Reset static state so the next scene load always triggers a full reinitialize.
+        s_sceneSessionTag = "";
+        sharedInitCount = 0;
+        sharedCutsceneFinished = false;
+        s_waitingForSkipTransition = false;
+        s_sceneChangeIssued = false;
+        s_waitingForEntryFade = true;
     }
 }

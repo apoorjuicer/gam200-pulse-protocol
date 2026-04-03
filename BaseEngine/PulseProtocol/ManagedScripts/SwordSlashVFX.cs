@@ -5,12 +5,13 @@ public class SwordSlashVFX : Script
 {
     public static float SpawnX = 0f;
     public static float SpawnY = 0f;
-    // Duration of the attack animation — VFX lives for exactly this long
+    // Duration of the attack animation
     public static float SpawnDuration = 0.5f;
 
-    private const int VFXTotalFrames = 10;
-    private const int VFXRows = 5;
-    private const int VFXCols = 2;
+    // Old sword slash VFX (Sword_Slash_VFX_1099x392): 5 rows, 2 cols, 10 frames
+    // public const int VFXTotalFrames = 10;
+    // public const int VFXRows = 5;
+    // public const int VFXCols = 2;
 
     private int initFrames = 0;
     private float elapsed = 0f;
@@ -27,10 +28,29 @@ public class SwordSlashVFX : Script
             tr.Y = SpawnY;
 
             // Scale speed so all frames finish in exactly SpawnDuration seconds
-            float speed = VFXTotalFrames / SpawnDuration;
+            float speed = 6 / SpawnDuration;
             Animation anim = GetAnimation();
-            anim.SetAnimation("sword_slash_vfx", VFXRows, VFXCols, VFXTotalFrames, speed);
-            // fall through — start counting elapsed this same frame
+
+            switch (EnemySpawner.enemyQueue.Peek())
+            {
+                case EnemyIconType.Rat:
+                    // Old: anim.SetAnimation("sword_slash_vfx", 5, 2, 10, speed);
+                    anim.SetAnimation("swordslash", 2, 3, 6, speed);
+                    break;
+
+                case EnemyIconType.BlueGorilla:
+                    anim.SetAnimation("spear_attack_vfx", 4, 4, 13, speed);
+                    break;
+
+                case EnemyIconType.Boss:
+                    break;
+
+                default:
+                    // Old: anim.SetAnimation("sword_slash_vfx", 5, 2, 10, speed);
+                    anim.SetAnimation("swordslash", 2, 3, 6, speed);
+                    break;
+            }
+
         }
 
         elapsed += Time.DeltaTime;
@@ -42,4 +62,5 @@ public class SwordSlashVFX : Script
             health.isAlive = false;
         }
     }
+
 }

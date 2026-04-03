@@ -23,6 +23,95 @@
 #include "CoreEngine/ECS/Coordinator.h"
 #include "Graphics/GraphicsManager.h"
 
+// DS4 USB rumble via direct HID (interrupt OUT endpoint)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <hidsdi.h>
+#include <hidpi.h>
+#include <setupapi.h>
+#pragma comment(lib, "hid.lib")
+#pragma comment(lib, "setupapi.lib")
+
+// ---------------------------------------------------------------------------
+// Send a DS4 USB rumble report via the interrupt OUT endpoint.
+// rightMotor = high-frequency (weak), leftMotor = low-frequency (strong).
+// ---------------------------------------------------------------------------
+static void RumbleDS4HID(uint8_t rightMotor, uint8_t leftMotor)
+{
+	GUID hidGuid;
+	HidD_GetHidGuid(&hidGuid);
+
+	HDEVINFO devInfo = SetupDiGetClassDevs(&hidGuid, NULL, NULL,
+	                                        DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+	if (devInfo == INVALID_HANDLE_VALUE) return;
+
+	SP_DEVICE_INTERFACE_DATA ifData{};
+	ifData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
+	bool sent = false;
+
+	for (DWORD idx = 0;
+	     !sent && SetupDiEnumDeviceInterfaces(devInfo, NULL, &hidGuid, idx, &ifData);
+	     ++idx)
+	{
+		DWORD needed = 0;
+		SetupDiGetDeviceInterfaceDetailA(devInfo, &ifData, NULL, 0, &needed, NULL);
+		if (needed == 0) continue;
+
+		std::vector<uint8_t> buf(needed);
+		auto* detail = reinterpret_cast<SP_DEVICE_INTERFACE_DETAIL_DATA_A*>(buf.data());
+		detail->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_A);
+		if (!SetupDiGetDeviceInterfaceDetailA(devInfo, &ifData, detail, needed, NULL, NULL))
+			continue;
+
+		// Filter: Sony VID (054C) + DS4 gen1 (05C4) or gen2 (09CC)
+		std::string path(detail->DevicePath);
+		for (auto& c : path) c = static_cast<char>(::tolower(static_cast<unsigned char>(c)));
+		bool isDS4 = path.find("vid_054c") != std::string::npos &&
+		             (path.find("pid_05c4") != std::string::npos ||
+		              path.find("pid_09cc") != std::string::npos);
+		if (!isDS4) continue;
+
+		HANDLE hid = CreateFileA(detail->DevicePath,
+		                          GENERIC_READ | GENERIC_WRITE,
+		                          FILE_SHARE_READ | FILE_SHARE_WRITE,
+		                          NULL, OPEN_EXISTING, 0, NULL);
+		if (hid == INVALID_HANDLE_VALUE) continue;
+
+		// Confirm this is the gamepad interface (UsagePage=0x01, Usage=0x05)
+		PHIDP_PREPARSED_DATA preparsed = nullptr;
+		HIDP_CAPS caps{};
+		if (HidD_GetPreparsedData(hid, &preparsed)) {
+			HidP_GetCaps(preparsed, &caps);
+			HidD_FreePreparsedData(preparsed);
+		}
+		if (caps.UsagePage != 0x0001 || caps.Usage != 0x0005) {
+			CloseHandle(hid);
+			continue;
+		}
+
+		// USB output report: ID 0x05, 32 bytes
+		// report[1] = 0xFF  enables motors + LED
+		// report[4] = right motor (weak/high-freq)
+		// report[5] = left  motor (strong/low-freq)
+		USHORT outLen = caps.OutputReportByteLength > 0 ? caps.OutputReportByteLength : 32;
+		std::vector<uint8_t> report(outLen, 0);
+		report[0] = 0x05;
+		report[1] = 0xFF;
+		if (outLen > 4) report[4] = rightMotor;
+		if (outLen > 5) report[5] = leftMotor;
+
+		DWORD written = 0;
+		sent = WriteFile(hid, report.data(), outLen, &written, NULL) &&
+		       written == static_cast<DWORD>(outLen);
+
+		CloseHandle(hid);
+	}
+
+	SetupDiDestroyDeviceInfoList(devInfo);
+}
+
 static Vector2 ScreenToWorld_ForInput(double fbX, double fbY)
 {
 	// letterboxed / game viewport in framebuffer pixels
@@ -117,6 +206,15 @@ void InputManager::Update(float dt) {
 	updateInputStates();
 	updateGamepadState();
 	processDebugToggles();
+
+	// Tick rumble timer — stop vibration when duration expires
+	if (rumbleTimeRemaining > 0.0f) {
+		rumbleTimeRemaining -= lastDt;
+		if (rumbleTimeRemaining <= 0.0f) {
+			rumbleTimeRemaining = 0.0f;
+			RumbleDS4HID(0, 0);
+		}
+	}
 
 	auto* coord = Coordinator::GetInstance();
 	auto sceneManager = coord->GetSystem<SceneManager>();
@@ -580,4 +678,13 @@ bool InputManager::isGamepadButtonReleased(int button) const {
 float InputManager::getGamepadAxis(int axis) const {
 	if (!gamepadConnected || axis < 0 || axis > GLFW_GAMEPAD_AXIS_LAST) return 0.0f;
 	return currentGamepad.axes[axis];
+}
+
+void InputManager::rumbleGamepad(float leftMotor, float rightMotor, float durationSec) {
+	if (!gamepadConnected || durationSec <= 0.0f) return;
+
+	// DS4: report[4]=right motor (weak/high-freq), report[5]=left motor (strong/low-freq)
+	RumbleDS4HID(static_cast<uint8_t>(glm::clamp(rightMotor, 0.0f, 1.0f) * 255.0f),
+	             static_cast<uint8_t>(glm::clamp(leftMotor,  0.0f, 1.0f) * 255.0f));
+	rumbleTimeRemaining = durationSec;
 }

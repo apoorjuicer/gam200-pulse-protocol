@@ -7,17 +7,17 @@ public class HealthBarController : Script
 
     private string[] healthFrames = new string[]
     {
-        "../../PulseProtocol/Assets/Textures/UI/tile001.png",
-        "../../PulseProtocol/Assets/Textures/UI/tile002.png",
-        "../../PulseProtocol/Assets/Textures/UI/tile003.png",
-        "../../PulseProtocol/Assets/Textures/UI/tile004.png",
-        "../../PulseProtocol/Assets/Textures/UI/tile005.png",
-        "../../PulseProtocol/Assets/Textures/UI/tile006.png",
-        "../../PulseProtocol/Assets/Textures/UI/tile007.png",
-        "../../PulseProtocol/Assets/Textures/UI/tile008.png",
-        "../../PulseProtocol/Assets/Textures/UI/tile009.png",
-        "../../PulseProtocol/Assets/Textures/UI/tile010.png",
-        "../../PulseProtocol/Assets/Textures/UI/tile012.png"
+        "health_tile001",
+        "health_tile002",
+        "health_tile003",
+        "health_tile004",
+        "health_tile005",
+        "health_tile006",
+        "health_tile007",
+        "health_tile008",
+        "health_tile009",
+        "health_tile010",
+        "health_tile011"
     };
 
     // Match the inspector values

@@ -71,6 +71,52 @@ public abstract class AudioSliderKnobBase : Script
     private bool dragJustStarted = false;   // prevents instant cancel on click frame
     private float dragOffsetX = 0.0f;
 
+    // ── Gamepad slider navigation (shared across Volume / Music / SFX instances) ──
+    private static readonly List<AudioSliderKnobBase> s_sliders      = new List<AudioSliderKnobBase>();
+    private static readonly List<AudioSliderKnobBase> s_prevSliders   = new List<AudioSliderKnobBase>();
+    private static int   s_focusedIdx       = -1;
+    private static int   s_sliderRegFrame   = -1;
+    private static int   s_sliderNavFrame   = -1;
+    private static bool  s_prevSettingsOpen = false;
+    private static float s_pendingAdj       = 0f;
+    private static int   s_pendingAdjFrame  = -1;
+
+    private const int GP_DPAD_UP    = InputConstants.GP_DPAD_UP;
+    private const int GP_DPAD_RIGHT = InputConstants.GP_DPAD_RIGHT;
+    private const int GP_DPAD_DOWN  = InputConstants.GP_DPAD_DOWN;
+    private const int GP_DPAD_LEFT  = InputConstants.GP_DPAD_LEFT;
+
+    // How much each D-pad L/R press adjusts the value (0–1 scale).
+    public float ControllerStep = 0.05f;
+    // Scale multiplier applied to the knob sprite when it has gamepad focus.
+    public float FocusScaleBoost = 1.15f;
+
+    // Exposed so HoverableButton can suppress its D-pad nav while a slider is focused.
+    public static bool IsAnySliderFocused => s_focusedIdx >= 0;
+
+    // Called from HoverableButton when the settings panel closes.
+    public static void ClearFocus()
+    {
+        s_focusedIdx = -1;
+        s_prevSettingsOpen = false;  // force auto-focus to re-trigger when settings next opens
+        DropdownState.IsDropdownFocused = false;
+    }
+
+    // Called from DropdownToggle when the user navigates down into sliders.
+    // Records the frame so the nav handler suppresses the same D-pad press that caused the transfer.
+    public static void FocusFirstSlider()
+    {
+        s_focusedIdx = 0;
+        s_focusTransferFrame = Time.FrameCount;
+    }
+
+    private static int s_focusTransferFrame = -1;
+
+    private bool  m_focused    = false;
+    private float m_baseScaleX = 0f;
+    private float m_baseScaleY = 0f;
+    private bool  m_baseSaved  = false;
+
     // Robust held binding (click uses IsMouseButtonTriggered like your hover buttons)
     private object? cachedInputObj;
     private System.Reflection.MethodInfo? heldMI = null;
@@ -131,6 +177,12 @@ public abstract class AudioSliderKnobBase : Script
             initialized = true;
         }
 
+        // Track settings open/close for auto-focus (runs even when slider is hidden).
+        bool _settingsNowOpen = NavigationButtons.ShowSettingsOverlay || Scene.GetCurrentScene() == "Settings";
+        if (_settingsNowOpen && !s_prevSettingsOpen)
+            s_focusedIdx = 0;  // auto-focus first slider (Volume) when settings opens
+        s_prevSettingsOpen = _settingsNowOpen;
+
         // =========================================================
         // IMPORTANT: When the settings UI is hidden, these slider
         // scripts must NOT respond to mouse input.
@@ -163,6 +215,107 @@ public abstract class AudioSliderKnobBase : Script
 
             PublishState(ToValue01(t.X));
             initialized = true;
+        }
+
+        // ─── Gamepad slider navigation ────────────────────────────────────────────
+        int _frameNow = Time.FrameCount;
+
+        // Save base scale once (before any focus boost is applied).
+        if (!m_baseSaved)
+        {
+            m_baseScaleX = t.ScaleX;
+            m_baseScaleY = t.ScaleY;
+            m_baseSaved  = true;
+        }
+
+        // Rebuild per-frame candidate list.
+        if (s_sliderRegFrame != _frameNow)
+        {
+            s_prevSliders.Clear();
+            s_prevSliders.AddRange(s_sliders);
+            s_sliders.Clear();
+            s_sliderRegFrame = _frameNow;
+        }
+        s_sliders.Add(this);
+
+        // Handle D-pad input once per frame (uses prev-frame list for stable ordering).
+        // Skip when the screen mode dropdown has focus — DropdownToggle handles D-pad then.
+        if (s_sliderNavFrame != _frameNow && s_prevSliders.Count > 0 && !DropdownState.IsDropdownFocused)
+        {
+            s_sliderNavFrame = _frameNow;
+
+            bool _dUp    = input.IsGamepadButtonTriggered(GP_DPAD_UP);
+            bool _dDown  = input.IsGamepadButtonTriggered(GP_DPAD_DOWN);
+            bool _dLeft  = input.IsGamepadButtonTriggered(GP_DPAD_LEFT);
+            bool _dRight = input.IsGamepadButtonTriggered(GP_DPAD_RIGHT);
+
+            int _count = s_prevSliders.Count;
+
+            // Up/Down cycles between sliders.
+            // UP past the first slider → focus the screen mode dropdown.
+            // DOWN past the last slider → release to NavigationButtons (back button).
+            // Suppress on s_focusTransferFrame: that D-pad press came from DropdownToggle
+            // and must not be re-consumed here.
+            bool _suppressNav = (_frameNow == s_focusTransferFrame);
+            if (s_focusedIdx >= 0 && (_dUp || _dDown) && !_suppressNav)
+            {
+                int _next = s_focusedIdx + (_dDown ? 1 : -1);
+                if (_next < 0)
+                {
+                    s_focusedIdx = -1;
+                    DropdownState.IsDropdownFocused = true;
+                }
+                else if (_next >= _count)
+                {
+                    // Already at the last slider — stay here, D-pad Down does nothing.
+                }
+                else
+                {
+                    s_focusedIdx = _next;
+                }
+            }
+
+            // Left/Right adjusts the focused slider (auto-focuses first/last if none focused).
+            if (_dLeft || _dRight)
+            {
+                if (s_focusedIdx < 0)
+                    s_focusedIdx = _dLeft ? _count - 1 : 0;
+
+                float _step = (s_focusedIdx >= 0 && s_focusedIdx < _count)
+                              ? s_prevSliders[s_focusedIdx].ControllerStep
+                              : ControllerStep;
+
+                s_pendingAdj      = _dRight ? _step : -_step;
+                s_pendingAdjFrame = _frameNow;
+            }
+        }
+
+        // Apply the pending adjustment if this is the currently focused slider.
+        int _myIdx = (s_prevSliders.Count > 0) ? s_prevSliders.IndexOf(this) : -1;
+        if (_myIdx >= 0 && _myIdx == s_focusedIdx &&
+            s_pendingAdjFrame == _frameNow && s_pendingAdj != 0f)
+        {
+            float _cur  = States.ContainsKey(FixedTag) ? States[FixedTag].Value01 : 0f;
+            float _next = Clamp(_cur + s_pendingAdj, 0f, 1f);
+            t.X = Clamp(knobMinX + _next * (knobMaxX - knobMinX), knobMinX, knobMaxX);
+            if (LockKnobY) t.Y = lockedY;
+            PublishState(_next);
+            ApplyToAudioMixer(_next);
+        }
+
+        // Apply / remove focus scale boost on the knob sprite.
+        bool _nowFocused = (_myIdx >= 0 && _myIdx == s_focusedIdx);
+        if (_nowFocused && !m_focused)
+        {
+            t.ScaleX = m_baseScaleX * FocusScaleBoost;
+            t.ScaleY = m_baseScaleY * FocusScaleBoost;
+            m_focused = true;
+        }
+        else if (!_nowFocused && m_focused)
+        {
+            t.ScaleX = m_baseScaleX;
+            t.ScaleY = m_baseScaleY;
+            m_focused = false;
         }
 
         float mx = input.WorldMouseX;

@@ -63,9 +63,30 @@ using InitFunctionPtr = void(*)(CoreEngine*);
 
 namespace
 {
+	std::filesystem::path ResolveSharedUserSettingsPath(const std::filesystem::path& gameRoot)
+	{
+		// Single shared runtime settings location:
+		//   .../build/PulseProtocol/JSON/user_settings.json
+		if (!gameRoot.empty())
+		{
+			const std::filesystem::path devBuildShared =
+				gameRoot.parent_path() / "build" / "PulseProtocol" / "JSON" / "user_settings.json";
+			if (std::filesystem::exists(devBuildShared.parent_path()))
+				return devBuildShared;
+
+			const std::filesystem::path viaConfigParent = gameRoot.parent_path() / "JSON" / "user_settings.json";
+			if (std::filesystem::exists(viaConfigParent.parent_path()))
+				return viaConfigParent;
+
+			return gameRoot / "JSON" / "user_settings.json";
+		}
+
+		return std::filesystem::path("user_settings.json");
+	}
+
 	bool TryLoadStartupFullscreenFromUserSettings(const std::filesystem::path& gameRoot, bool& fullscreenOut)
 	{
-		const std::filesystem::path settingsPath = gameRoot / "JSON" / "user_settings.json";
+		const std::filesystem::path settingsPath = ResolveSharedUserSettingsPath(gameRoot);
 		if (!std::filesystem::exists(settingsPath))
 			return false;
 
@@ -112,16 +133,7 @@ namespace
 		};
 
 		// Runtime settings used by the running executable.
-		writeFullscreen(gameRoot / "JSON" / "user_settings.json");
-
-		// Source-tree settings (helps keep editor/source JSON in sync with runtime toggles).
-		const std::filesystem::path sourceSettings =
-			gameRoot / ".." / ".." / ".." / ".." / "PulseProtocol" / "JSON" / "user_settings.json";
-		if (std::filesystem::weakly_canonical(sourceSettings) !=
-			std::filesystem::weakly_canonical(gameRoot / "JSON" / "user_settings.json"))
-		{
-			writeFullscreen(sourceSettings);
-		}
+		writeFullscreen(ResolveSharedUserSettingsPath(gameRoot));
 	}
 }
 
@@ -620,15 +632,12 @@ void CoreEngine::Init()
 	std::cout << "WindowWidth is: " << WindowWidth << "\n";
 	std::cout << "WindowHeight is: " << WindowHeight << "\n";
 
-	// Apply cached fullscreen preference early so every scene (including calibration)
-	// starts with the user's last selected screen mode.
-	bool cachedFullscreen = false;
-	if (TryLoadStartupFullscreenFromUserSettings(FilePathToGame, cachedFullscreen))
-	{
-		m_startupFullscreen = cachedFullscreen;
-		std::cout << "[CoreEngine] Startup fullscreen from user_settings.json: "
-			<< (m_startupFullscreen ? "true" : "false") << "\n";
-	}
+	// m_startupFullscreen is set by the entry point (GameMain/EditorMain) via
+	// SetStartupFullscreen() before Init() is called. Do NOT read it from
+	// user_settings.json here — that would overwrite the per-project default
+	// (game = fullscreen, editor = windowed).
+	std::cout << "[CoreEngine] Startup fullscreen: "
+		<< (m_startupFullscreen ? "true" : "false") << "\n";
 
 	///*saving config data*/ //tested saving works
 	// std::string newConfigPath = "../../PulseEngine/JSON/config2.json";

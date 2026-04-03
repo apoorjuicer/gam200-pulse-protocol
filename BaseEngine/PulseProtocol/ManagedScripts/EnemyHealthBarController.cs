@@ -1,3 +1,16 @@
+/******************************************************************************/
+/**
+ * @file        EnemyHealthBarController.cs
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 100%
+ * @brief       Updates enemy health bar sprites based on current health state.
+ *
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
+
 using System;
 using ScriptAPI;
 

@@ -1,9 +1,24 @@
+/******************************************************************************/
+/**
+ * @file        LevelSelectOverlay.cs
+ * @project     Pulse Protocol
+ * @author      Leu Jun Yong (primary) - 100%
+ * @brief       Controls level-select overlay visibility, selection, and input flow.
+ *
+ * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
+ *              Reproduction or disclosure of this file or its contents without the
+ *              prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+/******************************************************************************/
+
 using ScriptAPI;
 using System;
 
 public class LevelSelectOverlay : Script
 {
-    private const int GP_CIRCLE = 1;
+    private const int GP_CIRCLE     = InputConstants.GP_CIRCLE;
+    private const int GP_DPAD_RIGHT = InputConstants.GP_DPAD_RIGHT;
+    private const int GP_DPAD_LEFT  = InputConstants.GP_DPAD_LEFT;
 
     public override void Update()
     {
@@ -18,10 +33,8 @@ public class LevelSelectOverlay : Script
             return;
 
         InputComponent input = GetInput();
-        if (input.IsKeyTriggered(256) || input.IsGamepadButtonTriggered(GP_CIRCLE))
-        {
+        if (input.IsGamepadButtonTriggered(GP_CIRCLE))
             NavigationButtons.ShowLevelSelectOverlay = false;
-        }
     }
 }
 
@@ -40,8 +53,9 @@ public class LevelSelectCard : Script
     private static int s_gpNavFrame = -1;
     private static bool s_stickLeftWasActive = false;
     private static bool s_stickRightWasActive = false;
-    private const int GP_DPAD_RIGHT = 12;
-    private const int GP_DPAD_LEFT  = 14;
+
+    private const int GP_DPAD_RIGHT = InputConstants.GP_DPAD_RIGHT;
+    private const int GP_DPAD_LEFT  = InputConstants.GP_DPAD_LEFT;
     private const float StickDeadzone = 0.5f;
 
     private bool initialized = false;
@@ -162,23 +176,23 @@ public class LevelSelectCard : Script
         if (offset < -1) offset = -1;
 
         float targetX = 0.0f;
-        float targetY = 160.0f;
+        float targetY = 180.0f;
         float targetScaleX = 420.0f;
-        float targetScaleY = 470.0f;
+        float targetScaleY = 420.0f;
 
         if (offset < 0)
         {
             targetX = -920.0f;
             targetY = 140.0f;
             targetScaleX = 360.0f;
-            targetScaleY = 400.0f;
+            targetScaleY = 360.0f;
         }
         else if (offset > 0)
         {
             targetX = 920.0f;
             targetY = 140.0f;
             targetScaleX = 360.0f;
-            targetScaleY = 400.0f;
+            targetScaleY = 360.0f;
         }
 
         float lerp = Math.Min(1.0f, Time.DeltaTime * 10.0f);
@@ -201,9 +215,9 @@ public class LevelSelectCard : Script
     }
 
     public static float SelectedX => 0.0f;
-    public static float SelectedY => 160.0f;
+    public static float SelectedY => 180.0f;
     public static float SelectedScaleX => 420.0f;
-    public static float SelectedScaleY => 470.0f;
+    public static float SelectedScaleY => 420.0f;
     public static bool IsCenterSettled => s_centerSettled;
 
     private static int GetSceneIndex(string scene)
@@ -248,6 +262,10 @@ public class LevelSelectCard : Script
 
 public class LevelSelectSelector : Script
 {
+    private const float FadeInDuration = 0.35f;
+    private float _alpha = 0.0f;
+    private bool _wasVisible = false;
+
     public override void Update()
     {
         TransformComponent t = GetTransform();
@@ -257,20 +275,41 @@ public class LevelSelectSelector : Script
                        !NavigationButtons.ShowHowToPlayOverlay &&
                        LevelSelectCard.IsCenterSettled;
 
-        t.IsVisible = visible;
         if (!visible)
+        {
+            if (_wasVisible)
+            {
+                _alpha = 0.0f;
+                _wasVisible = false;
+                SpriteComponent s = GetSprite();
+                s.TintA = 0.0f;
+            }
+            t.IsVisible = false;
             return;
+        }
+
+        // First frame visible: snap position to target, start from alpha 0
+        if (!_wasVisible)
+        {
+            _alpha = 0.0f;
+            _wasVisible = true;
+            t.X = LevelSelectCard.SelectedX;
+            t.Y = LevelSelectCard.SelectedY;
+            t.ScaleX = LevelSelectCard.SelectedScaleX * 1.20f;
+            t.ScaleY = LevelSelectCard.SelectedScaleY * 1.20f;
+        }
+
+        t.IsVisible = true;
+
+        _alpha = Math.Min(1.0f, _alpha + Time.DeltaTime / FadeInDuration);
+        SpriteComponent sprite = GetSprite();
+        sprite.TintA = _alpha;
 
         float lerp = Math.Min(1.0f, Time.DeltaTime * 12.0f);
-        float targetX = LevelSelectCard.SelectedX;
-        float targetY = LevelSelectCard.SelectedY;
-        float targetScaleX = LevelSelectCard.SelectedScaleX * 1.20f;
-        float targetScaleY = LevelSelectCard.SelectedScaleY * 1.20f;
-
-        t.X += (targetX - t.X) * lerp;
-        t.Y += (targetY - t.Y) * lerp;
-        t.ScaleX += (targetScaleX - t.ScaleX) * lerp;
-        t.ScaleY += (targetScaleY - t.ScaleY) * lerp;
+        t.X += (LevelSelectCard.SelectedX - t.X) * lerp;
+        t.Y += (LevelSelectCard.SelectedY - t.Y) * lerp;
+        t.ScaleX += (LevelSelectCard.SelectedScaleX * 1.20f - t.ScaleX) * lerp;
+        t.ScaleY += (LevelSelectCard.SelectedScaleY * 1.20f - t.ScaleY) * lerp;
     }
 }
 
@@ -278,6 +317,9 @@ public class LevelSelectStartDisc : Script
 {
     private static bool s_waitingForSceneTransition = false;
     private static string s_pendingScene = "";
+    private static float s_sceneTransitionTimer = 0.0f;
+    private static int s_transitionTickFrame = -1;
+    private const float SceneTransitionDuration = 0.5f;
 
     private bool initialized = false;
     private bool wasStartHovered = false;
@@ -286,28 +328,60 @@ public class LevelSelectStartDisc : Script
     private const float SpinSpeed = 45.0f;
     private const float StartHitboxScale = 0.22f; // center-focused area around the START text
     private const float StartHoverScaleBoost = 1.03f;
-    private const float DiscHoverRadiusScale = 2.25f; // very generous full-disc hover coverage
 
     public override void Update()
     {
+        string realScene = Scene.GetCurrentScene();
+        if (!string.Equals(realScene, "MainMenu", StringComparison.OrdinalIgnoreCase))
+        {
+            // Safety reset: this transition state must never leak outside MainMenu.
+            s_waitingForSceneTransition = false;
+            s_pendingScene = "";
+            s_sceneTransitionTimer = 0.0f;
+            s_transitionTickFrame = -1;
+            return;
+        }
+
         if (s_waitingForSceneTransition)
         {
-            AudioComponent audio = GetAudio();
-            if (!audio.IsBGMPlaying())
+            if (s_transitionTickFrame != Time.FrameCount)
             {
-                s_waitingForSceneTransition = false;
+                s_transitionTickFrame = Time.FrameCount;
 
-                string sceneToLoad = s_pendingScene;
-                s_pendingScene = "";
+                float dt = Time.DeltaTime;
+                if (dt <= 0.0f)
+                    dt = 0.016f;
+                s_sceneTransitionTimer -= dt;
+                bool timeDone = s_sceneTransitionTimer <= 0.0f;
+                bool screenFadeDone = FadeAPI.IsFadeDone();
+                if (timeDone)
+                    FadeAPI.SetAlpha(1.0f);
+                if (timeDone && screenFadeDone)
+                {
+                    s_waitingForSceneTransition = false;
 
-                if (string.IsNullOrEmpty(sceneToLoad) || !Scene.SceneExists(sceneToLoad))
-                    sceneToLoad = "Level1";
+                    string sceneToLoad = s_pendingScene;
+                    s_pendingScene = "";
+                    s_sceneTransitionTimer = 0.0f;
+                    s_transitionTickFrame = -1;
 
-                NavigationButtons.ShowLevelSelectOverlay = false;
-                NavigationButtons.currentScene = sceneToLoad;
-                NavigationButtons.LastEnteredLevel = sceneToLoad;
-                LoadingScreenScript.NextLevel = sceneToLoad;
-                Scene.LoadScene("LoadingScreenScene");
+                    if (string.IsNullOrEmpty(sceneToLoad) || !Scene.SceneExists(sceneToLoad))
+                        sceneToLoad = "Level1";
+
+                    NavigationButtons.ShowLevelSelectOverlay = false;
+                    NavigationButtons.currentScene = sceneToLoad;
+                    NavigationButtons.LastEnteredLevel = sceneToLoad;
+                    if (NavigationButtons.ShouldUseLoadingScreenForScene(sceneToLoad))
+                    {
+                        LoadingScreenScript.NextLevel = sceneToLoad;
+                        Scene.LoadScene("LoadingScreenScene");
+                    }
+                    else
+                    {
+                        NavigationButtons.QueuePostLoadFadeIn(sceneToLoad, SceneTransitionDuration);
+                        Scene.LoadScene(sceneToLoad);
+                    }
+                }
             }
             return;
         }
@@ -333,19 +407,6 @@ public class LevelSelectStartDisc : Script
         float mx = input.WorldMouseX;
         float my = input.WorldMouseY;
 
-        // Any hover on the disc surface should stop spinning.
-        float discNx = (mx - t.X) / (t.ScaleX * 0.5f * DiscHoverRadiusScale);
-        float discNy = (my - t.Y) / (t.ScaleY * 0.5f * DiscHoverRadiusScale);
-        bool inDiscEllipse = (discNx * discNx + discNy * discNy <= 1.0f);
-
-        float discHalfW = t.ScaleX * 0.95f;
-        float discHalfH = t.ScaleY * 0.95f;
-        bool inDiscBox =
-            mx >= t.X - discHalfW && mx <= t.X + discHalfW &&
-            my >= t.Y - discHalfH && my <= t.Y + discHalfH;
-
-        bool isDiscHovered = input.InGameViewport && (inDiscEllipse || inDiscBox);
-
         // Only the center START area triggers highlight/click-to-start.
         float startNx = (mx - t.X) / (baseScaleX * StartHitboxScale);
         float startNy = (my - t.Y) / (baseScaleY * StartHitboxScale);
@@ -358,7 +419,8 @@ public class LevelSelectStartDisc : Script
         }
         wasStartHovered = isStartHovered;
 
-        if (!isDiscHovered)
+        // Rotation pause now uses the same center hitbox as hover SFX/scale.
+        if (!isStartHovered)
             t.RotX += SpinSpeed * Time.DeltaTime;
 
         float targetScaleX = isStartHovered ? baseScaleX * StartHoverScaleBoost : baseScaleX;
@@ -382,9 +444,15 @@ public class LevelSelectStartDisc : Script
             if (string.IsNullOrEmpty(sceneToLoad) || !Scene.SceneExists(sceneToLoad))
                 sceneToLoad = "Level1";
 
-            audio.FadeOutMusic(0.4f);
+            audio.FadeOutMusic(SceneTransitionDuration);
+            NavigationButtons.PendingSceneFadeIn = false;
+            FadeAPI.Stop();
+            FadeAPI.SetAlpha(0.0f);
+            FadeAPI.FadeOut(SceneTransitionDuration);
             s_pendingScene = sceneToLoad;
             s_waitingForSceneTransition = true;
+            s_sceneTransitionTimer = SceneTransitionDuration;
+            s_transitionTickFrame = -1;
         }
     }
 }
@@ -427,12 +495,14 @@ public class LevelSelectBackButton : Script
         bool hoveredNow = input.InGameViewport &&
                           input.WorldMouseX >= t.X - halfW && input.WorldMouseX <= t.X + halfW &&
                           input.WorldMouseY >= t.Y - halfH && input.WorldMouseY <= t.Y + halfH;
+        bool clickedNow = hoveredNow && input.IsMouseButtonTriggered(0);
 
         if (hoveredNow && !isHovered)
         {
             sprite.Texture = hoverTexture;
             isHovered = true;
-            PlayHoverSound();
+            if (!clickedNow)
+                PlayHoverSound();
         }
         else if (!hoveredNow && isHovered)
         {
@@ -440,12 +510,10 @@ public class LevelSelectBackButton : Script
             isHovered = false;
         }
 
-        if (hoveredNow && input.IsMouseButtonTriggered(0))
+        if (clickedNow)
         {
             PlayClickSound();
-            NavigationButtons.ShowLevelSelectOverlay = false;
-            sprite.Texture = defaultTexture;
-            isHovered = false;
+            NavigationButtons.BeginMainMenuOverlayTransitionToBase();
         }
     }
 

@@ -3,8 +3,9 @@
  * @file       SceneManager.cpp
  * @project    Pulse Protocol
  * @author     Chia Wei Xuan Rachael - 90%
- * @author     Goh Pin Kai (secondary) - 5%
+ * @author     Goh Pin Kai (secondary) - 4%
  * @author     Ban Kai Wei Benjamin (secondary) - 5%
+ * @author     Leu Jun Yong (secondary) - 1%
  * 
  * @brief      Manages scene lifecycle, serialization, and entity ownership across
  *             game scenes (MainMene and level1 for now) .
@@ -159,6 +160,17 @@ void SceneManager::Update(float dt)
 		// Update PreviousScene for change detection next frame
 		PreviousScene = CurrentScene;
 	}
+}
+
+bool SceneManager::ConsumeSceneLoadedPulse()
+{
+	if (!m_sceneLoadCompletedPulse)
+	{
+		return false;
+	}
+
+	m_sceneLoadCompletedPulse = false;
+	return true;
 }
 
 
@@ -608,6 +620,8 @@ void SceneManager::UnloadCurrentScene()
 
 void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE JSON FILE 
 {
+	m_sceneLoadCompletedPulse = false;
+
 	// Reset countdown/beat state on scene load
 	g_countdownFinished = false;
 
@@ -1098,6 +1112,7 @@ void SceneManager::LoadSceneFromJson(std::string const& path) // TAKES IN SCENE 
 
 
 	PreviousScene = CurrentScene;
+	m_sceneLoadCompletedPulse = true;
 
 #ifdef _DEBUG
 	std::cout << "\n===================================================" << std::endl;

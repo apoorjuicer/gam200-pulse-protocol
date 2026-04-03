@@ -14,7 +14,6 @@ public class Cheats: Script
     public int Key3 = 51;
     public int KeyI = 73;
     public int KeyK = 75;
-    public int KeyO = 79;
     public int KeyShift = 340;
 
     // fuck you I like it this neat
@@ -44,18 +43,11 @@ public class Cheats: Script
                 Scene.LoadScene(LoadingScreen);
             }
 
-            // for ltr
-            //else if(input.IsKeyTriggered(Key3))
-            //{
-            //    LoadingScreenScript.NextLevel = Level3;
-            //    Scene.LoadScene(LoadingScreen);
-            //}
-        }
-
-        // Clear wave
-        if(input.IsKeyTriggered(KeyO))
-        {
-            StageClearElement.StageClear(); // bring up winner overlay
+            else if(input.IsKeyTriggered(Key3))
+            {
+                LoadingScreenScript.NextLevel = Level3;
+                Scene.LoadScene(LoadingScreen);
+            }
         }
 
         // Kill current Enemy

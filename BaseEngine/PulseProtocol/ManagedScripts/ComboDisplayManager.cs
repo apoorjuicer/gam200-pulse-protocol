@@ -61,7 +61,14 @@ public class ComboDisplayManager : Script
     private int fadeOutCount = 0;
     private float fadeStaggerTimer = 0f;
 
+    // Gap slot reveals — pop the empty PNG on its beat during enemy reveal phase
+    private bool isGapRevealing = false;
+    private int[] gapVisualSlots = new int[0];
+    private float[] gapRevealOffsets = new float[0];
+    private int gapRevealIndex = 0;
+
     private string currentWeakness = "";
+    private bool _inputPageFlipped = false;
 
     // =========================
     // Registration
@@ -102,6 +109,7 @@ public class ComboDisplayManager : Script
         if (!initialized) { Initialize(); return; }
 
         if (isRevealing) { HandleBeatReveal(); }
+        if (isGapRevealing) { HandleGapReveal(); }
 
         if (isFadingOut) HandleStaggerFade();
 
@@ -120,18 +128,20 @@ public class ComboDisplayManager : Script
         if (isCountingDown && Conductor.Instance != null) {
             float elapsed = Conductor.Instance.GetAdjustedSongTime() - countdownStartTime;
 
-            while (countdownCurrentSlot < currentWeakness.Length && countdownCurrentSlot < currentSlotOffsets.Length) {
+            int countdownCap = Math.Min(currentWeakness.Length, _inputPageFlipped ? currentWeakness.Length : 4);
+            while (countdownCurrentSlot < countdownCap && countdownCurrentSlot < currentSlotOffsets.Length) {
                 float targetTime = currentSlotOffsets[countdownCurrentSlot] - ScaleAnimatedTime;
                 if (elapsed < targetTime) break;
 
+                int slotIdx = _inputPageFlipped ? countdownCurrentSlot : countdownCurrentSlot;
                 int alreadyPressed = ComboSystem.Instance != null ? ComboSystem.Instance.GetComboProgress() : 0;
-                if (countdownCurrentSlot >= alreadyPressed && playerSlots.ContainsKey(countdownCurrentSlot))
-                    playerSlots[countdownCurrentSlot].StartCountdown(currentWeakness[countdownCurrentSlot]);
+                if (countdownCurrentSlot >= alreadyPressed && playerSlots.ContainsKey(VisualSlot(countdownCurrentSlot)))
+                    playerSlots[VisualSlot(countdownCurrentSlot)].StartCountdown(currentWeakness[countdownCurrentSlot]);
 
                 countdownCurrentSlot++;
             }
 
-            if (countdownCurrentSlot >= currentWeakness.Length)
+            if (countdownCurrentSlot >= countdownCap)
                 isCountingDown = false;
         }
 
@@ -196,6 +206,41 @@ public class ComboDisplayManager : Script
         }
 
         lastInputProgress = currentProgress;
+
+        // Page-flip for 6/8-key combos: when player finishes page 1 (4 keys), show page 2 slots
+        if (!_inputPageFlipped && currentWeakness.Length > 4 && currentProgress >= 4)
+        {
+            _inputPageFlipped = true;
+            int page2Count = currentWeakness.Length - 4;
+
+            // Show anticipation for page-2 keys
+            for (int i = 4; i < currentWeakness.Length; i++)
+            {
+                int vs = VisualSlot(i); // wraps: 4→0, 5→1, 6→2, 7→3
+                if (playerSlots.ContainsKey(vs))
+                    playerSlots[vs].ShowBlankDim(currentWeakness[i]);
+            }
+            // Clear slots that have no page-2 key (e.g. slots 2,3 for a 6-key combo)
+            for (int s = page2Count; s < 4; s++)
+            {
+                if (playerSlots.ContainsKey(s)) playerSlots[s].ShowEmpty();
+            }
+
+            // Restart countdown for page-2 slots, offset relative to page-2 start
+            if (EnemyRhythmController.Instance?.SlotOffsets != null)
+            {
+                float[] allOffsets = EnemyRhythmController.Instance.SlotOffsets;
+                float page2StartOffset = allOffsets[4];
+                currentSlotOffsets = new float[page2Count];
+                for (int i = 0; i < page2Count; i++)
+                    currentSlotOffsets[i] = allOffsets[4 + i] - page2StartOffset;
+            }
+            countdownCurrentSlot = 4;
+            countdownStartTime = Conductor.Instance != null ? Conductor.Instance.GetAdjustedSongTime() : 0f;
+            isCountingDown = true;
+
+            Console.WriteLine("[ComboDisplayManager] Page flip: showing page-2 keys");
+        }
     }
 
     // =========================
@@ -216,6 +261,11 @@ public class ComboDisplayManager : Script
         countdownCurrentSlot = 0;
         isCountingDown = false;
 
+        isGapRevealing = false;
+        gapVisualSlots = new int[0];
+        gapRevealOffsets = new float[0];
+        gapRevealIndex = 0;
+
         enemySlots.Clear();
         playerSlots.Clear();
         judgementScript = null;
@@ -234,14 +284,11 @@ public class ComboDisplayManager : Script
         revealIndex = 0;
         isRevealing = true;
         isFadingOut = false;
+        _inputPageFlipped = false;
 
-        // Snap to the nearest beat boundary using visual time (same clock as VisualBeatSystem)
-        // so all keys align with the border pulse, not just the first one.
         if (Conductor.Instance != null)
         {
-            float visualTime = Conductor.Instance.GetVisualAdjustedSongTime();
-            float spb = Conductor.Instance.SecondsPerBeat;
-            revealStartTime = (float)Math.Floor(visualTime / spb) * spb;
+            revealStartTime = Conductor.Instance.GetVisualAdjustedSongTime();
         }
         else
         {
@@ -250,12 +297,40 @@ public class ComboDisplayManager : Script
         revealSlotOffsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0.0f, 0.5f, 1.0f, 1.5f };
         currentVisualSlots = EnemyRhythmController.Instance?.VisualSlotIndices ?? new int[] { 0, 1, 2, 3 };
 
+        // Build gap slot reveal list: slots 0-3 not in currentVisualSlots, offset = slot * beatDur
+        float bd = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat : 0.5f;
+        var gapSlotList = new System.Collections.Generic.List<(int slot, float offset)>();
+        for (int s = 0; s < 4; s++)
+        {
+            bool isUsed = false;
+            for (int j = 0; j < currentVisualSlots.Length; j++)
+                if (currentVisualSlots[j] == s) { isUsed = true; break; }
+            if (!isUsed) gapSlotList.Add((s, s * bd));
+        }
+        gapSlotList.Sort((a, b) => a.offset.CompareTo(b.offset));
+        gapVisualSlots  = new int[gapSlotList.Count];
+        gapRevealOffsets = new float[gapSlotList.Count];
+        for (int i = 0; i < gapSlotList.Count; i++)
+        {
+            gapVisualSlots[i]   = gapSlotList[i].slot;
+            gapRevealOffsets[i] = gapSlotList[i].offset;
+        }
+        gapRevealIndex  = 0;
+        isGapRevealing  = gapSlotList.Count > 0;
+
         ClearEnemySlotsInstant();
         float beatDur = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat : 0.5f;
 
-        // Fade out all player slots; active combo slots will cancel the fade when ShowBlankFadeToDim runs
+        // Show gap player slots empty immediately — they stay visible the whole enemy turn,
+        // no hide/pop-in. Only the enemy gap slots pop in on their beat.
         for (int i = 0; i < 4; i++)
-            if (playerSlots.ContainsKey(i)) playerSlots[i].FadeToHidden(beatDur);
+        {
+            if (!playerSlots.ContainsKey(i)) continue;
+            bool isUsed = false;
+            for (int j = 0; j < weakness.Length && j < 4; j++)
+                if (VisualSlot(j) == i) { isUsed = true; break; }
+            if (!isUsed) playerSlots[i].ShowEmpty();
+        }
 
         for (int i = 0; i < weakness.Length && i < 4; i++)
         {
@@ -309,8 +384,38 @@ public class ComboDisplayManager : Script
         if (revealIndex >= revealCombo.Length)
         {
             isRevealing = false;
+
+            // For combos > 4 where page 2 doesn't fill all 4 slots:
+            // slots that had page-1 keys but no page-2 key still show the old key just clear them.
+            if (revealCombo.Length > 4 && revealCombo.Length % 4 != 0)
+            {
+                int page2Count = revealCombo.Length % 4;
+                for (int s = page2Count; s < 4; s++)
+                {
+                    if (enemySlots.ContainsKey(s)) enemySlots[s].ShowEmpty();
+                }
+            }
+
             Console.WriteLine("[ComboDisplayManager] Beat reveal complete");
         }
+    }
+
+    private void HandleGapReveal()
+    {
+        if (Conductor.Instance == null) return;
+        float elapsed = Conductor.Instance.GetVisualAdjustedSongTime() - revealStartTime;
+
+        while (gapRevealIndex < gapVisualSlots.Length)
+        {
+            if (elapsed < gapRevealOffsets[gapRevealIndex]) break;
+            int s = gapVisualSlots[gapRevealIndex];
+            if (enemySlots.ContainsKey(s)) enemySlots[s].ShowEmptyPop();
+            // Player gap slots are already showing empty from StartComboReveal — no pop needed
+            gapRevealIndex++;
+        }
+
+        if (gapRevealIndex >= gapVisualSlots.Length)
+            isGapRevealing = false;
     }
 
     // =========================
@@ -318,7 +423,7 @@ public class ComboDisplayManager : Script
     // =========================
     private void HandleStaggerFade()
     {
-        if (fadeOutCount >= revealCombo.Length)
+        if (fadeOutCount >= 4)
         {
             isFadingOut = false;
             Console.WriteLine("[ComboDisplayManager] Stagger fade complete");
@@ -330,11 +435,11 @@ public class ComboDisplayManager : Script
         if (fadeStaggerTimer >= FadeStaggerDelay)
         {
             fadeStaggerTimer = 0f;
-            int vs = VisualSlot(fadeOutCount);
-            if (enemySlots.ContainsKey(vs))
+            // Fade slot by index directly so gap slots (empty key) also disappear
+            if (enemySlots.ContainsKey(fadeOutCount))
             {
-                enemySlots[vs].FadeOutAndHide(FadeOutDuration);
-                Console.WriteLine($"[ComboDisplayManager] Fading out enemy slot {vs}");
+                enemySlots[fadeOutCount].FadeOutAndHide(FadeOutDuration);
+                Console.WriteLine($"[ComboDisplayManager] Fading out enemy slot {fadeOutCount}");
             }
             fadeOutCount++;
         }
@@ -349,6 +454,35 @@ public class ComboDisplayManager : Script
             judgementScript.ShowJudgement(judgement);
         else
             Console.WriteLine("[ComboDisplayManager] ⚠️ Judgement display not registered!");
+    }
+
+    public void ShowGapMissKey(char key)
+    {
+        if (gapVisualSlots.Length == 0) return;
+        if (TurnManager.Instance == null || Conductor.Instance == null) return;
+
+        float currentTime = Conductor.Instance.GetVisualAdjustedSongTime();
+        float playerStart = TurnManager.Instance.GetPlayerInputStartTime();
+        float beatDur = Conductor.Instance.SecondsPerBeat;
+        float window = ComboSystem.Instance != null ? ComboSystem.Instance.greatWindow : 0.15f;
+
+        for (int i = 0; i < gapVisualSlots.Length; i++)
+        {
+            float expectedTime = playerStart + gapVisualSlots[i] * beatDur;
+            if (Math.Abs(currentTime - expectedTime) <= window)
+            {
+                int s = gapVisualSlots[i];
+                if (playerSlots.ContainsKey(s))
+                    playerSlots[s].ShowWrong(key, key);
+                return;
+            }
+        }
+    }
+
+    public void HideAllSlots()
+    {
+        ClearEnemySlotsInstant();
+        ClearPlayerSlots();
     }
 
     private void ClearPlayerSlots()
@@ -416,19 +550,24 @@ public class ComboDisplayManager : Script
         currentSlotOffsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0.0f, 0.5f, 1.0f, 1.5f };
         countdownStartTime = Conductor.Instance != null ? Conductor.Instance.GetAdjustedSongTime() : 0f;
 
-        // Fade out unused slots; active combo slots will cancel the fade via ShowBlankDim
-        float fadeOutDur = Conductor.Instance != null ? Conductor.Instance.SecondsPerBeat * 0.5f : 0.25f;
+        // Show empty PNG on gap player slots; active slots get ShowBlankDim
         for (int i = 0; i < 4; i++)
-            if (playerSlots.ContainsKey(i)) playerSlots[i].FadeToHidden(fadeOutDur);
+        {
+            if (!playerSlots.ContainsKey(i)) continue;
+            bool isUsed = false;
+            for (int j = 0; j < currentWeakness.Length && j < 4; j++)
+                if (VisualSlot(j) == i) { isUsed = true; break; }
+            if (!isUsed) playerSlots[i].ShowEmpty();
+        }
 
-        for (int i = 0; i < currentWeakness.Length; i++)
+        for (int i = 0; i < Math.Min(currentWeakness.Length, 4); i++)
         {
             int vs = VisualSlot(i);
             if (playerSlots.ContainsKey(vs))
                 playerSlots[vs].ShowBlankDim(currentWeakness[i]);
         }
 
-        countdownCurrentSlot = currentWeakness.Length;
+        countdownCurrentSlot = Math.Min(currentWeakness.Length, 4);
         isCountingDown = false;
         pendingCountdownStart = false;
         lastInputProgress = 0;

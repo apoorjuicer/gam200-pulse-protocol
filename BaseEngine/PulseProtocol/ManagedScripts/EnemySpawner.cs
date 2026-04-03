@@ -14,7 +14,7 @@ public class EnemySpawner : Script
     // =========================
     public string EnemyPrefabName = "Rat_Enemy";
     public float SpawnX = 800f;
-    public float SpawnY = 300f;
+    public float SpawnY = 350f;
 
     public int EnemiesToSpawn = 3;
     public float SpawnInterval = 0.5f; // keep small for testing
@@ -24,7 +24,8 @@ public class EnemySpawner : Script
     // =========================
     // UI / Queue
     // =========================
-    private Queue<EnemyIconType> enemyQueue = new Queue<EnemyIconType>(); // public enum EnemyIconType { None, Rat, Bat, Gorilla }
+    // I made this public static so i can use them in playeranimationcontroller.cs for different hero attack animations
+    public static Queue<EnemyIconType> enemyQueue = new Queue<EnemyIconType>(); // public enum EnemyIconType { None, Rat, Bat, Gorilla }
     public static int enemyQueueID = 0;
     private bool uiInitialized = false;
     private int framesSinceStart = 0;
@@ -74,6 +75,22 @@ public class EnemySpawner : Script
         EnemyIconType.BlueGorilla
     };
 
+    // Boss-only queue for isolated testing
+    private List<EnemyIconType> EnemyContainerBossTest = new List<EnemyIconType>
+    {
+        EnemyIconType.Boss
+    };
+
+    private List<EnemyIconType> EnemyContainer3 = new List<EnemyIconType>
+    {
+        EnemyIconType.Rat,
+        EnemyIconType.BlueGorilla,
+        EnemyIconType.Rat,
+        EnemyIconType.Bat,
+        EnemyIconType.BlueGorilla,
+        EnemyIconType.Bat,
+        EnemyIconType.Boss
+    };
 
     public override void Update()
     {
@@ -83,6 +100,9 @@ public class EnemySpawner : Script
             initialized = true;
             return;
         }
+
+        if (StageClearElement.IsCleared)
+            return;
 
         // UI init after a few frames
         framesSinceStart++;
@@ -186,6 +206,22 @@ public class EnemySpawner : Script
             }
         }
 
+        else if (CurrentScene == "Level3")
+        {
+            foreach (EnemyIconType type in EnemyContainer3)
+            {
+                enemyQueue.Enqueue(type);
+            }
+        }
+
+        else if (CurrentScene == "BossTest")
+        {
+            foreach (EnemyIconType type in EnemyContainerBossTest)
+            {
+                enemyQueue.Enqueue(type);
+            }
+        }
+
         EnemiesToSpawn = enemyQueue.Count();
 
         Console.WriteLine($"[EnemySpawner] Enemy queue setup with {enemyQueue.Count} enemies");
@@ -250,6 +286,7 @@ public class EnemySpawner : Script
             case EnemyIconType.Rat: return "Rat_Enemy";
             case EnemyIconType.Bat: return "Bat_Enemy";
             case EnemyIconType.BlueGorilla: return "BlueGorilla_Enemy";
+            case EnemyIconType.Boss: return "Boss_Enemy";
             default: return "";
         }
     }

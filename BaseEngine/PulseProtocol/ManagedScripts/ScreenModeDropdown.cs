@@ -35,6 +35,14 @@ public static class DropdownState
     // Debounce: block option selection for a couple frames after opening
     public static int SuppressOptionClickFrames = 0;
 
+    // Controller: whether the dropdown header currently has gamepad focus.
+    public static bool IsDropdownFocused = false;
+
+    // Which row is highlighted when open via controller:
+    //   0 = header/current-selection row  →  Cross just closes (no change)
+    //   1 = alternate-option row          →  Cross toggles screen mode
+    public static int HoveredOptionIndex = 1;
+
     public static bool IsInsideOpenDropdown(float x, float y)
     {
         return x >= OpenX - OpenHalfW && x <= OpenX + OpenHalfW &&
@@ -58,6 +66,20 @@ public class DropdownToggle : Script
     private float baseScaleX;
     private float baseScaleY;
 
+    private const int GP_CROSS      = InputConstants.GP_CROSS;
+    private const int GP_CIRCLE     = InputConstants.GP_CIRCLE;
+    private const int GP_DPAD_UP    = InputConstants.GP_DPAD_UP;
+    private const int GP_DPAD_RIGHT = InputConstants.GP_DPAD_RIGHT;
+    private const int GP_DPAD_DOWN  = InputConstants.GP_DPAD_DOWN;
+    private const int GP_DPAD_LEFT  = InputConstants.GP_DPAD_LEFT;
+
+    // Scale multiplier applied to the header sprite when it has gamepad focus.
+    public float FocusScaleBoost = 1.15f;
+    private bool m_focused = false;
+    // Frame on which gamepad focus was just gained — D-pad input is suppressed that frame
+    // so the same press that caused the focus transfer doesn't immediately release it.
+    private int m_focusGainFrame = -1;
+
     public override void Update()
     {
         InputComponent input = GetInput();
@@ -75,6 +97,125 @@ public class DropdownToggle : Script
         DropdownState.HeaderY = t.Y;
         DropdownState.HeaderHalfW = baseScaleX;
         DropdownState.HeaderHalfH = baseScaleY;
+
+        // Controller: apply/remove focus scale boost
+        if (DropdownState.IsDropdownFocused)
+        {
+            if (!m_focused)
+            {
+                Console.WriteLine("[Dropdown] Gamepad focus GAINED");
+                m_focused = true;
+                m_focusGainFrame = Time.FrameCount;
+            }
+            // Scale boost only when the dropdown is closed (shows the header has gamepad focus).
+            // When open, no scale boost on the header — the FULL SCREEN row uses its hover
+            // texture instead, keeping the visual clean.
+            bool headerHighlighted = !DropdownState.ScreenDropdownOpen;
+            if (headerHighlighted)
+            {
+                t.ScaleX = baseScaleX * FocusScaleBoost;
+                t.ScaleY = baseScaleY * FocusScaleBoost;
+            }
+            else
+            {
+                t.ScaleX = baseScaleX;
+                t.ScaleY = baseScaleY;
+            }
+        }
+        else if (m_focused)
+        {
+            Console.WriteLine("[Dropdown] Gamepad focus LOST");
+            t.ScaleX = baseScaleX;
+            t.ScaleY = baseScaleY;
+            m_focused = false;
+        }
+
+        // Controller: handle input when this header has gamepad focus
+        if (DropdownState.IsDropdownFocused)
+        {
+            bool _cross  = input.IsGamepadButtonTriggered(GP_CROSS);
+            bool _circle = input.IsGamepadButtonTriggered(GP_CIRCLE);
+            // Suppress D-pad on the same frame focus was gained — that press is what caused
+            // the transfer and must not be re-consumed here (would immediately release focus).
+            bool _suppressDPad = (Time.FrameCount == m_focusGainFrame);
+            bool _dLeft  = !_suppressDPad && input.IsGamepadButtonTriggered(GP_DPAD_LEFT);
+            bool _dRight = !_suppressDPad && input.IsGamepadButtonTriggered(GP_DPAD_RIGHT);
+            bool _dUp    = !_suppressDPad && input.IsGamepadButtonTriggered(GP_DPAD_UP);
+            bool _dDown  = !_suppressDPad && input.IsGamepadButtonTriggered(GP_DPAD_DOWN);
+
+            if (_cross || _dLeft || _dRight || _dUp || _dDown || _circle)
+                Console.WriteLine($"[Dropdown] focused input: cross={_cross} dL={_dLeft} dR={_dRight} dU={_dUp} dD={_dDown} open={DropdownState.ScreenDropdownOpen}");
+
+            if (DropdownState.ScreenDropdownOpen)
+            {
+                // D-pad Up: move highlight toward the header row; clamp at top (no exiting)
+                if (_dUp)
+                {
+                    if (DropdownState.HoveredOptionIndex > 0)
+                        DropdownState.HoveredOptionIndex--;
+                    return;
+                }
+                // D-pad Down: move highlight toward the alternate row; clamp at bottom (no exiting)
+                if (_dDown)
+                {
+                    if (DropdownState.HoveredOptionIndex < 1)
+                        DropdownState.HoveredOptionIndex++;
+                    return;
+                }
+                // Cross confirms the highlighted row:
+                //   index 1 (alternate) → toggle screen mode, close, move to slider
+                //   index 0 (current)   → just close, keep focus on header (no change)
+                if (_cross)
+                {
+                    if (DropdownState.HoveredOptionIndex == 1)
+                    {
+                        ToggleScreenAPI.ToggleFullscreen();
+                        UserSettingsStore.SetFullscreen(ToggleScreenAPI.IsFullscreen());
+                        DropdownState.ScreenDropdownOpen = false;
+                        DropdownState.IsDropdownFocused  = false;
+                        AudioSliderKnobBase.FocusFirstSlider();
+                    }
+                    else
+                    {
+                        // Confirmed current selection — just close the dropdown, stay on header
+                        DropdownState.ScreenDropdownOpen = false;
+                    }
+                    return;
+                }
+                // Circle: close the dropdown, keep focus on the header (no navigation away)
+                if (_circle)
+                {
+                    DropdownState.ScreenDropdownOpen = false;
+                    return;
+                }
+            }
+            else
+            {
+                // Dropdown is closed — Cross opens it; start highlight on the current row (top)
+                // so D-pad Down is required to reach the alternate option before confirming.
+                if (_cross)
+                {
+                    Console.WriteLine("[Dropdown] Opening dropdown via Cross");
+                    DropdownState.HoveredOptionIndex = 0;
+                    DropdownState.ScreenDropdownOpen = true;
+                    DropdownState.SuppressOptionClickFrames = 2;
+                    return;
+                }
+                // D-pad Down: move focus to Volume slider
+                if (_dDown)
+                {
+                    DropdownState.IsDropdownFocused = false;
+                    AudioSliderKnobBase.FocusFirstSlider();
+                    return;
+                }
+                // D-pad Up: release focus back to NavigationButtons (back button)
+                if (_dUp)
+                {
+                    DropdownState.IsDropdownFocused = false;
+                    return;
+                }
+            }
+        }
 
         float mx = input.WorldMouseX;
         float my = input.WorldMouseY;
@@ -158,30 +299,28 @@ public class DropdownOpenFollower : Script
 // ======================================================
 public class DropdownOptionFullscreen : Script
 {
-    // Make the clickable region feel like a real dropdown row:
-    // - width comes from the open dropdown box
-    // - height comes from this row's size (scaled up)
-    public float RowHitboxScaleY = 2.8f; // bigger = easier to click
+    public float RowHitboxScaleY = 2.8f;
     public float RowPadY = 0.0f;
 
     private bool initialized = false;
     private float originalScaleX;
     private float originalScaleY;
 
+    private bool   m_texInit    = false;
+    private string m_defaultTex = "";
+    private string m_hoverTex   = "";
+
     public override void Update()
     {
-        // Show this option only when currently WINDOWED
+        // Show only when currently WINDOWED and dropdown is open
         if (ToggleScreenAPI.IsFullscreen() || !DropdownState.ScreenDropdownOpen)
         {
             HideSelf();
+            if (m_texInit) { SpriteComponent _spr = GetSprite(); _spr.Texture = m_defaultTex; }
             return;
         }
 
         ShowSelf();
-
-        // Prevent the "open click" from instantly selecting
-        if (DropdownState.SuppressOptionClickFrames > 0)
-            return;
 
         InputComponent input = GetInput();
         TransformComponent t = GetTransform();
@@ -193,18 +332,35 @@ public class DropdownOptionFullscreen : Script
             initialized = true;
         }
 
+        // Cache hover texture once
+        if (!m_texInit)
+        {
+            SpriteComponent spr = GetSprite();
+            m_defaultTex = spr.Texture ?? "";
+            int dot = m_defaultTex.LastIndexOf('.');
+            m_hoverTex = dot >= 0
+                ? m_defaultTex.Substring(0, dot) + "_hover" + m_defaultTex.Substring(dot)
+                : m_defaultTex + "_hover";
+            m_texInit = true;
+        }
+
         float mx = input.WorldMouseX;
         float my = input.WorldMouseY;
 
-        // Big row hitbox (not just the letters)
-        float cx = DropdownState.OpenX;       // center aligned with dropdown box
-        float cy = t.Y;                       // row position (you placed it visually)
+        float cx    = DropdownState.OpenX;
+        float cy    = t.Y;
         float halfW = DropdownState.OpenHalfW;
         float halfH = (originalScaleY * RowHitboxScaleY) + RowPadY;
 
-        bool hovered =
-            mx >= cx - halfW && mx <= cx + halfW &&
-            my >= cy - halfH && my <= cy + halfH;
+        bool hovered = mx >= cx - halfW && mx <= cx + halfW &&
+                       my >= cy - halfH && my <= cy + halfH;
+
+        // Hover texture: mouse hover OR controller navigated to this row (index 1)
+        bool controllerOnThisRow = DropdownState.IsDropdownFocused && DropdownState.HoveredOptionIndex == 1;
+        { SpriteComponent _spr = GetSprite(); _spr.Texture = (hovered || controllerOnThisRow) ? m_hoverTex : m_defaultTex; }
+
+        if (DropdownState.SuppressOptionClickFrames > 0)
+            return;
 
         if (hovered && input.IsMouseButtonTriggered(0))
         {
@@ -254,19 +410,21 @@ public class DropdownOptionWindowed : Script
     private float originalScaleX;
     private float originalScaleY;
 
+    private bool   m_texInit    = false;
+    private string m_defaultTex = "";
+    private string m_hoverTex   = "";
+
     public override void Update()
     {
-        // Show this option only when currently FULLSCREEN
+        // Show only when currently FULLSCREEN and dropdown is open
         if (!ToggleScreenAPI.IsFullscreen() || !DropdownState.ScreenDropdownOpen)
         {
             HideSelf();
+            if (m_texInit) { SpriteComponent _spr = GetSprite(); _spr.Texture = m_defaultTex; }
             return;
         }
 
         ShowSelf();
-
-        if (DropdownState.SuppressOptionClickFrames > 0)
-            return;
 
         InputComponent input = GetInput();
         TransformComponent t = GetTransform();
@@ -278,17 +436,35 @@ public class DropdownOptionWindowed : Script
             initialized = true;
         }
 
+        // Cache hover texture once
+        if (!m_texInit)
+        {
+            SpriteComponent spr = GetSprite();
+            m_defaultTex = spr.Texture ?? "";
+            int dot = m_defaultTex.LastIndexOf('.');
+            m_hoverTex = dot >= 0
+                ? m_defaultTex.Substring(0, dot) + "_hover" + m_defaultTex.Substring(dot)
+                : m_defaultTex + "_hover";
+            m_texInit = true;
+        }
+
         float mx = input.WorldMouseX;
         float my = input.WorldMouseY;
 
-        float cx = DropdownState.OpenX;
-        float cy = t.Y;
+        float cx    = DropdownState.OpenX;
+        float cy    = t.Y;
         float halfW = DropdownState.OpenHalfW;
         float halfH = (originalScaleY * RowHitboxScaleY) + RowPadY;
 
-        bool hovered =
-            mx >= cx - halfW && mx <= cx + halfW &&
-            my >= cy - halfH && my <= cy + halfH;
+        bool hovered = mx >= cx - halfW && mx <= cx + halfW &&
+                       my >= cy - halfH && my <= cy + halfH;
+
+        // Hover texture: mouse hover OR controller navigated to this row (index 1)
+        bool controllerOnThisRow = DropdownState.IsDropdownFocused && DropdownState.HoveredOptionIndex == 1;
+        { SpriteComponent _spr = GetSprite(); _spr.Texture = (hovered || controllerOnThisRow) ? m_hoverTex : m_defaultTex; }
+
+        if (DropdownState.SuppressOptionClickFrames > 0)
+            return;
 
         if (hovered && input.IsMouseButtonTriggered(0))
         {

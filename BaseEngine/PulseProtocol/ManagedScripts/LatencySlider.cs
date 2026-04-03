@@ -26,7 +26,7 @@ public class LatencySliderApplier : Script
     public float MaxLatencyMs = 500f;
 
     // What to use when no saved value exists yet
-    public float DefaultLatencyMs = 100f;
+    public float DefaultLatencyMs = 80f;
 
     private bool seeded = false;
 
@@ -53,6 +53,8 @@ public class LatencySliderApplier : Script
         float offsetMs = MinLatencyMs + v01 * (MaxLatencyMs - MinLatencyMs);
         float offsetSec = offsetMs / 1000f;
 
+        // Update static so new Conductor instances (level loads) also pick up the saved value
+        Conductor.CalibratedOffset = offsetSec;
         if (Conductor.Instance != null)
             Conductor.Instance.MusicLatencyOffset = offsetSec;
     }

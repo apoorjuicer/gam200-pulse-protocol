@@ -19,10 +19,10 @@ public class VisualLatencyCalibrator : Script
     private const int KeyEnter = 257;
     private const int KeySpace = 32;
 
-    // Gamepad button constants
-    private const int GP_SQUARE = 2;  // confirm / start  (GLFW: Cross=0, Circle=1, Square=2, Triangle=3)
-    private const int GP_R1     = 5;  // flash earlier    (GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER)
-    private const int GP_L1     = 4;  // flash later      (GLFW_GAMEPAD_BUTTON_LEFT_BUMPER)
+    // Gamepad button constants — see InputConstants.cs
+    private const int GP_SQUARE = InputConstants.GP_SQUARE;  // confirm / start
+    private const int GP_R1     = InputConstants.GP_R1;      // flash earlier
+    private const int GP_L1     = InputConstants.GP_L1;      // flash later
 
     // -------------------------------------------------------------------------
     // Internal state
@@ -40,11 +40,25 @@ public class VisualLatencyCalibrator : Script
     private float leftHeld  = 0f;
     private const float HoldDelay = 0.1f;
     private const float HoldRate  = 0.06f;
+    private bool audioMixApplied = false;
 
     public override void Update()
     {
         Instance = this;
-        if (done) return;
+        if (done)
+        {
+            NavigationButtons.ReturnToSettingsAfterCalibration();
+            return;
+        }
+
+        if (!audioMixApplied)
+        {
+            audioMixApplied = true;
+            AudioComponent audio = GetAudio();
+            audio.SetMasterVolume(UserSettingsStore.GetSliderValue("Volume", 1.0f));
+            audio.SetMusicVolume(UserSettingsStore.GetSliderValue("Music", 1.0f));
+            audio.SetSfxVolume(UserSettingsStore.GetSliderValue("SFX", 0.25f));
+        }
 
         // Allow Conductor to tick in this scene
         GameStart.Ready = true;
@@ -171,7 +185,7 @@ public class VisualLatencyCalibrator : Script
             Conductor.Instance.DisplayLatencyOffset = Conductor.CalibratedDisplayOffset;
 
         Console.WriteLine("[VisualLatencyCalibrator] Skipped — keeping existing DisplayLatencyOffset.");
-        Scene.LoadScene(NextScene);
+        NavigationButtons.ReturnToSettingsAfterCalibration();
     }
 
     // Read-only access for UI scripts

@@ -564,6 +564,72 @@
             "mdl_ref": 1,
             "shd_ref": 3
         },
+        //red controller key
+        {
+            "id": "Controller_Red_O",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_RED_O.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "Controller_Red_X",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_RED_X.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "Controller_Red_SQ",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_RED_SQUARE.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "Controller_Red_TRI",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_RED_TRIANGLE.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        //green controller key
+        {
+            "id": "Controller_Green_O",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_Green_O.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "Controller_Green_X",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_Green_X.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "Controller_Green_SQ",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_Green_SQUARE.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
+        {
+            "id": "Controller_Green_TRI",
+            "path": "Assets/Textures/UI/ControllerKeys/Player_Input_Green_TRIANGLE.png",
+            "vert_shader_path": "shader/shader_vs.vert",
+            "frag_shader_path": "shader/shader_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 2
+        },
         // main menu UI
         {
             "id": "continue_mainmenu_btn",
@@ -643,6 +709,22 @@
             "path": "Assets/Textures/UI/Settings/back_hover.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "calibration_btn",
+            "path": "Assets/Textures/UI/calibration.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "calibration_btn_hover",
+            "path": "Assets/Textures/UI/calibration_hover.png",
+            "vert_shader_path": "shader/font_vs.vert",
+            "frag_shader_path": "shader/font_fs.frag",
             "mdl_ref": 1,
             "shd_ref": 3
         },
@@ -1188,6 +1270,22 @@
             "shd_ref": 3
         },
         {
+            "id": "playeremptykey",
+            "path": "Assets/Textures/UI/blankkeys/blank blue player key.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "enemyemptykey",
+            "path": "Assets/Textures/UI/blankkeys/Blank Enemy Key.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
             "id": "questionmark_blankkey",
             "path": "Assets/Textures/UI/blankkeys/question_mark_blank_key.png",
             "vert_shader_path": "shader/sprite_vs.vert",
@@ -1222,7 +1320,7 @@
         },
         {
             "id": "bat_attack_vfx",
-            "path": "Assets/Textures/VFX/Sword_Slash_VFX_1099x392.png",
+            "path": "Assets/Textures/VFX/bat_attack_vfx.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,

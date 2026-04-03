@@ -29,11 +29,21 @@ public class LatencyCalibrator : Script
     private float resultOffset = 0f;    // final MusicLatencyOffset written to Conductor
     private float lastSampleMs = 0f;    // most recent signed delta in ms (shown in UI)
     private float stdDevMs     = 0f;
+    private bool audioMixApplied = false;
 
     public override void Update()
     {
         Instance = this;
         if (done) return;
+
+        if (!audioMixApplied)
+        {
+            audioMixApplied = true;
+            AudioComponent audio = GetAudio();
+            audio.SetMasterVolume(UserSettingsStore.GetSliderValue("Volume", 1.0f));
+            audio.SetMusicVolume(UserSettingsStore.GetSliderValue("Music", 1.0f));
+            audio.SetSfxVolume(UserSettingsStore.GetSliderValue("SFX", 0.25f));
+        }
 
         // Allow Conductor to tick even before normal gameplay starts
         GameStart.Ready = true;

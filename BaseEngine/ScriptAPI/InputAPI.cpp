@@ -138,4 +138,11 @@ namespace ScriptAPI
 		if (!inputMgr) return 0.0f;
 		return inputMgr->getGamepadAxis(axis);
 	}
+
+	void InputComponent::RumbleGamepad(float leftMotor, float rightMotor, float durationSec)
+	{
+		auto inputMgr = Coordinator::GetInstance()->GetSystem<InputManager>();
+		if (!inputMgr) return;
+		inputMgr->rumbleGamepad(leftMotor, rightMotor, durationSec);
+	}
 }
