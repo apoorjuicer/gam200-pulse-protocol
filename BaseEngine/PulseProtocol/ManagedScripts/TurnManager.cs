@@ -114,6 +114,12 @@ public class TurnManager : Script
         bool killingBlowDealt = ComboSystem.Instance?.HasCompletedCombo() == true
             && (EnemyRhythmController.Instance?.IsPendingDeath == true
                 || EnemyRhythmController.Instance?.IsDying == true);
+
+        // Immediately resolve when killing blow is confirmed — don't wait for remaining player beats.
+        // This gets us into Resolution phase (input locked, slots dimmed) without delay.
+        if (killingBlowDealt && currentPhase == TurnPhase.PlayerInput && resolutionPendingFrames == 0)
+            resolutionPendingFrames = 2;
+
         if (playerInputPhaseActive && GameStart.Ready
             && currentPhase == TurnPhase.PlayerInput
             && !killingBlowDealt)
@@ -133,6 +139,7 @@ public class TurnManager : Script
                     ComboDisplayManager.TriggerPlayerSlotPulse(vs, beatDur);
                     if (i == 0)
                         GetAudio().PlaySFX(PlayerTurnSFX);
+
                 }
             }
 

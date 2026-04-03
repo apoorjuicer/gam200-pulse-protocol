@@ -26,8 +26,10 @@ public class Cheats: Script
     
     public override void Update()
     {
+        if (!GameStart.Ready) return;
+
         InputComponent input = GetInput();
- 
+
         // Level switch
         if(input.IsKeyPressed(KeyShift))
         {
@@ -56,8 +58,8 @@ public class Cheats: Script
             if(EnemyRhythmController.Instance != null)
             {
                 EnemyRhythmController.Instance.TakeDamage(99999);
+                EnemyRhythmController.Instance.TriggerHurtAnimation(); // pendingDeath is true so this skips hurt and goes straight to Die()
             }
-            
             else
             {
                 Console.WriteLine("There isn't an enemy on screen right now.....");

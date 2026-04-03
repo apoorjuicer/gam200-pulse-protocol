@@ -52,27 +52,25 @@ public class EnemySpawner : Script
     // };
 
     public string CurrentScene = "";
-    private List<EnemyIconType> EnemyContainer1 = new List<EnemyIconType> // chloe: i just change to rat for now since this is the reason why it wasnt spawning the next enemies
+    // Level 1: Teach randomised 4-beat combos (rat), then introduce the beat-gap pattern (gorilla).
+    // 4 enemies keeps the level focused without outstaying its welcome.
+    private List<EnemyIconType> EnemyContainer1 = new List<EnemyIconType>
     {
-        EnemyIconType.Rat,
-        EnemyIconType.Rat,
-        EnemyIconType.BlueGorilla,
-        EnemyIconType.Rat,
-        EnemyIconType.BlueGorilla,
-        EnemyIconType.Rat
+        EnemyIconType.Rat,           // learn the randomised 4-beat rhythm
+        EnemyIconType.Rat,           // reinforce it
+        EnemyIconType.BlueGorilla,   // introduce the gap (3-key, fixed pattern)
+        EnemyIconType.Rat,           // familiar closer
     };
 
+    // Level 2: Reintroduce familiar enemies, then layer in the bat's syncopated quaver rhythm.
+    // 5 enemies — gradual build, two bat encounters so the new pattern feels earned not cheap.
     private List<EnemyIconType> EnemyContainer2 = new List<EnemyIconType>
     {
-        EnemyIconType.Rat,
-        EnemyIconType.BlueGorilla,
-        EnemyIconType.Rat,
-        EnemyIconType.Bat,
-        EnemyIconType.Rat,
-        EnemyIconType.Bat,
-        EnemyIconType.BlueGorilla,
-        EnemyIconType.Bat,
-        EnemyIconType.BlueGorilla
+        EnemyIconType.Rat,           // warm-up
+        EnemyIconType.BlueGorilla,   // gap pattern refresher
+        EnemyIconType.Bat,           // introduce quaver syncopation
+        EnemyIconType.Rat,           // breather after hard timing
+        EnemyIconType.Bat,           // end strong on the new mechanic
     };
 
     // Boss-only queue for isolated testing
