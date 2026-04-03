@@ -2,7 +2,8 @@
 /**
  * @file        ScreenModeDropdown.cs
  * @project     Pulse Protocol
- * @author      Leu Jun Yong (primary) - 100%
+ * @author      Leu Jun Yong - 70%
+ * @author      Goh Pin Kai - 30%
  *
  * @brief       Screen mode dropdown UI logic (open/close behavior, click handling, and selecting fullscreen/windowed).
  *

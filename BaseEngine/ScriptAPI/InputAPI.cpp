@@ -2,8 +2,9 @@
 /**
 * @file        InputAPI.cpp
 * @project     Pulse Protocol
-* @author      Chloe Lau Rey En
-* @brief       Implementation of mouse input wrapper for C# scripts
+* @author      Chloe Lau Rey En - (95%)
+* @author      Goh Pin Kai - (5%)
+* @brief       Implementation of mouse & gamepad input wrapper for C# scripts
 *
 * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the
