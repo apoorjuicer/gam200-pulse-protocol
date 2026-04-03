@@ -63,6 +63,7 @@ public class TurnManager : Script
     // Time-based player slot pulses (mirrors SlotOffsets, runs every frame)
     private bool playerInputPhaseActive = false;
     private float playerInputStartTime = 0f;
+    private float phaseStartVisualTime = 0f;
     private bool[] slotPulsed = new bool[4];
     private bool[] gapSlotPulsed = new bool[4];
 
@@ -258,6 +259,7 @@ public class TurnManager : Script
         gameStarted = false;
         playerInputPhaseActive = false;
         resolutionPendingFrames = 0;
+        phaseStartVisualTime = 0f;
         EnemyDisplayBeatsOverride = null;
         PlayerInputBeatsOverride  = null;
         for (int i = 0; i < slotPulsed.Length; i++) slotPulsed[i] = false;
@@ -289,6 +291,7 @@ public class TurnManager : Script
     {
         currentPhase = TurnPhase.EnemyDisplay;
         phaseStartBeat = Conductor.Instance!.GetCurrentBeat() - 1;
+        phaseStartVisualTime = Conductor.Instance.GetVisualAdjustedSongTime();
 
         // Return player to idle at the start of every enemy turn.
         PlayerAnimationController.Instance?.ForceIdle();
@@ -324,6 +327,7 @@ public class TurnManager : Script
     {
         currentPhase = TurnPhase.PlayerInput;
         phaseStartBeat = Conductor.Instance!.GetCurrentBeat() - 1;
+        phaseStartVisualTime = Conductor.Instance.GetVisualAdjustedSongTime();
 
         ComboSystem.Instance?.ResetCombo();
         resolutionPendingFrames = 0;
@@ -452,6 +456,8 @@ public class TurnManager : Script
                 return 0;
         }
     }
+
+    public float GetPhaseStartVisualTime() => phaseStartVisualTime;
 
     public void OnDestroy()
     {

@@ -3,6 +3,8 @@ using ScriptAPI;
 
 public class VisualBeatSystem : Script
 {
+    private static readonly float[] DefaultBeatOffsets = new float[] { 0f };
+
     // =========================
     // Singleton
     // =========================
@@ -35,6 +37,11 @@ public class VisualBeatSystem : Script
     private bool _cachedBaseScale = false;
     private float _baseScaleX = 1f;
     private float _baseScaleY = 1f;
+    private TurnPhase? _batPulsePhase = null;
+    private float _batPulseAnchorTime = float.MinValue;
+    private int _batPulseNextIndex = 0;
+    private float _batPulseTimer = 0f;
+    public float discretePulseDuration = 0.10f;
 
     public override void Update()
     {
@@ -66,25 +73,7 @@ public class VisualBeatSystem : Script
             _cachedBaseScale = true;
         }
 
-        // =========================
-        // Beat phase (0..1)
-        // =========================
-        // Pre-advance by one frame so the rendered spike appears on screen
-        // on the same frame the beat is heard, compensating for display pipeline lag.
-        float songTime = Conductor.Instance!.GetVisualAdjustedSongTime();
-
-        int ppb = Math.Max(1, pulsesPerBeat);
-        float subBeat = spb / ppb;
-
-        float phase = songTime / subBeat;
-        phase = phase - (float)Math.Floor(phase); // 0..1
-        if (phase > 0.5f) phase -= 1.0f;          // -0.5..0.5, symmetric around the beat
-
-        // =========================
-        // Pulse curve (peaks exactly on the beat, fades symmetrically before and after)
-        // =========================
-        float w = Math.Max(0.0001f, width);
-        float pulse = (float)Math.Exp(-(phase * phase) / (2f * w * w)); // ~1 at beat, -> 0 before/after
+        float pulse = GetActivePulseStrength(spb);
 
         // =========================
         // Scale: open on beat, close back
@@ -146,5 +135,91 @@ public class VisualBeatSystem : Script
         if (v < 0f) return 0f;
         if (v > 1f) return 1f;
         return v;
+    }
+
+    private float GetActivePulseStrength(float spb)
+    {
+        if (Conductor.Instance == null)
+            return 0f;
+
+        float songTime = Conductor.Instance.GetVisualAdjustedSongTime();
+        float w = Math.Max(0.0001f, width);
+
+        if (TryGetBatPulseAnchor(out TurnPhase phase, out float anchorTime))
+        {
+            return UpdateDiscreteBatPulse(phase, anchorTime, songTime);
+        }
+
+        ResetBatPulseState();
+
+        int ppb = Math.Max(1, pulsesPerBeat);
+        float subBeat = spb / ppb;
+        float normalPhase = songTime / subBeat;
+        normalPhase = normalPhase - (float)Math.Floor(normalPhase);
+        if (normalPhase > 0.5f) normalPhase -= 1.0f;
+        return (float)Math.Exp(-(normalPhase * normalPhase) / (2f * w * w));
+    }
+
+    private bool TryGetBatPulseAnchor(out TurnPhase phase, out float anchorTime)
+    {
+        phase = TurnPhase.Countdown;
+        anchorTime = 0f;
+
+        if (EnemyRhythmController.Instance == null || TurnManager.Instance == null)
+            return false;
+
+        if (!(EnemyRhythmController.Instance is Bat) || EnemyRhythmController.Instance.IsDying)
+            return false;
+
+        phase = TurnManager.Instance.GetCurrentPhase();
+        if (phase == TurnPhase.EnemyDisplay)
+        {
+            anchorTime = TurnManager.Instance.GetPhaseStartVisualTime();
+            return true;
+        }
+
+        if (phase == TurnPhase.PlayerInput)
+        {
+            anchorTime = TurnManager.Instance.GetPlayerInputStartTime();
+            return true;
+        }
+
+        return false;
+    }
+
+    private float UpdateDiscreteBatPulse(TurnPhase phase, float anchorTime, float songTime)
+    {
+        if (_batPulsePhase != phase || Math.Abs(_batPulseAnchorTime - anchorTime) > 0.0001f)
+        {
+            _batPulsePhase = phase;
+            _batPulseAnchorTime = anchorTime;
+            _batPulseNextIndex = 0;
+            _batPulseTimer = 0f;
+        }
+
+        float[] offsets = EnemyRhythmController.Instance?.SlotOffsets ?? DefaultBeatOffsets;
+        float elapsed = songTime - anchorTime;
+
+        while (_batPulseNextIndex < offsets.Length && elapsed >= offsets[_batPulseNextIndex])
+        {
+            _batPulseTimer = discretePulseDuration;
+            _batPulseNextIndex++;
+        }
+
+        if (_batPulseTimer <= 0f)
+            return 0f;
+
+        float pulse = _batPulseTimer / Math.Max(0.0001f, discretePulseDuration);
+        _batPulseTimer -= Time.DeltaTime;
+        if (_batPulseTimer < 0f) _batPulseTimer = 0f;
+        return Clamp01(pulse);
+    }
+
+    private void ResetBatPulseState()
+    {
+        _batPulsePhase = null;
+        _batPulseAnchorTime = float.MinValue;
+        _batPulseNextIndex = 0;
+        _batPulseTimer = 0f;
     }
 }
