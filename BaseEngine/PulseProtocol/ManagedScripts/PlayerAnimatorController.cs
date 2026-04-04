@@ -46,6 +46,10 @@ public class PlayerAnimationController : Script
     private PlayerAnimState currentState = PlayerAnimState.Idle2;
     private bool swingToggle = false;
 
+    // Boss-specific attack cycling: 0=sword, 1=gun, 2=spear
+    private static int  _bossAttackCycle = 0;
+    private static int  _prevBossPhase   = 0;
+
     // Determines which idle to return to after Attack/Hurt finishes
     // false = Idle2 (default, unarmed stance)
     // true  = Idle1 (armed stance, after attacking)
@@ -156,39 +160,58 @@ public class PlayerAnimationController : Script
 
     public void PlayAttack(string combo) // param is the enemies weakness combo
     {
-        // update as we continue with more combo ig.
-        switch (combo.Length)
+        // ── Boss-fight path: cycle sword -> gun -> spear ──────────────────────
+        int currentBossPhase = BossEnemyController.BossPhase;
+
+        // Reset the cycle whenever a new boss fight starts (phase goes 0 → 1)
+        if (currentBossPhase > 0 && _prevBossPhase == 0)
+            _bossAttackCycle = 0;
+        _prevBossPhase = currentBossPhase;
+
+        if (currentBossPhase > 0)
         {
-            case 3: 
-                AttackSpriteSheet = "dorian_spear"; //gorilla
-                AttackRows = 4;
-                AttackColumns = 5;
-                AttackFrames = 18;
-                break;
-            case 4: 
-                if(EnemySpawner.enemyQueue.Peek() == EnemyIconType.Rat)
-                { 
-                    AttackSpriteSheet = "dorian_sword"; //rat
-                    AttackRows = 4;
-                    AttackColumns = 5;
-                    AttackFrames = 18;
-                }
-
-                else if(EnemySpawner.enemyQueue.Peek() == EnemyIconType.Bat)
-                {
-                    AttackSpriteSheet = "dorian_gun";   //bat
-                    AttackRows = 5;
-                    AttackColumns = 6;
-                    AttackFrames = 29;
-                }
-                break;
-
-            default: // imma just put this as the defualt cos idk wut else 2 put
-                AttackSpriteSheet = "dorian_sword";
-                AttackRows = 4;
-                AttackColumns = 5;
-                AttackFrames = 18;
-                break;
+            switch (_bossAttackCycle % 3)
+            {
+                case 0: // sword
+                    AttackSpriteSheet = "dorian_sword";
+                    AttackRows = 4; AttackColumns = 5; AttackFrames = 18;
+                    break;
+                case 1: // gun
+                    AttackSpriteSheet = "dorian_gun";
+                    AttackRows = 5; AttackColumns = 6; AttackFrames = 29;
+                    break;
+                case 2: // spear
+                    AttackSpriteSheet = "dorian_spear";
+                    AttackRows = 4; AttackColumns = 5; AttackFrames = 18;
+                    break;
+            }
+        }
+        else
+        {
+            // ── Normal enemies ────────────────────────────────────────────────
+            switch (combo.Length)
+            {
+                case 3:
+                    AttackSpriteSheet = "dorian_spear"; //gorilla
+                    AttackRows = 4; AttackColumns = 5; AttackFrames = 18;
+                    break;
+                case 4:
+                    if (EnemySpawner.enemyQueue.Peek() == EnemyIconType.Rat)
+                    {
+                        AttackSpriteSheet = "dorian_sword"; //rat
+                        AttackRows = 4; AttackColumns = 5; AttackFrames = 18;
+                    }
+                    else if (EnemySpawner.enemyQueue.Peek() == EnemyIconType.Bat)
+                    {
+                        AttackSpriteSheet = "dorian_gun";   //bat
+                        AttackRows = 5; AttackColumns = 6; AttackFrames = 29;
+                    }
+                    break;
+                default:
+                    AttackSpriteSheet = "dorian_sword";
+                    AttackRows = 4; AttackColumns = 5; AttackFrames = 18;
+                    break;
+            }
         }
 
         // Don't interrupt an ongoing attack
@@ -223,21 +246,44 @@ public class PlayerAnimationController : Script
         pendingHitVFX = true;
         hitVFXTimer   = stateDuration;
 
-        // Spawn attack VFX each enemy type has its own prefab with correct scale/dimensions
+        // Spawn attack VFX
         SwordSlashVFX.SpawnX = GetTransform().X + 300f;
         SwordSlashVFX.SpawnY = GetTransform().Y;
         SwordSlashVFX.SpawnDuration = stateDuration;
-        switch (EnemySpawner.enemyQueue.Count > 0 ? EnemySpawner.enemyQueue.Peek() : EnemyIconType.None)
+
+        if (currentBossPhase > 0)
         {
-            case EnemyIconType.BlueGorilla:
-                Factory.Instantiate("SpearAttackVFX");
-                break;
-            case EnemyIconType.Bat:
-                Factory.Instantiate("GunAttackVFX");
-                break;
-            default: // Rat and anything else
-                Factory.Instantiate("SwordSlashVFX");
-                break;
+            // VFX matches the current cycle step, then advance the counter
+            switch (_bossAttackCycle % 3)
+            {
+                case 0:
+                    SwordSlashVFX.BossVFXOverride = "sword";
+                    Factory.Instantiate("SwordSlashVFX");
+                    break;
+                case 1:
+                    Factory.Instantiate("GunAttackVFX");
+                    break;
+                case 2:
+                    SwordSlashVFX.BossVFXOverride = "spear";
+                    Factory.Instantiate("SpearAttackVFX");
+                    break;
+            }
+            _bossAttackCycle++;
+        }
+        else
+        {
+            switch (EnemySpawner.enemyQueue.Count > 0 ? EnemySpawner.enemyQueue.Peek() : EnemyIconType.None)
+            {
+                case EnemyIconType.BlueGorilla:
+                    Factory.Instantiate("SpearAttackVFX");
+                    break;
+                case EnemyIconType.Bat:
+                    Factory.Instantiate("GunAttackVFX");
+                    break;
+                default: // Rat and anything else
+                    Factory.Instantiate("SwordSlashVFX");
+                    break;
+            }
         }
     }
 
