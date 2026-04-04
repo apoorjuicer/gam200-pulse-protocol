@@ -207,14 +207,14 @@
             "id": "SFX_Rat_Steps_1",
             "path": "Assets/Sound/Enemy/SFX_Rat_Steps_1.mp3",
             "loop": false,
-            "volume": 0.4,
+            "volume": 0.6,
             "audiotype": "SFX"
         },
         {
             "id": "SFX_Rat_Steps_2",
             "path": "Assets/Sound/Enemy/SFX_Rat_Steps_2.mp3",
             "loop": false,
-            "volume": 0.4,
+            "volume": 0.6,
             "audiotype": "SFX"
         }
     ]
