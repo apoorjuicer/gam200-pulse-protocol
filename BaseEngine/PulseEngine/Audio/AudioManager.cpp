@@ -125,11 +125,14 @@ void AudioManager::Initialize()
     }
 
     // 2. Initialize FMOD system Object
+    // setSoftwareChannels must be called BEFORE init.
+    // This sets the number of real (audible) mixer voices.
+    // Default is 64 — once exceeded FMOD silently virtualizes (inaudible) new sounds.
+    mSystem->setSoftwareChannels(256);
+
     // init(maxchannels, flags, extradriverdata)
-    // allocate internal buffer for 32 voices (maxchannel)
-    //  channel is where we play audio clip, up to 32 sounds
-    //  can be played at the same time
-    result = mSystem->init(32, FMOD_INIT_NORMAL, nullptr);
+    // maxchannels = virtual voice limit (should be >= software channels)
+    result = mSystem->init(512, FMOD_INIT_NORMAL, nullptr);
     if (!FMOD_CHECK(result, "System::init"))
     {
         return; // failed to initialize FMOD engine
@@ -591,6 +594,18 @@ void AudioManager::PlaySound(std::string const &id)
     // get sound value
     FMOD::Sound *sound = it->second; // same as mSfx[id]
     FMOD::Channel *channel = nullptr;
+
+    // Stop the previous channel for this sound ID if it is still playing.
+    // Without this, every PlaySound call leaks a live FMOD channel into the pool
+    // because mChannels[id] is overwritten without stopping the old handle.
+    auto oldIt = mChannels.find(id);
+    if (oldIt != mChannels.end() && oldIt->second)
+    {
+        bool stillPlaying = false;
+        oldIt->second->isPlaying(&stillPlaying);
+        if (stillPlaying)
+            oldIt->second->stop();
+    }
 
     // Play sound through SFX channel group
     FMOD_RESULT result = mSystem->playSound(sound, mSfxGroup, false, &channel);

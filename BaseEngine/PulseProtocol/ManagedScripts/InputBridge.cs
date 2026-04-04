@@ -39,6 +39,7 @@ public class InputBridge : Script
     private bool prevD = false;
     private bool prevInvalidKeyDown = false;
     private bool breakSfxPlayed = false;
+    private bool anyWrongKey = false;    // true if any key this turn was wrong; drives last-beat SFX
     private int nextSlot = 0;            // advances ONLY on player press
     private bool prevIsPlayerTurn = false;
 
@@ -68,6 +69,8 @@ public class InputBridge : Script
         {
             nextSlot = 0;
             breakSfxPlayed = false;
+            anyWrongKey = false;
+            Console.WriteLine("[InputBridge] Per-turn reset fired");
         }
         prevIsPlayerTurn = isPlayerTurn;
 
@@ -141,6 +144,18 @@ public class InputBridge : Script
         if (StageClearElement.IsCleared) return;
         if (ComboSystem.Instance == null) return;
 
+        // Re-sync: if ComboSystem was reset (progress=0, not yet completed) but nextSlot
+        // is still non-zero from a previous turn, the per-turn edge-detection reset was
+        // missed. Correct it here so the first key of the new turn starts at slot 0.
+        if (nextSlot > 0
+            && ComboSystem.Instance.GetComboProgress() == 0
+            && !ComboSystem.Instance.HasCompletedCombo())
+        {
+            nextSlot = 0;
+            breakSfxPlayed = false;
+            anyWrongKey = false;
+        }
+
         AudioComponent audio = GetAudio();
         string expectedCombo = ComboSystem.Instance.GetExpectedCombo();
         if (string.IsNullOrEmpty(expectedCombo)) return;
@@ -157,6 +172,7 @@ public class InputBridge : Script
 
         bool isLastKey = slotIndex == expectedCombo.Length - 1;
         bool isCorrectKey = key == expectedCombo[slotIndex];
+        if (!isCorrectKey) anyWrongKey = true;   // track across both branches for last-beat SFX
 
         bool wasCompleted = ComboSystem.Instance.HasCompletedCombo();
         int progressBefore = ComboSystem.Instance.GetComboProgress();
@@ -200,11 +216,19 @@ public class InputBridge : Script
             ComboDisplayManager.Instance?.ShowJudgement(isCorrectKey && timingOk ? judgement : "MISS");
             ComboDisplayManager.Instance?.ForceShowPlayerKeyFeedback(slotIndex, key, isCorrectKey && timingOk, expectedCombo[slotIndex]);
 
-            // Last beat of an already-failed combo: play break SFX only if a combo was in progress
-            if (isLastKey && slotIndex > 0 && !breakSfxPlayed)
+            // Last beat: establish SFX if all keys were correct, break SFX if any were wrong
+            if (isLastKey && slotIndex > 0)
             {
-                audio.PlaySFX("SFX_ComboStreakBroken");
-                breakSfxPlayed = true;
+                if (!breakSfxPlayed)
+                {
+                    Console.WriteLine($"[InputBridge] LAST BEAT (wasCompleted path) anyWrongKey={anyWrongKey} isCorrectKey={isCorrectKey} slotIndex={slotIndex}");
+                    audio.PlaySFX(!anyWrongKey ? "SFX_ComboEstablished_1" : "SFX_ComboStreakBroken");
+                    breakSfxPlayed = true;
+                }
+                else
+                {
+                    Console.WriteLine($"[InputBridge] LAST BEAT BLOCKED (wasCompleted path) breakSfxPlayed already true! anyWrongKey={anyWrongKey}");
+                }
             }
             return;
         }
@@ -220,16 +244,16 @@ public class InputBridge : Script
         // Show green only if the key was correct AND timing was within the window
         ComboDisplayManager.Instance?.ForceShowPlayerKeyFeedback(slotIndex, key, isCorrectKey && timingAccepted, expectedCombo[slotIndex]);
 
-        // Last beat: outcome
+        // Last beat: establish SFX if all keys were correct, break SFX if any were wrong
         if (isLastKey)
         {
-            if (timingAccepted)
+            Console.WriteLine($"[InputBridge] LAST BEAT (normal path) anyWrongKey={anyWrongKey} isCorrectKey={isCorrectKey} timingAccepted={timingAccepted} PlayerDidSuccessfulCombo={ComboSystem.Instance.PlayerDidSuccessfulCombo}");
+            if (!anyWrongKey)
             {
-                // Establish SFX + weapon SFX play together the moment the last beat comes in
                 audio.PlaySFX("SFX_ComboEstablished_1");
-                breakSfxPlayed = true; // Mark resolved so turn-end reset doesn't double-fire break SFX
+                breakSfxPlayed = true;
 
-                // Damage + attack animation only if the full combo was also correct
+                // Damage + attack only when timing was also good
                 if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
                 {
                     float playerDamage = PlayerHealth.Instance != null ? PlayerHealth.Instance.GetHealth().damage : 10;
@@ -242,7 +266,6 @@ public class InputBridge : Script
             }
             else if (slotIndex > 0)
             {
-                // Out of window on last beat: break SFX (only if a combo was already in progress)
                 audio.PlaySFX("SFX_ComboStreakBroken");
                 breakSfxPlayed = true;
             }
@@ -272,6 +295,7 @@ public class InputBridge : Script
 
         if (currentTime > lastBeatTime + greatWindow)
         {
+            Console.WriteLine($"[InputBridge] CheckMissedTurn fired: songTime={currentTime:F3} lastBeatTime={lastBeatTime:F3} playerInputStart={TurnManager.Instance.GetPlayerInputStartTime():F3}");
             AudioComponent audio = GetAudio();
             audio.PlaySFX("SFX_ComboStreakBroken");
             breakSfxPlayed = true;

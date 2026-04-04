@@ -1999,7 +1999,7 @@
                 {
                     "audiosource": {
                         "audio_id": "BGM_L1_TESTING",
-                        "volume": 0.5,
+                        "volume": 1.0,
                         "loop": true,
                         "playOnAwake": false
                     }
