@@ -181,36 +181,12 @@ public class ComboDisplayManager : Script
 
         if (ComboSystem.Instance == null) return;
 
+        // Track progress for page-flip logic below.
+        // Sprite feedback is handled exclusively by ForceShowPlayerKeyFeedback (called from
+        // InputBridge on the same frame as the key press), which has both key-correctness and
+        // timing-window info. A secondary feedback block here ran one frame late and could
+        // override the correct result, so it has been removed.
         int currentProgress = ComboSystem.Instance!.GetComboProgress();
-
-        if (currentProgress > lastInputProgress)
-        {
-            string combo = ComboSystem.Instance!.GetCurrentComboString();
-            if (combo.Length > 0)
-            {
-                int slotIndex = currentProgress - 1;
-                int vs = VisualSlot(slotIndex);
-                char pressedKey = combo[combo.Length - 1];
-
-                bool isCorrect = slotIndex < currentWeakness.Length &&
-                                 pressedKey == currentWeakness[slotIndex];
-
-                if (playerSlots.ContainsKey(vs))
-                {
-                    if (isCorrect)
-                    {
-                        playerSlots[vs].ShowCorrect(pressedKey);
-                    }
-                    else
-                    {
-                        char expected = slotIndex < currentWeakness.Length ? currentWeakness[slotIndex] : pressedKey;
-                        playerSlots[vs].ShowWrong(pressedKey, expected);
-                        VFXAPI.ShakeCamera(0.01f, 5.0f);
-                    }
-                }
-            }
-        }
-
         lastInputProgress = currentProgress;
 
         // Page-flip for 6/8-key combos: when player finishes page 1 (4 keys), show page 2 slots
@@ -471,7 +447,10 @@ public class ComboDisplayManager : Script
         if (isCorrect)
             playerSlots[vs].ShowCorrect(pressedKey);
         else
+        {
             playerSlots[vs].ShowWrong(pressedKey, expectedKey);
+            VFXAPI.ShakeCamera(0.01f, 5.0f);
+        }
     }
 
     public void ShowGapMissKey(char key)

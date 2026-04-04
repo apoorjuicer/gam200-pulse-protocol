@@ -38,6 +38,9 @@ public class ComboSystem : Script
     // MISS    >  0.125s  (the central 50% of each beat interval pressing mid-beat) :(
     public float perfectWindow = 0.08f;
     public float greatWindow   = 0.15f;
+    // Shifts the entire timing window earlier by this many seconds.
+    // Increase to make the window feel more responsive / require pressing slightly before the beat.
+    public float InputEarlyShift = 0.05f;
 
 
     // DEBUG: Set to true to auto-set a test weakness and accept all input regardless of turn state
@@ -187,7 +190,7 @@ public class ComboSystem : Script
         float delta;
         if (TurnManager.Instance != null && slotIndex < slotOffsets.Length)
         {
-            float expectedTime = TurnManager.Instance.GetPlayerInputStartTime() + slotOffsets[slotIndex];
+            float expectedTime = TurnManager.Instance.GetPlayerInputStartTime() + slotOffsets[slotIndex] - InputEarlyShift;
             delta = Math.Abs(currentSongTime - expectedTime);
         }
         else

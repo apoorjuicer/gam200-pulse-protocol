@@ -602,7 +602,9 @@ public class EnemyRhythmController : Script
         {
             pendingDeath = true;
             pendingDeathFallbackTimer = 0f;
-            ComboDisplayManager.Instance?.DimSlotsForDeath();
+            // DimSlotsForDeath is intentionally NOT called here — calling it immediately in
+            // TakeDamage would wipe the last key's feedback sprite in the same frame it was set.
+            // Die() already calls DimSlotsForDeath once the death animation actually starts.
         }
     }
 
