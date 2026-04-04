@@ -50,5 +50,14 @@ namespace ScriptAPI
         void FadeInMusic(float duration);
 
         bool IsBGMPlaying();
+
+        // Spatial audio: set the world-space position of the listener (camera/player)
+        // Call this every frame so distance attenuation and panning update dynamically
+        void SetListenerPosition(float x, float y);
+
+        // Play a one-shot SFX immediately spatialized from a world position.
+        // minVolume = volume floor (0..1) so the sound is never silent when far away
+        void PlaySFXAt(String^ name, float worldX, float worldY,
+                       float minDist, float maxDist, float minVolume);
     };
 }

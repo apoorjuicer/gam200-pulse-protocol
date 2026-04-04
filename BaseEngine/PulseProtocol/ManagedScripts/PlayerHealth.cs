@@ -86,6 +86,10 @@ public class PlayerHealth : Script
         h.isAlive = true;
         Console.WriteLine($"[PlayerHealth] Initialized with {maxHP} HP");
 
+        TransformComponent tf = GetTransform();
+        GetAudio().SetListenerPosition(tf.X, tf.Y);
+
+
         initialized = true;
     }
 

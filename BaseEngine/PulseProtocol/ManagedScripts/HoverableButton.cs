@@ -1350,17 +1350,6 @@ public class NavigationButtons : Script
             return;
         }
 
-        if (tex.Contains("calibration"))
-        {
-            if (!string.Equals(Scene.GetCurrentScene(), "MainMenu", StringComparison.OrdinalIgnoreCase) ||
-                !ShowSettingsOverlay)
-                return;
-
-            // Start the 2-step calibration flow from MainMenu Settings.
-            NavigateTo("LatencyCalibration");
-            return;
-        }
-
         if (tex.Contains("settings") || tex.Contains("options"))
         {
             if (Scene.GetCurrentScene() == "MainMenu")

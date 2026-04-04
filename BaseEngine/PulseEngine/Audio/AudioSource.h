@@ -61,9 +61,10 @@ struct AudioSource {
         out.AddMember("audio_id", audioidVal, alloc);
         //float
         out.AddMember("volume", volume, alloc);
-        //bool        
+        //bool
         out.AddMember("loop", loop, alloc);
         out.AddMember("playOnAwake", playOnAwake, alloc);
+
     }
     // ---------------------------------------------------
     // Deserialize
@@ -94,7 +95,6 @@ struct AudioSource {
         {
             playOnAwake = (in["playOnAwake"].GetBool());
         }
-
         //MUST reset runtime-only ptr
         channel = nullptr;
     }

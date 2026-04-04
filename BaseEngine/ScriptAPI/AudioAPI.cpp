@@ -211,4 +211,19 @@ namespace ScriptAPI
         audio->FadeInCurrentBGM(duration);
     }
 
+    void AudioComponent::SetListenerPosition(float x, float y)
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr) return;
+        mgr->SetListenerPosition(x, y);
+    }
+
+    void AudioComponent::PlaySFXAt(String^ name, float worldX, float worldY,
+                                   float minDist, float maxDist, float minVolume)
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr) return;
+        mgr->PlaySoundAt(marshal_as<std::string>(name), worldX, worldY, minDist, maxDist, minVolume);
+    }
+
 }
