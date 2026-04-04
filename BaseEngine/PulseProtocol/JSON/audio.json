@@ -43,6 +43,13 @@
             "audiotype": "BGM"
         },
         {
+            "id": "BGM_Game_Lose",
+            "path": "Assets/Sound/BG & Ambience/BGM_Game_Lose.mp3",
+            "loop": true,
+            "volume": 1.0,
+            "audiotype": "BGM"
+        },
+        {
             "id": "SFX_Ambience_Alarm",
             "path": "Assets/Sound/BG & Ambience/SFX_Ambience_Alarm.wav",
             "loop": false,
@@ -94,6 +101,41 @@
         {
             "id": "SFX_WrongInput_2",
             "path": "Assets/Sound/Keys/SFX_WrongInput_2.mp3",
+            "loop": false,
+            "volume": 1.0,
+            "audiotype": "SFX"
+        },
+        {
+            "id": "SFX_Gun_1",
+            "path": "Assets/Sound/Player/SFX_Gun_1.mp3",
+            "loop": false,
+            "volume": 1.0,
+            "audiotype": "SFX"
+        },
+        {
+            "id": "SFX_Spear_1",
+            "path": "Assets/Sound/Player/SFX_Spear_1.mp3",
+            "loop": false,
+            "volume": 1.0,
+            "audiotype": "SFX"
+        },
+        {
+            "id": "SFX_Spear_2",
+            "path": "Assets/Sound/Player/SFX_Spear_2.mp3",
+            "loop": false,
+            "volume": 1.0,
+            "audiotype": "SFX"
+        },
+        {
+            "id": "SFX_Spear_3",
+            "path": "Assets/Sound/Player/SFX_Spear_3.mp3",
+            "loop": false,
+            "volume": 1.0,
+            "audiotype": "SFX"
+        },
+        {
+            "id": "SFX_Spear_4",
+            "path": "Assets/Sound/Player/SFX_Spear_4.mp3",
             "loop": false,
             "volume": 1.0,
             "audiotype": "SFX"

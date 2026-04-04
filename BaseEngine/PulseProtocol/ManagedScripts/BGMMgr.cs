@@ -116,6 +116,28 @@ public static class BGMManager
     public static string CurrentTrack = "";
 }
 
+// ============================================
+// USE THIS FOR: GameLose scene
+// ============================================
+public class GameLoseBGM : Script
+{
+    private bool started = false;
+
+    public override void Update()
+    {
+        if (started) return;
+        started = true;
+
+        AudioComponent audio = GetAudio();
+        audio.SetMasterVolume(UserSettingsStore.GetSliderValue("Volume", 1.0f));
+        audio.SetMusicVolume(UserSettingsStore.GetSliderValue("Music", 1.0f));
+        audio.SetSfxVolume(UserSettingsStore.GetSliderValue("SFX", 0.25f));
+        audio.PlayBGM("BGM_Game_Lose");
+        BGMManager.CurrentTrack = "GameLose";
+        Console.WriteLine("BGM: Playing Game Lose music");
+    }
+}
+
 public class LevelSelectBGM : Script
 {
     
