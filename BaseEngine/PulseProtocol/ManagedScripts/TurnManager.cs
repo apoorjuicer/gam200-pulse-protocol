@@ -75,6 +75,13 @@ public class TurnManager : Script
     // =========================
     public override void Update()
     {
+        if (StageClearElement.IsCleared)
+        {
+            playerInputPhaseActive = false;
+            resolutionPendingFrames = 0;
+            return;
+        }
+
         // Session restart detection for reused script objects (engine does not always
         // recreate C# Script instances on Stop→Play). GameStart.Ready flips from true
         // (end of last session) to false (LevelCountdown resets it at start of new session).

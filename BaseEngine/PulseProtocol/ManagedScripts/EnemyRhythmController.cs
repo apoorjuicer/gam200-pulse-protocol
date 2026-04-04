@@ -133,6 +133,13 @@ public class EnemyRhythmController : Script
 
     public override void Update()
     {
+        if (StageClearElement.IsCleared)
+        {
+            if (initialized && currentState != EnemyState.Dead && currentState != EnemyState.Hurt)
+                SetState(EnemyState.Idle);
+            return;
+        }
+
         // Detect if this C# object has been reused for a new entity 
         if (initialized && entityID != initializedForEntityID)
         {

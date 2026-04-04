@@ -30,6 +30,7 @@ namespace ScriptAPI
         void PlayBGM(); 
         void PlayBGM(String^ name);
         void StopBGM();
+        void StopAllSFX();
         void PauseBGM();
         void ResumeBGM();
         void SetBGMVolume(float volume);

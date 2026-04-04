@@ -108,6 +108,12 @@ public class ComboDisplayManager : Script
     {
         if (!initialized) { Initialize(); return; }
 
+        if (StageClearElement.IsCleared)
+        {
+            CancelStageClearVisuals();
+            return;
+        }
+
         if (isRevealing) { HandleBeatReveal(); }
         if (isGapRevealing) { HandleGapReveal(); }
 
@@ -613,5 +619,21 @@ public class ComboDisplayManager : Script
             fadeOutCount = 0;
             fadeStaggerTimer = 0f;
         }
+    }
+
+    private void CancelStageClearVisuals()
+    {
+        isRevealing = false;
+        isGapRevealing = false;
+        isFadingOut = false;
+        isCountingDown = false;
+        pendingCountdownStart = false;
+        revealIndex = 0;
+        gapRevealIndex = 0;
+        fadeOutCount = 0;
+        countdownCurrentSlot = 0;
+        lastInputProgress = 0;
+
+        ClearEnemySlotsInstant();
     }
 }

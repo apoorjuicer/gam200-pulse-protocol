@@ -21,6 +21,7 @@ public class StageClearElement : Script
     // =========================
     public static bool IsCleared { get; private set; } = false;
     private static bool s_winBgmStarted = false;
+    private static bool s_gameplaySfxStopped = false;
 
     public static void StageClear()
     {
@@ -30,6 +31,7 @@ public class StageClearElement : Script
         NavigationButtons.ReportLevelCleared(Scene.GetCurrentScene());
         IsCleared = true;
         s_winBgmStarted = false;
+        s_gameplaySfxStopped = false;
         Console.WriteLine("[StageClear]  StageClear() called");
     }
 
@@ -38,6 +40,7 @@ public class StageClearElement : Script
         NavigationButtons.SetStageClearPaused(false);
         IsCleared = false;
         s_winBgmStarted = false;
+        s_gameplaySfxStopped = false;
         Console.WriteLine("[StageClear]  ResetStageClear()");
     }
 
@@ -87,6 +90,12 @@ public class StageClearElement : Script
         var tr = GetTransform();
         tr.IsVisible = true;
         shown = true;
+
+        if (!s_gameplaySfxStopped)
+        {
+            s_gameplaySfxStopped = true;
+            GetAudio().StopAllSFX();
+        }
 
         if (!s_winBgmStarted)
         {

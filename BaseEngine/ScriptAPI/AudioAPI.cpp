@@ -97,6 +97,13 @@ namespace ScriptAPI
         mgr->StopBGM();
     }
 
+    void AudioComponent::StopAllSFX()
+    {
+        auto mgr = GetAudioManager();
+        if (!mgr) return;
+        mgr->StopAllSFX();
+    }
+
     void AudioComponent::PauseBGM()
     {
         auto mgr = GetAudioManager();

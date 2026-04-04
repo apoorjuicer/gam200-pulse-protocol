@@ -53,6 +53,13 @@ public class TurnAnnouncerUI : Script
             return;
         }
 
+        if (StageClearElement.IsCleared)
+        {
+            ResetScale();
+            Hide();
+            return;
+        }
+
         if (NavigationButtons.ShowPauseOverlay)
             return;
 

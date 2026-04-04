@@ -612,6 +612,21 @@ void AudioManager::PlaySound(std::string const &id)
     //std::cout << "[AudioManager] Playing SFX: " << id << "\n";
 }
 
+void AudioManager::StopAllSFX()
+{
+    if (!mSystem)
+        return;
+
+    if (mSfxGroup)
+    {
+        FMOD_RESULT result = mSfxGroup->stop();
+        FMOD_CHECK(result, "mSfxGroup->stop()");
+    }
+
+    mChannels.clear();
+    ClearAudioSourceChannelsMatching(nullptr);
+}
+
 /**/
 
 double AudioManager::GetBGMPositionSeconds() const
@@ -915,8 +930,6 @@ void AudioManager::ProcessAudioSources()
 
 void  AudioManager::ClearAudioSourceChannelsMatching(FMOD::Channel* dead)
 {
-    if (!dead) return;
-
     auto g = Coordinator::GetInstance();
     if (!g) return;
 
@@ -927,7 +940,7 @@ void  AudioManager::ClearAudioSourceChannelsMatching(FMOD::Channel* dead)
 
         auto& src = g->GetComponent<AudioSource>(e);
 
-        if (src.channel == dead)
+        if (!dead || src.channel == dead)
             src.channel = nullptr;
     }
 }

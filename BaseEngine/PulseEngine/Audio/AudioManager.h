@@ -72,6 +72,7 @@ public:
     bool LoadSFX(const std::string &id);
     bool LoadAllSFX();
     void PlaySound(const std::string &id);
+    void StopAllSFX();
 
     // for sliders
     FMOD::ChannelGroup *mMasterGroup = nullptr;

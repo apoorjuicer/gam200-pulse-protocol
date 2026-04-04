@@ -52,6 +52,16 @@ public class InputBridge : Script
     {
         if (!initialized) { Initialize(); return; }
 
+        if (StageClearElement.IsCleared)
+        {
+            prevW = false;
+            prevA = false;
+            prevS = false;
+            prevD = false;
+            prevInvalidKeyDown = false;
+            return;
+        }
+
         // Reset per-turn state when player turn starts
         bool isPlayerTurn = TurnManager.Instance?.IsPlayerTurn ?? false;
         if (isPlayerTurn && !prevIsPlayerTurn)
@@ -127,6 +137,7 @@ public class InputBridge : Script
     // =========================
     private void OnKeyPressed(char key)
     {
+        if (StageClearElement.IsCleared) return;
         if (ComboSystem.Instance == null) return;
 
         AudioComponent audio = GetAudio();
@@ -187,6 +198,12 @@ public class InputBridge : Script
     // =========================
     private void CheckInvalidKeys(InputComponent input)
     {
+        if (StageClearElement.IsCleared)
+        {
+            prevInvalidKeyDown = false;
+            return;
+        }
+
         int[] invalidKeys =
         {
             81, 69, 82, 84, 89, 85, 73, 79, 80,
