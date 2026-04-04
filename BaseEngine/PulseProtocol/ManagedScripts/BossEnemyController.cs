@@ -6,7 +6,7 @@ public class BossEnemyController : EnemyRhythmController
     // =========================
     // Boss Config
     // =========================
-    public int Phase1MaxHP = 30;
+    public int Phase1MaxHP = 40;
     public int Phase2MaxHP = 40;
 
     // =========================

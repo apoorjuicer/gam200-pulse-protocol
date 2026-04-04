@@ -1252,7 +1252,7 @@
                 },
                 {
                     "Health": {
-                        "hp": 30,
+                        "hp": 40,
                         "damage": 8,
                         "isAlive": true
                     }
