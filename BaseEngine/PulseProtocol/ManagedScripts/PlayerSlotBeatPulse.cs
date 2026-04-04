@@ -65,6 +65,12 @@ public class PlayerSlotBeatPulse : Script
     // Call this when a new play session starts to re-detect slots
     public static void ResetDetection()
     {
+        // Reset instance-level registration state so reused C# objects re-register in the new session.
+        foreach (var kvp in _instances)
+        {
+            kvp.Value._registered = false;
+            kvp.Value.SlotIndex   = -1;
+        }
         _pending.Clear();
         _instances.Clear();
         _assigned = false;
