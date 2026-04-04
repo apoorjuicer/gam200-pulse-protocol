@@ -50,6 +50,7 @@ public class PlayerAnimationController : Script
     private static int  _bossAttackCycle = 0;
     private static int  _prevBossPhase   = 0;
     private static int  _spearSFXIndex   = 0;
+    private bool hurtToggle = false;
 
     // Determines which idle to return to after Attack/Hurt finishes
     // false = Idle2 (default, unarmed stance)
@@ -305,6 +306,9 @@ public class PlayerAnimationController : Script
     {
         Console.WriteLine("[PlayerAnim] Playing Hurt");
         // hasAttacked = false; // Revert to Idle1 after hurt
+        string hurtSFX = hurtToggle ? "SFX_Player_Hurt_2" : "SFX_Player_Hurt_1";
+        hurtToggle = !hurtToggle;
+        GetAudio().PlaySFX(hurtSFX);
         SetAnimState(PlayerAnimState.Hurt);
 
         waitingForStateEnd = true;

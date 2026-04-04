@@ -16,9 +16,9 @@
         },
         {
             "id": "BGM_L2_TESTING",
-            "path": "Assets/Sound/BG & Ambience/BGM_Level_2_V2.mp3",
+            "path": "Assets/Sound/BG & Ambience/BGM_Level_2.mp3",
             "loop": true,
-            "volume": 1.0,
+            "volume": 2.0,
             "audiotype": "BGM"
         },
         {
@@ -46,7 +46,7 @@
             "id": "BGM_Game_Lose",
             "path": "Assets/Sound/BG & Ambience/BGM_Game_Lose.mp3",
             "loop": true,
-            "volume": 1.0,
+            "volume": 0.75,
             "audiotype": "BGM"
         },
         {
@@ -103,6 +103,20 @@
             "path": "Assets/Sound/Keys/SFX_WrongInput_2.mp3",
             "loop": false,
             "volume": 1.0,
+            "audiotype": "SFX"
+        },
+        {
+            "id": "SFX_Player_Hurt_1",
+            "path": "Assets/Sound/Player/SFX_Player_Hurt_1.mp3",
+            "loop": false,
+            "volume": 0.5,
+            "audiotype": "SFX"
+        },
+        {
+            "id": "SFX_Player_Hurt_2",
+            "path": "Assets/Sound/Player/SFX_Player_Hurt_2.mp3",
+            "loop": false,
+            "volume": 0.5,
             "audiotype": "SFX"
         },
         {
