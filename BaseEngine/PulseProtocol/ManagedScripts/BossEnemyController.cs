@@ -54,6 +54,9 @@ public class BossEnemyController : EnemyRhythmController
         HurtFrames = 15;   HurtColumns = 4;   HurtRows = 4;
         AttackFrames = 15; AttackColumns = 4; AttackRows = 4;
 
+        DeathSpriteSheet = "boss_death";
+        DeathFrames = 15; DeathColumns = 4; DeathRows = 4;
+
         AnimationSpeed = 12f;
         SizeMultiplier = 5.0f;
 

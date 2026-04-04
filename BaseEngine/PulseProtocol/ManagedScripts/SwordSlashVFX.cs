@@ -8,6 +8,10 @@ public class SwordSlashVFX : Script
     // Duration of the attack animation
     public static float SpawnDuration = 0.5f;
 
+    // Set by PlayerAnimatorController before instantiating during the boss fight.
+    // "sword" -> swordslash anim, "spear" -> spear_attack_vfx anim. Cleared after use.
+    public static string BossVFXOverride = "";
+
     // Old sword slash VFX (Sword_Slash_VFX_1099x392): 5 rows, 2 cols, 10 frames
     // public const int VFXTotalFrames = 10;
     // public const int VFXRows = 5;
@@ -43,6 +47,11 @@ public class SwordSlashVFX : Script
                     break;
 
                 case EnemyIconType.Boss:
+                    if (BossVFXOverride == "spear")
+                        anim.SetAnimation("spear_attack_vfx", 4, 4, 13, speed);
+                    else
+                        anim.SetAnimation("swordslash", 2, 3, 6, speed);
+                    BossVFXOverride = "";
                     break;
 
                 default:
