@@ -901,14 +901,12 @@ void AudioManager::ProcessAudioSources()
             }
             else
             {
-                float base = res->volume;
-                float user = std::clamp(src.volume, 0.0f, 1.0f);
-
+                float base  = res->volume;
+                float user  = std::clamp(src.volume, 0.0f, 1.0f);
                 float final = base * user;
 
                 src.channel->setVolume(clampto0and1(final));
                 src.channel->setMode(src.loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF);
-
             }
             continue; // go to next entity
         }   
@@ -951,6 +949,40 @@ void AudioManager::StopPlayingAllAudio() {
     {
         master->stop();
     }
+}
+
+void AudioManager::SetListenerPosition(float x, float y)
+{
+    mListenerX = x;
+    mListenerY = y;
+}
+
+void AudioManager::PlaySoundAt(const std::string& id, float worldX, float worldY,
+                                float minDist, float maxDist, float minVolume)
+{
+    PlaySound(id);
+
+    auto it = mChannels.find(id);
+    if (it == mChannels.end() || !it->second) return;
+
+    FMOD::Channel* ch = it->second;
+
+    float dx   = worldX - mListenerX;
+    float dy   = worldY - mListenerY;
+    float dist = std::sqrt(dx * dx + dy * dy);
+
+    float maxD    = std::max(maxDist, minDist + 1.0f);
+    float falloff = std::clamp((dist - minDist) / (maxD - minDist), 0.0f, 1.0f);
+    // Lerp from 1.0 (at minDist) down to minVolume (at maxDist and beyond)
+    float t = 1.0f - falloff * (1.0f - std::clamp(minVolume, 0.0f, 1.0f));
+
+    // Pan: left(-1) to right(+1), normalised by maxDist so far-right = hard right
+    float pan = std::clamp(dx / maxD, -1.0f, 1.0f);
+
+    float baseVol = 0.0f;
+    ch->getVolume(&baseVol);
+    ch->setVolume(clampto0and1(baseVol * t));
+    ch->setPan(pan);
 }
 
 void AudioManager::ResetBGMFade()

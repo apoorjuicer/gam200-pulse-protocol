@@ -11,6 +11,7 @@ public class EnemyRhythmController : Script
     // =========================
     public static EnemyRhythmController? Instance { get; private set; }
 
+
     // === SPRITE SHEET SETTINGS ===
     public string IdleSpriteSheet   = "rat_idle";
     public string WalkSpriteSheet   = "rat_walk";
@@ -534,6 +535,8 @@ public class EnemyRhythmController : Script
         myTf.X -= StepDistance;
 
         stepSFXToggle = !stepSFXToggle;
+        string stepSfx = stepSFXToggle ? "SFX_Rat_Steps_1" : "SFX_Rat_Steps_2";
+        GetAudio().PlaySFXAt(stepSfx, myTf.X, myTf.Y, 0f, 800f, 0.25f);
 
         Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}");
     }
