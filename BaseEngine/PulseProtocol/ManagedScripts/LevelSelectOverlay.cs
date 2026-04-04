@@ -185,11 +185,10 @@ public class LevelSelectCard : Script
         if (!s_clickedThisFrame && isHoveredNow && input.IsMouseButtonTriggered(0))
         {
             s_clickedThisFrame = true;
-            if (IsSceneUnlocked(levelScene))
-            {
-                s_selectedIndex = myIndex;
-                NavigationButtons.SelectedLevelScene = levelScene;
-            }
+            // Always allow clicking to scroll the carousel.
+            // Locked levels just can't be started (checked in LevelSelectStartDisc).
+            s_selectedIndex = myIndex;
+            NavigationButtons.SelectedLevelScene = s_sceneOrder[myIndex];
         }
 
         SpriteComponent sprite = GetSprite();

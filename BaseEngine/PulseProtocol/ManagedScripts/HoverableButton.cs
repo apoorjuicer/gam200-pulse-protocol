@@ -118,7 +118,10 @@ public class NavigationButtons : Script
             sceneHistory.Clear();
             currentScene = "";
             LastGameplayScene = "";
-            LastClearedLevel = LevelProgressStore.LoadLastClearedLevel();
+            var (savedCleared, savedEntered) = LevelProgressStore.LoadProgress();
+            LastClearedLevel = savedCleared;
+            if (!string.IsNullOrWhiteSpace(savedEntered))
+                LastEnteredLevel = savedEntered;
 
             ShowQuitOverlay = false;
             ShowPauseOverlay = false;
@@ -722,7 +725,10 @@ public class NavigationButtons : Script
         }  
 
         if (newScene.ToLower().Contains("level"))
+        {
             LastEnteredLevel = newScene;
+            LevelProgressStore.SaveLastEnteredLevel(newScene);
+        }
 
         currentScene = newScene;
         Scene.LoadScene(newScene);
@@ -802,7 +808,10 @@ public class NavigationButtons : Script
             sceneHistory.Clear();
 
         if (targetScene.StartsWith("Level", StringComparison.OrdinalIgnoreCase))
+        {
             LastEnteredLevel = targetScene;
+            LevelProgressStore.SaveLastEnteredLevel(targetScene);
+        }
 
         currentScene = targetScene;
         Scene.LoadScene(targetScene);
@@ -1547,8 +1556,11 @@ public class NavigationButtons : Script
     {
         if (!string.IsNullOrWhiteSpace(LastClearedLevel))
             return true;
+        if (!string.IsNullOrWhiteSpace(LastEnteredLevel))
+            return true;
 
-        return !string.IsNullOrWhiteSpace(LevelProgressStore.LoadLastClearedLevel());
+        var (cleared, entered) = LevelProgressStore.LoadProgress();
+        return !string.IsNullOrWhiteSpace(cleared) || !string.IsNullOrWhiteSpace(entered);
     }
 
     private void BeginNewGameFlow()
@@ -1734,9 +1746,11 @@ internal static class LevelProgressStore
     private sealed class ProgressData
     {
         public string LastClearedLevel { get; set; } = "";
+        public string LastEnteredLevel { get; set; } = "";
     }
 
-    public static string LoadLastClearedLevel()
+    // Loads both fields at once; returns (cleared, entered).
+    public static (string cleared, string entered) LoadProgress()
     {
         foreach (string path in CandidatePaths)
         {
@@ -1747,25 +1761,21 @@ internal static class LevelProgressStore
 
                 string json = File.ReadAllText(path);
                 ProgressData? data = JsonSerializer.Deserialize<ProgressData>(json);
-                if (!string.IsNullOrWhiteSpace(data?.LastClearedLevel))
-                    return data.LastClearedLevel!;
+                if (data != null)
+                    return (data.LastClearedLevel ?? "", data.LastEnteredLevel ?? "");
             }
-            catch
-            {
-                // Try next candidate path.
-            }
+            catch { }
         }
-
-        return "";
+        return ("", "");
     }
 
-    public static void SaveLastClearedLevel(string sceneName)
-    {
-        if (string.IsNullOrWhiteSpace(sceneName))
-            return;
+    public static string LoadLastClearedLevel() => LoadProgress().cleared;
+    public static string LoadLastEnteredLevel() => LoadProgress().entered;
 
+    private static void SaveProgress(string cleared, string entered)
+    {
         string json = JsonSerializer.Serialize(
-            new ProgressData { LastClearedLevel = sceneName },
+            new ProgressData { LastClearedLevel = cleared, LastEnteredLevel = entered },
             new JsonSerializerOptions { WriteIndented = true });
 
         foreach (string path in CandidatePaths)
@@ -1779,11 +1789,24 @@ internal static class LevelProgressStore
                 File.WriteAllText(path, json);
                 return;
             }
-            catch
-            {
-                // Try next candidate path.
-            }
+            catch { }
         }
+    }
+
+    public static void SaveLastClearedLevel(string sceneName)
+    {
+        if (string.IsNullOrWhiteSpace(sceneName))
+            return;
+        var (_, entered) = LoadProgress();
+        SaveProgress(sceneName, entered);
+    }
+
+    public static void SaveLastEnteredLevel(string sceneName)
+    {
+        if (string.IsNullOrWhiteSpace(sceneName))
+            return;
+        var (cleared, _) = LoadProgress();
+        SaveProgress(cleared, sceneName);
     }
 
     public static void ClearProgress()
