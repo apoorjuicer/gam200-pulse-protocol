@@ -37,6 +37,7 @@ public class NavigationButtons : Script
     public static bool ShowPauseOverlay = false;
     public static bool ShowHowToPlayOverlay = false;
     public static int HtpPage = 1; // 1, 2, or 3
+    private static bool htpOpenedFromPause = false; // true when HTP was opened from the in-game pause overlay
     private static bool openedSettingsFromPause  = false;
     private static bool stageClearPaused = false;
     private static bool s_appliedGamePause = false;
@@ -127,6 +128,7 @@ public class NavigationButtons : Script
             ShowPauseOverlay = false;
             ShowHowToPlayOverlay = false;
             HtpPage = 1;
+            htpOpenedFromPause = false;
             ShowSettingsOverlay = false;
             ShowLevelSelectOverlay = false;
             SelectedLevelScene = "Level1";
@@ -193,6 +195,7 @@ public class NavigationButtons : Script
                 ShowNewGameResetOverlay = false;
                 ShowPauseOverlay = false;
                 ShowHowToPlayOverlay = false;
+                htpOpenedFromPause = false;
                 ShowSettingsOverlay = openSettingsOnMainMenuEntry;
                 ShowLevelSelectOverlay = false;
                 openSettingsOnMainMenuEntry = false;
@@ -246,6 +249,7 @@ public class NavigationButtons : Script
                         ShowQuitOverlay = false;
                         ShowNewGameResetOverlay = false;
                         ShowHowToPlayOverlay = false;
+                        htpOpenedFromPause = false;
                         ShowSettingsOverlay = false;
                         ShowLevelSelectOverlay = false;
                     }
@@ -334,6 +338,7 @@ public class NavigationButtons : Script
             wasEscPressed = true;
 
             if (!openedSettingsFromPause &&
+                !ShowHowToPlayOverlay &&
                 !string.IsNullOrEmpty(realScene) &&
                 !realScene.Equals("MainMenu") &&
                 !realScene.Equals("Settings") &&
@@ -507,7 +512,7 @@ public class NavigationButtons : Script
             bool isPauseMenuOpen = ShowPauseOverlay;
             bool isPauseSettingsOpen = ShowSettingsOverlay && openedSettingsFromPause;
             bool shouldGameBePaused = isPauseMenuOpen || isPauseSettingsOpen || stageClearPaused
-                || s_resumeCountdownActive;
+                || s_resumeCountdownActive || htpOpenedFromPause;
 
             if (isPauseMenuOpen != lastPauseState)
             {
@@ -553,14 +558,14 @@ public class NavigationButtons : Script
 
         string texLower = defaultTexture.ToLower();
         bool isQuitOverlayButton = texLower.Contains("quit yes") || texLower.Contains("quit no");
-        bool isPauseOverlayButton = texLower.Contains("pause") || texLower.Contains("exit");
+        bool isPauseOverlayButton = texLower.Contains("pause") || texLower.Contains("exit") || texLower.Contains("how to play");
         
         bool isHowToPlayOverlayButton = texLower.Contains("temp_close") || texLower.Contains("close_htp") ||
             texLower.Contains("exit") || texLower.Contains("nextstage");
 
         bool isOverlayButton = isQuitOverlayButton || isPauseOverlayButton;
 
-        if ((ShowQuitOverlay || ShowNewGameResetOverlay || ShowPauseOverlay) && !isOverlayButton)
+        if ((ShowQuitOverlay || ShowNewGameResetOverlay || ShowPauseOverlay) && !isOverlayButton && !isHowToPlayOverlayButton)
         {
             if (isCurrentlyHovered)
             {
@@ -789,6 +794,7 @@ public class NavigationButtons : Script
         ShowNewGameResetOverlay = false;
         ShowPauseOverlay = false;
         ShowHowToPlayOverlay = false;
+        htpOpenedFromPause = false;
         ShowSettingsOverlay = false;
         ShowLevelSelectOverlay = false;
         openedSettingsFromPause = false;
@@ -972,6 +978,7 @@ public class NavigationButtons : Script
         ShowNewGameResetOverlay = false;
         ShowPauseOverlay = false;
         ShowHowToPlayOverlay = false;
+        htpOpenedFromPause = false;
         ShowLevelSelectOverlay = false;
 
         ShowSettingsOverlay = true;
@@ -1101,6 +1108,7 @@ public class NavigationButtons : Script
         ShowNewGameResetOverlay = false;
         ShowPauseOverlay = false;
         ShowHowToPlayOverlay = false;
+        htpOpenedFromPause = false;
         ShowSettingsOverlay = false;
         openedSettingsFromPause = false;
         Application.SetPaused(false);
@@ -1114,6 +1122,7 @@ public class NavigationButtons : Script
     ShowNewGameResetOverlay = false;
     ShowPauseOverlay = false;
     ShowHowToPlayOverlay = false;
+    htpOpenedFromPause = false;
     ShowSettingsOverlay = false;
     openedSettingsFromPause = false;
 
@@ -1145,6 +1154,11 @@ public class NavigationButtons : Script
             {
                 ShowHowToPlayOverlay = false;
                 HtpPage = 1;
+                if (htpOpenedFromPause)
+                {
+                    ShowPauseOverlay = true;
+                    htpOpenedFromPause = false;
+                }
                 return;
             }
             if (tex.Contains("nextstage"))
@@ -1407,6 +1421,7 @@ public class NavigationButtons : Script
             ShowNewGameResetOverlay = false;
             ShowPauseOverlay = false;
             ShowHowToPlayOverlay = false;
+            htpOpenedFromPause = false;
             ShowSettingsOverlay = false;
             ShowLevelSelectOverlay = false;
             StageClearElement.ResetStageClear();
@@ -1451,6 +1466,8 @@ public class NavigationButtons : Script
 
         if (tex.Contains("how to play"))
         {
+            htpOpenedFromPause = ShowPauseOverlay;
+            ShowPauseOverlay = false;
             ShowHowToPlayOverlay = true;
             return;
         }
