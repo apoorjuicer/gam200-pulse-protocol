@@ -144,24 +144,67 @@ public class InputBridge : Script
         string expectedCombo = ComboSystem.Instance.GetExpectedCombo();
         if (string.IsNullOrEmpty(expectedCombo)) return;
 
-        // Block input once all slots are filled
-        if (nextSlot >= expectedCombo.Length) return;
-
         int slotIndex = nextSlot;
         nextSlot++;
 
+        // Clamp to prevent out-of-bounds if the player keeps pressing after the combo ends
+        if (slotIndex >= expectedCombo.Length)
+        {
+            nextSlot = expectedCombo.Length;
+            return;
+        }
+
         bool isLastKey = slotIndex == expectedCombo.Length - 1;
         bool isCorrectKey = key == expectedCombo[slotIndex];
+
+        bool wasCompleted = ComboSystem.Instance.HasCompletedCombo();
+        int progressBefore = ComboSystem.Instance.GetComboProgress();
+        ComboSystem.Instance.RegisterInput(key);
+        bool timingAccepted = ComboSystem.Instance.GetComboProgress() > progressBefore
+                              || ComboSystem.Instance.PlayerDidSuccessfulCombo;
+
+        // If ComboSystem silently ignored the press (too soon — minTimeBetweenPresses gate),
+        // undo the slot advance so nextSlot stays in sync with ComboSystem.currentCombo.Count.
+        bool wasIgnored = !timingAccepted && !wasCompleted && !ComboSystem.Instance.HasCompletedCombo();
+        if (wasIgnored)
+        {
+            nextSlot--;
+            return;
+        }
+
+        if (wasCompleted)
+        {
+            // Combo already ended on a previous slot — ComboSystem won't process this press,
+            // so compute timing and judgement independently.
+            string judgement = "MISS";
+            bool timingOk    = false;
+            if (Conductor.Instance != null && TurnManager.Instance != null)
+            {
+                float songTime      = Conductor.Instance.GetVisualAdjustedSongTime();
+                float[] offsets     = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0f, 0.5f, 1f, 1.5f };
+                float perfectWindow = ComboSystem.Instance?.perfectWindow ?? 0.08f;
+                float greatWindow   = ComboSystem.Instance?.greatWindow   ?? 0.15f;
+                if (slotIndex < offsets.Length)
+                {
+                    float earlyShift  = ComboSystem.Instance?.InputEarlyShift ?? 0f;
+                    float expectedTime = TurnManager.Instance.GetPlayerInputStartTime() + offsets[slotIndex] - earlyShift;
+                    float delta = Math.Abs(songTime - expectedTime);
+                    if      (delta <= perfectWindow) { judgement = "PERFECT"; timingOk = true; }
+                    else if (delta <= greatWindow)   { judgement = "GREAT";   timingOk = true; }
+                }
+            }
+
+            if (!isLastKey)
+                audio.PlaySFX(isCorrectKey ? "SFX_W_Key" : "SFX_Invalid_Key");
+            ComboDisplayManager.Instance?.ShowJudgement(isCorrectKey && timingOk ? judgement : "MISS");
+            ComboDisplayManager.Instance?.ForceShowPlayerKeyFeedback(slotIndex, key, isCorrectKey && timingOk, expectedCombo[slotIndex]);
+            return;
+        }
 
         // Beats 1 to N-1: correct = click SFX, wrong = invalid SFX
         // Last beat: outcome SFX plays after RegisterInput
         if (!isLastKey)
             audio.PlaySFX(isCorrectKey ? "SFX_W_Key" : "SFX_Invalid_Key");
-
-        int progressBefore = ComboSystem.Instance.GetComboProgress();
-        ComboSystem.Instance.RegisterInput(key);
-        bool timingAccepted = ComboSystem.Instance.GetComboProgress() > progressBefore
-                              || ComboSystem.Instance.PlayerDidSuccessfulCombo;
 
         // Show green only if the key was correct AND timing was within the window
         ComboDisplayManager.Instance?.ForceShowPlayerKeyFeedback(slotIndex, key, isCorrectKey && timingAccepted, expectedCombo[slotIndex]);
