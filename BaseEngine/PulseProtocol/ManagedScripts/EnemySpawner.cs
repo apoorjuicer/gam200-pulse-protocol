@@ -73,12 +73,6 @@ public class EnemySpawner : Script
         EnemyIconType.Bat,           // end strong on the new mechanic
     };
 
-    // Boss-only queue for isolated testing
-    private List<EnemyIconType> EnemyContainerBossTest = new List<EnemyIconType>
-    {
-        EnemyIconType.Boss
-    };
-
     private List<EnemyIconType> EnemyContainer3 = new List<EnemyIconType>
     {
         EnemyIconType.Rat,
@@ -207,14 +201,6 @@ public class EnemySpawner : Script
         else if (CurrentScene == "Level3")
         {
             foreach (EnemyIconType type in EnemyContainer3)
-            {
-                enemyQueue.Enqueue(type);
-            }
-        }
-
-        else if (CurrentScene == "BossTest")
-        {
-            foreach (EnemyIconType type in EnemyContainerBossTest)
             {
                 enemyQueue.Enqueue(type);
             }
