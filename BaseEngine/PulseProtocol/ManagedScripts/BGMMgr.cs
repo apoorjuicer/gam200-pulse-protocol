@@ -124,7 +124,7 @@ public class LevelSelectBGM : Script
     {
         { "Level1", "BGM_L1_TESTING" },
         { "Level2", "BGM_L2_TESTING" },
-        // { "Level3", "BGM_L3_TESTING" },
+        { "Level3", "BGM_L3" },
     };
 
     private const float FadeDuration    = 1.5f;   // fade-in / fade-out length (seconds)

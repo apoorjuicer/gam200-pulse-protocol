@@ -14,6 +14,7 @@ public class Cheats: Script
     public int Key3 = 51;
     public int KeyI = 73;
     public int KeyK = 75;
+    public int KeyO = 79;
     public int KeyShift = 340;
 
     // fuck you I like it this neat
@@ -50,6 +51,12 @@ public class Cheats: Script
                 LoadingScreenScript.NextLevel = Level3;
                 Scene.LoadScene(LoadingScreen);
             }
+        }
+
+        // Clear wave / skip level
+        if(input.IsKeyTriggered(KeyO))
+        {
+            StageClearElement.StageClear();
         }
 
         // Kill current Enemy

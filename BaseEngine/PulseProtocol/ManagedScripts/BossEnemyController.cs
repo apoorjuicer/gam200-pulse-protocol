@@ -6,7 +6,7 @@ public class BossEnemyController : EnemyRhythmController
     // =========================
     // Boss Config
     // =========================
-    public int Phase1MaxHP = 30;
+    public int Phase1MaxHP = 40;
     public int Phase2MaxHP = 40;
 
     // =========================
@@ -44,22 +44,15 @@ public class BossEnemyController : EnemyRhythmController
     {
         // =====================================================================
         // TODO (Art): Replace gorilla placeholders with boss sprite sheets below.
-        //
-        // IdleSpriteSheet   = "boss_idle";      // rows=?, cols=?, frames=?
-        // WalkSpriteSheet   = "boss_move1";     // or boss_move2 / boss_move3 for phase variety
-        // AttackSpriteSheet = "boss_attack1";   // or boss_attack2 / boss_attack3
-        // HurtSpriteSheet   = "boss_hurt";
-        
-        // PLACEHOLDER
-        IdleSpriteSheet   = "gorilla_idle";
-        WalkSpriteSheet   = "gorilla_walk";
-        AttackSpriteSheet = "gorilla_attack";
-        HurtSpriteSheet   = "gorilla_hurt";
+        IdleSpriteSheet   = "boss_idle";
+        WalkSpriteSheet   = "boss_move1";   
+        AttackSpriteSheet = "boss_attack1"; 
+        HurtSpriteSheet   = "boss_hurt";
 
-        IdleFrames = 15; IdleColumns = 4; IdleRows = 4;
-        WalkFrames = 30; WalkColumns = 6; WalkRows = 5;
-        AttackFrames = 30; AttackColumns = 6; AttackRows = 5;
-        HurtFrames = 15; HurtColumns = 4; HurtRows = 4;
+        IdleFrames = 15;   IdleColumns = 4;   IdleRows = 4;
+        WalkFrames = 15;   WalkColumns = 4;   WalkRows = 4;
+        HurtFrames = 15;   HurtColumns = 4;   HurtRows = 4;
+        AttackFrames = 15; AttackColumns = 4; AttackRows = 4;
 
         AnimationSpeed = 12f;
         SizeMultiplier = 5.0f;
@@ -129,6 +122,10 @@ public class BossEnemyController : EnemyRhythmController
         h.hp    = Phase2MaxHP;
         MaxHP   = Phase2MaxHP;
         h.isAlive = true;
+
+        // for phase 2 stuff :/
+        WalkSpriteSheet   = "boss_move2";
+        AttackSpriteSheet = "boss_attack2";
 
         // Visual feedback
         VFXAPI.ShakeCamera(0.12f, 15f);

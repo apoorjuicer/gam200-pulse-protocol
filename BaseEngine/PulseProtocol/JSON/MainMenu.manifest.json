@@ -73,7 +73,10 @@
             "settings19"
         ],
         "audio": [
-            "BGM_GENERAL"
+            "BGM_GENERAL",
+            "BGM_L1_TESTING",
+            "BGM_L2_TESTING",
+            "BGM_L3"
         ],
         "fonts": [],
         "animations": []

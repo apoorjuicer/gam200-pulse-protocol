@@ -96,7 +96,7 @@ public class LevelSelectCard : Script
             string tex = (GetSprite().Texture ?? "").ToLower();
             if (tex.Contains("level2"))
                 levelScene = "Level2";
-            else if (tex.Contains("level3"))
+            else if (tex.Contains("level3") || tex.Contains("level 3"))
                 levelScene = "Level3";
             else
                 levelScene = "Level1";
@@ -115,21 +115,19 @@ public class LevelSelectCard : Script
 
         InputComponent input = GetInput();
 
-        float halfW = t.ScaleX * 0.5f;
-        float halfH = t.ScaleY * 0.5f;
-        bool isHoveredNow = input.InGameViewport &&
-                         input.WorldMouseX >= t.X - halfW && input.WorldMouseX <= t.X + halfW &&
-                         input.WorldMouseY >= t.Y - halfH && input.WorldMouseY <= t.Y + halfH;
+        int rawOffset = myIndex - s_selectedIndex;
+        bool withinRange = Math.Abs(rawOffset) <= 1;
 
-        if (!s_clickedThisFrame && isHoveredNow && input.IsMouseButtonTriggered(0))
-        {
-            s_clickedThisFrame = true;
-            if (IsSceneUnlocked(levelScene))
-            {
-                s_selectedIndex = myIndex;
-                NavigationButtons.SelectedLevelScene = levelScene;
-            }
-        }
+        // Target position:
+        //   offset  0  → centre  (selected)
+        //   offset ±1  → ±920    (adjacent, visible)
+        //   offset ±2+ → ±1440   (off-screen, hidden)
+        float targetX, targetY, targetScaleX, targetScaleY;
+        if      (rawOffset ==  0) { targetX =     0.0f; targetY = 180.0f; targetScaleX = 420.0f; targetScaleY = 420.0f; }
+        else if (rawOffset == -1) { targetX =  -920.0f; targetY = 140.0f; targetScaleX = 360.0f; targetScaleY = 360.0f; }
+        else if (rawOffset ==  1) { targetX =   920.0f; targetY = 140.0f; targetScaleX = 360.0f; targetScaleY = 360.0f; }
+        else if (rawOffset  < -1) { targetX = -1440.0f; targetY = 140.0f; targetScaleX = 360.0f; targetScaleY = 360.0f; }
+        else                      { targetX =  1440.0f; targetY = 140.0f; targetScaleX = 360.0f; targetScaleY = 360.0f; }
 
         // Gamepad navigation — only one instance handles it per frame
         if (s_gpNavFrame != Time.FrameCount)
@@ -165,35 +163,8 @@ public class LevelSelectCard : Script
             }
         }
 
-        SpriteComponent sprite = GetSprite();
-        if (IsSceneUnlocked(levelScene))
-            sprite.SetTint(1.0f, 1.0f, 1.0f, 1.0f);
-        else
-            sprite.SetTint(0.42f, 0.42f, 0.42f, 1.0f);
-
-        int offset = myIndex - s_selectedIndex;
-        if (offset > 1) offset = 1;
-        if (offset < -1) offset = -1;
-
-        float targetX = 0.0f;
-        float targetY = 180.0f;
-        float targetScaleX = 420.0f;
-        float targetScaleY = 420.0f;
-
-        if (offset < 0)
-        {
-            targetX = -920.0f;
-            targetY = 140.0f;
-            targetScaleX = 360.0f;
-            targetScaleY = 360.0f;
-        }
-        else if (offset > 0)
-        {
-            targetX = 920.0f;
-            targetY = 140.0f;
-            targetScaleX = 360.0f;
-            targetScaleY = 360.0f;
-        }
+        // Always lerp
+        t.IsVisible = withinRange;
 
         float lerp = Math.Min(1.0f, Time.DeltaTime * 10.0f);
         t.X += (targetX - t.X) * lerp;
@@ -201,7 +172,33 @@ public class LevelSelectCard : Script
         t.ScaleX += (targetScaleX - t.ScaleX) * lerp;
         t.ScaleY += (targetScaleY - t.ScaleY) * lerp;
 
-        if (offset == 0)
+        // Skip click detection and settle check for hidden cards.
+        if (!withinRange)
+            return;
+
+        float halfW = t.ScaleX * 0.5f;
+        float halfH = t.ScaleY * 0.5f;
+        bool isHoveredNow = input.InGameViewport &&
+                         input.WorldMouseX >= t.X - halfW && input.WorldMouseX <= t.X + halfW &&
+                         input.WorldMouseY >= t.Y - halfH && input.WorldMouseY <= t.Y + halfH;
+
+        if (!s_clickedThisFrame && isHoveredNow && input.IsMouseButtonTriggered(0))
+        {
+            s_clickedThisFrame = true;
+            if (IsSceneUnlocked(levelScene))
+            {
+                s_selectedIndex = myIndex;
+                NavigationButtons.SelectedLevelScene = levelScene;
+            }
+        }
+
+        SpriteComponent sprite = GetSprite();
+        if (IsSceneUnlocked(levelScene))
+            sprite.SetTint(1.0f, 1.0f, 1.0f, 1.0f);
+        else
+            sprite.SetTint(0.42f, 0.42f, 0.42f, 1.0f);
+
+        if (rawOffset == 0)
         {
             bool atCenter =
                 Math.Abs(t.X - targetX) < 3.0f &&
