@@ -713,22 +713,6 @@
             "shd_ref": 3
         },
         {
-            "id": "calibration_btn",
-            "path": "Assets/Textures/UI/calibration.png",
-            "vert_shader_path": "shader/font_vs.vert",
-            "frag_shader_path": "shader/font_fs.frag",
-            "mdl_ref": 1,
-            "shd_ref": 3
-        },
-        {
-            "id": "calibration_btn_hover",
-            "path": "Assets/Textures/UI/calibration_hover.png",
-            "vert_shader_path": "shader/font_vs.vert",
-            "frag_shader_path": "shader/font_fs.frag",
-            "mdl_ref": 1,
-            "shd_ref": 3
-        },
-        {
             "id": "windowed_TEXT",
             "path": "Assets/Textures/UI/Settings/windowed_.png",
             "vert_shader_path": "shader/font_vs.vert",
@@ -901,7 +885,7 @@
         //howtoplay cut scene
         {
             "id": "htp_1",
-            "path": "Assets/Textures/UI/howtoplay/HTP_1.png",
+            "path": "Assets/Textures/UI/howtoplay/NEW_HTP_1.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
@@ -909,7 +893,7 @@
         },
         {
             "id": "htp_2",
-            "path": "Assets/Textures/UI/howtoplay/HTP_2.png",
+            "path": "Assets/Textures/UI/howtoplay/NEW_HTP_2.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,
@@ -917,7 +901,7 @@
         },
         {
             "id": "htp_3",
-            "path": "Assets/Textures/UI/howtoplay/HTP_3.png",
+            "path": "Assets/Textures/UI/howtoplay/NEW_HTP_3.png",
             "vert_shader_path": "shader/sprite_vs.vert",
             "frag_shader_path": "shader/sprite_fs.frag",
             "mdl_ref": 1,

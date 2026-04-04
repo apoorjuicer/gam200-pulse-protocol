@@ -853,7 +853,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/HTP_1.png",
+                        "spriteName": "Assets/Textures/UI/howtoplay/NEW_HTP_1.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -928,7 +928,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/HTP_2.png",
+                        "spriteName": "Assets/Textures/UI/howtoplay/NEW_HTP_2.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1003,7 +1003,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/HTP_3.png",
+                        "spriteName": "Assets/Textures/UI/howtoplay/NEW_HTP_3.png",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -1285,7 +1285,7 @@
                     "transform": {
                         "position": {
                             "x": -934.0042724609375,
-                            "y": 100.0
+                            "y": 258.627899169922
                         },
                         "scale": {
                             "x": 300.0,
@@ -1369,7 +1369,7 @@
                     "transform": {
                         "position": {
                             "x": 5.692194938659668,
-                            "y": -24.0
+                            "y": 135.0
                         },
                         "scale": {
                             "x": 1140.0,
@@ -1449,7 +1449,7 @@
                     "transform": {
                         "position": {
                             "x": 1088.5072021484375,
-                            "y": -24.0
+                            "y": 135.0
                         },
                         "scale": {
                             "x": 50.0,
@@ -1530,7 +1530,7 @@
                     "transform": {
                         "position": {
                             "x": -574.864013671875,
-                            "y": -24.0
+                            "y": 135.0
                         },
                         "scale": {
                             "x": 542.4365234375,
@@ -1611,7 +1611,7 @@
                     "transform": {
                         "position": {
                             "x": -991.763916015625,
-                            "y": -150.0
+                            "y": -64.5322265625
                         },
                         "scale": {
                             "x": 230.0,
@@ -1695,7 +1695,7 @@
                     "transform": {
                         "position": {
                             "x": 5.692070960998535,
-                            "y": -274.0
+                            "y": -188.160125732422
                         },
                         "scale": {
                             "x": 1140.0,
@@ -1775,7 +1775,7 @@
                     "transform": {
                         "position": {
                             "x": 1092.57763671875,
-                            "y": -274.0
+                            "y": -188.160125732422
                         },
                         "scale": {
                             "x": 56.0,
@@ -1856,7 +1856,7 @@
                     "transform": {
                         "position": {
                             "x": 3.3775634765625,
-                            "y": -274.0
+                            "y": -188.160125732422
                         },
                         "scale": {
                             "x": 1117.2000732421875,
@@ -1937,7 +1937,7 @@
                     "transform": {
                         "position": {
                             "x": -942.3076782226563,
-                            "y": 350.0
+                            "y": 501.788024902344
                         },
                         "scale": {
                             "x": 300.0,
@@ -2007,12 +2007,12 @@
                 {
                     "Children": {
                         "children": [
-                            31,
-                            33,
                             32,
+                            33,
                             34,
                             35,
-                            36
+                            36,
+                            37
                         ]
                     }
                 }
@@ -2100,7 +2100,7 @@
                     "transform": {
                         "position": {
                             "x": 5.691999912261963,
-                            "y": -524.0
+                            "y": -511.320251464844
                         },
                         "scale": {
                             "x": 1140.0,
@@ -2180,7 +2180,7 @@
                     "transform": {
                         "position": {
                             "x": 1089.568603515625,
-                            "y": -524.0
+                            "y": -511.320251464844
                         },
                         "scale": {
                             "x": 56.0,
@@ -2261,7 +2261,7 @@
                     "transform": {
                         "position": {
                             "x": 0.3685302734375,
-                            "y": -524.0
+                            "y": -511.320251464844
                         },
                         "scale": {
                             "x": 1117.2000732421875,
@@ -2446,7 +2446,7 @@
                     "transform": {
                         "position": {
                             "x": -1051.9228515625,
-                            "y": -400.0
+                            "y": -387.692352294922
                         },
                         "scale": {
                             "x": 200.0,
@@ -2530,7 +2530,7 @@
                     "transform": {
                         "position": {
                             "x": -228.8460693359375,
-                            "y": 356.0
+                            "y": 508.076843261719
                         },
                         "scale": {
                             "x": 380.0,
@@ -2611,7 +2611,7 @@
                     "transform": {
                         "position": {
                             "x": -229.81077575683594,
-                            "y": 266.0
+                            "y": 417.34912109375
                         },
                         "scale": {
                             "x": 200.0,
@@ -2693,7 +2693,7 @@
                     "transform": {
                         "position": {
                             "x": -228.0,
-                            "y": 294.0
+                            "y": 445.543823242188
                         },
                         "scale": {
                             "x": 381.0,
@@ -2774,7 +2774,7 @@
                     "transform": {
                         "position": {
                             "x": -231.79489135742188,
-                            "y": 266.0
+                            "y": 417.948791503906
                         },
                         "scale": {
                             "x": 251.0,
@@ -2856,7 +2856,7 @@
                     "transform": {
                         "position": {
                             "x": -232.57635498046875,
-                            "y": 362.0
+                            "y": 514.120666503906
                         },
                         "scale": {
                             "x": 200.0,
@@ -2937,7 +2937,7 @@
                     "transform": {
                         "position": {
                             "x": -234.6527862548828,
-                            "y": 362.0
+                            "y": 514.120727539063
                         },
                         "scale": {
                             "x": 254.0,
@@ -3644,47 +3644,6 @@
                         ],
                         "visible": false,
                         "alignment": 1
-                    }
-                }
-            ]
-        },
-        {
-            "components": [
-                {
-                    "transform": {
-                        "position": { "x": -228.8460693359375, "y": 560.0 },
-                        "scale": { "x": 200.0, "y": 80.0 },
-                        "rotation": { "x": 0.0, "y": 0.0 },
-                        "isVisible": false,
-                        "visibilityTimer": 0.0,
-                        "autoHide": false
-                    }
-                },
-                {
-                    "render": {
-                        "mdl_ref": 0.0, "shd_ref": 1.0, "useTexture": true,
-                        "spriteName": "Assets/Textures/UI/calibration.png",
-                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
-                    }
-                },
-                {
-                    "animation": {
-                        "currentFrame": 0, "elapsedTime": 0.0,
-                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 2.0
-                    }
-                },
-                {
-                    "script": {
-                        "ScriptName": [ "NavigationButtons", "SettingsOverlay" ]
-                    }
-                },
-                {
-                    "name": { "name": "CalibrationButton" }
-                },
-                {
-                    "layerTag": {
-                        "layerName": "UI", "mask": 4,
-                        "sortingLayer": 2, "orderInLayer": 60, "z": 200.0
                     }
                 }
             ]

@@ -38,14 +38,28 @@ public class InputBridge : Script
     private bool prevS = false;
     private bool prevD = false;
     private bool prevInvalidKeyDown = false;
-    private bool breakSfxPlayed = false; // ensures break SFX only fires once per turn
+    private bool breakSfxPlayed = false;
+    private int nextSlot = 0;            // advances ONLY on player press
+    private bool prevIsPlayerTurn = false;
+
+    public int NextSlot => nextSlot;
 
     // =========================
     // Update Loop
     // =========================
+
     public override void Update()
     {
         if (!initialized) { Initialize(); return; }
+
+        // Reset per-turn state when player turn starts
+        bool isPlayerTurn = TurnManager.Instance?.IsPlayerTurn ?? false;
+        if (isPlayerTurn && !prevIsPlayerTurn)
+        {
+            nextSlot = 0;
+            breakSfxPlayed = false;
+        }
+        prevIsPlayerTurn = isPlayerTurn;
 
         InputComponent input = GetInput();
 
@@ -116,32 +130,40 @@ public class InputBridge : Script
         if (ComboSystem.Instance == null) return;
 
         AudioComponent audio = GetAudio();
+        string expectedCombo = ComboSystem.Instance.GetExpectedCombo();
+        if (string.IsNullOrEmpty(expectedCombo)) return;
 
-        // If the combo is not yet completed, this is a fresh turn — reset the break flag.
-        // More reliable than tracking the lock→unlock transition, because it doesn't depend
-        // on entity update order.
-        if (!ComboSystem.Instance.HasCompletedCombo())
-            breakSfxPlayed = false;
+        // Block input once all slots are filled
+        if (nextSlot >= expectedCombo.Length) return;
 
-        // Keys 1-3: play click instantly. Last key: play establish/break instead (no click).
-        bool isLastKey = !ComboSystem.Instance.HasCompletedCombo() &&
-                         ComboSystem.Instance.GetComboProgress() + 1 >= ComboSystem.Instance.GetExpectedCombo().Length;
+        int slotIndex = nextSlot;
+        nextSlot++;
+
+        bool isLastKey = slotIndex == expectedCombo.Length - 1;
+        bool isCorrectKey = key == expectedCombo[slotIndex];
+
+        // Beats 1 to N-1: correct = click SFX, wrong = invalid SFX
+        // Last beat: outcome SFX plays after RegisterInput
         if (!isLastKey)
-            audio.PlaySFX("SFX_W_Key");
+            audio.PlaySFX(isCorrectKey ? "SFX_W_Key" : "SFX_Invalid_Key");
 
         ComboSystem.Instance.RegisterInput(key);
 
-        if (ComboSystem.Instance.HasCompletedCombo())
+        // Always update the visual for the slot we just consumed
+        ComboDisplayManager.Instance?.ForceShowPlayerKeyFeedback(slotIndex, key, isCorrectKey, expectedCombo[slotIndex]);
+
+        // Last beat: outcome
+        if (isLastKey)
         {
             if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
             {
                 audio.PlaySFX("SFX_ComboEstablished_1");
                 float playerDamage = PlayerHealth.Instance != null ? PlayerHealth.Instance.GetHealth().damage : 10;
-                int comboLen = ComboSystem.Instance.GetExpectedCombo().Length;
+                int comboLen = expectedCombo.Length;
                 if (comboLen == 6) playerDamage = 10f;
                 else if (comboLen == 8) playerDamage = 15f;
                 EnemyRhythmController.Instance?.TakeDamage(playerDamage);
-                PlayerAnimationController.Instance?.PlayAttack(ComboSystem.Instance.GetExpectedCombo());
+                PlayerAnimationController.Instance?.PlayAttack(expectedCombo);
             }
             else if (!breakSfxPlayed)
             {

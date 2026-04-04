@@ -98,6 +98,14 @@ public:
     void PlayFromAudioSource(AudioSource& src);
     void StopPlayingAllAudio();
 
+    // Spatial audio: call every frame with the camera/player world position
+    void SetListenerPosition(float x, float y);
+
+    // Play a one-shot SFX with immediate spatial pan + volume applied from worldX/Y.
+    // minVolume = volume floor so the sound is never silent even when far away (0..1)
+    void PlaySoundAt(const std::string& id, float worldX, float worldY,
+                     float minDist = 0.f, float maxDist = 800.f, float minVolume = 0.25f);
+
     // Fade current BGM channel to 0 without changing slider values
     void FadeOutCurrentBGM(float durationSeconds, bool stopAfterFade = true);
     void CancelCurrentBGMFade();
@@ -144,6 +152,10 @@ private:
 
     std::chrono::steady_clock::time_point mLastAudioTick;
     bool mHasLastAudioTick = false;
+
+    // Listener position for spatial audio (world space)
+    float mListenerX = 0.f;
+    float mListenerY = 0.f;
 };
 
 /*

@@ -6,9 +6,9 @@
 * @author      Chloe Lau (13%)
 * @author      Leu Jun Yong (2%)
 * @author      Goh Pin Kai (2%)
-* @brief       Controls staggered slide-in and simultaneous slide-out animations
-*              for paired cutscene panels, with shared timing state across all
-*              panel instances and space-to-skip support.
+* @brief       Controls staggered slide-in and simultaneous fade-out animations
+*              for cutscene panels grouped as [3, 3, 1], with shared timing
+*              state across all panel instances and space-to-skip support.
 *
 * @copyright   Copyright (C) 2026 DigiPen Institute of Technology.
 *              Reproduction or disclosure of this file or its contents without the
@@ -20,23 +20,20 @@ using System;
 using ScriptAPI;
 
 /// <summary>
-/// Cutscene Panel Controller (Paired + Staggered)
+/// Cutscene Panel Controller (Groups + Staggered)
 /// =================================================
 /// Attach this script to EVERY panel entity (Panel1 through Panel8).
 ///
-/// Pairs: (1+2), (3+4), (5+6), (7+8)
-/// 
-/// Entry: Left panel slides in first, then right panel follows after a short stagger.
-/// Exit:  Both panels slide upward together simultaneously.
-/// 
-/// POSITIONING:
-///   Set 'targetX' on each panel entity in the inspector to control where it sits.
-///   - Left panels (1,3,5...): use negative values like -700
-///   - Right panels (2,4,6...): use positive values like 700
-///   - Adjust per panel to account for different panel sizes
-///   If targetX is left at 0, it will use the defaults (-700 / 700).
+/// Groups: (1+2+3), (4+5+6+7), (8)
 ///
-/// Press SPACE to skip. Loads Level1 when done.
+/// Entry: Panels within a group slide in one by one (staggered).
+/// Exit:  All panels in the group fade out together (alpha fade, not slide up).
+///
+/// POSITIONING:
+///   The panel's X and Y are read from the entity's saved transform.
+///   Set the transform position in the editor to control where each panel sits.
+///
+/// Press SPACE or gamepad A to skip. Loads Level1 when done.
 /// </summary>
 public class CutscenePanel : Script
 {
@@ -44,26 +41,30 @@ public class CutscenePanel : Script
     // Timing Configuration
     // =========================
     public float slideInDuration = 0.8f;     // Time for one panel to slide into view
-    public float staggerDelay = 1.5f;        // Delay before the second panel in a pair starts sliding in
-    public float holdDuration = 1.8f;        // Time pair stays fully visible (after both are in)
-    public float slideOutDuration = 0.8f;    // Time for both to slide out together
-    public float overlapDuration = 0.6f;     // Overlap between current pair exiting and next pair entering
+    public float staggerDelay = 1.5f;        // Delay before the next panel in a group starts sliding in
+    public float holdDuration = 1.8f;        // Time group stays fully visible (after all are in)
+    public float slideOutDuration = 0.8f;    // Time for the group to fade out together
+    public float overlapDuration = 0.6f;     // Overlap between current group exiting and next group entering
 
     // =========================
     // Position Configuration (per-panel)
     // =========================
-    // Set this in the inspector for each panel entity.
-    // Left panels should be negative (e.g. -700), right panels positive (e.g. 700).
-    // If left at 0, defaults will be used.
-    public float targetX = 0f;
-
-    // Defaults used when targetX is not set (left at 0)
-    public float defaultLeftX = -700f;
-    public float defaultRightX = 700f;
-
     public float centerY = 0f;
     public float offScreenBelow = -900f;
-    public float offScreenAbove = 900f;
+    public float offScreenAbove = 900f;      // Kept for compatibility, not used for exit animation
+
+    // =========================
+    // Group Configuration
+    // Groups: [3, 3, 1] — 7 panels total
+    // =========================
+    private static readonly int[] GroupSizes = { 3, 4, 1 };
+
+    private static int TotalGroups => GroupSizes.Length;
+
+    private static int TotalPanels
+    {
+        get { int n = 0; foreach (int g in GroupSizes) n += g; return n; }
+    }
 
     // =========================
     // Static Shared State
@@ -71,7 +72,6 @@ public class CutscenePanel : Script
     private static float sharedElapsedTime = 0f;
     private static bool sharedCutsceneFinished = false;
     private static int sharedInitCount = 0;
-    private static int totalPairs = 4;
     private static bool s_waitingForSkipTransition = false;
     private static float s_skipTransitionTimer = 0f;
     private const float SkipTransitionDuration = 0.5f;
@@ -81,23 +81,21 @@ public class CutscenePanel : Script
 
     public static bool IsCutsceneFinished => sharedCutsceneFinished;
 
-    // Cached timing values (set once during init)
-    private static float sPairTotalDuration = 0f;
-    private static float sStaggerDelay = 0f;
+    // Cached timing values (set once by the first panel)
     private static float sSlideInDuration = 0f;
+    private static float sStaggerDelay = 0f;
     private static float sHoldDuration = 0f;
     private static float sSlideOutDuration = 0f;
     private static float sOverlapDuration = 0f;
     private static float sOffScreenBelow = 0f;
-    private static float sOffScreenAbove = 0f;
-    private static float sCenterY = 0f;
 
     // =========================
     // Per-Instance State
     // =========================
     private int myPanelIndex = -1;
-    private int myPairIndex = -1;
-    private bool isLeftPanel = true;
+    private int myGroupIndex = -1;
+    private int myPosInGroup = -1;
+    private int myGroupSize = -1;
     private bool initialized = false;
     private bool isTimerOwner = false;
     private float myTargetX = 0f;
@@ -151,7 +149,7 @@ public class CutscenePanel : Script
 
             sharedElapsedTime += Time.DeltaTime;
 
-            float totalDuration = (totalPairs - 1) * (sPairTotalDuration - sOverlapDuration) + sPairTotalDuration;
+            float totalDuration = ComputeTotalDuration();
             if (sharedElapsedTime >= totalDuration)
             {
                 Console.WriteLine("[Cutscene] Complete! Loading Level1...");
@@ -164,16 +162,45 @@ public class CutscenePanel : Script
     }
 
     // =========================
+    // Timing Helpers
+    // =========================
+    // Total time for one group to complete (last panel slides in → all hold → all fade out)
+    private static float GroupTotalDuration(int groupIndex)
+    {
+        int size = GroupSizes[groupIndex];
+        return (size - 1) * sStaggerDelay + sSlideInDuration + sHoldDuration + sSlideOutDuration;
+    }
+
+    // Absolute start time of a group in the shared timeline
+    private static float GroupStartTime(int groupIndex)
+    {
+        float t = 0f;
+        for (int g = 0; g < groupIndex; g++)
+            t += GroupTotalDuration(g) - sOverlapDuration;
+        return t;
+    }
+
+    // Total runtime of the entire cutscene
+    private static float ComputeTotalDuration()
+    {
+        float t = 0f;
+        for (int g = 0; g < TotalGroups; g++)
+        {
+            t += GroupTotalDuration(g);
+            if (g < TotalGroups - 1)
+                t -= sOverlapDuration;
+        }
+        return t;
+    }
+
+    // =========================
     // Initialization
     // =========================
     private void Initialize()
     {
-        // Reset shared state when scene changes OR when this is the very first panel
-        // initializing (sharedInitCount == 0), which means it's a fresh scene load
-        // even if the session tag wasn't cleared (e.g. OnDestroy not called on scene change).
         string currentScene = Scene.GetCurrentScene();
         bool sceneChanged = !string.Equals(s_sceneSessionTag, currentScene, StringComparison.OrdinalIgnoreCase);
-        bool freshStart = sharedInitCount == 0 || sharedInitCount >= totalPairs * 2;
+        bool freshStart = sharedInitCount == 0 || sharedInitCount >= TotalPanels * 2;
         if (sceneChanged || freshStart)
         {
             s_sceneSessionTag = currentScene;
@@ -186,17 +213,22 @@ public class CutscenePanel : Script
             s_waitingForEntryFade = true;
         }
 
-        //Console.WriteLine($"[DAS PRETTY GAY IF U ASK ME] sharedInitCount: {sharedInitCount}, sharedCutsceneFinished: {sharedCutsceneFinished}\n\n\n\n\n\n\n");
-
         myPanelIndex = sharedInitCount;
         sharedInitCount++;
 
-        //Console.WriteLine($"[PEEPEEPOOPOO] Panel: {myPanelIndex} | Pair: {myPanelIndex / 2}\n\n\n\n\n\n");
-
-
-        // Pair info
-        myPairIndex = myPanelIndex / 2;
-        isLeftPanel = (myPanelIndex % 2) == 0;
+        // Determine which group this panel belongs to and its position within that group
+        int accumulated = 0;
+        for (int g = 0; g < GroupSizes.Length; g++)
+        {
+            if (myPanelIndex < accumulated + GroupSizes[g])
+            {
+                myGroupIndex = g;
+                myPosInGroup = myPanelIndex - accumulated;
+                myGroupSize = GroupSizes[g];
+                break;
+            }
+            accumulated += GroupSizes[g];
+        }
 
         // Read X and Y directly from the saved transform position
         TransformComponent savedTf = GetTransform();
@@ -210,28 +242,18 @@ public class CutscenePanel : Script
             sharedCutsceneFinished = false;
             isTimerOwner = true;
 
-            // Cache timing values from this panel's config (all panels should have the same timing)
             sSlideInDuration = slideInDuration;
             sStaggerDelay = staggerDelay;
             sHoldDuration = holdDuration;
             sSlideOutDuration = slideOutDuration;
             sOverlapDuration = overlapDuration;
             sOffScreenBelow = offScreenBelow;
-            sOffScreenAbove = offScreenAbove;
-            sCenterY = centerY;
 
-            // Pair total = stagger + slideIn + hold + slideOut
-            // The pair "starts" when the LEFT panel begins sliding in.
-            // RIGHT panel starts sliding in after staggerDelay.
-            // Hold begins after BOTH panels are in (i.e. after stagger + slideIn).
-            // Both exit together after hold.
-            sPairTotalDuration = sStaggerDelay + sSlideInDuration + sHoldDuration + sSlideOutDuration;
-
-            float totalDuration = (totalPairs - 1) * (sPairTotalDuration - sOverlapDuration) + sPairTotalDuration;
+            float totalDuration = ComputeTotalDuration();
             Console.WriteLine($"[Cutscene] Timer owner: Panel 1");
-            Console.WriteLine($"[Cutscene] Pair duration: {sPairTotalDuration}s (stagger:{sStaggerDelay} + in:{sSlideInDuration} + hold:{sHoldDuration} + out:{sSlideOutDuration})");
-            Console.WriteLine($"[Cutscene] Overlap: {sOverlapDuration}s | Pairs: {totalPairs}");
-            Console.WriteLine($"[Cutscene] Total: {totalDuration:F1}s");
+            Console.WriteLine($"[Cutscene] Groups: {TotalGroups} | Total panels: {TotalPanels}");
+            Console.WriteLine($"[Cutscene] Stagger: {sStaggerDelay}s | SlideIn: {sSlideInDuration}s | Hold: {sHoldDuration}s | FadeOut: {sSlideOutDuration}s | Overlap: {sOverlapDuration}s");
+            Console.WriteLine($"[Cutscene] Total duration: {totalDuration:F1}s");
         }
 
         // Start off-screen and invisible
@@ -240,8 +262,7 @@ public class CutscenePanel : Script
         tf.Y = offScreenBelow;
         tf.IsVisible = false;
 
-        string side = isLeftPanel ? "LEFT" : "RIGHT";
-        Console.WriteLine($"[CutscenePanel] Panel {myPanelIndex + 1} -> Pair {myPairIndex + 1} ({side}) X={myTargetX}");
+        Console.WriteLine($"[CutscenePanel] Panel {myPanelIndex + 1} -> Group {myGroupIndex + 1}, pos {myPosInGroup} X={myTargetX}");
 
         initialized = true;
     }
@@ -315,39 +336,28 @@ public class CutscenePanel : Script
     // =========================
     private void AnimatePanel()
     {
-        if (myPanelIndex < 0) return;
+        if (myPanelIndex < 0 || myGroupIndex < 0) return;
 
         TransformComponent tf = GetTransform();
         SpriteComponent sprite = GetSprite();
 
-        // When does this pair start?
-        float pairStartTime = myPairIndex * (sPairTotalDuration - sOverlapDuration);
-        float localTime = sharedElapsedTime - pairStartTime;
+        // Local time = how far into this group's timeline we are
+        float groupStart = GroupStartTime(myGroupIndex);
+        float localTime = sharedElapsedTime - groupStart;
 
-        // Timeline for a pair:
-        //
-        //  0.0                        stagger   stagger+slideIn   stagger+slideIn+hold   pairTotal
-        //  |--- LEFT slides in ---------|-----------|                    |                    |
-        //                               |--- RIGHT slides in ---|       |                    |
-        //                                                               |--- BOTH slide out -|
-        //
-        // LEFT  starts sliding at localTime = 0
-        // RIGHT starts sliding at localTime = staggerDelay
-        // Hold starts at localTime = staggerDelay + slideInDuration (both are in)
-        // Both exit at localTime = staggerDelay + slideInDuration + holdDuration
+        // Timeline within a group:
+        // mySlideStart = myPosInGroup * staggerDelay
+        // holdStart    = (groupSize - 1) * staggerDelay + slideInDuration
+        // holdEnd      = holdStart + holdDuration
+        // groupEnd     = holdEnd + slideOutDuration
 
-        float mySlideStart;
-        if (isLeftPanel)
-            mySlideStart = 0f;                 // Left panel enters immediately
-        else
-            mySlideStart = sStaggerDelay;       // Right panel enters after stagger
-
+        float mySlideStart = myPosInGroup * sStaggerDelay;
         float mySlideEnd = mySlideStart + sSlideInDuration;
-        float holdStart = sStaggerDelay + sSlideInDuration;  // Both are in after this
+        float holdStart = (myGroupSize - 1) * sStaggerDelay + sSlideInDuration;
         float holdEnd = holdStart + sHoldDuration;
-        float exitEnd = sPairTotalDuration;
+        float groupEnd = holdEnd + sSlideOutDuration;
 
-        // Before this pair starts
+        // Before this group starts
         if (localTime < 0f)
         {
             tf.IsVisible = false;
@@ -357,17 +367,17 @@ public class CutscenePanel : Script
             return;
         }
 
-        // After this pair is done
-        if (localTime >= exitEnd)
+        // After this group is fully done
+        if (localTime >= groupEnd)
         {
             tf.IsVisible = false;
             tf.X = myTargetX;
-            tf.Y = sOffScreenAbove;
+            tf.Y = centerY;
             SetAlpha(sprite, 0f);
             return;
         }
 
-        // === BEFORE MY SLIDE STARTS (only applies to right panel during stagger) ===
+        // Waiting for this panel's stagger slot
         if (localTime < mySlideStart)
         {
             tf.IsVisible = false;
@@ -377,7 +387,7 @@ public class CutscenePanel : Script
             return;
         }
 
-        // === Panel is active from here ===
+        // Panel is active from here
         tf.IsVisible = true;
         tf.X = myTargetX;
 
@@ -392,17 +402,17 @@ public class CutscenePanel : Script
         }
         else if (localTime < holdEnd)
         {
-            // === HOLDING (or waiting for other panel to finish sliding in) ===
+            // === HOLDING (all panels in this group are fully visible) ===
             tf.Y = centerY;
             SetAlpha(sprite, 1f);
         }
         else
         {
-            // === SLIDING OUT (both panels exit together) ===
+            // === FADING OUT (alpha fade in place, not slide upward) ===
             float t = (localTime - holdEnd) / sSlideOutDuration;
             float eased = EaseInCubic(t);
 
-            tf.Y = Lerp(centerY, sOffScreenAbove, eased);
+            tf.Y = centerY;
             SetAlpha(sprite, Lerp(1f, 0f, eased));
         }
     }

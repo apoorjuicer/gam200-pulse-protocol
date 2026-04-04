@@ -11,6 +11,7 @@ public class EnemyRhythmController : Script
     // =========================
     public static EnemyRhythmController? Instance { get; private set; }
 
+
     // === SPRITE SHEET SETTINGS ===
     public string IdleSpriteSheet   = "rat_idle";
     public string WalkSpriteSheet   = "rat_walk";
@@ -53,7 +54,7 @@ public class EnemyRhythmController : Script
     public bool RandomizeWeakness = true;
     // If true, VisualSlotIndices is re-randomized each turn (shifts where keys appear visually)
     public bool RandomizeVisualSlots = false;
-    private static readonly Random _rng = new Random();
+    protected static readonly Random _rng = new Random();
 
     // === COMBAT SETTINGS ===
     public int AttackDamage = 5;
@@ -534,6 +535,8 @@ public class EnemyRhythmController : Script
         myTf.X -= StepDistance;
 
         stepSFXToggle = !stepSFXToggle;
+        string stepSfx = stepSFXToggle ? "SFX_Rat_Steps_1" : "SFX_Rat_Steps_2";
+        GetAudio().PlaySFXAt(stepSfx, myTf.X, myTf.Y, 0f, 800f, 0.25f);
 
         Console.WriteLine($"[Enemy] Stepped to X={myTf.X:F1}");
     }
@@ -592,7 +595,7 @@ public class EnemyRhythmController : Script
         {
             pendingDeath = true;
             pendingDeathFallbackTimer = 0f;
-            ComboDisplayManager.Instance?.HideAllSlots();
+            ComboDisplayManager.Instance?.DimSlotsForDeath();
         }
     }
 
@@ -644,7 +647,9 @@ public class EnemyRhythmController : Script
         deathNotified = false;
         SetState(EnemyState.Dead);
 
-        ComboDisplayManager.Instance?.HideAllSlots();
+        // Dim player slots instead of hiding — input is locked by Resolution phase,
+        // but the slots should stay visible (dimmed) while the death animation plays.
+        ComboDisplayManager.Instance?.DimSlotsForDeath();
 
 
         Console.WriteLine("[Enemy] DEFEATED!");
@@ -764,6 +769,30 @@ public class EnemyRhythmController : Script
 
 public class Gorilla: EnemyRhythmController
 {
+    // Two gap patterns, randomised each turn — fixed keys, variable timing.
+    // Pattern A: [1][X][3][4]  SlotOffsets={0.0, 1.0, 1.5}
+    // Pattern B: [1][2][X][4]  SlotOffsets={0.0, 0.5, 1.5}
+    public override void ResetMovementForNewTurn()
+    {
+        base.ResetMovementForNewTurn();
+
+        if (_rng.Next(2) == 0)
+        {
+            SlotOffsets = new float[] { 0.0f, 1.0f, 1.5f };
+            VisualSlotIndices = new int[] { 0, 2, 3 };
+            Console.WriteLine("[Gorilla] Pattern A: [1][X][3][4]");
+        }
+        else
+        {
+            SlotOffsets = new float[] { 0.0f, 0.5f, 1.5f };
+            VisualSlotIndices = new int[] { 0, 1, 3 };
+            Console.WriteLine("[Gorilla] Pattern B: [1][2][X][4]");
+        }
+
+        // Re-apply weakness so ComboSystem recalculates minTimeBetweenPresses from new SlotOffsets
+        ComboSystem.Instance?.SetEnemyWeakness(WeaknessCombo);
+    }
+
     protected override void SetupSprites()
     {
         IdleSpriteSheet = "gorilla_idle";
@@ -811,6 +840,28 @@ public class Gorilla: EnemyRhythmController
 
 public class BlueGorilla : EnemyRhythmController
 {
+    // Same two gap patterns as Gorilla but with different fixed keys (DWS).
+    public override void ResetMovementForNewTurn()
+    {
+        base.ResetMovementForNewTurn();
+
+        if (_rng.Next(2) == 0)
+        {
+            SlotOffsets = new float[] { 0.0f, 1.0f, 1.5f };
+            VisualSlotIndices = new int[] { 0, 2, 3 };
+            Console.WriteLine("[BlueGorilla] Pattern A: [1][X][3][4]");
+        }
+        else
+        {
+            SlotOffsets = new float[] { 0.0f, 0.5f, 1.5f };
+            VisualSlotIndices = new int[] { 0, 1, 3 };
+            Console.WriteLine("[BlueGorilla] Pattern B: [1][2][X][4]");
+        }
+
+        // Re-apply weakness so ComboSystem recalculates minTimeBetweenPresses from new SlotOffsets
+        ComboSystem.Instance?.SetEnemyWeakness(WeaknessCombo);
+    }
+
     protected override void SetupSprites()
     {
         // Uses gorilla sprites until artist delivers blue gorilla sheets

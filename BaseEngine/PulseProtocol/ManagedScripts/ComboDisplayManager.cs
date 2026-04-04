@@ -456,6 +456,18 @@ public class ComboDisplayManager : Script
             Console.WriteLine("[ComboDisplayManager] ⚠️ Judgement display not registered!");
     }
 
+    // Called from InputBridge for every key press so slots always show feedback,
+    // even for presses that ComboSystem rejected (e.g. after an early wrong key).
+    public void ForceShowPlayerKeyFeedback(int pressIndex, char pressedKey, bool isCorrect, char expectedKey)
+    {
+        int vs = VisualSlot(pressIndex);
+        if (!playerSlots.ContainsKey(vs)) return;
+        if (isCorrect)
+            playerSlots[vs].ShowCorrect(pressedKey);
+        else
+            playerSlots[vs].ShowWrong(pressedKey, expectedKey);
+    }
+
     public void ShowGapMissKey(char key)
     {
         if (gapVisualSlots.Length == 0) return;
@@ -484,6 +496,22 @@ public class ComboDisplayManager : Script
         lastInputProgress = ComboSystem.Instance?.GetComboProgress() ?? lastInputProgress;
         ClearEnemySlotsInstant();
         ClearPlayerSlots();
+    }
+
+    // Called when enemy death animation starts.
+    // Hides the enemy row, stops all ongoing animations, and leaves player slots
+    // in the dimmed state (same as during enemy turn) so the UI doesn't go blank.
+    public void DimSlotsForDeath()
+    {
+        isRevealing = false;
+        isGapRevealing = false;
+        isFadingOut = false;
+        isCountingDown = false;
+        pendingCountdownStart = false;
+        lastInputProgress = ComboSystem.Instance?.GetComboProgress() ?? lastInputProgress;
+
+        ClearEnemySlotsInstant();
+        ShowDimmedPlayerSlots(currentWeakness);
     }
 
     private void ClearPlayerSlots()
