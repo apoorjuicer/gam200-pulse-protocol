@@ -112,6 +112,7 @@ public class InputBridge : Script
         prevD = curD;
 
         CheckInvalidKeys(input);
+        CheckMissedTurn();
     }
 
     // =========================
@@ -194,16 +195,26 @@ public class InputBridge : Script
                 }
             }
 
-            if (!isLastKey)
-                audio.PlaySFX(isCorrectKey ? "SFX_W_Key" : "SFX_Invalid_Key");
+            // Always play click SFX on every key including last
+            audio.PlaySFX(isCorrectKey ? "SFX_W_Key" : "SFX_Invalid_Key");
             ComboDisplayManager.Instance?.ShowJudgement(isCorrectKey && timingOk ? judgement : "MISS");
             ComboDisplayManager.Instance?.ForceShowPlayerKeyFeedback(slotIndex, key, isCorrectKey && timingOk, expectedCombo[slotIndex]);
+
+            // Last beat of an already-failed combo: play break SFX only if a combo was in progress
+            if (isLastKey && slotIndex > 0 && !breakSfxPlayed)
+            {
+                audio.PlaySFX("SFX_ComboStreakBroken");
+                breakSfxPlayed = true;
+            }
             return;
         }
 
-        // Beats 1 to N-1: correct = click SFX, wrong = invalid SFX
-        // Last beat: outcome SFX plays after RegisterInput
-        if (!isLastKey)
+        // Click SFX:
+        // - Beats 1–(N-1): key correctness determines W_Key vs Invalid_Key
+        // - Last beat: timing determines W_Key vs Invalid_Key (out of window = Invalid even if correct key)
+        if (isLastKey)
+            audio.PlaySFX(timingAccepted ? "SFX_W_Key" : "SFX_Invalid_Key");
+        else
             audio.PlaySFX(isCorrectKey ? "SFX_W_Key" : "SFX_Invalid_Key");
 
         // Show green only if the key was correct AND timing was within the window
@@ -212,21 +223,58 @@ public class InputBridge : Script
         // Last beat: outcome
         if (isLastKey)
         {
-            if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
+            if (timingAccepted)
             {
+                // Establish SFX + weapon SFX play together the moment the last beat comes in
                 audio.PlaySFX("SFX_ComboEstablished_1");
-                float playerDamage = PlayerHealth.Instance != null ? PlayerHealth.Instance.GetHealth().damage : 10;
-                int comboLen = expectedCombo.Length;
-                if (comboLen == 6) playerDamage = 10f;
-                else if (comboLen == 8) playerDamage = 15f;
-                EnemyRhythmController.Instance?.TakeDamage(playerDamage);
-                PlayerAnimationController.Instance?.PlayAttack(expectedCombo);
+                breakSfxPlayed = true; // Mark resolved so turn-end reset doesn't double-fire break SFX
+
+                // Damage + attack animation only if the full combo was also correct
+                if (ComboSystem.Instance.PlayerDidSuccessfulCombo)
+                {
+                    float playerDamage = PlayerHealth.Instance != null ? PlayerHealth.Instance.GetHealth().damage : 10;
+                    int comboLen = expectedCombo.Length;
+                    if (comboLen == 6) playerDamage = 10f;
+                    else if (comboLen == 8) playerDamage = 15f;
+                    EnemyRhythmController.Instance?.TakeDamage(playerDamage);
+                    PlayerAnimationController.Instance?.PlayAttack(expectedCombo);
+                }
             }
-            else if (!breakSfxPlayed)
+            else if (slotIndex > 0)
             {
+                // Out of window on last beat: break SFX (only if a combo was already in progress)
                 audio.PlaySFX("SFX_ComboStreakBroken");
                 breakSfxPlayed = true;
             }
+        }
+    }
+
+    // =========================
+    // Missed Turn Detection
+    // =========================
+    private void CheckMissedTurn()
+    {
+        // Fire break SFX at the last beat moment if the player pressed no keys this turn
+        if (nextSlot > 0 || breakSfxPlayed) return;
+        if (ComboSystem.Instance == null || TurnManager.Instance == null || Conductor.Instance == null) return;
+
+        string expectedCombo = ComboSystem.Instance.GetExpectedCombo();
+        if (string.IsNullOrEmpty(expectedCombo)) return;
+
+        float[] offsets = EnemyRhythmController.Instance?.SlotOffsets ?? new float[] { 0f, 0.5f, 1f, 1.5f };
+        int lastSlot = expectedCombo.Length - 1;
+        if (lastSlot >= offsets.Length) return;
+
+        float earlyShift  = ComboSystem.Instance.InputEarlyShift;
+        float greatWindow = ComboSystem.Instance.greatWindow;
+        float lastBeatTime = TurnManager.Instance.GetPlayerInputStartTime() + offsets[lastSlot] - earlyShift;
+        float currentTime  = Conductor.Instance.GetVisualAdjustedSongTime();
+
+        if (currentTime > lastBeatTime + greatWindow)
+        {
+            AudioComponent audio = GetAudio();
+            audio.PlaySFX("SFX_ComboStreakBroken");
+            breakSfxPlayed = true;
         }
     }
 
