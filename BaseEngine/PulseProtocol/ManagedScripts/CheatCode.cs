@@ -54,7 +54,7 @@ public class Cheats: Script
         }
 
         // Clear wave / skip level
-        if(input.IsKeyTriggered(KeyO))
+        if(input.IsKeyTriggered(KeyO) && !Application.IsPaused())
         {
             StageClearElement.StageClear();
         }
