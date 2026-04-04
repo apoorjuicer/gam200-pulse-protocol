@@ -512,7 +512,7 @@ public class NavigationButtons : Script
             bool isPauseMenuOpen = ShowPauseOverlay;
             bool isPauseSettingsOpen = ShowSettingsOverlay && openedSettingsFromPause;
             bool shouldGameBePaused = isPauseMenuOpen || isPauseSettingsOpen || stageClearPaused
-                || s_resumeCountdownActive || htpOpenedFromPause;
+                || s_resumeCountdownActive;
 
             if (isPauseMenuOpen != lastPauseState)
             {
@@ -581,7 +581,7 @@ public class NavigationButtons : Script
 
         if ((ShowQuitOverlay || ShowNewGameResetOverlay) && isPauseOverlayButton && !isQuitOverlayButton) return;
         if (ShowPauseOverlay && isQuitOverlayButton && !isPauseOverlayButton) return;
-        if (ShowHowToPlayOverlay && !isHowToPlayOverlayButton) return;
+        if (ShowHowToPlayOverlay && (!isHowToPlayOverlayButton || isPauseButton)) return;
 
         float currentScaleX = t.ScaleX;
         float currentScaleY = t.ScaleY;
@@ -1154,11 +1154,7 @@ public class NavigationButtons : Script
             {
                 ShowHowToPlayOverlay = false;
                 HtpPage = 1;
-                if (htpOpenedFromPause)
-                {
-                    ShowPauseOverlay = true;
-                    htpOpenedFromPause = false;
-                }
+                htpOpenedFromPause = false;
                 return;
             }
             if (tex.Contains("nextstage"))
@@ -1467,7 +1463,6 @@ public class NavigationButtons : Script
         if (tex.Contains("how to play"))
         {
             htpOpenedFromPause = ShowPauseOverlay;
-            ShowPauseOverlay = false;
             ShowHowToPlayOverlay = true;
             return;
         }
