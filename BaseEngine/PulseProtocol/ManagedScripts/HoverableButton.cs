@@ -1605,9 +1605,9 @@ public class NavigationButtons : Script
 public class QuitOverlay : Script
 {
     private const string QuitPromptTexture = "Assets/Textures/Backgrounds/quit screen.png";
-    private const string NewGamePromptTexture = "Assets/Textures/Backgrounds/Background3.png";
+    private const string NewGamePromptTexture = "Assets/Textures/Backgrounds/Calibrator BG.png";
     private const float QuitPromptAlpha = 1.0f;
-    private const float NewGamePromptAlpha = 0.82f;
+    private const float NewGamePromptAlpha = 0.95f;
 
     public override void Update()
     {
