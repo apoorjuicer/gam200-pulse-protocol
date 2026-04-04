@@ -270,5 +270,54 @@
                 }
             ]
         }
+        ,
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": { "x": 0.0, "y": 0.0 },
+                        "scale": { "x": 1.0, "y": 1.0 },
+                        "rotation": { "x": 0.0, "y": 0.0 },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0, "shd_ref": 0.0, "useTexture": false,
+                        "spriteName": "",
+                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
+                        "glow": { "enabled": false, "intensity": 1.0, "r": 1.0, "g": 1.0, "b": 1.0 }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0, "elapsedTime": 0.0,
+                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 1.0
+                    }
+                },
+                {
+                    "script": { "ScriptName": [ "GameLoseBGM" ] }
+                },
+                {
+                    "name": { "name": "BGMManager" }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World", "mask": 2,
+                        "sortingLayer": 1, "orderInLayer": 0, "z": 0.0
+                    }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "BGM_Game_Lose",
+                        "volume": 1.0,
+                        "loop": true,
+                        "playOnAwake": false
+                    }
+                }
+            ]
+        }
     ]
 }
