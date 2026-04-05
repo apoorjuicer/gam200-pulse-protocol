@@ -1666,6 +1666,9 @@ void CoreEngine::SetFullscreen(bool fullscreen)
 
 	// Persist immediately on every actual mode change (UI toggle, hotkey toggle, etc.).
 	PersistFullscreenToUserSettings(FilePathToGame, m_isFullscreen);
+
+	// Always keep cursor visible regardless of window mode
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
 
