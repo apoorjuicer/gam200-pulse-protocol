@@ -585,6 +585,20 @@ public class NavigationButtons : Script
         if (ShowPauseOverlay && isQuitOverlayButton && !isPauseOverlayButton) return;
         if (ShowHowToPlayOverlay && (!isHowToPlayOverlayButton || isPauseButton)) return;
 
+        if (stageClearPaused && isPauseButton)
+        {
+            if (isCurrentlyHovered)
+            {
+                SpriteComponent sprite = GetSprite();
+                TransformComponent transform = GetTransform();
+                sprite.Texture = defaultTexture;
+                transform.ScaleX = t.ScaleX / hoverScaleBoost;
+                transform.ScaleY = t.ScaleY / hoverScaleBoost;
+                isCurrentlyHovered = false;
+            }
+            return;
+        }
+
         float currentScaleX = t.ScaleX;
         float currentScaleY = t.ScaleY;
         float baseScaleX = isCurrentlyHovered ? currentScaleX / hoverScaleBoost : currentScaleX;
