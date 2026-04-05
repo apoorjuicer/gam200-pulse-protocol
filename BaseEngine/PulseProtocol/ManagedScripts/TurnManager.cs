@@ -41,6 +41,7 @@ public class TurnManager : Script
     public int CountdownBeats = 4;
     public int EnemyDisplayBeats = 4;  // with -1 backdating: 3 beats shown in switch + initial beat N = 4 enemy beats total. Transition fires on beat 4, player slot 0 fires on beat 5 (no gap).
     public int PlayerInputBeats = 5;   // with -1 backdating: beats 2-5 flash slots 0-3, beat 5 also resolves.
+    public float PulseLeadTime = 0.1f; // Seconds to fire the slot pulse BEFORE the beat, so it acts as an anticipatory cue
 
     // Boss overrides: set by BossEnemyController to extend phases for longer combos. Cleared after each turn.
     public static int? EnemyDisplayBeatsOverride = null;
@@ -137,7 +138,7 @@ public class TurnManager : Script
             float beatDur = Conductor.Instance.SecondsPerBeat;
             for (int i = 0; i < slotPulsed.Length && i < offsets.Length; i++)
             {
-                if (!slotPulsed[i] && elapsed >= offsets[i])
+                if (!slotPulsed[i] && elapsed >= offsets[i] - PulseLeadTime)
                 {
                     slotPulsed[i] = true;
                     int vs = (visualSlots != null && i < visualSlots.Length) ? visualSlots[i] : i;

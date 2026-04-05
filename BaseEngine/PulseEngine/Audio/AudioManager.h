@@ -49,7 +49,7 @@ public:
     // void SetRegistry(AssetRegistry* registry);       // load from audioResource
     void Initialize(); // creates FMOD system and (optionally) starts BGM
 
-    void Update();   // calls FMOD::System::update()
+    void Update(float dt) override;   // calls FMOD::System::update()
     void Shutdown(); // Exit calls releaseAll releases all FMOD resources
 
     // BGM controls (optional for other places in engine)

@@ -215,7 +215,7 @@ void AudioManager::Initialize()
     mHasLastAudioTick = false;
 } // end init
 
-void AudioManager::Update()
+void AudioManager::Update(float dt)
 {
     if (!mSystem)
         return;
@@ -223,7 +223,6 @@ void AudioManager::Update()
     using Clock = std::chrono::steady_clock;
     auto now = Clock::now();
 
-    float dt = 0.0f;
     if (!mHasLastAudioTick)
     {
         mLastAudioTick = now;
@@ -231,7 +230,6 @@ void AudioManager::Update()
     }
     else
     {
-        dt = std::chrono::duration<float>(now - mLastAudioTick).count();
         mLastAudioTick = now;
     }
 
@@ -243,7 +241,27 @@ void AudioManager::Update()
     {
         ProcessAudioSources();
     }
-    
+
+    // ---- Periodic audio diagnostic (frame counter, fires every 300 calls) ----
+    static int s_diagFrames = 0;
+    ++s_diagFrames;
+    if (s_diagFrames % 300 == 1)   // fires at frame 1, 301, 601, ...
+    {
+        float masterVol = -1.f, musicVol = -1.f, sfxVol = -1.f;
+        if (mMasterGroup) mMasterGroup->getVolume(&masterVol);
+        if (mMusicGroup)  mMusicGroup ->getVolume(&musicVol);
+        if (mSfxGroup)    mSfxGroup   ->getVolume(&sfxVol);
+
+        bool bgmPlaying = false;
+        if (mCurrentBGMCh) mCurrentBGMCh->isPlaying(&bgmPlaying);
+
+        std::cout << "[AudioDiag] frame=" << s_diagFrames
+                  << " master=" << masterVol
+                  << " music=" << musicVol
+                  << " sfx=" << sfxVol
+                  << " bgmCh=" << (mCurrentBGMCh ? (bgmPlaying ? "playing" : "stopped") : "null")
+                  << " bgmID=" << mCurrentBGMID << "\n" << std::flush;
+    }
 
     // FMOD should still update every frame
     mSystem->update();
@@ -754,13 +772,22 @@ void AudioManager::applyMasterVolume()
 void AudioManager::applyMusicVolume()
 {
     if (mMusicGroup)
-        mMusicGroup->setVolume(clampto0and1(mMusicVol * mBGMFadeMultiplier));
+    {
+        float v = clampto0and1(mMusicVol * mBGMFadeMultiplier);
+        mMusicGroup->setVolume(v);
+        std::cout << "[AudioMgr] applyMusicVolume -> " << v
+                  << " (mMusicVol=" << mMusicVol << " fade=" << mBGMFadeMultiplier << ")\n";
+    }
 }
 
 void AudioManager::applySfxVolume()
 {
     if (mSfxGroup)
-        mSfxGroup->setVolume(clampto0and1(mSfxVol));
+    {
+        float v = clampto0and1(mSfxVol);
+        mSfxGroup->setVolume(v);
+        std::cout << "[AudioMgr] applySfxVolume -> " << v << "\n";
+    }
 }
 float AudioManager::clampto0and1(float v)
 {
@@ -1022,6 +1049,12 @@ void AudioManager::ResetBGMFade()
     mBGMFadeElapsed = 0.0f;
     mBGMFadeStart = 1.0f;
 
+    // Clear all accumulated FMOD native fade points from the music group so that
+    // historical fade points from previous FadeIn/FadeOut calls cannot fire late
+    // and silence the group unexpectedly.
+    if (mMusicGroup)
+        mMusicGroup->removeFadePoints(0, static_cast<unsigned long long>(-1));
+
     applyMusicVolume();
 }
 
@@ -1153,14 +1186,17 @@ void AudioManager::FadeInCurrentBGM(float durationSeconds)
     unsigned long long parentClock = 0;
     mMusicGroup->getDSPClock(&dspClock, &parentClock);
 
+    // FMOD requires fade points on a ChannelGroup to use the PARENT's DSP clock,
+    // not the group's own clock (per FMOD API: addFadePoint dspclock must be the
+    // parentclock from getDSPClock).
     unsigned long long fadeEnd =
-        dspClock + static_cast<unsigned long long>(durationSeconds * sampleRate);
+        parentClock + static_cast<unsigned long long>(durationSeconds * sampleRate);
 
     // Clear any old fade points around this time window
-    mMusicGroup->removeFadePoints(dspClock, fadeEnd + sampleRate);
+    mMusicGroup->removeFadePoints(parentClock, fadeEnd + sampleRate);
 
     // Start silent now
-    mMusicGroup->addFadePoint(dspClock, 0.0f);
+    mMusicGroup->addFadePoint(parentClock, 0.0f);
 
     // Fade up to the current music slider value
     mMusicGroup->addFadePoint(fadeEnd, targetVol);
