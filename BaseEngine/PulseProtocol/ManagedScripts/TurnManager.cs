@@ -405,7 +405,8 @@ public class TurnManager : Script
             // InputBridge plays it immediately when a wrong key / MISS fires (comboCompleted = true).
             // If comboCompleted is still false, the player pressed nothing or pressed partially
             // without triggering an early fail — play it here instead.
-            if (ComboSystem.Instance == null || !ComboSystem.Instance.HasCompletedCombo())
+            if ((ComboSystem.Instance == null || !ComboSystem.Instance.HasCompletedCombo())
+                && !(InputBridge.Instance?.BreakSfxPlayed ?? false))
             {
                 AudioComponent audio = GetAudio();
                 audio.PlaySFX("SFX_ComboStreakBroken");

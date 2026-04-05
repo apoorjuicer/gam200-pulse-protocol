@@ -44,6 +44,7 @@ public class InputBridge : Script
     private bool prevIsPlayerTurn = false;
 
     public int NextSlot => nextSlot;
+    public bool BreakSfxPlayed => breakSfxPlayed;
 
     // =========================
     // Update Loop
