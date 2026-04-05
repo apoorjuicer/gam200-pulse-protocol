@@ -311,15 +311,9 @@ public class CutscenePanel : Script
         NavigationButtons.currentScene = targetScene;
         NavigationButtons.LastEnteredLevel = targetScene;
 
-        if (NavigationButtons.ShouldUseLoadingScreenForScene(targetScene))
-        {
-            LoadingScreenScript.NextLevel = targetScene;
-            Scene.LoadScene("LoadingScreenScene");
-            return;
-        }
-
-        NavigationButtons.QueuePostLoadFadeIn(targetScene, 0.5f);
-        Scene.LoadScene(targetScene);
+        // Always go through the loading screen from the intro cutscene
+        LoadingScreenScript.NextLevel = targetScene;
+        Scene.LoadScene("LoadingScreenScene");
     }
 
     private void BeginSkipTransition()

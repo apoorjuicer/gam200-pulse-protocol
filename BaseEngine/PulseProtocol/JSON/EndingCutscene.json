@@ -27,7 +27,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 1.0,
                         "useTexture": true,
-                        "spriteName": "Assets/Textures/Backgrounds/Background2.png",
+                        "spriteName": "Calibrator_BG",
                         "tintColor": {
                             "r": 0.0,
                             "g": 0.0,
@@ -60,9 +60,9 @@
                 },
                 {
                     "layerTag": {
-                        "layerName": "Background",
-                        "mask": 1,
-                        "sortingLayer": 0,
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
                         "orderInLayer": 0,
                         "z": 0.0
                     }
@@ -859,9 +859,18 @@
             "components": [
                 {
                     "transform": {
-                        "position": { "x": 0.0, "y": 0.0 },
-                        "scale": { "x": 1.0, "y": 1.0 },
-                        "rotation": { "x": 0.0, "y": 0.0 },
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 1.0,
+                            "y": 1.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
                         "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
