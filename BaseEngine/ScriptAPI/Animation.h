@@ -23,9 +23,12 @@ namespace ScriptAPI
 
 		// Get the current SpriteName from this entity
 		System::String^ GetCurrentAnimation();
-       
+
 		//change animation speed(duh)
 		void SetAnimationSpeed(float speed);
+
+		// Jump to a specific frame index (0-based) without restarting the animation
+		void SetCurrentFrame(int frame);
 
 	internal:
 		//Constrcutor when GetAnimation() with Entity ID gets called

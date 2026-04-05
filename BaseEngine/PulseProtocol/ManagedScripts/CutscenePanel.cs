@@ -81,6 +81,10 @@ public class CutscenePanel : Script
 
     public static bool IsCutsceneFinished => sharedCutsceneFinished;
 
+    // Seconds left before the cutscene naturally ends (0 once finished or skipped).
+    public static float TimeRemaining =>
+        sharedCutsceneFinished ? 0f : Math.Max(0f, ComputeTotalDuration() - sharedElapsedTime);
+
     // Cached timing values (set once by the first panel)
     private static float sSlideInDuration = 0f;
     private static float sStaggerDelay = 0f;

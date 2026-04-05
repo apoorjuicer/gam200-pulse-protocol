@@ -1074,6 +1074,30 @@
             "mdl_ref": 1,
             "shd_ref": 3
         },
+        {
+            "id": "boss_healthbar",
+            "path": "Assets/Textures/UI/boss_healthbar_659x68.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "enemyicon_boss",
+            "path": "Assets/Textures/UI/Boss Icon.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
+        {
+            "id": "enemyicon_boss_grey",
+            "path": "Assets/Textures/UI/Boss Icon greyed.png",
+            "vert_shader_path": "shader/sprite_vs.vert",
+            "frag_shader_path": "shader/sprite_fs.frag",
+            "mdl_ref": 1,
+            "shd_ref": 3
+        },
         //healthbar
         {
             "id": "back_glow_blue",

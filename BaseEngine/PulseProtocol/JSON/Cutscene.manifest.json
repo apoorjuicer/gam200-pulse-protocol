@@ -11,7 +11,9 @@
             "cutscene_7",
             "cutscene_8"
         ],
-        "audio": [],
+        "audio": [
+            "BGM_Cutscene"
+        ],
         "fonts": [],
         "animations": []
     }

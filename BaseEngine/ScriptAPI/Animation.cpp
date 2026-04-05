@@ -75,4 +75,12 @@ namespace ScriptAPI
         comp.animationSpeed = speed;
     }
 
+    void Animation::SetCurrentFrame(int frame)
+    {
+        auto* g_coordinator = Coordinator::GetInstance();
+        auto& comp = g_coordinator->GetComponent<Framework::Animation>(entityID);
+        comp.currentFrame = frame;
+        comp.elapsedTime = 0.0f;
+    }
+
 }

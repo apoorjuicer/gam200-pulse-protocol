@@ -62,6 +62,9 @@
                     "enemyicon_rat_grey",
                     "enemyicon_bat",
                     "enemyicon_bat_grey",
+                    "enemyicon_boss",
+                    "enemyicon_boss_grey",
+                    "boss_healthbar",
                     //combo text
                     "miss_ui",
                     "great_ui",

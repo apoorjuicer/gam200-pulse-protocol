@@ -5200,14 +5200,14 @@
                             "y": 0.0
                         },
                         "scale": {
-                            "x": 176.0,
-                            "y": 33.0
+                            "x": 659.0,
+                            "y": 68.0
                         },
                         "rotation": {
                             "x": 0.0,
                             "y": 0.0
                         },
-                        "isVisible": true,
+                        "isVisible": false,
                         "visibilityTimer": 0.0,
                         "autoHide": false
                     }
@@ -5217,7 +5217,7 @@
                         "mdl_ref": 0.0,
                         "shd_ref": 2.0,
                         "useTexture": true,
-                        "spriteName": "../../PulseProtocol/Assets/Textures/UI/enemy_hp4_00.png",
+                        "spriteName": "boss_healthbar",
                         "tintColor": {
                             "r": 1.0,
                             "g": 1.0,
@@ -5237,16 +5237,91 @@
                     "animation": {
                         "currentFrame": 0,
                         "elapsedTime": 0.0,
-                        "totalFrames": 1,
-                        "columns": 1,
-                        "rows": 1,
+                        "totalFrames": 10,
+                        "columns": 4,
+                        "rows": 3,
                         "animationSpeed": 0.0
                     }
                 },
                 {
                     "script": {
                         "ScriptName": [
-                            "EnemyHealthBarController"
+                            "BossHPBorderController"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "BossHPBorder"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 99,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 176.0,
+                            "y": 33.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 2.0,
+                        "useTexture": true,
+                        "spriteName": "boss_healthbar",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 9,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 10,
+                        "columns": 4,
+                        "rows": 3,
+                        "animationSpeed": 0.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "BossHealthBarController"
                         ]
                     }
                 },

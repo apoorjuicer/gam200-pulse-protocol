@@ -29,6 +29,13 @@
             "audiotype": "BGM"
         },
         {
+            "id": "BGM_Cutscene",
+            "path": "Assets/Sound/BG & Ambience/BGM_Cutscene.mp3",
+            "loop": true,
+            "volume": 0.75,
+            "audiotype": "BGM"
+        },
+        {
             "id": "BGM_GENERAL",
             "path": "Assets/Sound/BG & Ambience/BGM_General.mp3",
             "loop": true,
