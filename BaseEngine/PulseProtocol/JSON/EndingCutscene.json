@@ -724,13 +724,13 @@
                 {
                     "script": {
                         "ScriptName": [
-                            "CutsceneSkipHint"
+                            "EndingCutsceneSkipHint"
                         ]
                     }
                 },
                 {
                     "name": {
-                        "name": "CutsceneSkipHint"
+                        "name": "EndingCutsceneSkipHint"
                     }
                 },
                 {
@@ -851,6 +851,49 @@
                         ],
                         "visible": false,
                         "alignment": 1
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": { "x": 0.0, "y": 0.0 },
+                        "scale": { "x": 1.0, "y": 1.0 },
+                        "rotation": { "x": 0.0, "y": 0.0 },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "EndingCutsceneBGM"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "BGM_Manager"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 15,
+                        "z": 0.0
+                    }
+                },
+                {
+                    "audiosource": {
+                        "audio_id": "BGM_Cutscene",
+                        "volume": 0.75,
+                        "loop": true,
+                        "playOnAwake": false
                     }
                 }
             ]

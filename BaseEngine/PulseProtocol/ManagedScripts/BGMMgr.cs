@@ -117,6 +117,83 @@ public static class BGMManager
 }
 
 // ============================================
+// USE THIS FOR: Cutscene (starting)
+// ============================================
+public class CutsceneBGM : Script
+{
+    private const float FadeInDuration  = 1.5f;
+    private const float FadeOutDuration = 5.0f;
+
+    private bool started     = false;
+    private bool fadeOutDone = false;
+
+    public override void Update()
+    {
+        AudioComponent audio = GetAudio();
+
+        if (!started)
+        {
+            audio.SetMasterVolume(UserSettingsStore.GetSliderValue("Volume", 1.0f));
+            audio.SetMusicVolume(UserSettingsStore.GetSliderValue("Music", 1.0f));
+            audio.SetSfxVolume(UserSettingsStore.GetSliderValue("SFX", 0.25f));
+            audio.PlayBGM("BGM_Cutscene");
+            audio.FadeInMusic(FadeInDuration);
+            BGMManager.CurrentTrack = "Cutscene";
+            Console.WriteLine("BGM: Playing Cutscene music (fade in)");
+            started = true;
+        }
+
+        // Begin fade-out FadeOutDuration seconds before the cutscene ends so it
+        // finishes gracefully rather than being cut off by the scene load.
+        if (!fadeOutDone && started &&
+            (CutscenePanel.IsCutsceneFinished || CutscenePanel.TimeRemaining <= FadeOutDuration))
+        {
+            audio.FadeOutMusic(FadeOutDuration);
+            fadeOutDone = true;
+            Console.WriteLine($"[CutsceneBGM] Fading out over {FadeOutDuration}s");
+        }
+    }
+}
+
+// ============================================
+// USE THIS FOR: EndingCutscene
+// ============================================
+public class EndingCutsceneBGM : Script
+{
+    private const float FadeInDuration  = 1.5f;
+    private const float FadeOutDuration = 5.0f;
+
+    private bool started     = false;
+    private bool fadeOutDone = false;
+
+    public override void Update()
+    {
+        AudioComponent audio = GetAudio();
+
+        if (!started)
+        {
+            audio.SetMasterVolume(UserSettingsStore.GetSliderValue("Volume", 1.0f));
+            audio.SetMusicVolume(UserSettingsStore.GetSliderValue("Music", 1.0f));
+            audio.SetSfxVolume(UserSettingsStore.GetSliderValue("SFX", 0.25f));
+            audio.PlayBGM("BGM_Cutscene");
+            audio.FadeInMusic(FadeInDuration);
+            BGMManager.CurrentTrack = "Cutscene";
+            Console.WriteLine("BGM: Playing EndingCutscene music (fade in)");
+            started = true;
+        }
+
+        // Begin fade-out FadeOutDuration seconds before the cutscene ends.
+        if (!fadeOutDone && started &&
+            (EndingCutscenePanel.IsCutsceneFinished || EndingCutscenePanel.TimeRemaining <= FadeOutDuration))
+        {
+            audio.FadeOutMusic(FadeOutDuration);
+            fadeOutDone = true;
+            Console.WriteLine($"[EndingCutsceneBGM] Fading out over {FadeOutDuration}s");
+        }
+    }
+}
+
+// ============================================
 // USE THIS FOR: GameLose scene
 // ============================================
 public class GameLoseBGM : Script
