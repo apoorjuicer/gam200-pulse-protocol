@@ -513,8 +513,9 @@ public class ComboDisplayManager : Script
     {
         for (int i = 0; i < weakness.Length && i < 4; i++)
         {
-            if (playerSlots.ContainsKey(i))
-                playerSlots[i].ShowBlankDim(weakness[i]);
+            int vs = VisualSlot(i);
+            if (playerSlots.ContainsKey(vs))
+                playerSlots[vs].ShowBlankDim(weakness[i]);
         }
     }
 
