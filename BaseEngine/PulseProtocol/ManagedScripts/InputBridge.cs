@@ -172,7 +172,7 @@ public class InputBridge : Script
 
         bool isLastKey = slotIndex == expectedCombo.Length - 1;
         bool isCorrectKey = key == expectedCombo[slotIndex];
-        if (!isCorrectKey) anyWrongKey = true;   // track across both branches for last-beat SFX
+        if (!isCorrectKey) anyWrongKey = true;   // wrong key = miss
 
         bool wasCompleted = ComboSystem.Instance.HasCompletedCombo();
         int progressBefore = ComboSystem.Instance.GetComboProgress();
@@ -188,6 +188,9 @@ public class InputBridge : Script
             nextSlot--;
             return;
         }
+
+        // Timing miss (correct key but outside window) also counts as a miss
+        if (!wasCompleted && !timingAccepted) anyWrongKey = true;
 
         if (wasCompleted)
         {
@@ -222,6 +225,7 @@ public class InputBridge : Script
                 if (!breakSfxPlayed)
                 {
                     Console.WriteLine($"[InputBridge] LAST BEAT (wasCompleted path) anyWrongKey={anyWrongKey} isCorrectKey={isCorrectKey} slotIndex={slotIndex}");
+                    if (!timingOk) anyWrongKey = true; // timing miss in wasCompleted path
                     audio.PlaySFX(!anyWrongKey ? "SFX_ComboEstablished_1" : "SFX_ComboStreakBroken");
                     breakSfxPlayed = true;
                 }
