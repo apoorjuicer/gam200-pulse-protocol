@@ -132,6 +132,7 @@ public class OrderSlipUIController : Script
             case EnemyIconType.Rat: return "enemyicon_rat";
             case EnemyIconType.Bat: return "enemyicon_bat";
             case EnemyIconType.BlueGorilla: return "enemyicon_gorilla";
+            case EnemyIconType.Boss: return "enemyicon_boss";
             default: return "";
         }
     }
@@ -143,6 +144,7 @@ public class OrderSlipUIController : Script
             case EnemyIconType.Rat: return "enemyicon_rat_grey";
             case EnemyIconType.Bat: return "enemyicon_bat_grey";
             case EnemyIconType.BlueGorilla: return "enemyicon_gorilla_grey";
+            case EnemyIconType.Boss: return "enemyicon_boss_grey";
             default: return "";
         }
     }

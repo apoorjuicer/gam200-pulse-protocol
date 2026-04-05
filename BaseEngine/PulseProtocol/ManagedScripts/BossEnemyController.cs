@@ -232,18 +232,11 @@ public class BossEnemyController : EnemyRhythmController
             }
 
             case 6:
-                // Four patterns — at most 2 quavers total
-                switch (_bossRng.Next(4))
-                {
-                    case 0: // C C C C C C  (no quavers)
-                        return new float[] { 0, C, 2*C, 3*C, 4*C, 5*C };
-                    case 1: // Q Q C C C C  (2 quavers at start)
-                        return new float[] { 0, Q, 2*Q, 2*Q+C, 2*Q+2*C, 2*Q+3*C };
-                    case 2: // C C Q Q C C  (2 quavers in middle)
-                        return new float[] { 0, C, 2*C, 2*C+Q, 2*C+2*Q, 3*C+2*Q };
-                    default: // C C C C Q Q  (2 quavers at end)
-                        return new float[] { 0, C, 2*C, 3*C, 4*C, 4*C+Q };
-                }
+                // Two patterns: all crotchets, or first two quavers then crotchets.
+                if (_bossRng.Next(2) == 0) // C C C C C C
+                    return new float[] { 0, C, 2*C, 3*C, 4*C, 5*C };
+                else                       // C C C C Q Q
+                    return new float[] { 0, C, 2*C, 3*C, 4*C, 4*C+Q };
 
             default: // 8 — always all crotchets (long enough already)
                 return new float[] { 0, C, 2*C, 3*C, 4*C, 5*C, 6*C, 7*C };
