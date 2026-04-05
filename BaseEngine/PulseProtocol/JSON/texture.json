@@ -166,6 +166,30 @@
             "shd_ref": 1
         },
         {
+            "id": "enemy_BG",
+            "path": "Assets/Textures/Backgrounds/enemy_anim.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "Level2_BGback",
+            "path": "Assets/Textures/Backgrounds/lvl2_back.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "Level2_flicker",
+            "path": "Assets/Textures/Backgrounds/Flicker.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
             "id": "Level3_BG",
             "path": "Assets/Textures/Backgrounds/Background3.png",
             "vert_shader_path": "shader/bg_vs.vert",

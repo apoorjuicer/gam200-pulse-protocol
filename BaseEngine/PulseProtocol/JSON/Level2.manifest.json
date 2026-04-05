@@ -6,7 +6,10 @@
             "GameplayCommon"
         ],
         "textures": [
-            "Level2_BG"
+            "Level2_BG",
+            "enemy_BG",
+            "Level2_BGback",
+            "Level2_flicker"
             // "enemyicon_bat",
             // "enemyicon_bat_grey",
             // "enemyicon_rat",

@@ -5345,180 +5345,826 @@
             "components": [
                 {
                     "transform": {
-                        "position": { "x": 250.0, "y": 0.0 },
-                        "scale": { "x": 200.0, "y": 200.0 },
-                        "rotation": { "x": 0.0, "y": 0.0 },
-                        "isVisible": false, "visibilityTimer": 0.0, "autoHide": false
+                        "position": {
+                            "x": 250.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 200.0,
+                            "y": 200.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0, "shd_ref": 1.0, "useTexture": true,
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
                         "spriteName": "Assets/Textures/UI/How to Play.png",
-                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
-                        "glow": { "enabled": false, "intensity": 1.0, "r": 1.0, "g": 1.0, "b": 1.0 }
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
                     }
                 },
                 {
                     "animation": {
-                        "currentFrame": 0, "elapsedTime": 0.0,
-                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 2.0
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
                     }
                 },
-                { "script": { "ScriptName": [ "NavigationButtons", "PauseOverlay" ] } },
-                { "name": { "name": "pause_howtoplay" } },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "NavigationButtons",
+                            "PauseOverlay"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "pause_howtoplay"
+                    }
+                },
                 {
                     "layerTag": {
-                        "layerName": "UI", "mask": 4,
-                        "sortingLayer": 2, "orderInLayer": 5, "z": 0.0
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 5,
+                        "z": 0.0
                     }
                 },
-                { "Parent": { "parent": 8 } }
+                {
+                    "Parent": {
+                        "parent": 8
+                    }
+                }
             ]
         },
         {
             "components": [
                 {
                     "transform": {
-                        "position": { "x": 0.0, "y": 0.0 },
-                        "scale": { "x": 1600.0, "y": 900.0 },
-                        "rotation": { "x": 0.0, "y": 0.0 },
-                        "isVisible": false, "visibilityTimer": 0.0, "autoHide": false
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 1600.0,
+                            "y": 900.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0, "shd_ref": 1.0, "useTexture": true,
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
                         "spriteName": "Assets/Textures/UI/howtoplay/NEW_HTP_1.png",
-                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
-                        "glow": { "enabled": false, "intensity": 1.0, "r": 1.0, "g": 1.0, "b": 1.0 }
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
                     }
                 },
                 {
                     "animation": {
-                        "currentFrame": 0, "elapsedTime": 0.0,
-                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 2.0
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
                     }
                 },
-                { "script": { "ScriptName": [ "HowToPlayPage1" ] } },
-                { "name": { "name": "HTP_Page_1" } },
-                { "layerTag": { "layerName": "UI", "mask": 4, "sortingLayer": 2, "orderInLayer": 21, "z": 100.0 } }
+                {
+                    "script": {
+                        "ScriptName": [
+                            "HowToPlayPage1"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "HTP_Page_1"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 21,
+                        "z": 100.0
+                    }
+                }
             ]
         },
         {
             "components": [
                 {
                     "transform": {
-                        "position": { "x": 0.0, "y": 0.0 },
-                        "scale": { "x": 1600.0, "y": 900.0 },
-                        "rotation": { "x": 0.0, "y": 0.0 },
-                        "isVisible": false, "visibilityTimer": 0.0, "autoHide": false
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 1600.0,
+                            "y": 900.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0, "shd_ref": 1.0, "useTexture": true,
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
                         "spriteName": "Assets/Textures/UI/howtoplay/NEW_HTP_2.png",
-                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
-                        "glow": { "enabled": false, "intensity": 1.0, "r": 1.0, "g": 1.0, "b": 1.0 }
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
                     }
                 },
                 {
                     "animation": {
-                        "currentFrame": 0, "elapsedTime": 0.0,
-                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 2.0
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
                     }
                 },
-                { "script": { "ScriptName": [ "HowToPlayPage2" ] } },
-                { "name": { "name": "HTP_Page_2" } },
-                { "layerTag": { "layerName": "UI", "mask": 4, "sortingLayer": 2, "orderInLayer": 21, "z": 100.0 } }
+                {
+                    "script": {
+                        "ScriptName": [
+                            "HowToPlayPage2"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "HTP_Page_2"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 21,
+                        "z": 100.0
+                    }
+                }
             ]
         },
         {
             "components": [
                 {
                     "transform": {
-                        "position": { "x": 0.0, "y": 0.0 },
-                        "scale": { "x": 1600.0, "y": 900.0 },
-                        "rotation": { "x": 0.0, "y": 0.0 },
-                        "isVisible": false, "visibilityTimer": 0.0, "autoHide": false
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 1600.0,
+                            "y": 900.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0, "shd_ref": 1.0, "useTexture": true,
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
                         "spriteName": "Assets/Textures/UI/howtoplay/NEW_HTP_3.png",
-                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
-                        "glow": { "enabled": false, "intensity": 1.0, "r": 1.0, "g": 1.0, "b": 1.0 }
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
                     }
                 },
                 {
                     "animation": {
-                        "currentFrame": 0, "elapsedTime": 0.0,
-                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 2.0
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
                     }
                 },
-                { "script": { "ScriptName": [ "HowToPlayPage3" ] } },
-                { "name": { "name": "HTP_Page_3" } },
-                { "layerTag": { "layerName": "UI", "mask": 4, "sortingLayer": 2, "orderInLayer": 21, "z": 100.0 } }
+                {
+                    "script": {
+                        "ScriptName": [
+                            "HowToPlayPage3"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "HTP_Page_3"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 21,
+                        "z": 100.0
+                    }
+                }
             ]
         },
         {
             "components": [
                 {
                     "transform": {
-                        "position": { "x": -1200.0, "y": 600.0 },
-                        "scale": { "x": 100.0, "y": 100.0 },
-                        "rotation": { "x": 0.0, "y": 0.0 },
-                        "isVisible": false, "visibilityTimer": 0.0, "autoHide": false
+                        "position": {
+                            "x": -1200.0,
+                            "y": 600.0
+                        },
+                        "scale": {
+                            "x": 100.0,
+                            "y": 100.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0, "shd_ref": 1.0, "useTexture": true,
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
                         "spriteName": "Assets/Textures/UI/Exit.png",
-                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
-                        "glow": { "enabled": false, "intensity": 1.0, "r": 1.0, "g": 1.0, "b": 1.0 }
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
                     }
                 },
                 {
                     "animation": {
-                        "currentFrame": 0, "elapsedTime": 0.0,
-                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 2.0
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
                     }
                 },
-                { "script": { "ScriptName": [ "HowToPlayOverlay", "NavigationButtons" ] } },
-                { "name": { "name": "Exit_HTP_Button" } },
-                { "layerTag": { "layerName": "UI", "mask": 4, "sortingLayer": 2, "orderInLayer": 30, "z": 100.0 } }
+                {
+                    "script": {
+                        "ScriptName": [
+                            "HowToPlayOverlay",
+                            "NavigationButtons"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "Exit_HTP_Button"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 30,
+                        "z": 100.0
+                    }
+                }
             ]
         },
         {
             "components": [
                 {
                     "transform": {
-                        "position": { "x": 1200.0, "y": 600.0 },
-                        "scale": { "x": 100.0, "y": 100.0 },
-                        "rotation": { "x": 0.0, "y": 0.0 },
-                        "isVisible": false, "visibilityTimer": 0.0, "autoHide": false
+                        "position": {
+                            "x": 1200.0,
+                            "y": 600.0
+                        },
+                        "scale": {
+                            "x": 100.0,
+                            "y": 100.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": false,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
                     }
                 },
                 {
                     "render": {
-                        "mdl_ref": 0.0, "shd_ref": 1.0, "useTexture": true,
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
                         "spriteName": "Assets/Textures/UI/NextStage.png",
-                        "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
-                        "glow": { "enabled": false, "intensity": 1.0, "r": 1.0, "g": 1.0, "b": 1.0 }
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
                     }
                 },
                 {
                     "animation": {
-                        "currentFrame": 0, "elapsedTime": 0.0,
-                        "totalFrames": 1, "columns": 1, "rows": 1, "animationSpeed": 2.0
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
                     }
                 },
-                { "script": { "ScriptName": [ "HtpNextButton", "NavigationButtons" ] } },
-                { "name": { "name": "NextStage_HTP_Button" } },
-                { "layerTag": { "layerName": "UI", "mask": 4, "sortingLayer": 2, "orderInLayer": 30, "z": 100.0 } }
+                {
+                    "script": {
+                        "ScriptName": [
+                            "HtpNextButton",
+                            "NavigationButtons"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "NextStage_HTP_Button"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "UI",
+                        "mask": 4,
+                        "sortingLayer": 2,
+                        "orderInLayer": 30,
+                        "z": 100.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "scale": {
+                            "x": 1600.0,
+                            "y": 900.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "Level2_BGback",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "name": {
+                        "name": "BG_back"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": -2,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -749.3447875976563,
+                            "y": 151.96514892578125
+                        },
+                        "scale": {
+                            "x": 211.5,
+                            "y": 64.56400299072266
+                        },
+                        "rotation": {
+                            "x": 2.583341360092163,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "enemy_BG",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 30,
+                        "columns": 6,
+                        "rows": 5,
+                        "animationSpeed": 8.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "BGEnemyScroll"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "BG_enemy"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": -1,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -848.908203125,
+                            "y": 277.7292175292969
+                        },
+                        "scale": {
+                            "x": 204.0,
+                            "y": 53.5
+                        },
+                        "rotation": {
+                            "x": 7.613286018371582,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "enemy_BG",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 30,
+                        "columns": 6,
+                        "rows": 5,
+                        "animationSpeed": 9.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "BGEnemyScroll"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "BG_enemy2"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": -1,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": -906.5501708984375,
+                            "y": 110.04364776611328
+                        },
+                        "scale": {
+                            "x": 243.5,
+                            "y": 77.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "enemy_BG",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 30,
+                        "columns": 6,
+                        "rows": 5,
+                        "animationSpeed": 8.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "BGEnemyScroll"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "BG_enemy3"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": -1,
+                        "z": 0.0
+                    }
+                }
+            ]
+        },
+        {
+            "components": [
+                {
+                    "transform": {
+                        "position": {
+                            "x": 1161.6619873046875,
+                            "y": 167.1531524658203
+                        },
+                        "scale": {
+                            "x": 399.3562316894531,
+                            "y": 763.4888305664063
+                        },
+                        "rotation": {
+                            "x": -3.0,
+                            "y": 0.0
+                        },
+                        "isVisible": true,
+                        "visibilityTimer": 0.0,
+                        "autoHide": false
+                    }
+                },
+                {
+                    "render": {
+                        "mdl_ref": 0.0,
+                        "shd_ref": 1.0,
+                        "useTexture": true,
+                        "spriteName": "Level2_flicker",
+                        "tintColor": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "glow": {
+                            "enabled": false,
+                            "intensity": 1.0,
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        }
+                    }
+                },
+                {
+                    "animation": {
+                        "currentFrame": 0,
+                        "elapsedTime": 0.0,
+                        "totalFrames": 1,
+                        "columns": 1,
+                        "rows": 1,
+                        "animationSpeed": 2.0
+                    }
+                },
+                {
+                    "script": {
+                        "ScriptName": [
+                            "LightFlicker"
+                        ]
+                    }
+                },
+                {
+                    "name": {
+                        "name": "BG_flicker"
+                    }
+                },
+                {
+                    "layerTag": {
+                        "layerName": "World",
+                        "mask": 2,
+                        "sortingLayer": 1,
+                        "orderInLayer": 0,
+                        "z": 0.0
+                    }
+                }
             ]
         }
     ]
