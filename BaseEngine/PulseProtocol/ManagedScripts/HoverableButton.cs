@@ -1446,10 +1446,15 @@ public class NavigationButtons : Script
 
                 string nextScene;
                 if (!TryGetNextLevelSceneName(currentScene, out nextScene) || !Scene.SceneExists(nextScene))
-                    nextScene = "MainMenu";
+                {
+                    nextScene = Scene.SceneExists("EndingCutscene") && string.Equals(currentScene, "Level3", StringComparison.OrdinalIgnoreCase)
+                        ? "EndingCutscene"
+                        : "MainMenu";
+                }
 
                 StageClearElement.ResetStageClear();
                 ReportLevelCleared(currentScene);
+                NavigationButtons.QueuePostLoadFadeIn(nextScene, 0.5f);
                 LoadSceneImmediateNoFade(nextScene, string.Equals(nextScene, "MainMenu", StringComparison.OrdinalIgnoreCase));
                 return;
             }

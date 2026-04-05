@@ -1,6 +1,6 @@
 {
     "textureFilePaths": [
-        //Cutscene
+        //intro Cutscene
         {
             "id": "cutscene_1",
             "path": "Assets/Textures/Cutscene/1.png",
@@ -65,6 +65,73 @@
             "mdl_ref": 0,
             "shd_ref": 1
         },
+
+        //ending Cutscene
+        {
+            "id": "endingcutscene_1",
+            "path": "Assets/Textures/Cutscene/EndCutscene1.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "endingcutscene_2",
+            "path": "Assets/Textures/Cutscene/EndCutscene2.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "endingcutscene_3",
+            "path": "Assets/Textures/Cutscene/EndCutscene3.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "endingcutscene_4",
+            "path": "Assets/Textures/Cutscene/EndCutscene4.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "endingcutscene_5",
+            "path": "Assets/Textures/Cutscene/EndCutscene5.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "endingcutscene_6",
+            "path": "Assets/Textures/Cutscene/EndCutscene6.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "endingcutscene_7",
+            "path": "Assets/Textures/Cutscene/EndCutscene7.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+        {
+            "id": "endingcutscene_8",
+            "path": "Assets/Textures/Cutscene/EndCutscene8.png",
+            "vert_shader_path": "shader/bg_vs.vert",
+            "frag_shader_path": "shader/bg_fs.frag",
+            "mdl_ref": 0,
+            "shd_ref": 1
+        },
+
         //Backgrounds
         {
             "id": "game_BG",

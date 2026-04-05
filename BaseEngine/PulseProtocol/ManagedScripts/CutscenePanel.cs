@@ -200,7 +200,7 @@ public class CutscenePanel : Script
     {
         string currentScene = Scene.GetCurrentScene();
         bool sceneChanged = !string.Equals(s_sceneSessionTag, currentScene, StringComparison.OrdinalIgnoreCase);
-        bool freshStart = sharedInitCount == 0 || sharedInitCount >= TotalPanels * 2;
+        bool freshStart = sharedInitCount == 0 || sharedInitCount >= TotalPanels;
         if (sceneChanged || freshStart)
         {
             s_sceneSessionTag = currentScene;
