@@ -40,7 +40,7 @@ public class ComboSystem : Script
     public float greatWindow   = 0.15f;
     // Shifts the entire timing window earlier by this many seconds.
     // Increase to make the window feel more responsive / require pressing slightly before the beat.
-    public float InputEarlyShift = 0.05f;
+    public float InputEarlyShift = 0.17f;
 
 
     // DEBUG: Set to true to auto-set a test weakness and accept all input regardless of turn state

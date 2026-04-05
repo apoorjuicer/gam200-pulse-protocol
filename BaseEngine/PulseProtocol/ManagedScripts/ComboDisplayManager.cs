@@ -39,6 +39,7 @@ public class ComboDisplayManager : Script
     private int revealIndex = 0;
     private float revealStartTime = 0f;
     private float[] revealSlotOffsets = new float[] { 0.0f, 0.5f, 1.0f, 1.5f };
+    public float RevealLeadTime = 0.1f; // Seconds to pop enemy keys BEFORE their beat (anticipatory cue)
     private int[] currentVisualSlots = new int[] { 0, 1, 2, 3 };
 
     // Maps key index → UI slot position (allows visual gaps for rhythm clarity)
@@ -351,7 +352,7 @@ public class ComboDisplayManager : Script
 
         while (revealIndex < revealCombo.Length && revealIndex < revealSlotOffsets.Length)
         {
-            if (elapsed < revealSlotOffsets[revealIndex]) break;
+            if (elapsed < revealSlotOffsets[revealIndex] - RevealLeadTime) break;
 
             char key = revealCombo[revealIndex];
             int vs = VisualSlot(revealIndex);
@@ -389,7 +390,7 @@ public class ComboDisplayManager : Script
 
         while (gapRevealIndex < gapVisualSlots.Length)
         {
-            if (elapsed < gapRevealOffsets[gapRevealIndex]) break;
+            if (elapsed < gapRevealOffsets[gapRevealIndex] - RevealLeadTime) break;
             int s = gapVisualSlots[gapRevealIndex];
             if (enemySlots.ContainsKey(s)) enemySlots[s].ShowEmptyPop();
             // Player gap slots are already showing empty from StartComboReveal — no pop needed

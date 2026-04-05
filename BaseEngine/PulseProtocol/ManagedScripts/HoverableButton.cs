@@ -339,6 +339,8 @@ public class NavigationButtons : Script
 
             if (!openedSettingsFromPause &&
                 !ShowHowToPlayOverlay &&
+                !StageClearElement.IsCleared &&
+                !realScene.Equals("GameLose") &&
                 !string.IsNullOrEmpty(realScene) &&
                 !realScene.Equals("MainMenu") &&
                 !realScene.Equals("Settings") &&
@@ -1400,6 +1402,8 @@ public class NavigationButtons : Script
 
         if (tex.Contains("pause"))
         {
+            if (StageClearElement.IsCleared || Scene.GetCurrentScene() == "GameLose")
+                return;
             ShowPauseOverlay = true;
             return;
         }

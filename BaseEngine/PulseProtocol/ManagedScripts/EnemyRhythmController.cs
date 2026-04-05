@@ -778,7 +778,7 @@ public class EnemyRhythmController : Script
 
 public class Gorilla: EnemyRhythmController
 {
-    // Two gap patterns, randomised each turn — fixed keys, variable timing.
+    // Two gap patterns, randomised each turn.
     // Pattern A: [1][X][3][4]  SlotOffsets={0.0, 1.0, 1.5}
     // Pattern B: [1][2][X][4]  SlotOffsets={0.0, 0.5, 1.5}
     public override void ResetMovementForNewTurn()

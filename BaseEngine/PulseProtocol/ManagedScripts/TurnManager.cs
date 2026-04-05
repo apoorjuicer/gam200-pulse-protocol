@@ -41,7 +41,7 @@ public class TurnManager : Script
     public int CountdownBeats = 4;
     public int EnemyDisplayBeats = 4;  // with -1 backdating: 3 beats shown in switch + initial beat N = 4 enemy beats total. Transition fires on beat 4, player slot 0 fires on beat 5 (no gap).
     public int PlayerInputBeats = 5;   // with -1 backdating: beats 2-5 flash slots 0-3, beat 5 also resolves.
-    public float PulseLeadTime = 0.1f; // Seconds to fire the slot pulse BEFORE the beat, so it acts as an anticipatory cue
+    public float PulseLeadTime = 0.17f; // Seconds to fire the slot pulse BEFORE the beat, so it acts as an anticipatory cue
 
     // Boss overrides: set by BossEnemyController to extend phases for longer combos. Cleared after each turn.
     public static int? EnemyDisplayBeatsOverride = null;
@@ -160,7 +160,7 @@ public class TurnManager : Script
                     for (int j = 0; j < visualSlots.Length; j++)
                         if (visualSlots[j] == s) { isActive = true; break; }
                 if (isActive) continue;
-                if (elapsed >= s * beatDur)
+                if (elapsed >= s * beatDur - PulseLeadTime)
                 {
                     gapSlotPulsed[s] = true;
                     PlayerSlotBeatPulse.TriggerScale(s, beatDur);
@@ -357,6 +357,12 @@ public class TurnManager : Script
         Console.WriteLine("[TurnManager] === PLAYER TURN ===");
         Console.WriteLine($"[TurnManager] Input the combo: {EnemyRhythmController.Instance?.WeaknessCombo ?? "UNKNOWN"}");
         Console.WriteLine("[TurnManager] Player input UNLOCKED");
+        {
+            var dbgOffsets = EnemyRhythmController.Instance?.SlotOffsets;
+            string dbgType = EnemyRhythmController.Instance?.GetType().Name ?? "null";
+            string dbgOff  = dbgOffsets != null ? string.Join(", ", dbgOffsets) : "null";
+            Console.WriteLine($"[TurnManager] SlotOffsets from {dbgType}: [{dbgOff}]");
+        }
 
         // Enemy freezes during player input (handled in EnemyRhythmController.HandleBeat)
 
