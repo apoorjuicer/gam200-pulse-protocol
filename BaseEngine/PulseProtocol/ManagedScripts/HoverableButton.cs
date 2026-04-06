@@ -1017,8 +1017,16 @@ public class NavigationButtons : Script
     public static void SetStageClearPaused(bool value)
     {
         stageClearPaused = value;
-        if (value && !Application.IsPaused())
-            Application.SetPaused(true);
+        if (value)
+        {
+            // Flush stale gameplay nav candidates (e.g. PauseBTN) so the first
+            // D-pad press on the stage-clear screen focuses an actual button.
+            s_focusedButton = null;
+            s_prevCandidates.Clear();
+            s_navCandidates.Clear();
+            if (!Application.IsPaused())
+                Application.SetPaused(true);
+        }
     }
 
     public static void ReportLevelCleared(string sceneName)
