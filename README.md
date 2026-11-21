@@ -4,6 +4,7 @@ A 2D rhythm game built on our team's own real-time C++ engine with an
 in-house ImGui editor. 8-person team (1 artist, 1 designer, 6 programmers), 2 trimesters, DigiPen Institute of
 Technology Singapore.
 
+![Pulse Protocol gameplay](pulse-protocol.gif)
 
 ## My part (engine and tools programmer)
 - **Editor undo/redo**: undo manager and snapshot system for the in-house
@@ -46,3 +47,7 @@ C++, C#, OpenGL, ImGui, RapidJSON, FMOD, Visual Studio
 
 Original repository hosted on DigiPen's Git server; this is a mirror for
 portfolio purposes.
+
+## Full gameplay
+https://github.com/user-attachments/assets/8e446c52-d49b-43a3-bb41-f333bc516216
+
